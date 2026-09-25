@@ -853,7 +853,9 @@ def _run_scf_iterations_lax_core(
             diis_active,
             lambda operand: _diis_extrapolate(
                 operand[0],
-                _orthonormal_diis_error(operand[0], operand[1], operand[2], operand[3]),
+                _orthonormal_diis_error(
+                    operand[0], operand[1], operand[2], operand[3]
+                ),
                 operand[4],
                 operand[5],
                 operand[6],
@@ -866,7 +868,16 @@ def _run_scf_iterations_lax_core(
                 operand[6],
                 operand[7],
             ),
-            operand=(fock_pre_diis, density_i, s, diis_basis, fock_hist, err_hist, hist_head, hist_count),
+            operand=(
+                fock_pre_diis,
+                density_i,
+                s,
+                diis_basis,
+                fock_hist,
+                err_hist,
+                hist_head,
+                hist_count,
+            ),
         )
         fock_eff = _apply_optional_level_shift(
             fock_eff,
