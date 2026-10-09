@@ -100,15 +100,18 @@ class MoleculeFactory:
         if index in self._cache:
             return self._cache[index]
         spec = self.specs[index]
-        molecule = restricted_molecule_from_spec_with_jax_rks(
-            atom=spec.atom,
-            basis=self.args.basis,
-            xc_spec=self.args.ref_xc,
-            unit="Angstrom",
-            charge=self.args.charge,
-            spin=self.args.spin,
-            integral_backend="cpu",
-        )
+        # The native integral backend is CPU-only; build the reference molecule
+        # under a CPU device context so this also runs cleanly on GPU nodes.
+        with jax.default_device(jax.devices("cpu")[0]):
+            molecule = restricted_molecule_from_spec_with_jax_rks(
+                atom=spec.atom,
+                basis=self.args.basis,
+                xc_spec=self.args.ref_xc,
+                unit="Angstrom",
+                charge=self.args.charge,
+                spin=self.args.spin,
+                integral_backend="cpu",
+            )
         if molecule.mf_energy is None:
             raise RuntimeError(f"{spec.name}: reference energy unavailable")
         e_ref = float(molecule.mf_energy)
@@ -219,6 +222,7 @@ def make_solver(args) -> DifferentiableSCF:
             damping=0.5,
             conv_tol_energy=1e-8,
             conv_tol_density=1e-8,
+            conv_tol_grad=args.conv_tol_grad,
             differentiation=SCFDifferentiationConfig(mode="implicit"),
         )
     )
@@ -403,6 +407,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--spin", type=int, default=0)
     parser.add_argument("--basis", default="sto-3g")
     parser.add_argument("--steps", type=int, default=5000)
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=None,
+        help="If set, train for this many epochs (each epoch iterates the "
+        "whole training split once). Loss/MAE/MSE are then reported per "
+        "epoch over ALL training molecules. Overrides --steps.",
+    )
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument(
         "--lr-schedule", choices=("constant", "cosine"), default="constant"
@@ -424,6 +436,16 @@ def parse_args() -> argparse.Namespace:
                         "val_loss improvement; 0 disables early stopping.")
     parser.add_argument("--ckpt-every", type=int, default=500)
     parser.add_argument("--max-cycle", type=int, default=40)
+    parser.add_argument(
+        "--conv-tol-grad",
+        type=float,
+        default=1e-5,
+        help="MO gradient residual tolerance of the SCF convergence check. "
+        "The framework default (1e-7) is tighter than the numerical noise "
+        "floor of the grid-based Skala potential on larger molecules "
+        "(e.g. benzene stalls at ~1e-6 and is never marked converged, so "
+        "its samples get masked out of the loss).",
+    )
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument(
@@ -479,15 +501,25 @@ def main() -> None:
     params, static = eqx.partition(model, eqx.is_inexact_array)
     w3j_ref = model.non_local_model.tp_down.w3j["w3j_0_0_0"]
 
+    batch_size = args.batch_size if args.batch_size > 0 else len(train_idx)
+    batch_size = min(batch_size, len(train_idx))
+    steps_per_epoch = max(1, math.ceil(len(train_idx) / batch_size))
+    if args.epochs is not None:
+        total_steps = int(args.epochs) * steps_per_epoch
+    else:
+        total_steps = int(args.steps)
+    print(
+        f"epochs={args.epochs}  train={len(train_idx)}  batch_size={batch_size}  "
+        f"steps_per_epoch={steps_per_epoch}  total_steps={total_steps}",
+        flush=True,
+    )
+
     if args.lr_schedule == "cosine":
-        schedule = optax.cosine_decay_schedule(args.lr, max(args.steps, 1))
+        schedule = optax.cosine_decay_schedule(args.lr, max(total_steps, 1))
     else:
         schedule = optax.constant_schedule(args.lr)
     optim = optax.chain(optax.clip_by_global_norm(1.0), optax.adam(schedule))
     opt_state = optim.init(params)
-
-    batch_size = args.batch_size if args.batch_size > 0 else len(train_idx)
-    batch_size = min(batch_size, len(train_idx))
 
     def loss_fn(params, batch_cfgs):
         m = eqx.combine(params, static)
@@ -508,10 +540,11 @@ def main() -> None:
 
     log_path = output_dir / "log.csv"
     log_fields = [
-        "step",
-        "loss",
+        "epoch",
+        "last_batch_loss",
         "train_energy_mae",
         "train_energy_mse",
+        "train_energy_rmse",
         "train_density_rel",
         "n_skipped",
         "grad_norm",
@@ -559,8 +592,14 @@ def main() -> None:
         val_sample_writer = csv.writer(val_sample_file)
         val_sample_writer.writerow(val_sample_fields)
 
-        for i in range(args.steps):
-            batch_idx = rng.choice(train_idx, size=batch_size, replace=False)
+        epoch_order = np.empty(0, dtype=np.int64)
+        for i in range(total_steps):
+            epoch = i // steps_per_epoch
+            pos = i % steps_per_epoch
+            if pos == 0:
+                # New epoch: shuffle the whole training split.
+                epoch_order = rng.permutation(train_idx)
+            batch_idx = epoch_order[pos * batch_size : (pos + 1) * batch_size]
             batch_cfgs = [factory.get(int(j)) for j in batch_idx]
 
             (loss_value, (e_errs, d_errs, mask)), grads = eqx.filter_value_and_grad(
@@ -575,7 +614,7 @@ def main() -> None:
 
             if not (math.isfinite(float(loss_value)) and math.isfinite(float(grad_norm))):
                 print(
-                    f"step {i:02d}  : non-finite loss/grad, update skipped",
+                    f"epoch {epoch:03d} batch {pos:03d}  : non-finite loss/grad, update skipped",
                     flush=True,
                 )
                 continue
@@ -583,35 +622,49 @@ def main() -> None:
             updates, opt_state = optim.update(grads, opt_state, params)
             params = optax.apply_updates(params, updates)
 
-            n_valid = float(jnp.maximum(mask.sum(), 1.0))
-            train_mae = float(jnp.sum(mask * jnp.abs(e_errs)) / n_valid)
-            train_mse = float(jnp.sum(mask * e_errs**2) / n_valid)
-            train_drel = float(jnp.sum(mask * d_errs) / n_valid)
             print(
-                f"step {i:02d}  : loss={float(loss_value):.6e}  "
-                f"energy_mae={train_mae:.6e}  energy_mse={train_mse:.6e}  "
-                f"density_rel={train_drel:.6e}  "
+                f"epoch {epoch:03d} batch {pos:03d}  : batch_loss={float(loss_value):.6e}  "
                 f"skipped={n_skipped}  grad_norm={float(grad_norm):.6e}  lr={lr:.2e}",
                 flush=True,
             )
-            for cfg, e_err, d_err, conv in zip(batch_cfgs, e_errs, d_errs, mask):
-                train_sample_writer.writerow(
-                    [
-                        i,
-                        cfg.name,
-                        bool(conv),
-                        float(cfg.e_ref + e_err),
-                        cfg.e_ref,
-                        float(e_err),
-                        float(d_err),
-                    ]
-                )
-            train_sample_file.flush()
 
             val_energy_mae = val_energy_rmse = val_density_rel = val_loss = ""
             step_model = eqx.combine(params, static)
             stop_early = False
-            if val_idx and ((i + 1) % args.val_every == 0 or i == args.steps - 1):
+            epoch_end = (pos == steps_per_epoch - 1) or (i == total_steps - 1)
+            if epoch_end:
+                # -------- epoch-level metrics over the WHOLE training split --------
+                train_cfgs = [factory.get(int(j)) for j in train_idx]
+                tr_metrics, tr_per_sample = evaluate(
+                    step_model, solver, train_cfgs, args.density_weight
+                )
+                epoch_train_mae = tr_metrics["energy_mae"]
+                epoch_train_rmse = tr_metrics["energy_rmse"]
+                epoch_train_mse = epoch_train_rmse * epoch_train_rmse
+                epoch_train_drel = tr_metrics["density_rel"]
+                epoch_train_skipped = len(train_cfgs) - len(tr_per_sample)
+                print(
+                    f"epoch {epoch:03d}  : train_energy_mae={epoch_train_mae:.6e}  "
+                    f"train_energy_mse={epoch_train_mse:.6e}  "
+                    f"train_energy_rmse={epoch_train_rmse:.6e}  "
+                    f"train_density_rel={epoch_train_drel:.6e}  "
+                    f"skipped={epoch_train_skipped}/{len(train_cfgs)}",
+                    flush=True,
+                )
+                for row in tr_per_sample:
+                    train_sample_writer.writerow(
+                        [
+                            epoch,
+                            row["name"],
+                            True,
+                            row["energy"],
+                            row["energy_ref"],
+                            row["energy"] - row["energy_ref"],
+                            row["density_rel_err"],
+                        ]
+                    )
+                train_sample_file.flush()
+            if val_idx and epoch_end:
                 val_cfgs = [factory.get(int(j)) for j in val_idx]
                 val_metrics, val_per_sample = evaluate(
                     step_model, solver, val_cfgs, args.density_weight
@@ -621,7 +674,7 @@ def main() -> None:
                 val_density_rel = val_metrics["density_rel"]
                 val_loss = val_metrics["val_loss"]
                 print(
-                    f"step {i:02d}  : val_energy_mae={val_energy_mae:.6e}  "
+                    f"epoch {epoch:03d}  : val_energy_mae={val_energy_mae:.6e}  "
                     f"val_energy_rmse={val_energy_rmse:.6e}  "
                     f"val_density_rel={val_density_rel:.6e}  "
                     f"val_loss={val_loss:.6e}",
@@ -630,7 +683,7 @@ def main() -> None:
                 for row in val_per_sample:
                     val_sample_writer.writerow(
                         [
-                            i,
+                            epoch,
                             row["name"],
                             row["energy"],
                             row["energy_ref"],
@@ -643,7 +696,7 @@ def main() -> None:
 
                 if not math.isfinite(val_loss):
                     print(
-                        f"step {i:02d}  : no converged val sample, "
+                        f"epoch {epoch:03d}  : no converged val sample, "
                         "checkpoint/early-stop check skipped",
                         flush=True,
                     )
@@ -655,7 +708,7 @@ def main() -> None:
                     best_dir = output_dir / "weights_best"
                     save_weights_to_npz(step_model, best_dir)
                     print(
-                        f"step {i:02d}  : new best val_loss={best_val_loss:.6e} "
+                        f"epoch {epoch:03d}  : new best val_loss={best_val_loss:.6e} "
                         f"-> {best_dir}",
                         flush=True,
                     )
@@ -666,36 +719,38 @@ def main() -> None:
                         and val_checks_no_improve >= args.early_stop_patience
                     ):
                         print(
-                            f"step {i:02d}  : early stopping "
+                            f"epoch {epoch:03d}  : early stopping "
                             f"(no val_loss improvement for {val_checks_no_improve} "
-                            f"checks; best at step {best_step})",
+                            f"checks; best at global step {best_step})",
                             flush=True,
                         )
                         stop_early = True
 
-            writer.writerow(
-                [
-                    i,
-                    float(loss_value),
-                    train_mae,
-                    train_mse,
-                    train_drel,
-                    n_skipped,
-                    float(grad_norm),
-                    lr,
-                    val_energy_mae,
-                    val_energy_rmse,
-                    val_density_rel,
-                    val_loss,
-                ]
-            )
-            log_file.flush()
+            if epoch_end:
+                writer.writerow(
+                    [
+                        epoch,
+                        float(loss_value),
+                        epoch_train_mae,
+                        epoch_train_mse,
+                        epoch_train_rmse,
+                        epoch_train_drel,
+                        epoch_train_skipped,
+                        float(grad_norm),
+                        lr,
+                        val_energy_mae,
+                        val_energy_rmse,
+                        val_density_rel,
+                        val_loss,
+                    ]
+                )
+                log_file.flush()
 
             if stop_early:
                 break
 
-            if (i + 1) % args.ckpt_every == 0:
-                ckpt_dir = output_dir / f"weights_step{i + 1}"
+            if epoch_end:
+                ckpt_dir = output_dir / f"weights_epoch{epoch + 1:03d}"
                 save_weights_to_npz(step_model, ckpt_dir)
                 print(f"checkpoint -> {ckpt_dir}", flush=True)
 

@@ -1,0 +1,14 @@
+{
+  "data": "/home/chenghaoc/skalax_train_500_data",
+  "output_dir": "/home/chenghaoc/skalax_run_500_100ep",
+  "weights_dir": null,
+  "target_key": "target_exc",
+  "val_fraction": 0.1,
+  "epochs": 150,
+  "learning_rate": 1e-05,
+  "seed": 0,
+  "checkpoint_every": 10,
+  "resume": "/home/chenghaoc/skalax_run_500_100ep/model_epoch_0100.eqx",
+  "start_epoch": 100,
+  "early_stop_mse": 1e-06
+}
