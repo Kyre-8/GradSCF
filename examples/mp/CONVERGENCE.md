@@ -1,7 +1,6 @@
 # High-order MP convergence benchmarks
 
-Selected measured figures: [He2(2+)](he2_convergence.svg) and
-[Ne/F-](ne_f_convergence.svg).
+See the [example index](README.md) for scripts and execution order.
 
 These examples distinguish numerical agreement between implementations from
 convergence of the physical perturbation series. A converged SCF solution does
@@ -37,6 +36,12 @@ separates its independent native and external preparation sections. All scripts
 have editable top-level settings and no command-line parser.
 
 ## He2(2+): deceptive UMP convergence
+
+![He2 dication: native reference curves, MP convergence, barriers and spin contamination](he2_convergence.png)
+
+Figure formats: [PNG](he2_convergence.png) · [SVG](he2_convergence.svg) ·
+[PDF](he2_convergence.pdf). The potential-energy zero is the sampled molecular
+FCI minimum. Lines join calculated points; no smoothing is applied.
 
 Gill and Radom, *Chemical Physics Letters* **132**, 16--22 (1986),
 [DOI 10.1016/0009-2614(86)80686-8](https://doi.org/10.1016/0009-2614(86)80686-8),
@@ -93,6 +98,13 @@ basis/contraction details, optimization, or the printed table. It is not
 counted as an exact literature match.
 
 ## Ne and F-: complete external high-order reference
+
+![Ne and fluoride: external high-order corrections and FCI errors, with native MP2 and MP3 checks](ne_f_convergence.png)
+
+Figure formats: [PNG](ne_f_convergence.png) · [SVG](ne_f_convergence.svg) ·
+[PDF](ne_f_convergence.pdf). Crosses mark native GradSCF MP2/MP3; high-order
+curves come from the complete external reference. The signed-error panel uses
+a symmetric logarithmic scale, linear within 0.1 milli-Hartree of zero.
 
 The atomic settings are spherical aug-cc-pVDZ, a frozen doubly occupied 1s
 orbital, and all virtual orbitals. Each atom has 23 spatial AOs; the active
