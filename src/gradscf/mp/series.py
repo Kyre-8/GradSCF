@@ -22,6 +22,10 @@ from .integrals import _reference_data, canonical_error, _active_orbitals
 
 def make_series_space(nmo, nocc, *, frozen=None, config):
     k = config.order // 2 if config.wavefunction_order is None else config.wavefunction_order
+    if config.algorithm == "tensor":
+        from ._tensor import make_tensor_space
+        return make_tensor_space(nmo, nocc, max_excitation=2*k, frozen=frozen,
+            max_determinants=config.max_determinants, max_tensor_elements=config.max_tensor_elements)
     build = make_uci_space if isinstance(nocc, tuple) else make_ci_space
     return build(nmo, nocc, max_excitation=2*k, frozen=frozen,
                  max_determinants=config.max_determinants)
@@ -61,24 +65,35 @@ def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config):
     hs, gs, focks, reference_energy = _reference_data(h1, eri, nocc)
     unrestricted = isinstance(nocc, tuple)
     space = make_series_space(hs[0].shape[0], nocc, frozen=frozen, config=config)
-    op = hamiltonian.build_hamiltonian(h1, eri, space)
     n = space.nmo
-    ff = focks if unrestricted else (focks[0], focks[0])
-    reference_bits = space.determinants[0]
-    # Changes in occupations, including both spin frames, define F_N directly.
-    changes = np.array([[(int(d & (1 << p) != 0)-int(reference_bits & (1 << p) != 0))
-                          for p in range(2*n)] for d in space.determinants])
-    gaps = jnp.asarray(changes, dtype=op.diagonal.dtype) @ jnp.concatenate([jnp.diag(f) for f in ff])
+    if config.algorithm == "tensor":
+        from ._tensor import build_tensor_action
+        gaps = space.gaps(focks)
+        action = build_tensor_action(gs if unrestricted else gs[0], focks, space)
+        fluctuation = lambda c, degree: action.apply(c, max_input_rank=2*degree)
+        alpha_rank, beta_rank = space.spin_ranks()
+        amplitudes = space.amplitudes
+    else:
+        op = hamiltonian.build_hamiltonian(h1, eri, space)
+        ff = focks if unrestricted else (focks[0], focks[0])
+        reference_bits = space.determinants[0]
+        # Changes in occupations, including both spin frames, define F_N directly.
+        changes = np.array([[(int(d & (1 << p) != 0)-int(reference_bits & (1 << p) != 0))
+                              for p in range(2*n)] for d in space.determinants])
+        gaps = jnp.asarray(changes, dtype=op.diagonal.dtype) @ jnp.concatenate([jnp.diag(f) for f in ff])
+        fluctuation = lambda c, degree: op(c)-(reference_energy+gaps)*c
+        alpha_rank = np.array([((d ^ reference_bits) & ((1 << n)-1)).bit_count()//2
+                               for d in space.determinants])
+        beta_rank = np.array([((d ^ reference_bits) >> n).bit_count()//2 for d in space.determinants])
+        amplitudes = lambda first: _amplitudes(first, space, unrestricted)
     diagonal0 = reference_energy + gaps
-    phi = jnp.zeros(space.size, op.diagonal.dtype).at[0].set(1.)
-    def fluctuation(c):
-        return op(c)-diagonal0*c
+    phi = jnp.zeros(space.size, reference_energy.dtype).at[0].set(1.)
     # W is linear in the state: share W Psi_j across all subsequent degrees.
-    ws = [fluctuation(phi)]
+    ws = [fluctuation(phi, 0)]
     def residual(y, lam, w):
         return jnp.concatenate((gaps[1:]*y[:-1]-y[-1]*y[:-1]+lam*w[1:],
                                 (lam*w[0]-y[-1])[None]))
-    zero = jnp.zeros(space.size, op.diagonal.dtype)
+    zero = jnp.zeros_like(phi)
     lam0 = jnp.zeros((), zero.dtype)
     _, jacobian = jax.linearize(lambda y: residual(y, lam0, ws[0]), zero)
     jacdiag = jnp.concatenate((gaps[1:], -jnp.ones(1, zero.dtype)))
@@ -96,7 +111,7 @@ def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config):
             preconditioner=lambda v: v/safe, transpose_preconditioner=lambda v: v/safe)
         ys.append(response.solution)
         waves.append(jnp.concatenate((jnp.zeros(1, zero.dtype), response.solution[:-1])))
-        ws.append(fluctuation(waves[-1]))
+        ws.append(fluctuation(waves[-1], degree))
         solved = solved & response.converged
         norm = jnp.maximum(norm, response.residual_norm)
     def rayleigh(c, hc):
@@ -110,13 +125,10 @@ def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config):
     corrections = jnp.stack(es[1:])
     first = waves[1]
     # Project first-order channels, then apply the same generic energy functional.
-    alpha_rank = np.array([((d ^ reference_bits) & ((1 << n)-1)).bit_count()//2
-                           for d in space.determinants])
-    beta_rank = np.array([((d ^ reference_bits) >> n).bit_count()//2 for d in space.determinants])
     def channel(mask):
         c1 = jnp.where(jnp.asarray(mask), first, 0.)
         _, terms = _jet(rayleigh, (phi, hc0),
-            ((c1, jnp.zeros_like(phi)), (diagonal0*c1+ws[0], fluctuation(c1))))
+            ((c1, jnp.zeros_like(phi)), (diagonal0*c1+ws[0], fluctuation(c1, 1))))
         return terms[1]
     ss = channel(((alpha_rank == 2) & (beta_rank == 0)) | ((alpha_rank == 0) & (beta_rank == 2)))
     os = channel((alpha_rank == 1) & (beta_rank == 1))
@@ -129,7 +141,7 @@ def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config):
     mask = lambda x: x*jnp.where(valid, jnp.ones_like(x), jnp.full_like(x, jnp.nan))
     corr = jnp.sum(corrections)
     e3 = corrections[1] if config.order >= 3 else jnp.zeros_like(corr)
-    t2 = jax.tree.map(mask, _amplitudes(first, space, unrestricted)) if config.with_t2 else None
+    t2 = jax.tree.map(mask, amplitudes(first)) if config.with_t2 else None
     return MPResult(mask(reference_energy+nuclear_repulsion+corr), mask(corr),
         reference_energy+nuclear_repulsion, mask(corrections[0]), mask(e3), mask(ss), mask(os), t2,
         minimum, error, valid, mask(corrections),

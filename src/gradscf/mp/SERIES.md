@@ -3,7 +3,7 @@
 `MP(mf, order=p)` computes all corrections E2 through Ep from one physical
 residual. The generic engine supports real canonical restricted/unrestricted
 HF frames, integer occupations and fixed frozen spaces. It has no fixed order
-ceiling, but it has explicit determinant and Slater--Condon connection limits.
+ceiling, but it has explicit representation-dependent capacity limits.
 It does not claim convergence of the series at lambda=1.
 
 ## Physical partition and gauge
@@ -24,8 +24,10 @@ For each retained determinant D, its Fock excitation gap is
 
 All occupied electrons, including frozen cores, contribute to the physical HF
 Fock and reference energy. Frozen orbitals restrict excitations; they are not
-removed from reference determinants. The operator is generated from the shared
-CI Slater--Condon machinery on the retained space. No FCI product-space
+removed from reference determinants. The default operator is generated from the
+shared CI Slater--Condon machinery on the retained space. The experimental
+`algorithm='tensor'` instead contracts complete excitation blocks; see
+[TENSOR_BLOCKS.md](TENSOR_BLOCKS.md). No FCI product-space
 enumeration, physical dense Hamiltonian or diagonalization is required.
 
 Use intermediate normalization, c0(lambda)=1. Write the unknowns as
@@ -67,7 +69,9 @@ coefficient alignment, measured CPU speedups and scope.
 The determinant residual is only a generic polynomial in state, energy and
 coupling; no separate MP2, MP3 or higher-order correction formula is coded.
 Returned wavefunction rows contain Phi0, Psi1, ... in `calculation.space`
-determinant order. Their reference components are (1,0,...). They are coefficients
+coordinates: determinant order for `series`, packed quasiparticle blocks for
+`tensor` (different ordering and phases; see the tensor coordinate convention).
+Their reference components are (1,0,...). They are coefficients
 under intermediate normalization, not individually normalized physical states.
 
 ## Complete rank limits and Wigner's rule
@@ -110,6 +114,8 @@ the algorithm still does not perform an FCI eigensolve. Wavefunctions in this
 representation and their connection table grow combinatorially. This is an
 in-core generic reference engine, not yet a tensor-factorized high-order backend.
 The unrestricted CI adapter also materializes spin-orbital integral tensors.
+The opt-in tensor backend avoids that adapter and its connection table, but
+still has combinatorial state growth and dense antisymmetric temporary blocks.
 
 ## Public usage
 
@@ -126,7 +132,8 @@ print(calculation.space.ranks)
 For JIT/AD, use `run_mp(h1,eri,nocc=...,config=MPConfig(order=6))`.
 `algorithm='auto'` selects specialized R/U MP2 and restricted MP3 when available,
 otherwise the generic series path. `algorithm='series'` forces the generic path
-from MP2 onward. `algorithm='direct'` explicitly selects a specialized kernel
+from MP2 onward. `algorithm='tensor'` uses the same Taylor engine with the
+experimental block action, from MP2 onward. `algorithm='direct'` explicitly selects a specialized kernel
 and rejects unsupported orders or coefficient requests. The existing MP2/MP3
 facades remain convenient aliases; UHF MP3 uses the generic engine.
 
