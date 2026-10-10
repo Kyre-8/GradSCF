@@ -106,5 +106,8 @@ for suffix in ("png","pdf","svg"):
     fig.savefig(folder/("ne_f_convergence."+suffix))
 plt.close(fig)
 (folder/"summary.json").write_text(json.dumps(summary,indent=2)+"\n")
+for name in ("he2_convergence", "ne_f_convergence"):
+    svg = folder/(name+".svg")
+    svg.write_text("\n".join(line.rstrip() for line in svg.read_text().splitlines())+"\n")
 print(json.dumps(summary,indent=2))
 print("Figures:",folder.resolve())
