@@ -96,7 +96,7 @@ $$
 $$
 
 agrees with the true eigenvalue through order 2k+1. The state error is
-O(lambda^(k+1)); stationarity makes the energy error O(lambda^(2k+2)). Taylor
+$O(lambda^(k+1))$; stationarity makes the energy error $O(lambda^(2k+2))$. Taylor
 AD of this one functional therefore gives every requested energy coefficient.
 Increasing `wavefunction_order` above the default computes more complete state
 coefficients and increases the rank/capacity requirement accordingly.
