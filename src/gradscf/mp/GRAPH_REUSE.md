@@ -9,17 +9,17 @@ AD and public API. No MP4/MP5-specific formulas or independent solver are added.
 
 For a fixed canonical HF frame, W=H-H0 is linear in the state. Write
 
-\[
+$$
 c(\lambda)=\sum_{j=0}^{k}\lambda^j c_j,\qquad
 c_0=\Phi_0,\qquad u_j=Wc_j.
-\]
+$$
 
 Linearity gives
 
-\[
+$$
 Wc(\lambda)=\sum_{j=0}^{k}\lambda^j u_j,\qquad
 [\lambda^n]\,\lambda Wc(\lambda)=u_{n-1}.
-\]
+$$
 
 Compute u0 once and append uj after solving for cj. The residual receives
 the prepared Taylor coefficients of this linear node as its third input;
@@ -32,11 +32,11 @@ diag(Omega_exc,-1), with the same physical gaps and checked shared solver.
 The energy graph uses the same nodes. For the partial state through k, prepare
 the coefficients of H(lambda)c(lambda):
 
-\[
+$$
 h_0=H_0c_0,\qquad
 h_j=H_0c_j+u_{j-1}\ (1\le j\le k),\qquad
 h_{k+1}=u_k.
-\]
+$$
 
 Higher coefficients vanish for this partial state. Taylor AD of the generic
 Rayleigh functional dot(c,h)/dot(c,c) produces the requested energies under
@@ -52,10 +52,10 @@ not a persistent numerical cache across changed integrals or model parameters.
 
 Every uj remains an ordinary differentiable JAX array:
 
-\[
+$$
 \frac{d u_j}{d\theta}
 =\frac{dW}{d\theta}c_j+W\frac{dc_j}{d\theta}.
-\]
+$$
 
 No `stop_gradient` is applied. The prepared hj coefficients similarly retain
 H0/gap and state response. The same guards reject invalid values and JVP/VJP.
