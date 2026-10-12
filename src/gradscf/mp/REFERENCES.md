@@ -7,22 +7,22 @@ equations below describe the independently retained specialized kernels.
 The MP partition is defined by the physical HF Fock operator. Using HF normal
 ordering, write
 
-\[
+$$
 H=E_{\mathrm{HF}}+F_N+\lambda V_N,
 \qquad T_2=\lambda T_2^{(1)}+\lambda^2T_2^{(2)}+\cdots.
-\]
+$$
 
 For canonical RHF, first-order singles vanish by the Brillouin condition.
 With spatial chemists' integrals and negative excitation denominators,
 
-\[
+$$
 \Delta_{ij}^{ab}=\epsilon_i+\epsilon_j-\epsilon_a-\epsilon_b,
 \quad t_{ij}^{ab(1)}=\frac{(ia|jb)}{\Delta_{ij}^{ab}},
-\]
+$$
 
-\[
+$$
 E^{(2)}=\sum_{ijab}t_{ij}^{ab(1)}[2(ia|jb)-(ib|ja)].
-\]
+$$
 
 The opposite-spin contribution is \(\sum t^{(1)}(ia|jb)\); the same-spin
 contribution is \(\sum t^{(1)}[(ia|jb)-(ib|ja)]\). For UHF, same-spin amplitudes
@@ -32,28 +32,28 @@ ordered tensor indices, not separate physical excitations multiple times.
 
 For MP3 define the connected doubles action
 
-\[
+$$
 \mathcal A_V(X)_{ij}^{ab}
 =\left.\frac{d}{d\eta}
 \langle\Phi_{ij}^{ab}|e^{-\eta X}V_Ne^{\eta X}|\Phi_0\rangle
 \right|_{\eta=0}.
-\]
+$$
 
 Expanding the connected doubles residual order by order gives
 
-\[
+$$
 0=V_{ij}^{ab}-\Delta_{ij}^{ab}t_{ij}^{ab(1)},
 \qquad
 0=\mathcal A_V(T_2^{(1)})_{ij}^{ab}-\Delta_{ij}^{ab}t_{ij}^{ab(2)}.
-\]
+$$
 
 Thus
 
-\[
+$$
 t_{ij}^{ab(2)}=\frac{\mathcal A_V(T_2^{(1)})_{ij}^{ab}}{\Delta_{ij}^{ab}},
 \qquad
 E^{(3)}=\sum_{ijab}t_{ij}^{ab(2)}[2(ia|jb)-(ib|ja)].
-\]
+$$
 
 `mp3.py` evaluates this action with `jax.jvp` of the existing restricted CCD
 residual at zero amplitudes, setting its Fock part to zero. It does not truncate
