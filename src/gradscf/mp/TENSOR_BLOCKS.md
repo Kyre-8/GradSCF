@@ -30,20 +30,20 @@ occupied-beta holes). The block with alpha/beta excitation ranks (r_a,r_b) has
 group counts s=(r_a,r_b,r_a,r_b). Its full tensor is antisymmetric within each
 group, and its contribution to the state is
 
-\[
+$$
  |\Psi_s\rangle = {1\over\prod_t s_t!}
  \sum_{X_0\ldots X_3} A_s(X_0,\ldots,X_3)
  b^\dagger_{X_0}\cdots b^\dagger_{X_3}|\Phi\rangle.
-\]
+$$
 
 Only strictly increasing index combinations in each group are stored in the
 state vector. These independent coordinates are orthonormal:
 
-\[
+$$
  \langle\Psi|\Psi\rangle
  =\sum_s {\|A_s\|_F^2\over\prod_t s_t!}
  =\|c_\mathrm{packed}\|_2^2.
-\]
+$$
 
 `wavefunction_coefficients` returns Phi, Psi1, ... in these coordinates, **not
 the determinant ordering/phases of `algorithm="series"`**. Both use intermediate
@@ -64,9 +64,9 @@ particle indices and I the concatenated hole indices (beta indices shifted by
 nmo). Define eta from
 `excite(reference_bits, I, P) -> (determinant_bits, eta)`. For r=r_a+r_b,
 
-\[
+$$
  c_\mathrm{det}=\eta(-1)^{r(r-1)/2}c_\mathrm{packed}.
-\]
+$$
 
 The additional sign arises because the quasiparticle convention orders hole
 creators forward, whereas the standard excitation operator reverses its hole
@@ -78,11 +78,11 @@ signs for both backends; SS/OS energies still decompose E2 only.
 
 The HF-normal-ordered fluctuation operator is
 
-\[
+$$
  W=\sum_{pq}(F_{pq}-\delta_{pq}F_{pp})\{a_p^\dagger a_q\}
  +{1\over4}\sum_{pqrs}\bar g_{pqrs}
  \{a_p^\dagger a_q^\dagger a_s a_r\}.
-\]
+$$
 
 Off-diagonal Fock elements are retained, even when negligible for a converged
 canonical reference, so the action preserves the existing integral derivative
@@ -104,9 +104,9 @@ The term contributes only if all u are nonnegative and the target is retained.
 Contract the l kernel axes with the first l axes of each source group, then
 interleave created and surviving axes by group. The remaining cross-group sign is
 
-\[
+$$
  (-1)^{\sum_{a<b}u_a(l_b+m_b)}.
-\]
+$$
 
 Antisymmetrize the target by signed subset shuffles of the m created positions
 among its t positions. The action multiplies the normal-ordered kernel by
