@@ -1,4 +1,5 @@
 """Alternating optimization must preserve accepted states and element locality."""
+from importlib import import_module
 import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
@@ -8,11 +9,7 @@ import pytest
 
 
 def driver():
-    path = Path(__file__).resolve().parents[2] / 'tools/train_nnao_joint.py'
-    assert path.is_file(), 'The alternating coefficient/exponent driver is not implemented.'
-    spec = importlib.util.spec_from_file_location('joint_training', path)
-    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
-    return module
+    return import_module("gradscf.model.nnao.training.alternating")
 
 
 ROWS = [dict(structure_id='ch4', symbols=['C', 'H']),

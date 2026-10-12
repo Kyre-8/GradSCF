@@ -1,4 +1,5 @@
 """Fixed-shape DF-RHF response reuses its JIT and differentiates physical inputs."""
+from importlib import import_module
 import importlib.util
 from dataclasses import replace
 from pathlib import Path
@@ -9,11 +10,7 @@ import numpy as np
 
 
 def module():
-    spec = importlib.util.spec_from_file_location('df_rhf_test',
-        Path('tools/optimize_methane_nnao.py'))
-    result = importlib.util.module_from_spec(spec); spec.loader.exec_module(result)
-    assert hasattr(result, '_df_rhf_solver'), 'Shared physical-input DF-RHF solver is missing.'
-    return result
+    return import_module("gradscf.model.nnao.training.objective")
 
 
 def inputs():
@@ -49,8 +46,8 @@ def test_scaled_basis_experiments_share_the_complete_scf_backward(monkeypatch):
     kwargs=dict(basis_family='szp663_direct',core_primitives=6,jk_backend='df',
         implicit_tolerance=1e-8,geometry=dict(name='H2',symbols=['H','H'],
             coords_angstrom=[[0.,0.,0.],[0.,0.,.74]],charge=0,spin=0))
-    first=m.MethaneRHF(**kwargs)
-    changed=m.MethaneRHF(**kwargs,log_exponent_scales={('H',0):.12})
+    first=m.BasisRHF(**kwargs)
+    changed=m.BasisRHF(**kwargs,log_exponent_scales={('H',0):.12})
     e1,g1,_=first.evaluate(first.layout.reference_outputs())
     e2,g2,_=changed.evaluate(changed.layout.reference_outputs())
     assert len(calls)==1, 'A new exponent pool recreates the full SCF/backward compilation.'

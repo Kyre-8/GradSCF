@@ -6,8 +6,8 @@ import pytest
 from gradscf.scf import UKSConfig
 from gradscf.scf.builders import _build_unrestricted_reference
 from gradscf.scf.differentiable import _is_unrestricted_reference
-from gradscf.workflows.core import run_molecule_from_spec
-from gradscf.workflows.types import MoleculeSpecConfig, SimulationConfig
+from gradscf.model.neural_xc.workflows.core import run_molecule_from_spec
+from gradscf.model.neural_xc.workflows.types import MoleculeSpecConfig, SimulationConfig
 
 
 def test_spin_resolved_charged_state_overrides_restricted_nocc_marker():

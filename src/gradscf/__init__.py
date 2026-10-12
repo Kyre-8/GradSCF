@@ -27,9 +27,7 @@ _NAMESPACE_EXPORTS = {
     "tdscf",
     "tddft",
     "model",
-    "training",
     "tools",
-    "workflows",
     "data",
 }
 

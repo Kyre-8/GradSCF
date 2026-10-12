@@ -1,3 +1,4 @@
+from importlib import import_module
 import importlib
 import jax
 import jax.numpy as jnp
@@ -83,7 +84,7 @@ def test_real_mace_predicts_direct_coefficients():
 def test_grimme_methane_implicit_gradient():
     from pathlib import Path
     import runpy
-    cls=runpy.run_path(str(Path('tools/optimize_methane_nnao.py')))['MethaneRHF']
+    cls=vars(import_module("gradscf.model.nnao.training.objective"))['BasisRHF']
     experiment=cls(basis_family='qvszps')
     x=experiment.layout.reference_outputs()
     energy,gradient,info=experiment.evaluate(x)

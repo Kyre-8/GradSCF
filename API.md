@@ -3,7 +3,8 @@
 Import domain namespaces, then construct calculation objects:
 
 ```python
-from gradscf import gto, scf, fci, training
+from gradscf import gto, scf, fci
+from gradscf.model.neural_xc import training
 
 mol = gto.M(atom='H 0 0 0; H 0 0 .74', basis='6-31g*')
 mf = scf.RHF(mol).run()
@@ -91,7 +92,7 @@ entry points inside `jax.jit` / `jax.grad`.
 This is an intentional import-path break. Repository examples, workflows and
 tests have been migrated, without compatibility forwarding files or a second
 training implementation. See [MIGRATION.md](MIGRATION.md) for earlier module
-ownership changes, and [training](src/gradscf/training/README.md) for loss,
+ownership changes, and [training](src/gradscf/model/neural_xc/training/README.md) for loss,
 convergence and derivative contracts.
 
 ## Validation of this cleanup

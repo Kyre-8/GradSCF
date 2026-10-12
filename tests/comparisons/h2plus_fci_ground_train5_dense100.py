@@ -42,14 +42,14 @@ from gradscf.model.neural_xc import (
 )
 from gradscf.scf import UKSConfig
 from gradscf.scf.builders import _build_unrestricted_reference
-from gradscf.training import (
+from gradscf.model.neural_xc.training import (
     MolecularTrainingDatum,
     MolecularTrainingConfig,
     molecular_loss,
     make_ground_state_predictor,
     save_params_checkpoint,
 )
-from gradscf.training.trainer import create_train_state_from_molecule, make_molecular_train_step
+from gradscf.model.neural_xc.training.trainer import create_train_state_from_molecule, make_molecular_train_step
 
 HARTREE_TO_EV = 27.211386245988
 _DEFAULT_SEMILOCAL_XC = ("lda_x", "gga_x_b88", "lda_c_vwn_rpa", "gga_c_lyp")

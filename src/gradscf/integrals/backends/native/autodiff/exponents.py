@@ -54,7 +54,7 @@ def exponent_products(operator, atoms, basis, active, active_exponents, shape, c
         if not isinstance(denv, ad.Zero):
             raise NotImplementedError("Native higher or mixed exponent derivatives are not implemented")
         primal = primitive.bind(env, vector)
-        tangent = (ad.Zero.from_primal_value(primal) if isinstance(dvector, ad.Zero)
+        tangent = (ad.Zero(jax.typeof(primal).to_tangent_aval()) if isinstance(dvector, ad.Zero)
                    else primitive.bind(env, dvector))
         return primal, tangent
 

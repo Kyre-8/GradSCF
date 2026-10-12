@@ -78,7 +78,7 @@ def test_spin_context_and_missing_physical_quantity():
 @pytest.mark.parametrize('mode, backward', [
     ('fixed_density','implicit'), ('self_consistent','explicit'), ('self_consistent','implicit')])
 def test_three_training_modes_have_fd_gradients_and_accept_external_params(mode, backward):
-    from gradscf.training import MolecularTrainingConfig, MolecularTrainingDatum, molecular_loss, Trainer
+    from gradscf.model.neural_xc.training import MolecularTrainingConfig, MolecularTrainingDatum, molecular_loss, Trainer
     f, mol = functional(), molecule()
     cfg = MolecularTrainingConfig(mode=mode,scf_gradient_mode=backward,
         e0_total_mse_weight=1.,scf_max_cycle=60,scf_damping=0.,
@@ -157,8 +157,8 @@ def test_ao_response_is_used_by_tda_and_tddft(spin):
 
 def test_nonfinite_training_step_is_rejected_without_changing_optimizer_state():
     from flax.training.train_state import TrainState
-    from gradscf.training import MolecularTrainingConfig, MolecularTrainingDatum
-    from gradscf.training.trainer import make_molecular_train_step
+    from gradscf.model.neural_xc.training import MolecularTrainingConfig, MolecularTrainingDatum
+    from gradscf.model.neural_xc.training.trainer import make_molecular_train_step
     from gradscf.dft import Functional
     f=Functional(lambda s:s.rho,lambda p,x:jnp.sqrt(p["scale"])*jnp.sum(x))
     cfg=MolecularTrainingConfig(e0_total_mse_weight=1.)
@@ -194,8 +194,8 @@ def test_external_unrestricted_scf_density_response(backward):
 
 
 def test_external_implicit_training_requires_converged_state_by_default():
-    from gradscf.training import MolecularTrainingConfig, MolecularTrainingDatum
-    from gradscf.training.trainer import make_molecular_train_step
+    from gradscf.model.neural_xc.training import MolecularTrainingConfig, MolecularTrainingDatum
+    from gradscf.model.neural_xc.training.trainer import make_molecular_train_step
     from flax.training.train_state import TrainState
     f=functional()
     cfg=MolecularTrainingConfig(mode='self_consistent',scf_gradient_mode='implicit',
@@ -209,14 +209,14 @@ def test_external_implicit_training_requires_converged_state_by_default():
 
 def test_external_init_fn_can_initialize_pytree_inputs():
     from gradscf.dft import Functional
-    from gradscf.training.trainer import create_train_state_from_molecule
+    from gradscf.model.neural_xc.training.trainer import create_train_state_from_molecule
     f=Functional(inputs,energy,init_fn=lambda key,x:{'scale':jnp.sum(x['weights'])/10})
     state=create_train_state_from_molecule(f,jax.random.PRNGKey(0),molecule(),optax.adam(.01))
     np.testing.assert_allclose(state.params['scale'],.1)
 
 
 def test_response_binding_does_not_replace_the_scf_functional():
-    from gradscf.training.targets import _freeze_functional_for_fractional_path
+    from gradscf.model.neural_xc.training.targets import _freeze_functional_for_fractional_path
     f, mol, p = functional(), molecule(), {'scale':jnp.array(.3)}
     frozen, params = _freeze_functional_for_fractional_path(p, f, mol)
     assert frozen is f
@@ -225,8 +225,8 @@ def test_response_binding_does_not_replace_the_scf_functional():
 
 def test_explicit_explicit_convergence_policy_rejects_finite_unconverged_updates():
     from flax.training.train_state import TrainState
-    from gradscf.training import MolecularTrainingConfig, MolecularTrainingDatum
-    from gradscf.training.trainer import make_molecular_train_step
+    from gradscf.model.neural_xc.training import MolecularTrainingConfig, MolecularTrainingDatum
+    from gradscf.model.neural_xc.training.trainer import make_molecular_train_step
     f=functional()
     cfg=MolecularTrainingConfig(mode='self_consistent',scf_gradient_mode='explicit',
         scf_require_converged=True,scf_max_cycle=1,e0_total_mse_weight=1.)

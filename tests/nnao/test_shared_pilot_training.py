@@ -1,4 +1,5 @@
 """Shared-training control tests use analytical energies and a NumPy Adam."""
+from importlib import import_module
 import json
 from pathlib import Path
 import runpy
@@ -8,9 +9,7 @@ import pytest
 
 
 def module():
-    path = Path('tools/train_nnao_pilot.py')
-    assert path.is_file(), 'Shared NNAO pilot trainer is missing'
-    return runpy.run_path(str(path))
+    return vars(import_module("gradscf.model.nnao.training.trainer"))
 
 
 def info():
@@ -294,8 +293,8 @@ def test_cosine_schedule_resume_keeps_global_update_count(tmp_path):
 
 def test_host_fixed_integrals_match_device_storage(tmp_path):
     pytest.importorskip('jax')
-    numerical = runpy.run_path('tools/optimize_methane_nnao.py')
-    experiment_class = numerical['MethaneRHF']
+    numerical = vars(import_module("gradscf.model.nnao.training.objective"))
+    experiment_class = numerical['BasisRHF']
     geometry = dict(name='H2', symbols=['H', 'H'], charge=0, spin=0,
                     coords_angstrom=[[0., 0., 0.], [0., 0., .74]])
     kwargs = dict(geometry=geometry, basis_family='szp663_direct', core_primitives=6,
@@ -320,22 +319,23 @@ def test_stage2_requires_both_heldout_inputs_before_starting(capsys):
             '--heldout-structures', 'missing-heldout', '--cache-storage', 'host',
             '--final-learning-rate', '1e-5']
     with pytest.raises(SystemExit) as error:
-        api['main'](args)
+        import_module('gradscf.model.nnao.workflows.train').main(args)
     assert error.value.code == 2
     assert 'together' in capsys.readouterr().err
 
 
 def test_every_split_gate_checks_same_scientific_and_helper_sources(tmp_path):
-    api = module(); tools = tmp_path / 'tools'; tools.mkdir()
-    filenames = [('experiment_source_sha256', 'optimize_methane_nnao.py'),
-                 ('source_sha256', 'validate_nnao_pilot.py')]
+    api = module(); tools = tmp_path / 'src/gradscf/model/nnao'; tools.mkdir(parents=True)
+    (tools/'training').mkdir(); (tools/'workflows').mkdir()
+    filenames = [('experiment_source_sha256', 'training/objective.py'),
+                 ('source_sha256', 'workflows/validate.py')]
     import hashlib
     config = dict(scientific_source_sha256='scientific')
     for field, name in filenames:
         path = tools / name; path.write_text(name)
         config[field] = hashlib.sha256(path.read_bytes()).hexdigest()
     api['verify_validation_sources']({'config': config}, tmp_path, scientific_hash='scientific')
-    (tools / 'validate_nnao_pilot.py').write_text('changed')
+    (tools / 'workflows/validate.py').write_text('changed')
     with pytest.raises(ValueError, match='changed since validation'):
         api['verify_validation_sources']({'config': config}, tmp_path, scientific_hash='scientific')
 
@@ -350,10 +350,10 @@ def test_initial_heldout_failure_does_not_claim_an_accepted_checkpoint(tmp_path)
 
 @pytest.mark.parametrize('order', ['C', 'F'])
 def test_npz_numeric_mapping_preserves_order_bytes_and_readonly(tmp_path, order):
-    numerical = runpy.run_path('tools/optimize_methane_nnao.py')
+    numerical = vars(import_module("gradscf.model.nnao.training.objective"))
     expected = np.array(np.arange(30, dtype=np.float64).reshape(5, 6), order=order)
     path = tmp_path / 'integrals.npz'; np.savez(path, factors=expected)
-    actual = numerical['map_npz_numeric'](path, 'factors')
+    actual = import_module('gradscf.model.nnao.integrals.cache').map_npz_numeric(path, 'factors')
     assert isinstance(actual, np.memmap) and actual.nbytes == expected.nbytes
     assert Path(actual.filename) == path
     assert not actual.flags.writeable
@@ -364,25 +364,25 @@ def test_npz_numeric_mapping_preserves_order_bytes_and_readonly(tmp_path, order)
 
 
 def test_npz_mapping_rejects_compressed_and_object_members(tmp_path):
-    numerical = runpy.run_path('tools/optimize_methane_nnao.py')
+    numerical = vars(import_module("gradscf.model.nnao.training.objective"))
     compressed = tmp_path / 'compressed.npz'
     np.savez_compressed(compressed, factors=np.arange(10.))
     with pytest.raises(ValueError, match='ZIP_STORED'):
-        numerical['map_npz_numeric'](compressed, 'factors')
+        import_module('gradscf.model.nnao.integrals.cache').map_npz_numeric(compressed, 'factors')
     objects = tmp_path / 'objects.npz'; np.savez(objects, factors=np.array([{}], dtype=object))
     with pytest.raises(ValueError, match='numeric'):
-        numerical['map_npz_numeric'](objects, 'factors')
+        import_module('gradscf.model.nnao.integrals.cache').map_npz_numeric(objects, 'factors')
 
 
 def test_mmap_integrals_match_device_energy_and_gradient(tmp_path):
-    numerical = runpy.run_path('tools/optimize_methane_nnao.py')
+    numerical = vars(import_module("gradscf.model.nnao.training.objective"))
     geometry = dict(name='H2', symbols=['H', 'H'], charge=0, spin=0,
                     coords_angstrom=[[0., 0., 0.], [0., 0., .74]])
     kwargs = dict(geometry=geometry, basis_family='szp663_direct', core_primitives=6,
                   jk_backend='df', implicit_tolerance=1e-8)
-    device = numerical['MethaneRHF'](**kwargs)
+    device = numerical['BasisRHF'](**kwargs)
     path = device.write_integral_cache(tmp_path / 'integrals.npz')
-    mapped = numerical['MethaneRHF'](**kwargs, integral_cache=path, cache_storage='mmap')
+    mapped = numerical['BasisRHF'](**kwargs, integral_cache=path, cache_storage='mmap')
     assert all(isinstance(array, np.memmap) and not array.flags.writeable
                for array in (mapped.ps, mapped.ph, mapped.rep))
     outputs = device.layout.reference_outputs()

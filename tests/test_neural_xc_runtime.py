@@ -45,14 +45,14 @@ from gradscf.tddft.response import (
 )
 import gradscf.tddft.response as response_module
 from gradscf.tddft.unrestricted import build_unrestricted_tda_operator
-from gradscf.training import (
+from gradscf.model.neural_xc.training import (
     MolecularTrainingDatum,
     MolecularTrainingConfig,
     molecular_loss,
     predict_excitation_energies,
     predict_ground_state_total_energy,
 )
-from gradscf.training.trainer import create_train_state_from_molecule, make_molecular_train_step
+from gradscf.model.neural_xc.training.trainer import create_train_state_from_molecule, make_molecular_train_step
 
 
 def test_libxc_module_uses_polarized_channels_for_unrestricted_features(monkeypatch):

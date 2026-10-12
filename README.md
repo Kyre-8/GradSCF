@@ -160,7 +160,8 @@ the electronic state and differentiates its fixed point.
 import jax
 import jax.numpy as jnp
 jax.config.update("jax_enable_x64", True)
-from gradscf import gto, scf, dft, fci, training
+from gradscf import gto, scf, dft, fci
+from gradscf.model.neural_xc import training
 
 def inputs(state):
     return {"rho": state.rho, "weights": state.weights}
@@ -261,8 +262,11 @@ its baseline. GradSCF differentiates the whole feature-to-energy graph for
 the AO potential and Hessian-vector response. See
 [functional contracts](src/gradscf/dft/FUNCTIONAL.md).
 
-`training.Sample`/`training.Trainer` are shared framework APIs;
-[model.neural_xc](src/gradscf/model/neural_xc) is a separate concrete model.
+`Sample` and `Trainer` live in `gradscf.model.neural_xc.training`. They accept
+both external `dft.Functional` callbacks and the built-in
+[Neural XC model](src/gradscf/model/neural_xc). Each model owns its training
+and experiment workflows; there are no top-level `gradscf.training` or
+`gradscf.workflows` packages.
 
 | Mode | Forward and derivative |
 | --- | --- |
@@ -271,7 +275,7 @@ the AO potential and Hessian-vector response. See
 | `implicit` | Run SCF and differentiate its fixed-point condition |
 
 `explicit` is the public name; SCF uses `lax.scan`, not manual expansion
-of iteration blocks. The [training guide](src/gradscf/training/README.md)
+of iteration blocks. The [training guide](src/gradscf/model/neural_xc/training/README.md)
 defines labels, MSE/MAE losses and update rejection. Samples capture prepared
 states; reconstruct them after changing the source. External callbacks must
 support the derivative order and physical inputs required by their objective.
@@ -288,6 +292,56 @@ Single-geometry or training-set optimization does not establish transferability.
 representation features; their energy supplies potential and response.
 See [neural kinetic energy](examples/ofdft/neural_kinetic.py).
 Additional dispersion models live in [model.neural_d](src/gradscf/model/neural_d).
+
+### Model development and ownership
+
+Keep a new neural model in `src/gradscf/model/<name>/`. Its network, physical
+integration, training and workflows belong together:
+
+```text
+model/<name>/
+  config.py, initialization.py   # architecture, physical assets and initialization
+  encoder.py, inputs.py          # network and model-specific features
+  integrals/                    # model-specific integral execution and caches
+  training/                     # objectives, gradients, updates and checkpoints
+  workflows/                    # data selection, training and evaluation entry points
+  data/                         # required physical assets and provenance
+  vendor/                       # pinned upstream source, when needed
+```
+
+Use only the files/subpackages the model needs; a small model can use a single
+`training.py`. Model-owned integral modules call the shared
+`gradscf.integrals` kernels. SCF, response and implicit/explicit derivative
+solvers remain in their physical modules. Training loops and workflow policy
+are maintained by each model, rather than a separate global framework.
+
+The standard development sequence is:
+
+1. Specify the predicted physical quantity, units, shapes, symmetries and fixed
+   versus trainable parameters.
+2. Implement initialization and network evaluation with explicit parameter
+   and non-training state; importing a model must not start calculations or
+   choose a device.
+3. Assemble physical inputs using the existing normalization and integral
+   operators; declare cache dependencies and supported derivative orders.
+4. Define the model's objective and compose its gradient through the existing
+   electronic solver. Variational basis optimization and supervised XC
+   learning require different objectives.
+5. Implement updates, failure handling and reproducible checkpoint recovery
+   within the model. Invalid SCF/gradient candidates must not replace accepted
+   parameters or optimizer state.
+6. Verify initialization, directional finite differences, a small training
+   update and checkpoint continuation before measuring larger workloads.
+
+Current owners are [`neural_xc/training`](src/gradscf/model/neural_xc/training),
+[`neural_xc/workflows`](src/gradscf/model/neural_xc/workflows), and NNAO's
+[`integrals`](src/gradscf/model/nnao/integrals),
+[`training`](src/gradscf/model/nnao/training) and
+[`workflows`](src/gradscf/model/nnao/workflows).
+The unchanged MACE snapshot stays inside NNAO at
+[`nnao/vendor/mace-jax`](src/gradscf/model/nnao/vendor/mace-jax).
+See the [model development guide](src/gradscf/model/README.md) and
+[NNAO guide](src/gradscf/model/nnao/README.md) for the full contracts and commands.
 
 ## Numerical infrastructure and memory
 
@@ -368,6 +422,11 @@ basis/XC, convergence controls and reference result. Contributions should keep
 physical equations separate from shared solvers, add focused numerical regressions,
 and preserve upstream notices.
 
+Repository-local `.vscode/` settings and the root `docs/` working directory
+are kept locally and excluded from GitHub synchronization. Published API and
+model documentation lives in the root Markdown guides and the relevant
+`src/gradscf/` modules.
+
 ## Citation
 
 Identify the repository and commit/version used in published calculations.
@@ -387,4 +446,4 @@ Adapted/vendored components retain their own notices and licenses:
 [PySCF CC contractions](src/gradscf/cc/NOTICE.md),
 [native PySCF/libcint](src/gradscf/integrals/_native/README.md),
 [OFDFT/libKEDF](src/gradscf/ofdft/LICENSE.libKEDF), and
-[MACE-JAX provenance](src/gradscf/model/nnao/UPSTREAM.json).
+[MACE-JAX provenance](src/gradscf/model/nnao/vendor/mace-jax/UPSTREAM.json).

@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 
 from gradscf.model.neural_xc import make_neural_xc_functional
-from gradscf.workflows.core import run_neural_tddft, run_reference
-from gradscf.workflows.types import SimulationConfig
+from gradscf.model.neural_xc.workflows.core import run_neural_tddft, run_reference
+from gradscf.model.neural_xc.workflows.types import SimulationConfig
 
 
 pytestmark = pytest.mark.skipif(

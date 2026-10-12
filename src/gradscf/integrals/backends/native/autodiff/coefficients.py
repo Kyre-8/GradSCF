@@ -76,7 +76,7 @@ def coefficient_products(operator, atoms, basis, ncoeff, shape, cart, split, ope
             terms.append(hessian.bind(env, coefficients, dcoefficients, vector))
         if not isinstance(dvector, ad.Zero):
             terms.append(primitive.bind(env, coefficients, dvector))
-        return primal, sum(terms) if terms else ad.Zero.from_primal_value(primal)
+        return primal, sum(terms) if terms else ad.Zero(jax.typeof(primal).to_tangent_aval())
 
     def transpose(primitive, other, cotangent, env, coefficients, vector):
         if ad.is_undefined_primal(env):
@@ -106,7 +106,7 @@ def coefficient_products(operator, atoms, basis, ncoeff, shape, cart, split, ope
             terms.append(primitive.bind(env, coefficients, dleft, right))
         if not isinstance(dright, ad.Zero):
             terms.append(primitive.bind(env, coefficients, left, dright))
-        return primal, sum(terms) if terms else ad.Zero.from_primal_value(primal)
+        return primal, sum(terms) if terms else ad.Zero(jax.typeof(primal).to_tangent_aval())
 
     def second_transpose(primitive, cotangent, env, coefficients, left, right):
         if ad.is_undefined_primal(env):

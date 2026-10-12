@@ -2,6 +2,16 @@
 
 ## Unreleased — GradSCF
 
+### Model-owned training and workflows
+
+- Move XC training and workflows into `gradscf.model.neural_xc`; remove the
+  former top-level namespaces and update their callers.
+- Separate NNAO integration, initialization, training and CLI workflows.
+  Keep the unchanged MACE snapshot inside `model/nnao/vendor/mace-jax`.
+- Document model ownership and the standard development/validation process
+  in the root README and model guides. Keep local editor settings and root
+  working documentation out of repository synchronization.
+
 ### Native differentiable basis integrals
 
 - Add CPU native contraction-coefficient JVP/VJP and Hessian products, and
@@ -116,7 +126,7 @@
 
 - Keep `model.neural_xc` as the concrete built-in neural XC model. Move the
   generic callback adapter to `dft.Functional` and shared training to
-  `gradscf.training` (`Sample` / `Trainer`).
+  `gradscf.model.neural_xc.training` (`Sample` / `Trainer`).
 - Move XC derivatives to `dft.derivatives` and shared physical HFX/PT2 inputs
   to `dft.hfx` / `dft.pt2`. SCF, data loading, and external-model training no
   longer import the built-in neural model to obtain physical primitives.

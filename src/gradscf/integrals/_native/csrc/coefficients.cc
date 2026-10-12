@@ -2,12 +2,14 @@
 // Each AO leg has an independent shadow shell. VJPs uncontract one shell leg
 // locally and consume its block immediately, without a primitive-pair cache.
 #include "tables.h"
+#include "parallel.h"
 extern "C" {
 extern CINTIntegralFunction int3c2e_cart, int3c2e_sph;
 }
 
 struct CoefficientTables {
   IntegralTables t;
+  int first_shell=0, shell_stride=1;
   int op, cart, active, orbital_ao, auxiliary_ao, components;
   int shadow_shell[2], shadow_coeff[2];
   size_t count=0, pairs=0, shadow_capacity=0;
@@ -103,7 +105,7 @@ struct CoefficientTables {
   }
   template<class Consume>
   void shell_pairs(Consume consume) {
-    for (int i=0; i<active; ++i) for (int j=0; j<(op==6 ? i+1:active); ++j) {
+    for (int i=first_shell; i<active; i+=shell_stride) for (int j=0; j<(op==6 ? i+1:active); ++j) {
       if (op==6) for (int k=active; k<int(t.ao.size())-1; ++k) consume(i,j,k);
       else consume(i,j,-1);
     }
@@ -134,7 +136,7 @@ struct CoefficientTables {
     }
     // No optimizer: its nonzero-contraction masks would be stale after a
     // direction/identity substitution and can erase derivatives at zero.
-    t.shell(intor,shells,size_t(components)*di*dj*dk,block,cache);
+    t.shell(intor,shells,size_t(components)*di*dj*dk,block,cache,op==6 ? 3:2);
   }
   void directional(const double* left, const double* right, double* output) {
     shell_pairs([&](int i,int j,int k) {
@@ -195,7 +197,9 @@ static ffi::Error CoefficientProduct(ffi::BufferR2<ffi::S32> atoms,
     CoefficientTables::check_finite(vector.typed_data(),vector.element_count());
     double* output=result->typed_data();
     std::fill(output,output+result->element_count(),0.);
-    if constexpr (transpose) driver.transpose(nullptr,vector.typed_data(),output);
+    if constexpr (transpose) parallel_vjp(driver,output,[&](auto& local,double* out) {
+      local.transpose(nullptr,vector.typed_data(),out);
+    });
     else {
       driver.directional(vector.typed_data(),nullptr,output);
       driver.directional(nullptr,vector.typed_data(),output);
@@ -226,7 +230,9 @@ static ffi::Error CoefficientHessianProduct(ffi::BufferR2<ffi::S32> atoms,
     CoefficientTables::check_finite(vector.typed_data(),vector.element_count());
     double* output=result->typed_data();
     std::fill(output,output+result->element_count(),0.);
-    if constexpr (transpose) driver.transpose(direction.typed_data(),vector.typed_data(),output);
+    if constexpr (transpose) parallel_vjp(driver,output,[&](auto& local,double* out) {
+      local.transpose(direction.typed_data(),vector.typed_data(),out);
+    });
     else {
       driver.directional(direction.typed_data(),vector.typed_data(),output);
       driver.directional(vector.typed_data(),direction.typed_data(),output);

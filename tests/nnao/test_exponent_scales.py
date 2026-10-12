@@ -1,4 +1,5 @@
 """Shared element/shell exponent scales retain coefficient-only implicit AD."""
+from importlib import import_module
 import runpy
 
 import jax
@@ -14,7 +15,7 @@ def layout(atom='C 0 0 0; H 0 0 1.09'):
 
 
 def experiment(**kwargs):
-    cls = runpy.run_path('tools/optimize_methane_nnao.py')['MethaneRHF']
+    cls = vars(import_module("gradscf.model.nnao.training.objective"))['BasisRHF']
     return cls(basis_family='szp663_direct', core_primitives=6, jk_backend='df',
         implicit_tolerance=1e-8, geometry=dict(name='H2', charge=0, spin=0,
             symbols=['H', 'H'], coords_angstrom=[[0., 0., 0.], [0., 0., .74]]), **kwargs)

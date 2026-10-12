@@ -51,17 +51,17 @@ pythonpath = ["src"]
 where = ["src"]
 include = ["gradscf*"]
 exclude = ["gradscf.integrals._native.*", "gradscf.integrals.basis.data.pyscf_basis_snapshot*",
-           "gradscf.model.nnao.mace_jax*", "gradscf.model.nnao.tests*",
-           "gradscf.model.nnao.examples*", "gradscf.model.nnao.scripts*"]
+           "gradscf.model.nnao.tests*", "gradscf.model.nnao.vendor*"]
 
 [tool.setuptools.package-data]
+"gradscf.model" = ["README.md"]
 "gradscf.dft" = ["*.md"]
-"gradscf.training" = ["*.md"]
+"gradscf.model.neural_xc.training" = ["*.md"]
 "gradscf.ofdft" = ["*.md", "LICENSE.libKEDF"]
 "gradscf.fci" = ["*.md", "references.bib"]
 "gradscf.mp" = ["*.md"]
 "gradscf.cc" = ["LICENSE.pyscf", "*.md", "references.bib"]
-"gradscf.model.nnao" = ["data/szp3.json", "data/qvszps/**/*", "NNAO.md"]
+"gradscf.model.nnao" = ["data/szp3.json", "data/qvszps/**/*", "NNAO.md", "README.md"]
 "gradscf.integrals" = ["*.md"]
 "gradscf.integrals.basis.data" = [
   "_pyscf_basis_bundle.json",

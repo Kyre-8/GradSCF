@@ -402,7 +402,7 @@ def build_graddft_ground_atom_datum(
 ) -> Any:
     """Build one molecular datum from a GradDFT ground-state atom record."""
 
-    from gradscf.training import MolecularTrainingDatum
+    from gradscf.model.neural_xc.training import MolecularTrainingDatum
 
     molecule = build_graddft_ground_atom_molecule(record, basis=basis, **molecule_kwargs)
     return MolecularTrainingDatum(

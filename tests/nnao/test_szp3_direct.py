@@ -1,3 +1,4 @@
+from importlib import import_module
 from pathlib import Path
 import runpy
 import jax
@@ -48,7 +49,7 @@ def test_methane_all_electron_energy_and_gradient_without_ecp(monkeypatch):
         assert operator!='ecp','The all-electron path must not evaluate an ECP'
         return original(self,operator,*args,**kwargs)
     monkeypatch.setattr(IntegralPlan,'evaluate',reject_ecp)
-    cls=runpy.run_path(str(Path('tools/optimize_methane_nnao.py')))['MethaneRHF']
+    cls=vars(import_module("gradscf.model.nnao.training.objective"))['BasisRHF']
     experiment=cls(basis_family='szp3_direct')
     assert experiment.nelectron==10 and experiment.layout.topology.nao==26
     x=experiment.layout.reference_outputs();energy,gradient,info=experiment.evaluate(x)

@@ -8,7 +8,7 @@ import jax
 import jax.numpy as jnp
 from jaxtyping import Array
 
-from gradscf.training import MolecularTrainingConfig, predict_ground_state_total_energy
+from gradscf.model.neural_xc.training import MolecularTrainingConfig, predict_ground_state_total_energy
 
 
 FractionalChargeEnergyEvaluator = Callable[[Any], Array]

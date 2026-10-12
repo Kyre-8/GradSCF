@@ -17,13 +17,12 @@ gradscf/
     functional.py      # generic energy-callback adapter and current-density inputs
     derivatives.py     # shared XC potential and Hessian actions
     hfx.py, pt2.py      # shared physical ingredients and bounded-memory caches
-  training/            # Sample / Trainer, losses and optimization
+  model/neural_xc/training/  # Sample / Trainer, XC losses and optimization
   model/neural_xc/     # one concrete built-in model, its input transforms and presets
 ```
 
-The generic DFT, SCF, response, data and training paths do not import the
-concrete model. The built-in model imports shared physical implementations
-from DFT. A subprocess test blocks every `gradscf.model` import while computing
+The generic DFT, SCF and response paths do not import concrete neural models. The built-in model imports shared physical implementations
+from DFT. A subprocess test blocks built-in neural network imports while computing
 an external functional's potential/kernel and taking an implicit SCF training
 step. The old locations have been removed, with no forwarding files.
 
@@ -110,7 +109,7 @@ projection routines. Parameter derivatives remain available through the kernel.
 ## Training API
 
 ```python
-from gradscf import training
+from gradscf.model.neural_xc import training
 
 data = [training.Sample(reference, energy=e_fci)]
 trainer = training.Trainer(functional, params=params)
@@ -240,7 +239,7 @@ After relocation: **123 regression tests passed** (43.55 s), plus **9 targeted
 HFX/PT2 tests passed** (4.97 s; 79 unrelated runtime tests deselected).
 CPU float64, JAX 0.8.1. Existing deprecation/version warnings were retained;
 no full-repository or GPU run is claimed. Package discovery includes
-`gradscf.training` and excludes the removed `gradscf.model.training` package.
+`gradscf.model.neural_xc.training` and excludes the removed `gradscf.model.training` package.
 
 The 9 HFX and 3 PT2 function/class definitions have identical ASTs to the
 previous implementation. Seven training modules are unchanged except imports,

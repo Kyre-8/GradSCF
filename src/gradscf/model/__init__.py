@@ -7,7 +7,7 @@ Hosts the machine-learned model code:
 - ``gradscf.model.nnao``: MACE-conditioned neural-network basis sets (NNAO)
 
 Note: the vendored ``mace_jax`` upstream project ships inside
-``gradscf/model/nnao/mace_jax`` but remains a separate top-level package at
+``gradscf/model/nnao/vendor/mace-jax`` but remains a separate top-level package at
 runtime (installed via the ``nnao`` extra); its sources are unchanged.
 """
 

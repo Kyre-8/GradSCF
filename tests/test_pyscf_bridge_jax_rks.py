@@ -10,8 +10,8 @@ from gradscf.scf.builders import _build_restricted_reference
 from reference_scf_features import _charge_center
 from gradscf.scf import RKSConfig
 from gradscf.scf.rks import TraceableRKSResult
-from gradscf.workflows.core import run_reference
-from gradscf.workflows.types import SimulationConfig
+from gradscf.model.neural_xc.workflows.core import run_reference
+from gradscf.model.neural_xc.workflows.types import SimulationConfig
 
 
 def _pyscf_or_skip():

@@ -1,3 +1,4 @@
+from importlib import import_module
 from pathlib import Path
 import runpy
 from typing import NamedTuple
@@ -10,21 +11,21 @@ import pytest
 
 @pytest.mark.parametrize('tolerance', [0., -1., float('nan'), float('inf')])
 def test_methane_rejects_invalid_implicit_tolerance(tolerance):
-    module=runpy.run_path(str(Path('tools/optimize_methane_nnao.py')))
+    module=vars(import_module("gradscf.model.nnao.training.objective"))
     with pytest.raises(ValueError,match='implicit_tolerance must be finite and positive'):
-        module['MethaneRHF'](implicit_tolerance=tolerance)
+        module['BasisRHF'](implicit_tolerance=tolerance)
 
 
 @pytest.mark.parametrize('shift',[-.1,float('nan'),float('inf')])
 def test_methane_rejects_invalid_scf_rescue_level_shift(shift):
-    module=runpy.run_path('tools/optimize_methane_nnao.py')
+    module=vars(import_module("gradscf.model.nnao.training.objective"))
     with pytest.raises(ValueError,match='scf_rescue_level_shift must be finite and nonnegative'):
-        module['MethaneRHF'](scf_rescue_level_shift=shift)
+        module['BasisRHF'](scf_rescue_level_shift=shift)
 
 
 @pytest.mark.parametrize('primary_converged',[True,False])
 def test_scf_rescue_only_runs_after_failure_and_polishes_consistent_orbitals(primary_converged):
-    module=runpy.run_path('tools/optimize_methane_nnao.py');events=[]
+    module=vars(import_module("gradscf.model.nnao.training.objective"));events=[]
     class Result(NamedTuple):
         converged:object
         cycles:object
@@ -56,16 +57,16 @@ def test_scf_rescue_only_runs_after_failure_and_polishes_consistent_orbitals(pri
 
 
 def test_checked_scf_rejects_non_aufbau_stationary_density():
-    module=runpy.run_path('tools/optimize_methane_nnao.py')
+    module=vars(import_module("gradscf.model.nnao.training.objective"))
     info=dict(converged=True,scf_cycles=2,orbital_residual=1e-12,
         min_overlap_eigenvalue=.1,reconstruction_error=0.,fixed_point_residual=.5)
     with pytest.raises(RuntimeError,match='fixed point'):
-        module['MethaneRHF']._checked_info(-1.,info)
+        module['BasisRHF']._checked_info(-1.,info)
 
 
 def test_nonfinite_coefficient_gradient_retains_outputs_and_valid_forward_diagnostics():
-    module=runpy.run_path('tools/optimize_methane_nnao.py')
-    experiment=object.__new__(module['MethaneRHF'])
+    module=vars(import_module("gradscf.model.nnao.training.objective"))
+    experiment=object.__new__(module['BasisRHF'])
     experiment.ps=experiment.ph=experiment.rep=None
     outputs=np.array([[[.2,.3]]])
     gradient=np.array([[[np.nan,np.inf]]])
@@ -88,8 +89,8 @@ def test_nonfinite_coefficient_gradient_retains_outputs_and_valid_forward_diagno
     ({'orbital_residual':float('nan')},-1.),({},float('nan')),
 ])
 def test_value_only_rejects_invalid_scf_without_calling_backward(bad_info,energy):
-    module=runpy.run_path('tools/optimize_methane_nnao.py')
-    experiment=object.__new__(module['MethaneRHF'])
+    module=vars(import_module("gradscf.model.nnao.training.objective"))
+    experiment=object.__new__(module['BasisRHF'])
     experiment.ps=experiment.ph=experiment.rep=None
     info=dict(converged=True,scf_cycles=3,orbital_residual=1e-12,
               min_overlap_eigenvalue=.1,reconstruction_error=0.,fixed_point_residual=0.)
@@ -101,8 +102,8 @@ def test_value_only_rejects_invalid_scf_without_calling_backward(bad_info,energy
 
 
 def test_hydrogen_value_only_matches_implicit_energy_and_fd():
-    module=runpy.run_path('tools/optimize_methane_nnao.py')
-    experiment=module['MethaneRHF'](basis_family='szp663_direct',core_primitives=6,
+    module=vars(import_module("gradscf.model.nnao.training.objective"))
+    experiment=module['BasisRHF'](basis_family='szp663_direct',core_primitives=6,
         jk_backend='df',implicit_tolerance=1e-8,geometry=dict(name='H2',charge=0,spin=0,
             symbols=['H','H'],coords_angstrom=[[0.,0.,0.],[0.,0.,.74]]))
     outputs=experiment.layout.reference_outputs()
@@ -111,7 +112,7 @@ def test_hydrogen_value_only_matches_implicit_energy_and_fd():
     actual,info=experiment.evaluate_value(outputs)
     np.testing.assert_allclose(actual,expected,atol=1e-12,rtol=0.)
     assert info['converged'] and info['orbital_residual']<1e-7
-    check=runpy.run_path('tools/validate_nnao_pilot.py')['directional_check']
+    check=vars(import_module("gradscf.model.nnao.training.validation"))['directional_check']
     direction=np.asarray(gradient)/np.linalg.norm(np.asarray(gradient))
     result=check(experiment.evaluate_value,outputs,gradient,direction,
                  step=1e-4,atol=2e-6,rtol=2e-5)
@@ -119,14 +120,14 @@ def test_hydrogen_value_only_matches_implicit_energy_and_fd():
 
 
 def test_energy_only_fd_rejects_an_unconverged_perturbation():
-    module=runpy.run_path('tools/optimize_methane_nnao.py')
-    experiment=object.__new__(module['MethaneRHF'])
+    module=vars(import_module("gradscf.model.nnao.training.objective"))
+    experiment=object.__new__(module['BasisRHF'])
     experiment.ps=experiment.ph=experiment.rep=None
     info=dict(converged=False,scf_cycles=150,orbital_residual=1e-12,
               min_overlap_eigenvalue=.1,reconstruction_error=0.,fixed_point_residual=0.)
     experiment._value=lambda *args:(-1.,info)
     experiment._value_grad=lambda *args:pytest.fail('FD evaluation called backward.')
-    check=runpy.run_path('tools/validate_nnao_pilot.py')['directional_check']
+    check=vars(import_module("gradscf.model.nnao.training.validation"))['directional_check']
     with pytest.raises(RuntimeError,match='SCF is not stationary'):
         check(experiment.evaluate_value,np.zeros(1),np.zeros(1),np.ones(1),
               step=1e-4,atol=2e-6,rtol=2e-5)
@@ -136,8 +137,8 @@ def test_energy_only_fd_rejects_an_unconverged_perturbation():
 def test_methane_implicit_energy_gradient_matches_reconverged_scf(implicit_tolerance):
     script=Path('tools/optimize_methane_nnao.py')
     assert script.is_file(), 'Methane implicit-SCF experiment is missing'
-    module=runpy.run_path(str(script))
-    experiment=module['MethaneRHF'](basis_family='szp3',implicit_tolerance=implicit_tolerance)
+    module=vars(import_module("gradscf.model.nnao.training.objective"))
+    experiment=module['BasisRHF'](basis_family='szp3',implicit_tolerance=implicit_tolerance)
     assert experiment.implicit_tolerance==implicit_tolerance
     x=jnp.zeros((5,2,2))
     energy,grad,info=experiment.evaluate(x)
@@ -152,8 +153,8 @@ def test_methane_implicit_energy_gradient_matches_reconverged_scf(implicit_toler
 
 
 def test_methane_implicit_scf_hessian_matches_reconverged_gradient():
-    module=runpy.run_path(str(Path('tools/optimize_methane_nnao.py')))
-    experiment=module['MethaneRHF'](basis_family='szp3')
+    module=vars(import_module("gradscf.model.nnao.training.objective"))
+    experiment=module['BasisRHF'](basis_family='szp3')
     x=jnp.zeros((5,2,2),dtype=jnp.float64)
     direction=jnp.zeros_like(x)
     direction=direction.at[0].set(jnp.array([[.2,-.3],[.4,.1]]))
@@ -171,8 +172,8 @@ def test_methane_implicit_scf_hessian_matches_reconverged_gradient():
 
 
 def test_adam_rejects_invalid_trial_and_halves_learning_rate():
-    module=runpy.run_path(str(Path('tools/optimize_methane_nnao.py')))
-    run_adam=module['_run_adam_steps']
+    module=vars(import_module("gradscf.model.nnao.training.objective"))
+    run_adam=import_module("gradscf.model.nnao.workflows.optimize")._run_adam_steps
     attempts=[];records=[]
 
     def evaluate(vector):

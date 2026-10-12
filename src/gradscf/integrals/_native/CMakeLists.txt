@@ -37,6 +37,9 @@ add_library(gradscf_integrals SHARED
 target_include_directories(gradscf_integrals PRIVATE
   "${JAX_INCLUDE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/generated"
   vendor/libcint/src vendor/libcint/include vendor/pyscf_ecp)
+find_package(Threads REQUIRED)
+target_link_libraries(gradscf_integrals PRIVATE Threads::Threads)
+
 if(APPLE)
   find_library(ACCELERATE_FRAMEWORK Accelerate REQUIRED)
   target_link_libraries(gradscf_integrals PRIVATE m ${ACCELERATE_FRAMEWORK})

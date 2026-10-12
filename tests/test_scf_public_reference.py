@@ -3,7 +3,8 @@ from dataclasses import replace
 import numpy as np
 import pytest
 
-from gradscf import dft, gto, scf, training
+from gradscf import dft, gto, scf
+from gradscf.model.neural_xc import training
 
 
 @pytest.mark.parametrize('spin', [False, True])
@@ -56,7 +57,7 @@ def test_package_root_has_only_domain_namespaces():
 
 
 def test_workflow_compatibility_forwarders_are_not_parallel_entrypoints():
-    from gradscf.workflows import core, pipeline
+    from gradscf.model.neural_xc.workflows import core, pipeline
     for owner, names in ((core, ('run_pipeline_core_from_spec','run_pipeline_core_from_molecule_spec')),
         (pipeline, ('run_neural_xc_spectrum_pipeline_from_spec',
                     'run_neural_xc_spectrum_pipeline_from_molecule_spec',

@@ -1,4 +1,5 @@
 """Large-system implicit coefficient gradient and independent RHF checks."""
+from importlib import import_module
 import argparse
 import json
 from pathlib import Path
@@ -15,7 +16,7 @@ from pyscf import gto,scf
 
 def run(args):
     geometry=json.loads(Path(args.geometry).read_text());start=time.perf_counter()
-    cls=runpy.run_path('tools/optimize_methane_nnao.py')['MethaneRHF']
+    cls=vars(import_module("gradscf.model.nnao.training.objective"))['BasisRHF']
     print('Building primitive J/K backend',args.family,flush=True)
     ex=cls(geometry=geometry,basis_family=args.family,jk_backend=args.jk_backend,auxbasis=args.auxbasis)
     x=ex.layout.reference_outputs()

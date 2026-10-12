@@ -10,10 +10,10 @@ import pytest
 from flax import linen as nn
 from jax.lax import Precision
 
-import gradscf.training.targets as training_targets
+import gradscf.model.neural_xc.training.targets as training_targets
 from gradscf.tools.spectra import HARTREE_TO_EV, lorentzian_spectrum
 from gradscf.model.neural_xc import make_neural_xc_functional
-from gradscf.training import (
+from gradscf.model.neural_xc.training import (
     MolecularTrainingDatum,
     MolecularTrainingConfig,
     dm21_scf_regularization_delta_energy,
@@ -30,11 +30,11 @@ from gradscf.training import (
     predict_ground_state_total_energy,
     xc_kernel_matching_penalty,
 )
-from gradscf.training.trainer import create_train_state_from_molecule, make_molecular_train_step
-from gradscf.training.targets import _electron_count, orbital_energy_matching_penalty
+from gradscf.model.neural_xc.training.trainer import create_train_state_from_molecule, make_molecular_train_step
+from gradscf.model.neural_xc.training.targets import _electron_count, orbital_energy_matching_penalty
 from gradscf.scf.molecules import QuadratureGrid, UnrestrictedMolecule
-from gradscf.workflows.core import run_molecule_from_spec
-from gradscf.workflows.types import MoleculeSpecConfig, SimulationConfig
+from gradscf.model.neural_xc.workflows.core import run_molecule_from_spec
+from gradscf.model.neural_xc.workflows.types import MoleculeSpecConfig, SimulationConfig
 
 
 @dataclass(frozen=True)

@@ -3,15 +3,15 @@ import math
 import pytest
 
 import jax.numpy as jnp
-from gradscf.training import MolecularTrainingConfig
+from gradscf.model.neural_xc.training import MolecularTrainingConfig
 
-from gradscf.workflows.core import (
+from gradscf.model.neural_xc.workflows.core import (
     _canonicalize_graddft_ground_state_config,
     _resolve_training_scf_gradient_mode,
     build_spectrum,
     run_pipeline_core,
 )
-from gradscf.workflows.types import (
+from gradscf.model.neural_xc.workflows.types import (
     MoleculeRun,
     MoleculeSpecConfig,
     NeuralExcitedStateRun,
@@ -109,14 +109,14 @@ def test_run_pipeline_core_canonicalizes_strict_mode_before_reference_build(monk
         captured["train_config"] = config
         return "training"
 
-    monkeypatch.setattr("gradscf.workflows.core.run_reference", fake_run_reference)
-    monkeypatch.setattr("gradscf.workflows.core.train_neural_xc", fake_train_neural_xc)
+    monkeypatch.setattr("gradscf.model.neural_xc.workflows.core.run_reference", fake_run_reference)
+    monkeypatch.setattr("gradscf.model.neural_xc.workflows.core.train_neural_xc", fake_train_neural_xc)
     monkeypatch.setattr(
-        "gradscf.workflows.core.run_neural_tddft",
+        "gradscf.model.neural_xc.workflows.core.run_neural_tddft",
         lambda reference, training, simulation_config: "neural",
     )
     monkeypatch.setattr(
-        "gradscf.workflows.core.build_spectrum",
+        "gradscf.model.neural_xc.workflows.core.build_spectrum",
         lambda reference, neural, spectrum_config, simulation_config: "spectrum",
     )
 
@@ -175,16 +175,16 @@ def test_run_pipeline_core_uses_strict_jax_reference_path(monkeypatch):
         return "training"
 
     monkeypatch.setattr(
-        "gradscf.workflows.core.run_molecule_from_spec",
+        "gradscf.model.neural_xc.workflows.core.run_molecule_from_spec",
         fake_run_molecule_from_spec,
     )
-    monkeypatch.setattr("gradscf.workflows.core.train_neural_xc", fake_train_neural_xc)
+    monkeypatch.setattr("gradscf.model.neural_xc.workflows.core.train_neural_xc", fake_train_neural_xc)
     monkeypatch.setattr(
-        "gradscf.workflows.core.run_neural_tddft",
+        "gradscf.model.neural_xc.workflows.core.run_neural_tddft",
         lambda reference, training, simulation_config: "neural",
     )
     monkeypatch.setattr(
-        "gradscf.workflows.core.build_spectrum",
+        "gradscf.model.neural_xc.workflows.core.build_spectrum",
         lambda reference, neural, spectrum_config, simulation_config: "spectrum",
     )
 
@@ -234,19 +234,19 @@ def test_run_pipeline_core_requests_local_pt2_features_when_pt2_channel_enabled(
         return "reference"
 
     monkeypatch.setattr(
-        "gradscf.workflows.core.run_molecule_from_spec",
+        "gradscf.model.neural_xc.workflows.core.run_molecule_from_spec",
         fake_run_molecule_from_spec,
     )
     monkeypatch.setattr(
-        "gradscf.workflows.core.train_neural_xc",
+        "gradscf.model.neural_xc.workflows.core.train_neural_xc",
         lambda reference, config, spectrum_config: "training",
     )
     monkeypatch.setattr(
-        "gradscf.workflows.core.run_neural_tddft",
+        "gradscf.model.neural_xc.workflows.core.run_neural_tddft",
         lambda reference, training, simulation_config: "neural",
     )
     monkeypatch.setattr(
-        "gradscf.workflows.core.build_spectrum",
+        "gradscf.model.neural_xc.workflows.core.build_spectrum",
         lambda reference, neural, spectrum_config, simulation_config: "spectrum",
     )
 
