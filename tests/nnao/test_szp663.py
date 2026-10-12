@@ -1,3 +1,4 @@
+from importlib import import_module
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -58,7 +59,7 @@ def test_real_mace_expanded_head_and_no_fixed_residual():
 
 def test_warm_start_preserves_nonreference_contractions():
     import runpy
-    embed=runpy.run_path('tools/optimize_methane_nnao.py')['embedded_outputs']
+    embed=vars(import_module("gradscf.model.nnao.training.objective"))['embedded_outputs']
     old=prepare_direct_basis('C 0 0 0; H 0 0 1.09')
     new=prepare_direct_basis('C 0 0 0; H 0 0 1.09',basis_family='szp663_direct')
     params=old.bind(old.reference_outputs().at[0,0,3].set(.2).at[1,0,1].add(.1))

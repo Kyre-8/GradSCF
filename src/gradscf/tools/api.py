@@ -8,7 +8,7 @@ remain here for explicit legacy callers with their original I/O/return types.
 
 from __future__ import annotations
 
-from ..workflows.types import (
+from gradscf.model.neural_xc.workflows.types import (
     MoleculeSpecConfig,
     NeuralXCTrainingConfig,
     OutputConfig,
@@ -26,7 +26,7 @@ def build_molecule(
 ):
     """Run SCF and optional TD calculations from specs; return a MoleculeRun."""
 
-    from ..workflows.core import run_molecule_from_spec
+    from gradscf.model.neural_xc.workflows.core import run_molecule_from_spec
 
     return run_molecule_from_spec(molecule, simulation=simulation)
 
@@ -40,7 +40,7 @@ def run_pipeline(
 ):
     """Run strict-JAX molecule -> training -> TDDFT spectrum core pipeline."""
 
-    from ..workflows.core import run_pipeline_core
+    from gradscf.model.neural_xc.workflows.core import run_pipeline_core
 
     return run_pipeline_core(
         molecule_spec=molecule,
@@ -61,7 +61,7 @@ def run_spectrum_pipeline(
 ):
     """Run the strict-JAX molecule spectrum pipeline and write outputs."""
 
-    from ..workflows.pipeline import run_neural_xc_spectrum_pipeline
+    from gradscf.model.neural_xc.workflows.pipeline import run_neural_xc_spectrum_pipeline
 
     return run_neural_xc_spectrum_pipeline(
         system_label=system_label,

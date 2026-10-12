@@ -2,6 +2,7 @@
 // Cartesian angular raising is reduced to the original shell before its
 // original Cartesian/spherical transformation. No finite differences or Jacobian.
 #include "tables.h"
+#include "parallel.h"
 #include <array>
 extern "C" {
 extern CINTIntegralFunction int3c2e_cart;
@@ -19,11 +20,13 @@ static std::vector<std::array<int,3>> powers(int l) {
 
 struct ExponentTables {
   IntegralTables t;
+  int first_shell=0,shell_stride=1;
   int op,cart,active,original_shells,shadow,coefficient_ptr,n,m,components;
   size_t count=0,pairs;
   std::vector<size_t> offsets;
   std::array<std::vector<double>,13> transformations;
-  std::vector<double> block,cache,reduced;
+  std::vector<double> block,cache,reduced,spherical_scratch;
+  std::array<std::vector<std::array<int,3>>,11> raise_indices;
   Intor intor;
 
   ExponentTables(ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<ffi::S32> basis,
@@ -74,7 +77,8 @@ struct ExponentTables {
       int contractions=t.bas[shells[axis]*BAS_SLOTS+NCTR_OF];
       int old=dims[axis],next=contractions*ns;
       size_t outer=reduced.size()/(stride*old);
-      std::vector<double> out(outer*stride*next,0.);
+      spherical_scratch.assign(outer*stride*next,0.);
+      auto& out=spherical_scratch;
       const auto& matrix=transform(l);
       for (size_t o=0;o<outer;++o) for (int c=0;c<contractions;++c)
         for (int s=0;s<ns;++s) for (int p=0;p<nc;++p) {
@@ -108,12 +112,15 @@ struct ExponentTables {
     }
     if ((op==6 ? 3*workspace:workspace)>=std::numeric_limits<int>::max())
       throw std::invalid_argument("Exponent raised Cartesian cache exceeds int32 indexing");
-    t.shell(intor,shells.data(),size_t(workspace),block,cache);
-    auto lower=powers(l),higher=powers(l+2);
-    std::vector<std::array<int,3>> index(lower.size());
-    for (size_t p=0;p<lower.size();++p) for (int axis=0;axis<3;++axis) {
-      auto monomial=lower[p];monomial[axis]+=2;
-      index[p][axis]=int(std::find(higher.begin(),higher.end(),monomial)-higher.begin());
+    t.shell(intor,shells.data(),size_t(workspace),block,cache,legs);
+    auto& index=raise_indices[l];
+    if (index.empty()) {
+      auto lower=powers(l),higher=powers(l+2);
+      index.resize(lower.size());
+      for (size_t p=0;p<lower.size();++p) for (int axis=0;axis<3;++axis) {
+        auto monomial=lower[p];monomial[axis]+=2;
+        index[p][axis]=int(std::find(higher.begin(),higher.end(),monomial)-higher.begin());
+      }
     }
     size_t size=size_t(dims[0])*dims[1]*dims[2];
     reduced.assign(size*components,0.);
@@ -132,7 +139,7 @@ struct ExponentTables {
   }
   template<bool transpose>
   void apply(const double* input,double* output) {
-    for (int i=0;i<active;++i) for (int j=0;j<(op==6 ? i+1:active);++j)
+    for (int i=first_shell;i<active;i+=shell_stride) for (int j=0;j<(op==6 ? i+1:active);++j)
       for (int kk=op==6 ? active:0;kk<(op==6 ? original_shells:1);++kk)
         for (int leg=0;leg<2;++leg) {
           int shell=leg==0 ? i:j,np=t.bas[shell*BAS_SLOTS+NPRIM_OF];
@@ -167,7 +174,10 @@ static ffi::Error ExponentProduct(ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<ff
     for (size_t i=0;i<vector.element_count();++i)
       if (!std::isfinite(vector.typed_data()[i])) throw std::invalid_argument("Nonfinite exponent derivative vector");
     std::fill(result->typed_data(),result->typed_data()+result->element_count(),0.);
-    driver.apply<transpose>(vector.typed_data(),result->typed_data());
+    if constexpr (transpose) parallel_vjp(driver,result->typed_data(),[&](auto& local,double* out) {
+      local.template apply<true>(vector.typed_data(),out);
+    });
+    else driver.apply<false>(vector.typed_data(),result->typed_data());
     return ffi::Error::Success();
   } catch (const std::invalid_argument& e) {return ffi::Error::InvalidArgument(e.what());}
     catch (const std::exception& e) {return ffi::Error::Internal(e.what());}

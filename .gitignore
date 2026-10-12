@@ -10,6 +10,7 @@ __pycache__/
 
 .venv/
 .claude/
+.vscode/
 build/
 dist/
 *.egg-info/

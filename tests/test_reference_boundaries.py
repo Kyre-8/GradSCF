@@ -185,7 +185,8 @@ def test_restricted_response_feature_kind_helpers_are_owned_by_features_module()
 
 def test_public_api_prefers_owned_namespaces_and_object_conversion():
     import gradscf
-    from gradscf import scf, workflows
+    from gradscf import scf
+    from gradscf.model.neural_xc import workflows
     from gradscf.scf import builders
     assert {'QuadratureGrid','RestrictedMolecule','UnrestrictedMolecule','as_reference'}.issubset(scf.__all__)
     assert {'MoleculeRun','MoleculeSpecConfig','ExperimentPipeline'}.issubset(workflows.__all__)

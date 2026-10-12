@@ -15,16 +15,17 @@ class MPConfig:
     max_determinants: int = 5000
     wavefunction_order: int | None = None
     with_coefficients: bool = False
+    max_tensor_elements: int = 2_000_000
 
     def __post_init__(self):
         if isinstance(self.order, bool) or not isinstance(self.order, Integral) or self.order < 2:
             raise ValueError("MP order must be an integer at least 2")
-        if self.algorithm not in {"auto", "direct", "series"}:
-            raise ValueError("MP algorithm must be auto, direct or series")
+        if self.algorithm not in {"auto", "direct", "series", "tensor"}:
+            raise ValueError("MP algorithm must be auto, direct, series or tensor")
         if self.algorithm == "direct" and self.order > 3:
             raise ValueError("Direct MP kernels support only orders 2 and 3")
         if self.algorithm == "direct" and (self.with_coefficients or self.wavefunction_order is not None):
-            raise ValueError("Wavefunction coefficients require the series algorithm")
+            raise ValueError("Wavefunction coefficients require the series or tensor algorithm")
         if (isinstance(self.max_determinants, bool) or not isinstance(self.max_determinants, Integral)
                 or self.max_determinants < 1):
             raise ValueError("max_determinants must be a positive integer")
@@ -32,12 +33,15 @@ class MPConfig:
             isinstance(self.wavefunction_order, bool) or not isinstance(self.wavefunction_order, Integral)
             or self.wavefunction_order < self.order // 2):
             raise ValueError("wavefunction_order must be an integer at least order//2")
+        if (isinstance(self.max_tensor_elements, bool) or not isinstance(self.max_tensor_elements, Integral)
+                or self.max_tensor_elements < 1):
+            raise ValueError("max_tensor_elements must be a positive integer")
         if any(not isfinite(x) or x <= 0
                for x in (self.denominator_tol, self.canonical_tol)):
             raise ValueError("MP tolerances must be positive and finite")
 
     def _use_series(self, unrestricted=False):
-        return (self.algorithm == "series" or self.order > 3 or self.with_coefficients
+        return (self.algorithm in {"series", "tensor"} or self.order > 3 or self.with_coefficients
                 or self.wavefunction_order is not None
                 or (unrestricted and self.order == 3 and self.algorithm == "auto"))
 
@@ -50,6 +54,9 @@ class MPResult(NamedTuple):
     T2^(1), even for MP3. same_spin_energy/opposite_spin_energy decompose E2
     only. Invalid inputs produce NaN total/correlation energy. Reference values,
     diagnostics and still-valid lower-order components may remain available.
+    wavefunction_coefficients uses the selected space's orthonormal coordinates:
+    determinant order for series, packed quasiparticle blocks for tensor.
+    Both use intermediate normalization; see SERIES.md and TENSOR_BLOCKS.md.
     """
     total_energy: object
     correlation_energy: object

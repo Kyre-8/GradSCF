@@ -8,7 +8,8 @@ import pytest
 
 
 def selector():
-    return runpy.run_path('tools/select_nnao_stage2.py')['select_structures']
+    from gradscf.model.nnao.workflows.select import select_structures
+    return select_structures
 
 
 def structure(identifier, symbols):

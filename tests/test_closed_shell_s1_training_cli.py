@@ -574,7 +574,7 @@ def test_streaming_preserves_chunked_hfx_nu_api():
     module = _load_training_tool()
     from gradscf.dft.hfx import ChunkedHFXNu
     from gradscf.scf.molecules import QuadratureGrid, RestrictedMolecule
-    from gradscf.training import MolecularTrainingDatum
+    from gradscf.model.neural_xc.training import MolecularTrainingDatum
 
     hfx_nu = np.arange(2 * 5 * 2 * 2, dtype=np.float64).reshape(2, 5, 2, 2)
 

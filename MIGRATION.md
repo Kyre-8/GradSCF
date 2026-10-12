@@ -28,7 +28,7 @@ training is shared infrastructure at the package root.
 |---|---|
 | `gradscf.model.neural_xc.ExternalFunctional` | `gradscf.dft.Functional` |
 | `gradscf.model.neural_xc.DensityInputs` | `gradscf.dft.DensityInputs` |
-| `gradscf.model.training` | `gradscf.training` |
+| `gradscf.model.training` | `gradscf.model.neural_xc.training` |
 | `gradscf.scf.xc_energy` | `gradscf.dft.derivatives` |
 | HFX physical/cache helpers in `model.neural_xc.inputs` | `gradscf.dft.hfx` |
 | PT2 physical helpers in `model.neural_xc.inputs` | `gradscf.dft.pt2` |
@@ -242,7 +242,7 @@ Hard switch, no compatibility aliases:
 |---|---|
 | `gradscf.neural_xc` | `gradscf.model.neural_xc` |
 | `gradscf.neural_d` | `gradscf.model.neural_d` |
-| `gradscf.training` | `gradscf.model.training` |
+| `gradscf.model.neural_xc.training` | `gradscf.model.training` |
 | `nnao` (top level) | `gradscf.model.nnao` |
 
 Top-level `gradscf` symbols re-exported via `gradscf/__init__.py`

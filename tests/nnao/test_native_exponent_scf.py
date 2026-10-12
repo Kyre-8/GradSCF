@@ -10,11 +10,8 @@ from gradscf.integrals.molecular.density_fitting import unpack_factors
 
 
 def solver_module():
-    path = Path(__file__).resolve().parents[2] / 'tools/optimize_methane_nnao.py'
-    spec = importlib.util.spec_from_file_location('alpha_rhf', path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    from gradscf.model.nnao.training import objective
+    return objective
 
 
 def problem():
@@ -34,7 +31,7 @@ def problem():
         h=plan.evaluate('kinetic',bound)+plan.evaluate('nuclear',bound)
         b=unpack_factors(ri.factors(bound,ap,metric_factor=metric),top.nao)
         return solve((s,h,b),enuc)
-    return energy,jnp.array([0.,0.,.7,.35]),module.MethaneRHF._checked_info
+    return energy,jnp.array([0.,0.,.7,.35]),module.BasisRHF._checked_info
 
 
 def test_log_exponent_and_coefficient_energy_gradients_match_reconverged_fd():
@@ -89,12 +86,12 @@ def test_water_log_exponent_gradient_matches_reconverged_scf():
         return solve((s, h, factors), enuc)
 
     (value, info), gradient = jax.jit(jax.value_and_grad(energy, has_aux=True))(0.)
-    module.MethaneRHF._checked_info(value, info)
+    module.BasisRHF._checked_info(value, info)
     evaluate = jax.jit(energy)
 
     def checked(t):
         value, info = evaluate(t)
-        module.MethaneRHF._checked_info(value, info)
+        module.BasisRHF._checked_info(value, info)
         return value
 
     step = 1e-4

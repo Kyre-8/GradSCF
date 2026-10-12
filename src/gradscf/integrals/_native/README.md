@@ -1,6 +1,6 @@
 # Private native integral backend
 
-This directory builds a private, serial CPU library with JAX typed FFI entry
+This directory builds a private CPU library with JAX typed FFI entry
 points. Runtime evaluation does not import or load PySCF. The source subset is
 pinned to PySCF v2.13.0 and libcint v6.1.3; full commit IDs, original relative
 paths, Git blob IDs and SHA256 checksums are in `vendor/manifest.json`.
@@ -16,6 +16,7 @@ Upstream Apache-2.0 licenses are retained at `vendor/pyscf/LICENSE` and
 - `csrc/coefficients.cc`: shell-local coefficient JVP/VJP and coefficient Hessian products.
 - `csrc/exponents.cc`: analytic Gaussian-exponent JVP/VJP through Cartesian angular raising.
 - `csrc/tables.h`: shared table validation and owned libcint buffers.
+- `csrc/parallel.h`: bounded shell workers and parameter-gradient reduction.
 - `vendor/`: pinned, unmodified upstream C sources, licenses and checksums.
 - `include/`, `exports.*`, `CMakeLists.txt`: build configuration and ABI exports.
 - `patches/`: documentation of upstream adaptations.
@@ -41,7 +42,39 @@ are ignored by Git. An installed editable package does not need `PYTHONPATH`.
 Rebuild against the installed JAX headers after changing JAX versions.
 Linux and macOS are supported build targets; no binary wheels are provided by
 this initial source build. `--jobs` defaults to 2 for compilation only. Integral
-evaluation is serial and does not modify process-wide threading settings.
+evaluation is serial by default and does not modify process-wide threading settings.
+
+## Parameter VJP threading and reuse
+
+The optimized implementation is the sole maintained native path. A thread count
+of 1 uses the same workspace reuse and derivative kernels as parallel execution;
+it is not a legacy backend. Rebuild this library when updating the native sources.
+
+Set `GRADSCF_NATIVE_THREADS=4` before execution to parallelize coefficient VJP,
+coefficient Hessian-VJP, and exponent VJP. The default is 1; positive integer
+values are capped by the number of orbital shells. Other kernels, including
+JVP, retain their existing execution paths. `OMP_NUM_THREADS` is not inherited.
+Use `MKL_NUM_THREADS=1` / `OPENBLAS_NUM_THREADS=1` to avoid nested BLAS workers.
+The limit applies **per FFI call**, not to all concurrent JAX calls combined;
+budget for callback concurrency when choosing it within a Slurm allocation.
+
+Workers own independent mutable BAS/ENV tables and shell buffers. They reduce
+small parameter vectors in fixed worker order; no primitive ERI or integral
+Jacobian is cached. Changing thread count can change floating-point summation
+order. Within each call, real 1e/3c products reuse libcint cache sizes by intor
+and shell shape; exponent products also reuse angular-raising maps and spherical
+scratch. These caches do not survive a call or retain stale basis parameters.
+
+Run `tests/integrals/test_native_parallel.py` for serial/parallel checks. The
+standalone `tools/benchmark_native_basis_vjp.py` compares thread counts in the
+current library with identical CPU float64 inputs and reports warm timings
+separately from the first call. It accepts no alternate/legacy library path.
+Its timings exclude SCF, GPU transfers, and the neural network. For example:
+
+```sh
+PYTHONPATH=src python tools/benchmark_native_basis_vjp.py \
+  --threads 1 8 16 --output artifacts/native-vjp-timings.json
+```
 
 All vendor symbols have hidden visibility and a linker export allowlist;
 The derivative exports include `GradSCFGeometryJVP`, `GradSCFGeometryVJP`,

@@ -99,7 +99,19 @@ Linear Hamiltonian nodes are shared across Taylor degrees and energy extraction;
 For pth-order energies it computes complete state coefficients through
 floor(p/2), retaining rank through twice that value; see SERIES.md.
 
+`algorithm="tensor"` is an experimental alternative action representation for
+that same Taylor engine. It contracts complete spin-resolved excitation blocks,
+avoiding Slater--Condon connections and full spin-orbital ERIs. It still uses
+full spatial MO integrals and dense antisymmetric temporary blocks; performance
+depends on the occupied/virtual dimensions and requested order. See
+[the coordinate convention, capacity bounds and measurements](TENSOR_BLOCKS.md).
+
 ## Validation
+
+The [convergence examples](../../../examples/mp/CONVERGENCE.md) reproduce
+He2(2+) deceptive UMP convergence with native RMP/UMP2--30 and independent
+FCI/RS checks. Ne/F- use a complete external high-order benchmark with native
+HF/MP2/MP3 comparisons; their high-order curves are not GradSCF calculations.
 
 `tests/mp` checks RHF water/6-31G* MP2 and UHF H3/STO-3G MP2 against independent
 PySCF energies/amplitudes, with Cartesian orbitals and CPU float64. Tests also

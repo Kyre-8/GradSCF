@@ -3,7 +3,8 @@
 import numpy as np
 import pytest
 
-from gradscf import bse, cc, ci, dft, fci, gto, gw, scf, training
+from gradscf import bse, cc, ci, dft, fci, gto, gw, scf
+from gradscf.model.neural_xc import training
 
 
 @pytest.mark.parametrize('backend', ['full', 'df', 'direct'])

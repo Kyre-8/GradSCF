@@ -1,4 +1,5 @@
 """Pilot orchestration tests deliberately avoid optional numerical imports."""
+from importlib import import_module
 import json
 from pathlib import Path
 import runpy
@@ -8,9 +9,7 @@ import pytest
 
 
 def module():
-    path = Path('tools/validate_nnao_pilot.py')
-    assert path.is_file(), 'Resumable NNAO pilot validation entry point is missing'
-    return runpy.run_path(str(path))
+    return vars(import_module("gradscf.model.nnao.training.validation"))
 
 
 def structure(identifier='W4-11/h2'):
@@ -19,7 +18,7 @@ def structure(identifier='W4-11/h2'):
 
 
 def test_pilot_rejects_unknown_ids_and_open_shell(tmp_path):
-    read = module()['read_structures']
+    read = import_module("gradscf.model.nnao.runtime").read_structures
     source = tmp_path / 'structures.jsonl'
     source.write_text(json.dumps(structure()) + '\n')
     with pytest.raises(ValueError, match='Unknown structure IDs'):
@@ -31,7 +30,7 @@ def test_pilot_rejects_unknown_ids_and_open_shell(tmp_path):
 
 
 def test_pilot_preserves_dataset_order_and_limits(tmp_path):
-    read = module()['read_structures']
+    read = import_module("gradscf.model.nnao.runtime").read_structures
     source = tmp_path / 'structures.jsonl'
     source.write_text('\n'.join(json.dumps(structure(x)) for x in ['b', 'a', 'c']))
     rows = read(source, ids=['a', 'b'], limit=1)
@@ -84,7 +83,7 @@ def test_pilot_summary_rejects_nonfinite_success(tmp_path):
 
 
 def test_pilot_does_not_resume_missing_or_modified_cache(tmp_path):
-    run = module()['run_suite']; cache_hash = module()['file_hash']; calls = []
+    run = module()['run_suite']; cache_hash = import_module("gradscf.model.nnao.runtime").file_hash; calls = []
     cache = tmp_path / 'integrals.npz'
 
     def prepare(row, path):
@@ -114,7 +113,7 @@ def test_directional_check_detects_incorrect_gradient():
 
 
 def test_scientific_source_signature_changes_with_kernel_or_basis(tmp_path):
-    signature = module()['scientific_source_hash']
+    signature = import_module("gradscf.model.nnao.runtime").scientific_source_hash
     package = tmp_path / 'src' / 'gradscf'
     package.mkdir(parents=True)
     source = package / 'scf.py'; source.write_text('energy = 1\n')
@@ -127,7 +126,7 @@ def test_scientific_source_signature_changes_with_kernel_or_basis(tmp_path):
 
 
 def test_pilot_rejects_installed_copy_even_when_other_modules_are_current(tmp_path):
-    verify = module()['verify_source_imports']
+    verify = import_module("gradscf.model.nnao.runtime").verify_source_imports
     paths = {'gradscf': '__init__.py', 'gradscf.scf.rks': 'scf/rks.py',
              'gradscf.solvers.nonlinear.fixed_point': 'solvers/nonlinear/fixed_point.py'}
     imported = {}
@@ -145,7 +144,7 @@ def test_pilot_rejects_installed_copy_even_when_other_modules_are_current(tmp_pa
 
 
 def test_pilot_cli_forwards_and_records_implicit_tolerance(tmp_path, monkeypatch):
-    main = module()['main']; namespace = main.__globals__; calls = []
+    main = import_module('gradscf.model.nnao.workflows.validate').main; namespace = main.__globals__; calls = []
     source = tmp_path / 'structures.jsonl'
     source.write_text(json.dumps(structure()) + '\n')
     monkeypatch.setitem(namespace, 'numerical_runtime', lambda platform: (None, None))
@@ -167,7 +166,7 @@ def test_pilot_cli_forwards_and_records_implicit_tolerance(tmp_path, monkeypatch
 @pytest.mark.parametrize('tolerance', ['0', '-1', 'nan', 'inf'])
 def test_pilot_cli_rejects_invalid_implicit_tolerance(tmp_path, tolerance, capsys):
     with pytest.raises(SystemExit) as error:
-        module()['main'](['validate', '--structures', str(tmp_path / 'missing'),
+        import_module('gradscf.model.nnao.workflows.validate').main(['validate', '--structures', str(tmp_path / 'missing'),
             '--cache-dir', str(tmp_path), '--output-dir', str(tmp_path),
             '--implicit-tolerance', tolerance])
     assert error.value.code == 2
@@ -175,7 +174,7 @@ def test_pilot_cli_rejects_invalid_implicit_tolerance(tmp_path, tolerance, capsy
 
 
 def test_pilot_cli_forwards_mmap_for_validation(tmp_path,monkeypatch):
-    main=module()['main'];namespace=main.__globals__;calls=[]
+    main=import_module('gradscf.model.nnao.workflows.validate').main;namespace=main.__globals__;calls=[]
     source=tmp_path/'structures.jsonl';source.write_text(json.dumps(structure())+'\n')
     monkeypatch.setitem(namespace,'numerical_runtime',lambda platform:(None,None))
     monkeypatch.setitem(namespace,'validate',lambda row,path,**kwargs:calls.append(kwargs) or {})
@@ -190,6 +189,6 @@ def test_pilot_cli_forwards_mmap_for_validation(tmp_path,monkeypatch):
 
 def test_pilot_cache_preparation_rejects_host_or_mmap(tmp_path,capsys):
     with pytest.raises(SystemExit):
-        module()['main'](['prepare-cache','--structures',str(tmp_path/'missing'),
+        import_module('gradscf.model.nnao.workflows.validate').main(['prepare-cache','--structures',str(tmp_path/'missing'),
             '--cache-dir',str(tmp_path),'--output-dir',str(tmp_path),'--cache-storage','mmap'])
     assert 'requires --cache-storage device' in capsys.readouterr().err

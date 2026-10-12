@@ -8,7 +8,7 @@ from typing import Any
 import jax.numpy as jnp
 import numpy as np
 
-from gradscf.training.config import MolecularTrainingDatum
+from gradscf.model.neural_xc.training.config import MolecularTrainingDatum
 
 
 _ARRAY_FIELD_NAMES = (

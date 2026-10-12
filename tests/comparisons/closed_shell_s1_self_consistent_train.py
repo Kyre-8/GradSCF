@@ -53,7 +53,7 @@ from pyscf_adapters import build_chunked_hfx_nu_from_mol
 from pyscf_data_reference import restricted_reference_from_pyscf
 from gradscf.dft.hfx import ChunkedHFXNu
 from gradscf.tools.spectra import HARTREE_TO_EV
-from gradscf.training import (
+from gradscf.model.neural_xc.training import (
     MolecularTrainingDatum,
     MolecularTrainingConfig,
     molecular_loss,
@@ -63,7 +63,7 @@ from gradscf.training import (
     load_params_checkpoint,
     save_params_checkpoint,
 )
-from gradscf.training.trainer import (
+from gradscf.model.neural_xc.training.trainer import (
     create_train_state_from_molecule,
     make_molecular_loss_and_grad,
     make_molecular_train_step,

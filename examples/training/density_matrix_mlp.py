@@ -16,7 +16,8 @@ from flax import linen as nn
 
 jax.config.update('jax_enable_x64', True)
 
-from gradscf import gto, scf, dft, training
+from gradscf import gto, scf, dft
+from gradscf.model.neural_xc import training
 
 
 # The input is the CURRENT spin-summed AO density matrix, supplied by GradSCF.

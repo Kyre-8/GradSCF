@@ -1,4 +1,4 @@
-"""Generic DFT/training must not import any concrete neural model package."""
+"""External functionals can use model-owned training without concrete networks."""
 from pathlib import Path
 import os
 import subprocess
@@ -11,13 +11,14 @@ import importlib.abc
 import sys
 class NoModels(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path=None, target=None):
-        if fullname == 'gradscf.model' or fullname.startswith('gradscf.model.'):
+        if fullname.startswith(('gradscf.model.neural_xc.networks', 'gradscf.model.neural_xc.model', 'gradscf.model.nnao', 'gradscf.model.neural_d')):
             raise AssertionError('Generic framework imported a concrete model: '+fullname)
 sys.meta_path.insert(0, NoModels())
 import jax
 import jax.numpy as jnp
 jax.config.update('jax_enable_x64', True)
-from gradscf import dft, training, scf
+from gradscf import dft, scf
+from gradscf.model.neural_xc import training
 from gradscf.dft.derivatives import xc_kernel_action
 sys.path.insert(0, 'tests')
 from test_external_neural_xc import molecule
@@ -33,7 +34,8 @@ trainer.scf=dict(max_cycle=60,damping=0.,conv_tol_density=1e-10,conv_tol_energy=
 trainer.run([training.Sample(mol,energy=-2.1)],steps=1)
 assert trainer.history['update_accepted'][-1]
 assert len(trainer.history['loss'])==2
-assert not any(x=='gradscf.model' or x.startswith('gradscf.model.') for x in sys.modules)
+assert 'gradscf.model.neural_xc.model' not in sys.modules
+assert 'gradscf.model.neural_xc.networks' not in sys.modules
 '''
     result = subprocess.run([sys.executable, '-c', code], cwd=Path(__file__).resolve().parents[1],
         env=dict(os.environ, PYTHONPATH='src', JAX_PLATFORMS='cpu'),

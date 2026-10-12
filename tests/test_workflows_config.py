@@ -1,14 +1,14 @@
 import pytest
-from gradscf.training import MolecularTrainingConfig
+from gradscf.model.neural_xc.training import MolecularTrainingConfig
 
-from gradscf.workflows import (
+from gradscf.model.neural_xc.workflows import (
     ExperimentConfig,
     ExperimentPipeline,
     NeuralXCTrainingConfig,
     MoleculeSpecConfig,
     SystemConfig,
 )
-from gradscf.workflows.presets import (
+from gradscf.model.neural_xc.workflows.presets import (
     benzene_experiment_config,
     water_experiment_config,
 )
@@ -92,11 +92,11 @@ def test_experiment_pipeline_routes_reference_spec_systems(monkeypatch):
         return "run"
 
     monkeypatch.setattr(
-        "gradscf.workflows.pipeline.run_neural_xc_spectrum_pipeline",
+        "gradscf.model.neural_xc.workflows.pipeline.run_neural_xc_spectrum_pipeline",
         fake_pipeline,
     )
     monkeypatch.setattr(
-        "gradscf.workflows.pipeline.print_run_summary",
+        "gradscf.model.neural_xc.workflows.pipeline.print_run_summary",
         lambda *args, **kwargs: None,
     )
 
@@ -186,7 +186,7 @@ def test_neural_xc_training_config_defaults_follow_neural_xc_defaults():
 
 
 def test_simulation_config_defaults_to_strict_jax_runtime():
-    from gradscf.workflows import SimulationConfig
+    from gradscf.model.neural_xc.workflows import SimulationConfig
 
     config = SimulationConfig()
 

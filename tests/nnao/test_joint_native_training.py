@@ -1,4 +1,5 @@
 """Native joint training uses both derivatives and transactional checkpoints."""
+from importlib import import_module
 import importlib.util
 import json
 from pathlib import Path
@@ -10,11 +11,50 @@ import pytest
 
 
 def driver():
-    path = Path(__file__).resolve().parents[2] / 'tools/train_nnao_joint_ad.py'
-    spec = importlib.util.spec_from_file_location('joint_native_training', path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    return import_module("gradscf.model.nnao.training.native")
+
+
+def test_explicit_compilation_cache_root_is_namespaced_by_native_binary(tmp_path):
+    from types import SimpleNamespace
+    m=driver();args=SimpleNamespace(compilation_cache_dir=tmp_path/'shared',output_dir=tmp_path/'run')
+    first=m.compilation_cache_path(args,'a'*64)
+    second=m.compilation_cache_path(args,'b'*64)
+    assert first.parent==args.compilation_cache_dir and first!=second
+    args.compilation_cache_dir=None
+    assert m.compilation_cache_path(args,'a'*64)==args.output_dir/'compilation-cache'/('a'*16)
+
+
+def test_joint_checkpoint_initialization_preserves_learned_exponents(tmp_path):
+    m=driver();path=tmp_path/'parent.npz'
+    vector=np.concatenate([np.linspace(-.1,.1,7171),np.linspace(-.25,.1,14)])
+    metadata=dict(epoch=1000,identity=dict(model_config=m.MODEL_CONFIG,
+        exponent_keys=[list(x) for x in m.base.EXPONENT_KEYS]))
+    np.savez(path,parameters=vector,metadata=np.asarray(json.dumps(metadata)))
+    theta,beta,parent=m.read_initial_parameters(path,log_bound=.25)
+    np.testing.assert_array_equal(theta,vector[:-14])
+    np.testing.assert_array_equal(beta,vector[-14:])
+    assert parent['epoch']==1000
+    metadata['identity']['exponent_keys'].reverse()
+    np.savez(path,parameters=vector,metadata=np.asarray(json.dumps(metadata)))
+    with pytest.raises(ValueError,match='exponent'):
+        m.read_initial_parameters(path,log_bound=.25)
+
+
+def test_parent_parity_preserves_raw_reference_while_training_uses_stable_energy(tmp_path):
+    from types import SimpleNamespace
+    m=driver(); engine=object.__new__(m.NativeJointEngine)
+    engine.batch=0;engine.args=SimpleNamespace(log_bound=.25,output_dir=tmp_path)
+    engine.rows=[dict(structure_id='sample')];engine.parent_energies={'sample':-1.}
+    def molecule(vector,key):
+        return -1.2,np.ones_like(vector),dict(converged=True,stable=True,
+            orbital_residual=0.,fixed_point_residual=0.,min_overlap_eigenvalue=1.,
+            reconstruction_error=0.,initial_scf_energy=-1.)
+    engine.molecule=molecule
+    value,_,_=engine.evaluate(np.zeros(15))
+    assert value==-1.2
+    gate=json.loads((tmp_path/'parent-parity.json').read_text())
+    assert gate['max_absolute_error_hartree']==0.
+    assert gate['stable_energies']['sample']==-1.2
 
 
 def test_joint_adam_rates_bounds_and_serialization():
@@ -62,7 +102,7 @@ def test_native_joint_projection_pullback_matches_finite_difference():
     aux = integrals.make_auxiliary_plan(layout.topology, at)
     context = dict(layout=layout, plan=integrals.make_plan(layout.topology), aux=aux, ap=ap,
         metric=aux.metric_factor(layout.parameters, ap))
-    forward, backward = m.native_projection(context)
+    forward, backward = m.native_projection(context, m.EXPONENT_KEYS)
     outputs = layout.reference_outputs()
     beta = jnp.zeros(len(m.base.EXPONENT_KEYS))
     physical = forward(outputs, beta)

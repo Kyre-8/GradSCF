@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from functools import lru_cache
+from functools import lru_cache, partial
 from dataclasses import dataclass, replace
 from typing import Any, Callable, Literal
 
@@ -238,6 +238,29 @@ def _diis_extrapolate(
     )
 
 
+@partial(jax.custom_jvp, nondiff_argnums=(4,))
+def _df_jk_with_orbital_hint(factors, density, mo_coeff, mo_occ, nocc):
+    """Orbitals accelerate a consistent primal; density defines its response."""
+    orbital_density = _build_density_from_occ(mo_coeff, mo_occ)
+    tolerance = 64*jnp.finfo(density.dtype).eps*jnp.maximum(1., jnp.max(jnp.abs(density)))
+    consistent = jnp.max(jnp.abs(density-orbital_density)) <= tolerance
+    return jax.lax.cond(
+        consistent,
+        lambda _: build_jk_from_df_orbitals(factors, density, mo_coeff, mo_occ, nocc=nocc),
+        lambda _: build_jk_from_df(factors, density), None)
+
+
+@_df_jk_with_orbital_hint.defjvp
+def _df_jk_with_orbital_hint_jvp(nocc, primals, tangents):
+    factors, density, coeff, occ = primals
+    dfactors, ddensity, _, _ = tangents
+    value = _df_jk_with_orbital_hint(factors, density, coeff, occ, nocc)
+    # A numerically coincident guess/damped density need not share its tangent
+    # with the orbital hint. Differentiate the physical J/K operands instead.
+    _, tangent = jax.jvp(build_jk_from_df, (factors, density), (dfactors, ddensity))
+    return value, tangent
+
+
 def _make_jk_builder(
     eri: Array | None,
     cfg: RKSConfig,
@@ -397,13 +420,9 @@ def _make_jk_builder(
         ):
             del density_last, j_last, k_last
             if use_orbital_k and mo_coeff is not None and mo_occ is not None:
-                return build_jk_from_df_orbitals(
-                    factors,
-                    density,
-                    mo_coeff,
-                    mo_occ,
-                    nocc=int(nocc),
-                )
+                # Density-only guesses and density damping need K[D], not
+                # K from orbitals that describe a different density.
+                return _df_jk_with_orbital_hint(factors, density, mo_coeff, mo_occ, int(nocc))
             return build_jk_from_df(factors, density)
 
         return _df_jk

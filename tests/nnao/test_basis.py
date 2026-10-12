@@ -87,7 +87,7 @@ def test_export_matches_independent_native_integrals(symbol,cart):
 def test_upstream_snapshot_is_unchanged():
     import json,hashlib
     from pathlib import Path
-    root=Path('src/gradscf/model/nnao')
+    root=Path('src/gradscf/model/nnao/vendor/mace-jax')
     for name,expected in json.loads((root/'UPSTREAM.json').read_text())['files_sha256'].items():
         assert hashlib.sha256((root/name).read_bytes()).hexdigest()==expected,name
 

@@ -1,4 +1,5 @@
 """Non-methane geometry handling and memory-safe integral paths."""
+from importlib import import_module
 import runpy
 
 import jax.numpy as jnp
@@ -23,7 +24,7 @@ def test_aniline_training_configures_direct_jk_without_eri(monkeypatch,family):
         return jnp.eye(n) if operator=='overlap' else jnp.zeros((n,n))
     monkeypatch.setattr(IntegralPlan,'evaluate',bounded)
     geometry=aniline_size_geometry()
-    cls=runpy.run_path('tools/optimize_methane_nnao.py')['MethaneRHF']
+    cls=vars(import_module("gradscf.model.nnao.training.objective"))['BasisRHF']
     experiment=cls(geometry=geometry,basis_family=family)
     assert experiment.jk_backend=='direct' and experiment.rep is None
     assert operators==['overlap','kinetic','nuclear']
@@ -33,7 +34,7 @@ def test_nitrogen_geometry_energy_gradient_and_species_mapping():
     from gradscf.model.nnao import prepare_direct_basis
     geometry=dict(name='ammonia',symbols=['N','H','H','H'],charge=0,spin=0,
                   coords_angstrom=[[0,0,.12],[0,.94,-.28],[.814,-.47,-.28],[-.814,-.47,-.28]])
-    cls=runpy.run_path('tools/optimize_methane_nnao.py')['MethaneRHF']
+    cls=vars(import_module("gradscf.model.nnao.training.objective"))['BasisRHF']
     ex=cls(geometry=geometry,basis_family='szp442_direct')
     assert ex.nelectron==10 and ex.molecule=='ammonia' and ex.bond is None
     assert ex.layout.topology.nao==22

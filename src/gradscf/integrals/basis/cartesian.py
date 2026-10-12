@@ -619,15 +619,18 @@ def basis_from_molecule_spec(
     max_l: int = 3,
     precompute_eri_groups: bool = True,
 ) -> CartesianBasis:
-    """Build a cartesian basis from an explicit MoleculeSpec (differentiable coords path)."""
+    """Build Cartesian AOs from named or static raw shells and traced coordinates.
 
-    if not isinstance(basis, str):
-        raise TypeError("Strict-JAX basis_from_molecule_spec currently supports named basis strings only.")
+    Raw shell data follow ``prepare_basis``'s list/per-element-dict convention.
+    Trainable exponents/coefficients use integral plans instead of this host-side
+    AO construction path.
+    """
 
     aos: list[CartesianAO] = []
     shells: list[ContractedShell] = []
     for atom_idx, sym in enumerate(spec.symbols):
-        shells_raw = load_basis_from_snapshot(str(basis), sym)
+        value = basis[sym] if isinstance(basis, dict) else basis
+        shells_raw = load_basis_from_snapshot(value, sym) if isinstance(value, str) else value
         center = jnp.asarray(spec.coords_bohr[atom_idx], dtype=jnp.float64)
         for shell in shells_raw:
             l = int(shell[0])

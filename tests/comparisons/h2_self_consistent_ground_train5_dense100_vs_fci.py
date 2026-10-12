@@ -106,8 +106,8 @@ def _load_runtime_dependencies(logger: "RunLogger | None" = None) -> None:
     )
     _log("[bootstrap] import gradscf.tools.spectra")
     from gradscf.tools.spectra import HARTREE_TO_EV as _HARTREE_TO_EV
-    _log("[bootstrap] import gradscf.training")
-    from gradscf.training import (
+    _log("[bootstrap] import gradscf.model.neural_xc.training")
+    from gradscf.model.neural_xc.training import (
         MolecularTrainingDatum as _MolecularTrainingDatum,
         MolecularTrainingConfig as _MolecularTrainingConfig,
         molecular_loss as _molecular_loss,
@@ -115,13 +115,13 @@ def _load_runtime_dependencies(logger: "RunLogger | None" = None) -> None:
         make_ground_state_predictor as _make_ground_state_predictor,
         save_params_checkpoint as _save_params_checkpoint,
     )
-    from gradscf.training.trainer import (
+    from gradscf.model.neural_xc.training.trainer import (
         create_train_state_from_molecule as _create_train_state_from_molecule,
         make_molecular_loss_and_grad as _make_molecular_loss_and_grad,
         make_molecular_train_step as _make_molecular_train_step,
     )
-    _log("[bootstrap] import gradscf.training.targets")
-    from gradscf.training.targets import predict_excitation_energies as _predict_excitation_energies
+    _log("[bootstrap] import gradscf.model.neural_xc.training.targets")
+    from gradscf.model.neural_xc.training.targets import predict_excitation_energies as _predict_excitation_energies
 
     neural_xc = _neural_xc
     restricted_reference_from_pyscf = _restricted_reference_from_pyscf
@@ -1800,7 +1800,7 @@ def main() -> None:
         },
     )()
 
-    from gradscf.workflows.reporting import plot_training_curves, write_training_curve_csv
+    from gradscf.model.neural_xc.workflows.reporting import plot_training_curves, write_training_curve_csv
 
     write_training_curve_csv(training_curve_csv, training_run_like)
     write_dense_csv(training_per_point_csv, training["per_point_history"])

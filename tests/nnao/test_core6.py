@@ -1,3 +1,4 @@
+from importlib import import_module
 import runpy
 import jax
 import jax.numpy as jnp
@@ -31,7 +32,7 @@ def test_six_primitive_core_uses_631g_and_is_fixed(symbol):
 
 
 def test_methane_core6_default_energy_and_gradient():
-    cls=runpy.run_path('tools/optimize_methane_nnao.py')['MethaneRHF']
+    cls=vars(import_module("gradscf.model.nnao.training.objective"))['BasisRHF']
     experiment=cls()
     assert experiment.layout.topology.primitive_counts[0]==6
     assert experiment.layout.topology.nao==26

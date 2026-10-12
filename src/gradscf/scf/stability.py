@@ -1,6 +1,7 @@
 """Shared real-orbital RKS/UKS stability analysis and bounded saddle escape.
 
-These host-side diagnostics select a solution branch; they are not an AD rule.
+Host diagnostics and bounded JAX primal checks select a solution branch;
+attach implicit differentiation separately to the selected stationary root.
 Internal stability does not establish a global minimum or UHF->GHF stability.
 """
 
@@ -63,6 +64,96 @@ class StabilityAttempt:
     energy: float
     converged: bool
     accepted: bool = False
+
+
+def stabilize_df_rhf(result, *, max_restarts=4, stability_tol=1e-5,
+                     eigensolver_tol=1e-7, step_sizes=(.5, 1.), **scf_inputs):
+    """JIT-compatible real internal RHF check and bounded negative-mode escape.
+
+    This selects a primal root only: attach implicit differentiation afterwards
+    to the original physical inputs. Unresolved curvature or exhausted retries
+    return stable=False, never a silent successful fallback. Small orbital
+    spaces use a dense Hessian; larger spaces use HVP/Davidson estimates.
+    Neither path materializes four-index ERIs.
+    """
+    from .rks import run_rks_from_integrals_traceable
+    from ..integrals.molecular.jk import build_jk_from_df
+
+    steps = _follow_controls(max_restarts, step_sizes, 1e-10)
+    cfg = scf_inputs['config']
+    if cfg.xc_spec.lower() != 'hf' or cfg.jk_backend != 'df':
+        raise ValueError('stabilize_df_rhf requires DF-HF inputs.')
+    if (not jax.config.x64_enabled or
+            any(not np.isfinite(x) or x <= 0 for x in (stability_tol,eigensolver_tol))):
+        raise ValueError('DF stability requires float64 and positive tolerances.')
+    result = jax.tree.map(jax.lax.stop_gradient, result)
+    keys = ('overlap', 'hcore', 'df_factors', 'nuclear_repulsion')
+    data = {**scf_inputs, **{k: jax.lax.stop_gradient(scf_inputs[k]) for k in keys}}
+    for key in ('init_density','init_mo_coeff','init_mo_energy','init_mo_occ'):
+        data.pop(key,None)
+    s,h,b,enuc = (data[k] for k in keys)
+    if jnp.iscomplexobj(s) or jnp.iscomplexobj(result.mo_coeff) or data['nelectron'] % 2:
+        raise ValueError('DF-RHF stability requires real closed-shell inputs.')
+    n = s.shape[0]; no = int(data['nelectron'])//2
+    if not 0 < no <= n:
+        raise ValueError('Invalid DF-RHF closed-shell electron count.')
+    occ = (1.,)*no + (0.,)*(n-no)
+    expected_occ = 2*jnp.asarray(occ)
+    dimension, rotate, density_from = _rotation_functions('roks', (occ,occ))
+    if not dimension:
+        valid = result.converged & jnp.all(result.mo_occ == expected_occ)
+        return result, dict(stable=valid, minimum_curvature=jnp.asarray(0.,s.dtype),
+                            stability_restarts=jnp.asarray(0), stability_resolved=valid,
+                            stability_scf_cycles=jnp.asarray(0))
+    origin = jnp.zeros(dimension, s.dtype)
+
+    def energy(angles, coeff):
+        d = jnp.sum(density_from(rotate(angles, coeff[None])), axis=0)
+        j,k = build_jk_from_df(b,d)
+        return jnp.sum(d*h)+.5*jnp.sum(d*j)-.25*jnp.sum(d*k)+enuc
+
+    def analyze(current):
+        gradient,apply = jax.linearize(jax.grad(lambda x:energy(x,current.mo_coeff)),origin)
+        i,a = np.where(np.triu(np.asarray(occ)[:,None] != np.asarray(occ)[None,:],1))
+        eps = jnp.diag(current.mo_coeff.T @ current.fock_matrix @ current.mo_coeff)
+        diagonal = 4*(eps[a]-eps[i])
+        operator = LinearOperator((dimension,dimension),s.dtype,apply,diagonal=diagonal,
+                                  matmat=jax.vmap(apply,in_axes=1,out_axes=1))
+        solved = solve_hermitian(operator,config=EigenSolverConfig(
+            method='dense' if dimension<=128 else 'davidson',nroots=min(3,dimension),
+            atol=eigensolver_tol,maxiter=100,max_subspace=min(40,dimension),
+            initial_guess_count=min(8,dimension)))
+        resolved = (current.converged & jnp.all(current.mo_occ == expected_occ) & jnp.all(solved.converged)
+            & jnp.all(jnp.isfinite(solved.values))
+            & (jnp.linalg.norm(gradient) <= 1e-7))
+        minimum = solved.values[0]
+        return resolved & (minimum >= -stability_tol),minimum,solved.vectors[:,0],resolved
+
+    stable,minimum,direction,resolved = analyze(result)
+    signed_steps = jnp.asarray([sign*step for step in steps for sign in (1.,-1.)],s.dtype)
+    def condition(state):
+        _,stable,_,_,resolved,count,improved,_ = state
+        return (~stable) & resolved & improved & (count < max_restarts)
+
+    def escape(state):
+        current,_,_,direction,_,count,_,cycles = state
+        def trial(carry, step):
+            best,cycles = carry
+            c = rotate(step*direction,current.mo_coeff[None])[0]
+            candidate = run_rks_from_integrals_traceable(**data,
+                init_mo_coeff=c,init_mo_energy=current.mo_energy)
+            accept = (candidate.converged & jnp.isfinite(candidate.total_energy)
+                      & (candidate.total_energy < best.total_energy-1e-10))
+            return (jax.lax.cond(accept,lambda _:candidate,lambda _:best,None),
+                    cycles+candidate.cycles),None
+        (best,cycles),_ = jax.lax.scan(trial,(current,cycles),signed_steps)
+        stable,minimum,direction,resolved = analyze(best)
+        return best,stable,minimum,direction,resolved,count+1,best.total_energy<current.total_energy-1e-10,cycles
+
+    result,stable,minimum,_,resolved,count,_,cycles = jax.lax.while_loop(condition,escape,
+        (result,stable,minimum,direction,resolved,jnp.asarray(0),jnp.asarray(True),jnp.asarray(0)))
+    return result,dict(stable=stable,minimum_curvature=minimum,
+                       stability_restarts=count,stability_resolved=resolved,stability_scf_cycles=cycles)
 
 
 def _curvature_check(
@@ -262,17 +353,19 @@ def restricted_stability(
 
     result, inputs = _restricted_scf_state(source)
     cfg = source._config()
-    if cfg.jk_backend != "full" or cfg.potential_clip is not None:
+    if cfg.jk_backend not in {"full","df"} or cfg.potential_clip is not None:
         raise NotImplementedError(
-            "Restricted stability requires full/packed ERIs and unclipped XC"
+            "Restricted stability requires full/packed or DF ERIs and unclipped XC"
         )
+    if cfg.jk_backend == 'df' and channel != 'internal':
+        raise NotImplementedError('DF restricted stability currently supports the internal channel.')
     occ = np.asarray(result.mo_occ)
     if not np.all((occ == 0) | (occ == 2)):
         raise ValueError("Restricted stability requires integer 0/2 occupations")
     topology = tuple(map(tuple, np.stack([occ / 2, occ / 2])))
     dimension, rotate, density_from = _rotation_functions("roks", topology)
-    pair = None if inputs.eri is not None else inputs.response_eri_pair_matrix()
-    if inputs.eri is None and pair is None:
+    pair = None if inputs.eri is not None or cfg.jk_backend == 'df' else inputs.response_eri_pair_matrix()
+    if cfg.jk_backend == 'full' and inputs.eri is None and pair is None:
         raise ValueError("Restricted stability requires available AO ERIs")
     if channel == "spin":
         spin_cfg = UKSConfig(
@@ -339,6 +432,7 @@ def restricted_stability(
         inputs.eri,
         cfg,
         eri_pair_matrix=pair,
+        df_factors=inputs.df_factors,
         with_k=abs(float(alpha)) > 1e-14,
         nocc=inputs.nelectron // 2,
     )

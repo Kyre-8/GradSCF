@@ -22,7 +22,7 @@ jax.config.update('jax_enable_x64', True)
 
 from gradscf import gto, scf, fci
 from gradscf.integrals.molecular.ao2mo import transform_integrals
-from gradscf import training
+from gradscf.model.neural_xc import training
 from density_matrix_mlp import functional
 
 

@@ -22,7 +22,7 @@ from gradscf.scf import (
     DifferentiableSCF, DifferentiableSCFConfig, SCFDifferentiationConfig,
     QuadratureGrid, RestrictedMolecule, nuclear_repulsion_energy,
 )
-from gradscf.training import energy_and_forces, make_force_loss_and_grad
+from gradscf.model.neural_xc.training import energy_and_forces, make_force_loss_and_grad
 
 
 class TinyNeuralXC:

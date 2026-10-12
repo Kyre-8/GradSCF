@@ -8,7 +8,7 @@ from test_external_neural_xc import molecule, functional
 
 
 def test_sample_reuses_existing_pytree_record():
-    from gradscf.training import Sample, MolecularTrainingDatum
+    from gradscf.model.neural_xc.training import Sample, MolecularTrainingDatum
     mol = molecule()
     sample = Sample(mol, energy=-2.1, density=jnp.ones(3))
     assert isinstance(sample, MolecularTrainingDatum)
@@ -20,7 +20,7 @@ def test_sample_reuses_existing_pytree_record():
 
 
 def test_run_returns_self_and_history_includes_initial_and_post_update_losses():
-    from gradscf.training import Sample, Trainer
+    from gradscf.model.neural_xc.training import Sample, Trainer
     data = [Sample(molecule(), energy=-2.1)]
     trainer = Trainer(functional(), params={'scale':jnp.array(.3)})
     trainer.loss = {'energy': {'mse':1., 'mae':1.}}
@@ -39,7 +39,7 @@ def test_run_returns_self_and_history_includes_initial_and_post_update_losses():
 
 
 def test_sequential_runs_preserve_optimizer_and_history():
-    from gradscf.training import Sample, Trainer
+    from gradscf.model.neural_xc.training import Sample, Trainer
     data=[Sample(molecule(),energy=-2.1)]
     a=Trainer(functional(),params={'scale':jnp.array(.3)})
     b=Trainer(functional(),params={'scale':jnp.array(.3)})
@@ -51,7 +51,7 @@ def test_sequential_runs_preserve_optimizer_and_history():
 
 
 def test_fixed_density_does_not_silently_enter_scf_for_density_labels():
-    from gradscf.training import Sample, Trainer
+    from gradscf.model.neural_xc.training import Sample, Trainer
     trainer=Trainer(functional(),params={'scale':jnp.array(.3)})
     trainer.loss={'density':{'mse':1.}}
     with pytest.raises(ValueError,match='self.consistent'):
@@ -59,7 +59,7 @@ def test_fixed_density_does_not_silently_enter_scf_for_density_labels():
 
 
 def test_loss_typo_rejected_before_training():
-    from gradscf.training import Sample, Trainer
+    from gradscf.model.neural_xc.training import Sample, Trainer
     trainer=Trainer(functional(),params={'scale':jnp.array(.3)})
     trainer.loss={'energy':{'msee':1.}}
     with pytest.raises(ValueError,match='msee'):
@@ -67,7 +67,7 @@ def test_loss_typo_rejected_before_training():
 
 
 def test_nonfinite_update_has_no_optimizer_step_but_is_recorded():
-    from gradscf.training import Sample, Trainer
+    from gradscf.model.neural_xc.training import Sample, Trainer
     from gradscf.dft import Functional
     f=Functional(lambda s:s.rho, lambda p,x:jnp.sqrt(p['x'])*x.sum())
     trainer=Trainer(f,params={'x':jnp.array(-1.)})
@@ -80,7 +80,7 @@ def test_nonfinite_update_has_no_optimizer_step_but_is_recorded():
 def test_explicit_name_preserves_existing_scf_gradient_behavior():
     from gradscf.scf import SCFDifferentiationConfig
     from gradscf.scf.autodiff import normalize_scf_gradient_mode
-    from gradscf.training import Sample, Trainer
+    from gradscf.model.neural_xc.training import Sample, Trainer
     assert normalize_scf_gradient_mode('explicit') == 'explicit'
     assert normalize_scf_gradient_mode('expl') == 'explicit'
     assert normalize_scf_gradient_mode('unrolled') == 'explicit'
@@ -97,7 +97,7 @@ def test_explicit_name_preserves_existing_scf_gradient_behavior():
 
 @pytest.mark.parametrize('rate', [float('nan'), float('inf'), -float('inf'), 0., [.1]])
 def test_learning_rate_must_be_finite_positive_scalar(rate):
-    from gradscf.training import Sample, Trainer
+    from gradscf.model.neural_xc.training import Sample, Trainer
     trainer=Trainer(functional(),params={'scale':jnp.array(.3)})
     trainer.learning_rate=rate
     with pytest.raises(ValueError,match='finite positive scalar'):
@@ -105,7 +105,7 @@ def test_learning_rate_must_be_finite_positive_scalar(rate):
 
 
 def test_weighted_metrics_match_weighted_loss():
-    from gradscf.training import Sample, Trainer
+    from gradscf.model.neural_xc.training import Sample, Trainer
     trainer=Trainer(functional(),params={'scale':jnp.array(.3)})
     trainer.loss={'energy':{'mse':.2,'mae':.7}}
     data=[Sample(molecule(),energy=-2.1,weight=2.),Sample(molecule(),energy=-1.5,weight=1.)]
