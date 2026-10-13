@@ -1,18 +1,27 @@
-"""Static finite-q electronic response at fixed geometry and overlap.
+"""Static finite-q response with Fock, overlap and direct-density sources.
 
 Solve (1-chi0_q K_q) dD_q = chi0_q v_q with the shared Problem/linear solver.
 This is the finite-basis spectral form of the Sternheimer equation, with all
-AO bands retained. It does not implement atomic-displacement/Pulay sources or
-phonons. See Baroni et al., Rev. Mod. Phys. 73, 515 (2001), Sec. II.C.1.
+AO bands retained. QSource supports moving-metric/Pulay response; the bounded
+phonon adapter supplies geometry sources. See Baroni et al., Rev. Mod. Phys.
+73, 515 (2001), Sec. II.C.1.
 """
 import jax
 import jax.numpy as jnp
 import numpy as np
+from typing import NamedTuple
 from .core import Problem
 from ..pbc._kpoint import energy_and_fock
 from ..pbc.response import q_kernel,q_density
 from ..pbc.occupations import _fermi_divided_difference
 from ..pbc.kpoints import weights_for,reciprocal_vectors
+
+
+class QSource(NamedTuple):
+    """Fixed-density Fock/overlap variations and direct spin-density envelope."""
+    fock: object
+    overlap: object
+    rho_spin: object
 
 
 def _independent_response(result,transfer,temperature):
@@ -41,9 +50,17 @@ def _independent_response(result,transfer,temperature):
                 return _fermi_divided_difference(all_values,jnp.array([safe_mu,t]))[:n,n:]
             return jax.vmap(pair)(values[partner],values)*jnp.isfinite(chemical_potential)
         divided=jax.vmap(spin)(e,mu)
-    def apply(v):
+    def apply(v,overlap=None):
         mo=c[:,partner].conj().swapaxes(-1,-2)@v@c
-        return c[:,partner]@(divided*mo)@c.conj().swapaxes(-1,-2)
+        response=divided*mo
+        if overlap is not None:
+            metric=c[:,partner].conj().swapaxes(-1,-2)@overlap@c
+            # Generalized spectral derivative: (f_i-f_j)/(e_i-e_j) dF
+            # minus [ (f_i+f_j)/2 + (e_i+e_j)/2 * divided ] dS.
+            weighted=.5*(f[:,partner,:,None]+f[:,:,None,:])
+            weighted+=.5*(e[:,partner,:,None]+e[:,:,None,:])*divided
+            response-=weighted*metric
+        return c[:,partner]@response@c.conj().swapaxes(-1,-2)
     return apply,valid
 
 
@@ -77,19 +94,21 @@ def finite_q_problem(inputs,result,transfer,*,mesh,xc='hf',exxdiv='ewald',
     valid &= jnp.max(jnp.abs(mismatch))<=tolerance
     pack=lambda d:jnp.concatenate([d.real.ravel(),d.imag.ravel()])
     unpack=lambda x:(x[:size]+1j*x[size:]).reshape(shape)
-    def residual(x,potential):
+    zero=QSource(jnp.zeros(shape,dtype=complex),jnp.zeros(inputs.overlap.shape,dtype=complex),
+                 jnp.zeros((2,len(inputs.weights)),dtype=complex))
+    def residual(x,source):
         d=unpack(x)
-        return pack(d-chi(potential+interaction(d)))
-    def quantities(x,potential):
+        return pack(d-chi(source.fock+interaction(d),source.overlap))
+    def quantities(x,source):
         d=unpack(x)
         # Nonzero-q first-order energy/particle-number averages vanish over
         # the commensurate supercell. Second order involves other q sectors.
-        return dict(density=d,rho_spin=q_density(inputs,transfer,d),
+        return dict(density=d,rho_spin=q_density(inputs,transfer,d)+source.rho_spin,
                     energy=jnp.array(0.),electron_number=jnp.array(0.))
     def potential_tangent(value):
         value=jnp.asarray(value,dtype=jnp.complex128)
         if value.shape==shape[1:]:value=jnp.broadcast_to(value,shape)
         if value.shape!=shape:raise ValueError('Finite-q potential requires (nk,nao,nao) or (2,nk,nao,nao)')
-        return value
-    return Problem(residual,jnp.zeros(2*size),jnp.zeros(shape,dtype=complex),quantities,
+        return zero._replace(fock=value)
+    return Problem(residual,jnp.zeros(2*size),zero,quantities,
         valid,tolerance,potential_tangent,series_supported=False)

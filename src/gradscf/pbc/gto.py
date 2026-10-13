@@ -100,7 +100,7 @@ class Cell:
         coordinates=jnp.asarray(coordinates)
         if coordinates.shape!=self.coords.shape or not jnp.issubdtype(coordinates.dtype,jnp.floating):
             raise ValueError('coordinates must be real floating (natom,3) arrays in Bohr')
-        if not np.allclose(self.parameters.centers,self.coords[self._shell_atoms],atol=1e-12,rtol=0):
+        if not np.allclose(self.parameters.centers,np.asarray(self.coords)[self._shell_atoms],atol=1e-12,rtol=0):
             raise ValueError('parameters_at requires atom-attached basis centers')
         return replace(self.parameters,centers=coordinates[self._shell_atoms],nuclear_coords=coordinates)
 

@@ -130,7 +130,9 @@ closed, equally weighted k mesh. Both integer insulating and finite-temperature
 Fermi references are supported. It retains the k+q folding phases and reuses
 the FFT exchange and shared linear solvers. This is separate from the TD/GW
 occupation restrictions below. See [finite-q conventions and checks](../dfpt/FINITE_Q.md).
-Atomic-displacement/overlap sources, phonons and finite-q OFDFT remain pending.
+Atomic-displacement/overlap sources and bounded commensurate HF/KS/OFDFT
+reference phonons are now available; see [atomic response](../dfpt/ATOMIC_RESPONSE.md).
+The latter retain a supercell workspace and are not a primitive-cell scaling implementation.
 
 ### External XC functionals
 
@@ -250,5 +252,5 @@ not a material convergence benchmark.
 
 The next foundation work remains physical space-group/AO transformations,
 irreducible J/K evaluation and periodic Trainer sample adapters.
-Finite-q phonons, metallic TD/GW/BSE, other smearing schemes, SOC and
+Scalable primitive-cell phonons, metallic TD/GW/BSE, other smearing schemes, SOC and
 macroscopic Berry-phase fields are not supplied by this increment.

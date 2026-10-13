@@ -39,8 +39,9 @@ def test_q_zero_kernel_matches_existing_density_jvp(xc,monkeypatch):
     np.testing.assert_allclose(apply(perturbation),expected,atol=1e-10)
 
 
+@pytest.mark.parametrize('moving_metric',[False,True])
 @pytest.mark.parametrize('temperature',[None,.15])
-def test_independent_q_response_against_full_matrix_function(temperature):
+def test_independent_q_response_against_full_matrix_function(temperature,moving_metric):
     from types import SimpleNamespace
     from gradscf.dfpt.finite_q import _independent_response
     from gradscf.pbc.momentum import momentum_transfer
@@ -58,13 +59,17 @@ def test_independent_q_response_against_full_matrix_function(temperature):
     chi,valid=_independent_response(result,transfer,temperature)
     assert valid
     potential=jnp.arange(12).reshape(3,2,2)*.01+.013j
-    response=chi(jnp.stack([potential,potential]))[0]
+    overlap=potential*.2 if moving_metric else jnp.zeros_like(potential)
+    response=chi(jnp.stack([potential,potential]),overlap)[0]
     perturbation=jnp.zeros((6,6),dtype=complex)
     for source,target in enumerate(transfer.partners):
         perturbation=perturbation.at[2*target:2*target+2,2*source:2*source+2].set(potential[source])
     perturbation+=perturbation.conj().T
     def density(t):
-        e,c=jnp.linalg.eigh(jnp.diag(eps[0].ravel())+t*perturbation)
+        s=jnp.eye(6)+(.2*t*perturbation if moving_metric else 0.)
+        x=jnp.linalg.inv(jnp.linalg.cholesky(s)).conj().T
+        e,c=jnp.linalg.eigh(x.conj().T@(jnp.diag(eps[0].ravel())+t*perturbation)@x)
+        c=x@c
         f=(jnp.arange(6)<3) if temperature is None else jax.nn.sigmoid((mu[0]-e)/temperature)
         return (c*f)@c.conj().T
     fd=(density(1e-5)-density(-1e-5))/2e-5

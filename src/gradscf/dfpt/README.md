@@ -10,9 +10,11 @@ The package name uses the standard abbreviation **DFPT**.
 Finite-q periodic electronic response is available through
 `DFPT(mf, q=[qx,qy,qz]).response(potential=vq)`, with q in fractional reciprocal
 coordinates. See [finite-q theory, conventions and validation](FINITE_Q.md).
-This supports HF/semilocal KS on closed, equally weighted k meshes; finite-q
-OFDFT, arbitrary external models, atomic-displacement sources and phonons
-remain outside the current adapter. The examples below use q=0.
+This supports HF/semilocal KS on closed, equally weighted k meshes. Moving
+overlap/density sources and a bounded commensurate phonon driver are described
+in [atomic response](ATOMIC_RESPONSE.md); OFDFT phonons use its supercell KKT
+path. Arbitrary external-model finite-q extensions are not inferred. The
+examples below use the electronic-potential q=0 interface.
 
 ```python
 from gradscf import dfpt
@@ -215,9 +217,9 @@ chart. It includes occupation and chemical-potential response at fixed spin
 populations. Thermal Taylor series and higher derivatives at degeneracy are not
 provided; see [periodic foundations](../pbc/README.md).
 
-Finite-q **electronic potential** response is implemented separately; it does
-not supply the geometric/Pulay sources required for finite-q phonons.
-Phonons, dynamical response, Berry-phase
+Atomic/Pulay response and small commensurate reference phonons are available
+through the separate [geometry adapter](ATOMIC_RESPONSE.md). Scalable native
+primitive-cell phonons, dynamical response, Berry-phase
 electric fields, Born charges, and a turnkey nuclear-Hessian driver are not
 provided here. No all-order geometry capability is implied. The KS chart stores
 full density matrices, so matrix-free linear algebra alone does not make this
