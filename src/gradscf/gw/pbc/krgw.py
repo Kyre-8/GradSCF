@@ -192,6 +192,8 @@ class KRGW:
 
     def kernel(self, orbs: Sequence[int] | None = None):
         mf = self._scf
+        from ...pbc.scf import validate_reference
+        validate_reference(mf)
         result = mf.result
         kpts = np.asarray(mf.kpts)
         if kpts.shape == (1, 3) and not np.any(kpts):

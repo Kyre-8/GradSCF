@@ -118,7 +118,7 @@ def kpoint_product_factors(
     mesh:
         FFT grid shape (``cell.mesh``).
     momentum_table:
-        From :func:`gradscf.gw.pbc.momentum.momentum_transfer_table`.
+        From :func:`gradscf.pbc.momentum.momentum_transfer_table`.
 
     Returns
     -------

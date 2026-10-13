@@ -268,6 +268,7 @@ def _needs_predicted_ground_state_energy(
 
 
 _LOSS_COMPONENT_KEYS = (
+    "response_loss",
     "e0_total_loss",
     "grid_density_loss",
     "xc_potential_loss",
@@ -284,6 +285,7 @@ _LOSS_COMPONENT_KEYS = (
 )
 
 _MOLECULAR_METRIC_KEYS = (
+    "response_mse", "response_mae", "response_converged",
     "e0_total_mse",
     "e0_total_mae",
     "normalized_e0_total_mse",
@@ -2035,6 +2037,11 @@ def _validate_training_datum(
 ) -> None:
     requirements = (
         (
+            _has_weight(config, "response_mse_weight", "response_mae_weight"),
+            datum.target_density_response,
+            "target_density_response",
+        ),
+        (
             _has_weight(config, "e0_total_mse_weight", "e0_total_mae_weight")
             or config.self_consistent_e0_weight != 0.0,
             datum.target_e0_total_h,
@@ -2101,6 +2108,7 @@ def _validate_training_datum(
 
 def _has_active_objective(config: MolecularTrainingConfig) -> bool:
     names = (
+        "response_mse_weight", "response_mae_weight",
         "e0_total_mse_weight",
         "e0_total_mae_weight",
         "grid_density_mse_weight",
@@ -2125,6 +2133,7 @@ def _has_active_objective(config: MolecularTrainingConfig) -> bool:
 
 def _datum_dtype(datum: MolecularTrainingDatum) -> Any:
     for name in (
+        "target_density_response",
         "target_e0_total_h",
         "target_s1_total_h",
         "target_excitation_gaps_h",
@@ -2231,6 +2240,18 @@ def molecular_loss(
             )
 
         grid_density_mse = zero
+        response_mse = response_mae = zero
+        response_converged = jnp.array([], dtype=dtype)
+        if _has_weight(config, 'response_mse_weight', 'response_mae_weight'):
+            from gradscf.dfpt import DFPT
+            response = DFPT(eval_molecule, functional=functional, params=params,
+                converged=True if scf_info is None else scf_info.converged).response(
+                    potential=datum.response_potential)
+            residual = response.density-jnp.asarray(datum.target_density_response)
+            response_mse, response_mae = jnp.mean(residual**2), jnp.mean(jnp.abs(residual))
+            response_converged = jnp.atleast_1d(response.converged).astype(dtype)
+            component_losses['response_loss'] = (config.response_mse_weight*response_mse
+                                                + config.response_mae_weight*response_mae)
         if config.grid_density_mse_weight != 0.0:
             grid_density_mse = density_matching_penalty(
                 params,
@@ -2436,6 +2457,9 @@ def molecular_loss(
             component_totals[key] = component_totals[key] + weight * value
 
         metric_values = {
+            "response_mse": response_mse,
+            "response_mae": response_mae,
+            "response_converged": response_converged,
             "e0_total_mse": e0_mse,
             "e0_total_mae": e0_mae,
             "normalized_e0_total_mse": normalized_e0_mse,

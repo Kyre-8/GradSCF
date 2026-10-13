@@ -2,6 +2,13 @@
 import jax
 import jax.numpy as jnp
 import numpy as np
+
+
+def test_bisection_preserves_brackets_and_reports_invalid_lane():
+    from gradscf.solvers.nonlinear import bisect
+    roots,converged=bisect(lambda x:x*x-jnp.array([2.,-1.]),jnp.zeros(2),jnp.ones(2)*2)
+    np.testing.assert_allclose(roots[0],np.sqrt(2.),atol=1e-12)
+    np.testing.assert_array_equal(converged,[True,False])
 import pytest
 from gradscf.solvers.nonlinear import ScalarRootConfig, solve_scalar_roots
 

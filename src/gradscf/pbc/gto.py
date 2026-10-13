@@ -1,17 +1,12 @@
 """Three-dimensional neutral periodic Gaussian cells, independent of PySCF."""
 from dataclasses import dataclass
-from functools import lru_cache
-import json
-from importlib.resources import files
 import numpy as np
 import jax.numpy as jnp
 from ..data.molecule import parse_molecule_spec, ANGSTROM_TO_BOHR
 from .kpoints import reciprocal_vectors, uniform_kpoints
-
-
-@lru_cache(maxsize=1)
-def _gth_data():
-    return json.loads(files('gradscf.integrals.periodic').joinpath('gth_data.json').read_text())
+from ..integrals.periodic.library import (
+    basis_names, basis_elements, load_basis, load_pseudo, basis_valence, is_periodic_basis,
+)
 
 
 @dataclass
@@ -50,19 +45,22 @@ class Cell:
         distances=np.linalg.norm(delta@np.asarray(self.lattice),axis=-1)
         if np.any(distances[np.triu_indices(len(fractional),1)]<1e-8):
             raise ValueError('Atoms coincide modulo a lattice translation.')
-        data=_gth_data()
         self.basis_spec={}
         self.pseudopotentials=[]
         for symbol in self.spec.symbols:
             value=self.basis.get(symbol) if isinstance(self.basis,dict) else self.basis
-            if isinstance(value,str) and value.lower() in data['basis']:
-                value=data['basis'][value.lower()].get(symbol)
-                if not value: raise ValueError(f'No bundled {self.basis} basis for {symbol}.')
+            valence=None
+            if isinstance(value,str) and is_periodic_basis(value):
+                valence=basis_valence(value,symbol)
+                value=load_basis(value,symbol)
             self.basis_spec[symbol]=value
             pp=self.pseudo.get(symbol) if isinstance(self.pseudo,dict) else self.pseudo
             if isinstance(pp,str):
-                pp=data['pseudo'].get(pp.lower(),{}).get(symbol)
+                pp=load_pseudo(pp,symbol)
             if not pp: raise ValueError(f'Provide supported GTH parameters for {symbol}.')
+            if valence is not None and valence!=sum(pp[0]):
+                raise ValueError(f'{symbol} basis expects valence q{valence}, but the pseudopotential '
+                                 f'has q{sum(pp[0])}; select a matching -qN basis/potential pair.')
             if pp[1]<=0 or len(pp[3])>4 or len(pp[5:])!=pp[4]:
                 raise ValueError('Invalid GTH local potential or projector channels.')
             for radius,count,coupling in pp[5:]:
@@ -71,11 +69,14 @@ class Cell:
             self.pseudopotentials.append(pp)
         self.charges=jnp.asarray([sum(pp[0]) for pp in self.pseudopotentials])
         self.nelectron=int(sum(sum(pp[0]) for pp in self.pseudopotentials))
-        if abs(self.spin)>self.nelectron or (self.nelectron+self.spin)%2:
+        if not np.isfinite(self.spin) or self.spin!=int(self.spin) or abs(self.spin)>self.nelectron:
             raise ValueError('spin must be compatible with the valence electron count.')
-        self.nelec=((self.nelectron+self.spin)//2,(self.nelectron-self.spin)//2)
+        counts=((self.nelectron+self.spin)/2,(self.nelectron-self.spin)/2)
+        self.nelec=tuple(int(v) if v==int(v) else v for v in counts)
         from ..integrals.basis import prepare_basis
         self.topology,self.parameters=prepare_basis(self.spec,self.basis_spec)
+        self._shell_atoms=np.argmin(np.linalg.norm(np.asarray(self.parameters.centers)[:,None]
+            -np.asarray(self.coords)[None],axis=-1),axis=1)
         self._version=getattr(self,'_version',0)+1
         return self
 
@@ -86,8 +87,22 @@ class Cell:
     def reciprocal_vectors(self):
         return reciprocal_vectors(self.lattice)
 
-    def make_kpts(self,mesh):
-        return uniform_kpoints(self.lattice,mesh)
+    def make_kpts(self,mesh,*,shift=(0.,0.,0.)):
+        return uniform_kpoints(self.lattice,mesh,shift=shift)
+
+    def parameters_at(self,coordinates):
+        """Move all atom-attached shells and nuclei; coordinates are in Bohr.
+
+        Exponents/contractions remain fixed. Floating basis centers require an
+        explicit BasisParameters construction instead of this atomic adapter.
+        """
+        from dataclasses import replace
+        coordinates=jnp.asarray(coordinates)
+        if coordinates.shape!=self.coords.shape or not jnp.issubdtype(coordinates.dtype,jnp.floating):
+            raise ValueError('coordinates must be real floating (natom,3) arrays in Bohr')
+        if not np.allclose(self.parameters.centers,np.asarray(self.coords)[self._shell_atoms],atol=1e-12,rtol=0):
+            raise ValueError('parameters_at requires atom-attached basis centers')
+        return replace(self.parameters,centers=coordinates[self._shell_atoms],nuclear_coords=coordinates)
 
 
 def M(**kwargs):

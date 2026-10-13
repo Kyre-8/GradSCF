@@ -207,6 +207,7 @@ _LOSS_FIELDS = {
     'spectrum': {'mse': 'spectrum_mse_weight'},
     'xc_potential': {'mse': 'xc_potential_mse_weight'},
     'xc_kernel': {'mse': 'xc_kernel_mse_weight'},
+    'response': {'mse': 'response_mse_weight', 'mae': 'response_mae_weight'},
 }
 
 
@@ -316,6 +317,9 @@ class Trainer:
             energy=raw['predicted_e0_total_h'],
             energy_mse=mean('e0_total_mse'), energy_mae=mean('e0_total_mae'),
             density_mse=mean('grid_density_mse'),
+            response_mse=mean('response_mse'), response_mae=mean('response_mae'),
+            response_converged=(jnp.all(raw['response_converged'] == 1)
+                                if raw['response_converged'].size else None),
             scf_converged=jnp.all(raw['scf_converged'] == 1) if has_scf else None,
             scf_cycles=jnp.max(raw['scf_cycles']) if has_scf else jnp.asarray(0))
 

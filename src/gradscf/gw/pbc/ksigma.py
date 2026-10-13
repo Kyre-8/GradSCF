@@ -40,7 +40,7 @@ from ..polarizability import rho_response_iw
 from ...solvers.nonlinear import ScalarRootConfig, solve_scalar_roots
 from ..self_energy import sigma_imag_part, sigma_residue_part
 from ..types import GWResult
-from .momentum import momentum_transfer_table
+from ...pbc.momentum import momentum_transfer_table
 from .product_basis import kpoint_product_factors
 from .q0 import transition_moments_kpoints
 
@@ -244,6 +244,9 @@ def g0w0_cd_kpoints(
     )
     if any(isinstance(leaf, jax.core.Tracer) for leaf in leaves):
         raise NotImplementedError("k-point GW currently supports eager evaluation only; AD/JIT is not implemented.")
+    weights=getattr(inputs,'kweights',None)
+    if weights is not None and not np.allclose(weights,1/len(weights),atol=1e-12,rtol=0):
+        raise NotImplementedError('k-point GW currently requires equal k weights.')
     e_k = [jnp.asarray(e, dtype=jnp.float64) for e in jnp.asarray(mo_energy_k)]
     c_k = jnp.asarray(mo_coeff_k, dtype=jnp.complex128)
     nk = len(e_k)

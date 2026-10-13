@@ -16,7 +16,7 @@ from gradscf.gw.polarizability import rho_response_iw, rho_response_real
 from gradscf.gw.pbc.ksigma import _screened_w_kpoint, _sigma_residue_kpoint, g0w0_cd_kpoints
 from gradscf.gw.pbc.krgw import g0w0_cd_gamma
 from gradscf.gw.pbc.kugw import g0w0_cd_gamma_unrestricted
-from gradscf.gw.pbc.momentum import momentum_transfer_table
+from gradscf.pbc.momentum import momentum_transfer_table
 from gradscf.gw.pbc.product_basis import kpoint_product_factors
 from gradscf.gw.pbc.q0 import q0_residue_correction, screened_w_imag_axis_head_wing
 from gradscf.gw.self_energy import sigma_residue_part

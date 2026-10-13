@@ -18,7 +18,7 @@ from __future__ import annotations
 
 
 from .product_basis import gamma_product_factors, kpoint_product_factors
-from .momentum import momentum_transfer_table, wrap_to_kmesh
+from ...pbc.momentum import momentum_transfer_table, wrap_to_kmesh
 from .krgw import KRGW, evgw_cd_gamma, g0w0_cd_gamma
 from .kugw import KUGW, g0w0_cd_gamma_unrestricted
 from .ksigma import g0w0_cd_kpoints

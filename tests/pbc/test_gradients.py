@@ -29,3 +29,20 @@ def test_periodic_hf_bond_gradient_matches_finite_difference(mode,nk):
     fd=(energy(.03+step)-energy(.03-step))/(2*step)
     assert jnp.isfinite(value) and abs(gradient)>1e-3
     np.testing.assert_allclose(gradient,fd,atol=2e-6,rtol=0)
+
+
+def test_nonlocal_gth_geometry_gradient_and_second_derivative():
+    from gradscf.integrals.periodic.ao import fourier_ao,reciprocal_grid
+    from gradscf.integrals.periodic.pseudo import nonlocal_matrix
+    cell=gto.M(atom='C .4 .5 .6; H 1.8 .8 .9',spin=1,a=np.eye(3)*6,unit='Bohr',mesh=(9,)*3)
+    assert any(channel[1] for pp in cell.pseudopotentials for channel in pp[5:])
+    vectors=reciprocal_grid(cell.lattice,cell.mesh)
+    def energy(t):
+        params=cell.parameters_at(cell.coords.at[0,0].add(t))
+        ft=fourier_ao(cell.topology,params,vectors)
+        v=nonlocal_matrix(vectors,ft,params.nuclear_coords,cell.pseudopotentials,cell.volume)
+        density=jnp.eye(v.shape[0])*.3+jnp.ones_like(v)*.02
+        return jnp.trace(density@v).real
+    gradient=jax.grad(energy);step=1e-4
+    np.testing.assert_allclose(gradient(.02),(energy(.02+step)-energy(.02-step))/2/step,atol=1e-7)
+    np.testing.assert_allclose(jax.grad(gradient)(.02),(gradient(.02+step)-gradient(.02-step))/2/step,atol=1e-7)

@@ -33,13 +33,13 @@ def velocity_matrix(cell,*,parameters=None,kpt=None):
 def transition_velocity(td):
     """Physical complex transition velocity; overall eigenvector phases are free."""
     mf=td._scf
+    from .scf import validate_reference
+    validate_reference(mf)
     if mf.unrestricted or np.asarray(mf.kpts).shape!=(1,3) or np.any(np.asarray(mf.kpts)):
         raise NotImplementedError('Optical strengths currently support restricted Gamma references.')
     signature=(id(mf.result),td.singlet,mf.xc,id(mf.inputs))
     if getattr(td,'_solution_reference',None)!=signature:
         raise ValueError('Run the response kernel for the current reference first.')
-    if (mf.xc!=mf._computed_xc or mf.cell.mesh!=mf._computed_mesh or mf.cell._version!=mf._cell_version):
-        raise ValueError('Run SCF and response again after changing the cell.')
     if not np.all(np.asarray(td.converged)) or np.any(np.asarray(td.e)<=0):
         raise ValueError('Optical strengths require converged positive-energy excitations.')
     x,y=td.xy
