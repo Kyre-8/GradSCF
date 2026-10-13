@@ -30,15 +30,20 @@ def energy_and_fock(density,inputs,*,mesh,xc='hf',exxdiv='ewald',functional=None
 
 def grid_xc_potential(density,inputs,*,xc):
     """XC fields on the SCF grid, reused for non-self-consistent band queries."""
-    kind=xc_type(xc);nk=density.shape[1]
+    kind=xc_type(xc)
     if kind=='HF':return jnp.array(0.),None
+    variables=grid_xc_variables(density,inputs,kind)
+    energies,potential=_point_unrestricted_xc_value_and_grad_kernel(xc,kind)(variables)
+    return jnp.dot(inputs.weights,energies),potential
+
+
+def grid_xc_variables(density,inputs,kind):
+    """Real spin density/gradient variables shared by ground-state and q response."""
     ao=inputs.ao[:,0];deriv=inputs.ao[:,1:4]
     kw=weights_for(inputs)
     rho=jnp.einsum('k,kgp,skpq,kgq->sg',kw,ao,density,ao.conj()).real
     grad=2*jnp.einsum('k,kgp,skpq,kxgq->sgx',kw,ao,density,deriv.conj()).real
-    variables=rho.T if kind=='LDA' else jnp.concatenate([rho.T,grad[0],grad[1]],axis=1)
-    energies,potential=_point_unrestricted_xc_value_and_grad_kernel(xc,kind)(variables)
-    return jnp.dot(inputs.weights,energies),potential
+    return rho.T if kind=='LDA' else jnp.concatenate([rho.T,grad[0],grad[1]],axis=1)
 
 
 def project_xc_potential(ao_channels,weights,potential,kind):

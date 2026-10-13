@@ -20,6 +20,27 @@ References
 from __future__ import annotations
 
 import numpy as np
+from typing import NamedTuple
+
+
+class MomentumTransfer(NamedTuple):
+    """Static positive-q map: k[partners]=k+q+shifts, shifts reciprocal integers."""
+    q: object
+    partners: object
+    shifts: object
+
+
+def momentum_transfer(kpoints,q):
+    """Prepare a k -> k+q map in fractional reciprocal coordinates.
+
+    Retain the reciprocal shifts needed for cell-periodic Bloch factors;
+    wrapping the indices alone loses the phases of a finite-q response.
+    """
+    k=np.asarray(kpoints,dtype=float);q=np.asarray(q,dtype=float)
+    if q.shape!=(3,) or not np.isfinite(q).all():
+        raise ValueError('q must be a finite fractional reciprocal three-vector')
+    partners=momentum_transfer_table(k,qpts=-q[None])[:,0]
+    return MomentumTransfer(q,partners,np.rint(k[partners]-k-q).astype(int))
 
 
 def wrap_to_kmesh(kpts: np.ndarray, tol: float = 1e-8) -> np.ndarray:
@@ -68,4 +89,4 @@ def momentum_transfer_table(kpts: np.ndarray, *, qpts=None, tol: float = 1e-6) -
     return table
 
 
-__all__ = ["wrap_to_kmesh", "momentum_transfer_table"]
+__all__ = ["wrap_to_kmesh", "momentum_transfer_table", "MomentumTransfer", "momentum_transfer"]

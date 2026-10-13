@@ -37,5 +37,8 @@ def test_periodic_ks_q0_matches_perturbed_scf(nk, xc):
         np.testing.assert_allclose(series.density[0], result.density, atol=1e-8)
         np.testing.assert_allclose(2*series.energy[1],
             jnp.einsum('skij,kji->', result.density, perturbation).real/nk, atol=1e-8)
-    with pytest.raises(NotImplementedError, match='q=0'):
-        dfpt.DFPT(mf, q=[.5, 0., 0.])
+    if nk==1:
+        with pytest.raises(ValueError, match='not closed'):
+            dfpt.DFPT(mf, q=[.5, 0., 0.])
+    else:
+        assert dfpt.DFPT(mf,q=[.5,0.,0.]).response(potential=perturbation).converged

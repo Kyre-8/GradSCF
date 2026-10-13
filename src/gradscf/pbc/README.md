@@ -124,6 +124,14 @@ the appropriate thermodynamic potential.
 
 ## Response and consumer boundaries
 
+Static finite-q electronic response is now available through
+`dfpt.DFPT(mf, q=...).response(potential=...)` for HF and semilocal KS on a
+closed, equally weighted k mesh. Both integer insulating and finite-temperature
+Fermi references are supported. It retains the k+q folding phases and reuses
+the FFT exchange and shared linear solvers. This is separate from the TD/GW
+occupation restrictions below. See [finite-q conventions and checks](../dfpt/FINITE_Q.md).
+Atomic-displacement/overlap sources, phonons and finite-q OFDFT remain pending.
+
 ### External XC functionals
 
 The same `dft.Functional(input_fn, energy_fn)` used for molecules accepts

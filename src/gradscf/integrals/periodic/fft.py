@@ -122,6 +122,15 @@ def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True):
     vr=jnp.fft.ifftn(jnp.fft.fftn(rho.reshape(mesh))*coulomb_kernel(inputs.gvectors).reshape(mesh)).reshape(-1).real
     j=weight*jnp.einsum('kgp,g,kgq->kpq',ao.conj(),vr,ao)
     if not with_k:return j,jnp.zeros_like(density_spin)
+    return j,_kpoint_exchange(inputs,density_spin,mesh=mesh,exxdiv=exxdiv)
+
+
+def _kpoint_exchange(inputs,density_spin,*,mesh,exxdiv,bra=None,bra_overlap=None):
+    """Shared diagonal/finite-q exchange; bra may represent lifted k+q AOs."""
+    from ...pbc.kpoints import weights_for
+    ao=inputs.ao[:,0];nk=ao.shape[0];weight=inputs.weights[0];kw=weights_for(inputs)
+    bra=ao if bra is None else bra
+    bra_overlap=inputs.overlap if bra_overlap is None else bra_overlap
     matrices=[]
     for target in range(nk):
         k=jnp.zeros_like(density_spin[:,target])
@@ -130,12 +139,12 @@ def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True):
             kernel=coulomb_kernel(inputs.gvectors+inputs.kpoints[target]-inputs.kpoints[source])
             shape=tuple(mesh)+pairs.shape[1:]
             potential=jnp.fft.ifftn(jnp.fft.fftn(pairs.reshape(shape),axes=(0,1,2))*kernel.reshape(tuple(mesh)+(1,1)),axes=(0,1,2)).reshape(pairs.shape)
-            k=k+weight*kw[source]*jnp.einsum('gp,gs,tsr,grq->tpq',ao[target].conj(),ao[source],density_spin[:,source],potential)
+            k=k+weight*kw[source]*jnp.einsum('gp,gs,tsr,grq->tpq',bra[target].conj(),bra[source],density_spin[:,source],potential)
         if exxdiv=='ewald':
-            s=inputs.overlap[target];k=k+inputs.madelung*jnp.einsum('pr,trs,sq->tpq',s,density_spin[:,target],s)
+            s=inputs.overlap[target];k=k+inputs.madelung*jnp.einsum('pr,trs,sq->tpq',bra_overlap[target],density_spin[:,target],s)
             k=k*jnp.where(jnp.all(jnp.abs(kw-1/nk)<1e-12),1.,jnp.nan)
         matrices.append(k)
-    return j,jnp.stack(matrices,axis=1)
+    return jnp.stack(matrices,axis=1)
 
 
 def build_band_inputs(cell,kpts,reference):

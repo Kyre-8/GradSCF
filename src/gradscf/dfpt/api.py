@@ -61,7 +61,9 @@ def _periodic(mf, tolerance):
 def DFPT(source, *, functional=None, params=None, converged=True, q=None, tolerance=1e-7):
     """Build a response snapshot from converged molecular/periodic KS or OFDFT.
 
-    Static q=0 response. Periodic sources may use fixed or Fermi occupations.
+    Static response. q is in fractional reciprocal coordinates. Periodic KS
+    supports finite-q electronic potentials on a closed k mesh; other adapters
+    currently require q=0. Periodic sources may use fixed or Fermi occupations.
     Rebuild after changing the source.
     Array users can construct ks_problem, periodic_problem or ofdft_problem.
     Periodic facades retain their own functional and params; use DFPT(mf).
@@ -70,8 +72,23 @@ def DFPT(source, *, functional=None, params=None, converged=True, q=None, tolera
     Construct inside the differentiated function to retain reference relaxation.
     """
     from ..ofdft.api import OFDFT
-    if q is not None and (np.shape(q)!=(3,) or np.any(np.asarray(q)!=0)):
-        raise NotImplementedError('DFPT currently supports q=0 only')
+    if q is not None:
+        if np.shape(q)!=(3,) or not np.isfinite(q).all():
+            raise ValueError('q must be a finite fractional reciprocal three-vector')
+        if np.any(np.abs(np.asarray(q))>1e-12):
+            from ..pbc.scf import _SCF,validate_reference
+            from ..pbc.momentum import momentum_transfer
+            from .finite_q import finite_q_problem
+            if not isinstance(source,_SCF):
+                raise NotImplementedError('This adapter supports q=0 only; finite q currently requires periodic KS/HF')
+            if functional is not None or params is not None:
+                raise NotImplementedError('An arbitrary external functional needs an explicit finite-q extension')
+            validate_reference(source,integer=False,equal_weights=True)
+            fractional=np.asarray(source.kpts)@np.asarray(source.cell.lattice).T/(2*np.pi)
+            transfer=momentum_transfer(fractional,q)
+            problem=finite_q_problem(source.inputs,source.result,transfer,mesh=source.cell.mesh,
+                xc=source.xc,exxdiv=source.exxdiv,temperature=source.temperature,tolerance=tolerance)
+            return replace(problem,converged=problem.converged&converged)
     if functional is not None:
         if hasattr(source,'cell'):
             raise ValueError('Set the periodic Functional and params in SCF, then use DFPT(mf); '
