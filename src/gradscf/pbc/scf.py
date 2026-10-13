@@ -10,27 +10,40 @@ from ..scf.rks import _vxc_matrix_from_grid_potential
 from ..scf.energy import XCContribution,unrestricted_energy,unrestricted_fock
 from ..scf.autodiff import SCFDifferentiationConfig,attach_scf_backward
 from ..dft.libxc_jax.jax_libxc import hybrid_coeff,xc_type
-from .kpoints import weights_for
+from .kpoints import weights_for,time_reversal_plan
 from ._kpoint import run_kpoint_scf
 
 
-def validate_reference(mf, *, integer=True, equal_weights=True):
+def validate_reference(mf, *, integer=True, equal_weights=True, external=False):
     """Check freshness and the reference domain required by a consumer."""
     if mf.result is None or not mf.converged:
         raise ValueError('Periodic response requires a converged SCF reference.')
     if (mf.xc!=mf._computed_xc or mf.cell.mesh!=mf._computed_mesh or mf.cell._version!=mf._cell_version):
         raise ValueError('Run kernel() again after changing the periodic reference.')
+    if getattr(mf,'functional',None) is not getattr(mf,'_computed_functional',None):
+        raise ValueError('Run kernel() again after changing the external functional.')
+    if getattr(mf,'functional',None) is not None:
+        if _params_signature(mf.params)!=mf._computed_params:
+            raise ValueError('Run kernel() again after changing functional parameters.')
+        if not external:raise NotImplementedError('This consumer does not yet support external periodic functionals.')
     if hasattr(mf,'_computed_temperature'):
         weights=np.full(len(mf.kpts),1/len(mf.kpts)) if mf.kweights is None else np.asarray(mf.kweights)
         if (mf.temperature!=mf._computed_temperature or mf.exxdiv!=mf._computed_exxdiv
                 or not np.array_equal(mf.kpts,mf._computed_kpoints)
                 or not np.array_equal(weights,mf._computed_kweights)):
             raise ValueError('Run kernel() again after changing temperature, k sampling or exchange correction.')
+    if getattr(mf,'time_reversal',False)!=getattr(mf,'_computed_time_reversal',False):
+        raise ValueError('Run kernel() again after changing time-reversal reduction.')
     if integer and (getattr(mf,'temperature',None) is not None
             or not np.allclose(mf.result.mo_occ_spin,np.rint(mf.result.mo_occ_spin),atol=1e-10,rtol=0)):
         raise NotImplementedError('This method currently requires zero-temperature integer occupations.')
     if equal_weights and not np.allclose(weights_for(mf.inputs),1/len(mf.kpts),atol=1e-12,rtol=0):
         raise NotImplementedError('This method currently requires equal k weights.')
+
+
+def _params_signature(params):
+    from ..scf.reference import _array_signature
+    return jax.tree.structure(params),tuple(_array_signature(x) for x in jax.tree.leaves(params))
 
 
 class PeriodicSCFResult(NamedTuple):
@@ -67,17 +80,18 @@ def gamma_energy_and_fock(density,inputs,*,xc='hf',exxdiv='ewald'):
 def run_gamma_scf(inputs,*,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
                   conv_tol=1e-10,conv_tol_density=1e-8,conv_tol_grad=1e-7,
                   damping=0.,level_shift=0.,init_density=None,
-                  differentiation=None,temperature=None,mesh=None):
+                  differentiation=None,temperature=None,mesh=None,functional=None,params=None,reduction=None):
     """Array-valued SCF with implicit/explicit derivatives on fixed FFT topology."""
     if inputs.overlap.shape[0]!=1:
         raise NotImplementedError('This solver currently accepts Gamma only.')
-    if temperature is not None:
-        if mesh is None:raise ValueError('Thermal Gamma SCF requires the explicit FFT mesh')
+    if temperature is not None or functional is not None or reduction is not None:
+        if mesh is None:raise ValueError('Thermal/external Gamma SCF requires the explicit FFT mesh')
         density=None if init_density is None else jnp.asarray(init_density)[:,None]
         return run_kpoint_scf(inputs,mesh=mesh,nelec=nelec,xc=xc,exxdiv=exxdiv,
             max_cycle=max_cycle,conv_tol=conv_tol,conv_tol_density=conv_tol_density,
             conv_tol_grad=conv_tol_grad,damping=damping,level_shift=level_shift,
-            init_density=density,differentiation=differentiation,temperature=temperature)
+            init_density=density,differentiation=differentiation,temperature=temperature,
+            functional=functional,params=params,reduction=reduction)
     if xc_type(xc) not in ('HF','LDA','GGA'):
         raise NotImplementedError('Periodic XC currently supports LDA/GGA/global hybrids.')
     n=inputs.overlap.shape[-1]
@@ -119,27 +133,45 @@ class _SCF:
     default_xc='hf'
     k_sampling=False
 
-    def __init__(self,cell,*,kpts=None,kweights=None,xc=None,exxdiv='ewald',temperature=None,**controls):
+    def __init__(self,cell,*,kpts=None,kweights=None,xc=None,exxdiv='ewald',temperature=None,
+                 functional=None,params=None,time_reversal=False,**controls):
         self.cell=cell if hasattr(cell,'topology') else cell.build()
         self.kpts=jnp.zeros((1,3)) if kpts is None else jnp.asarray(kpts).reshape(-1,3)
         if not self.k_sampling and (self.kpts.shape!=(1,3) or np.any(np.asarray(self.kpts)!=0)):
             raise NotImplementedError('First periodic SCF release supports Gamma only.')
         if not self.unrestricted and self.cell.spin!=0:
             raise ValueError('Restricted periodic SCF requires spin=0.')
-        self.xc=self.default_xc if xc is None else xc
+        if functional is not None and (self.default_xc=='hf' or xc is not None):
+            raise ValueError('Use a periodic KS class with one external Functional and no named xc baseline.')
+        if params is not None and functional is None:raise ValueError('params requires an external functional')
+        self.functional=functional;self.params=params
+        self.xc=(self.default_xc if xc is None else xc) if functional is None else None
         if self.default_xc=='hf' and self.xc!='hf':
             raise ValueError('Use a periodic KS class for a DFT functional.')
         self.kweights=kweights;self.temperature=temperature
+        self.time_reversal=bool(time_reversal);self.reduction=None
         self.exxdiv=exxdiv;self.controls=controls;self.inputs=None;self.result=None
 
     def kernel(self,dm0=None):
         if not jax.config.x64_enabled:raise ValueError('Periodic SCF requires JAX float64.')
+        if self.functional is not None and (self.default_xc=='hf' or self.xc is not None):
+            raise ValueError('Use a periodic KS class with one external Functional and no named xc baseline.')
+        if self.params is not None and self.functional is None:
+            raise ValueError('params requires an external functional')
         if self.default_xc=='hf' and self.xc!='hf':
             raise ValueError('Use a periodic KS class for a DFT functional.')
         self.inputs=build_inputs(self.cell,kpts=self.kpts,kweights=self.kweights)
+        self.reduction=(time_reversal_plan(np.asarray(self.kpts)@np.asarray(self.cell.lattice).T/(2*np.pi))
+                        if self.time_reversal else None)
+        if self.reduction is not None:
+            w=np.asarray(self.inputs.kweights)
+            if (not bool(self.reduction.consistent(self.inputs.overlap))
+                    or not bool(self.reduction.consistent(self.inputs.hcore))
+                    or not np.allclose(w,w[self.reduction.partners],atol=1e-12,rtol=0)):
+                raise ValueError('Inputs violate time reversal; use the full mesh or refine the FFT grid.')
         if self.temperature is not None and (not np.isfinite(self.temperature) or self.temperature<=0):
             raise ValueError('temperature is kBT in Eh and must be positive; use None for fixed occupations')
-        if (hybrid_coeff(self.xc)!=0 and self.exxdiv=='ewald'
+        if (self.functional is None and hybrid_coeff(self.xc)!=0 and self.exxdiv=='ewald'
                 and not np.allclose(self.inputs.kweights,1/len(self.kpts),atol=1e-12,rtol=0)):
             raise NotImplementedError('Ewald exchange correction requires equal k weights; use exxdiv=None for general weights')
         density=None
@@ -149,11 +181,14 @@ class _SCF:
         if self.kpts.shape==(1,3) and not np.any(np.asarray(self.kpts)):
             self.result=run_gamma_scf(self.inputs,nelec=self.cell.nelec,xc=self.xc,exxdiv=self.exxdiv,
                 init_density=None if density is None else density[:,0],temperature=self.temperature,
-                mesh=self.cell.mesh,**self.controls)
+                mesh=self.cell.mesh,functional=self.functional,params=self.params,reduction=self.reduction,**self.controls)
         else:
             self.result=run_kpoint_scf(self.inputs,mesh=self.cell.mesh,nelec=self.cell.nelec,
-                xc=self.xc,exxdiv=self.exxdiv,init_density=density,temperature=self.temperature,**self.controls)
+                xc=self.xc,exxdiv=self.exxdiv,init_density=density,temperature=self.temperature,
+                functional=self.functional,params=self.params,reduction=self.reduction,**self.controls)
         self._computed_xc=self.xc;self._computed_mesh=self.cell.mesh;self._cell_version=self.cell._version
+        self._computed_functional=self.functional;self._computed_params=_params_signature(self.params)
+        self._computed_time_reversal=self.time_reversal
         self.e_tot=self.result.total_energy
         self.e_free=self.result.free_energy;self.entropy=self.result.entropy
         self.chemical_potential=self.result.chemical_potential
@@ -168,7 +203,8 @@ class _SCF:
         return self.e_tot
 
     def run(self,**controls):
-        if 'temperature' in controls:self.temperature=controls.pop('temperature')
+        for name in ('temperature','functional','params','time_reversal'):
+            if name in controls:setattr(self,name,controls.pop(name))
         self.controls.update(controls);self.kernel();return self
 
     def get_bands(self,kpts,*,chunk_size=4):

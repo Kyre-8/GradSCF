@@ -101,11 +101,13 @@ class Functional:
 
     All learned parameters must be explicit in params. Pure JAX/Flax/Haiku
     callbacks are supported. The energy may couple grid points; the response
-    is the full density-matrix Hessian action, not a local projection. Real
-    density functionals only. Include all desired baseline XC in energy_fn;
-    no separate hybrid fraction or implicit baseline is added. TD response
-    uses the adiabatic Hessian of the real symmetric density functional.
-    Current-dependent/complex-orbital and hybrid response are not inferred.
+    is the full density-matrix Hessian action, not a local projection. Molecular
+    inputs use real symmetric densities; periodic inputs use complex Hermitian
+    densities and a real energy per cell. Include all desired baseline XC in
+    energy_fn; no separate hybrid fraction or implicit baseline is added.
+    Molecular TD response uses the adiabatic Hessian. Periodic external models
+    support static q=0 DFPT; their TD, band-query and hybrid operators are not
+    inferred from a scalar energy callback.
     """
     input_fn: Callable
     energy_fn: Callable
@@ -120,6 +122,9 @@ class Functional:
             raise ValueError('A separate exact-exchange fraction requires an explicit hybrid adapter.')
 
     def inputs_for_density(self, molecule, density):
+        if getattr(molecule,'kpoints',None) is not None:
+            from ..pbc.functional import density_inputs
+            return self.input_fn(density_inputs(molecule,density))
         dm = jnp.asarray(density)
         if jnp.iscomplexobj(dm):
             raise ValueError('Functional currently requires real density matrices.')
@@ -137,9 +142,12 @@ class Functional:
         return value
 
     def init_from_molecule(self, rng, molecule):
+        return self.init_for_density(rng,molecule,molecule.rdm1)
+
+    def init_for_density(self, rng, molecule, density):
         if self.init_fn is None:
             raise ValueError('Supply params or init_fn for the external functional.')
-        return self.init_fn(rng, self.inputs_for_density(molecule, molecule.rdm1))
+        return self.init_fn(rng, self.inputs_for_density(molecule, density))
 
     def energy_for_density(self, params, molecule, density):
         return self.apply(params, self.inputs_for_density(molecule, density))
@@ -154,11 +162,11 @@ class Functional:
 
     def potential(self, params, molecule, density):
         return xc_energy_and_potential_from_density(params, molecule=molecule, density=density,
-            xc_energy_fn=self.energy_for_density).vxc_matrix
+            xc_energy_fn=self.energy_for_density,density_weights=_density_weights(molecule,density)).vxc_matrix
 
     def kernel_action(self, params, molecule, density, tangent):
         return xc_kernel_action(params, molecule=molecule, density=density,
-            tangent=tangent, xc_energy_fn=self.energy_for_density)
+            tangent=tangent, xc_energy_fn=self.energy_for_density,density_weights=_density_weights(molecule,density))
 
     def bind_to_molecule_for_response(self, params, molecule):
         return _BoundFunctional(self, params)
@@ -176,3 +184,11 @@ class _BoundFunctional:
         if tangent.ndim == 2 and density.ndim == 3:
             density = density.sum(axis=0)
         return self.functional.kernel_action(self.params, molecule, density, tangent)
+
+
+def _density_weights(molecule,density):
+    if getattr(molecule,'kpoints',None) is not None:
+        from ..pbc.kpoints import weights_for
+        weights=weights_for(molecule)
+        return weights[0] if jnp.ndim(density)==2 else weights
+    return None

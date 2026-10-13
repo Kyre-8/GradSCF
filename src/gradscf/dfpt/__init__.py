@@ -3,5 +3,6 @@ from .core import Problem, Response
 from .ks import ks_problem
 from .ofdft import ofdft_problem
 from .api import DFPT
+from .periodic import periodic_problem
 
-__all__ = ['Problem', 'Response', 'ks_problem', 'ofdft_problem', 'DFPT']
+__all__ = ['Problem', 'Response', 'ks_problem', 'ofdft_problem', 'periodic_problem', 'DFPT']

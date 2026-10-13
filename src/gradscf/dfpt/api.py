@@ -51,71 +51,11 @@ def _molecular(mf, tolerance):
 
 def _periodic(mf, tolerance):
     from ..pbc.scf import validate_reference
-    from ..pbc.kpoints import weights_for
-    from ..pbc._kpoint import energy_and_fock
-    validate_reference(mf,integer=False,equal_weights=False)
-    result, inputs = mf.result, mf.inputs
-    inputs = inputs._replace(hcore=inputs.hcore.astype(jnp.complex128))
-    if getattr(mf,'temperature',None) is not None:
-        return _thermal_periodic(mf, inputs, tolerance)
-    coeff = result.mo_coeff_spin.astype(jnp.complex128)
-    mesh, xc, exxdiv = tuple(mf.cell.mesh), mf.xc, mf.exxdiv
-    nk, n = coeff.shape[1], coeff.shape[-1]
-    shape = (2, nk, n, n)
-    def evaluate(d, a):
-        e, f = energy_and_fock(d.reshape(shape), a, mesh=mesh, xc=xc, exxdiv=exxdiv)
-        return e, f.reshape(2*nk, n, n)
-    problem = ks_problem(coeff.reshape(2*nk, n, n),
-                          tuple(no for no in mf.cell.nelec for _ in range(nk)), inputs,
-                          lambda d,a:evaluate(d,a)[1], lambda d,a:evaluate(d,a)[0],
-                          overlap=lambda a:jnp.tile(a.overlap, (2,1,1)),
-                          converged=result.converged, tolerance=tolerance)
-    observe = problem.quantities
-    def quantities(x, a):
-        values = observe(x, a)
-        return dict(values, density=values['density'].reshape(shape),
-                    electron_number=jnp.sum(values['electron_number'].reshape(2,nk)*weights_for(a)))
-    def potential_tangent(value):
-        value = jnp.asarray(value, dtype=inputs.hcore.dtype)
-        if value.shape != inputs.hcore.shape:
-            raise ValueError('Periodic potential perturbation must have shape (nk,nao,nao)')
-        value *= jnp.where(jnp.max(jnp.abs(value-value.conj().swapaxes(-1,-2))) <= 1e-10, 1., jnp.nan)
-        return jax.tree.map(jnp.zeros_like, inputs)._replace(hcore=value)
-    return replace(problem, quantities=quantities, potential_tangent=potential_tangent,
-                    potential_path=lambda tangent,t:inputs._replace(hcore=inputs.hcore+t*tangent.hcore))
-
-
-def _thermal_periodic(mf, inputs, tolerance):
-    from .core import Problem
-    from .ks import _Hermitian
-    from ..pbc._kpoint import energy_and_fock
-    from ..pbc.occupations import fermi_density, density_entropy
-    from ..pbc.kpoints import weights_for
-    shape=mf.result.density_spin.shape
-    chart=_Hermitian(shape[-1],True)
-    mesh,xc,exxdiv=tuple(mf.cell.mesh),mf.xc,mf.exxdiv
-    args=(inputs,jnp.asarray(mf.temperature),jnp.asarray(mf.cell.nelec,dtype=float))
-    pack=lambda d:jnp.concatenate([chart.pack(m) for m in d.reshape(-1,shape[-1],shape[-1])])
-    unpack=lambda x:jnp.stack([chart.unpack(v) for v in x.reshape(-1,chart.size)]).reshape(shape)
-    def residual(x,a):
-        d=unpack(x)
-        f=energy_and_fock(d,a[0],mesh=mesh,xc=xc,exxdiv=exxdiv)[1]
-        target,_=fermi_density(f,a[0].overlap,a[2],a[1],weights_for(a[0]))
-        return pack(d-target)
-    def quantities(x,a):
-        d=unpack(x)
-        e=energy_and_fock(d,a[0],mesh=mesh,xc=xc,exxdiv=exxdiv)[0]
-        entropy=density_entropy(d,a[0].overlap,weights_for(a[0]))
-        count=jnp.einsum('k,skij,kji->',weights_for(a[0]),d,a[0].overlap).real
-        return dict(density=d,energy=e,free_energy=e-a[1]*entropy,entropy=entropy,electron_number=count)
-    def potential_tangent(value):
-        value=jnp.asarray(value,dtype=inputs.hcore.dtype)
-        if value.shape!=inputs.hcore.shape:raise ValueError('Periodic potential must have shape (nk,nao,nao)')
-        value*=jnp.where(jnp.max(jnp.abs(value-value.conj().swapaxes(-1,-2)))<1e-10,1.,jnp.nan)
-        zero=jax.tree.map(jnp.zeros_like,args)
-        return (zero[0]._replace(hcore=value),zero[1],zero[2])
-    return Problem(residual,pack(mf.result.density_spin),args,quantities,
-                   mf.result.converged,tolerance,potential_tangent,series_supported=False)
+    from .periodic import periodic_problem
+    validate_reference(mf,integer=False,equal_weights=False,external=True)
+    return periodic_problem(mf.inputs,mf.result,mesh=tuple(mf.cell.mesh),nelec=mf.cell.nelec,
+        xc=mf.xc,exxdiv=mf.exxdiv,functional=getattr(mf,"functional",None),
+        params=getattr(mf,"params",None),temperature=getattr(mf,"temperature",None),tolerance=tolerance)
 
 
 def DFPT(source, *, functional=None, params=None, converged=True, q=None, tolerance=1e-7):
@@ -123,8 +63,9 @@ def DFPT(source, *, functional=None, params=None, converged=True, q=None, tolera
 
     Static q=0 response. Periodic sources may use fixed or Fermi occupations.
     Rebuild after changing the source.
-    Array/custom-functional users can construct ks_problem/ofdft_problem directly.
-    For an external dft.Functional, supply functional and params with the state
+    Array users can construct ks_problem, periodic_problem or ofdft_problem.
+    Periodic facades retain their own functional and params; use DFPT(mf).
+    For a molecular external dft.Functional, supply functional and params with the state
     returned by DifferentiableSCF; pass its convergence flag as converged.
     Construct inside the differentiated function to retain reference relaxation.
     """
@@ -132,6 +73,9 @@ def DFPT(source, *, functional=None, params=None, converged=True, q=None, tolera
     if q is not None and (np.shape(q)!=(3,) or np.any(np.asarray(q)!=0)):
         raise NotImplementedError('DFPT currently supports q=0 only')
     if functional is not None:
+        if hasattr(source,'cell'):
+            raise ValueError('Set the periodic Functional and params in SCF, then use DFPT(mf); '
+                             'use periodic_problem for array-valued parameter differentiation.')
         from .functional import functional_problem
         return functional_problem(source, functional, params, converged=converged, tolerance=tolerance)
     if params is not None:

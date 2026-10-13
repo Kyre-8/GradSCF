@@ -68,8 +68,14 @@ Response supervision requires `explicit` or `implicit`; fixed-density energy,
 potential, and kernel training remain available. A nonstationary fixed density
 is not a valid screened DFPT reference. Failed SCF/response calculations produce
 nonfinite loss and reject the update through the existing optimizer guard.
-This external-model adapter currently covers real molecular energy functionals,
-not periodic neural functionals or separately supplied hybrid exchange.
+This Trainer adapter covers real molecular energy functionals, without a
+separately supplied hybrid exchange. Periodic external models use the shared
+`dft.Functional` with periodic SCF and the array-level `periodic_problem`
+factory, or `DFPT(mf)` after `pbc.dft.KRKS(..., functional=..., params=...).run()`.
+The array factory preserves model-parameter and relaxed-reference AD; construct
+it inside the loss when training response observables. See
+`examples/training/periodic_xc.py`. The molecular Trainer sample interface has
+not yet been extended to periodic references.
 
 ## Stationary response and Taylor recurrence
 

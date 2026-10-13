@@ -20,6 +20,21 @@ class PeriodicInputs(NamedTuple):
     kpoints: object
     gvectors: object
     kweights: object = None
+    lattice: object = None
+    atom_coords: object = None
+    atom_charges: object = None
+    ionic_charges: object = None
+    ao_laplacian: object = None
+
+
+def _context(cell,parameters,lattice,ft,gv,kpts):
+    volume=jnp.linalg.det(lattice);ngrid=int(np.prod(cell.mesh))
+    q=gv[None]+kpts[:,None]
+    values=-jnp.sum(q*q,axis=-1)[...,None]*ft*ngrid/volume
+    laplacian=jnp.fft.ifftn(values.reshape((len(kpts),)+tuple(cell.mesh)+(-1,)),axes=(1,2,3)).reshape(ft.shape)
+    return dict(lattice=lattice,atom_coords=parameters.nuclear_coords,
+                atom_charges=jnp.asarray(cell.topology.nuclear_charges,dtype=lattice.dtype),
+                ionic_charges=jnp.asarray(cell.charges,dtype=lattice.dtype),ao_laplacian=laplacian)
 
 
 def build_inputs(cell,*,parameters=None,lattice=None,kpts=None,kweights=None):
@@ -52,7 +67,8 @@ def build_inputs(cell,*,parameters=None,lattice=None,kpts=None,kweights=None):
     enuc=ewald_energy(lattice,parameters.nuclear_coords,cell.charges,precision=cell.precision,reference_lattice=cell.lattice)
     mad=-2*ewald_energy(lattice,jnp.zeros((1,3)),jnp.ones(1),precision=cell.precision,reference_lattice=cell.lattice)
     return PeriodicInputs(overlap[None],(kinetic+local+nonlocal_pp)[None],kinetic[None],ao,coords,
-        jnp.full(ngrid,volume/ngrid),potential,enuc,mad,kpts,gv,jnp.asarray(w))
+        jnp.full(ngrid,volume/ngrid),potential,enuc,mad,kpts,gv,jnp.asarray(w),
+        **_context(cell,parameters,lattice,ft,gv,kpts))
 
 
 def get_jk(inputs,density_spin,*,exxdiv='ewald',with_k=True):
@@ -92,7 +108,8 @@ def _assemble_kpoints(cell,parameters,lattice,ao,ft,gv,coords,kpts,kmesh,*,elect
     else:
         enuc,mad=electrostatic
     return PeriodicInputs(jnp.stack(overlaps),jnp.stack(cores),jnp.stack(kinetics),ao,coords,
-        jnp.full(ngrid,volume/ngrid),None,enuc,mad,kpts,gv)
+        jnp.full(ngrid,volume/ngrid),None,enuc,mad,kpts,gv,
+        **_context(cell,parameters,lattice,ft,gv,kpts))
 
 
 def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True):

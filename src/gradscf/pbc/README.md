@@ -34,6 +34,19 @@ sums, not an irreducible-SCF backend or an automatic space-group finder. Users
 must supply symmetries valid for their Hamiltonian. Symmetry matching is discrete
 host preprocessing, not part of the AD graph.
 
+`KRKS(..., time_reversal=True)` (also `KRHF/KUHF/KUKS`) uses one member of
+each k/-k pair for SCF-iteration diagonalization and expands the density by
+complex conjugation. Input overlap/core matrices and pair weights must obey
+time reversal; external XC potentials are checked in the iteration as well.
+The converged state is certified against the original full-mesh fixed point.
+Implicit backward retains the **full** residual and therefore includes
+time-reversal-breaking perturbations. Explicit derivatives of a reduced
+iteration require perturbations that preserve the declared symmetry.
+Integrals, FFT J/K contractions, storage and final reported MO diagonalization
+still use the full mesh. This is not general space-group/AO reduction or a
+claim of an end-to-end speedup. A finite FFT grid that violates the matrix
+symmetry checks must be refined, or the full-mesh path used.
+
 `pbc.momentum.momentum_transfer_table(kpts, qpts=...)` is shared by periodic
 response/correlation and GW. Coordinates are fractional reciprocal coordinates;
 the table satisfies `k[j] = k[i] - q` modulo reciprocal lattice vectors. Shifted
@@ -111,6 +124,42 @@ the appropriate thermodynamic potential.
 
 ## Response and consumer boundaries
 
+### External XC functionals
+
+The same `dft.Functional(input_fn, energy_fn)` used for molecules accepts
+periodic SCF inputs. `input_fn` receives the **current** Hermitian density
+`(2,nk,nao,nao)`, real spin densities, density gradients, kinetic-energy density
+and density Laplacian. It can also access AO values/covariant derivatives,
+overlap, grid coordinates/weights, k points/weights, lattice and atomic
+coordinates. `atom_charges` are full nuclear charges; `ionic_charges` are GTH
+valence charges. Grid and k-point weights are different quantities.
+`energy_fn(params, features)` returns a real scalar XC energy per cell in Eh;
+the user supplies the whole XC model, including any desired baseline.
+
+```python
+mf = dft.KRKS(cell, kpts=kpts, functional=functional, params=params,
+              temperature=.01, time_reversal=True).run()
+response = dfpt.DFPT(mf).response(potential=v1)
+mf.run(params=new_params)  # Recompute before constructing a new response.
+```
+
+Here `dft` is `gradscf.pbc.dft`; construct `functional` using
+`gradscf.dft.Functional`. Potential/kernel evaluation uses the shared derivative
+module. For complex density blocks, its convention is
+`dE = Re sum_sk w_k Tr(V_sk dD_sk)`: conjugate the JAX gradient and divide by
+k weights once. The kernel is the JVP of this physical potential, with no
+locality approximation or four-index Hessian allocation.
+
+For parameter training, use `pbc.scf.run_kpoint_scf(..., functional=..., params=...)`
+and `dfpt.periodic_problem(inputs, result, ..., functional=..., params=...)`
+inside the differentiated function. Model parameters are explicit leaves of
+the SCF/response residual. Fixed-density, explicit and implicit energy training
+are demonstrated in `examples/training/periodic_xc.py`; the molecular `Trainer`
+facade is not yet a periodic sample adapter. Rebuild response snapshots after
+changing parameters. Response-loss parameter gradients are tested for
+nondegenerate thermal references; this does not extend the higher-derivative
+guarantees at degeneracy.
+
 `dfpt.DFPT(mf).response(potential=...)` supports static q=0 thermal response using
 the Fermi-density residual, including changes of occupations and chemical
 potentials. It returns density, internal energy, free energy, entropy, and
@@ -122,6 +171,9 @@ equal-weight consumers. They reject thermal/nonuniform references rather than
 silently replacing their occupations. Optical postprocessing, bands, DFPT, and
 GW share reference freshness checks, including temperature, k points, weights,
 and exchange correction.
+External periodic models are currently supported by SCF and q=0 DFPT, but not
+by the TD/GW, optical or band-query consumers: an arbitrary energy model does
+not specify their missing off-grid/dynamical operators.
 
 ## Validation and remaining steps
 
@@ -137,6 +189,6 @@ free-energy AD and q=0 response. Its coarse sampling is an API demonstration,
 not a material convergence benchmark.
 
 The next foundation work remains physical space-group/AO transformations,
-irreducible SCF evaluation, further XC/model adapters, and the force/stress
+irreducible J/K evaluation, periodic Trainer sample adapters, and the force/stress
 interface. Finite-q phonons, metallic TD/GW/BSE, other smearing schemes, SOC and
 macroscopic Berry-phase fields are not supplied by this increment.

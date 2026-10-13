@@ -46,6 +46,46 @@ class KPointReduction(NamedTuple):
     weights: object
 
 
+class TimeReversalPlan(NamedTuple):
+    """Representative k points plus conjugation maps for scalar collinear AOs."""
+    representatives: object
+    full_to_ir: object
+    conjugate: object
+    partners: object
+
+    def expand(self, matrices):
+        values=jnp.take(matrices,self.full_to_ir,axis=-3)
+        mask=jnp.asarray(self.conjugate).reshape((1,)*(values.ndim-3)+(-1,1,1))
+        return jnp.where(mask,values.conj(),values)
+
+    def reduce_weights(self, weights):
+        return jnp.zeros(len(self.representatives),dtype=weights.dtype).at[self.full_to_ir].add(weights)
+
+    def consistent(self, matrices, tolerance=1e-8):
+        # Self-paired Gamma/TRIM points must also equal their own conjugate.
+        restored=jnp.take(matrices,self.partners,axis=-3).conj()
+        return jnp.max(jnp.abs(matrices-restored))<=tolerance
+
+
+def time_reversal_plan(kpoints, *, tolerance=1e-8):
+    """Pair fractional k and -k modulo reciprocal vectors; no spatial rotations.
+
+    AO matrices use the lattice-translation Bloch convention, for which paired
+    matrices are complex conjugates. The SCF additionally verifies this on
+    overlap and Fock matrices: finite FFT cutoffs need not preserve it exactly.
+    """
+    from .momentum import wrap_to_kmesh
+    k=wrap_to_kmesh(kpoints)
+    reduced=symmetry_reduce(k,time_reversal=True,tolerance=tolerance)
+    partners=[]
+    for point in k:
+        found=np.flatnonzero(np.max(np.abs(wrap_to_kmesh(k+point)),axis=1)<tolerance)
+        if len(found)!=1:raise ValueError('Time reversal requires a unique partner for every k point')
+        partners.append(found[0])
+    conjugate=np.arange(len(k))!=reduced.representatives[reduced.full_to_ir]
+    return TimeReversalPlan(reduced.representatives,reduced.full_to_ir,conjugate,np.asarray(partners))
+
+
 def symmetry_reduce(kpoints, *, rotations=None, time_reversal=True, tolerance=1e-8):
     """Orbit metadata for fractional k points under supplied reciprocal rotations.
 
