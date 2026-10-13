@@ -85,13 +85,19 @@ def test_inconsistent_thermal_reference_is_rejected(mu):
     assert not valid
 
 
-@pytest.mark.parametrize('xc,temperature',[('hf',None),('hf',.15),('pbe',None),('pbe',.15)])
-def test_q_response_matches_supercell_finite_difference(xc,temperature,monkeypatch):
+@pytest.mark.parametrize('xc,temperature,handwritten',[
+    ('hf',None,False),('hf',.15,False),('pbe',None,True),('pbe',.15,True),
+    pytest.param('pbe',None,False,id='pbe-runtime-zero'),
+    pytest.param('pbe',.15,False,id='pbe-runtime-thermal'),
+])
+def test_q_response_matches_supercell_finite_difference(xc,temperature,handwritten,monkeypatch):
     from gradscf import dfpt
     from gradscf.pbc.momentum import momentum_transfer
     from gradscf.pbc.response import project_q_potential
     from gradscf.pbc import dft as pdft,_kpoint
-    if xc=='pbe':
+    if xc=='pbe' and not handwritten:
+        pytest.importorskip('jax_xc',reason='Production XC backend required')
+    if handwritten:
         from test_pbe import pbe_energy_density
         monkeypatch.setattr(_kpoint,'_point_unrestricted_xc_value_and_grad_kernel',
             lambda xc,kind:jax.vmap(jax.value_and_grad(lambda v:pbe_energy_density(v[:2],v[2:].reshape(2,3)))))
@@ -154,21 +160,24 @@ def test_shifted_mesh_q_conjugacy_and_self_inverse_channel(nk):
     if nk==2:np.testing.assert_allclose(positive.density,adjoint(positive.density),atol=1e-7,rtol=0)
 
 
-def test_q_response_loss_gradient_through_relaxed_reference():
+@pytest.mark.parametrize('xc',['hf',pytest.param('pbe',id='pbe-runtime-grad')])
+def test_q_response_loss_gradient_through_relaxed_reference(xc):
     from gradscf import dfpt
     from gradscf.pbc.momentum import momentum_transfer
     from gradscf.scf import SCFDifferentiationConfig
     from gradscf.solvers import LinearSolverConfig
+    if xc=='pbe':
+        pytest.importorskip('jax_xc',reason='Production XC response derivatives required')
     cell=gto.M(atom='H .2 .3 .4; H 1.6 .6 .8',a=np.eye(3)*6,unit='Bohr',mesh=(9,)*3)
     k=cell.make_kpts((3,1,1));data=build_inputs(cell,kpts=k)
     transfer=momentum_transfer(np.asarray(k)@np.asarray(cell.lattice).T/(2*np.pi),[1/3,0,0])
     perturbation=jnp.broadcast_to(jnp.array([[.1,.03],[.03,-.2]]),data.hcore.shape)
     def response(scale,method='gmres'):
         inputs=data._replace(hcore=data.hcore+scale*perturbation)
-        result=scf.run_kpoint_scf(inputs,mesh=cell.mesh,nelec=cell.nelec,temperature=.12,
+        result=scf.run_kpoint_scf(inputs,mesh=cell.mesh,nelec=cell.nelec,xc=xc,temperature=.12,
             conv_tol=1e-12,conv_tol_density=1e-11,conv_tol_grad=1e-10,
             differentiation=SCFDifferentiationConfig(mode='implicit',tolerance=1e-11,max_iter=80))
-        problem=dfpt.finite_q_problem(inputs,result,transfer,mesh=cell.mesh,temperature=.12)
+        problem=dfpt.finite_q_problem(inputs,result,transfer,mesh=cell.mesh,xc=xc,temperature=.12)
         return problem.response(potential=perturbation,config=LinearSolverConfig(method=method,rtol=1e-11,atol=1e-12))
     iterative=response(.2);direct=response(.2,'direct')
     assert iterative.converged and direct.converged
@@ -177,6 +186,7 @@ def test_q_response_loss_gradient_through_relaxed_reference():
     derivative=jax.jit(jax.grad(loss))(.2)
     fd=(loss(.20001)-loss(.19999))/2e-5
     assert abs(derivative)>1e-6
+    print(xc,'response-loss gradient:',float(derivative),'finite difference:',float(fd))
     np.testing.assert_allclose(derivative,fd,atol=1e-7,rtol=2e-5)
 
 

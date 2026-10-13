@@ -139,9 +139,63 @@ and 1e-10 in the gradient criterion. Tests use CPU JAX float64.
 | Handwritten PBE | 0 | 2.61e-10 |
 | Handwritten PBE | 0.15 | 2.17e-8 |
 
-The PBE oracle uses the independent JAX formula in `tests/dfpt/test_pbe.py`;
-it does not establish coverage of an unavailable jax-xc/libxc higher-derivative
-backend. Additional tests cover q=0 kernel agreement, shifted meshes, q/-q
+The CPU PBE oracle above uses the independent JAX formula in
+`tests/dfpt/test_pbe.py`; production-backend validation is recorded separately
+below. Additional tests cover q=0 kernel agreement, shifted meshes, q/-q
 conjugacy, self-inverse q, a filled spin channel in unrestricted HF, dense/GMRES
 agreement, and response-loss gradients through a nondegenerate relaxed HF
 reference. See `examples/dfpt/04_finite_q_response.py` for a runnable example.
+
+## Production XC and CUDA validation (2026-10-13)
+
+An isolated snapshot of production commit `1989eeb` was tested on `jy_gpu_1`
+(host c20), using its `jax_scf` environment. The additional tests exercise the
+actual XC backend without replacing the pointwise kernel. Environment:
+Python 3.11.15, JAX/JAXlib 0.10.0, jax-xc 0.0.9, PySCF 2.13.0, CPU float64
+and CUDA float64. GPU checks used one NVIDIA RTX 5090 (physical GPU 7, selected
+by UUID). CPU comparisons used Intel Xeon Platinum 8457C with two OpenMP/BLAS
+threads. The CUDA eigensolver and FFT-gradient probe passed before testing.
+
+| Production PBE check | Measured result |
+|---|---:|
+| Zero-T finite-q vs supercell, maximum AO response error | 2.64122e-10 |
+| kBT=0.15 Eh finite-q vs supercell, maximum AO response error | 2.17385e-8 |
+| Relaxed-reference response-loss AD gradient | 3.463457417934745 |
+| Same gradient, centered finite difference | 3.4634574188174834 |
+| Gradient absolute difference | 8.83e-10 |
+
+The response-loss test perturbs hcore by a scalar times a fixed Hermitian AO
+matrix, reconverges at kBT=0.12 Eh, and differentiates the squared norm of the
+screened finite-q density response. It checks the runtime XC kernel's dependence
+on the relaxed density, including the higher XC derivatives entering backward.
+This is a nondegenerate HF/PBE validation, not a guarantee for every functional
+or degenerate MO-frame derivative.
+
+Execution records are deliberately separated:
+
+- The two production-PBE supercell tests completed successfully on CUDA:
+  **2 passed**, 204.90 seconds.
+- A subsequent CUDA batch individually passed the remaining **18 finite-q**
+  checks and **4 existing periodic DFPT** checks. Its 900-second watchdog then
+  expired while starting an additional ground-state DFT/PySCF comparison.
+  The batch exit status was 124; it was not a clean completion of that entire
+  selection. All 20 finite-q checks and all 4 periodic DFPT checks had reported
+  PASSED across these two GPU invocations.
+- The remaining ground-state comparisons were rerun as a separate CPU batch:
+  **14 passed**, 74.43 seconds, covering SVWN/PBE/PBE0, restricted/unrestricted
+  Gamma and k-point calculations, and spin-polarized PBE. Their energy tolerance
+  against PySCF is 1e-6 Eh.
+
+To reproduce the completed scope, use `PYTHONPATH=src JAX_ENABLE_X64=1`
+and separate the response and ground-state selections:
+
+```sh
+JAX_PLATFORMS=cuda python -m pytest -vv -s tests/dfpt/test_finite_q.py tests/dfpt/test_periodic.py
+JAX_PLATFORMS=cpu python -m pytest -vv -s tests/pbc/test_dft.py
+```
+
+The recorded GPU invocations were split as described above; the second also
+selected the ground-state comparison file, which explains its timeout and the
+separate CPU rerun. Timings include initial JIT compilation and
+are not warmed-throughput benchmarks. New production-backend cases skip when
+`jax_xc` is unavailable; the original handwritten PBE tests remain independent.
