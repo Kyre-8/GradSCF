@@ -73,6 +73,8 @@ class MolecularTrainingDatum:
     target_orbital_energies: Array | None = None
     target_orbital_occupations: Array | None = None
     weight: float = 1.0
+    response_potential: Array | None = None
+    target_density_response: Array | None = None
 
     def __post_init__(self) -> None:
         _require_scalar("target_e0_total_h", self.target_e0_total_h)
@@ -92,6 +94,13 @@ class MolecularTrainingDatum:
             )
         if float(self.weight) < 0.0:
             raise ValueError("weight must be non-negative.")
+        if (self.response_potential is None) != (self.target_density_response is None):
+            raise ValueError('Response supervision requires both potential and density response.')
+        if self.response_potential is not None:
+            shape = self.molecule.h1e.shape
+            for value in (self.response_potential, self.target_density_response):
+                if jnp.shape(value) != shape or jnp.iscomplexobj(value):
+                    raise ValueError('Response potential and target must be real AO matrices.')
 
 
 @dataclass(frozen=True)
@@ -167,6 +176,8 @@ class MolecularTrainingConfig:
     scf_implicit_diff_max_iter: int = 6
     scf_implicit_diff_tolerance: float = 1e-6
     scf_implicit_diff_regularization: float = 0.0
+    response_mse_weight: float = 0.0
+    response_mae_weight: float = 0.0
 
     def requires_scf_convergence(self, functional: Any) -> bool:
         if self.scf_require_converged is not None:
@@ -174,6 +185,8 @@ class MolecularTrainingConfig:
         return bool(getattr(functional, "require_converged_scf", False))
 
     def __post_init__(self) -> None:
+        if self.mode != 'self_consistent' and (self.response_mse_weight or self.response_mae_weight):
+            raise ValueError('DFPT response supervision requires self-consistent training.')
         for field in fields(self):
             if field.name.endswith("_weight") and float(getattr(self, field.name)) < 0.0:
                 raise ValueError(f"{field.name} must be non-negative.")
@@ -204,17 +217,21 @@ class MolecularTrainingConfig:
 def Sample(molecule, *, energy=None, density=None, s1_energy=None,
            excitation_energies=None, oscillator_strengths=None,
            orbital_energies=None, orbital_occupations=None, spectrum=None,
-           xc_potential=None, xc_kernel=None, weight=1.):
+           xc_potential=None, xc_kernel=None, response=None, weight=1.):
     """Construct a training sample using the existing validated PyTree record.
 
     The source is a solved RKS/UKS object or an explicit AO/grid state.
     Energies are Hartree. Density is sampled on the prepared state's grid;
     spectrum is (grid_in_eV, values). Conversion is eager, without another SCF
     calculation or a parallel sample type.
+    response=(potential_derivative, density_derivative) uses two real AO
+    matrices at fixed geometry, with a spin-summed density response. The loss
+    depends on AO basis and perturbation units; no hidden normalization is used.
     """
     from gradscf.scf.reference import as_reference
     molecule = as_reference(molecule)
     grid, curve = (None, None) if spectrum is None else spectrum
+    potential, density_response = (None, None) if response is None else response
     return MolecularTrainingDatum(
         molecule=molecule, target_e0_total_h=energy, target_grid_density=density,
         target_s1_total_h=s1_energy, target_excitation_gaps_h=excitation_energies,
@@ -222,4 +239,5 @@ def Sample(molecule, *, energy=None, density=None, s1_energy=None,
         target_orbital_energies=orbital_energies,
         target_orbital_occupations=orbital_occupations,
         target_spectrum_grid_ev=grid, target_spectrum_curve=curve,
-        target_xc_potential=xc_potential, target_xc_kernel=xc_kernel, weight=weight)
+        target_xc_potential=xc_potential, target_xc_kernel=xc_kernel, weight=weight,
+        response_potential=potential, target_density_response=density_response)

@@ -23,6 +23,7 @@ _NAMESPACE_EXPORTS = {
     "gto",
     "scf",
     "dft",
+    "dfpt",
     "ofdft",
     "tdscf",
     "tddft",

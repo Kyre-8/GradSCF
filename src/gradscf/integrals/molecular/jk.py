@@ -221,9 +221,12 @@ def build_j_from_eri_pair_matrix(eri_pair_matrix: Array, density: Array) -> Arra
     rows, cols, _, multiplicity = _metadata_arrays(nao, density.dtype)
     density_pair = density[rows, cols] * multiplicity
     j_pair = pair @ density_pair
+    # Each triangle has unique indices. Halve the diagonal before adding both
+    # triangles: equivalent to assignment, with a Taylor-compatible primitive.
+    values = j_pair*jnp.where(rows==cols, .5, 1.)
     j_mat = jnp.zeros_like(density)
-    j_mat = j_mat.at[rows, cols].set(j_pair)
-    j_mat = j_mat.at[cols, rows].set(j_pair)
+    j_mat = j_mat.at[rows, cols].add(values)
+    j_mat = j_mat.at[cols, rows].add(values)
     return 0.5 * (j_mat + j_mat.T)
 
 @jax.jit

@@ -63,10 +63,35 @@ adding a label does not create an unsupported potential/response definition.
 
 Loss is a mapping from target to metric weights. Supported target names are
 `energy`, `density`, `orbital_energy`, `s1_energy`, `excitation`,
-`oscillator_strength`, `spectrum`, `xc_potential`, and `xc_kernel`.
-`energy`, `orbital_energy`, `s1_energy`, `excitation` and `oscillator_strength`
+`oscillator_strength`, `spectrum`, `xc_potential`, `xc_kernel`, and `response`.
+`energy`, `orbital_energy`, `s1_energy`, `excitation`, `oscillator_strength`, and `response`
 support MSE and MAE; the other targets support MSE. Unknown keys fail before
 training. Default loss is `{'energy': {'mse': 1.0}}`.
+
+For a real molecular `dft.Functional`, train the static screened density response:
+
+```python
+sample = training.Sample(reference, response=(potential_derivative, density_derivative))
+trainer.mode = 'implicit'  # or 'explicit'
+trainer.loss = {'response': {'mse': 1., 'mae': .1}}
+trainer.run(sample, steps=5)
+```
+
+Both labels are real `(nao,nao)` AO matrices; the density derivative is spin-summed.
+The perturbation is `h(t)=h(0)+t*potential_derivative` at fixed geometry. MSE/MAE
+are elementwise AO matrix averages, with no basis or perturbation normalization.
+Keep the AO basis, ordering, units, and perturbation convention consistent with
+the labels. Different directions can be supplied as separate samples.
+
+This loss invokes `dfpt.DFPT` on the already relaxed state and retains its model
+parameter dependence. It includes the derivative of the screened response as
+well as the derivative of the SCF reference. It is distinct from `xc_kernel`,
+which supervises an XC kernel rather than the self-consistent density response.
+DFPT requires a stationary reference, so response loss rejects `fixed_density`.
+All existing three-mode objectives retain their previous behavior. History adds
+`response_mse`, `response_mae`, and `response_converged`. An invalid reference or
+failed response solve rejects the update without advancing Adam state.
+See `examples/training/dfpt_response.py` for a four-layer MLP example.
 
 The new facade rejects density/orbital-energy supervision in fixed-density
 mode, since those objectives otherwise request SCF through the low-level
