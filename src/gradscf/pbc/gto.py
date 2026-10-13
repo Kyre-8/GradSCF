@@ -1,17 +1,12 @@
 """Three-dimensional neutral periodic Gaussian cells, independent of PySCF."""
 from dataclasses import dataclass
-from functools import lru_cache
-import json
-from importlib.resources import files
 import numpy as np
 import jax.numpy as jnp
 from ..data.molecule import parse_molecule_spec, ANGSTROM_TO_BOHR
 from .kpoints import reciprocal_vectors, uniform_kpoints
-
-
-@lru_cache(maxsize=1)
-def _gth_data():
-    return json.loads(files('gradscf.integrals.periodic').joinpath('gth_data.json').read_text())
+from ..integrals.periodic.library import (
+    basis_names, basis_elements, load_basis, load_pseudo, basis_valence, is_periodic_basis,
+)
 
 
 @dataclass
@@ -50,19 +45,22 @@ class Cell:
         distances=np.linalg.norm(delta@np.asarray(self.lattice),axis=-1)
         if np.any(distances[np.triu_indices(len(fractional),1)]<1e-8):
             raise ValueError('Atoms coincide modulo a lattice translation.')
-        data=_gth_data()
         self.basis_spec={}
         self.pseudopotentials=[]
         for symbol in self.spec.symbols:
             value=self.basis.get(symbol) if isinstance(self.basis,dict) else self.basis
-            if isinstance(value,str) and value.lower() in data['basis']:
-                value=data['basis'][value.lower()].get(symbol)
-                if not value: raise ValueError(f'No bundled {self.basis} basis for {symbol}.')
+            valence=None
+            if isinstance(value,str) and is_periodic_basis(value):
+                valence=basis_valence(value,symbol)
+                value=load_basis(value,symbol)
             self.basis_spec[symbol]=value
             pp=self.pseudo.get(symbol) if isinstance(self.pseudo,dict) else self.pseudo
             if isinstance(pp,str):
-                pp=data['pseudo'].get(pp.lower(),{}).get(symbol)
+                pp=load_pseudo(pp,symbol)
             if not pp: raise ValueError(f'Provide supported GTH parameters for {symbol}.')
+            if valence is not None and valence!=sum(pp[0]):
+                raise ValueError(f'{symbol} basis expects valence q{valence}, but the pseudopotential '
+                                 f'has q{sum(pp[0])}; select a matching -qN basis/potential pair.')
             if pp[1]<=0 or len(pp[3])>4 or len(pp[5:])!=pp[4]:
                 raise ValueError('Invalid GTH local potential or projector channels.')
             for radius,count,coupling in pp[5:]:
