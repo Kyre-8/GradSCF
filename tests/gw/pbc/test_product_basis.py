@@ -4,7 +4,7 @@ import numpy as np
 import jax.numpy as jnp
 
 from gradscf.integrals.periodic.fft import get_jk
-from gradscf.gw.pbc.momentum import momentum_transfer_table, wrap_to_kmesh
+from gradscf.pbc.momentum import momentum_transfer_table, wrap_to_kmesh
 from gradscf.gw.pbc.product_basis import gamma_product_factors
 from gradscf.pbc import gto, scf
 

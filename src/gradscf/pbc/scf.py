@@ -10,6 +10,27 @@ from ..scf.rks import _vxc_matrix_from_grid_potential
 from ..scf.energy import XCContribution,unrestricted_energy,unrestricted_fock
 from ..scf.autodiff import SCFDifferentiationConfig,attach_scf_backward
 from ..dft.libxc_jax.jax_libxc import hybrid_coeff,xc_type
+from .kpoints import weights_for
+from ._kpoint import run_kpoint_scf
+
+
+def validate_reference(mf, *, integer=True, equal_weights=True):
+    """Check freshness and the reference domain required by a consumer."""
+    if mf.result is None or not mf.converged:
+        raise ValueError('Periodic response requires a converged SCF reference.')
+    if (mf.xc!=mf._computed_xc or mf.cell.mesh!=mf._computed_mesh or mf.cell._version!=mf._cell_version):
+        raise ValueError('Run kernel() again after changing the periodic reference.')
+    if hasattr(mf,'_computed_temperature'):
+        weights=np.full(len(mf.kpts),1/len(mf.kpts)) if mf.kweights is None else np.asarray(mf.kweights)
+        if (mf.temperature!=mf._computed_temperature or mf.exxdiv!=mf._computed_exxdiv
+                or not np.array_equal(mf.kpts,mf._computed_kpoints)
+                or not np.array_equal(weights,mf._computed_kweights)):
+            raise ValueError('Run kernel() again after changing temperature, k sampling or exchange correction.')
+    if integer and (getattr(mf,'temperature',None) is not None
+            or not np.allclose(mf.result.mo_occ_spin,np.rint(mf.result.mo_occ_spin),atol=1e-10,rtol=0)):
+        raise NotImplementedError('This method currently requires zero-temperature integer occupations.')
+    if equal_weights and not np.allclose(weights_for(mf.inputs),1/len(mf.kpts),atol=1e-12,rtol=0):
+        raise NotImplementedError('This method currently requires equal k weights.')
 
 
 class PeriodicSCFResult(NamedTuple):
@@ -21,6 +42,9 @@ class PeriodicSCFResult(NamedTuple):
     fock_spin: object
     converged: object
     cycles: object
+    free_energy: object = None
+    entropy: object = 0.
+    chemical_potential: object = None
 
 
 def gamma_energy_and_fock(density,inputs,*,xc='hf',exxdiv='ewald'):
@@ -43,15 +67,22 @@ def gamma_energy_and_fock(density,inputs,*,xc='hf',exxdiv='ewald'):
 def run_gamma_scf(inputs,*,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
                   conv_tol=1e-10,conv_tol_density=1e-8,conv_tol_grad=1e-7,
                   damping=0.,level_shift=0.,init_density=None,
-                  differentiation=None):
+                  differentiation=None,temperature=None,mesh=None):
     """Array-valued SCF with implicit/explicit derivatives on fixed FFT topology."""
     if inputs.overlap.shape[0]!=1:
         raise NotImplementedError('This solver currently accepts Gamma only.')
+    if temperature is not None:
+        if mesh is None:raise ValueError('Thermal Gamma SCF requires the explicit FFT mesh')
+        density=None if init_density is None else jnp.asarray(init_density)[:,None]
+        return run_kpoint_scf(inputs,mesh=mesh,nelec=nelec,xc=xc,exxdiv=exxdiv,
+            max_cycle=max_cycle,conv_tol=conv_tol,conv_tol_density=conv_tol_density,
+            conv_tol_grad=conv_tol_grad,damping=damping,level_shift=level_shift,
+            init_density=density,differentiation=differentiation,temperature=temperature)
     if xc_type(xc) not in ('HF','LDA','GGA'):
         raise NotImplementedError('Periodic XC currently supports LDA/GGA/global hybrids.')
     n=inputs.overlap.shape[-1]
-    if any(v<0 or v>n for v in nelec) or sum(nelec)==0 or max_cycle<1:
-        raise ValueError('Invalid occupations or max_cycle.')
+    if any(v<0 or v>n or v!=int(v) for v in nelec) or sum(nelec)==0 or max_cycle<1:
+        raise ValueError('Zero-temperature SCF requires integer occupations and positive max_cycle.')
     config=differentiation or SCFDifferentiationConfig(mode='explicit')
     s=inputs.overlap[0];x=_orthogonalizer(s,1e-10)
     eps,c=_diagonalize_fock(inputs.hcore[0],x)
@@ -80,7 +111,7 @@ def run_gamma_scf(inputs,*,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
         energies,coeff=jax.vmap(lambda f:_diagonalize_fock(f,x))(f)
     energy,fock=evaluate(density,inputs)
     return PeriodicSCFResult(energy,density[:,None],coeff[:,None],energies[:,None],
-                             occ[:,None],fock[:,None],converged,cycles)
+                             occ[:,None],fock[:,None],converged,cycles,energy)
 
 
 class _SCF:
@@ -88,7 +119,7 @@ class _SCF:
     default_xc='hf'
     k_sampling=False
 
-    def __init__(self,cell,*,kpts=None,xc=None,exxdiv='ewald',**controls):
+    def __init__(self,cell,*,kpts=None,kweights=None,xc=None,exxdiv='ewald',temperature=None,**controls):
         self.cell=cell if hasattr(cell,'topology') else cell.build()
         self.kpts=jnp.zeros((1,3)) if kpts is None else jnp.asarray(kpts).reshape(-1,3)
         if not self.k_sampling and (self.kpts.shape!=(1,3) or np.any(np.asarray(self.kpts)!=0)):
@@ -98,26 +129,38 @@ class _SCF:
         self.xc=self.default_xc if xc is None else xc
         if self.default_xc=='hf' and self.xc!='hf':
             raise ValueError('Use a periodic KS class for a DFT functional.')
+        self.kweights=kweights;self.temperature=temperature
         self.exxdiv=exxdiv;self.controls=controls;self.inputs=None;self.result=None
 
     def kernel(self,dm0=None):
         if not jax.config.x64_enabled:raise ValueError('Periodic SCF requires JAX float64.')
         if self.default_xc=='hf' and self.xc!='hf':
             raise ValueError('Use a periodic KS class for a DFT functional.')
-        self.inputs=build_inputs(self.cell,kpts=self.kpts)
+        self.inputs=build_inputs(self.cell,kpts=self.kpts,kweights=self.kweights)
+        if self.temperature is not None and (not np.isfinite(self.temperature) or self.temperature<=0):
+            raise ValueError('temperature is kBT in Eh and must be positive; use None for fixed occupations')
+        if (hybrid_coeff(self.xc)!=0 and self.exxdiv=='ewald'
+                and not np.allclose(self.inputs.kweights,1/len(self.kpts),atol=1e-12,rtol=0)):
+            raise NotImplementedError('Ewald exchange correction requires equal k weights; use exxdiv=None for general weights')
         density=None
         if dm0 is not None:
             d=jnp.asarray(dm0)
             density=d if self.unrestricted else jnp.stack([d/2,d/2])
         if self.kpts.shape==(1,3) and not np.any(np.asarray(self.kpts)):
             self.result=run_gamma_scf(self.inputs,nelec=self.cell.nelec,xc=self.xc,exxdiv=self.exxdiv,
-                init_density=None if density is None else density[:,0],**self.controls)
+                init_density=None if density is None else density[:,0],temperature=self.temperature,
+                mesh=self.cell.mesh,**self.controls)
         else:
-            from ._kpoint import run_kpoint_scf
             self.result=run_kpoint_scf(self.inputs,mesh=self.cell.mesh,nelec=self.cell.nelec,
-                xc=self.xc,exxdiv=self.exxdiv,init_density=density,**self.controls)
+                xc=self.xc,exxdiv=self.exxdiv,init_density=density,temperature=self.temperature,**self.controls)
         self._computed_xc=self.xc;self._computed_mesh=self.cell.mesh;self._cell_version=self.cell._version
         self.e_tot=self.result.total_energy
+        self.e_free=self.result.free_energy;self.entropy=self.result.entropy
+        self.chemical_potential=self.result.chemical_potential
+        self._computed_temperature=self.temperature
+        self._computed_exxdiv=self.exxdiv
+        self._computed_kpoints=np.asarray(self.kpts).copy()
+        self._computed_kweights=np.asarray(self.inputs.kweights).copy()
         self.converged=bool(self.result.converged);self.cycles=int(self.result.cycles)
         self.mo_coeff=self.result.mo_coeff_spin if self.unrestricted else self.result.mo_coeff_spin[0]
         self.mo_energy=self.result.mo_energy_spin if self.unrestricted else self.result.mo_energy_spin[0]
@@ -125,6 +168,7 @@ class _SCF:
         return self.e_tot
 
     def run(self,**controls):
+        if 'temperature' in controls:self.temperature=controls.pop('temperature')
         self.controls.update(controls);self.kernel();return self
 
     def get_bands(self,kpts,*,chunk_size=4):

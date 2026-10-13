@@ -196,7 +196,13 @@ There is no silent finite-difference fallback or replacement of a missing
 derivative by zero. The potential shortcuts keep unrelated geometry and metric
 leaves constant to avoid spurious active Taylor paths.
 
-Finite-q phonons, metallic/smeared occupations, dynamical response, Berry-phase
+Finite-temperature periodic SCF now has a separate q=0 first-response adapter
+using the Fermi-density fixed-point residual, rather than the integer projector
+chart. It includes occupation and chemical-potential response at fixed spin
+populations. Thermal Taylor series and higher derivatives at degeneracy are not
+provided; see [periodic foundations](../pbc/README.md).
+
+Finite-q phonons, dynamical response, Berry-phase
 electric fields, Born charges, and a turnkey nuclear-Hessian driver are not
 provided here. No all-order geometry capability is implied. The KS chart stores
 full density matrices, so matrix-free linear algebra alone does not make this

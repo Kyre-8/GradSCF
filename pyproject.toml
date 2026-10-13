@@ -57,6 +57,7 @@ exclude = ["gradscf.integrals._native.*", "gradscf.integrals.basis.data.pyscf_ba
 "gradscf.model" = ["README.md"]
 "gradscf.dft" = ["*.md"]
 "gradscf.dfpt" = ["*.md"]
+"gradscf.pbc" = ["*.md"]
 "gradscf.model.neural_xc.training" = ["*.md"]
 "gradscf.ofdft" = ["*.md", "LICENSE.libKEDF"]
 "gradscf.fci" = ["*.md", "references.bib"]

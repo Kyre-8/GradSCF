@@ -69,9 +69,10 @@ class Cell:
             self.pseudopotentials.append(pp)
         self.charges=jnp.asarray([sum(pp[0]) for pp in self.pseudopotentials])
         self.nelectron=int(sum(sum(pp[0]) for pp in self.pseudopotentials))
-        if abs(self.spin)>self.nelectron or (self.nelectron+self.spin)%2:
+        if not np.isfinite(self.spin) or self.spin!=int(self.spin) or abs(self.spin)>self.nelectron:
             raise ValueError('spin must be compatible with the valence electron count.')
-        self.nelec=((self.nelectron+self.spin)//2,(self.nelectron-self.spin)//2)
+        counts=((self.nelectron+self.spin)/2,(self.nelectron-self.spin)/2)
+        self.nelec=tuple(int(v) if v==int(v) else v for v in counts)
         from ..integrals.basis import prepare_basis
         self.topology,self.parameters=prepare_basis(self.spec,self.basis_spec)
         self._version=getattr(self,'_version',0)+1
@@ -84,8 +85,8 @@ class Cell:
     def reciprocal_vectors(self):
         return reciprocal_vectors(self.lattice)
 
-    def make_kpts(self,mesh):
-        return uniform_kpoints(self.lattice,mesh)
+    def make_kpts(self,mesh,*,shift=(0.,0.,0.)):
+        return uniform_kpoints(self.lattice,mesh,shift=shift)
 
 
 def M(**kwargs):

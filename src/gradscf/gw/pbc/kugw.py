@@ -138,6 +138,8 @@ class KUGW:
 
     def kernel(self, orbs: Sequence[int] | None = None):
         mf = self._scf
+        from ...pbc.scf import validate_reference
+        validate_reference(mf)
         result = mf.result
         mo_energy = jnp.asarray(result.mo_energy_spin[:, 0])
         mo_coeff = jnp.asarray(result.mo_coeff_spin[:, 0])

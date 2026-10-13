@@ -47,6 +47,31 @@ class ScalarRootResult(NamedTuple):
     newton_steps: object
 
 
+def bisect(function, lower, upper, *, tolerance=1e-12, maxiter=100):
+    """Batched bracketed continuous scalar roots; returns (roots, converged).
+
+    This is a primal solver. Use attach_root for derivatives of an isolated
+    root; branch decisions of bisection do not define its physical derivative.
+    """
+    if tolerance <= 0 or not isfinite(tolerance) or maxiter < 1:
+        raise ValueError('Bisection requires positive tolerance and maxiter')
+    lo, hi = jnp.asarray(lower), jnp.asarray(upper)
+    fl, fh = function(lo), function(hi)
+    valid = (lo <= hi) & jnp.isfinite(fl) & jnp.isfinite(fh) & (jnp.sign(fl)*jnp.sign(fh) <= 0)
+    def step(_, state):
+        lo, hi, fl = state
+        mid = lo+(hi-lo)/2
+        fm = function(mid)
+        left = jnp.sign(fl)*jnp.sign(fm) <= 0
+        exact = fm == 0
+        return jnp.where(exact,mid,jnp.where(left,lo,mid)), jnp.where(left,mid,hi), jnp.where(exact,0.,jnp.where(left,fl,fm))
+    lo, hi, _ = jax.lax.fori_loop(0, maxiter, step, (lo, hi, fl))
+    roots = lo+(hi-lo)/2
+    residual = function(roots)
+    valid &= jnp.isfinite(residual) & (jnp.abs(residual) <= tolerance)
+    return roots, valid
+
+
 class _State(NamedTuple):
     previous: object
     x: object

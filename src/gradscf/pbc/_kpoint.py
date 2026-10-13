@@ -7,6 +7,7 @@ from ..scf.convergence import convergence_reached
 from ..scf.uks import _point_unrestricted_xc_value_and_grad_kernel
 from ..scf.autodiff import SCFDifferentiationConfig,attach_scf_backward
 from ..dft.libxc_jax.jax_libxc import hybrid_coeff,xc_type
+from .kpoints import weights_for
 
 
 def energy_and_fock(density,inputs,*,mesh,xc='hf',exxdiv='ewald'):
@@ -15,8 +16,9 @@ def energy_and_fock(density,inputs,*,mesh,xc='hf',exxdiv='ewald'):
     exc,potential=grid_xc_potential(density,inputs,xc=xc)
     vxc=project_xc_potential(inputs.ao,inputs.weights,potential,kind)
     h=inputs.hcore
-    energy=jnp.einsum('skpq,kqp->',density,h+.5*j).real/nk
-    energy-=.5*alpha*jnp.einsum('skpq,skqp->',density,k).real/nk
+    kw=weights_for(inputs)
+    energy=jnp.einsum('k,skpq,kqp->',kw,density,h+.5*j).real
+    energy-=.5*alpha*jnp.einsum('k,skpq,skqp->',kw,density,k).real
     return energy+exc+inputs.nuclear_repulsion,h+j-alpha*k+vxc
 
 
@@ -25,8 +27,9 @@ def grid_xc_potential(density,inputs,*,xc):
     kind=xc_type(xc);nk=density.shape[1]
     if kind=='HF':return jnp.array(0.),None
     ao=inputs.ao[:,0];deriv=inputs.ao[:,1:4]
-    rho=jnp.einsum('kgp,skpq,kgq->sg',ao,density,ao.conj()).real/nk
-    grad=2*jnp.einsum('kgp,skpq,kxgq->sgx',ao,density,deriv.conj()).real/nk
+    kw=weights_for(inputs)
+    rho=jnp.einsum('k,kgp,skpq,kgq->sg',kw,ao,density,ao.conj()).real
+    grad=2*jnp.einsum('k,kgp,skpq,kxgq->sgx',kw,ao,density,deriv.conj()).real
     variables=rho.T if kind=='LDA' else jnp.concatenate([rho.T,grad[0],grad[1]],axis=1)
     energies,potential=_point_unrestricted_xc_value_and_grad_kernel(xc,kind)(variables)
     return jnp.dot(inputs.weights,energies),potential
@@ -49,27 +52,42 @@ def project_xc_potential(ao_channels,weights,potential,kind):
 
 def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
                    conv_tol=1e-10,conv_tol_density=1e-8,conv_tol_grad=1e-7,
-                   damping=0.,level_shift=0.,init_density=None,differentiation=None):
+                   damping=0.,level_shift=0.,init_density=None,differentiation=None,
+                   temperature=None):
     from .scf import PeriodicSCFResult
+    from .occupations import fermi_density, fermi_occupations, density_entropy
     if xc_type(xc) not in ('HF','LDA','GGA'):raise NotImplementedError('Unsupported periodic XC.')
     nk,n,_=inputs.overlap.shape
-    if max_cycle<1 or any(v<0 or v>n for v in nelec):raise ValueError('Invalid occupations or cycles.')
+    thermal=temperature is not None
+    if max_cycle<1 or not 0<=damping<1:raise ValueError('Invalid cycles or damping.')
+    if not thermal and any(v<0 or v>n or v!=int(v) for v in nelec):
+        raise ValueError('Zero-temperature SCF requires integer spin populations in [0,nao].')
+    if thermal and level_shift!=0:
+        raise ValueError('Finite-temperature SCF does not support projector level shifts.')
     config=differentiation or SCFDifferentiationConfig(mode='explicit')
+    args=(inputs,jnp.asarray(temperature if thermal else 0.),jnp.asarray(nelec,dtype=float))
     s=inputs.overlap
     def transform(s):
         return jnp.linalg.inv(jnp.linalg.cholesky(s)).conj().swapaxes(-1,-2)
     x=transform(s)
-    occ=jnp.stack([jnp.broadcast_to((jnp.arange(n)<count).astype(float),(nk,n)) for count in nelec])
+    occ=jnp.stack([jnp.broadcast_to((jnp.arange(n)<count).astype(float),(nk,n)) for count in nelec]) if not thermal else None
     def diagonalize(f,metric=x):
         orth=metric.conj().swapaxes(-1,-2)@f@metric
         eps,c=jnp.linalg.eigh(orth)
         return eps,metric@c
     def density_from(c):return jnp.einsum('skpi,ski,skqi->skpq',c,occ,c.conj())
-    evaluate=lambda d,args:energy_and_fock(d,args,mesh=mesh,xc=xc,exxdiv=exxdiv)
-    eps,c=diagonalize(jnp.broadcast_to(inputs.hcore,(2,nk,n,n)))
-    d=density_from(c) if init_density is None else jnp.asarray(init_density,dtype=c.dtype)
+    def mapped(f,a):
+        if thermal:return fermi_density(f,a[0].overlap,a[2],a[1],weights_for(a[0]))[0]
+        return density_from(diagonalize(f,transform(a[0].overlap))[1])
+    def evaluate(d,a):
+        energy,fock=energy_and_fock(d,a[0],mesh=mesh,xc=xc,exxdiv=exxdiv)
+        entropy=density_entropy(d,a[0].overlap,weights_for(a[0])) if thermal else jnp.array(0.)
+        return energy-a[1]*entropy,fock,energy,entropy
+    initial_fock=jnp.broadcast_to(inputs.hcore,(2,nk,n,n)).astype(jnp.complex128)
+    eps,c=diagonalize(initial_fock)
+    d=mapped(initial_fock,args) if init_density is None else jnp.asarray(init_density,dtype=c.dtype)
     if d.shape!=(2,nk,n,n):raise ValueError('Spin density must have shape (2,nk,nao,nao).')
-    e,f=evaluate(d,inputs)
+    e,f,_,_=evaluate(d,args)
     def error(f,d):return x.conj().swapaxes(-1,-2)@(f@d@s-s@d@f)@x
     def pack(a):return jnp.stack([a.real,a.imag])
     history=jnp.zeros((DIIS_SPACE,2,2,nk,n,n))
@@ -80,10 +98,12 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
             feff,fh,eh,head,count=diis_extrapolate(pack(f),pack(error(f,d)).reshape(-1),fh,eh,head,count)
             feff=feff[0]+1j*feff[1]+level_shift*(s-s@d@s)
             eps,c=diagonalize(feff)
-            dn=(1-damping)*density_from(c)+damping*d
-            en,fn=evaluate(dn,inputs)
+            target=mapped(feff,args) if thermal else density_from(c)
+            dn=(1-damping)*target+damping*d
+            en,fn,_,_=evaluate(dn,args)
             rms=jnp.sqrt(jnp.mean(jnp.abs(dn-d)**2))
-            residual=jnp.linalg.norm(error(fn,dn))/jnp.sqrt(2*nk)
+            residual=(jnp.linalg.norm(mapped(fn,args)-dn)/jnp.sqrt(dn.size) if thermal
+                      else jnp.linalg.norm(error(fn,dn))/jnp.sqrt(2*nk))
             done=convergence_reached(jnp.abs(en-e),rms,residual,conv_tol=conv_tol,
                 conv_tol_density=conv_tol_density,conv_tol_grad=conv_tol_grad,has_prior_cycle=index>0)
             return dn,en,fn,c,eps,fh,eh,head,count,done,index+1
@@ -93,10 +113,15 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
     (d,e,f,c,eps,*rest),_=jax.lax.scan(step,initial,jnp.arange(max_cycle))
     converged,cycles=rest[-2:]
     if config.mode=='implicit':
-        def residual(d,args):
-            _,f=evaluate(d,args)
-            _,c=diagonalize(f,transform(args.overlap))
-            return density_from(c)-d
-        d=attach_scf_backward(inputs,solution=d,residual=residual,config=config,converged=converged)
-        e,f=evaluate(d,inputs);eps,c=diagonalize(f)
-    return PeriodicSCFResult(e,d,c,eps,occ,f,converged,cycles)
+        def residual(d,a):
+            _,f,_,_=evaluate(d,a)
+            return mapped(f,a)-d
+        d=attach_scf_backward(args,solution=d,residual=residual,config=config,converged=converged)
+    free,f,energy,entropy=evaluate(d,args)
+    eps,c=diagonalize(f)
+    mu=None
+    if thermal:
+        population=fermi_occupations(eps,args[2],args[1],weights_for(inputs))
+        occ,mu=population.occupations,population.chemical_potential
+        converged &= population.converged
+    return PeriodicSCFResult(energy,d,c,eps,occ,f,converged,cycles,free,entropy,mu)

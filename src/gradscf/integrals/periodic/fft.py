@@ -19,21 +19,25 @@ class PeriodicInputs(NamedTuple):
     madelung: object
     kpoints: object
     gvectors: object
+    kweights: object = None
 
 
-def build_inputs(cell,*,parameters=None,lattice=None,kpts=None):
+def build_inputs(cell,*,parameters=None,lattice=None,kpts=None,kweights=None):
     """Mesh/topology are static; dynamic parameters and lattice remain explicit."""
     lattice=cell.lattice if lattice is None else jnp.asarray(lattice)
     parameters=cell.parameters if parameters is None else parameters
     mesh=cell.mesh;volume=jnp.linalg.det(lattice);ngrid=int(np.prod(mesh))
     from ...pbc.kpoints import kmesh_shape
     reference_kpts=np.zeros((1,3)) if kpts is None else np.asarray(kpts)
+    w=np.full(len(reference_kpts),1/len(reference_kpts)) if kweights is None else np.asarray(kweights,dtype=float)
+    if w.shape!=(len(reference_kpts),) or not np.isfinite(w).all() or np.any(w<=0) or not np.isclose(w.sum(),1.,atol=1e-12,rtol=0):
+        raise ValueError('k weights must be positive, finite, normalized, and match kpts')
     kmesh=kmesh_shape(cell.lattice,reference_kpts)
     scaled=reference_kpts@np.asarray(cell.lattice).T/(2*np.pi)
     kpts=jnp.asarray(scaled)@(2*jnp.pi*jnp.linalg.inv(lattice).T)
     ao,ft,gv,coords=bloch_grid(cell.topology,parameters,lattice,mesh,kpts)
     if len(reference_kpts)!=1 or np.any(reference_kpts!=0):
-        return _assemble_kpoints(cell,parameters,lattice,ao,ft,gv,coords,kpts,kmesh)
+        return _assemble_kpoints(cell,parameters,lattice,ao,ft,gv,coords,kpts,kmesh)._replace(kweights=jnp.asarray(w))
     ao=ao.real;coeff=ft[0];values=ao[0,0]
     overlap=(coeff.conj().T@coeff/volume).real
     kinetic=(coeff.conj().T@(.5*jnp.sum(gv*gv,axis=1)[:,None]*coeff)/volume).real
@@ -48,7 +52,7 @@ def build_inputs(cell,*,parameters=None,lattice=None,kpts=None):
     enuc=ewald_energy(lattice,parameters.nuclear_coords,cell.charges,precision=cell.precision,reference_lattice=cell.lattice)
     mad=-2*ewald_energy(lattice,jnp.zeros((1,3)),jnp.ones(1),precision=cell.precision,reference_lattice=cell.lattice)
     return PeriodicInputs(overlap[None],(kinetic+local+nonlocal_pp)[None],kinetic[None],ao,coords,
-        jnp.full(ngrid,volume/ngrid),potential,enuc,mad,kpts,gv)
+        jnp.full(ngrid,volume/ngrid),potential,enuc,mad,kpts,gv,jnp.asarray(w))
 
 
 def get_jk(inputs,density_spin,*,exxdiv='ewald',with_k=True):
@@ -94,8 +98,10 @@ def _assemble_kpoints(cell,parameters,lattice,ao,ft,gv,coords,kpts,kmesh,*,elect
 def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True):
     if exxdiv not in ('ewald',None):raise NotImplementedError('Unsupported exchange correction.')
     ao=inputs.ao[:,0];nk=ao.shape[0];weight=inputs.weights[0]
+    from ...pbc.kpoints import weights_for
+    kw=weights_for(inputs)
     total=density_spin.sum(axis=0)
-    rho=jnp.einsum('kgp,kpq,kgq->g',ao,total,ao.conj()).real/nk
+    rho=jnp.einsum('k,kgp,kpq,kgq->g',kw,ao,total,ao.conj()).real
     vr=jnp.fft.ifftn(jnp.fft.fftn(rho.reshape(mesh))*coulomb_kernel(inputs.gvectors).reshape(mesh)).reshape(-1).real
     j=weight*jnp.einsum('kgp,g,kgq->kpq',ao.conj(),vr,ao)
     if not with_k:return j,jnp.zeros_like(density_spin)
@@ -107,9 +113,10 @@ def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True):
             kernel=coulomb_kernel(inputs.gvectors+inputs.kpoints[target]-inputs.kpoints[source])
             shape=tuple(mesh)+pairs.shape[1:]
             potential=jnp.fft.ifftn(jnp.fft.fftn(pairs.reshape(shape),axes=(0,1,2))*kernel.reshape(tuple(mesh)+(1,1)),axes=(0,1,2)).reshape(pairs.shape)
-            k=k+weight/nk*jnp.einsum('gp,gs,tsr,grq->tpq',ao[target].conj(),ao[source],density_spin[:,source],potential)
+            k=k+weight*kw[source]*jnp.einsum('gp,gs,tsr,grq->tpq',ao[target].conj(),ao[source],density_spin[:,source],potential)
         if exxdiv=='ewald':
             s=inputs.overlap[target];k=k+inputs.madelung*jnp.einsum('pr,trs,sq->tpq',s,density_spin[:,target],s)
+            k=k*jnp.where(jnp.all(jnp.abs(kw-1/nk)<1e-12),1.,jnp.nan)
         matrices.append(k)
     return j,jnp.stack(matrices,axis=1)
 

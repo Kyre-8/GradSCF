@@ -41,6 +41,7 @@ class Problem:
     tolerance: float = 1e-7
     potential_tangent: object = None
     potential_path: object = None
+    series_supported: bool = True
 
     def _base(self):
         if not isfinite(self.tolerance) or self.tolerance <= 0:
@@ -79,6 +80,8 @@ class Problem:
         return Response(state, values, jax.lax.stop_gradient(norm), valid)
 
     def series(self, path=None, *, potential=None, order=2, config=None):
+        if not self.series_supported:
+            raise NotImplementedError('Taylor series is not available for this response model; use first response.')
         x, valid = self._base()
         if (path is None) == (potential is None):
             raise ValueError('Supply exactly one of path or potential')

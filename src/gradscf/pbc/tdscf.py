@@ -3,15 +3,9 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 from ._kpoint import energy_and_fock
+from .scf import validate_reference as _validate_reference
 from ..solvers.eigen.davidson import _davidson_lowest_symmetric
 from ..solvers.eigen.rpa import _davidson_lowest_tdhf, solve_dense_rpa
-
-
-def _validate_reference(mf):
-    if mf.result is None or not mf.converged:
-        raise ValueError('Periodic response requires a converged SCF reference.')
-    if (mf.xc!=mf._computed_xc or mf.cell.mesh!=mf._computed_mesh or mf.cell._version!=mf._cell_version):
-        raise ValueError('Run kernel() again after changing the periodic reference.')
 
 
 def response_operators(mf,*,singlet=True):
