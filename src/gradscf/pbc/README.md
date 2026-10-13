@@ -132,9 +132,11 @@ the FFT exchange and shared linear solvers. This is separate from the TD/GW
 occupation restrictions below. See [finite-q conventions and checks](../dfpt/FINITE_Q.md).
 Atomic-displacement/overlap sources and bounded commensurate HF/KS/OFDFT
 reference phonons are now available; see [atomic response](../dfpt/ATOMIC_RESPONSE.md).
-Primitive HF/KS displacement sources no longer require a supercell. The phonon
-driver can also select primitive electronic response, while retaining bounded
-supercell geometry contractions; it is not yet a fully primitive-cell scaling implementation.
+Primitive HF/KS displacement sources and `Phonons.kernel(method='primitive')`
+now construct geometry curvature and electronic response without a supercell.
+The bounded supercell path remains an independent reference and supports OFDFT.
+Primitive response still requires an equal-weight closed k mesh and FFT
+convergence; full AO contractions and k-pair exchange work remain.
 
 ### External XC functionals
 
@@ -254,5 +256,6 @@ not a material convergence benchmark.
 
 The next foundation work remains physical space-group/AO transformations,
 irreducible J/K evaluation and periodic Trainer sample adapters.
-Scalable primitive-cell phonons, metallic TD/GW/BSE, other smearing schemes, SOC and
+Native finite-q OFDFT phonons, Born charges/LO-TO corrections, general phonon
+interpolation, metallic TD/GW/BSE, other smearing schemes, SOC and
 macroscopic Berry-phase fields are not supplied by this increment.

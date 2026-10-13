@@ -156,7 +156,7 @@ test, the core-source adjoint defect decreased from 5.35e-4 at mesh 15 cubed to
 1.41e-6 at mesh 31 cubed, and passed the 1e-8 absolute comparison at mesh 41
 cubed. Sources are not silently symmetrized to conceal this cutoff effect.
 
-## Commensurate phonon reference
+## Primitive force constants and the commensurate reference
 
 The phase convention uses cell translations only: u_l=exp(iq.R_l)u. The driver
 solves cosine/sine responses with the shared linear solver, then projects
@@ -179,7 +179,8 @@ at Gamma. It does not modify the reported raw force constants or replace mesh
 convergence. Unrelaxed geometries give local curvatures, not an equilibrium
 phonon benchmark.
 
-This first driver is intentionally bounded:
+Both paths retain explicit atom/grid/workspace limits. The independent
+supercell reference additionally has these restrictions:
 
 - The KS supercell must match a full, equally weighted, Gamma-centered k mesh.
   A fresh supercell reference is checked against the folded primitive density.
@@ -197,20 +198,68 @@ This first driver is intentionally bounded:
   external-functional adapters.
 
 `Phonons.kernel(q, method='supercell')` retains the full supercell response
-space and supports HF/KS and OFDFT. The new explicit option
-`method='primitive'` solves the HF/KS electronic response in primitive q blocks
-using the sources above, then reconstructs its cosine/sine supercell density
-variations. A JVP of the shared Pulay force routine supplies the force derivative,
-including W1 via W=D F S^-1. Thus no separate force-response solver or manually
-duplicated W1 implementation is introduced.
+space and supports HF/KS and OFDFT. It remains the default, independent oracle.
+`method='primitive'` now constructs both HF/KS geometry curvature and electronic
+response in the primitive cell. It does not construct a replicated Cell, build
+supercell integrals, or rerun SCF. The earlier intermediate geometry-contraction
+path has been removed. Gamma reuses `atomic_problem`; nonzero q uses the
+existing `finite_q_problem` and shared linear solver. A closed, equally weighted
+k mesh is required, including shifted/even meshes; no real-supercell-density
+or odd-replication restriction is imposed on this path.
 
-This is an intermediate optimization: both modes still build and certify a
-supercell SCF reference and retain its integrals and second geometry derivative
-workspace. Only the electronic response space changes. The full-supercell
-method remains the default and independent comparison. Neither mode claims
-fully primitive-cell scaling. Born
-charges, macroscopic nonanalytic LO/TO corrections and general dispersion
-interpolation are not supplied by this increment.
+To derive the native contraction, differentiate the stationary force once more.
+Holding D and W fixed in the inner geometry derivative defines
+
+\[
+ L^{\rm geom}_{uv}(q)=\partial_{u,-q}\partial_{v,+q}
+ \left[E(D,R)-\sum_{sk}w_k\operatorname{Tr}(W_{sk}S_k(R))\right]_{D,W}.
+\]
+
+The remaining chain-rule terms are density and energy-weighted-density
+responses. Thus the bilinear force constant is
+
+\[
+ u^T\Phi(q)v=L^{\rm geom}_{uv}(q)
+ +\sum_{sk}w_k\operatorname{Tr}\left[
+ F_{u,q}^\dagger D^{(1)}_{v,q}-S_{u,q}^\dagger W^{(1)}_{v,q}\right].
+\]
+
+F_u here is the fixed-D Fock source. There is no extra factor of two or real
+projection: the row already represents -q and the result can be complex.
+For the column v, first solve for D1 and form F1=F_source+K_q[D1]. Differentiating
+W=D F S^-1 gives, with p=k+q,
+
+\[
+ W^{(1)}_{pk}=(D^{(1)}_{pk}F_k+D_pF^{(1)}_{pk}-W_pS^{(1)}_{pk})S_k^{-1}.
+\]
+
+The code averages this with the equivalent derivative of S^-1 F D to match
+the shared symmetrized W convention. It never symmetrizes a q block by its own
+adjoint, since the adjoint belongs to the -q sector. This also preserves
+fractional Fermi occupations; replacing W by D F D would be incorrect.
+
+The fixed-D,W term uses JVPs of the shared Fourier AO and GTH projector builders.
+The first AO variations live at k+q and k-q, and their mixed variation returns
+to k. The kinetic/overlap contractions retain all four product-rule terms.
+Hartree and semilocal XC contain the second density field plus the product of
+two first-order fields and the corresponding kernel. Exchange and nonlocal
+GTH each differentiate four factors, including same-factor second derivatives
+and every distinct-factor cross term. The Ewald exchange metric correction is
+included. Ionic Ewald curvature uses the same real/reciprocal image topology
+as the ground-state evaluator; wrapping an atom by lattice vector T also
+transforms its +q amplitude by exp(-iq.T).
+
+For each column v, AD differentiates the real and imaginary parts of this
+bilinear expression with respect to the real row amplitude u at zero. This
+produces the whole complex column without a dense coordinate Hessian or a
+second electronic solve for each row. Only the final 3N by 3N force-constant
+matrix is assembled. The grid and AO workspaces are primitive-cell sized;
+exchange still sums over pairs of k points and the full AO basis. This is not
+an end-to-end timing or large-system scaling claim.
+
+Native finite-q OFDFT phonons, arbitrary external finite-q models, Born charges,
+macroscopic nonanalytic LO/TO corrections and general dispersion interpolation
+remain outside this increment.
 
 The compiled finite-q independent response has a regression for complex MO
 frames against a full generalized-eigenproblem finite difference, at zero and
@@ -239,6 +288,38 @@ confused with converged acoustic frequencies. No silent zero-force correction
 is applied.
 
 Validation on 2026-10-13:
+
+- Native geometry increment: all numerical tests run on `jy_gpu_1`, never
+  locally. The first dedicated suite passed **11 tests** in 116.27 seconds:
+  Gamma/finite-q Ewald including atoms outside the primitive cell, fixed-D,W
+  curvature components for HF (with/without Ewald exchange correction) and PBE,
+  carbon/hydrogen nonlocal GTH curvature, and relaxed force constants with a
+  guard forbidding supercell construction. The nonlocal curvature error was
+  4.23e-16 Eh/Bohr squared; the HF exchange component difference at mesh 15
+  cubed was about 1.5e-7 Eh/Bohr squared. Finite FFT quadratures of primitive and
+  replicated cells need not agree exactly before mesh convergence.
+- The additional boundary batch passed **3 tests** in 156.94 seconds: restricted
+  H2 with q/-q conjugacy, unrestricted H3 at kBT=0.1 Eh, and a shifted two-k
+  mesh at its zone boundary. These also forbid supercell construction. All used
+  CPU float64 in the same remote environment. The example was rerun there;
+  native force-constant Hermiticity and linear residual were respectively
+  5.63e-14 and 5.70e-16 in its reported atomic-unit conventions.
+- The affected-module regression passed **34 tests, no skips**, in 715.87
+  seconds on `jy_gpu_1` (`jax_scf`, JAX 0.10.0, jax-xc 0.0.9, CPU float64;
+  OMP and OpenBLAS thread settings were 2). It covered displacement sources,
+  periodic integrals and geometry derivatives, forces/stress, both phonon
+  paths, and periodic OFDFT forces:
+
+  ```sh
+  PYTHONPATH=src JAX_PLATFORMS=cpu python -m pytest -q \
+    tests/dfpt/test_displacement.py tests/pbc/test_integrals.py \
+    tests/pbc/test_gradients.py tests/pbc/test_forces.py \
+    tests/pbc/test_phonon.py tests/ofdft/test_periodic_forces.py
+  ```
+- The carbon/hydrogen nonlocal curvature was additionally tested through
+  `jax.jit`: **1 passed**, 13.13 seconds, error 4.65e-16 Eh/Bohr squared.
+
+Earlier stages (before native geometry replaced the intermediate path):
 
 - Primitive-source/electronic-response increment: local CPU JAX 0.8.1,
   float64, **70 passed, 9 skipped**, 441.48 seconds, with

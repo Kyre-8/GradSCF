@@ -118,10 +118,10 @@ frames are not thereby guaranteed. q matching itself is host-static metadata.
 Atomic displacement sources can now be generated directly in the primitive
 cell by `dfpt.displacement_source`, including overlap/Pulay and direct density
 changes; an explicit supercell AD oracle remains available for comparisons.
-The phonon driver can use primitive electronic response with bounded supercell
-geometry contractions. It also supports OFDFT through the supercell KKT response; this
-spectral KS factory itself is not an OFDFT adapter. Scalable primitive-cell
-phonons, arbitrary external neural functionals and dynamical response remain
+The HF/KS phonon driver now constructs both geometry curvature and electronic
+response in the primitive cell. It also supports OFDFT through the supercell
+KKT response; this spectral KS factory itself is not an OFDFT adapter. Native
+finite-q OFDFT phonons, arbitrary external neural functionals and dynamical response remain
 outside this path. An arbitrary primitive-cell energy callback does not
 determine its finite-q extension. Taylor series are disabled because higher
 orders couple zero, q, 2q and further harmonics; iterating this one-sector linear

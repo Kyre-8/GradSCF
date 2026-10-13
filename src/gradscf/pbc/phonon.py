@@ -1,10 +1,10 @@
-"""Bounded commensurate-supercell DFPT phonons using shared atomic response.
+"""Periodic DFPT phonons with primitive and independent supercell paths.
 
 Geometry sources and force derivatives use AD, not finite displacement. The
-default retains the supercell electronic response; method='primitive' uses
-the primitive electronic response with supercell geometry contractions. Both
-are small-system paths, not fully scalable primitive phonons. Odd replication
-preserves the current symmetric FFT grid. Frequencies are signed hbar*omega
+default retains the bounded supercell reference; method='primitive' uses
+primitive HF/KS geometry and electronic response. The supercell reference
+requires odd replication; primitive response requires a closed equal-weight
+k mesh. Frequencies are signed hbar*omega
 in Eh (negative means an imaginary mode); masses are supplied in atomic mass
 units. Mode diagonalization is an eager numerical postprocessing operation.
 """
@@ -80,49 +80,12 @@ def _replica(cell,repetitions):
     return replica,indices,translations
 
 
-def _q_force_response(source,reference,q,indices,transform,config):
-    """Primitive electronic solve, bounded supercell geometry contraction.
-
-    This intermediate path removes the supercell response solve, not its
-    integrals or geometry Hessian workspace. W1 follows by differentiating
-    D F S^-1 in the shared Pulay force routine, including fractional f.
-    """
-    from ..dfpt.finite_q import finite_q_problem
-    from ..dfpt.atomic import _ks_forces
-    from ..integrals.periodic.fft import build_inputs
-    cell=source.cell;sup=reference.cell;nk=len(source.kpts);n=cell.topology.nao
-    fractional=np.asarray(source.kpts)@np.asarray(cell.lattice).T/(2*np.pi)
-    transfer=momentum_transfer(fractional,q)
-    problem=finite_q_problem(source.inputs,source.result,transfer,mesh=cell.mesh,
-                            xc=source.xc,exxdiv=source.exxdiv,temperature=source.temperature)
-    phase=jnp.exp(2j*jnp.pi*(jnp.asarray(indices)@q))
-    def inputs_at(r):
-        return build_inputs(sup,parameters=sup.parameters_at(r))
-    def forces(d,r):
-        return _ks_forces(d,r,inputs_at,mesh=sup.mesh,xc=reference.xc,exxdiv=reference.exxdiv)
-    density=reference.result.density_spin
-    def respond(direction):
-        perturbation=displacement_source(source,q,direction).perturbation
-        result=problem.response(tangent=perturbation,config=config)
-        blocks=jnp.zeros((2,nk,n,nk,n),dtype=complex)
-        for k,p in enumerate(transfer.partners):
-            blocks=blocks.at[:,p,:,k,:].set(result.density[:,k])
-        full=transform@blocks.reshape(2,nk*n,nk*n)@transform.conj().T
-        adjoint=full.conj().swapaxes(-1,-2)
-        cosine=((full+adjoint)/2).real[:,None].astype(density.dtype)
-        sine=((full-adjoint)/(2j)).real[:,None].astype(density.dtype)
-        pattern=(phase[:,None,None]*direction[None]).reshape(-1,3)
-        real=jax.jvp(forces,(density,sup.coords),(cosine,pattern.real))[1]
-        imag=jax.jvp(forces,(density,sup.coords),(sine,pattern.imag))[1]
-        return real+1j*imag,result.residual_norm,result.converged
-    return forces(density,sup.coords),jax.jit(respond)
-
-
 class Phonons:
     """Small-cell reference phonons for periodic HF/KS and Cell-based OFDFT.
 
-    KS replication must match a Gamma-centered full k mesh. OFDFT accepts an
-    explicit odd supercell. Arbitrary external model replication is not inferred.
+    Supercell KS replication must match a Gamma-centered full k mesh. OFDFT
+    accepts an explicit odd supercell. Primitive HF/KS needs no replication.
+    Arbitrary external functional finite-q extensions are not inferred.
     Every kernel call builds a fresh snapshot; no stale response cache is reused.
     """
     def __init__(self,source,*,masses,supercell=None,max_atoms=24,max_pair_elements=2_000_000,max_grid=20_000):
@@ -249,8 +212,7 @@ class Phonons:
     def kernel(self,q=(0.,0.,0.),*,asr=False,config=None,method='supercell'):
         """Force constants and numerical modes; ASR projection is opt-in at Gamma.
 
-        method selects the finite-q electronic response space. 'primitive'
-        supports HF/KS and retains a bounded supercell geometry contraction;
+        'primitive' constructs HF/KS geometry and response in the primitive cell;
         'supercell' is the independent reference and also supports OFDFT.
         """
         self.result=None;self.super_reference=None;self.reference_forces=None
@@ -259,17 +221,20 @@ class Phonons:
         if asr and not gamma:raise ValueError('ASR projection is only defined here at Gamma')
         source=self.source;cell=source.cell if isinstance(source,_SCF) else source.system
         if len(self.masses)!=len(cell.coords):raise ValueError('One mass per primitive-cell atom is required')
-        if gamma:
+        primitive=method=='primitive' and not gamma
+        if primitive:
+            if not isinstance(source,_SCF):
+                raise NotImplementedError('Primitive phonons currently require HF/KS')
+            from ..dfpt.force_constants import primitive_force_response
+            self._limits(cell,(1,1,1),nk=len(source.kpts))
+            self.reference_forces,respond=primitive_force_response(source,q,config)
+            indices=np.zeros((1,3),dtype=int)
+        elif gamma:
             self._limits(cell,(1,1,1),nk=len(source.kpts) if isinstance(source,_SCF) else 1)
             reference=source;indices=np.zeros((1,3),dtype=int)
         else:
-            if method=='primitive' and not isinstance(source,_SCF):
-                raise NotImplementedError('Primitive phonon electronic response currently requires HF/KS')
-            _,_,indices,transform=self._prepare(q);reference=self.super_reference
-        primitive=method=='primitive' and not gamma
-        if primitive:
-            self.reference_forces,respond=_q_force_response(source,reference,q,indices,transform,config)
-        else:
+            _,_,indices,_=self._prepare(q);reference=self.super_reference
+        if not primitive:
             problem=atomic_problem(reference)
             self.reference_forces=problem.quantities(problem.solution,problem.inputs)['forces']
             respond=jax.jit(lambda direction:problem.response(tangent=direction,config=config))
@@ -277,9 +242,11 @@ class Phonons:
         nat=len(cell.coords);columns=[];residuals=[]
         for direction in jnp.eye(3*nat).reshape(3*nat,nat,3):
             if primitive:
-                response,residual,converged=respond(direction)
+                column,residual,converged=respond(direction)
                 if not bool(converged):raise RuntimeError('Atomic q response did not converge')
                 residuals.append(residual)
+                columns.append(column)
+                continue
             else:
                 pattern=(phase[:,None,None]*direction[None]).reshape(-1,3)
                 real=respond(pattern.real)
@@ -294,7 +261,7 @@ class Phonons:
         phi=jnp.stack(columns,axis=1)
         error=jnp.linalg.norm(phi-phi.conj().T)
         if not np.isfinite(phi).all() or float(error)>1e-6*max(1.,float(jnp.linalg.norm(phi))):
-            raise RuntimeError('Force constants fail the Hermiticity check; tighten reference/response convergence')
+            raise RuntimeError('Force constants fail the Hermiticity check; refine the FFT mesh or tighten convergence')
         translations=jnp.tile(jnp.eye(3),(nat,1))
         asr_error=jnp.linalg.norm(phi@translations) if gamma else None
         dynamical,frequencies,vectors=_modes(phi,self.masses,asr)

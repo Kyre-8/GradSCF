@@ -1,8 +1,8 @@
 """AD atomic response and commensurate reference phonons for a periodic H2 cell.
 
 GTH-SZV/GTH-Pade, 6-Bohr cubic cell, 3x1x1 k mesh, 31-cubed FFT mesh,
-CPU float64. Finite-q electronic response uses the primitive cell; the
-geometry Hessian still uses a bounded three-cell supercell. This input
+CPU float64. Finite-q electronic response and geometry curvature both use
+the primitive cell, without an auxiliary supercell calculation. This input
 geometry is not optimized: signed frequencies describe its local curvatures,
 and negative values are retained. It is not a converged material benchmark.
 """
@@ -47,17 +47,17 @@ print('q=(1/3,0,0) frequencies (cm^-1):', np.asarray(finite.frequencies)*to_cm1)
 print('Force-constant Hermiticity error:', float(finite.hermiticity_error))
 print('Maximum linear residual:', float(finite.residual_norm))
 
-# Measured CPU float64 output, JAX 0.8.1:
+# Measured on jy_gpu_1, jax_scf, CPU float64, JAX 0.10.0:
 # Gamma force-constant column (Eh/Bohr^2):
 # [[-0.44937907 -0.10217584 -0.10217450]
 #  [ 0.44928785  0.10217638  0.10217402]]
-# Raw Gamma ASR residual (Eh/Bohr^2): 0.0005457780540763559
+# Raw Gamma ASR residual (Eh/Bohr^2): 0.0005457780540758484
 # Gamma frequencies with ASR (cm^-1):
 # [-1736.00227 -1710.11028 ~0 ~0 ~0 5072.93120]
-# (The three projected translation frequencies are below 2e-5 cm^-1.)
-# Finite-q overlap-source norm (1/Bohr): 0.7864469202751011
-# Finite-q coefficient-density response norm: 0.2297273763920824
+# (The three projected translations are numerical zeros; the raw ASR is above.)
+# Finite-q overlap-source norm (1/Bohr): 0.7864469202751015
+# Finite-q coefficient-density response norm: 0.22972737639208246
 # q=(1/3,0,0) frequencies (cm^-1):
 # [-1732.45234 -1708.19684 -61.59887 -46.30911 243.69684 5070.43139]
-# Force-constant Hermiticity error: 6.173390327105482e-14
-# Maximum linear residual: 6.150304229797515e-16
+# Force-constant Hermiticity error: 5.6323123129316333e-14
+# Maximum linear residual: 5.698573219506457e-16

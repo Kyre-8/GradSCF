@@ -25,6 +25,12 @@ class DisplacementSource(NamedTuple):
     hcore: object
 
 
+def _orbitals(cell,inputs,coordinates):
+    """Periodic AO/gradient channels and Fourier columns at fixed lattice."""
+    values,ft,_,_=bloch_grid(cell.topology,cell.parameters_at(coordinates),cell.lattice,cell.mesh,inputs.kpoints)
+    return values*jnp.exp(-1j*inputs.kpoints@inputs.coords.T)[:,None,:,None],ft
+
+
 def _nonlocal_source(cell,inputs,ft,dft,direction,partner):
     """Two AO legs and two GTH-projector legs, in separable form."""
     volume=jnp.linalg.det(cell.lattice)
@@ -97,8 +103,7 @@ def displacement_source(source,q,displacements):
     transfer=momentum_transfer(np.asarray(source.kpts)@np.asarray(cell.lattice).T/(2*np.pi),q)
     partner=transfer.partners;mesh=tuple(cell.mesh);volume=jnp.linalg.det(cell.lattice)
     def orbitals(r):
-        values,ft,_,_=bloch_grid(cell.topology,cell.parameters_at(r),cell.lattice,mesh,source.kpts)
-        return values*jnp.exp(-1j*source.kpts@data.coords.T)[:,None,:,None],ft
+        return _orbitals(cell,data,r)
     (ao,ft),(dao,dft)=jax.jvp(orbitals,(cell.coords,),(direction,))
     plus=_shifted_ao(data._replace(ao=ao),transfer)
     dplus=_shifted_ao(data._replace(ao=dao),transfer)
