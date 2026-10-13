@@ -75,6 +75,8 @@ class Cell:
         self.nelec=tuple(int(v) if v==int(v) else v for v in counts)
         from ..integrals.basis import prepare_basis
         self.topology,self.parameters=prepare_basis(self.spec,self.basis_spec)
+        self._shell_atoms=np.argmin(np.linalg.norm(np.asarray(self.parameters.centers)[:,None]
+            -np.asarray(self.coords)[None],axis=-1),axis=1)
         self._version=getattr(self,'_version',0)+1
         return self
 
@@ -87,6 +89,20 @@ class Cell:
 
     def make_kpts(self,mesh,*,shift=(0.,0.,0.)):
         return uniform_kpoints(self.lattice,mesh,shift=shift)
+
+    def parameters_at(self,coordinates):
+        """Move all atom-attached shells and nuclei; coordinates are in Bohr.
+
+        Exponents/contractions remain fixed. Floating basis centers require an
+        explicit BasisParameters construction instead of this atomic adapter.
+        """
+        from dataclasses import replace
+        coordinates=jnp.asarray(coordinates)
+        if coordinates.shape!=self.coords.shape or not jnp.issubdtype(coordinates.dtype,jnp.floating):
+            raise ValueError('coordinates must be real floating (natom,3) arrays in Bohr')
+        if not np.allclose(self.parameters.centers,self.coords[self._shell_atoms],atol=1e-12,rtol=0):
+            raise ValueError('parameters_at requires atom-attached basis centers')
+        return replace(self.parameters,centers=coordinates[self._shell_atoms],nuclear_coords=coordinates)
 
 
 def M(**kwargs):

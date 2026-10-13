@@ -154,12 +154,6 @@ class _SCF:
 
     def kernel(self,dm0=None):
         if not jax.config.x64_enabled:raise ValueError('Periodic SCF requires JAX float64.')
-        if self.functional is not None and (self.default_xc=='hf' or self.xc is not None):
-            raise ValueError('Use a periodic KS class with one external Functional and no named xc baseline.')
-        if self.params is not None and self.functional is None:
-            raise ValueError('params requires an external functional')
-        if self.default_xc=='hf' and self.xc!='hf':
-            raise ValueError('Use a periodic KS class for a DFT functional.')
         self.inputs=build_inputs(self.cell,kpts=self.kpts,kweights=self.kweights)
         self.reduction=(time_reversal_plan(np.asarray(self.kpts)@np.asarray(self.cell.lattice).T/(2*np.pi))
                         if self.time_reversal else None)
@@ -169,8 +163,6 @@ class _SCF:
                     or not bool(self.reduction.consistent(self.inputs.hcore))
                     or not np.allclose(w,w[self.reduction.partners],atol=1e-12,rtol=0)):
                 raise ValueError('Inputs violate time reversal; use the full mesh or refine the FFT grid.')
-        if self.temperature is not None and (not np.isfinite(self.temperature) or self.temperature<=0):
-            raise ValueError('temperature is kBT in Eh and must be positive; use None for fixed occupations')
         if (self.functional is None and hybrid_coeff(self.xc)!=0 and self.exxdiv=='ewald'
                 and not np.allclose(self.inputs.kweights,1/len(self.kpts),atol=1e-12,rtol=0)):
             raise NotImplementedError('Ewald exchange correction requires equal k weights; use exxdiv=None for general weights')
@@ -178,14 +170,7 @@ class _SCF:
         if dm0 is not None:
             d=jnp.asarray(dm0)
             density=d if self.unrestricted else jnp.stack([d/2,d/2])
-        if self.kpts.shape==(1,3) and not np.any(np.asarray(self.kpts)):
-            self.result=run_gamma_scf(self.inputs,nelec=self.cell.nelec,xc=self.xc,exxdiv=self.exxdiv,
-                init_density=None if density is None else density[:,0],temperature=self.temperature,
-                mesh=self.cell.mesh,functional=self.functional,params=self.params,reduction=self.reduction,**self.controls)
-        else:
-            self.result=run_kpoint_scf(self.inputs,mesh=self.cell.mesh,nelec=self.cell.nelec,
-                xc=self.xc,exxdiv=self.exxdiv,init_density=density,temperature=self.temperature,
-                functional=self.functional,params=self.params,reduction=self.reduction,**self.controls)
+        self.result=self._solve(self.inputs,params=self.params,init_density=density,reduction=self.reduction)
         self._computed_xc=self.xc;self._computed_mesh=self.cell.mesh;self._cell_version=self.cell._version
         self._computed_functional=self.functional;self._computed_params=_params_signature(self.params)
         self._computed_time_reversal=self.time_reversal
@@ -206,6 +191,26 @@ class _SCF:
         for name in ('temperature','functional','params','time_reversal'):
             if name in controls:setattr(self,name,controls.pop(name))
         self.controls.update(controls);self.kernel();return self
+
+    def _solve(self,inputs,*,params,init_density=None,reduction=None):
+        if self.functional is not None and (self.default_xc=='hf' or self.xc is not None):
+            raise ValueError('Use a periodic KS class with one external Functional and no named xc baseline.')
+        if params is not None and self.functional is None:
+            raise ValueError('params requires an external functional')
+        if self.default_xc=='hf' and self.xc!='hf':
+            raise ValueError('Use a periodic KS class for a DFT functional.')
+        if self.temperature is not None and (not np.isfinite(self.temperature) or self.temperature<=0):
+            raise ValueError('temperature is kBT in Eh and must be positive; use None for fixed occupations')
+        gamma=self.kpts.shape==(1,3) and not np.any(np.asarray(self.kpts))
+        solver=run_gamma_scf if gamma else run_kpoint_scf
+        density=init_density[:,0] if gamma and init_density is not None else init_density
+        return solver(inputs,mesh=self.cell.mesh,nelec=self.cell.nelec,xc=self.xc,exxdiv=self.exxdiv,
+            init_density=density,temperature=self.temperature,functional=self.functional,
+            params=params,reduction=reduction,**self.controls)
+
+    def nuc_grad_method(self):
+        from .grad import Gradients
+        return Gradients(self)
 
     def get_bands(self,kpts,*,chunk_size=4):
         from .bands import get_bands

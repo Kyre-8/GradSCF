@@ -1,4 +1,4 @@
 """Periodic Gaussian electronic structure."""
-from . import gto,scf,dft,tdscf,optics
+from . import gto,scf,dft,tdscf,optics,grad
 from .gto import Cell
-__all__=['gto','scf','dft','tdscf','optics','Cell']
+__all__=['gto','scf','dft','tdscf','optics','grad','Cell']

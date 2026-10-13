@@ -41,3 +41,8 @@ class OFDFT:
     def run(self, initial=None):
         self.kernel(initial)
         return self
+
+    def nuc_grad_method(self):
+        """Periodic Cell forces/stress; array inputs require an energy callback."""
+        from ..pbc.grad import Gradients
+        return Gradients(self)

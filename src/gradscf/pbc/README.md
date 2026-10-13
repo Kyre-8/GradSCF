@@ -175,6 +175,58 @@ External periodic models are currently supported by SCF and q=0 DFPT, but not
 by the TD/GW, optical or band-query consumers: an arbitrary energy model does
 not specify their missing off-grid/dynamical operators.
 
+## Forces and stress
+
+Periodic HF/KS and Cell-based OFDFT share `pbc.grad`:
+
+```python
+gradient = mf.nuc_grad_method()  # Also calc.nuc_grad_method() for periodic OFDFT.
+de = gradient.kernel()          # dE/dR, or dF/dR at finite temperature.
+forces = gradient.result.forces # -de, in Eh/Bohr.
+stress = gradient.stress()      # Tensile-positive, in Eh/Bohr**3.
+pressure = -stress.trace()/3
+```
+
+Each `kernel()` rebuilds integrals and reconverges from the default seed using
+the existing explicit/implicit policy. An existing SCF reference must have
+current settings. A density differing from the supplied reference by more than
+`1e-6*(1+norm(reference))` is rejected, rather than silently returning another
+solution's derivatives. Following an arbitrary metastable branch is not
+implemented. Failed primal/adjoint calculations leave no result cache.
+`stress()` reuses the latest successful `kernel()` result; rerun `kernel()` after
+changing the source. The source SCF result is not replaced.
+
+For row lattice A and Cartesian positions R, let G_R=dE/dR and G_A=dE/dA:
+
+\[
+\mathbf F=-G_R,\qquad
+\sigma=\frac{\operatorname{sym}(G_R^{\mathsf T}R+G_A^{\mathsf T}A)}{\det A}.
+\]
+
+The symmetric strain convention is `R(e)=R@(I+e).T`, `A(e)=A@(I+e).T`.
+Forces hold the cell fixed; stress holds fractional positions and fractional
+k points fixed. Electron/spin counts, kBT, Gaussian exponents and contractions
+are fixed. `cell.parameters_at(coordinates)` moves every atom-attached shell;
+floating centers require an explicit geometry callback. Moving overlaps,
+Gaussian centers, FFT weights, reciprocal vectors, GTH potentials, Ewald and
+exchange corrections remain in AD. Thermal derivatives use free energy.
+The derivative driver uses the full k mesh even for a time-reversal source.
+
+`pbc.grad.energy_and_derivatives(energy_fn, params, coordinates, lattice)` is
+the pure JAX entry for custom models and parameter/geometry differentiation.
+Its callback returns a real scalar, rebuilds geometry-dependent inputs and owns
+convergence checks. Existing derivative-order limits still apply; no higher
+thermal derivatives at degeneracy are implied. OFDFT supports grid and Gamma
+Gaussian amplitudes and retains its local-pseudopotential restriction.
+
+FFT mesh and Ewald image topology remain fixed during AD: this differentiates
+the discretized energy, not an adaptive cutoff. Check force/stress mesh
+convergence separately. For the off-grid H2 regression, the largest residual
+total-force component decreases from `1.18e-5` at mesh 31 cubed to
+`2.82e-8 Eh/Bohr` at mesh 41 cubed; rigid-translation energy differences reproduce
+the residual. No artificial zero-force projection is applied.
+`examples/periodic_forces.py` demonstrates HF and OFDFT.
+
 ## Validation and remaining steps
 
 Focused tests cover weighted energy/Fock consistency (HF and a handwritten PBE
@@ -189,6 +241,6 @@ free-energy AD and q=0 response. Its coarse sampling is an API demonstration,
 not a material convergence benchmark.
 
 The next foundation work remains physical space-group/AO transformations,
-irreducible J/K evaluation, periodic Trainer sample adapters, and the force/stress
-interface. Finite-q phonons, metallic TD/GW/BSE, other smearing schemes, SOC and
+irreducible J/K evaluation and periodic Trainer sample adapters.
+Finite-q phonons, metallic TD/GW/BSE, other smearing schemes, SOC and
 macroscopic Berry-phase fields are not supplied by this increment.
