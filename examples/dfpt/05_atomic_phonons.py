@@ -1,7 +1,8 @@
 """AD atomic response and commensurate reference phonons for a periodic H2 cell.
 
 GTH-SZV/GTH-Pade, 6-Bohr cubic cell, 3x1x1 k mesh, 31-cubed FFT mesh,
-CPU float64. The finite-q reference uses a three-cell supercell. This input
+CPU float64. Finite-q electronic response uses the primitive cell; the
+geometry Hessian still uses a bounded three-cell supercell. This input
 geometry is not optimized: signed frequencies describe its local curvatures,
 and negative values are retained. It is not a converged material benchmark.
 """
@@ -41,7 +42,7 @@ assert screened.converged
 print('Finite-q overlap-source norm (1/Bohr):', float(jnp.linalg.norm(source.perturbation.overlap)))
 print('Finite-q coefficient-density response norm:', float(jnp.linalg.norm(screened.density)))
 
-finite = phonons.kernel(q)
+finite = phonons.kernel(q, method='primitive')
 print('q=(1/3,0,0) frequencies (cm^-1):', np.asarray(finite.frequencies)*to_cm1)
 print('Force-constant Hermiticity error:', float(finite.hermiticity_error))
 print('Maximum linear residual:', float(finite.residual_norm))
@@ -55,8 +56,8 @@ print('Maximum linear residual:', float(finite.residual_norm))
 # [-1736.00227 -1710.11028 ~0 ~0 ~0 5072.93120]
 # (The three projected translation frequencies are below 2e-5 cm^-1.)
 # Finite-q overlap-source norm (1/Bohr): 0.7864469202751011
-# Finite-q coefficient-density response norm: 0.22972737639183513
+# Finite-q coefficient-density response norm: 0.2297273763920824
 # q=(1/3,0,0) frequencies (cm^-1):
 # [-1732.45234 -1708.19684 -61.59887 -46.30911 243.69684 5070.43139]
-# Force-constant Hermiticity error: 8.483791559210257e-15
-# Maximum linear residual: 2.093895830192015e-16
+# Force-constant Hermiticity error: 6.173390327105482e-14
+# Maximum linear residual: 6.150304229797515e-16

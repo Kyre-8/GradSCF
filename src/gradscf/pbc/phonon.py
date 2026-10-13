@@ -1,8 +1,9 @@
 """Bounded commensurate-supercell DFPT phonons using shared atomic response.
 
 Geometry sources and force derivatives use AD, not finite displacement. The
-supercell response space is retained: this is a small-system reference path,
-not a scalable primitive-cell phonon implementation. Odd diagonal replication
+default retains the supercell electronic response; method='primitive' uses
+the primitive electronic response with supercell geometry contractions. Both
+are small-system paths, not fully scalable primitive phonons. Odd replication
 preserves the current symmetric FFT grid. Frequencies are signed hbar*omega
 in Eh (negative means an imaginary mode); masses are supplied in atomic mass
 units. Mode diagonalization is an eager numerical postprocessing operation.
@@ -20,13 +21,9 @@ from .kpoints import kmesh_shape
 from .momentum import momentum_transfer,wrap_to_kmesh
 from ..dfpt.atomic import atomic_problem
 from ..dfpt.finite_q import QSource
+from ..dfpt.displacement import DisplacementSource,displacement_source
 from ..solvers.operators import as_operator
 from ..solvers.eigen.dense import dense_vectors
-
-
-class DisplacementSource(NamedTuple):
-    perturbation: QSource
-    hcore: object
 
 
 class PhononResult(NamedTuple):
@@ -81,6 +78,44 @@ def _replica(cell,repetitions):
         centers=(p.centers[None]+translations[:,None]).reshape(-1,3),nuclear_coords=coords)
     replica._shell_atoms=np.concatenate([cell._shell_atoms+i*len(cell.coords) for i in range(len(indices))])
     return replica,indices,translations
+
+
+def _q_force_response(source,reference,q,indices,transform,config):
+    """Primitive electronic solve, bounded supercell geometry contraction.
+
+    This intermediate path removes the supercell response solve, not its
+    integrals or geometry Hessian workspace. W1 follows by differentiating
+    D F S^-1 in the shared Pulay force routine, including fractional f.
+    """
+    from ..dfpt.finite_q import finite_q_problem
+    from ..dfpt.atomic import _ks_forces
+    from ..integrals.periodic.fft import build_inputs
+    cell=source.cell;sup=reference.cell;nk=len(source.kpts);n=cell.topology.nao
+    fractional=np.asarray(source.kpts)@np.asarray(cell.lattice).T/(2*np.pi)
+    transfer=momentum_transfer(fractional,q)
+    problem=finite_q_problem(source.inputs,source.result,transfer,mesh=cell.mesh,
+                            xc=source.xc,exxdiv=source.exxdiv,temperature=source.temperature)
+    phase=jnp.exp(2j*jnp.pi*(jnp.asarray(indices)@q))
+    def inputs_at(r):
+        return build_inputs(sup,parameters=sup.parameters_at(r))
+    def forces(d,r):
+        return _ks_forces(d,r,inputs_at,mesh=sup.mesh,xc=reference.xc,exxdiv=reference.exxdiv)
+    density=reference.result.density_spin
+    def respond(direction):
+        perturbation=displacement_source(source,q,direction).perturbation
+        result=problem.response(tangent=perturbation,config=config)
+        blocks=jnp.zeros((2,nk,n,nk,n),dtype=complex)
+        for k,p in enumerate(transfer.partners):
+            blocks=blocks.at[:,p,:,k,:].set(result.density[:,k])
+        full=transform@blocks.reshape(2,nk*n,nk*n)@transform.conj().T
+        adjoint=full.conj().swapaxes(-1,-2)
+        cosine=((full+adjoint)/2).real[:,None].astype(density.dtype)
+        sine=((full-adjoint)/(2j)).real[:,None].astype(density.dtype)
+        pattern=(phase[:,None,None]*direction[None]).reshape(-1,3)
+        real=jax.jvp(forces,(density,sup.coords),(cosine,pattern.real))[1]
+        imag=jax.jvp(forces,(density,sup.coords),(sine,pattern.imag))[1]
+        return real+1j*imag,result.residual_norm,result.converged
+    return forces(density,sup.coords),jax.jit(respond)
 
 
 class Phonons:
@@ -169,15 +204,23 @@ class Phonons:
         if q.shape!=(3,) or not np.isfinite(q).all():raise ValueError('q must be a finite fractional three-vector')
         return wrap_to_kmesh(q)
 
-    def displacement(self,q,displacements):
-        """AD fixed-D sources for the primitive finite_q_problem (nonzero q)."""
+    def displacement(self,q,displacements,*,method='primitive'):
+        """Fixed-D sources; independent supercell AD remains an explicit oracle."""
+        self.super_reference=None
+        if method=='primitive':return displacement_source(self.source,q,displacements)
+        if method!='supercell':raise ValueError('Use primitive or supercell displacement sources')
+        return self._supercell_displacement(q,displacements)
+
+    def _supercell_displacement(self,q,displacements):
+        """Independent AD oracle retaining the bounded full supercell."""
         from ..integrals.periodic.fft import build_inputs
         from ._kpoint import energy_and_fock
         from .functional import density_inputs
-        q=self._q(q)
-        if not isinstance(self.source,_SCF) or np.allclose(q,0.):
+        canonical=self._q(q)
+        q=np.asarray(q,dtype=float)
+        if not isinstance(self.source,_SCF) or np.allclose(canonical,0.):
             raise NotImplementedError('Use atomic_problem for Gamma or OFDFT displacement response')
-        cell,repetitions,indices,b=self._prepare(q)
+        cell,repetitions,indices,b=self._prepare(canonical)
         direction=jnp.asarray(displacements)
         if direction.shape!=cell.coords.shape or jnp.iscomplexobj(direction):
             raise ValueError('displacements must be real (natom,3) amplitudes in Bohr')
@@ -203,9 +246,15 @@ class Phonons:
         envelope*=jnp.exp(-1j*self.source.inputs.coords@wave)
         return DisplacementSource(QSource(fold(f),fold(s),envelope),fold(h))
 
-    def kernel(self,q=(0.,0.,0.),*,asr=False,config=None):
-        """Force constants and numerical modes; ASR projection is opt-in at Gamma."""
+    def kernel(self,q=(0.,0.,0.),*,asr=False,config=None,method='supercell'):
+        """Force constants and numerical modes; ASR projection is opt-in at Gamma.
+
+        method selects the finite-q electronic response space. 'primitive'
+        supports HF/KS and retains a bounded supercell geometry contraction;
+        'supercell' is the independent reference and also supports OFDFT.
+        """
         self.result=None;self.super_reference=None;self.reference_forces=None
+        if method not in ('primitive','supercell'):raise ValueError('Use primitive or supercell phonon response')
         q=self._q(q);gamma=np.allclose(q,0.)
         if asr and not gamma:raise ValueError('ASR projection is only defined here at Gamma')
         source=self.source;cell=source.cell if isinstance(source,_SCF) else source.system
@@ -214,21 +263,32 @@ class Phonons:
             self._limits(cell,(1,1,1),nk=len(source.kpts) if isinstance(source,_SCF) else 1)
             reference=source;indices=np.zeros((1,3),dtype=int)
         else:
-            _,_,indices,_=self._prepare(q);reference=self.super_reference
-        problem=atomic_problem(reference)
-        self.reference_forces=problem.quantities(problem.solution,problem.inputs)['forces']
+            if method=='primitive' and not isinstance(source,_SCF):
+                raise NotImplementedError('Primitive phonon electronic response currently requires HF/KS')
+            _,_,indices,transform=self._prepare(q);reference=self.super_reference
+        primitive=method=='primitive' and not gamma
+        if primitive:
+            self.reference_forces,respond=_q_force_response(source,reference,q,indices,transform,config)
+        else:
+            problem=atomic_problem(reference)
+            self.reference_forces=problem.quantities(problem.solution,problem.inputs)['forces']
+            respond=jax.jit(lambda direction:problem.response(tangent=direction,config=config))
         phase=jnp.exp(2j*jnp.pi*(jnp.asarray(indices)@q));count=len(indices)
         nat=len(cell.coords);columns=[];residuals=[]
-        respond=jax.jit(lambda direction:problem.response(tangent=direction,config=config))
         for direction in jnp.eye(3*nat).reshape(3*nat,nat,3):
-            pattern=(phase[:,None,None]*direction[None]).reshape(-1,3)
-            real=respond(pattern.real)
-            if not bool(real.converged):raise RuntimeError('Atomic response did not converge')
-            response=real.values['forces'].astype(complex);residuals.append(real.residual_norm)
-            if not gamma:
-                imag=respond(pattern.imag)
-                if not bool(imag.converged):raise RuntimeError('Atomic response did not converge')
-                response+=1j*imag.values['forces'];residuals.append(imag.residual_norm)
+            if primitive:
+                response,residual,converged=respond(direction)
+                if not bool(converged):raise RuntimeError('Atomic q response did not converge')
+                residuals.append(residual)
+            else:
+                pattern=(phase[:,None,None]*direction[None]).reshape(-1,3)
+                real=respond(pattern.real)
+                if not bool(real.converged):raise RuntimeError('Atomic response did not converge')
+                response=real.values['forces'].astype(complex);residuals.append(real.residual_norm)
+                if not gamma:
+                    imag=respond(pattern.imag)
+                    if not bool(imag.converged):raise RuntimeError('Atomic response did not converge')
+                    response+=1j*imag.values['forces'];residuals.append(imag.residual_norm)
             column=-jnp.einsum('r,rai->ai',phase.conj()/count,response.reshape(count,nat,3))
             columns.append(column.ravel())
         phi=jnp.stack(columns,axis=1)

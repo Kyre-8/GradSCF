@@ -2,8 +2,8 @@
 
 Solve (1-chi0_q K_q) dD_q = chi0_q v_q with the shared Problem/linear solver.
 This is the finite-basis spectral form of the Sternheimer equation, with all
-AO bands retained. QSource supports moving-metric/Pulay response; the bounded
-phonon adapter supplies geometry sources. See Baroni et al., Rev. Mod. Phys.
+AO bands retained. QSource supports moving-metric/Pulay response; the primitive
+displacement adapter supplies geometry sources. See Baroni et al., Rev. Mod. Phys.
 73, 515 (2001), Sec. II.C.1.
 """
 import jax
@@ -51,16 +51,20 @@ def _independent_response(result,transfer,temperature):
             return jax.vmap(pair)(values[partner],values)*jnp.isfinite(chemical_potential)
         divided=jax.vmap(spin)(e,mu)
     def apply(v,overlap=None):
-        mo=c[:,partner].conj().swapaxes(-1,-2)@v@c
+        # JAX 0.8.1 CPU constant folding can miscompile gather+conjugate+
+        # transpose of a closed-over complex frame. Keep the frame at runtime;
+        # the barrier is an AD identity and does not detach its derivatives.
+        coeff=jax.lax.optimization_barrier(c)
+        mo=coeff[:,partner].conj().swapaxes(-1,-2)@v@coeff
         response=divided*mo
         if overlap is not None:
-            metric=c[:,partner].conj().swapaxes(-1,-2)@overlap@c
+            metric=coeff[:,partner].conj().swapaxes(-1,-2)@overlap@coeff
             # Generalized spectral derivative: (f_i-f_j)/(e_i-e_j) dF
             # minus [ (f_i+f_j)/2 + (e_i+e_j)/2 * divided ] dS.
             weighted=.5*(f[:,partner,:,None]+f[:,:,None,:])
             weighted+=.5*(e[:,partner,:,None]+e[:,:,None,:])*divided
             response-=weighted*metric
-        return c[:,partner]@response@c.conj().swapaxes(-1,-2)
+        return coeff[:,partner]@response@coeff.conj().swapaxes(-1,-2)
     return apply,valid
 
 

@@ -132,7 +132,9 @@ the FFT exchange and shared linear solvers. This is separate from the TD/GW
 occupation restrictions below. See [finite-q conventions and checks](../dfpt/FINITE_Q.md).
 Atomic-displacement/overlap sources and bounded commensurate HF/KS/OFDFT
 reference phonons are now available; see [atomic response](../dfpt/ATOMIC_RESPONSE.md).
-The latter retain a supercell workspace and are not a primitive-cell scaling implementation.
+Primitive HF/KS displacement sources no longer require a supercell. The phonon
+driver can also select primitive electronic response, while retaining bounded
+supercell geometry contractions; it is not yet a fully primitive-cell scaling implementation.
 
 ### External XC functionals
 

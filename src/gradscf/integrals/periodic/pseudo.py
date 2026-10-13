@@ -42,13 +42,18 @@ def local_potential(gvectors,coords,pseudopotentials):
     return potential
 
 
+def _projector_overlap(vectors,ao_fourier,pos,l,radius,count,volume):
+    """Separable GTH projector/AO overlaps, also used by displacement AD."""
+    beta=jnp.stack([projector(vectors,l,i,radius) for i in range(count)],axis=0)
+    beta=beta*jnp.exp(-1j*vectors@pos)[None,:,None]
+    return jnp.einsum('igm,gp->imp',beta.conj(),ao_fourier)/volume
+
+
 def nonlocal_matrix(vectors,ao_fourier,coords,pseudopotentials,volume):
     result=jnp.zeros((ao_fourier.shape[1],)*2,dtype=complex)
     for pos,pp in zip(coords,pseudopotentials):
         for l,(radius,count,coupling) in enumerate(pp[5:]):
             if not count: continue
-            beta=jnp.stack([projector(vectors,l,i,radius) for i in range(count)],axis=0)
-            beta=beta*jnp.exp(-1j*vectors@pos)[None,:,None]
-            overlap=jnp.einsum('igm,gp->imp',beta.conj(),ao_fourier)/volume
+            overlap=_projector_overlap(vectors,ao_fourier,pos,l,radius,count,volume)
             result=result+jnp.einsum('imp,ij,jmq->pq',overlap.conj(),jnp.asarray(coupling),overlap)
     return result

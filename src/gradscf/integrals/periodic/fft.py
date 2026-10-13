@@ -125,6 +125,13 @@ def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True):
     return j,_kpoint_exchange(inputs,density_spin,mesh=mesh,exxdiv=exxdiv)
 
 
+def _pair_potential(pairs,kernel,mesh):
+    """FFT Coulomb action on AO-pair columns, shared with geometry response."""
+    shape=tuple(mesh)+pairs.shape[1:]
+    return jnp.fft.ifftn(jnp.fft.fftn(pairs.reshape(shape),axes=(0,1,2))
+        *kernel.reshape(tuple(mesh)+(1,1)),axes=(0,1,2)).reshape(pairs.shape)
+
+
 def _kpoint_exchange(inputs,density_spin,*,mesh,exxdiv,bra=None,bra_overlap=None):
     """Shared diagonal/finite-q exchange; bra may represent lifted k+q AOs."""
     from ...pbc.kpoints import weights_for
@@ -137,8 +144,7 @@ def _kpoint_exchange(inputs,density_spin,*,mesh,exxdiv,bra=None,bra_overlap=None
         for source in range(nk):
             pairs=ao[source].conj()[:,:,None]*ao[target][:,None,:]
             kernel=coulomb_kernel(inputs.gvectors+inputs.kpoints[target]-inputs.kpoints[source])
-            shape=tuple(mesh)+pairs.shape[1:]
-            potential=jnp.fft.ifftn(jnp.fft.fftn(pairs.reshape(shape),axes=(0,1,2))*kernel.reshape(tuple(mesh)+(1,1)),axes=(0,1,2)).reshape(pairs.shape)
+            potential=_pair_potential(pairs,kernel,mesh)
             k=k+weight*kw[source]*jnp.einsum('gp,gs,tsr,grq->tpq',bra[target].conj(),bra[source],density_spin[:,source],potential)
         if exxdiv=='ewald':
             s=inputs.overlap[target];k=k+inputs.madelung*jnp.einsum('pr,trs,sq->tpq',bra_overlap[target],density_spin[:,target],s)

@@ -48,10 +48,11 @@ dh = source.hcore
 ds = source.perturbation.overlap
 ```
 
-The displacement adapter uses JVPs of the existing supercell integrals and
-fixed-density Fock builder for cosine and sine displacement patterns. It folds
-their complex combination back to primitive k+q/k blocks. Local and nonlocal
-GTH, moving Gaussians, Hartree and XC contributions follow the same AD path.
+The default displacement adapter constructs primitive k+q/k blocks directly,
+as described below. The explicit `method='supercell'` oracle uses JVPs of the
+existing supercell integrals and fixed-density Fock builder for cosine and sine
+patterns, then folds their combination back to those same blocks. Both include
+local/nonlocal GTH, moving Gaussians, Hartree, exchange and XC contributions.
 
 ## Stationary forces and their response
 
@@ -99,6 +100,62 @@ the second energy derivative, following the stationary DFPT construction of
 Taylor series remain disabled for this adapter until the active integral and
 response primitives have the required higher-order jet coverage.
 
+## Primitive-cell displacement sources
+
+`dfpt.displacement_source(mf, q, displacement)` constructs the fixed-density
+Fock, overlap, direct density and core-Hamiltonian derivatives on the primitive
+cell. It does not build a supercell or rerun SCF. Displacements are real
+Cartesian amplitudes in Bohr; q is fractional reciprocal. Both integer and
+finite-temperature HF/semilocal KS references are accepted. The full equal-weight
+k mesh must be closed under q; the source itself also accepts shifted and even
+meshes. This does not relax the phonon geometry driver's restrictions below.
+The caller's reciprocal representative is preserved, matching `DFPT(mf,q=q)`:
+q and q+G give the same lattice displacement but their periodic density
+envelopes differ by exp(-iG.r). Neither source path silently wraps this envelope.
+
+For AO Fourier columns A_k and their center derivatives B_k, the overlap source
+has two moving-basis legs,
+
+\[
+ S^{(1)}_{k+q,k}=B_k^\dagger A_k/\Omega
+                  +A_{k+q}^\dagger B_{k+q}/\Omega.
+\]
+
+The kinetic source has the same form with the kinetic-energy multiplier.
+The local ionic potential is differentiated at G+q. Nonlocal GTH includes two
+AO legs and two projector legs, sharing the ground-state projector overlaps.
+On the grid, with lifted periodic Bloch factors a and their derivatives b,
+
+\[
+ \rho^{(1),\mathrm{basis}}_{s,q}(r)=\sum_k w_k
+ \left[b_{k+q}D_{s,k}a_k^\dagger
+       +a_{k+q}D_{s,k+q}b_k^\dagger\right].
+\]
+
+Hartree and semilocal XC include both this induced field and both moving AO
+projection legs. Exchange differentiates all four AO factors and the Ewald
+metric correction; its FFT pair-potential action is shared with ground-state
+exchange. Reciprocal folding phases are retained. The resulting source is fed
+directly to the existing finite-q response solver:
+
+```python
+source = dfpt.displacement_source(mf, q, displacement)
+response = dfpt.DFPT(mf, q=q).response(tangent=source.perturbation)
+```
+
+`Phonons.displacement(...)` now uses this primitive construction by default;
+`method='supercell'` explicitly selects the independent full-supercell AD oracle.
+The source facade checks reference freshness eagerly and supports JIT/JVP of
+displacement amplitudes. It is not an array-level training adapter for varying
+the captured SCF reference. Arbitrary external functional finite-q extensions
+and OFDFT primitive sources are not inferred.
+
+Conjugacy at a Brillouin-zone boundary also requires FFT convergence: a finite
+G window need not be closed under a reciprocal shift. For the shifted two-k H2
+test, the core-source adjoint defect decreased from 5.35e-4 at mesh 15 cubed to
+1.41e-6 at mesh 31 cubed, and passed the 1e-8 absolute comparison at mesh 41
+cubed. Sources are not silently symmetrized to conceal this cutoff effect.
+
 ## Commensurate phonon reference
 
 The phase convention uses cell translations only: u_l=exp(iq.R_l)u. The driver
@@ -139,11 +196,29 @@ This first driver is intentionally bounded:
   requires local pseudopotentials. Atomic Gamma response can use existing
   external-functional adapters.
 
-Finite-q phonons currently use the full supercell response space, including for
-OFDFT. The typed primitive q sources provide a route toward a more scalable
-implementation, but the driver does not claim primitive-cell scaling. Born
+`Phonons.kernel(q, method='supercell')` retains the full supercell response
+space and supports HF/KS and OFDFT. The new explicit option
+`method='primitive'` solves the HF/KS electronic response in primitive q blocks
+using the sources above, then reconstructs its cosine/sine supercell density
+variations. A JVP of the shared Pulay force routine supplies the force derivative,
+including W1 via W=D F S^-1. Thus no separate force-response solver or manually
+duplicated W1 implementation is introduced.
+
+This is an intermediate optimization: both modes still build and certify a
+supercell SCF reference and retain its integrals and second geometry derivative
+workspace. Only the electronic response space changes. The full-supercell
+method remains the default and independent comparison. Neither mode claims
+fully primitive-cell scaling. Born
 charges, macroscopic nonanalytic LO/TO corrections and general dispersion
 interpolation are not supplied by this increment.
+
+The compiled finite-q independent response has a regression for complex MO
+frames against a full generalized-eigenproblem finite difference, at zero and
+finite temperature and with/without moving overlap. Local JAX 0.8.1 CPU
+miscompiled constant gather/conjugate/transpose of a closed-over complex frame;
+a runtime `optimization_barrier` avoids that constant-folding path. It is an AD
+identity, not a `stop_gradient`, and relaxed-reference response-loss derivatives
+remain covered by the existing tests.
 
 ## Checks and example
 
@@ -165,6 +240,27 @@ is applied.
 
 Validation on 2026-10-13:
 
+- Primitive-source/electronic-response increment: local CPU JAX 0.8.1,
+  float64, **70 passed, 9 skipped**, 441.48 seconds, with
+  `tests/dfpt tests/pbc/test_integrals.py tests/pbc/test_gradients.py tests/pbc/test_phonon.py`.
+  Against the independent supercell path, the maximum force-constant errors
+  were 1.35e-9 (zero-temperature HF), 3.15e-9 (HF at kBT=0.1 Eh), and
+  1.13e-13 Eh/Bohr squared (handwritten PBE at kBT=0.1 Eh). The carbon/hydrogen
+  nonlocal GTH source comparison gave 1.56e-14 Eh/Bohr. These are fixed-grid
+  implementation comparisons, not timing/scaling or material benchmarks.
+- After the q-representative boundary fix, the complete displacement test file
+  was rerun: **8 passed, 2 skipped**, 89.43 seconds. It includes q+G density
+  covariance and the unchanged HF/PBE force-constant comparisons.
+- Isolated `jy_gpu_1` / `jax_scf`, CPU JAX 0.10.0, jax-xc 0.0.9,
+  float64: the production-PBE displacement/phonon tests, complex-frame
+  independent-response tests and production-PBE finite-q response/gradient
+  tests gave **13 passed**, 530.62 seconds. PBE force constants from primitive
+  and supercell electronic responses differed by 1.14e-13 Eh/Bohr squared.
+  The response-loss gradient was 3.463457417934749, versus the independent
+  finite difference 3.463457418084736. These are small-cell implementation
+  tests, not a converged material spectrum or GPU performance benchmark.
+  The final q-representative/input-validation test also passed separately in
+  that environment (**1 passed**, 16.57 seconds).
 - Local CPU JAX 0.8.1, float64: `tests/pbc tests/dfpt` plus the OFDFT
   representation/periodic-force regressions gave **133 passed, 34 skipped**
   in 660.08 seconds. Skips concern optional XC/reference dependencies.

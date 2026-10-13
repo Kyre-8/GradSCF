@@ -41,7 +41,8 @@ def test_q_zero_kernel_matches_existing_density_jvp(xc,monkeypatch):
 
 @pytest.mark.parametrize('moving_metric',[False,True])
 @pytest.mark.parametrize('temperature',[None,.15])
-def test_independent_q_response_against_full_matrix_function(temperature,moving_metric):
+@pytest.mark.parametrize('complex_orbitals',[False,True])
+def test_independent_q_response_against_full_matrix_function(temperature,moving_metric,complex_orbitals):
     from types import SimpleNamespace
     from gradscf.dfpt.finite_q import _independent_response
     from gradscf.pbc.momentum import momentum_transfer
@@ -54,13 +55,18 @@ def test_independent_q_response_against_full_matrix_function(temperature,moving_
     if temperature:
         pop=fermi_occupations(eps,jnp.array([1.,1.]),temperature,jnp.ones(3)/3)
         occ,mu=pop.occupations,pop.chemical_potential
-    result=SimpleNamespace(mo_energy_spin=eps,mo_coeff_spin=jnp.broadcast_to(jnp.eye(2),(2,3,2,2)),
+    coeff=jnp.broadcast_to(jnp.eye(2),(2,3,2,2))
+    if complex_orbitals:
+        rng=np.random.default_rng(42)
+        coeff=jnp.asarray(np.linalg.qr(rng.normal(size=(2,3,2,2))+1j*rng.normal(size=(2,3,2,2)))[0])
+    result=SimpleNamespace(mo_energy_spin=eps,mo_coeff_spin=coeff,
                            mo_occ_spin=occ,chemical_potential=mu)
     chi,valid=_independent_response(result,transfer,temperature)
     assert valid
     potential=jnp.arange(12).reshape(3,2,2)*.01+.013j
     overlap=potential*.2 if moving_metric else jnp.zeros_like(potential)
     response=chi(jnp.stack([potential,potential]),overlap)[0]
+    compiled=jax.jit(chi)(jnp.stack([potential,potential]),overlap)[0]
     perturbation=jnp.zeros((6,6),dtype=complex)
     for source,target in enumerate(transfer.partners):
         perturbation=perturbation.at[2*target:2*target+2,2*source:2*source+2].set(potential[source])
@@ -68,13 +74,16 @@ def test_independent_q_response_against_full_matrix_function(temperature,moving_
     def density(t):
         s=jnp.eye(6)+(.2*t*perturbation if moving_metric else 0.)
         x=jnp.linalg.inv(jnp.linalg.cholesky(s)).conj().T
-        e,c=jnp.linalg.eigh(x.conj().T@(jnp.diag(eps[0].ravel())+t*perturbation)@x)
+        frame=jax.scipy.linalg.block_diag(*coeff[0])
+        h=(frame*eps[0].ravel())@frame.conj().T
+        e,c=jnp.linalg.eigh(x.conj().T@(h+t*perturbation)@x)
         c=x@c
         f=(jnp.arange(6)<3) if temperature is None else jax.nn.sigmoid((mu[0]-e)/temperature)
         return (c*f)@c.conj().T
     fd=(density(1e-5)-density(-1e-5))/2e-5
     expected=jnp.stack([fd[2*t:2*t+2,2*s:2*s+2] for s,t in enumerate(transfer.partners)])
     np.testing.assert_allclose(response,expected,atol=1e-9)
+    np.testing.assert_allclose(compiled,expected,atol=1e-9)
 
 
 @pytest.mark.parametrize('mu',[jnp.nan,jnp.inf,-jnp.inf,1.])
