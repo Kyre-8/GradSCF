@@ -212,6 +212,11 @@ class _SCF:
         from .grad import Gradients
         return Gradients(self)
 
+    def to_reference(self):
+        """Capture a validated periodic array state for the shared Trainer."""
+        from .training import Reference
+        return Reference.from_scf(self)
+
     def get_bands(self,kpts,*,chunk_size=4):
         from .bands import get_bands
         return get_bands(self,kpts,chunk_size=chunk_size)

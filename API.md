@@ -87,6 +87,15 @@ UKS returns alpha/beta AO densities. Reference containers retain their existing
 spin-stacked representation. Conversion is eager; array kernels remain the
 entry points inside `jax.jit` / `jax.grad`.
 
+Periodic HF/KS facades also provide `to_reference()` for the shared Trainer.
+Gamma/k-point, restricted/unrestricted and finite-temperature snapshots support
+an external `dft.Functional` with energy or spin-summed grid-density labels.
+`energy=` means internal energy per cell in Hartree (`mf.e_tot`), including at
+finite temperature. The same three modes and default convergence gate apply;
+unsupported molecular loss types are rejected. See the
+[periodic training contract](src/gradscf/model/neural_xc/training/README.md#periodic-references)
+and [example](examples/training/periodic_xc.py).
+
 ## Migration scope
 
 This is an intentional import-path break. Repository examples, workflows and

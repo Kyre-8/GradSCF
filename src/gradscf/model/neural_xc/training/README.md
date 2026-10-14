@@ -45,6 +45,52 @@ low-level SCF normalizer accepts historical `expl`/`unrolled` aliases and
 maps them to `explicit`; new high-level Trainer configurations use only the
 three names above. `impl` remains a historical low-level alias for `implicit`.
 
+## Periodic references
+
+The same `Sample` and `Trainer` accept solved periodic Gamma/k-point HF/KS
+facades, including unrestricted and finite-temperature references. Supply an
+external `dft.Functional`; its input callback receives the existing periodic
+density features, k weights and lattice. The snapshot retains integral arrays
+and spin/k density as PyTree data, and freezes the mesh, electron populations,
+temperature and exchange convention. Later facade changes do not refresh it.
+
+```python
+sample = training.Sample(periodic_mf, energy=target_energy_per_cell)
+trainer = training.Trainer(functional, params=params)
+trainer.mode = 'implicit'  # fixed_density and explicit use the same interface
+trainer.scf = dict(max_cycle=100, damping=.1, conv_tol_energy=1e-12,
+                   conv_tol_density=1e-10, conv_tol_grad=1e-9)
+trainer.adjoint = dict(tolerance=1e-10, max_iter=60)
+trainer.run(sample, steps=3)
+```
+
+Periodic supervision currently supports `energy` (MSE/MAE) and spin-summed
+`density` (grid MSE); density supervision requires a self-consistent mode.
+Energy labels and predictions are **internal energy E per cell in Hartree**,
+matching `mf.e_tot`. Finite-temperature SCF minimizes free energy, but its
+entropy term is not silently included in the energy label. To train a different
+thermodynamic observable, use the corresponding array API explicitly.
+Per-electron normalization uses the represented electrons; per-atom normalization
+uses primitive-cell atoms. k weights and quadrature weights remain distinct.
+
+Periodic self-consistent training calls the existing full-k SCF, even if the
+source used time-reversal diagonalization. Its supported controls are cycles,
+damping, level shift (zero temperature), energy/density/orbital-gradient
+tolerances, the shared differentiation policy and convergence requirement.
+Changing molecular clipping/jitter/orthogonalization or iterate-selection
+policies is rejected; their inherited defaults do not add these operations to
+periodic SCF. Excitation, orbital, XC-potential/kernel and response training
+targets are not yet supported by this adapter and raise explicit errors.
+
+As for molecular external functionals, unconverged updates are rejected by
+default without advancing Adam. The existing deliberate
+`scf['require_converged'] = False` opt-out is retained for finite-iterate explicit
+training; it does not establish a converged SCF derivative. Best-iterate history
+is not recorded by the periodic solver; its unavailable diagnostics are marked
+with cycle `-1` and `NaN`, rather than inferred from the final state.
+
+See [the periodic four-layer network example](../../../../../examples/training/periodic_xc.py).
+
 ## Inputs and loss
 
 `Sample` is a constructor for the existing validated PyTree sample record,

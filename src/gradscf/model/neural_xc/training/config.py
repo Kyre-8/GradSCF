@@ -160,6 +160,7 @@ class MolecularTrainingConfig:
         "energy_and_residual"
     )
     scf_conv_tol_density: float = 1e-8
+    scf_conv_tol_grad: float = 1e-7
     scf_orthogonalization_eps: float = 1e-10
     scf_eigenvalue_jitter: float = 1e-8
     scf_vxc_clip: float = 20.0
@@ -220,16 +221,23 @@ def Sample(molecule, *, energy=None, density=None, s1_energy=None,
            xc_potential=None, xc_kernel=None, response=None, weight=1.):
     """Construct a training sample using the existing validated PyTree record.
 
-    The source is a solved RKS/UKS object or an explicit AO/grid state.
+    The source is a solved molecular/periodic HF/KS object or an AO/grid state.
     Energies are Hartree. Density is sampled on the prepared state's grid;
     spectrum is (grid_in_eV, values). Conversion is eager, without another SCF
     calculation or a parallel sample type.
     response=(potential_derivative, density_derivative) uses two real AO
     matrices at fixed geometry, with a spin-summed density response. The loss
     depends on AO basis and perturbation units; no hidden normalization is used.
+    Periodic samples currently accept energy (internal E/cell) and spin-summed
+    grid-density targets, with the same fixed/explicit/implicit Trainer modes.
     """
     from gradscf.scf.reference import as_reference
     molecule = as_reference(molecule)
+    from gradscf.pbc.training import Reference
+    if isinstance(molecule,Reference) and any(value is not None for value in
+            (s1_energy,excitation_energies,oscillator_strengths,orbital_energies,
+             orbital_occupations,spectrum,xc_potential,xc_kernel,response)):
+        raise NotImplementedError('Periodic samples support energy and grid density targets.')
     grid, curve = (None, None) if spectrum is None else spectrum
     potential, density_response = (None, None) if response is None else response
     return MolecularTrainingDatum(

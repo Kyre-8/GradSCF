@@ -261,8 +261,16 @@ response is checked against independently perturbed SCF solutions. Optional
 free-energy AD and q=0 response. Its coarse sampling is an API demonstration,
 not a material convergence benchmark.
 
+The shared `training.Sample`/`training.Trainer` now accepts periodic snapshots
+through `mf.to_reference()`, preserving fixed-density, explicit and implicit
+modes. External `dft.Functional` models support energy and grid-density labels;
+energy labels mean internal E/cell even at finite temperature. See the
+[training contract](../model/neural_xc/training/README.md#periodic-references)
+and [example](../../../examples/training/periodic_xc.py).
+
 The next foundation work remains physical space-group/AO transformations,
-irreducible J/K evaluation and periodic Trainer sample adapters.
-Native finite-q OFDFT phonons, Born charges/LO-TO corrections, general phonon
-interpolation, metallic TD/GW/BSE, other smearing schemes, SOC and
+irreducible J/K evaluation and the finite-q external-functional contract.
+Native finite-q OFDFT phonons, Born charges/LO-TO corrections,
+metallic TD/GW/BSE, other smearing schemes, SOC and
 macroscopic Berry-phase fields are not supplied by this increment.
+Nonpolar Fourier interpolation, dispersion and DOS are described in [IFC.md](IFC.md).

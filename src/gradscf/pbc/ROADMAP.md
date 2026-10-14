@@ -21,6 +21,20 @@ parent capability is marked complete.
 - Merge/push completed milestones when requested; do not publish unfinished work
   or include unrelated local changes. Keep the goal active across milestones.
 
+## Current priority
+
+Resume stage 1 functional coverage. Periodic reference snapshots now connect to
+the existing Sample/Trainer with fixed-density, explicit and implicit modes,
+energy/density supervision and the shared convergence policy. The adapter
+reuses periodic SCF and the shared loss/optimizer. Next are physical space-group
+and AO/Bloch operations, followed by irreducible integration using them. The
+finite-q external-functional contract remains a separate open task.
+
+The silicon pilot's memory and timing work is parked. Its diagnostic resource
+limits are not project acceptance criteria and must not block unrelated
+foundation capabilities. Resume material performance work when its stage-2/3
+acceptance gate is being addressed explicitly.
+
 ## 1. Periodic ground-state foundations
 
 - [x] Offline GTH bases/pseudopotentials with provenance and coverage queries.
@@ -29,7 +43,7 @@ parent capability is marked complete.
 - [x] External energy functional integration and three array-level training modes.
 - [ ] Physical space-group operations, atom/basis mapping and AO/Bloch rotations.
 - [ ] Irreducible integration/J/K with numerical equivalence to the full mesh.
-- [ ] Periodic Trainer samples, preserving fixed-density, explicit and implicit modes.
+- [x] Periodic Trainer energy/density samples in fixed-density, explicit and implicit modes.
 - [ ] Explicit external-functional finite-q contract and corresponding response tests.
 
 Acceptance: full/reduced forward agreement; geometry and parameter derivatives
@@ -66,7 +80,7 @@ checks, independent models and first-principles comparisons, raw ASR diagnostics
 converged material dispersions and performance records. Imaginary modes remain
 visible. A projected Gamma zero is not evidence of mesh convergence.
 
-Current milestone: **Fourier force constants and a silicon pilot**. Interpolation
+Completed pilot implementation: **Fourier force constants and silicon**. Interpolation
 passes analytic-lattice and small-cell tests; the full silicon 2-by-2-by-2 q grid
 and DOS run on CPU. The fixed-geometry SZV pilot has imaginary branches and is
 not a converged nonpolar material benchmark. Its remaining convergence and
@@ -82,8 +96,8 @@ construction finishes, but the original full-column action requests about
 reduces that estimate to 23.35 GiB. The 32-GiB RSS gate is still not met; a
 separate 48-GiB diagnostic completes one k4³ column and its hot repeat, taking
 249.39 s (cold) and 178.93 s (hot). The full matrix and k-convergence gate remain
-open. Next: measure the remaining AO/geometry and projection costs before
-selecting a larger k block or further intermediate reduction. Do not infer
+open. Future performance work should measure the remaining AO/geometry and
+projection costs before selecting a larger k block. Do not infer
 material stability from ASR projection.
 
 ## 4. Periodic correlation and spectra
@@ -170,3 +184,21 @@ the supported invariant observables. Complex arrays alone do not meet this gate.
   checks total for this contraction change). The material process peaked at
   32.71 GiB and timed out after 600 s while computing the second column; its
   measured hot repeat took 178.93 s. No completed k4³ spectrum is claimed.
+- 2026-10-15, periodic Trainer adapter on baseline `b21ef41`: ten new regressions
+  first failed on the baseline, then passed in 101.39 s. Three additional Gamma,
+  unrestricted and deliberate convergence-opt-out checks passed in 72.52 s;
+  26 molecular training regressions passed in 58.42 s. The latter reported one
+  existing JAX deprecation warning from the invalid-learning-rate list test.
+  All 39 checks ran on `jy_gpu_1`, `jax_scf`, CPU float64, JAX 0.10.0, with
+  OMP/OpenBLAS threads set to two. No local numerical tests were run.
+  The source/test overlay SHA256 is
+  `e51f95bad239afc2a528989ee5c4f97e1eb670fae0e537eaff801384206e0e06`;
+  added coverage/example overlay is
+  `eaba01e08844f5e40fffd2a1b793ddd8b15c47abedd827817e11682a9fa894df`.
+  Logs are `red.log`, `green.log`, `coverage.log`, `molecular.log`, `example.log`
+  under `/home/yjiao/gradscf_checks/pbc-training-b21ef41`.
+- The shared-Trainer four-layer periodic XC example completes three Adam steps
+  in each mode: MSE falls from approximately 8.04e-5 to 4.14e-5 Eh²; the separate
+  q=0 DFPT electron-number derivative is -2.78e-17. Its labels now use internal
+  energy per cell, explicitly replacing the earlier hand-written free-energy
+  training loop. This is a synthetic teacher/API example, not a material model.
