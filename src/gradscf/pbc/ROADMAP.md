@@ -76,10 +76,15 @@ The negative L curvature is independently reproduced by PySCF. FFT31³ to 41³
 and SZV to DZVP sensitivity checks are complete, but neither removes the pair.
 Finite-q actions now use runtime arrays, independent reference snapshots,
 batched k operations and streamed bilinear rows. DZVP/k2³ completes within the
-monitored resource envelope. SZV/k4³ still exceeds the RSS trigger before
-producing force constants. Next: profile the reference-force factory and
-compiled action separately, then bound their live k/FFT intermediates before
-restarting k convergence. Do not infer material stability from ASR projection.
+monitored resource envelope. Phase profiling is complete: reference-force
+construction finishes, but the original full-column action requests about
+39.90 GiB of temporary buffers. Streaming the two shared response contractions
+reduces that estimate to 23.35 GiB. The 32-GiB RSS gate is still not met; a
+separate 48-GiB diagnostic completes one k4³ column and its hot repeat, taking
+249.39 s (cold) and 178.93 s (hot). The full matrix and k-convergence gate remain
+open. Next: measure the remaining AO/geometry and projection costs before
+selecting a larger k block or further intermediate reduction. Do not infer
+material stability from ASR projection.
 
 ## 4. Periodic correlation and spectra
 
@@ -148,3 +153,20 @@ the supported invariant observables. Complex arrays alone do not meet this gate.
   15.14/30.97 GiB RSS. This is not a warm-call speedup or a scaling fit. The
   final k4³ attempt exited 143 after the memory monitor fired; no k4³ spectrum
   or force-constant matrix was obtained. See IFC.md for the detailed boundaries.
+- Profiling `8da6036`: SCF 31.49 s; reference forces 24.00 s, peak process RSS
+  15.72 GiB at that stage. XLA finished compiling the first action before the
+  0.2-second RSS monitor stopped it. Separate compile-only probes estimate
+  39.90 GiB of full-column temporary storage and 30.00 GiB for a dynamic
+  single-row action; neither probe executes the large compiled action. Exact
+  orbital translation reuse and a two-JIT-stage trial offered no useful
+  reduction and were reverted. See IFC.md for logs and measured boundaries.
+- Shared k-streamed contractions: eight focused value/AD/dtype/memory checks
+  pass in 12.77 s; eight HF/PBE kernel/displacement/geometry checks pass in
+  154.84 s. Final full-column XLA temporary estimate: 25,068,718,408 bytes
+  (23.35 GiB). The 48-GiB material diagnostic completes a column with residual
+  4.21e-13 and repeats it within 1e-12. This is not a completed k4³ IFC matrix
+  or evidence of a speedup against an executed original k4³ calculation.
+- Complete-action snapshot/JVP/VJP checks: three passed in 507.19 s (19 passing
+  checks total for this contraction change). The material process peaked at
+  32.71 GiB and timed out after 600 s while computing the second column; its
+  measured hot repeat took 178.93 s. No completed k4³ spectrum is claimed.

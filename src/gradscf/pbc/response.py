@@ -20,23 +20,37 @@ def _shifted_ao(inputs,transfer):
 
 
 def _fields(density,ao,plus,weights,kind):
-    rho=jnp.einsum('k,kgp,skpq,kgq->sg',weights,plus[:,0],density,ao[:,0].conj())
-    if kind=='LDA':return rho.T
-    gradient=(jnp.einsum('k,kxgp,skpq,kgq->sgx',weights,plus[:,1:4],density,ao[:,0].conj())
-              +jnp.einsum('k,kgp,skpq,kxgq->sgx',weights,plus[:,0],density,ao[:,1:4].conj()))
-    return jnp.concatenate([rho.T,gradient[0],gradient[1]],axis=1)
+    # Sum grid fields before moving to the next k point. Full-k contraction
+    # intermediates otherwise dominate finite-q geometry response workspaces.
+    dtype=jnp.result_type(density,ao,plus,weights)
+    def accumulate(total,arrays):
+        d,a,b,w=arrays
+        d=d.astype(dtype)*w.astype(dtype)
+        rho=jnp.einsum('gp,spq,gq->sg',b[0],d,a[0].conj())
+        fields=rho.T
+        if kind!='LDA':
+            gradient=(jnp.einsum('xgp,spq,gq->sgx',b[1:4],d,a[0].conj())
+                      +jnp.einsum('gp,spq,xgq->sgx',b[0],d,a[1:4].conj()))
+            fields=jnp.concatenate([fields,gradient[0],gradient[1]],axis=1)
+        return total+fields,None
+    initial=jnp.zeros((ao.shape[2],density.shape[0] if kind=='LDA' else 8),
+                      dtype=dtype)
+    return jax.lax.scan(accumulate,initial,
+                        (density.swapaxes(0,1),ao,plus,weights))[0]
 
 
 def _project(ao,plus,weights,potential,kind):
-    blocks=[]
-    for spin in range(2):
-        value=jnp.einsum('g,kgp,kgq->kpq',weights*potential[:,spin],plus[:,0].conj(),ao[:,0])
-        if kind=='GGA':
-            vg=weights[:,None]*potential[:,2+3*spin:5+3*spin]
-            value+=jnp.einsum('gx,kxgp,kgq->kpq',vg,plus[:,1:4].conj(),ao[:,0])
-            value+=jnp.einsum('gx,kgp,kxgq->kpq',vg,plus[:,0].conj(),ao[:,1:4])
-        blocks.append(value)
-    return jnp.stack(blocks)
+    def at_k(arrays):
+        a,b=arrays;blocks=[]
+        for spin in range(2):
+            value=jnp.einsum('g,gp,gq->pq',weights*potential[:,spin],b[0].conj(),a[0])
+            if kind=='GGA':
+                vg=weights[:,None]*potential[:,2+3*spin:5+3*spin]
+                value+=jnp.einsum('gx,xgp,gq->pq',vg,b[1:4].conj(),a[0])
+                value+=jnp.einsum('gx,gp,xgq->pq',vg,b[0].conj(),a[1:4])
+            blocks.append(value)
+        return jnp.stack(blocks)
+    return jax.lax.map(at_k,(ao,plus)).swapaxes(0,1)
 
 
 def q_density(inputs,transfer,density):

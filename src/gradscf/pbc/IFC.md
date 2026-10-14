@@ -181,6 +181,106 @@ its 32 GiB trigger (sampled peak 45.4 GiB); it has no force-constant result. A
 five-second sampling interval can overshoot the trigger and is not a hard RSS
 cap. Increasing the permitted memory is not evidence of an algorithmic fix.
 
+### Isolating the k4 workspace
+
+The 2026-10-14 profile of revision `8da6036` uses the same Si cell, PBE,
+GTH-SZV/GTH-PBE, FFT31³ and q=(0,0,1/2), now with 64 k points. SCF tolerances
+are 1e-11 Eh for energy, 1e-10 for density and 1e-9 for the orbital gradient.
+On `jy_gpu_1` (CPU float64, JAX 0.10.0, two OMP/OpenBLAS threads), SCF took
+31.49 s and the reference-force construction another 24.00 s. The latter
+finished at 4.87 GiB RSS after a process high-water mark of 15.72 GiB.
+The first action finished XLA compilation before the 32-GiB RSS monitor
+terminated it. Sampling every 0.2 s reduced overshoot; the process still reached
+32.84 GiB. This run produced no force-constant column or hot-call timing.
+
+Separate compile-only probes used runtime reference arrays and did **not**
+execute the large action. XLA reported the following temporary buffer estimates;
+these are not measured process RSS or additive allocations between experiments:
+
+| Compiled calculation | Temporary bytes | GiB |
+| --- | ---: | ---: |
+| Production full-column action | 42,838,947,312 | 39.90 |
+| Exact translated-orbital reuse trial | 42,704,768,304 | 39.77 |
+| Split trial: electronic response only | 24,582,540,720 | 22.89 |
+| Split trial: curvature/response contraction only | 43,078,288,840 | 40.12 |
+| One dynamic bilinear row, including electronic response | 32,208,131,184 | 30.00 |
+
+The single-row probe supplies independent runtime row and column displacements;
+it does not specialize to a fixed direction with zero derivative channels.
+The full action has approximately 0.91 GiB of array arguments. Its optimized
+HLO contains many AO/derivative/shifted tensors of shape `(64,4,29791,8)` and
+complex128 dtype, each approximately 0.91 GiB. Logical tensor sizes alone do
+not determine peak liveness, but the single-row result excludes row batching
+as the sole cause. The next memory boundary must include k-resolved geometry
+and grid contractions, not just separate JIT calls around the linear solve.
+
+Translated-orbital reuse passed its equivalence/AD checks but saved only 0.3%
+of the estimated workspace. Splitting electronic response from contraction
+also failed to lower the dominant workspace. Both production-code trials were
+reverted; their diagnostic scripts/patches remain under ignored artifacts.
+No compiler flags, additional caches or alternate physics paths were retained.
+
+Reproduction records are in the isolated remote snapshot
+`/home/yjiao/gradscf_checks/pbc-roadmap-01de656-y0uDNwuQ`:
+`phonon_cpu/memory_phases.log`,
+`phonon_cpu/silicon_memory_compile_before_translation/`,
+`phonon_cpu/memory_compile_translation.log`,
+`phonon_cpu/silicon_split_memory/` and `phonon_cpu/silicon_row_memory/`.
+The probes use `artifacts/roadmap/bounded_cpu_profile.sh` with a 600-second
+timeout, a 128-GiB virtual-memory ceiling and a 32-GiB sampled RSS trigger.
+The single-row upload archive SHA256 is
+`5d9247d0e37f1fbab05ef224745d320cf5bc3d8b4247a28d607441bee829137c`.
+
+### Streaming shared response contractions
+
+The shared `_fields` contraction now accumulates the weighted density and
+gradient fields one k point at a time. `_project` evaluates each k-resolved
+potential matrix in the same way. Both keep the original complex bilinear
+formulas and spin/channel ordering; the implementation changes temporary
+storage rather than the response equation or its solver. The common dtype
+of density, both AO legs and quadrature weights is applied to the small
+density block before multiplication, preserving mixed-precision semantics.
+
+These contractions need grid-sized scratch space for one k point instead of
+the full k mesh. The AO inputs, shifted AO arrays and geometry derivatives
+still span all k points. Reverse differentiation may also retain loop
+intermediates, so this is not a guarantee of bounded total forward/backward
+memory independent of the k mesh.
+
+The final implementation reduces the full-column XLA temporary estimate
+from 42,838,947,312 to 25,068,718,408 bytes: 39.90 to 23.35 GiB (41.5%).
+The final implementation passes eight
+focused CPU checks covering complex non-Hermitian density blocks, LDA/GGA
+values, JVP/VJP, mixed precision and scratch-space growth, in 12.77 s. The two
+memory gates failed on the original full-k implementation, and both
+mixed-precision regressions were observed failing before correction.
+Eight independent q-kernel/displacement/geometry checks for HF/PBE also pass
+in 154.84 s. Three complete-action snapshot/JVP/VJP checks pass in 507.19 s.
+All 19 checks ran remotely on `jy_gpu_1`; no local numerical tests were run.
+
+The final source/test overlay SHA256 is
+`3a00eeaf26a4389243c79d215e6fab6c1f21f9f7d913d1c247277a2124469f94`.
+Focused, physical and complete-action AD logs are `contraction_verified.log`,
+`contraction_physical.log` and `contraction_ad.log` in the same remote snapshot.
+The final compile-only estimate is recorded in
+`phonon_cpu/silicon_final_memory/compile.jsonl`. It is not an RSS measurement.
+
+A separate execution diagnostic retained the 600-second time limit but used
+a 48-GiB RSS trigger. One k4³ column completed with response residual 4.21e-13;
+its hot repeat matched within 1e-12. The cold column took 249.39 s and the hot
+repeat 178.93 s. The process eventually peaked at 32.71 GiB RSS, below the
+diagnostic trigger but above the original 32-GiB target. It reached the time
+limit during the second column (exit 124), so no complete force-constant matrix,
+k4³ frequencies or k-convergence result was obtained. See
+`phonon_cpu/stream_execution48.log` and
+`phonon_cpu/silicon_stream_execution/k4.jsonl`.
+
+The timings come from a shared CPU node while other validation processes were
+running. They are resource diagnostics, not an isolated scaling fit. There
+is no completed original k4³ hot call for a speedup comparison. Remaining
+work includes measuring AO/geometry and projection costs and assessing k
+block sizes without giving up the demonstrated memory bound and AD checks.
+
 The test gates were: three Bloch-grid/value/JVP tests; 23 shared-integral,
 geometry, HF/OFDFT and phonon tests after batching; then three final snapshot/
 constant-capture/JVP-VJP tests and three final independent physical checks after
