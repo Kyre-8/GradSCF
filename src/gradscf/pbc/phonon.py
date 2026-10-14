@@ -37,6 +37,14 @@ class PhononResult(NamedTuple):
     converged: object
 
 
+def _project_translations(phi):
+    """Orthogonal Gamma ASR projection in Cartesian, unweighted coordinates."""
+    nat=len(phi)//3
+    translations=jnp.tile(jnp.eye(3,dtype=phi.dtype),(nat,1))/jnp.sqrt(nat)
+    projector=jnp.eye(len(phi),dtype=phi.dtype)-translations@translations.T
+    return projector@phi@projector
+
+
 def _modes(force_constants,masses,asr):
     phi=jnp.asarray(force_constants)
     masses=np.asarray(masses,dtype=float)
@@ -44,9 +52,7 @@ def _modes(force_constants,masses,asr):
         raise ValueError('Supply one finite positive mass in amu per primitive-cell atom')
     phi=.5*(phi+phi.conj().T)
     if asr:
-        translations=jnp.tile(jnp.eye(3),(len(masses),1))/jnp.sqrt(len(masses))
-        projector=jnp.eye(len(phi))-translations@translations.T
-        phi=projector@phi@projector
+        phi=_project_translations(phi)
     ratio=physical_constants['atomic mass constant'][0]/physical_constants['electron mass'][0]
     scale=jnp.repeat(jnp.sqrt(jnp.asarray(masses)*ratio),3)
     dynamical=phi/scale[:,None]/scale[None,:]
@@ -173,6 +179,32 @@ class Phonons:
         if method=='primitive':return displacement_source(self.source,q,displacements)
         if method!='supercell':raise ValueError('Use primitive or supercell displacement sources')
         return self._supercell_displacement(q,displacements)
+
+    def mesh(self,qmesh,*,asr=False,config=None,method='primitive'):
+        """Sample a complete q mesh and return Fourier-interpolable force constants.
+
+        qmesh must be commensurate with the reference k mesh (or the explicit
+        OFDFT supercell). Raw matrices are collected before optional Gamma ASR
+        projection in ForceConstants, preserving its diagnostic residual.
+        """
+        from .ifc import ForceConstants
+        mesh=np.asarray(qmesh)
+        if mesh.shape!=(3,) or not np.isfinite(mesh).all() or np.any(mesh<1) or np.any(mesh!=mesh.astype(int)):
+            raise ValueError('q mesh must contain three positive integers')
+        mesh=mesh.astype(int)
+        if method not in ('primitive','supercell'):raise ValueError('Use primitive or supercell phonon response')
+        if isinstance(self.source,_SCF):
+            validate_reference(self.source,integer=False,equal_weights=True)
+            cell=self.source.cell;reference_mesh=np.asarray(kmesh_shape(cell.lattice,self.source.kpts))
+        else:
+            cell=self.source.system
+            reference_mesh=np.asarray((1,1,1) if self.supercell is None else self.supercell)
+            if method=='primitive' and np.any(mesh!=1):
+                raise NotImplementedError('Primitive finite-q OFDFT phonons are not available')
+        if np.any(reference_mesh%mesh):raise ValueError('q mesh must be commensurate with the reference sampling')
+        qpoints=np.asarray(list(itertools.product(*[np.arange(n)/n for n in mesh])))
+        matrices=jnp.stack([self.kernel(q,config=config,method=method).force_constants for q in qpoints])
+        return ForceConstants.from_qmesh(cell,qpoints,matrices,masses=self.masses,asr=asr)
 
     def _supercell_displacement(self,q,displacements):
         """Independent AD oracle retaining the bounded full supercell."""

@@ -138,6 +138,13 @@ The bounded supercell path remains an independent reference and supports OFDFT.
 Primitive response still requires an equal-weight closed k mesh and FFT
 convergence; full AO contractions and k-pair exchange work remain.
 
+`Phonons.mesh(qmesh, method='primitive')` samples unweighted force constants and
+returns a `ForceConstants` object for shortest-image Fourier interpolation,
+band paths and Gaussian DOS. The input q mesh must close on the reference k
+mesh. Raw ASR diagnostics are retained; Gamma projection is opt-in and imaginary
+frequencies stay visible. See [IFC conventions, units and validation](IFC.md)
+for the phase gauge, numerical postprocessing boundary and polar limitations.
+
 ### External XC functionals
 
 The same `dft.Functional(input_fn, energy_fn)` used for molecules accepts
