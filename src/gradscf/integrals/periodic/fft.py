@@ -1,5 +1,6 @@
 """Gamma-point FFT density fitting without a four-index ERI tensor."""
 from typing import NamedTuple
+import jax
 import jax.numpy as jnp
 import numpy as np
 from .ao import bloch_grid
@@ -90,14 +91,14 @@ def _assemble_kpoints(cell,parameters,lattice,ao,ft,gv,coords,kpts,kmesh,*,elect
     volume=jnp.linalg.det(lattice);mesh=cell.mesh;ngrid=int(np.prod(mesh))
     vg=local_potential(gv,parameters.nuclear_coords,cell.pseudopotentials)
     vr=jnp.fft.ifftn((vg*ngrid/volume).reshape(mesh)).reshape(-1).real
-    overlaps=[];kinetics=[];cores=[]
-    for index,k in enumerate(kpts):
-        values=ao[index,0];coeff=ft[index];q=gv+k
+    def matrices(k,values,coeff):
+        q=gv+k
         s=coeff.conj().T@coeff/volume
         t=coeff.conj().T@(.5*jnp.sum(q*q,axis=1)[:,None]*coeff)/volume
         v=values.conj().T@(vr[:,None]*values)*volume/ngrid
         v=v+nonlocal_matrix(q,coeff,parameters.nuclear_coords,cell.pseudopotentials,volume)
-        overlaps.append(s);kinetics.append(t);cores.append(t+v)
+        return s,t,t+v
+    overlaps,kinetics,cores=jax.vmap(matrices)(kpts,ao[:,0],ft)
     # Store periodic factors u_k; derivative channels retain (grad + i*k)u_k.
     ao=ao*jnp.exp(-1j*kpts@coords.T)[:,None,:,None]
     if electrostatic is None:
@@ -107,7 +108,7 @@ def _assemble_kpoints(cell,parameters,lattice,ao,ft,gv,coords,kpts,kmesh,*,elect
                             reference_lattice=np.asarray(kmesh)[:,None]*np.asarray(cell.lattice))
     else:
         enuc,mad=electrostatic
-    return PeriodicInputs(jnp.stack(overlaps),jnp.stack(cores),jnp.stack(kinetics),ao,coords,
+    return PeriodicInputs(overlaps,cores,kinetics,ao,coords,
         jnp.full(ngrid,volume/ngrid),None,enuc,mad,kpts,gv,
         **_context(cell,parameters,lattice,ft,gv,kpts))
 

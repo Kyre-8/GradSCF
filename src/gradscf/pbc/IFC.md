@@ -117,12 +117,78 @@ as much as 1.47e-4 Eh/Bohr². `07_silicon_pyscf_reference.py` independently chec
 directional curvatures with re-converged PySCF displaced energies, using the
 primitive cell at Gamma and a doubled cell at q=(0,0,1/2).
 
-| Displacement step (Bohr) | Gamma absolute error (Eh/Bohr²) | Boundary absolute error (Eh/Bohr²) |
-| --- | --- | --- |
-| 0.002 | 9.5589e-6 | 1.1972e-5 |
-| 0.001 | 3.0850e-6 | 4.0075e-6 |
+| Step (Bohr) | Gamma optical error | Boundary optical error | Boundary lowest-mode error |
+| --- | --- | --- | --- |
+| 0.002 | 9.5585e-6 | 1.1971e-5 | 1.6413e-5 |
+| 0.001 | 3.0850e-6 | 4.0039e-6 | 5.8983e-6 |
 
-All four satisfy the preselected absolute gate 2e-5 Eh/Bohr². The doubled
-cell's undisplaced energy divided by two agrees with the native primitive
-energy to 7.2e-14 Eh/cell. These checks establish agreement at matched coarse
-settings; they do not establish convergence of the negative phonon branches.
+All errors are in Eh/Bohr²; all six satisfy the preselected absolute gate 2e-5.
+The doubled cell's undisplaced energy divided by two agrees with the native
+primitive energy within 8e-14 Eh/cell. The native lowest curvature is
+-0.005430210 Eh/Bohr², while the independent PySCF 0.001-Bohr difference is
+-0.005424312 Eh/Bohr². The negative curvature is therefore reproduced without
+Fourier interpolation. It does not establish a physical instability of bulk Si.
+With the same SZV basis and k=2³, increasing FFT from 31³ to 41³ changes the L
+transverse pair from -71.4779 to -71.5419 cm^-1, and the largest IFC entry change
+is 1.81e-5 Eh/Bohr². Basis, k/q and geometry convergence remain separate gates.
+GTH-DZVP at FFT31³/k2³ gives a lowest pair of -84.8419 cm^-1; expanding the
+basis alone also does not remove it. Example 08 records these independent
+sensitivity cases, and example 09 plots them alongside the PySCF negative-
+curvature check.
+
+## Compilation boundary
+
+Primitive finite-q actions pass their grid and SCF reference arrays as JIT
+runtime arguments. The source is validated before construction, and cell and
+sampling metadata are copied into an independent snapshot. Later changes to
+the original SCF object do not mix its new settings with the snapshot arrays.
+The public displacement source still checks a live reference before assembly;
+both paths reuse the same array implementation and shared response solver.
+
+For a fixed column displacement v, the row contraction is real-linear in u:
+`B(u) = u.T @ Phi(q) @ v`, with `B(0) = 0`. Thus its ith derivative at zero is
+exactly `B(e_i)`. The implementation streams these unit-row evaluations with
+`lax.map`, reusing the single electronic response for v. It avoids constructing
+an internal reverse graph solely to recover coefficients of a linear function.
+AO/geometry derivatives inside each contraction still use AD, and differentiation
+of the resulting column is retained. Outer reverse differentiation can still
+store intermediates across rows; this is not a universal low-memory backward
+guarantee.
+
+Bloch-grid generation, one-body matrices and nonlocal overlaps batch their k
+axis rather than copying the same graph once per k point. This avoids embedding
+large reference arrays in the compiled action and reduces trace growth. It does
+not make all runtime workspaces small or establish large-k material scaling.
+The initial Si k=4³ attempt was stopped
+after reaching about 195 GiB RSS; an isolated JAX constant-handling experiment
+also failed under a 64 GiB virtual-memory cap. No experimental compiler option
+is required or enabled by the library. The remaining large-case and GPU gates
+are tracked in ROADMAP.md.
+
+On the Intel Xeon Platinum 8457C node with JAX 0.10.0, CPU float64 and
+OMP/OpenBLAS thread counts set to two, the final streamed implementation gave:
+
+| Single L-point case, FFT31³/k2³ | SCF + force constants, including compilation | Process peak RSS |
+| --- | --- | --- |
+| GTH-SZV, 8 AOs | 185.63 s | 15.14 GiB |
+| GTH-DZVP, 28 AOs | 313.82 s | 30.97 GiB |
+
+The complete SZV raw matrix differs from the original implementation by at most
+9.38e-15 Eh/Bohr². The small-case cold time did not improve overall. These are
+completed single-point measurements on a shared node, not warm-call scaling
+fits. The k4³ run converged its SCF but was stopped after the RSS monitor crossed
+its 32 GiB trigger (sampled peak 45.4 GiB); it has no force-constant result. A
+five-second sampling interval can overshoot the trigger and is not a hard RSS
+cap. Increasing the permitted memory is not evidence of an algorithmic fix.
+
+The test gates were: three Bloch-grid/value/JVP tests; 23 shared-integral,
+geometry, HF/OFDFT and phonon tests after batching; then three final snapshot/
+constant-capture/JVP-VJP tests and three final independent physical checks after
+row streaming. All ran on `jy_gpu_1`; no local numerical tests were run. The
+final two gates took 508.20 s and 246.28 s, respectively. An earlier combined
+run reached its 600-second limit and was rerun as these separate completed gates.
+
+For background on compile-time array handling, see the
+[JAX closed-over constants documentation](https://docs.jax.dev/en/latest/internals/constants.html).
+The runtime-argument boundary here uses ordinary JAX APIs, without relying on
+the experimental constant-handling switch discussed there.

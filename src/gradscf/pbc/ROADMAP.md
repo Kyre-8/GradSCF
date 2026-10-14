@@ -72,6 +72,15 @@ and DOS run on CPU. The fixed-geometry SZV pilot has imaginary branches and is
 not a converged nonpolar material benchmark. Its remaining convergence and
 performance gates stay open.
 
+The negative L curvature is independently reproduced by PySCF. FFT31³ to 41³
+and SZV to DZVP sensitivity checks are complete, but neither removes the pair.
+Finite-q actions now use runtime arrays, independent reference snapshots,
+batched k operations and streamed bilinear rows. DZVP/k2³ completes within the
+monitored resource envelope. SZV/k4³ still exceeds the RSS trigger before
+producing force constants. Next: profile the reference-force factory and
+compiled action separately, then bound their live k/FFT intermediates before
+restarting k convergence. Do not infer material stability from ASR projection.
+
 ## 4. Periodic correlation and spectra
 
 - [x] Existing q=0 periodic TDHF/TDDFT and partial periodic GW infrastructure.
@@ -123,3 +132,19 @@ the supported invariant observables. Complex arrays alone do not meet this gate.
   failed an XLA layout-normalization assertion. Disabling cuBLASLt for one
   diagnostic job did not fix it. No permanent compiler flags were installed;
   this environment-specific GPU gate remains open.
+- 2026-10-14: negative-mode PySCF curvature -0.005424312 versus native
+  -0.005430210 Eh/Bohr² at a 0.001-Bohr step; all six Gamma/boundary directional
+  differences pass the 2e-5 Eh/Bohr² gate in example 07.
+- Runtime-array regression initially failed with 45.69 MB of captured constants;
+  snapshot-mutation and k-trace-growth regressions also reproduced their failures
+  before repair. Final Bloch tests: 3 passed, 10.19 s. Batching integration gate:
+  23 passed, 741.74 s. Final streamed action gates: 3 AD/snapshot tests passed in
+  508.20 s and 3 physical tests passed in 246.28 s. Snapshot archive hashes are
+  `47125553c1ed17d567f27abe608eeebc3ad9f59aca9445ace12993bdd8183621`
+  (batched) and `725e3e4bf4e1eae985f3db8f1167c1f4281c8a2b9df7b9fd63d66935596ae839`
+  (final streamed source/test overlay); CPU float64, JAX 0.10.0 throughout.
+- Matched SZV full-IFC difference after streaming: 9.38e-15 Eh/Bohr². Completed
+  SZV/DZVP single-L-point cold calculations took 185.63/313.82 s and peaked at
+  15.14/30.97 GiB RSS. This is not a warm-call speedup or a scaling fit. The
+  final k4³ attempt exited 143 after the memory monitor fired; no k4³ spectrum
+  or force-constant matrix was obtained. See IFC.md for the detailed boundaries.

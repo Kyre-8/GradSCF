@@ -39,11 +39,8 @@ def _nonlocal_source(cell,inputs,ft,dft,direction,partner):
         for l,(radius,count,coupling) in enumerate(pp[5:]):
             if not count:continue
             def overlaps(coeff,pos):
-                values=[]
-                for k,c in zip(inputs.kpoints,coeff):
-                    vectors=inputs.gvectors+k
-                    values.append(_projector_overlap(vectors,c,pos,l,radius,count,volume))
-                return jnp.stack(values)
+                return jax.vmap(lambda k,c:_projector_overlap(
+                    inputs.gvectors+k,c,pos,l,radius,count,volume))(inputs.kpoints,coeff)
             pos=cell.coords[atom]
             o,da=jax.jvp(lambda coeff:overlaps(coeff,pos),(ft,),(dft,))
             db=jax.jvp(lambda r:overlaps(ft,r),(pos,),(direction[atom],))[1]
@@ -88,6 +85,11 @@ def displacement_source(source,q,displacements):
     from ..pbc.scf import _SCF,validate_reference
     if not isinstance(source,_SCF):raise TypeError('A periodic HF/KS reference is required')
     validate_reference(source,integer=False,equal_weights=True)
+    return _displacement_source(source,q,displacements)
+
+
+def _displacement_source(source,q,displacements):
+    """Array assembly after the public entry point has validated the snapshot."""
     cell=source.cell;data=source.inputs;d=source.result.density_spin
     q=np.asarray(q,dtype=float)
     if q.shape!=(3,) or not np.isfinite(q).all():raise ValueError('q must be a finite three-vector')
