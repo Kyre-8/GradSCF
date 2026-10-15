@@ -1,7 +1,7 @@
 """Reproduce the finite-temperature H2 scGW grid sweep (Ha, beta in Ha^-1).
 
 Example:
-    PYTHONPATH=src JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 python examples/scgw_matsubara_h2.py \
+    PYTHONPATH=src JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 python examples/gw/scgw_matsubara_h2.py \
         --beta 80 --nw 40 80 160 320 640 --output /tmp/scgw_h2_beta80.json
 
 For a low-temperature check at fixed time resolution, compare

@@ -114,7 +114,7 @@ Rebuild it after edits. A physical space-group operation need not preserve the
 finite FFT cutoff or quadrature grid, and a density may break crystal symmetry.
 These maps underlie the optional integration path below. They do not remove
 symmetry-breaking response directions. See
-[the AO-map example](../../../examples/periodic_symmetry.py).
+[the AO-map example](../../../examples/pbc/periodic_symmetry.py).
 
 ## Irreducible SCF integration
 
@@ -152,7 +152,7 @@ response. Explicit differentiation of reduced iterations requires perturbations
 that preserve the declared symmetry and finite sampling. Rebuild static plans
 after geometry/basis edits; symmetry discovery itself is not differentiated.
 These are target-contraction savings, not a claim of full input compression or
-an end-to-end speedup. See [the SCF example](../../../examples/periodic_irreducible.py).
+an end-to-end speedup. See [the SCF example](../../../examples/pbc/periodic_irreducible.py).
 
 ## Finite-temperature SCF
 
@@ -358,7 +358,7 @@ convergence separately. For the off-grid H2 regression, the largest residual
 total-force component decreases from `1.18e-5` at mesh 31 cubed to
 `2.82e-8 Eh/Bohr` at mesh 41 cubed; rigid-translation energy differences reproduce
 the residual. No artificial zero-force projection is applied.
-`examples/periodic_forces.py` demonstrates HF and OFDFT.
+`examples/pbc/periodic_forces.py` demonstrates HF and OFDFT.
 
 ## Validation and remaining steps
 
@@ -369,7 +369,7 @@ PySCF Fermi-smearing energy/free-energy/entropy/occupation comparisons. Al stati
 response is checked against independently perturbed SCF solutions. Optional
 `jax_xc` comparisons remain separate from the handwritten PBE tests.
 
-`examples/periodic_temperature.py` demonstrates FCC Al with a small shifted mesh,
+`examples/pbc/periodic_temperature.py` demonstrates FCC Al with a small shifted mesh,
 free-energy AD and q=0 response. Its coarse sampling is an API demonstration,
 not a material convergence benchmark.
 

@@ -10,4 +10,5 @@ GradSCF installation. Each example states its dependencies and numerical scope.
 | [External functional](external_functional.py) | An external Flax XC network connected through `dft.Functional`, with synthetic teacher targets. |
 | [Periodic external XC](periodic_xc.py) | A four-layer external JAX network using the shared Sample/Trainer in all three modes; internal-energy labels per cell and a separate static periodic DFPT calculation. |
 | [Density-matrix MLP](density_matrix_mlp.py) | A density-matrix energy functional used by the FCI training example. |
+| [Neural SCF forces](train_neural_scf_forces.py) | Force-supervision gradients through native integrals and a small neural XC model. |
 | [Plot H2 FCI training](plot_h2_fci_training.py) | Plot the recorded fixed-density, explicit and implicit loss curves. |

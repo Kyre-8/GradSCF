@@ -15,7 +15,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import numpy as np
 from PIL import Image
 
-root = Path(__file__).resolve().parents[1]
+root = Path(__file__).resolve().parents[2]
 output = root / "artifacts" / "bodipy_boys"
 with np.load(output / "trajectory.npz") as archive:
     rotations, stages = archive["rotations"], archive["stages"]

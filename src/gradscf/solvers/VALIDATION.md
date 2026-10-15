@@ -38,7 +38,7 @@ python -m pytest -q tests/test_scf_orbital_optimization.py \
 python -m pytest -q -rs tests/gw/test_gw_scgw_response.py tests/pbc/test_tdscf.py
 ```
 
-`examples/shared_solvers.py` also ran successfully. Its matrix-free
+`examples/solvers/shared_solvers.py` also ran successfully. Its matrix-free
 eigenvector-dependent observable gave derivative -0.23383077651091166 versus
 central finite difference -0.2338307764748748 (step 1e-5); the nonsymmetric
 linear solve had residual 1.11e-16.
@@ -140,7 +140,7 @@ validate preservation of their existing contracts, not higher-order projector AD
 
 ```bash
 PYTHONPATH=src JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 \
-  python examples/degenerate_subspace.py
+  python examples/solvers/degenerate_subspace.py
 ```
 
 The dimensionless four-state example selects the twofold eigenvalue 1, with
@@ -200,7 +200,7 @@ problem and a one-cycle limit; it still tests genuine nonconvergence.
 
 ```sh
 PYTHONPATH=src JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 \
-  /opt/anaconda3/bin/python examples/degenerate_subspace.py
+  /opt/anaconda3/bin/python examples/solvers/degenerate_subspace.py
 ```
 
 Dimensionless 4-by-4 real symmetric matrix, rank-2 internally degenerate

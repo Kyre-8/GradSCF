@@ -1,6 +1,6 @@
 """An internally degenerate spectral projector and its first-order response.
 
-Run: PYTHONPATH=src JAX_PLATFORMS=cpu python examples/degenerate_subspace.py
+Run: PYTHONPATH=src JAX_PLATFORMS=cpu python examples/solvers/degenerate_subspace.py
 The toy matrix and coupling parameter are dimensionless; no chemical units.
 """
 

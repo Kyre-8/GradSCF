@@ -1,7 +1,7 @@
 """Animate every accepted Boys optimization step for all eight occupied MOs.
 
 Run after building GradSCF native integrals:
-    PYTHONPATH=src JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 python examples/animate_ethylene_boys.py
+    PYTHONPATH=src JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 python examples/localization/animate_ethylene_boys.py
 
 Requires matplotlib >= 3.7, pillow and a NumPy-compatible scikit-image.
 No PySCF or CLI is used.
@@ -25,8 +25,8 @@ from skimage.measure import marching_cubes
 
 from gradscf import integrals
 
-root = Path(__file__).resolve().parents[1]
-example = runpy.run_path(str(root / "examples" / "ethylene_boys.py"))
+root = Path(__file__).resolve().parents[2]
+example = runpy.run_path(str(root / "examples" / "localization" / "ethylene_boys.py"))
 mol = example["mol"]
 c_occ = np.asarray(example["c_occ"])
 rotations = np.asarray(example["rotation_history"])

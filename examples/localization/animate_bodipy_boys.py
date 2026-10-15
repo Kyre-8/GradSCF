@@ -1,6 +1,6 @@
 """Render every accepted BODIPY Boys step from a saved GradSCF trajectory.
 
-Run examples/bodipy_boys.py first. This script does not rerun SCF or optimize
+Run examples/localization/bodipy_boys.py first. This script does not rerun SCF or optimize
 orbitals. It needs matplotlib >= 3.7, pillow and a NumPy-compatible scikit-image.
 All 49 occupied orbitals are shown on separate pages, with fixed phase colors,
 view and isovalue. There is no CLI and no PySCF dependency.
@@ -24,7 +24,7 @@ from skimage.measure import marching_cubes
 from gradscf import integrals
 
 jax.config.update("jax_enable_x64", True)
-root = Path(__file__).resolve().parents[1]
+root = Path(__file__).resolve().parents[2]
 output = root / "artifacts" / "bodipy_boys"
 with np.load(output / "trajectory.npz") as archive:
     data = dict(archive)

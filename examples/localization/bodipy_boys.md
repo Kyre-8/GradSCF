@@ -1,7 +1,7 @@
 # Parent BODIPY: fixed-subspace Boys localization
 
 The [calculation](bodipy_boys.py), [animation](animate_bodipy_boys.py), and
-[independent PySCF comparison](../tests/comparisons/compare_bodipy_boys.py)
+[independent PySCF comparison](../../tests/comparisons/compare_bodipy_boys.py)
 are separate ordinary Python scripts, without command-line argument parsers.
 
 ## Structure and reference calculation
@@ -27,11 +27,11 @@ These storage sizes are not peak process-memory estimates.
 ## Workflow
 
 ```bash
-PYTHONPATH=src JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 python examples/bodipy_boys.py
+PYTHONPATH=src JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 python examples/localization/bodipy_boys.py
 PYTHONPATH=src JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 python tests/comparisons/compare_bodipy_boys.py
-PYTHONPATH=src JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 python examples/animate_bodipy_boys.py
-python examples/combine_bodipy_boys.py
-python examples/animate_bodipy_boys_rotation.py
+PYTHONPATH=src JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 python examples/localization/animate_bodipy_boys.py
+python examples/localization/combine_bodipy_boys.py
+python examples/localization/animate_bodipy_boys_rotation.py
 ```
 
 Build GradSCF's native integrals before the first command. The animation needs

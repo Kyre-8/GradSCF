@@ -16,7 +16,7 @@ construct occupied KS orbitals or require an HF/KS reference.
 For Cell-based periodic calculations, `calc.nuc_grad_method().kernel()` gives
 Cartesian energy gradients. The same driver exposes forces and tensile-positive
 stress through its `result`; see [periodic geometry conventions](../pbc/README.md#forces-and-stress)
-and `examples/periodic_forces.py`. Grid and Gaussian amplitudes use the same
+and `examples/pbc/periodic_forces.py`. Grid and Gaussian amplitudes use the same
 geometry derivative helper and their existing constrained implicit/explicit
 solver. This facade does not supply molecular OFDFT nuclear gradients.
 

@@ -5,16 +5,33 @@ installation. Examples are ordinary Python scripts; numerical settings are
 written directly in the code. Individual files describe optional dependencies,
 units, convergence criteria and measured outputs where available.
 
+## Directory guide
+
+| Directory | Examples |
+| --- | --- |
+| [basis](basis/README.md) | Basis optimization, counterpoise and neural basis assembly. |
+| [bse](bse/) | Optical spectra and BSE electron-phonon effects. |
+| [cc](cc/) | Ground-state and EOM coupled cluster. |
+| [ci](ci/) / [fci](fci/) | Truncated and full configuration interaction. |
+| [dfpt](dfpt/README.md) | Static response, finite q and phonons. |
+| [gw](gw/) | Quasiparticles, Matsubara scGW and electron-phonon effects. |
+| [localization](localization/README.md) | Boys orbitals and optimization animations. |
+| [mp](mp/README.md) | Perturbation series and convergence studies. |
+| [ofdft](ofdft/) | Orbital-free DFT and external comparisons. |
+| [pbc](pbc/) | Periodic basis, SCF, forces, temperature and symmetry. |
+| [solvers](solvers/README.md) | Shared linear/eigenvalue solvers and degenerate response. |
+| [training](training/README.md) | Neural XC, force supervision and response targets. |
+
 ## Periodic foundations
 
 | Example | Purpose |
 | --- | --- |
-| [Periodic H2](periodic_h2.py) | Gaussian/GTH periodic ground-state calculation. |
-| [Basis library](periodic_basis.py) | Offline periodic basis and pseudopotential selection. |
-| [Finite temperature](periodic_temperature.py) | Fermi occupations, free energy and static response. |
-| [Forces](periodic_forces.py) | HF and OFDFT geometry derivatives. |
-| [Spatial symmetry](periodic_symmetry.py) | Space-group and Cartesian AO/Bloch transformations. |
-| [Irreducible integration](periodic_irreducible.py) | Full/irreducible SCF comparison and target contraction counts. |
+| [Periodic H2](pbc/periodic_h2.py) | Gaussian/GTH periodic ground-state calculation. |
+| [Basis library](pbc/periodic_basis.py) | Offline periodic basis and pseudopotential selection. |
+| [Finite temperature](pbc/periodic_temperature.py) | Fermi occupations, free energy and static response. |
+| [Forces](pbc/periodic_forces.py) | HF and OFDFT geometry derivatives. |
+| [Spatial symmetry](pbc/periodic_symmetry.py) | Space-group and Cartesian AO/Bloch transformations. |
+| [Irreducible integration](pbc/periodic_irreducible.py) | Full/irreducible SCF comparison and target contraction counts. |
 | [Periodic XC training](training/periodic_xc.py) | Shared Sample/Trainer in fixed-density, explicit and implicit modes. |
 | [DFPT and silicon phonons](dfpt/README.md) | Molecular/periodic response, external finite-q energies and material checks. |
 
@@ -31,9 +48,12 @@ they are not converged material benchmarks. See the
   electron-phonon effects and orbital-free models.
 - [Training](training/README.md) and [basis optimization](basis/README.md):
   external functional models, reference targets and basis parameters.
-- [Ethylene Boys orbitals](ethylene_boys.py), [BODIPY Boys orbitals](bodipy_boys.py)
+- [Neural basis assembly](basis/nnao_basis.py) and
+  [neural SCF force supervision](training/train_neural_scf_forces.py): native
+  integral and gradient demonstrations.
+- [Ethylene Boys orbitals](localization/ethylene_boys.py), [BODIPY Boys orbitals](localization/bodipy_boys.py)
   and their `animate_*` scripts: orbital localization and visualization.
-- [Shared solvers](shared_solvers.py) and [degenerate subspaces](degenerate_subspace.py):
+- [Shared solvers](solvers/shared_solvers.py) and [degenerate subspaces](solvers/degenerate_subspace.py):
   differentiable solver interfaces and invariant observables.
 
 Generated checkpoints, arrays and plots are written to the paths stated in each

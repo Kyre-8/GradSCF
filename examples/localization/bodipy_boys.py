@@ -222,7 +222,7 @@ np.testing.assert_allclose(local_ad, analytic, atol=1e-10, rtol=0)
 print("Analytic gradient, finite-difference gradient and HVP checks passed.")
 
 # Numerical output only; PySCF comparison and rendering are separate scripts.
-output = Path(__file__).resolve().parents[1] / "artifacts" / "bodipy_boys"
+output = Path(__file__).resolve().parents[2] / "artifacts" / "bodipy_boys"
 output.mkdir(parents=True, exist_ok=True)
 np.savez(output / "trajectory.npz", c_occ=np.asarray(c_occ), c_boys=np.asarray(c_boys),
          rotations=np.asarray(rotation_history), stages=np.asarray(iteration_stages),

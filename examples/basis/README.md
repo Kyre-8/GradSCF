@@ -1,4 +1,12 @@
-# RHF counterpoise example
+# Basis examples
+
+- [bsse_counterpoise.py](bsse_counterpoise.py): RHF counterpoise correction.
+- [optimize_bsse_contractions.py](optimize_bsse_contractions.py): differentiable
+  contraction optimization for a fixed water dimer.
+- [nnao_basis.py](nnao_basis.py): MACE-conditioned H-X basis assembly and native
+  overlap integrals; requires the optional MACE stack and native library.
+
+## RHF counterpoise example
 
 bsse_counterpoise.py directly calls the public GradSCF API:
 

@@ -172,7 +172,7 @@ projector observables. State targets reject unresolved internal gaps for the
 entire requested set, even when a particular aggregate might be invariant.
 Use the subspace energy sum for that aggregate instead.
 
-See [the executable example](../../../examples/degenerate_subspace.py) and
+See [the executable example](../../../examples/solvers/degenerate_subspace.py) and
 [validation](VALIDATION.md) for the test coverage and numerical evidence.
 
 ## Explicit spectral intervals

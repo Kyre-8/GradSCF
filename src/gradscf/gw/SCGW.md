@@ -119,7 +119,7 @@ float64/complex128. H2 at 0.74 Angstrom, Cartesian STO-3G, HF start;
 
 ```bash
 PYTHONPATH=src JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 \
-  python examples/scgw_matsubara_h2.py --beta 80 --nw 40 80 160 320 640 \
+  python examples/gw/scgw_matsubara_h2.py --beta 80 --nw 40 80 160 320 640 \
   --output /tmp/scgw_h2_beta80.json
 ```
 
@@ -143,9 +143,9 @@ To change temperature at fixed time resolution and frequency cutoff:
 
 ```bash
 PYTHONPATH=src JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 \
-  python examples/scgw_matsubara_h2.py --beta 40 --nw 160 --output /tmp/scgw_h2_beta40.json
+  python examples/gw/scgw_matsubara_h2.py --beta 40 --nw 160 --output /tmp/scgw_h2_beta40.json
 PYTHONPATH=src JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 \
-  python examples/scgw_matsubara_h2.py --beta 160 --nw 640 --output /tmp/scgw_h2_beta160.json
+  python examples/gw/scgw_matsubara_h2.py --beta 160 --nw 640 --output /tmp/scgw_h2_beta160.json
 ```
 
 Together with `(beta,nw)=(80,320)`, these produce energies
@@ -226,7 +226,7 @@ finite differences when moving to a new regime.
 
 ```bash
 PYTHONPATH=src JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 \
-  python examples/scgw_implicit_response_h2.py \
+  python examples/gw/scgw_implicit_response_h2.py \
   --beta 8 --nw 8 --output /tmp/scgw_h2_implicit_response.json
 ```
 

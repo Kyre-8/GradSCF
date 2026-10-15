@@ -288,7 +288,7 @@ the supported invariant observables. Complex arrays alone do not meet this gate.
   The nonlocal model is validated at Hessian level, not as a separate complete
   nonlocal SCF-loss benchmark. See [FINITE_Q.md](../dfpt/FINITE_Q.md) for inputs,
   normalizations and independent-oracle construction.
-- Both `examples/periodic_irreducible.py` and
+- Both `examples/pbc/periodic_irreducible.py` and
   `examples/dfpt/03_external_finite_q.py` exited zero on the final runtime
   snapshot. Their logs are `irreducible-example.log` and `external-example.log`
   in the same remote directory; measured output is included as code comments.

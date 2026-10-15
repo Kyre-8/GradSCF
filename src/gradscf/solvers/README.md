@@ -129,7 +129,7 @@ Linear `maxiter` counts GMRES restart cycles, not individual Krylov steps.
   only the external boundary. Unresolved prerequisites produce NaN derivatives.
   See [the derivation and boundary policy](DEGENERACY.md),
   [migration plan](UNIFIED_EIGEN.md), and
-  [example](../../../examples/degenerate_subspace.py).
+  [example](../../../examples/solvers/degenerate_subspace.py).
 - Legacy `EigenSolverConfig` AD fields (also used by RPA) remain honored when
   the explicit `response` argument is omitted. Mixing nondefault legacy controls
   with an explicit response raises an error. No independent projector or
