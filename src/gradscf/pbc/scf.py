@@ -86,8 +86,8 @@ def run_gamma_scf(inputs,*,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
     """Array-valued SCF with implicit/explicit derivatives on fixed FFT topology."""
     if inputs.overlap.shape[0]!=1:
         raise NotImplementedError('This solver currently accepts Gamma only.')
-    if temperature is not None or functional is not None or reduction is not None:
-        if mesh is None:raise ValueError('Thermal/external Gamma SCF requires the explicit FFT mesh')
+    if temperature is not None or functional is not None or reduction is not None or xc_type(xc)=='MGGA':
+        if mesh is None:raise ValueError('Thermal/external/meta-GGA Gamma SCF requires the explicit FFT mesh')
         density=None if init_density is None else jnp.asarray(init_density)[:,None]
         return run_kpoint_scf(inputs,mesh=mesh,nelec=nelec,xc=xc,exxdiv=exxdiv,
             max_cycle=max_cycle,conv_tol=conv_tol,conv_tol_density=conv_tol_density,

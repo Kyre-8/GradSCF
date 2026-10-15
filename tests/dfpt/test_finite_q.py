@@ -103,6 +103,7 @@ def test_inconsistent_thermal_reference_is_rejected(mu):
     ('hf',None,False),('hf',.15,False),('pbe',None,True),('pbe',.15,True),
     pytest.param('pbe',None,False,id='pbe-runtime-zero'),
     pytest.param('pbe',.15,False,id='pbe-runtime-thermal'),
+    pytest.param('r2scan',.15,False,id='r2scan-runtime-thermal'),
 ])
 def test_q_response_matches_supercell_finite_difference(xc,temperature,handwritten,monkeypatch):
     from gradscf import dfpt
@@ -174,7 +175,7 @@ def test_shifted_mesh_q_conjugacy_and_self_inverse_channel(nk):
     if nk==2:np.testing.assert_allclose(positive.density,adjoint(positive.density),atol=1e-7,rtol=0)
 
 
-@pytest.mark.parametrize('xc',['hf',pytest.param('pbe',id='pbe-runtime-grad')])
+@pytest.mark.parametrize('xc',['hf',pytest.param('pbe',id='pbe-runtime-grad'),'r2scan'])
 def test_q_response_loss_gradient_through_relaxed_reference(xc):
     from gradscf import dfpt
     from gradscf.pbc.momentum import momentum_transfer

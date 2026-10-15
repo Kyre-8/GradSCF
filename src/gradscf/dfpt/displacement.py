@@ -101,7 +101,7 @@ def _displacement_source(source,q,displacements):
         raise ValueError('displacements must be finite')
     direction=direction.astype(cell.coords.dtype)
     kind=xc_type(source.xc);alpha=hybrid_coeff(source.xc)
-    if kind not in ('HF','LDA','GGA'):raise NotImplementedError('Atomic q sources support HF/LDA/GGA/global hybrids')
+    if kind not in ('HF','LDA','GGA','MGGA'):raise NotImplementedError('Unsupported atomic q XC source')
     transfer=momentum_transfer(np.asarray(source.kpts)@np.asarray(cell.lattice).T/(2*np.pi),q)
     partner=transfer.partners;mesh=tuple(cell.mesh);volume=jnp.linalg.det(cell.lattice)
     def orbitals(r):
@@ -132,8 +132,9 @@ def _displacement_source(source,q,displacements):
     hcore+=basis_projection(jnp.stack([v0,v0],axis=1),'LDA')[0]
     hcore+=_project(ao,plus,data.weights,jnp.stack([dv,dv],axis=1),'LDA')[0]
     hcore+=_nonlocal_source(cell,data,ft,dft,direction,partner)
-    fields=_fields(d,ao,dplus,weights_for(data),'GGA' if kind=='GGA' else 'LDA')
-    fields+=_fields(d[:,partner],dao,plus,weights_for(data),'GGA' if kind=='GGA' else 'LDA')
+    field_kind='LDA' if kind=='HF' else kind
+    fields=_fields(d,ao,dplus,weights_for(data),field_kind)
+    fields+=_fields(d[:,partner],dao,plus,weights_for(data),field_kind)
     rho0=_kpoint.grid_xc_variables(d,data,'LDA')
     v0=poisson(rho0.sum(axis=1),jnp.zeros(3)).real
     dv=poisson(fields[:,:2].sum(axis=1),wave)

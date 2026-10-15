@@ -243,6 +243,7 @@ _ALIASES = {
     "svwn": "lda_x + lda_c_vwn",
     "svwn_rpa": "lda_x + lda_c_vwn_rpa",
     "pbe": "gga_x_pbe + gga_c_pbe",
+    "r2scan": "mgga_x_r2scan + mgga_c_r2scan",
     "pbe0": "0.25*hf + 0.75*gga_x_pbe + gga_c_pbe",
     "pbeh": "0.25*hf + 0.75*gga_x_pbe + gga_c_pbe",
     "hyb_gga_xc_pbeh": "0.25*hf + 0.75*gga_x_pbe + gga_c_pbe",
@@ -266,6 +267,8 @@ _TERM_FAMILIES = {
     "gga_x_wpbeh": "GGA",
     "gga_c_lyp": "GGA",
     "gga_c_pbe": "GGA",
+    "mgga_x_r2scan": "MGGA",
+    "mgga_c_r2scan": "MGGA",
     "hf": "HF",
 }
 
@@ -717,6 +720,8 @@ def eval_xc_energy_density_unrestricted_from_density_gradients(
     grad_a: Array,
     grad_b: Array,
     *,
+    tau_a: Array | None = None,
+    tau_b: Array | None = None,
     omega: Array | float | None = None,
     allow_experimental_jax_xc: bool = False,
 ) -> Array:
@@ -736,6 +741,8 @@ def eval_xc_energy_density_unrestricted_from_density_gradients(
             rho_b,
             grad_a,
             grad_b,
+            tau_a=tau_a,
+            tau_b=tau_b,
             omega=term_omega,
             allow_experimental_jax_xc=allow_experimental_jax_xc,
         )

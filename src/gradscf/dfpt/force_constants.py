@@ -92,7 +92,7 @@ def geometry_curvature(source,q,u,v):
     kinetic=mixed_matrix(.5*jnp.sum((data.gvectors[None]+data.kpoints[:,None])**2,axis=-1)[:,:,None])
     trace=lambda matrix:jnp.einsum('k,skij,kji->',kw,density,matrix)
     kind=xc_type(source.xc);alpha=hybrid_coeff(source.xc)
-    field_kind='GGA' if kind=='GGA' else 'LDA'
+    field_kind='LDA' if kind=='HF' else kind
     fields=lambda left,right:_fields(density,left,right,kw,field_kind)
     second=fields(ao,d2)+fields(d2,ao)+fields(up,vp)+fields(vm,um)
     # Opposite-q density fields carry their own reciprocal folding phases.

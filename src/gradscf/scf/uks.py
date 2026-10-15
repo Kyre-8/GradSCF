@@ -105,7 +105,7 @@ def _validate_spin_occ(mo_occ: Array, *, nao: int, nelec: int, label: str) -> Ar
 
 
 @lru_cache(maxsize=64)
-def _point_unrestricted_xc_value_and_grad_kernel(
+def _point_unrestricted_xc_energy(
     xc_spec: str,
     xc_kind: str,
 ):
@@ -119,7 +119,7 @@ def _point_unrestricted_xc_value_and_grad_kernel(
         if xc_kind_norm == "LDA":
             grad_a = zero_grad
             grad_b = zero_grad
-        elif xc_kind_norm == "GGA":
+        elif xc_kind_norm in ("GGA", "MGGA"):
             grad_a = variables[2:5]
             grad_b = variables[5:8]
         else:
@@ -130,9 +130,24 @@ def _point_unrestricted_xc_value_and_grad_kernel(
             rho_b,
             grad_a,
             grad_b,
+            tau_a=variables[8] if xc_kind_norm == "MGGA" else None,
+            tau_b=variables[9] if xc_kind_norm == "MGGA" else None,
         )
 
+    return point_energy
+
+
+@lru_cache(maxsize=64)
+def _point_unrestricted_xc_value_and_grad_kernel(xc_spec: str, xc_kind: str):
+    point_energy = _point_unrestricted_xc_energy(xc_spec, xc_kind)
     return jax.jit(jax.vmap(jax.value_and_grad(point_energy)))
+
+
+@lru_cache(maxsize=64)
+def _point_unrestricted_xc_hessian_kernel(xc_spec: str, xc_kind: str):
+    """Independent local-field Hessians; never a grid-by-grid Hessian."""
+    point_energy = _point_unrestricted_xc_energy(xc_spec, xc_kind)
+    return jax.jit(jax.vmap(jax.jacfwd(jax.grad(point_energy))))
 
 
 def _unrestricted_xc_energy_and_potential_on_grid(

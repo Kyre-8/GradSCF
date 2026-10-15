@@ -37,6 +37,8 @@ _STRICT_JAX_XC_FUNCTIONALS = {
     "gga_x_wpbeh",
     "gga_c_lyp",
     "gga_c_pbe",
+    "mgga_x_r2scan",
+    "mgga_c_r2scan",
 }
 
 _HybridTerm = tuple[float, str, dict[str, float]]
@@ -380,6 +382,12 @@ def _evaluate_factory_from_unrestricted_features(
     *,
     family: str,
 ) -> jnp.ndarray:
+    if family == "MGGA":
+        raise NotImplementedError(
+            "Unrestricted MGGA requires explicit spin gradients and tau; use "
+            "eval_xc_energy_density_unrestricted_from_density_gradients. "
+            "The feature-bundle orbital bridge does not preserve sigma_ab."
+        )
     rho_a = jnp.maximum(jnp.asarray(features.rho_a), _DENSITY_FLOOR)
     rho_b = jnp.maximum(jnp.asarray(features.rho_b), _DENSITY_FLOOR)
     sigma_aa = jnp.maximum(jnp.asarray(features.sigma_aa), 0.0)
@@ -432,6 +440,8 @@ def eval_jax_xc_energy_density_from_unrestricted_density_gradients(
     grad_a: Any,
     grad_b: Any,
     *,
+    tau_a: Any | None = None,
+    tau_b: Any | None = None,
     omega: Any | None = None,
     allow_experimental_jax_xc: bool = False,
 ) -> jnp.ndarray:
@@ -439,8 +449,8 @@ def eval_jax_xc_energy_density_from_unrestricted_density_gradients(
 
     info = jax_xc_functional_info(name)
     _raise_if_not_allowed(info, allow_experimental_jax_xc=allow_experimental_jax_xc)
-    if info.family == "MGGA":
-        raise ValueError("Direct unrestricted density-gradient evaluation does not support MGGA.")
+    if info.family == "MGGA" and (tau_a is None or tau_b is None):
+        raise ValueError("MGGA requires explicit orbital-derived tau_a and tau_b.")
     module, _ = load_jax_xc()
     try:
         factory = getattr(module, info.name)
@@ -470,7 +480,15 @@ def eval_jax_xc_energy_density_from_unrestricted_density_gradients(
             dtype=rho_a_eff.dtype,
         )
 
-    epsilon_xc = functional(rho_fn, origin)
+    if info.family == "MGGA":
+        # Synthetic orbital gradients reproduce the supplied positive kinetic
+        # densities. rho_fn retains the full, nonparallel spin gradients.
+        def mo_fn(displacement):
+            slopes = jnp.sqrt(jnp.maximum(2*jnp.asarray([tau_a, tau_b]), 1e-30))
+            return slopes[:, None]*displacement[0]
+        epsilon_xc = functional(rho_fn, origin, mo_fn)
+    else:
+        epsilon_xc = functional(rho_fn, origin)
     return (rho_a_eff + rho_b_eff) * jnp.asarray(
         _coerce_functional_value(epsilon_xc),
         dtype=rho_a_eff.dtype,

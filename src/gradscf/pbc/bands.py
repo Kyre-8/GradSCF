@@ -11,8 +11,8 @@ from .kpoints import weights_for
 def get_bands(mf,kpts,*,chunk_size=4):
     from .scf import validate_reference
     validate_reference(mf,integer=False,equal_weights=False)
-    if hybrid_coeff(mf.xc)!=0 or xc_type(mf.xc) not in ('LDA','GGA'):
-        raise NotImplementedError('Band queries currently support pure LDA/GGA only.')
+    if hybrid_coeff(mf.xc)!=0 or xc_type(mf.xc) not in ('LDA','GGA','MGGA'):
+        raise NotImplementedError('Band queries currently support pure LDA/GGA/meta-GGA only.')
     points=np.asarray(kpts,dtype=float)
     if points.ndim!=2 or points.shape[1]!=3 or not len(points) or not np.isfinite(points).all():
         raise ValueError('kpts must be a nonempty finite (nquery,3) array in inverse Bohr.')

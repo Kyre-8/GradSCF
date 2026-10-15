@@ -58,7 +58,12 @@ def grid_xc_variables(density,inputs,kind):
     kw=weights_for(inputs)
     rho=jnp.einsum('k,kgp,skpq,kgq->sg',kw,ao,density,ao.conj()).real
     grad=2*jnp.einsum('k,kgp,skpq,kxgq->sgx',kw,ao,density,deriv.conj()).real
-    return rho.T if kind=='LDA' else jnp.concatenate([rho.T,grad[0],grad[1]],axis=1)
+    if kind=='LDA':return rho.T
+    fields=jnp.concatenate([rho.T,grad[0],grad[1]],axis=1)
+    if kind=='MGGA':
+        tau=.5*jnp.einsum('k,kxgp,skpq,kxgq->sg',kw,deriv,density,deriv.conj()).real
+        fields=jnp.concatenate([fields,tau.T],axis=1)
+    return fields
 
 
 def project_xc_potential(ao_channels,weights,potential,kind):
@@ -68,10 +73,12 @@ def project_xc_potential(ao_channels,weights,potential,kind):
     for spin in range(2):
         vr=potential[:,spin]
         block=jnp.einsum('g,kgp,kgq->kpq',weights*vr,ao.conj(),ao)
-        if kind=='GGA':
+        if kind in ('GGA','MGGA'):
             vg=potential[:,2+3*spin:5+3*spin]
             term=jnp.einsum('gx,kxgp,kgq->kpq',weights[:,None]*vg,deriv.conj(),ao)
             block=block+term+term.conj().swapaxes(-1,-2)
+        if kind=='MGGA':
+            block+=.5*jnp.einsum('g,kxgp,kxgq->kpq',weights*potential[:,8+spin],deriv.conj(),deriv)
         blocks.append(block)
     return jnp.stack(blocks)
 
@@ -84,7 +91,7 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
     from .occupations import fermi_density, fermi_occupations, density_entropy
     if functional is None:
         if params is not None:raise ValueError('params requires an external functional')
-        if xc_type(xc) not in ('HF','LDA','GGA'):raise NotImplementedError('Unsupported periodic XC.')
+        if xc_type(xc) not in ('HF','LDA','GGA','MGGA'):raise NotImplementedError('Unsupported periodic XC.')
     else:
         from ..dft import Functional
         if not isinstance(functional,Functional):raise TypeError('Use dft.Functional for external periodic XC')

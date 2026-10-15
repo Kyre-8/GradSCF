@@ -12,6 +12,9 @@ stages 2–5, implementation ownership, dependencies and outstanding validation.
 force-response projection, local energy-expansion tools and relative loss/gain
 spectra used by the [thermally excited graphite example](../../../examples/thermally_excited_graphite/README.md).
 
+[Periodic r2SCAN](META_GGA.md) describes the orbital kinetic-density convention,
+shared meta-GGA potential/kernel assembly and finite-q geometry response.
+
 ## Sampling and weights
 
 ```python

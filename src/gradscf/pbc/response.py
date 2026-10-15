@@ -32,8 +32,11 @@ def _fields(density,ao,plus,weights,kind):
             gradient=(jnp.einsum('xgp,spq,gq->sgx',b[1:4],d,a[0].conj())
                       +jnp.einsum('gp,spq,xgq->sgx',b[0],d,a[1:4].conj()))
             fields=jnp.concatenate([fields,gradient[0],gradient[1]],axis=1)
+        if kind=='MGGA':
+            tau=.5*jnp.einsum('xgp,spq,xgq->sg',b[1:4],d,a[1:4].conj())
+            fields=jnp.concatenate([fields,tau.T],axis=1)
         return total+fields,None
-    initial=jnp.zeros((ao.shape[2],density.shape[0] if kind=='LDA' else 8),
+    initial=jnp.zeros((ao.shape[2],density.shape[0] if kind=='LDA' else (10 if kind=='MGGA' else 8)),
                       dtype=dtype)
     return jax.lax.scan(accumulate,initial,
                         (density.swapaxes(0,1),ao,plus,weights))[0]
@@ -44,10 +47,12 @@ def _project(ao,plus,weights,potential,kind):
         a,b=arrays;blocks=[]
         for spin in range(2):
             value=jnp.einsum('g,gp,gq->pq',weights*potential[:,spin],b[0].conj(),a[0])
-            if kind=='GGA':
+            if kind in ('GGA','MGGA'):
                 vg=weights[:,None]*potential[:,2+3*spin:5+3*spin]
                 value+=jnp.einsum('gx,xgp,gq->pq',vg,b[1:4].conj(),a[0])
                 value+=jnp.einsum('gx,gp,xgq->pq',vg,b[0].conj(),a[1:4])
+            if kind=='MGGA':
+                value+=.5*jnp.einsum('g,xgp,xgq->pq',weights*potential[:,8+spin],b[1:4].conj(),a[1:4])
             blocks.append(value)
         return jnp.stack(blocks)
     return jax.lax.map(at_k,(ao,plus)).swapaxes(0,1)
@@ -76,7 +81,7 @@ def q_kernel(inputs,density,transfer,*,mesh,xc='hf',exxdiv='ewald',functional=No
         from .functional import finite_q_kernel
         kind='HF';alpha=0.
         external_action=finite_q_kernel(functional,params,inputs,density,transfer)
-    if kind not in ('HF','LDA','GGA'):raise NotImplementedError('Finite-q kernels support HF/LDA/GGA/global hybrids')
+    if kind not in ('HF','LDA','GGA','MGGA'):raise NotImplementedError('Unsupported finite-q XC kernel')
     if exxdiv not in ('ewald',None):raise NotImplementedError('Unsupported exchange correction')
     ao=inputs.ao;plus=_shifted_ao(inputs,transfer);kw=weights_for(inputs)
     mesh=tuple(mesh)
@@ -85,9 +90,14 @@ def q_kernel(inputs,density,transfer,*,mesh,xc='hf',exxdiv='ewald',functional=No
     xc_action=None
     if kind!='HF':
         variables=_kpoint.grid_xc_variables(density,inputs,kind)
-        _,xc_action=jax.linearize(lambda v:_kpoint._point_unrestricted_xc_value_and_grad_kernel(xc,kind)(v)[1],variables)
+        if kind=='MGGA':
+            from ..scf.uks import _point_unrestricted_xc_hessian_kernel
+            hessian=_point_unrestricted_xc_hessian_kernel(xc,kind)(variables)
+            xc_action=lambda fields:jnp.einsum('gij,gj->gi',hessian,fields)
+        else:
+            _,xc_action=jax.linearize(lambda v:_kpoint._point_unrestricted_xc_value_and_grad_kernel(xc,kind)(v)[1],variables)
     def apply(d):
-        fields=_fields(d,ao,plus,kw,'GGA' if kind=='GGA' else 'LDA')
+        fields=_fields(d,ao,plus,kw,'LDA' if kind=='HF' else kind)
         rho=fields[:,:2].sum(axis=1)
         vh=jnp.fft.ifftn(jnp.fft.fftn(rho.reshape(mesh))*kernel).reshape(-1)
         potential=jnp.stack([vh,vh],axis=1)
