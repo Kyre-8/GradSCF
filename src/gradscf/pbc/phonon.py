@@ -37,6 +37,17 @@ class PhononResult(NamedTuple):
     converged: object
 
 
+class ProjectedPhononResult(NamedTuple):
+    force_constants: object
+    mass_matrix: object
+    frequencies: object
+    modes: object
+    residual_norm: object
+    subspace_residual_norm: object
+    hermiticity_error: object
+    converged: object
+
+
 def _project_translations(phi):
     """Orthogonal Gamma ASR projection in Cartesian, unweighted coordinates."""
     nat=len(phi)//3
@@ -241,16 +252,11 @@ class Phonons:
         envelope*=jnp.exp(-1j*self.source.inputs.coords@wave)
         return DisplacementSource(QSource(fold(f),fold(s),envelope),fold(h))
 
-    def kernel(self,q=(0.,0.,0.),*,asr=False,config=None,method='supercell'):
-        """Force constants and numerical modes; ASR projection is opt-in at Gamma.
-
-        'primitive' constructs HF/KS geometry and response in the primitive cell;
-        'supercell' is the independent reference and also supports OFDFT.
-        """
+    def _force_constant_action(self, q, config, method):
+        """Build one reference snapshot, shared by full and projected modes."""
         self.result=None;self.super_reference=None;self.reference_forces=None
         if method not in ('primitive','supercell'):raise ValueError('Use primitive or supercell phonon response')
         q=self._q(q);gamma=np.allclose(q,0.)
-        if asr and not gamma:raise ValueError('ASR projection is only defined here at Gamma')
         source=self.source;cell=source.cell if isinstance(source,_SCF) else source.system
         if len(self.masses)!=len(cell.coords):raise ValueError('One mass per primitive-cell atom is required')
         primitive=method=='primitive' and not gamma
@@ -271,25 +277,41 @@ class Phonons:
             self.reference_forces=problem.quantities(problem.solution,problem.inputs)['forces']
             respond=jax.jit(lambda direction:problem.response(tangent=direction,config=config))
         phase=jnp.exp(2j*jnp.pi*(jnp.asarray(indices)@q));count=len(indices)
-        nat=len(cell.coords);columns=[];residuals=[]
-        for direction in jnp.eye(3*nat).reshape(3*nat,nat,3):
+        nat=len(cell.coords)
+        def action(direction):
             if primitive:
                 column,residual,converged=respond(direction)
                 if not bool(converged):raise RuntimeError('Atomic q response did not converge')
-                residuals.append(residual)
-                columns.append(column)
-                continue
+                return column, residual
             else:
                 pattern=(phase[:,None,None]*direction[None]).reshape(-1,3)
                 real=respond(pattern.real)
                 if not bool(real.converged):raise RuntimeError('Atomic response did not converge')
-                response=real.values['forces'].astype(complex);residuals.append(real.residual_norm)
+                response=real.values['forces'].astype(complex)
+                residual=real.residual_norm
                 if not gamma:
                     imag=respond(pattern.imag)
                     if not bool(imag.converged):raise RuntimeError('Atomic response did not converge')
-                    response+=1j*imag.values['forces'];residuals.append(imag.residual_norm)
+                    response+=1j*imag.values['forces']
+                    residual=jnp.maximum(residual,imag.residual_norm)
             column=-jnp.einsum('r,rai->ai',phase.conj()/count,response.reshape(count,nat,3))
-            columns.append(column.ravel())
+            return column.ravel(), residual
+        return action
+
+    def kernel(self,q=(0.,0.,0.),*,asr=False,config=None,method='supercell'):
+        """Force constants and numerical modes; ASR projection is opt-in at Gamma.
+
+        'primitive' constructs HF/KS geometry and response in the primitive cell;
+        'supercell' is the independent reference and also supports OFDFT.
+        """
+        self.result=None;self.super_reference=None;self.reference_forces=None
+        q=self._q(q);gamma=np.allclose(q,0.)
+        if asr and not gamma:raise ValueError('ASR projection is only defined here at Gamma')
+        action=self._force_constant_action(q,config,method)
+        nat=len(self.masses);columns=[];residuals=[]
+        for direction in jnp.eye(3*nat).reshape(3*nat,nat,3):
+            column,residual=action(direction)
+            columns.append(column);residuals.append(residual)
         phi=jnp.stack(columns,axis=1)
         error=jnp.linalg.norm(phi-phi.conj().T)
         if not np.isfinite(phi).all() or float(error)>1e-6*max(1.,float(jnp.linalg.norm(phi))):
@@ -298,4 +320,76 @@ class Phonons:
         asr_error=jnp.linalg.norm(phi@translations) if gamma else None
         dynamical,frequencies,vectors=_modes(phi,self.masses,asr)
         self.result=PhononResult(phi,dynamical,frequencies,vectors,jnp.max(jnp.stack(residuals)),error,asr_error,True)
+        return self.result
+
+    def project(self, directions, q=(0.,0.,0.), *, config=None, method='primitive'):
+        """Solve only the requested real Cartesian displacement directions.
+
+        directions has shape (nvector,natom,3); rows must be independent but
+        need not be normalized. Solve B† Phi B v = omega² B† M B v with M in
+        electron masses. Returned modes are full Cartesian mass-weighted unit
+        vectors; signed frequencies are hbar*omega in Hartree as in kernel().
+        Each response is solved for a unit direction and rescaled afterwards,
+        so arbitrary input amplitudes cannot weaken the absolute solver gate.
+
+        This is an eager Rayleigh--Ritz projection, not a new eigenderivative
+        contract. subspace_residual_norm measures the full dynamical residual
+        (Hartree²): a projected eigenmode is an exact physical mode only when
+        the subspace is invariant. No acoustic-sum-rule projection is applied.
+        """
+        self.result=None;self.super_reference=None;self.reference_forces=None
+        basis=np.asarray(directions)
+        if (np.ndim(self.masses)!=1 or not np.isfinite(self.masses).all()
+                or np.any(np.asarray(self.masses)<=0)):
+            raise ValueError('Supply finite positive masses in amu')
+        nat=len(self.masses)
+        if (basis.ndim!=3 or basis.shape[1:]!=(nat,3) or not len(basis)
+                or len(basis)>3*nat or np.iscomplexobj(basis)
+                or not np.isfinite(basis).all()):
+            raise ValueError('directions must be finite real (nvector,natom,3) arrays')
+        basis=basis.reshape(len(basis),-1).astype(float)
+        if np.linalg.matrix_rank(basis)!=len(basis):
+            raise ValueError('Projected directions must be linearly independent')
+        ratio=physical_constants['atomic mass constant'][0]/physical_constants['electron mass'][0]
+        mass=jnp.repeat(jnp.asarray(self.masses)*ratio,3)
+        metric=jnp.asarray(basis)@(mass[:,None]*jnp.asarray(basis.T))
+        if not np.isfinite(metric).all() or np.linalg.eigvalsh(metric).min()<=0:
+            raise ValueError('Projected directions have an unrepresentable mass metric')
+        if np.linalg.cond(metric)>1e12:
+            raise ValueError('Projected directions have an ill-conditioned mass metric')
+        whiten=jnp.linalg.inv(jnp.linalg.cholesky(metric)).T
+        if not np.isfinite(whiten).all():
+            raise ValueError('Projected mass metric whitening is not finite')
+        lengths=np.linalg.norm(basis,axis=1)
+        if not np.isfinite(lengths).all() or np.any(lengths<=0):
+            raise ValueError('Projected directions have unrepresentable lengths')
+        action=self._force_constant_action(q,config,method)
+        columns=[];residuals=[]
+        for direction,length in zip(basis.reshape(-1,nat,3),lengths):
+            column,residual=action(jnp.asarray(direction/length))
+            columns.append(column*length);residuals.append(residual*length)
+        actions=jnp.stack(columns,axis=1)
+        basis=jnp.asarray(basis.T)
+        phi=basis.T@actions
+        error=jnp.linalg.norm(phi-phi.conj().T)
+        # Test Hermiticity before symmetrizing, in coordinates independent of
+        # the user's arbitrary basis amplitudes. The returned error remains
+        # the raw projected force-constant norm for diagnostic consistency.
+        matrix=whiten.T@phi@whiten
+        matrix_error=jnp.linalg.norm(matrix-matrix.conj().T)
+        if (not all(np.isfinite(value).all() for value in (phi,error,matrix,matrix_error))
+                or float(matrix_error)>1e-6*max(1e-12,float(jnp.linalg.norm(matrix)))):
+            raise RuntimeError('Projected force constants fail the Hermiticity check')
+        matrix=.5*(matrix+matrix.conj().T)
+        vectors=dense_vectors(as_operator(matrix),nroots=len(phi),max_dense=len(phi))
+        values=jnp.sum(vectors.conj()*(matrix@vectors),axis=0).real
+        modes=jnp.sqrt(mass)[:,None]*(basis@whiten@vectors)
+        full_action=(actions@whiten@vectors)/jnp.sqrt(mass)[:,None]
+        leakage=jnp.linalg.norm(full_action-modes*values)
+        eigen_error=jnp.linalg.norm(matrix@vectors-vectors*values)
+        if (not all(np.isfinite(v).all() for v in (values,modes,leakage,eigen_error))
+                or float(eigen_error)>1e-8*max(1.,float(jnp.linalg.norm(matrix)))):
+            raise RuntimeError('Projected phonon eigensolve failed its residual check')
+        self.result=ProjectedPhononResult(phi,metric,jnp.sign(values)*jnp.sqrt(jnp.abs(values)),
+            modes,jnp.max(jnp.stack(residuals)),leakage,error,True)
         return self.result
