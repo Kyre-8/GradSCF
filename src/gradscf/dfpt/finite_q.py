@@ -69,7 +69,7 @@ def _independent_response(result,transfer,temperature):
 
 
 def finite_q_problem(inputs,result,transfer,*,mesh,xc='hf',exxdiv='ewald',
-                     temperature=None,tolerance=1e-7):
+                     temperature=None,tolerance=1e-7,functional=None,params=None):
     """A finite-q response snapshot, with explicit static momentum-transfer data.
 
     Potential and density blocks have shape (2,nk,nao,nao), row k+q/column k;
@@ -77,6 +77,8 @@ def finite_q_problem(inputs,result,transfer,*,mesh,xc='hf',exxdiv='ewald',
     non-Hermitian. Physical real perturbations combine q and its adjoint -q.
     Equal k weights and a closed mesh are required. Zero T requires an insulator;
     finite T reuses stable Fermi secants, including coincident-energy limits.
+    External Functional models require q_energy_fn; params remain differentiable
+    along with the reference. Construct this problem inside the AD function.
     """
     if np.allclose(np.asarray(transfer.q)-np.rint(transfer.q),0.,atol=1e-10,rtol=0):
         raise ValueError('Use periodic_problem for q=0, including chemical-potential response')
@@ -85,9 +87,11 @@ def finite_q_problem(inputs,result,transfer,*,mesh,xc='hf',exxdiv='ewald',
         raise ValueError('Inconsistent spin/k/AO reference shapes')
     if len(transfer.partners)!=shape[1]:raise ValueError('Momentum transfer must cover the k mesh')
     chi,valid=_independent_response(result,transfer,temperature)
-    interaction=q_kernel(inputs,result.density_spin,transfer,mesh=mesh,xc=xc,exxdiv=exxdiv)
+    interaction=q_kernel(inputs,result.density_spin,transfer,mesh=mesh,xc=xc,exxdiv=exxdiv,
+                         functional=functional,params=params)
     c=result.mo_coeff_spin;s=inputs.overlap;eps=result.mo_energy_spin
-    fock=energy_and_fock(result.density_spin,inputs,mesh=mesh,xc=xc,exxdiv=exxdiv)[1]
+    fock=energy_and_fock(result.density_spin,inputs,mesh=mesh,xc=xc,exxdiv=exxdiv,
+                        functional=functional,params=params)[1]
     rebuilt=(c*result.mo_occ_spin[...,None,:])@c.conj().swapaxes(-1,-2)
     valid &= result.converged & jnp.all(jnp.abs(weights_for(inputs)-1/shape[1])<1e-12)
     valid &= jnp.max(jnp.abs(c.conj().swapaxes(-1,-2)@s@c-jnp.eye(shape[-1])))<=tolerance

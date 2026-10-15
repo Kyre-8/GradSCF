@@ -23,14 +23,16 @@ parent capability is marked complete.
 
 ## Current priority
 
-Resume stage 1 functional coverage. Periodic reference snapshots now connect to
-the existing Sample/Trainer with fixed-density, explicit and implicit modes,
-energy/density supervision and the shared convergence policy. The adapter
-reuses periodic SCF and the shared loss/optimizer. Scalar Cartesian space-group
-and AO/Bloch maps are also implemented and independently checked. Next is
-irreducible integration/J/K using these maps, including finite-FFT covariance
-and full-response derivative gates. The finite-q external-functional contract
-remains a separate open task.
+Stage 1 is complete as of 2026-10-15 within the declared scalar, neutral 3D
+Gaussian/GTH scope. Periodic snapshots use the shared Sample/Trainer in all
+three modes. Spatial maps now drive irreducible target J/K and XC projection;
+the final state and implicit residual retain the full mesh. External functionals
+can explicitly define their finite-q energy, whose AD Hessian supplies the
+response kernel. The final boundary and derivative checks are recorded below.
+
+The next priority is stage 2: independent force/stress comparisons at relaxed
+material geometries, basis/FFT/k convergence and explicit SCF branch tracking.
+Stages 2 through 5 remain incomplete; stage-1 closure does not close the goal.
 
 The silicon pilot's memory and timing work is parked. Its diagnostic resource
 limits are not project acceptance criteria and must not block unrelated
@@ -44,13 +46,20 @@ acceptance gate is being addressed explicitly.
 - [x] First thermal density response and time-reversal diagonalization reduction.
 - [x] External energy functional integration and three array-level training modes.
 - [x] Scalar Cartesian space-group operations, atom/basis mapping and AO/Bloch rotations.
-- [ ] Irreducible integration/J/K with numerical equivalence to the full mesh.
+- [x] Irreducible integration/J/K with numerical equivalence to the full mesh.
 - [x] Periodic Trainer energy/density samples in fixed-density, explicit and implicit modes.
-- [ ] Explicit external-functional finite-q contract and corresponding response tests.
+- [x] Explicit external-functional finite-q contract and corresponding response tests.
 
 Acceptance: full/reduced forward agreement; geometry and parameter derivatives
 against independent differences; symmetry-breaking perturbations retained by
 the full response residual; physical model restrictions enforced.
+
+Scope: reduction acts on target contractions and occupation/energy quadrature,
+not on source-k sums or full AO/one-body input storage. Only symmetries of the
+finite reciprocal box, real FFT grid, unwrapped k mesh and weights are used;
+automatic discovery can yield identity only. External finite-q response requires
+an explicit energy extension of the same functional and a closed, equally
+weighted full mesh. No finite-q model is inferred from a diagonal-k callback.
 
 ## 2. Forces, stress and reference-state consistency
 
@@ -224,3 +233,64 @@ the supported invariant observables. Complex arrays alone do not meet this gate.
   preserves `Tr(P F)` to 1.21e-13. It is an AO/gauge example, not an SCF result.
   Finite-FFT covariance, irreducible J/K and symmetry-breaking response remain
   the next integration gates; no space-group speedup is claimed here.
+- 2026-10-15, stage-1 completion on `e8b888c`: the combined irreducible/finite-q
+  gate passed **35 tests in 475.11 s**; existing HF/KS/thermal/time-reversal
+  regressions passed **28 in 356.03 s**. Basis/sampling/occupation/external-XC/
+  Trainer regressions passed **34 in 353.55 s**, with one version-pinned basis
+  source oracle skipped (requires PySCF 2.9.0; installed 2.13.0) and three
+  larger basis/material cases deselected. These are 97 passes, not a full-suite
+  or material convergence result. The combined source/test overlay SHA256 is
+  `d815ad5acde535e1b2666e757bbf1ce03662a4e40554f733e8e85eeaecbd046b`.
+- Two final boundary checks were added: one-spin J-only output shape and a
+  symmetry-tied Gaussian-exponent derivative against full-grid differences.
+  The former failed before the one-line spin-axis fix. Final irreducible/combined
+  boundary files passed **16 tests in 208.55 s**; this repeats 14 earlier cases
+  and adds two, for **99 distinct passing cases** across this completion gate.
+  Final source/test overlay SHA256:
+  `82408fbd7069e71ebf70acf21b0bf72577762a548a764159f8b5468b809c4cb2`.
+  No other numerical source changed after the combined gate. Five upstream
+  spglib deprecation warnings were reported in this final run.
+- All completion tests ran on `jy_gpu_1`, Intel Xeon Platinum 8457C, `jax_scf`,
+  JAX 0.10.0 CPU float64, OMP/OpenBLAS threads two, with a 900-second timeout
+  per batch. Logs are under `/home/yjiao/gradscf_checks/pbc-ibz-e8b888c`:
+  `combined-new.log`, `ground-regression.log`, `api-regression.log` and
+  `final-boundaries.log`. Commands, from that directory, with
+  `CUDA_VISIBLE_DEVICES= JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 OMP_NUM_THREADS=2
+  OPENBLAS_NUM_THREADS=2 PYTHONPATH=src`:
+
+  ```sh
+  python -m pytest -q tests/pbc/test_reduction.py tests/pbc/test_irreducible_scf.py tests/pbc/test_ibz_boundaries.py tests/dfpt/test_external_finite_q.py
+  python -m pytest -q tests/pbc/test_scf.py tests/pbc/test_dft.py tests/pbc/test_thermal_scf.py tests/pbc/test_time_reversal_scf.py
+  python -m pytest -q tests/pbc/test_basis_library.py tests/pbc/test_foundation.py tests/pbc/test_weighted_kpoints.py tests/pbc/test_occupations.py tests/pbc/test_external_functional.py tests/pbc/test_training.py -k 'not silicon_molopt and not molopt_hydrogen'
+  python -m pytest -q tests/pbc/test_irreducible_scf.py tests/pbc/test_ibz_boundaries.py
+  ```
+
+  The first command now collects two additional cases on the final source.
+  Tested runtime/test files were checked by SHA256 against the local worktree;
+  no numerical tests ran locally. Example formatting/comments changed only
+  after execution, with exact Python AST equivalence checked locally.
+- Irreducible tests cover HF with/without Ewald, handwritten PBE, thermal and
+  integer occupations, unrestricted spin, nonunitary Cartesian s/p/d frames,
+  explicit/implicit geometry and model-parameter derivatives, symmetry-breaking
+  implicit response, stabilizers and finite-grid incompatibilities. The H2
+  example uses a 6-Bohr cubic cell, H at +/-0.7 Bohr, the default GTH-SZV/GTH-PADE
+  inputs, FFT 9 cubed, k=(3,1,1), kBT=0.2 Eh and no Ewald correction. It has
+  3 full/2 representative k points, 9 full/6 representative target-source exchange
+  pairs, identical free energy -1.1169946341008274 Eh/cell and maximum density
+  difference 1.82e-13. This is a coarse API check, not a timing/scaling benchmark.
+- External finite-q tests include independent full-matrix supercell Hessians
+  for a nonlinear nonlocal energy at two and three k points, q/-q conjugacy,
+  complex linearity, self-inverse q and parameter/reference AD. A nonlinear
+  GGA-type SCF-to-screened-response calculation agrees with its independent
+  supercell AO response to 2.68e-10; its relaxed parameter derivative is
+  -0.0306164785926 versus finite difference -0.0306164786079. Freezing the
+  reference gives -0.0263801801854, confirming that relaxation matters.
+  The nonlocal model is validated at Hessian level, not as a separate complete
+  nonlocal SCF-loss benchmark. See [FINITE_Q.md](../dfpt/FINITE_Q.md) for inputs,
+  normalizations and independent-oracle construction.
+- Both `examples/periodic_irreducible.py` and
+  `examples/dfpt/03_external_finite_q.py` exited zero on the final runtime
+  snapshot. Their logs are `irreducible-example.log` and `external-example.log`
+  in the same remote directory; measured output is included as code comments.
+  The finite-q example reports free energy -0.6104181508891107 Eh/cell and
+  density-response norm 0.05878070762111205.

@@ -10,10 +10,13 @@ The package name uses the standard abbreviation **DFPT**.
 Finite-q periodic electronic response is available through
 `DFPT(mf, q=[qx,qy,qz]).response(potential=vq)`, with q in fractional reciprocal
 coordinates. See [finite-q theory, conventions and validation](FINITE_Q.md).
-This supports HF/semilocal KS on closed, equally weighted k meshes. Moving
+This supports HF/semilocal KS and external `dft.Functional` models with an
+explicit `q_energy_fn` on closed, equally weighted k meshes. Moving
 overlap/density sources and a bounded commensurate phonon driver are described
 in [atomic response](ATOMIC_RESPONSE.md); OFDFT phonons use its supercell KKT
-path. Arbitrary external-model finite-q extensions are not inferred. The
+path. The external callback supplies the real per-cell energy for D+Zq+Zq†;
+AD derives the full, possibly nonlocal kernel, including the normalization at
+self-inverse q. A diagonal-k energy alone does not define this extension. The
 examples below use the electronic-potential q=0 interface.
 
 ```python
@@ -77,14 +80,22 @@ Response supervision requires `explicit` or `implicit`; fixed-density energy,
 potential, and kernel training remain available. A nonstationary fixed density
 is not a valid screened DFPT reference. Failed SCF/response calculations produce
 nonfinite loss and reject the update through the existing optimizer guard.
-This Trainer adapter covers real molecular energy functionals, without a
-separately supplied hybrid exchange. Periodic external models use the shared
-`dft.Functional` with periodic SCF and the array-level `periodic_problem`
-factory, or `DFPT(mf)` after `pbc.dft.KRKS(..., functional=..., params=...).run()`.
-The array factory preserves model-parameter and relaxed-reference AD; construct
-it inside the loss when training response observables. See
-`examples/training/periodic_xc.py`. The molecular Trainer sample interface has
-not yet been extended to periodic references.
+Trainer response labels currently cover real molecular energy functionals,
+without separately supplied hybrid exchange. The same `Sample`/`Trainer`
+interface also supports periodic energy and density supervision, including
+unrestricted and thermal references; periodic response labels remain
+unsupported. See `examples/training/periodic_xc.py` and the
+[Trainer contract](../model/neural_xc/training/README.md#periodic-references).
+
+Periodic external models use `periodic_problem(..., functional=..., params=...)`
+for q=0 and `finite_q_problem(..., functional=..., params=...)` for nonzero q,
+or `DFPT(mf, q=q)` after `pbc.dft.KRKS(..., functional=..., params=...).run()`.
+Construct both the SCF reference and the array factory inside a custom loss
+to retain model-parameter and relaxed-reference AD. No local approximation is
+applied to the external kernel. The finite-q tests independently check a
+nonlocal energy Hessian and a GGA-type screened-response parameter gradient;
+see [the contract and tested boundaries](FINITE_Q.md#external-energy-functionals)
+and `examples/dfpt/03_external_finite_q.py`.
 
 ## Stationary response and Taylor recurrence
 
@@ -192,6 +203,8 @@ parameter PyTrees are reused without a separate functional implementation.
 | --- | --- | --- |
 | Molecular RHF/RKS, real closed shell | AO potential and supplied input tangents | Requires jet-supported builders |
 | Periodic Gamma/k-point KS, fixed integer occupations | q=0, Hermitian AO potential and input tangents | Gamma HF potential path tested |
+| Periodic HF/KS on a closed equal-weight k mesh | Finite-q electronic potential; integer or Fermi occupations | Not supported in a single q sector |
+| Periodic external `dft.Functional` | q=0; finite-q electronic potential requires `q_energy_fn` | Not supported in the finite-q sector |
 | Molecular Gaussian OFDFT | Potential and input tangents | Potential path tested |
 | Periodic grid OFDFT | Potential, particle number, volume/input tangents | Potential path tested, including external PBE |
 | Periodic Gaussian OFDFT | Potential/input interface; potential tested | Backend-dependent, not separately benchmarked |

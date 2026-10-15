@@ -1,4 +1,5 @@
 """Current periodic density features for the shared dft.Functional interface."""
+import jax
 import jax.numpy as jnp
 from ..dft.functional import DensityInputs
 from .kpoints import weights_for
@@ -80,3 +81,38 @@ def density_inputs(inputs, density):
     if dm.shape!=(2,nk,n,n):
         raise ValueError('Periodic density requires (nk,nao,nao) or (2,nk,nao,nao)')
     return PeriodicDensityInputs(.5*(dm+dm.conj().swapaxes(-1,-2)),inputs)
+
+
+def finite_q_kernel(functional,params,inputs,density,transfer):
+    """Differentiate an explicit physical q/-q energy extension, matrix free.
+
+    For E(D+Z+Z†), the Euclidean gradient is conj(jax.grad(E)). Its Hessian
+    H has complex-linear part (H(z)-i H(i z))/2 = 2*w_k*K_q(z).
+    Removing the anti-linear part also handles overlapping q/-q blocks at
+    self-inverse q, without doubling the physical response. No reference or
+    parameter is detached, so higher AD includes reference relaxation.
+    """
+    if functional.q_energy_fn is None:
+        raise NotImplementedError('External finite-q response requires an explicit q_energy_fn energy extension')
+    if functional.exact_exchange_fraction != 0.:
+        raise NotImplementedError('External finite-q hybrids require an explicit hybrid adapter')
+    density=jnp.asarray(density)
+    nk=len(inputs.kpoints);n=inputs.overlap.shape[-1]
+    if density.shape!=(2,nk,n,n):
+        raise ValueError('Finite-q reference density requires (2,nk,nao,nao)')
+    zero=jnp.zeros_like(density,dtype=jnp.result_type(density,1j))
+    def energy(z):
+        value=jnp.asarray(functional.q_energy_fn(params,inputs,density,transfer,z))
+        if value.shape!=() or jnp.iscomplexobj(value):
+            raise ValueError('q_energy_fn must return a real scalar XC energy per cell')
+        return value
+    _,hessian=jax.linearize(lambda z:jax.grad(energy)(z).conj(),zero)
+    weights=weights_for(inputs)
+    valid=jnp.all(jnp.isfinite(weights)&(weights>0))
+    scale=4*jnp.where(weights>0,weights,1.)[None,:,None,None]
+    def apply(tangent):
+        tangent=jnp.asarray(tangent,dtype=zero.dtype)
+        if tangent.shape!=density.shape:
+            raise ValueError('Finite-q tangent requires the spin/k/AO reference shape')
+        return (hessian(tangent)-1j*hessian(1j*tangent))/scale*jnp.where(valid,1.,jnp.nan)
+    return apply

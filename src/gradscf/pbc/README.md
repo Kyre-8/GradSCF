@@ -12,8 +12,10 @@ mf = scf.KRHF(cell, kpts=kpts).run()
 ```
 
 `shift` is in grid steps; zero preserves the original Gamma-centered convention.
-Absolute k points are in inverse Bohr, and lattice vectors are rows. SCF currently
-evaluates the **full uniform Cartesian-product mesh**, including shifted meshes.
+Absolute k points are in inverse Bohr, and lattice vectors are rows. SCF inputs
+use the **full uniform Cartesian-product mesh**, including shifted meshes.
+`symmetry=True` optionally reduces target contractions and iteration
+diagonalization as described below; source-k sums remain complete.
 `kweights` can be supplied explicitly as strictly positive normalized weights.
 The weights enter density, Hartree/exchange contractions, XC, energies, particle
 counts, entropy, and semilocal band queries. They are independent of FFT grid
@@ -34,7 +36,7 @@ sums, not an irreducible-SCF backend or an automatic space-group finder. Users
 must supply symmetries valid for their Hamiltonian. Symmetry matching is discrete
 host preprocessing, not part of the AD graph.
 
-`KRKS(..., time_reversal=True)` (also `KRHF/KUHF/KUKS`) uses one member of
+Without `symmetry=True`, `KRKS(..., time_reversal=True)` (also `KRHF/KUHF/KUKS`) uses one member of
 each k/-k pair for SCF-iteration diagonalization and expands the density by
 complex conjugation. Input overlap/core matrices and pair weights must obey
 time reversal; external XC potentials are checked in the iteration as well.
@@ -110,9 +112,47 @@ path through changing geometry. The operation is a static snapshot;
 `operation.validate(cell)` rejects stale geometry, basis or potential data.
 Rebuild it after edits. A physical space-group operation need not preserve the
 finite FFT cutoff or quadrature grid, and a density may break crystal symmetry.
-This layer does not activate spatial reduction in SCF or remove symmetry-breaking
-response directions. Irreducible integration/J/K and their derivative gates
-remain separate work. See [the runnable example](../../../examples/periodic_symmetry.py).
+These maps underlie the optional integration path below. They do not remove
+symmetry-breaking response directions. See
+[the AO-map example](../../../examples/periodic_symmetry.py).
+
+## Irreducible SCF integration
+
+```python
+mf = scf.KRHF(cell, kpts=kpts, symmetry=True, time_reversal=True).run()
+print(mf.reduction.representatives)
+```
+
+The same flags apply to KRKS, KUHF and KUKS. `symmetry=True` discovers spatial
+operations with spglib; `time_reversal=True` additionally permits their
+antiunitary compositions. The array-level SCF accepts an explicit
+`pbc.reduction.SpatialReduction.from_cell(cell, kpts, operations=...)` plan
+without spglib. Its constructor takes absolute Cartesian k points.
+
+Only operations preserving the actual finite reciprocal box, real FFT grid,
+unwrapped k mesh and k weights are retained. Reciprocal-lattice folding that
+changes the finite plane-wave set is not treated as an exact symmetry.
+Automatic discovery can therefore return identity only. Explicit incompatible
+operations are rejected. Density checks include representative stabilizers,
+not just mappings between distinct k points.
+
+During SCF iterations, J/K and built-in XC matrix projection are evaluated only
+at representative targets. One-body and J/K energy traces and occupation sums
+use orbit-summed weights. The Hartree grid density, exchange source-k sum and
+XC grid energy still use the full density. External XC energy/potential AD also
+retains its full input, and its potential must satisfy the declared symmetry.
+Full Fock matrices are reconstructed with the covariant operator map; density
+matrices use the distinct contravariant map above. A broken symmetry is rejected
+or produces a nonconverged/nonfinite array result, never silently projected.
+
+Full AO arrays, one-body input construction and final reported orbitals remain
+on the complete mesh. The final energy, Fock and fixed point are certified there.
+Implicit backward differentiates the full residual, preserving symmetry-breaking
+response. Explicit differentiation of reduced iterations requires perturbations
+that preserve the declared symmetry and finite sampling. Rebuild static plans
+after geometry/basis edits; symmetry discovery itself is not differentiated.
+These are target-contraction savings, not a claim of full input compression or
+an end-to-end speedup. See [the SCF example](../../../examples/periodic_irreducible.py).
 
 ## Finite-temperature SCF
 
@@ -236,11 +276,22 @@ For parameter training, use `pbc.scf.run_kpoint_scf(..., functional=..., params=
 and `dfpt.periodic_problem(inputs, result, ..., functional=..., params=...)`
 inside the differentiated function. Model parameters are explicit leaves of
 the SCF/response residual. Fixed-density, explicit and implicit energy training
-are demonstrated in `examples/training/periodic_xc.py`; the molecular `Trainer`
-facade is not yet a periodic sample adapter. Rebuild response snapshots after
+are demonstrated with the shared `training.Sample`/`training.Trainer` in
+`examples/training/periodic_xc.py`, for energy and grid-density labels.
+Rebuild response snapshots after
 changing parameters. Response-loss parameter gradients are tested for
 nondegenerate thermal references; this does not extend the higher-derivative
 guarantees at degeneracy.
+
+For finite-q response, supply
+`Functional(..., q_energy_fn=...)`: a real XC energy per primitive cell for the
+physical density `D + Z_q + Z_q†`. An arbitrary diagonal-k callback alone does
+not define this extension. GradSCF obtains the complex-linear response kernel
+from its AD Hessian action, including the self-inverse-q normalization, and
+retains parameter and reference-density derivatives. `dfpt.DFPT(mf, q=q)` uses
+the model and parameters of the converged reference. See the
+[energy contract and derivation](../dfpt/FINITE_Q.md#external-energy-functionals)
+and [example](../../../examples/dfpt/03_external_finite_q.py).
 
 `dfpt.DFPT(mf).response(potential=...)` supports static q=0 thermal response using
 the Fermi-density residual, including changes of occupations and chemical
@@ -329,8 +380,10 @@ energy labels mean internal E/cell even at finite temperature. See the
 [training contract](../model/neural_xc/training/README.md#periodic-references)
 and [example](../../../examples/training/periodic_xc.py).
 
-The next foundation work is irreducible integration/J/K using the validated
-spatial maps, followed by the finite-q external-functional contract.
+Stage 1 is complete within the scalar, neutral 3D Gaussian/GTH scope above.
+The next roadmap gate is stage 2: independent material force/stress comparisons,
+basis/FFT/k convergence and explicit SCF branch tracking. See [ROADMAP.md](ROADMAP.md)
+for the acceptance ledger and numerical evidence.
 Native finite-q OFDFT phonons, Born charges/LO-TO corrections,
 metallic TD/GW/BSE, other smearing schemes, SOC and
 macroscopic Berry-phase fields are not supplied by this increment.

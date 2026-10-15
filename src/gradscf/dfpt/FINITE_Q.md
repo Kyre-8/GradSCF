@@ -1,8 +1,9 @@
 # Static finite-q electronic response
 
-The first finite-q implementation covers collinear periodic Gaussian
-HF and semilocal KS references, including the existing global-hybrid kernel
-algebra. The k mesh must be complete, uniformly weighted and closed under the
+Finite-q response covers collinear periodic Gaussian HF and semilocal KS
+references, including the existing global-hybrid kernel algebra, and external
+`dft.Functional` models with an explicit `q_energy_fn` energy extension.
+The k mesh must be complete, uniformly weighted and closed under the
 requested q. Both insulating integer occupations and finite-temperature Fermi
 occupations are supported. The electronic-potential shortcut holds geometry
 fixed; `QSource` also accepts overlap and direct-density variations for atomic
@@ -95,6 +96,54 @@ available through the existing `LinearSolverConfig`. No DFPT-local solver is
 introduced. Reference metric, eigen-equation, density and sampling consistency
 are checked before returning a valid response.
 
+## External energy functionals
+
+An arbitrary diagonal-k energy does not determine its off-diagonal finite-q
+extension. Supply another scalar energy callback, rather than a handwritten
+response kernel:
+
+```python
+def q_energy_fn(params, inputs, reference_density, transfer, delta_q):
+    ...  # real XC energy per primitive cell, in Hartree
+
+functional = dft.Functional(input_fn, energy_fn, q_energy_fn=q_energy_fn)
+```
+
+The callback receives raw periodic inputs and the spin/k reference density,
+not the features returned by `input_fn`. Its argument `delta_q[s,k]` contains
+the row k+q / column k blocks of Z. Evaluate the same translation-invariant
+functional on the physical density D+Z+Z†, including both q and -q and the
+Bloch phases. The energy at Z=0 must agree with `energy_fn`. The callback may
+couple grid points or density-matrix entries; no locality assumption or local
+projection is imposed. It supplies only XC energy; the existing Hartree kernel
+is added separately. External hybrid adapters remain unsupported.
+
+Let H(z) be the directional derivative, at Z=0, of the Euclidean gradient
+with respect to Z, `conj(jax.grad(energy_of_Z))`, holding the other callback
+arguments fixed for this inner derivative. The complex-linear XC action is
+
+\[
+K_q(z)=\frac{H(z)-iH(iz)}{4w_k}.
+\]
+
+The complex-linear part of H is (H(z)-iH(iz))/2; differentiating the physical
+q/-q energy contributes another factor 2w_k. This normalization also applies
+at self-inverse q: the callback still evaluates D+Z+Z† without halving Z,
+while the projection removes the overlapping anti-linear contribution.
+This energy convention is distinct from supplying an already assembled
+physical potential once to `response(potential=...)`.
+
+`Functional.q_kernel_action(params, inputs, density, transfer, tangent)` exposes
+this matrix-free action. The screened factory accepts `functional=...` and
+`params=...`; `DFPT(mf, q=q)` uses the functional and parameters stored by the
+periodic SCF facade. Missing extensions raise `NotImplementedError`, with no
+fallback to a q=0 or local kernel. Neither parameters nor reference density
+are detached. To differentiate a screened-response loss, construct both
+`run_kpoint_scf(..., functional=functional, params=params)` and
+`finite_q_problem(..., functional=functional, params=params)` inside the loss,
+using the existing explicit or implicit SCF differentiation policy.
+See `examples/dfpt/03_external_finite_q.py` for an energy-only callback example.
+
 ## API and AD boundary
 
 ```python
@@ -121,9 +170,9 @@ changes; an explicit supercell AD oracle remains available for comparisons.
 The HF/KS phonon driver now constructs both geometry curvature and electronic
 response in the primitive cell. It also supports OFDFT through the supercell
 KKT response; this spectral KS factory itself is not an OFDFT adapter. Native
-finite-q OFDFT phonons, arbitrary external neural functionals and dynamical response remain
-outside this path. An arbitrary primitive-cell energy callback does not
-determine its finite-q extension. Taylor series are disabled because higher
+finite-q OFDFT phonons and dynamical response remain outside this path.
+The external-functional extension above covers electronic-potential response;
+it does not add an external-functional atomic/phonon adapter. Taylor series are disabled because higher
 orders couple zero, q, 2q and further harmonics; iterating this one-sector linear
 residual would not produce those physical corrections.
 
@@ -205,3 +254,36 @@ selected the ground-state comparison file, which explains its timeout and the
 separate CPU rerun. Timings include initial JIT compilation and
 are not warmed-throughput benchmarks. New production-backend cases skip when
 `jax_xc` is unavailable; the original handwritten PBE tests remain independent.
+
+## External-functional validation (2026-10-15)
+
+On `jy_gpu_1`, CPU JAX 0.10.0 with float64 and two OpenMP/BLAS threads,
+`tests/dfpt/test_external_finite_q.py` completed **6 passed, 0 skipped** in
+270.87 seconds. The independent full-matrix supercell energy test includes a
+nonlocal quartic density-matrix term on two- and three-cell meshes. It checks
+the finite-q Hessian against finite differences of the full physical
+potential, complex linearity, q/-q conjugacy, self-inverse q, and parameter
+and reference-density derivatives.
+
+The complete SCF-to-screened-response test uses the nonlinear GGA-type energy
+`p * integral(rho**3/3 + 0.02*rho*|grad rho|**2)`. For the H2 cell above,
+9-cubed primitive and 27x9x9 supercell grids, kBT=0.12 Eh and p=0.15:
+
+| Check | Measured value |
+|---|---:|
+| Three-cell SCF finite-difference maximum AO response error | 2.6819533387515205e-10 |
+| Screened-response loss parameter AD gradient | -0.030616478592631502 |
+| Centered parameter finite difference, step 1e-5 | -0.030616478607914385 |
+| Parameter gradient with the reference frozen | -0.026380180185378983 |
+
+The loss is the squared norm of the screened density response; the difference
+from the frozen-reference result confirms the relaxed-reference contribution.
+The SCF tolerances are those above, and the supercell perturbation step is
+1e-4. This screened AD measurement uses the GGA-type model; the nonlocal model
+is validated at the energy/kernel level, not by a separate nonlocal SCF-loss
+benchmark. Two-cell facade and conjugacy checks pass; its independent physical
+oracle is the full-matrix Hessian because an exactly commensurate doubled FFT
+grid is even and excluded by the existing odd-grid guard. Existing external
+q=0, q=0 HF/PBE-kernel and independent-q regressions completed **16 passed,
+16 deselected** in 192.27 seconds. These are CPU checks, not external-model
+CUDA or general degenerate-reference validation.

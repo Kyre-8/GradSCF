@@ -10,22 +10,37 @@ from ..dft.libxc_jax.jax_libxc import hybrid_coeff,xc_type
 from .kpoints import weights_for
 
 
-def energy_and_fock(density,inputs,*,mesh,xc='hf',exxdiv='ewald',functional=None,params=None):
+def energy_and_fock(density,inputs,*,mesh,xc='hf',exxdiv='ewald',functional=None,params=None,integration=None):
+    """Energy and Fock; optional IBZ targets retain complete source-k sums."""
     alpha=hybrid_coeff(xc) if functional is None else 0.
-    j,k=get_kpoint_jk(inputs,density,mesh=mesh,exxdiv=exxdiv,with_k=alpha!=0)
+    targets=None if integration is None else integration.representatives
+    j,k=get_kpoint_jk(inputs,density,mesh=mesh,exxdiv=exxdiv,with_k=alpha!=0,targets=targets)
+    valid=jnp.asarray(True)
+    if integration is not None:
+        valid=(integration.sampling_consistent(inputs)&integration.consistent_density(density)
+               &integration.consistent(inputs.overlap)&integration.consistent(inputs.hcore))
     if functional is None:
         exc,potential=grid_xc_potential(density,inputs,xc=xc)
-        vxc=project_xc_potential(inputs.ao,inputs.weights,potential,xc_type(xc))
+        ao=inputs.ao if targets is None else inputs.ao[targets]
+        vxc=project_xc_potential(ao,inputs.weights,potential,xc_type(xc))
     else:
         from ..dft.derivatives import xc_energy_and_potential_from_density
         result=xc_energy_and_potential_from_density(params,molecule=inputs,density=density,
             xc_energy_fn=functional.energy_for_density,density_weights=weights_for(inputs))
         exc,vxc=result.xc_energy,result.vxc_matrix
+        if integration is not None:
+            valid &= integration.consistent(vxc)
+            vxc=vxc[:,targets]
     h=inputs.hcore
     kw=weights_for(inputs)
+    if integration is not None:
+        h=h[targets];density=density[:,targets];kw=integration.reduce_weights(kw)
     energy=jnp.einsum('k,skpq,kqp->',kw,density,h+.5*j).real
     energy-=.5*alpha*jnp.einsum('k,skpq,skqp->',kw,density,k).real
-    return energy+exc+inputs.nuclear_repulsion,h+j-alpha*k+vxc
+    energy=energy+exc+inputs.nuclear_repulsion;fock=h+j-alpha*k+vxc
+    if integration is not None:
+        fock=integration.expand_operator(fock)
+    return jnp.where(valid,energy,jnp.nan),jnp.where(valid,fock,jnp.nan)
 
 
 def grid_xc_potential(density,inputs,*,xc):
@@ -75,7 +90,8 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
         if not isinstance(functional,Functional):raise TypeError('Use dft.Functional for external periodic XC')
     nk,n,_=inputs.overlap.shape
     if reduction is not None and len(reduction.full_to_ir)!=nk:
-        raise ValueError('Time-reversal map must cover the full SCF k mesh')
+        raise ValueError('Reduction map must cover the full SCF k mesh')
+    integration=reduction if getattr(reduction,'integrates',False) else None
     thermal=temperature is not None
     if max_cycle<1 or not 0<=damping<1:raise ValueError('Invalid cycles or damping.')
     if not thermal and any(v<0 or v>n or v!=int(v) for v in nelec):
@@ -100,7 +116,7 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
         valid=True
         if use_reduction:
             valid=(reduction.consistent(f)&reduction.consistent(overlap)
-                   &jnp.all(jnp.abs(weights-weights[reduction.partners])<1e-12))
+                   &reduction.weights_consistent(weights))
             f=f[:,reduction.representatives];overlap=overlap[reduction.representatives]
             weights=reduction.reduce_weights(weights)
         if thermal:
@@ -109,15 +125,16 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
             occupation=occ[:,reduction.representatives] if use_reduction else occ
             density=density_from(diagonalize(f,transform(overlap))[1],occupation)
         return reduction.expand(density)*jnp.where(valid,1.,jnp.nan) if use_reduction else density
-    def evaluate(d,a):
-        energy,fock=energy_and_fock(d,a[0],mesh=mesh,xc=xc,exxdiv=exxdiv,functional=functional,params=a[3])
+    def evaluate(d,a,*,reduce=False):
+        energy,fock=energy_and_fock(d,a[0],mesh=mesh,xc=xc,exxdiv=exxdiv,functional=functional,params=a[3],
+                                   integration=integration if reduce else None)
         entropy=density_entropy(d,a[0].overlap,weights_for(a[0])) if thermal else jnp.array(0.)
         return energy-a[1]*entropy,fock,energy,entropy
     initial_fock=jnp.broadcast_to(inputs.hcore,(2,nk,n,n)).astype(jnp.complex128)
     eps,c=diagonalize(initial_fock)
     d=mapped(initial_fock,args,reduce=True) if init_density is None else jnp.asarray(init_density,dtype=c.dtype)
     if d.shape!=(2,nk,n,n):raise ValueError('Spin density must have shape (2,nk,nao,nao).')
-    e,f,_,_=evaluate(d,args)
+    e,f,_,_=evaluate(d,args,reduce=True)
     def error(f,d):return x.conj().swapaxes(-1,-2)@(f@d@s-s@d@f)@x
     def pack(a):return jnp.stack([a.real,a.imag])
     history=jnp.zeros((DIIS_SPACE,2,2,nk,n,n))
@@ -133,7 +150,7 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
                 eps,c=diagonalize(feff)
                 target=density_from(c)
             dn=(1-damping)*target+damping*d
-            en,fn,_,_=evaluate(dn,args)
+            en,fn,_,_=evaluate(dn,args,reduce=True)
             rms=jnp.sqrt(jnp.mean(jnp.abs(dn-d)**2))
             residual=(jnp.linalg.norm(mapped(fn,args,reduce=True)-dn)/jnp.sqrt(dn.size) if thermal
                       else jnp.linalg.norm(error(fn,dn))/jnp.sqrt(2*nk))
@@ -148,7 +165,10 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
     if reduction is not None:
         # Certify the ORIGINAL full fixed point, including symmetry-breaking
         # directions. Implicit backward below also deliberately uses that space.
-        converged &= jnp.linalg.norm(mapped(f,args)-d)/jnp.sqrt(d.size)<=max(conv_tol_density,conv_tol_grad)
+        full_e,full_f,_,_=evaluate(d,args)
+        converged &= jnp.max(jnp.abs(full_f-f))<=max(conv_tol_grad,1e-8)
+        converged &= jnp.abs(full_e-e)<=max(conv_tol,1e-8)
+        converged &= jnp.linalg.norm(mapped(full_f,args)-d)/jnp.sqrt(d.size)<=max(conv_tol_density,conv_tol_grad)
     if config.mode=='implicit':
         def residual(d,a):
             _,f,_,_=evaluate(d,a)

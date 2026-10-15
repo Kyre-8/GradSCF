@@ -100,8 +100,17 @@ and [example](examples/training/periodic_xc.py).
 Periodic spatial operations provide `matrix`, `coefficients`, `density` and
 `operator` maps at fractional reciprocal k points. Discovery optionally uses
 spglib; explicit operations do not. These maps preserve the native Cartesian
-basis metric and Bloch gauge; they do not yet enable irreducible SCF integration.
+basis metric and Bloch gauge. `KRHF/KRKS/KUHF/KUKS(..., symmetry=True)` enables
+irreducible target J/K, built-in XC projection and iteration diagonalization;
+`time_reversal=True` additionally permits antiunitary operations. Full source-k
+sums and the full implicit residual are retained. Operations must preserve the
+finite discretization as well as the physical crystal.
 See [the symmetry contract](src/gradscf/pbc/README.md#spatial-symmetry-and-aobloch-maps).
+
+External periodic `dft.Functional` models may supply `q_energy_fn` to define a
+real per-cell energy for `D + Z_q + Z_q†`. `dfpt.DFPT(mf, q=q)` then derives the
+finite-q kernel by AD and retains model/reference derivatives. A diagonal-k
+energy alone is insufficient. See [the finite-q contract](src/gradscf/dfpt/FINITE_Q.md#external-energy-functionals).
 
 ## Migration scope
 

@@ -66,9 +66,16 @@ def project_q_potential(inputs,transfer,potential):
     return _project(inputs.ao,_shifted_ao(inputs,transfer),inputs.weights,v.T,'LDA')
 
 
-def q_kernel(inputs,density,transfer,*,mesh,xc='hf',exxdiv='ewald'):
+def q_kernel(inputs,density,transfer,*,mesh,xc='hf',exxdiv='ewald',functional=None,params=None):
     """Return the complex-linear finite-q Fock derivative on a fixed AO basis."""
-    kind=xc_type(xc);alpha=hybrid_coeff(xc)
+    if functional is None:
+        if params is not None:raise ValueError('params requires an external functional')
+        kind=xc_type(xc);alpha=hybrid_coeff(xc)
+        external_action=None
+    else:
+        from .functional import finite_q_kernel
+        kind='HF';alpha=0.
+        external_action=finite_q_kernel(functional,params,inputs,density,transfer)
     if kind not in ('HF','LDA','GGA'):raise NotImplementedError('Finite-q kernels support HF/LDA/GGA/global hybrids')
     if exxdiv not in ('ewald',None):raise NotImplementedError('Unsupported exchange correction')
     ao=inputs.ao;plus=_shifted_ao(inputs,transfer);kw=weights_for(inputs)
@@ -88,6 +95,8 @@ def q_kernel(inputs,density,transfer,*,mesh,xc='hf',exxdiv='ewald'):
         if xc_action is not None:
             vxc=xc_action(fields.real)+1j*xc_action(fields.imag)
             f+=_project(ao,plus,inputs.weights,vxc,kind)
+        if external_action is not None:
+            f+=external_action(d)
         if alpha:
             f-=alpha*_kpoint_exchange(inputs,d,mesh=mesh,exxdiv=exxdiv,
                                      bra=plus[:,0],bra_overlap=inputs.overlap[transfer.partners])

@@ -113,7 +113,8 @@ def _assemble_kpoints(cell,parameters,lattice,ao,ft,gv,coords,kpts,kmesh,*,elect
         **_context(cell,parameters,lattice,ft,gv,kpts))
 
 
-def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True):
+def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True,targets=None):
+    """Full source-k sums with optional representative target contractions."""
     if exxdiv not in ('ewald',None):raise NotImplementedError('Unsupported exchange correction.')
     ao=inputs.ao[:,0];nk=ao.shape[0];weight=inputs.weights[0]
     from ...pbc.kpoints import weights_for
@@ -121,9 +122,10 @@ def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True):
     total=density_spin.sum(axis=0)
     rho=jnp.einsum('k,kgp,kpq,kgq->g',kw,ao,total,ao.conj()).real
     vr=jnp.fft.ifftn(jnp.fft.fftn(rho.reshape(mesh))*coulomb_kernel(inputs.gvectors).reshape(mesh)).reshape(-1).real
-    j=weight*jnp.einsum('kgp,g,kgq->kpq',ao.conj(),vr,ao)
-    if not with_k:return j,jnp.zeros_like(density_spin)
-    return j,_kpoint_exchange(inputs,density_spin,mesh=mesh,exxdiv=exxdiv)
+    target_ao=ao if targets is None else ao[jnp.asarray(targets)]
+    j=weight*jnp.einsum('kgp,g,kgq->kpq',target_ao.conj(),vr,target_ao)
+    if not with_k:return j,jnp.zeros((density_spin.shape[0],)+j.shape,dtype=density_spin.dtype)
+    return j,_kpoint_exchange(inputs,density_spin,mesh=mesh,exxdiv=exxdiv,targets=targets)
 
 
 def _pair_potential(pairs,kernel,mesh):
@@ -133,14 +135,14 @@ def _pair_potential(pairs,kernel,mesh):
         *kernel.reshape(tuple(mesh)+(1,1)),axes=(0,1,2)).reshape(pairs.shape)
 
 
-def _kpoint_exchange(inputs,density_spin,*,mesh,exxdiv,bra=None,bra_overlap=None):
+def _kpoint_exchange(inputs,density_spin,*,mesh,exxdiv,bra=None,bra_overlap=None,targets=None):
     """Shared diagonal/finite-q exchange; bra may represent lifted k+q AOs."""
     from ...pbc.kpoints import weights_for
     ao=inputs.ao[:,0];nk=ao.shape[0];weight=inputs.weights[0];kw=weights_for(inputs)
     bra=ao if bra is None else bra
     bra_overlap=inputs.overlap if bra_overlap is None else bra_overlap
     matrices=[]
-    for target in range(nk):
+    for target in (range(nk) if targets is None else targets):
         k=jnp.zeros_like(density_spin[:,target])
         for source in range(nk):
             pairs=ao[source].conj()[:,:,None]*ao[target][:,None,:]

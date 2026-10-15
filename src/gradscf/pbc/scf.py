@@ -34,6 +34,8 @@ def validate_reference(mf, *, integer=True, equal_weights=True, external=False):
             raise ValueError('Run kernel() again after changing temperature, k sampling or exchange correction.')
     if getattr(mf,'time_reversal',False)!=getattr(mf,'_computed_time_reversal',False):
         raise ValueError('Run kernel() again after changing time-reversal reduction.')
+    if getattr(mf,'symmetry',False)!=getattr(mf,'_computed_symmetry',False):
+        raise ValueError('Run kernel() again after changing spatial symmetry reduction.')
     if integer and (getattr(mf,'temperature',None) is not None
             or not np.allclose(mf.result.mo_occ_spin,np.rint(mf.result.mo_occ_spin),atol=1e-10,rtol=0)):
         raise NotImplementedError('This method currently requires zero-temperature integer occupations.')
@@ -134,7 +136,7 @@ class _SCF:
     k_sampling=False
 
     def __init__(self,cell,*,kpts=None,kweights=None,xc=None,exxdiv='ewald',temperature=None,
-                 functional=None,params=None,time_reversal=False,**controls):
+                 functional=None,params=None,time_reversal=False,symmetry=False,**controls):
         self.cell=cell if hasattr(cell,'topology') else cell.build()
         self.kpts=jnp.zeros((1,3)) if kpts is None else jnp.asarray(kpts).reshape(-1,3)
         if not self.k_sampling and (self.kpts.shape!=(1,3) or np.any(np.asarray(self.kpts)!=0)):
@@ -149,20 +151,26 @@ class _SCF:
         if self.default_xc=='hf' and self.xc!='hf':
             raise ValueError('Use a periodic KS class for a DFT functional.')
         self.kweights=kweights;self.temperature=temperature
-        self.time_reversal=bool(time_reversal);self.reduction=None
+        self.time_reversal=bool(time_reversal);self.symmetry=bool(symmetry);self.reduction=None
         self.exxdiv=exxdiv;self.controls=controls;self.inputs=None;self.result=None
 
     def kernel(self,dm0=None):
         if not jax.config.x64_enabled:raise ValueError('Periodic SCF requires JAX float64.')
         self.inputs=build_inputs(self.cell,kpts=self.kpts,kweights=self.kweights)
-        self.reduction=(time_reversal_plan(np.asarray(self.kpts)@np.asarray(self.cell.lattice).T/(2*np.pi))
-                        if self.time_reversal else None)
+        if self.symmetry:
+            from .reduction import SpatialReduction
+            self.reduction=SpatialReduction.from_cell(self.cell,self.kpts,
+                kweights=np.asarray(self.inputs.kweights),time_reversal=self.time_reversal)
+        elif self.time_reversal:
+            self.reduction=time_reversal_plan(np.asarray(self.kpts)@np.asarray(self.cell.lattice).T/(2*np.pi))
+        else:
+            self.reduction=None
         if self.reduction is not None:
             w=np.asarray(self.inputs.kweights)
             if (not bool(self.reduction.consistent(self.inputs.overlap))
                     or not bool(self.reduction.consistent(self.inputs.hcore))
-                    or not np.allclose(w,w[self.reduction.partners],atol=1e-12,rtol=0)):
-                raise ValueError('Inputs violate time reversal; use the full mesh or refine the FFT grid.')
+                    or not bool(self.reduction.weights_consistent(w))):
+                raise ValueError('Inputs violate the requested symmetry; use the full mesh or refine the FFT grid.')
         if (self.functional is None and hybrid_coeff(self.xc)!=0 and self.exxdiv=='ewald'
                 and not np.allclose(self.inputs.kweights,1/len(self.kpts),atol=1e-12,rtol=0)):
             raise NotImplementedError('Ewald exchange correction requires equal k weights; use exxdiv=None for general weights')
@@ -174,6 +182,7 @@ class _SCF:
         self._computed_xc=self.xc;self._computed_mesh=self.cell.mesh;self._cell_version=self.cell._version
         self._computed_functional=self.functional;self._computed_params=_params_signature(self.params)
         self._computed_time_reversal=self.time_reversal
+        self._computed_symmetry=self.symmetry
         self.e_tot=self.result.total_energy
         self.e_free=self.result.free_energy;self.entropy=self.result.entropy
         self.chemical_potential=self.result.chemical_potential
@@ -188,7 +197,7 @@ class _SCF:
         return self.e_tot
 
     def run(self,**controls):
-        for name in ('temperature','functional','params','time_reversal'):
+        for name in ('temperature','functional','params','time_reversal','symmetry'):
             if name in controls:setattr(self,name,controls.pop(name))
         self.controls.update(controls);self.kernel();return self
 
