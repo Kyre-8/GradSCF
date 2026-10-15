@@ -26,6 +26,7 @@ dependencies = [
 Repository = "https://github.com/STOKES-DOT/GradSCF"
 
 [project.optional-dependencies]
+symmetry = ["spglib>=2.0"]
 nnao = ["mace_jax @ git+https://github.com/ACEsuit/mace-jax.git@19cf364a405fcf9f2f82590a98d61bc870e05881"]
 comparison-tests = ["pytest>=8.0", "pyscf>=2.3.0"]
 dev = [

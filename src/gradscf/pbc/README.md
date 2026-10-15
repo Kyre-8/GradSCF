@@ -18,8 +18,8 @@ evaluates the **full uniform Cartesian-product mesh**, including shifted meshes.
 The weights enter density, Hartree/exchange contractions, XC, energies, particle
 counts, entropy, and semilocal band queries. They are independent of FFT grid
 quadrature weights. Arbitrary weights do not automatically represent an
-irreducible Brillouin zone: the missing AO/Bloch transformations must also be
-implemented before evaluating only symmetry representatives.
+irreducible Brillouin zone: AO/Bloch transformations and reciprocal-space sums
+must be applied consistently before evaluating only symmetry representatives.
 
 For HF/global hybrids, `exxdiv='ewald'` retains the supercell Madelung correction
 and requires equal weights. Use `exxdiv=None` for a general weighted quadrature;
@@ -52,6 +52,67 @@ response/correlation and GW. Coordinates are fractional reciprocal coordinates;
 the table satisfies `k[j] = k[i] - q` modulo reciprocal lattice vectors. Shifted
 k meshes generally require a separate unshifted q mesh. The former internal
 `gw.pbc.momentum` module has moved here; exports from `gw.pbc` remain available.
+
+## Spatial symmetry and AO/Bloch maps
+
+```python
+from gradscf.pbc import symmetry
+
+operations = symmetry.space_group(cell)  # optional spglib discovery
+operation = operations[0]
+k_fractional = k_absolute @ cell.lattice.T / (2 * jnp.pi)
+coefficients_rotated = operation.coefficients(k_fractional, coefficients)
+density_rotated = operation.density(k_fractional, density)
+operator_rotated = operation.operator(k_fractional, operator)
+```
+
+Install the optional `symmetry` extra for automatic discovery. Alternatively,
+`symmetry.Operation.from_cell(cell, rotation, translation)` accepts an explicit
+operation without spglib. The supplied fractional rotation must be integral,
+unimodular and an isometry of the lattice. The translation is fractional and
+may include whole lattice vectors. The geometry tolerance is a positive length
+in Bohr. GradSCF verifies the atom permutation, matching GTH potentials, shell
+types, contraction counts and actual radial parameters. It conservatively
+treats different raw basis/PP data as distinct atomic types. Floating basis
+centers and nonfinite geometry are rejected.
+
+With row lattice A and the fractional column convention of
+[spglib](https://spglib.readthedocs.io/en/stable/definition.html),
+
+\[
+x'=Wx+t,\quad Q=A^{\mathsf T}WA^{-\mathsf T},\quad k'=kW^{-1}.
+\]
+
+All operation methods consume **fractional reciprocal k vectors**, whereas
+`cell.make_kpts()` returns absolute vectors in inverse Bohr. `rotate_k()` leaves
+the result unwrapped, so it does not introduce a wrap discontinuity in AD.
+If atom i transforms into atom j plus integer lattice shift L_i, its source
+AO columns acquire phase `exp(-2*pi*1j*dot(k_prime,L_i))`. This is the native
+lattice-translation Bloch gauge, retaining both atoms outside the home cell
+and non-symmorphic translations. Shell rotations are obtained by expanding
+the Cartesian monomials; no spherical-harmonic normalization is imposed.
+
+Let T be `operation.matrix(k)`. Native Cartesian d/f shells share radial
+normalization and generally do not have Euclidean-unitary T. Therefore:
+
+\[
+C'=TC,\qquad P'=TPT^\dagger,\qquad F'=T^{-\dagger}FT^{-1}.
+\]
+
+Overlap matrices transform like F. These rules preserve `C† S C` and `Tr(P F)`.
+Using `T F T†` for a general Cartesian shell is incorrect. The methods accept
+leading spin/batch dimensions on same-k coefficients and matrices, and support
+JIT/JVP/VJP in k and their array inputs. Collinear spin blocks can be transformed
+independently; spin rotations and magnetic-state symmetry are not inferred.
+
+Discovery and atom/shell matching are discrete eager operations, not an AD
+path through changing geometry. The operation is a static snapshot;
+`operation.validate(cell)` rejects stale geometry, basis or potential data.
+Rebuild it after edits. A physical space-group operation need not preserve the
+finite FFT cutoff or quadrature grid, and a density may break crystal symmetry.
+This layer does not activate spatial reduction in SCF or remove symmetry-breaking
+response directions. Irreducible integration/J/K and their derivative gates
+remain separate work. See [the runnable example](../../../examples/periodic_symmetry.py).
 
 ## Finite-temperature SCF
 
@@ -268,8 +329,8 @@ energy labels mean internal E/cell even at finite temperature. See the
 [training contract](../model/neural_xc/training/README.md#periodic-references)
 and [example](../../../examples/training/periodic_xc.py).
 
-The next foundation work remains physical space-group/AO transformations,
-irreducible J/K evaluation and the finite-q external-functional contract.
+The next foundation work is irreducible integration/J/K using the validated
+spatial maps, followed by the finite-q external-functional contract.
 Native finite-q OFDFT phonons, Born charges/LO-TO corrections,
 metallic TD/GW/BSE, other smearing schemes, SOC and
 macroscopic Berry-phase fields are not supplied by this increment.

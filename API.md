@@ -38,6 +38,7 @@ removed root export and the additional facade relocations.
 | External XC architecture | `dft.Functional(inputs, apply, init_fn=...)` |
 | Training data and optimization | `training.Sample(mf, ...)`, `training.Trainer(functional)` |
 | Prediction | `trainer.predict(mf)` |
+| Periodic spatial symmetry | `pbc.symmetry.space_group(cell)`, `pbc.symmetry.Operation.from_cell(cell, W, t)` |
 | Excited states | `tdscf.TDA(mf)`, `tdscf.TDDFT(mf)` |
 | CI / CC / FCI | `ci.CIS(mf)`, `cc.CCSD(mf)`, `fci.FCI(mf)` |
 | Moller–Plesset correlation | `mp.MP2(mf)`, `mp.MP3(mf)`, `mp.MP(mf, order=6)`; see [reference restrictions](src/gradscf/mp/README.md) |
@@ -95,6 +96,12 @@ finite temperature. The same three modes and default convergence gate apply;
 unsupported molecular loss types are rejected. See the
 [periodic training contract](src/gradscf/model/neural_xc/training/README.md#periodic-references)
 and [example](examples/training/periodic_xc.py).
+
+Periodic spatial operations provide `matrix`, `coefficients`, `density` and
+`operator` maps at fractional reciprocal k points. Discovery optionally uses
+spglib; explicit operations do not. These maps preserve the native Cartesian
+basis metric and Bloch gauge; they do not yet enable irreducible SCF integration.
+See [the symmetry contract](src/gradscf/pbc/README.md#spatial-symmetry-and-aobloch-maps).
 
 ## Migration scope
 

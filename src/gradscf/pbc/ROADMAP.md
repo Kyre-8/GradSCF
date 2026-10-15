@@ -26,9 +26,11 @@ parent capability is marked complete.
 Resume stage 1 functional coverage. Periodic reference snapshots now connect to
 the existing Sample/Trainer with fixed-density, explicit and implicit modes,
 energy/density supervision and the shared convergence policy. The adapter
-reuses periodic SCF and the shared loss/optimizer. Next are physical space-group
-and AO/Bloch operations, followed by irreducible integration using them. The
-finite-q external-functional contract remains a separate open task.
+reuses periodic SCF and the shared loss/optimizer. Scalar Cartesian space-group
+and AO/Bloch maps are also implemented and independently checked. Next is
+irreducible integration/J/K using these maps, including finite-FFT covariance
+and full-response derivative gates. The finite-q external-functional contract
+remains a separate open task.
 
 The silicon pilot's memory and timing work is parked. Its diagnostic resource
 limits are not project acceptance criteria and must not block unrelated
@@ -41,7 +43,7 @@ acceptance gate is being addressed explicitly.
 - [x] Full and shifted k meshes, quadrature weights and Fermi occupations.
 - [x] First thermal density response and time-reversal diagonalization reduction.
 - [x] External energy functional integration and three array-level training modes.
-- [ ] Physical space-group operations, atom/basis mapping and AO/Bloch rotations.
+- [x] Scalar Cartesian space-group operations, atom/basis mapping and AO/Bloch rotations.
 - [ ] Irreducible integration/J/K with numerical equivalence to the full mesh.
 - [x] Periodic Trainer energy/density samples in fixed-density, explicit and implicit modes.
 - [ ] Explicit external-functional finite-q contract and corresponding response tests.
@@ -202,3 +204,23 @@ the supported invariant observables. Complex arrays alone do not meet this gate.
   q=0 DFPT electron-number derivative is -2.78e-17. Its labels now use internal
   energy per cell, explicitly replacing the earlier hand-written free-energy
   training loop. This is a synthetic teacher/API example, not a material model.
+- 2026-10-15, spatial symmetry on baseline `bb24e5d`: 16 initial tests failed
+  before the module existed. Four finite-geometry regressions reproduced the
+  NaN-center acceptance hole and nonspecific rejection of other NaN geometry;
+  these now fail early with explicit finite-real checks. Final symmetry suite:
+  **23 passed in 8.81 s**, including non-symmorphic phases/composition, atoms
+  outside the cell, Cartesian s through g polynomials, contracted-f Fourier
+  covariance, nonstandard lattice bases, PySCF overlap/kinetic covariance,
+  stale metadata and JAX derivatives. Seven existing k-point/time-reversal and
+  optional-dependency checks passed in 111.36 s. No numerical tests ran locally.
+  Environment: `jy_gpu_1`, `jax_scf`, CPU float64, OMP/OpenBLAS threads two,
+  JAX 0.10.0, spglib 2.7.0, PySCF 2.13.0. Six upstream spglib deprecation
+  warnings were reported; no tests were skipped. Automatic discovery is an
+  optional dependency; explicit operations remain independent of it.
+  Final source/test overlay SHA256:
+  `ca84d172677baac030322c4c0b90e601190b81df55fdcb0adb91431a6e3b8f01`.
+  Logs: `/home/yjiao/gradscf_checks/pbc-symmetry-bb24e5d/{red,boundary-red,final,regression,example}.log`.
+  The example discovers 48 operations for its hexagonal two-He cell and
+  preserves `Tr(P F)` to 1.21e-13. It is an AO/gauge example, not an SCF result.
+  Finite-FFT covariance, irreducible J/K and symmetry-breaking response remain
+  the next integration gates; no space-group speedup is claimed here.
