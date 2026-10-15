@@ -1,0 +1,36 @@
+{
+  "settings": {
+    "a_angstrom": 2.46,
+    "c_angstrom": 6.708,
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "xc": "pbe",
+    "fft_mesh": [
+      15,
+      15,
+      31
+    ],
+    "k_mesh": [
+      3,
+      3,
+      1
+    ],
+    "scf_controls": {
+      "max_cycle": 200,
+      "damping": 0.25,
+      "conv_tol": 1e-12,
+      "conv_tol_density": 1e-11,
+      "conv_tol_grad": 1e-10
+    },
+    "geometry": "fixed AB graphite, not relaxed",
+    "exxdiv": null
+  },
+  "electron_temperature_K": 300.0,
+  "geometry_relaxed": false,
+  "total_energy_Eh_cell": -22.472858173664125,
+  "free_energy_Eh_cell": -22.473441428470178,
+  "seconds": 23.326990861009108,
+  "jax_version": "0.10.0",
+  "backend": "cpu",
+  "scope": "fixed-geometry pilot; basis/FFT/k convergence is not established"
+}

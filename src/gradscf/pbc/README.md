@@ -8,6 +8,10 @@ The [development acceptance ledger](ROADMAP.md#status-review-2026-10-15)
 records the completed stage-1 scope, 21 remaining acceptance items across
 stages 2–5, implementation ownership, dependencies and outstanding validation.
 
+[Projected phonons and vibrational spectra](VIBRATIONS.md) document the shared
+force-response projection, local energy-expansion tools and relative loss/gain
+spectra used by the [thermally excited graphite example](../../../examples/thermally_excited_graphite/README.md).
+
 ## Sampling and weights
 
 ```python

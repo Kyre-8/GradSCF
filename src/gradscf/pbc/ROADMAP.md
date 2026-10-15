@@ -295,6 +295,16 @@ reopen the already accepted stage-1 scope or silently expand it.
 
 ## Evidence
 
+- 2026-10-15, graphite-driven extension: `Phonons.project` reuses the existing
+  force-response action and checks the generalized mass metric, full-space
+  leakage and basis-scale-independent Hermiticity. Local frozen-mode fit/direct
+  jet utilities and relative one-phonon loss/gain spectra are implemented with
+  explicit scope. Seventy distinct focused/regression cases pass on `jy_gpu_1`
+  CPU float64. The [graphite pilot](../../../examples/thermally_excited_graphite/RESULTS.md)
+  verifies directional AD/DFPT curvature against relaxed displaced energies and
+  demonstrates electronic FFT convergence against PySCF. It does **not** close
+  P3.1 or P3.5: the default material sampling is unconverged, and neither a local
+  Gamma expansion nor instrumental broadening is a bulk anharmonic self-energy.
 - Baseline `01de656`: see [ATOMIC_RESPONSE.md](../dfpt/ATOMIC_RESPONSE.md) for native phonon and regression
   evidence. The merge gate verified 811 committed source/test/data files and
   passed 42 tests (one PySCF-version-pinned source oracle skipped) on `jy_gpu_1`.

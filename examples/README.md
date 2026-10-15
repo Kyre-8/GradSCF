@@ -21,6 +21,7 @@ units, convergence criteria and measured outputs where available.
 | [pbc](pbc/) | Periodic basis, SCF, forces, temperature and symmetry. |
 | [solvers](solvers/README.md) | Shared linear/eigenvalue solvers and degenerate response. |
 | [training](training/README.md) | Neural XC, force supervision and response targets. |
+| [thermally_excited_graphite](thermally_excited_graphite/README.md) | Graphite phonons, electronic-temperature scans, local anharmonic diagnostics and relative vibrational spectra. |
 
 ## Periodic foundations
 
