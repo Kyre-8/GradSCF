@@ -1,0 +1,5 @@
+case,mechanism,temperature_K,peak_index,energy_meV,relative_height
+r2scan_szv_fft39_k3,electronic_plus_bose,300.0,0,176.47541486373484,0.8977782823304141
+r2scan_szv_fft39_k3,electronic_plus_bose,300.0,1,194.59889921338478,1.000000027564369
+r2scan_szv_fft39_k3,bose_only,300.0,0,176.47541486373484,0.8977782823304141
+r2scan_szv_fft39_k3,bose_only,300.0,1,194.59889921338478,1.000000027564369

@@ -44,9 +44,9 @@ def make_cell(*, basis=BASIS, mesh=FFT_MESH):
                  mesh=mesh, precision=1e-10)
 
 
-def mean_field(cell, temperature, *, kmesh=K_MESH):
-    """Construct the same finite-electron-temperature PBE calculation each time."""
-    return dft.KRKS(cell, kpts=cell.make_kpts(kmesh), xc='pbe',
+def mean_field(cell, temperature, *, kmesh=K_MESH, xc='pbe'):
+    """Construct a finite-electron-temperature calculation with shared controls."""
+    return dft.KRKS(cell, kpts=cell.make_kpts(kmesh), xc=xc,
                     temperature=temperature*KB_HARTREE, exxdiv=None,
                     **SCF_CONTROLS)
 

@@ -1,0 +1,1883 @@
+{
+  "scope": "Read-only projected-Phi diagnostic; nonzero rigid-translation curvature violates translational invariance. Grid eggbox is a hypothesis requiring convergence evidence.",
+  "source_script_sha256": "3edcfd63519f9ab4318187868226ccc051351852c48be2a219d983048ca2b237",
+  "records": [
+    {
+      "case": "pilot",
+      "temperature_K": 1377.0,
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          15,
+          15,
+          31
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "source_file": "graphite_results/gamma_1377K.npz",
+      "source_sha256": "cfbc437588da90b12bc72f5b3337c3c1d7ba2f7f9227c02d8c3f0fb28f88b78c",
+      "signed_energies_meV": [
+        -48.94398371375852,
+        -47.68025898114927,
+        31.500501379869995,
+        33.42000895306941,
+        178.06478916782243,
+        178.42422263915245,
+        180.4159719526604,
+        180.77618448370666
+      ],
+      "projected_mass_metric_electron_masses": [
+        [
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223
+        ]
+      ],
+      "asr_applied": false,
+      "full_space_operator_available": false,
+      "translations": [
+        {
+          "axis": "x",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": -0.018522067208621887,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": -8.45960698075827e-07,
+          "signed_energy_meV": -25.027977756169335,
+          "mass_metric_eigenmode_overlaps": [
+            0.12627815811629767,
+            0.3788269068212045,
+            0.123721841040738,
+            0.3711730900197659,
+            5.602362102495349e-11,
+            1.5610976398776154e-11,
+            7.902922416291808e-10,
+            3.140067259603017e-09
+          ],
+          "projected_mass_weighted_residual_Hartree2": 2.289920359015651e-06
+        },
+        {
+          "axis": "y",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": -0.020346218794628036,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": -9.292754021913353e-07,
+          "signed_energy_meV": -26.231485626378138,
+          "mass_metric_eigenmode_overlaps": [
+            0.3788344743355876,
+            0.12627563561153546,
+            0.3711655231221139,
+            0.12372436333992326,
+            1.6807086328856034e-10,
+            5.2036587751879366e-12,
+            2.3708767283097798e-09,
+            1.0466890879362943e-09
+          ],
+          "projected_mass_weighted_residual_Hartree2": 2.2890733078548317e-06
+        }
+      ]
+    },
+    {
+      "case": "pilot",
+      "temperature_K": 300.0,
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          15,
+          15,
+          31
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "source_file": "graphite_results/gamma_300K.npz",
+      "source_sha256": "b951f914d683ed0b7b55fedd11a1479c7c44de3d3459856947703b222ba7047a",
+      "signed_energies_meV": [
+        -51.454446749034595,
+        -50.25409241616117,
+        27.71376667490273,
+        29.877355024385665,
+        175.08639040125038,
+        175.4532812543445,
+        178.55994709497534,
+        178.92268846198047
+      ],
+      "projected_mass_metric_electron_masses": [
+        [
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223
+        ]
+      ],
+      "asr_applied": false,
+      "full_space_operator_available": false,
+      "translations": [
+        {
+          "axis": "x",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": -0.018523210727438916,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": -8.460129261541415e-07,
+          "signed_energy_meV": -25.02875033520902,
+          "mass_metric_eigenmode_overlaps": [
+            0.10884249666563144,
+            0.3265538443616473,
+            0.14115730264256407,
+            0.4234455737431389,
+            1.6702497757412306e-07,
+            4.7438241430637786e-07,
+            3.366800719475171e-08,
+            1.07511618485296e-07
+          ],
+          "projected_mass_weighted_residual_Hartree2": 2.289793196120936e-06
+        },
+        {
+          "axis": "y",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": -0.020347426378916598,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": -9.29330556339964e-07,
+          "signed_energy_meV": -26.23226405750149,
+          "mass_metric_eigenmode_overlaps": [
+            0.32652748999951753,
+            0.10885128145302064,
+            0.42347190792034617,
+            0.14114852458348195,
+            5.0107493274481e-07,
+            1.581274714337737e-07,
+            1.0100402159165044e-07,
+            3.5837206165897456e-08
+          ],
+          "projected_mass_weighted_residual_Hartree2": 2.288945497859402e-06
+        }
+      ]
+    },
+    {
+      "case": "pilot",
+      "temperature_K": 800.0,
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          15,
+          15,
+          31
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "source_file": "graphite_results/gamma_800K.npz",
+      "source_sha256": "3c25445025b2cc2b791533141e00e5d6ba477937f2387e24fbf78a3747378734",
+      "signed_energies_meV": [
+        -49.415134982968766,
+        -48.16378420775491,
+        30.75785497151066,
+        32.72099952590216,
+        176.22750910957134,
+        176.59097583554845,
+        178.76226936513842,
+        179.12551640180143
+      ],
+      "projected_mass_metric_electron_masses": [
+        [
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223
+        ]
+      ],
+      "asr_applied": false,
+      "full_space_operator_available": false,
+      "translations": [
+        {
+          "axis": "x",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": -0.018522069950351567,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": -8.459608232991905e-07,
+          "signed_energy_meV": -25.027979608552933,
+          "mass_metric_eigenmode_overlaps": [
+            0.1228627505732112,
+            0.36858734847733465,
+            0.12713723650466657,
+            0.3814126152627689,
+            6.4419351943895754e-09,
+            1.4562171307190674e-08,
+            6.482723424612546e-09,
+            2.1695188664569795e-08
+          ],
+          "projected_mass_weighted_residual_Hartree2": 2.2897973004614504e-06
+        },
+        {
+          "axis": "y",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": -0.020346294614073293,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": -9.292788651023653e-07,
+          "signed_energy_meV": -26.231534501671767,
+          "mass_metric_eigenmode_overlaps": [
+            0.3685882517193926,
+            0.12286244949252623,
+            0.3814117095040946,
+            0.1271375384242236,
+            1.9325805580363366e-08,
+            4.854057101387996e-09,
+            1.9448170271053817e-08,
+            7.231729553845391e-09
+          ],
+          "projected_mass_weighted_residual_Hartree2": 2.288950173252989e-06
+        }
+      ]
+    },
+    {
+      "case": "r2scan_szv_fft33_k3",
+      "temperature_K": 1377.0,
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          33,
+          33,
+          63
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "r2scan"
+      },
+      "source_file": "graphite_results/gamma_precision/r2scan_szv_fft33_k3/gamma_1377K.npz",
+      "source_sha256": "53a6acd2aeb1a72bf1189fd8ff6aa288b002f8d4796fcca90b5924b5307165be",
+      "signed_energies_meV": [
+        -13.9307776273316,
+        -13.930777627145932,
+        120.93775431117635,
+        120.93775431139257,
+        177.09374216947933,
+        177.09374216952654,
+        208.89776985877404,
+        208.89776985889097
+      ],
+      "projected_mass_metric_electron_masses": [
+        [
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223
+        ]
+      ],
+      "asr_applied": false,
+      "full_space_operator_available": false,
+      "translations": [
+        {
+          "axis": "x",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.21541630912947254,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 9.838736097624043e-06,
+          "signed_energy_meV": 85.35330116098297,
+          "mass_metric_eigenmode_overlaps": [
+            0.09894724488763934,
+            0.39639287979864657,
+            0.3696246109370123,
+            0.13502871939228878,
+            2.0096916162279703e-10,
+            1.4232337692869183e-08,
+            5.101354105816175e-06,
+            1.429197001176915e-06
+          ],
+          "projected_mass_weighted_residual_Hartree2": 1.0007624163209516e-05
+        },
+        {
+          "axis": "y",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.21541630912978227,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 9.838736097638189e-06,
+          "signed_energy_meV": 85.35330116104431,
+          "mass_metric_eigenmode_overlaps": [
+            0.39639287979866755,
+            0.09894724488763681,
+            0.13502871939229044,
+            0.36962461093699117,
+            1.423233771682675e-08,
+            2.009691618806297e-10,
+            1.4291970011237952e-06,
+            5.1013541056937325e-06
+          ],
+          "projected_mass_weighted_residual_Hartree2": 1.0007624163228007e-05
+        }
+      ]
+    },
+    {
+      "case": "r2scan_szv_fft33_k3",
+      "temperature_K": 300.0,
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          33,
+          33,
+          63
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "r2scan"
+      },
+      "source_file": "graphite_results/gamma_precision/r2scan_szv_fft33_k3/gamma_300K.npz",
+      "source_sha256": "1b9d6fda90ee516f8c7675890680d277ddcda444608e8da0ec3490232fab0222",
+      "signed_energies_meV": [
+        -22.552121331256767,
+        -22.552121331160812,
+        119.67748654605656,
+        119.67748654628066,
+        174.7956053078592,
+        174.79560530788302,
+        207.0749483603429,
+        207.07494836045151
+      ],
+      "projected_mass_metric_electron_masses": [
+        [
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223
+        ]
+      ],
+      "asr_applied": false,
+      "full_space_operator_available": false,
+      "translations": [
+        {
+          "axis": "x",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.2154094725434346,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 9.838423849372701e-06,
+          "signed_energy_meV": 85.35194673749659,
+          "mass_metric_eigenmode_overlaps": [
+            0.1665459542795504,
+            0.30808355112774716,
+            0.39632890943452287,
+            0.12896127732542415,
+            2.428069956082628e-06,
+            5.17039936735012e-05,
+            1.9207503592658745e-05,
+            6.968265533288816e-06
+          ],
+          "projected_mass_weighted_residual_Hartree2": 1.0007360106930709e-05
+        },
+        {
+          "axis": "y",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.21540947254381795,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 9.838423849390211e-06,
+          "signed_energy_meV": 85.35194673757255,
+          "mass_metric_eigenmode_overlaps": [
+            0.30808355112782004,
+            0.16654595427952748,
+            0.12896127732544868,
+            0.39632890943444865,
+            5.170399367381818e-05,
+            2.428069955966162e-06,
+            6.968265533121572e-06,
+            1.9207503592456023e-05
+          ],
+          "projected_mass_weighted_residual_Hartree2": 1.0007360106949994e-05
+        }
+      ]
+    },
+    {
+      "case": "r2scan_szv_fft39_k3",
+      "temperature_K": 300.0,
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          39,
+          39,
+          75
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "r2scan"
+      },
+      "source_file": "graphite_results/gamma_precision/r2scan_szv_fft39_k3/gamma_300K.npz",
+      "source_sha256": "16f084e9088be66745dc9cf0cfa32b46b3a06b338ebca8910d85f985b34264d8",
+      "signed_energies_meV": [
+        13.663355690651613,
+        13.663355690727427,
+        90.70239939761572,
+        90.70239939762507,
+        176.46461170509454,
+        176.46461170510526,
+        194.60759037123475,
+        194.60759037124683
+      ],
+      "projected_mass_metric_electron_masses": [
+        [
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223
+        ]
+      ],
+      "asr_applied": false,
+      "full_space_operator_available": false,
+      "translations": [
+        {
+          "axis": "x",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.13553338998006156,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 6.190233514904032e-06,
+          "signed_energy_meV": 67.70241849282678,
+          "mass_metric_eigenmode_overlaps": [
+            4.888731054834117e-05,
+            0.45315373127445857,
+            1.1838619457152029e-05,
+            0.5467647195431333,
+            8.919789932709479e-10,
+            1.0128539303116908e-05,
+            7.384749151860973e-08,
+            1.061997362869827e-05
+          ],
+          "projected_mass_weighted_residual_Hartree2": 5.408546333194787e-06
+        },
+        {
+          "axis": "y",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.13553338998000736,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 6.190233514901556e-06,
+          "signed_energy_meV": 67.70241849281324,
+          "mass_metric_eigenmode_overlaps": [
+            0.45315373127445574,
+            4.8887310548340225e-05,
+            0.5467647195431355,
+            1.1838619457151661e-05,
+            1.0128539303108961e-05,
+            8.919789932474412e-10,
+            1.0619973628836138e-05,
+            7.384749151883463e-08
+          ],
+          "projected_mass_weighted_residual_Hartree2": 5.408546333195059e-06
+        }
+      ]
+    },
+    {
+      "case": "szv_fft21_k3",
+      "temperature_K": 300.0,
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          21,
+          21,
+          41
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "source_file": "graphite_results/gamma_precision/szv_fft21_k3/gamma_300K.npz",
+      "source_sha256": "58f8d176429cf377444112f2d8888147ec1d37184c9f017ecf37e947e8fbdda1",
+      "signed_energies_meV": [
+        11.165353632310698,
+        11.16606374309487,
+        32.18840331000007,
+        32.18884846454343,
+        176.96235773032527,
+        176.9623632699456,
+        180.1647005933924,
+        180.16474309844483
+      ],
+      "projected_mass_metric_electron_masses": [
+        [
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223
+        ]
+      ],
+      "asr_applied": false,
+      "full_space_operator_available": false,
+      "translations": [
+        {
+          "axis": "x",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.02589209469936951,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 1.182572887778317e-06,
+          "signed_energy_meV": 29.591339580855,
+          "mass_metric_eigenmode_overlaps": [
+            0.04401512105625128,
+            0.13203352350104594,
+            0.6179664280361944,
+            0.2059848709398606,
+            8.565179780716397e-10,
+            2.5695316551062484e-09,
+            3.9780276493293656e-08,
+            1.326032159074037e-08
+          ],
+          "projected_mass_weighted_residual_Hartree2": 4.689073503210663e-07
+        },
+        {
+          "axis": "y",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.02589218924611865,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 1.1825772060238453e-06,
+          "signed_energy_meV": 29.591393608202697,
+          "mass_metric_eigenmode_overlaps": [
+            0.13204539417796793,
+            0.044011164163966,
+            0.20598882783239614,
+            0.6179545573585241,
+            2.5695564192224557e-09,
+            8.565097242906323e-10,
+            1.326007995617855e-08,
+            3.9781001479032285e-08
+          ],
+          "projected_mass_weighted_residual_Hartree2": 4.6892708068357925e-07
+        }
+      ]
+    },
+    {
+      "case": "szv_fft27_k3",
+      "temperature_K": 1377.0,
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          27,
+          27,
+          51
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "source_file": "graphite_results/gamma_precision/szv_fft27_k3/gamma_1377K.npz",
+      "source_sha256": "40f3cba27a91afd352b1a143946e758f27c7be83adc6feb54a33fb39e41680ca",
+      "signed_energies_meV": [
+        -7.636779453522877,
+        -7.636777937179479,
+        9.94298956190907,
+        9.94299076923923,
+        178.51855453551244,
+        178.51855459918102,
+        180.1970673256622,
+        180.19706738906908
+      ],
+      "projected_mass_metric_electron_masses": [
+        [
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223
+        ]
+      ],
+      "asr_applied": false,
+      "full_space_operator_available": false,
+      "translations": [
+        {
+          "axis": "x",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.002223810694805129,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 1.0156838470438794e-07,
+          "signed_energy_meV": 8.672213071747612,
+          "mass_metric_eigenmode_overlaps": [
+            0.11287527436577319,
+            0.03762262316681962,
+            0.6371079735575796,
+            0.21239412860962467,
+            3.7402888992237364e-11,
+            1.2467580998288269e-11,
+            1.8775140674737645e-10,
+            6.258207156365854e-11
+          ],
+          "projected_mass_weighted_residual_Hartree2": 7.590570740727857e-08
+        },
+        {
+          "axis": "y",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.0022238110434796305,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 1.0156840062944218e-07,
+          "signed_energy_meV": 8.672213751612013,
+          "mass_metric_eigenmode_overlaps": [
+            0.03762262269258333,
+            0.11287527578099531,
+            0.21239412908386085,
+            0.6371079721423557,
+            1.2467586752321553e-11,
+            3.7402872272496744e-11,
+            6.25820253540192e-11,
+            1.8775154384329095e-10
+          ],
+          "projected_mass_weighted_residual_Hartree2": 7.590570780772083e-08
+        }
+      ]
+    },
+    {
+      "case": "szv_fft27_k3",
+      "temperature_K": 300.0,
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          27,
+          27,
+          51
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "source_file": "graphite_results/gamma_precision/szv_fft27_k3/gamma_300K.npz",
+      "source_sha256": "40ccd815c3e550d6bd213c9a3ab09f00f4ef2ec33909158d797ea0399f7d7601",
+      "signed_energies_meV": [
+        -22.72517505401007,
+        -22.725174537651466,
+        8.974701421700301,
+        8.97470274204798,
+        175.21566501544106,
+        175.2156650806879,
+        178.27097443336464,
+        178.27097449723766
+      ],
+      "projected_mass_metric_electron_masses": [
+        [
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223
+        ]
+      ],
+      "asr_applied": false,
+      "full_space_operator_available": false,
+      "translations": [
+        {
+          "axis": "x",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.0022238063934747277,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 1.0156818824918519e-07,
+          "signed_energy_meV": 8.672204684776576,
+          "mass_metric_eigenmode_overlaps": [
+            0.006706905057828151,
+            0.0022351002219357574,
+            0.7433267361544899,
+            0.24773125692362732,
+            1.0362963686120732e-09,
+            3.4546158015526146e-10,
+            1.9527464631864778e-10,
+            6.508608389857629e-11
+          ],
+          "projected_mass_weighted_residual_Hartree2": 7.591571322850908e-08
+        },
+        {
+          "axis": "y",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.002223806742265049,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 1.0156820417952927e-07,
+          "signed_energy_meV": 8.672205364867466,
+          "mass_metric_eigenmode_overlaps": [
+            0.0022351001758278695,
+            0.006706905195274594,
+            0.24773125696973497,
+            0.7433267360170427,
+            3.454616005896243e-10,
+            1.036296309366481e-09,
+            6.508603800703691e-11,
+            1.9527478492377273e-10
+          ],
+          "projected_mass_weighted_residual_Hartree2": 7.591571362782625e-08
+        }
+      ]
+    },
+    {
+      "case": "szv_fft33_k3",
+      "temperature_K": 1377.0,
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          33,
+          33,
+          63
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "source_file": "graphite_results/gamma_precision/szv_fft33_k3/gamma_1377K.npz",
+      "source_sha256": "be12ab9d46241ffa9abbdbb190517eb5dd63de9545e7fd00e2580df3088d7b33",
+      "signed_energies_meV": [
+        -9.319860339403407,
+        -9.31986033938025,
+        7.626642495815343,
+        7.626642495963499,
+        178.43892059728404,
+        178.43892059729185,
+        180.11740250623282,
+        180.11740250623518
+      ],
+      "projected_mass_metric_electron_masses": [
+        [
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223
+        ]
+      ],
+      "asr_applied": false,
+      "full_space_operator_available": false,
+      "translations": [
+        {
+          "axis": "x",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.001200734790085195,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 5.4841310626038955e-08,
+          "signed_energy_meV": 6.372422751000229,
+          "mass_metric_eigenmode_overlaps": [
+            0.0006535962286843101,
+            0.1204141370052668,
+            0.000822200318220438,
+            0.8781100664111925,
+            1.0672602405293473e-14,
+            2.0978122363414457e-11,
+            1.5599285473349447e-11,
+            4.8649513061381954e-14
+          ],
+          "projected_mass_weighted_residual_Hartree2": 6.389082827254344e-08
+        },
+        {
+          "axis": "y",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.0012007347900462404,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 5.484131062425978e-08,
+          "signed_energy_meV": 6.372422750896861,
+          "mass_metric_eigenmode_overlaps": [
+            0.1204141370004231,
+            0.0006535962286697027,
+            0.8781100664160509,
+            0.0008222003182201412,
+            2.0978121985557837e-11,
+            1.0672602182055412e-14,
+            4.8649516464581756e-14,
+            1.5599286563508056e-11
+          ],
+          "projected_mass_weighted_residual_Hartree2": 6.389082827064344e-08
+        }
+      ]
+    },
+    {
+      "case": "szv_fft33_k3",
+      "temperature_K": 300.0,
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          33,
+          33,
+          63
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "source_file": "graphite_results/gamma_precision/szv_fft33_k3/gamma_300K.npz",
+      "source_sha256": "09683ff814c934723d1b3b3667676a8479eae5a011f98dd9a43aad9265c74607",
+      "signed_energies_meV": [
+        -23.441638578774064,
+        -23.441638578747934,
+        6.663386791056747,
+        6.663386791139376,
+        175.13419102522624,
+        175.13419102523562,
+        178.19056261098712,
+        178.1905626109944
+      ],
+      "projected_mass_metric_electron_masses": [
+        [
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21894.71360874223
+        ]
+      ],
+      "asr_applied": false,
+      "full_space_operator_available": false,
+      "translations": [
+        {
+          "axis": "x",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.001200785217839374,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 5.4843613819178636e-08,
+          "signed_energy_meV": 6.372556562228487,
+          "mass_metric_eigenmode_overlaps": [
+            0.006371121990431241,
+            1.242542152458923e-05,
+            0.990650646232646,
+            0.002965805913847124,
+            5.475216726177169e-11,
+            3.6236247097727814e-10,
+            1.8576088716928493e-11,
+            5.860102494450878e-12
+          ],
+          "projected_mass_weighted_residual_Hartree2": 6.388529988700797e-08
+        },
+        {
+          "axis": "y",
+          "cartesian_euclidean_norm": 1.0,
+          "curvature_Hartree_per_Bohr2": 0.0012007852178745398,
+          "inertia_electron_masses": 21894.71360874223,
+          "rayleigh_omega_squared_Hartree2": 5.4843613820784776e-08,
+          "signed_energy_meV": 6.3725565623218,
+          "mass_metric_eigenmode_overlaps": [
+            1.2425421523941164e-05,
+            0.0063711219902762,
+            0.002965805913848008,
+            0.9906506462328009,
+            3.623624719498771e-10,
+            5.4752167406920434e-11,
+            5.860102571986096e-12,
+            1.8576088952248133e-11
+          ],
+          "projected_mass_weighted_residual_Hartree2": 6.388529988624002e-08
+        }
+      ]
+    }
+  ],
+  "independent_translation_checks": [
+    {
+      "case": "r2scan_szv_fft33_k3",
+      "source_file": "graphite_results/gamma_precision/r2scan_szv_fft33_k3/translation_check.json",
+      "source_sha256": "db6aa9986103207f9365f27b9e24129b56be8e3c4f02e93b79d90a3f97ea4eff",
+      "exported_file": "r2scan_szv_fft33_k3_translation_check.json",
+      "data": {
+        "direction": [
+          [
+            0.5,
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.0,
+            0.0
+          ]
+        ],
+        "amplitudes_bohr": [
+          -0.0004,
+          -0.0002,
+          0.0,
+          0.0002,
+          0.0004
+        ],
+        "free_energies_Eh": [
+          -22.42712964601002,
+          -22.427129658672683,
+          -22.427129662967616,
+          -22.427129658672698,
+          -22.427129646010023
+        ],
+        "dfpt_curvature_Eh_Bohr2": 0.21540947254343457,
+        "fd_curvature_Eh_Bohr2": 0.2119699304969913,
+        "half_step_curvature_Eh_Bohr2": 0.21474626521467144,
+        "seconds": 319.5123659929959,
+        "interpretation": "No ASR applied; a rigid translation should have zero curvature in the continuum."
+      }
+    }
+  ]
+}
