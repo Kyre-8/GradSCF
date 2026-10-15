@@ -4,6 +4,10 @@ The native periodic path uses Cartesian Gaussian orbitals, GTH pseudopotentials
 and FFT Coulomb integration on neutral 3D cells. Orbital basis data are offline;
 see [basis provenance and coverage](../integrals/periodic/NOTICE.md).
 
+The [development acceptance ledger](ROADMAP.md#status-review-2026-10-15)
+records the completed stage-1 scope, 21 remaining acceptance items across
+stages 2–5, implementation ownership, dependencies and outstanding validation.
+
 ## Sampling and weights
 
 ```python

@@ -6,6 +6,29 @@ A prototype, a passed unit test, and a converged material benchmark are distinct
 states. An unsupported combination must be documented and resolved before its
 parent capability is marked complete.
 
+## Status review: 2026-10-15
+
+Reviewed against local `release/v1.0.0` at `2a916c2`, after the stage-1 merge
+and example reorganization. This review checks source/API restrictions and
+the recorded evidence below; it does not rerun numerical calculations. Local
+uncommitted NNAO/SCF work is not counted as delivered periodic functionality.
+This document is the canonical five-stage checklist; detailed theory and
+benchmark records remain in their owning modules.
+
+| Stage | Current state | Open acceptance items |
+| --- | --- | ---: |
+| 1. Ground-state foundations | Complete within the declared scalar 3D Gaussian/GTH scope | 0 |
+| 2. Forces, stress and reference consistency | Derivative infrastructure implemented; material and branch-continuation gates open | 3 |
+| 3. DFPT and phonons | HF/KS primitive response, OFDFT supercell reference and Fourier IFC implemented; extensions and material validation open | 6 |
+| 4. Correlation and spectra | q=0 TD and partial periodic GW implemented; method/spin/AD/optical coverage incomplete | 7 |
+| 5. Spinors and macroscopic fields | Foundational implementations and validation still required | 5 |
+
+There are **21 open acceptance items**. They are umbrella tasks, not equal-sized
+units or a percentage estimate. An open item can contain working infrastructure;
+its missing implementation and validation are specified below. Historical
+"Stage 2" labels inside `gw/pbc` refer to that subproject's own development
+sequence, not stage 2 of this roadmap.
+
 ## Execution constraints
 
 - Develop in isolated worktrees; preserve unrelated main-worktree changes.
@@ -33,6 +56,13 @@ response kernel. The final boundary and derivative checks are recorded below.
 The next priority is stage 2: independent force/stress comparisons at relaxed
 material geometries, basis/FFT/k convergence and explicit SCF branch tracking.
 Stages 2 through 5 remain incomplete; stage-1 closure does not close the goal.
+
+Work order: establish branch-consistent displaced/strained references (P2.3),
+complete matched force/stress and discretization records (P2.1/P2.2), then
+finish a converged nonpolar phonon benchmark (P3.1). Primitive OFDFT response
+(P3.2) is a separate implementation task. Dielectric/Born-charge work (P3.3)
+needs the electric-field/polarization infrastructure in P5.4/P5.5 before the
+LO-TO gate (P3.4) can close; the stage numbers do not remove this dependency.
 
 The silicon pilot's memory and timing work is parked. Its diagnostic resource
 limits are not project acceptance criteria and must not block unrelated
@@ -65,9 +95,23 @@ weighted full mesh. No finite-q model is inferred from a diagonal-k callback.
 
 - [x] HF/KS and grid/Gaussian OFDFT forces and stress with moving basis/Pulay terms.
 - [x] Finite-temperature free-energy derivatives and stale-reference rejection.
-- [ ] Materials with relaxed geometries and independent force/stress comparisons.
-- [ ] Basis/FFT/k-mesh convergence records at fixed physical settings.
-- [ ] Explicit branch-following support and rejection of unintended SCF branch changes.
+- [ ] **P2.1 — Relaxed-material force/stress validation.** Existing
+  [geometry derivatives](grad.py) cover HF/KS and both periodic OFDFT
+  representations. Add relaxed material references and independent force/stress
+  comparisons with matched geometry, basis, PP, XC, occupations and grids.
+  Report Eh/Bohr forces and Eh/Bohr^3 tensile stress, including finite-temperature
+  free-energy derivatives where applicable. Small-cell derivative tests alone
+  do not close this material gate.
+- [ ] **P2.2 — Discretization convergence.** Record basis, FFT and k-mesh
+  sensitivity separately at fixed physical settings. Declare energy, force and
+  stress tolerances before comparing the runs. Existing Si FFT/basis checks are
+  partial evidence; full k convergence and relaxed references remain open.
+- [ ] **P2.3 — Explicit SCF branch continuation.** The current geometry facade
+  reconverges from its default seed and rejects a density inconsistent with the
+  stored reference; it does not follow an arbitrary metastable branch. Add
+  continuation from the selected state and observable diagnostics for unintended
+  branch changes. Verify displaced and strained finite differences stay on the
+  intended branch, while stale-reference and unconverged-state checks remain.
 
 Acceptance: state/energy/force consistency, translation and strain diagnostics,
 external numerical references, and no hidden projection of raw force errors.
@@ -79,12 +123,33 @@ external numerical references, and no hidden projection of raw force errors.
 - [x] Restricted/unrestricted, zero/finite-T checks and shifted/even-mesh gates.
 - [x] Independent commensurate-supercell HF/KS/OFDFT reference path.
 - [x] Fourier force constants, shortest-image weighting, dispersion and DOS.
-- [ ] Nonpolar material benchmark, external comparison and measured scaling.
-- [ ] Primitive finite-q OFDFT response and geometry, in both representations.
-- [ ] Dielectric tensors and Born effective charges with normalization checks.
-- [ ] Long-range subtraction/restoration and nonanalytic LO-TO correction.
-- [ ] Higher-response/Taylor support with all required momentum sectors.
-- [ ] Degenerate-subspace invariant phonon response observables.
+- [ ] **P3.1 — Converged nonpolar phonons and scaling.** Finish an independent
+  material dispersion comparison after P2.1/P2.2, with raw force constants,
+  ASR and imaginary modes retained. Measure complete calculations, cold/warm
+  timings and peak RSS over meaningful basis/k/q sizes. The Si pilot, one large-k
+  response column and compile-only buffer estimates do not close this gate.
+- [ ] **P3.2 — Primitive finite-q OFDFT.** Extend the stationary/KKT response to
+  grid and Gaussian OFDFT with atomic sources and geometry curvature. Reuse the
+  OFDFT functional derivatives and shared response solvers; validate number
+  constraints and q/-q symmetry against the independent supercell path.
+  [Phonons](phonon.py) currently rejects primitive finite-q OFDFT explicitly.
+- [ ] **P3.3 — Dielectric tensors and Born effective charges.** Build the required
+  periodic field/polarization interface together with P5.4/P5.5. Validate volume,
+  charge, unit and gauge conventions, tensor symmetries and independent physical
+  references. A response to an arbitrary AO potential is not this capability.
+- [ ] **P3.4 — Polar IFCs and LO-TO splitting.** Once P3.3 is validated, implement
+  consistent long-range subtraction before interpolation and restoration at the
+  target q, including the direction-dependent nonanalytic limit. Compare a polar
+  material to an independent reference and check against double counting.
+- [ ] **P3.5 — Higher periodic response.** Extend Taylor propagation to all
+  momentum sectors generated by the perturbation (including 0, q and 2q), with
+  the necessary primitive/geometry derivative rules. Verify coefficients against
+  independent differences or small reference problems. A one-sector linear
+  finite-q solve does not establish all-order or thermal Taylor support.
+- [ ] **P3.6 — Degenerate phonon observables.** Reuse shared spectral-subspace
+  response for projectors, cluster traces and other basis-invariant observables.
+  Test exact/near degeneracy and a separated cluster boundary; individual sorted
+  frequencies or mode vectors need not have unique derivatives at a crossing.
 
 Acceptance: q-grid round trips, Hermiticity and q/-q conjugacy, unit/gauge/mass
 checks, independent models and first-principles comparisons, raw ASR diagnostics,
@@ -104,23 +169,54 @@ batched k operations and streamed bilinear rows. DZVP/k2³ completes within the
 monitored resource envelope. Phase profiling is complete: reference-force
 construction finishes, but the original full-column action requests about
 39.90 GiB of temporary buffers. Streaming the two shared response contractions
-reduces that estimate to 23.35 GiB. The 32-GiB RSS gate is still not met; a
+reduces that estimate to 23.35 GiB. The earlier 32-GiB diagnostic threshold was not met; a
 separate 48-GiB diagnostic completes one k4³ column and its hot repeat, taking
 249.39 s (cold) and 178.93 s (hot). The full matrix and k-convergence gate remain
 open. Future performance work should measure the remaining AO/geometry and
 projection costs before selecting a larger k block. Do not infer
 material stability from ASR projection.
 
+The 32/48-GiB values above describe historical diagnostics, not a required
+production memory budget. The outstanding scientific gate is a complete,
+converged material calculation with measured resource use.
+
 ## 4. Periodic correlation and spectra
 
 - [x] Existing q=0 periodic TDHF/TDDFT and partial periodic GW infrastructure.
-- [ ] Periodic static BSE with external excitation/optical comparisons.
-- [ ] Full k-point unrestricted GW and its q-to-zero head/wing corrections.
-- [ ] Audit and complete periodic support of the required GW self-consistency paths.
-- [ ] Metallic/fractional-occupation TD/GW/BSE response and associated gradients.
-- [ ] General periodic optical matrix elements and finite-q dynamical response.
-- [ ] Momentum-conserving periodic MP/CC foundations with validated method endpoints.
-- [ ] Consistent periodic electronic/phonon coupling interfaces for spectral consumers.
+- [ ] **P4.1 — Periodic static BSE.** Add periodic reference/screening and
+  momentum-resolved electron-hole operators while reusing the molecular BSE
+  and shared solver infrastructure where mathematically applicable. Validate
+  excitations and optical observables against independent periodic results;
+  the existing [BSE facade](../bse/api.py) is molecular.
+- [ ] **P4.2 — Unrestricted k-point GW.** Extend the existing Gamma-point
+  [KUGW](../gw/pbc/kugw.py) to full k sampling and implement its missing q-to-zero
+  head/wing correction. Check spin factors, closed-shell limits and corrected
+  versus uncorrected finite-size behavior independently.
+- [ ] **P4.3 — Periodic GW method and AD coverage.** Start from the existing
+  restricted Gamma/k-point G0W0 and Gamma evGW paths. Record a method-by-method
+  matrix for G0W0, evGW0, evGW, qsGW and scGW: spin, sampling, occupation,
+  correction, forward and backward coverage. Complete the required endpoints
+  with independent validation. In particular, [k-point G0W0](../gw/pbc/ksigma.py)
+  currently rejects JAX transformations; molecular implicit differentiation does
+  not establish a working periodic backward path.
+- [ ] **P4.4 — Metallic excited-state response.** Supply fractional-occupation
+  TD/GW/BSE kernels and their supported gradients, including intraband and
+  zero-temperature limiting checks. Thermal SCF and static first response are
+  already present, but their existence does not establish metallic spectra.
+- [ ] **P4.5 — General periodic optics and dynamics.** Extend the current
+  restricted-Gamma velocity-gauge [optical strengths](optics.py) to the required
+  k/spin sectors and finite-q dynamical response. Keep per-cell oscillator
+  strengths distinct from macroscopic dielectric/absorption quantities and
+  establish gauge, normalization and nonlocal-PP checks.
+- [ ] **P4.6 — Periodic MP/CC.** Establish momentum-conserving excitation spaces,
+  integral actions and method endpoints before adding response. Reuse shared
+  Taylor/nonlinear/linear solvers; validate Gamma/supercell limits and matched
+  periodic energies. Molecular methods alone do not satisfy this gate.
+- [ ] **P4.7 — Electronic/phonon coupling integration.** Connect validated
+  periodic displacement responses, mode conventions and k/q indexing to GW/BSE
+  spectral consumers. The existing prescribed-model periodic Fan example is
+  not a first-principles periodic phonon-to-GW/BSE workflow. Validate phases,
+  masses, units, momentum conservation and supported derivatives end to end.
 
 Acceptance: method/occupation/spin coverage recorded explicitly; matched reference
 inputs for external comparisons; forward and supported backward checks; zero
@@ -128,19 +224,78 @@ temperature insulating limits; stable memory and iteration diagnostics.
 
 ## 5. Spinors and macroscopic fields
 
-- [ ] Spinor/noncollinear SCF and compatible XC density/potential/kernel interfaces.
-- [ ] SOC operators with traceable relativistic pseudopotential data.
-- [ ] Spinor response, symmetry and degeneracy-invariant observables.
-- [ ] Berry-phase polarization and gauge-invariant k-link operations.
-- [ ] Macroscopic electric-field response and compatible forces/Born charges.
+- [ ] **P5.1 — Spinor/noncollinear ground states.** Implement spinor densities
+  and compatible XC energy/potential/kernel contracts; establish collinear and
+  scalar limits before claiming noncollinear response.
+- [ ] **P5.2 — SOC and relativistic data.** Add traceable relativistic PP assets
+  and SOC operators, with explicit conventions and independent SOC-off and
+  finite-SOC numerical checks.
+- [ ] **P5.3 — Spinor response and symmetry.** Extend spatial/time-reversal
+  transformations, response operators and invariant degenerate observables to
+  spinors. Complex scalar AO arrays are not a spinor implementation.
+- [ ] **P5.4 — Berry-phase polarization.** Implement gauge-invariant k-link
+  operations and polarization branches, with mesh and gauge tests. Reuse this
+  field interface for P3.3 rather than inventing a molecular position operator
+  for a periodic crystal.
+- [ ] **P5.5 — Macroscopic fields and derivatives.** Add compatible field,
+  force and mixed-response interfaces, validating the connection to P3.3 Born
+  charges and dielectric tensors at consistent conventions and normalization.
 
 Acceptance: scalar/SOC-off and collinear limits, gauge tests, physical reference
 systems and external numerical comparisons, and tested first derivatives of
 the supported invariant observables. Complex arrays alone do not meet this gate.
 
+## Ownership and reuse
+
+This checklist is stored in `pbc`, but does not move every periodic algorithm
+into this package or introduce module-local copies of shared solvers.
+
+| Work | Existing implementation owners | Starting regression/reference files |
+| --- | --- | --- |
+| P2 geometry and branches | [pbc.grad](grad.py), [pbc.scf](scf.py), periodic integrals, OFDFT | [force tests](../../../tests/pbc/test_forces.py), [gradient tests](../../../tests/pbc/test_gradients.py), [example](../../../examples/pbc/periodic_forces.py) |
+| P3 electronic/atomic response | [dfpt](../dfpt/README.md), [pbc.phonon](phonon.py), [pbc.ifc](ifc.py), OFDFT and shared solvers | [primitive Hessian tests](../../../tests/dfpt/test_primitive_hessian.py), [phonon tests](../../../tests/pbc/test_phonon.py), [silicon workflow](../../../examples/dfpt/README.md) |
+| P4 correlation/spectra | [gw/pbc](../gw/pbc/), [bse](../bse/), [pbc.tdscf](tdscf.py), [optics](optics.py), MP/CC | [periodic GW tests](../../../tests/gw/pbc/), [TD tests](../../../tests/pbc/test_tdscf.py), [optical tests](../../../tests/pbc/test_optics.py) |
+| P5 spin/field foundations | periodic cell/integrals/SCF/XC, [symmetry](symmetry.py), DFPT | Extend [symmetry tests](../../../tests/pbc/test_symmetry.py) and add independent spinor/field references |
+
+## Coverage boundaries and verification debt
+
+These boundaries qualify the existing capabilities; they are not a reason to
+reopen the already accepted stage-1 scope or silently expand it.
+
+- The current native cell path is neutral, three-dimensional, scalar and
+  Cartesian Gaussian/GTH. Lower-dimensional electrostatics, charged-cell
+  conventions and a general all-electron periodic backend are outside the
+  accepted first-stage scope.
+- Ground-state built-in XC covers HF/LDA/GGA/global hybrids, not a complete
+  molecular XC catalogue. [Off-mesh band queries](bands.py) currently support
+  pure LDA/GGA; hybrid and external-model bands need additional operators.
+- External `q_energy_fn` supplies **electronic potential response**. The native
+  displacement and primitive-force adapters still reject external models;
+  atomic/moving-basis and supercell extensions must be defined and checked
+  before claiming arbitrary-model phonons. External finite-q hybrids also
+  require an explicit adapter. Track these as response coverage within P3/P4.
+- Periodic [Trainer](training.py) supports energy and grid-density labels in
+  all three modes. Force/stress/response losses are not yet supplied by this
+  periodic sample adapter; array-level derivatives do not automatically add
+  those loss types. Extend the existing trainer if these targets are required.
+- The accepted irreducible path reduces target contractions and iteration
+  diagonalization, while retaining full AO/source-k data and full implicit
+  response. Larger-scale source/storage reduction is a separate measured
+  optimization, not an unimplemented part of its existing mathematical contract.
+- The stage-1 closure suite skipped a PySCF-2.9.0-pinned basis-source oracle
+  and deselected three larger basis/material cases. Retain these qualifications
+  when reporting validation; rerun them in the appropriate reference environment
+  or material campaign rather than counting them as passes.
+- The recorded JAX 0.10.0 silicon CUDA compiler failure is an environment/backend
+  validation gap. A successful small CUDA probe does not establish a working
+  material calculation. CPU results and GPU validation must be reported separately.
+- Existing experimental material timings, negative modes and memory diagnostics
+  remain in [IFC.md](IFC.md). Resume that work for P2/P3 scientific acceptance;
+  do not let an arbitrary memory cap replace feature or accuracy requirements.
+
 ## Evidence
 
-- Baseline `01de656`: see `ATOMIC_RESPONSE.md` for native phonon and regression
+- Baseline `01de656`: see [ATOMIC_RESPONSE.md](../dfpt/ATOMIC_RESPONSE.md) for native phonon and regression
   evidence. The merge gate verified 811 committed source/test/data files and
   passed 42 tests (one PySCF-version-pinned source oracle skipped) on `jy_gpu_1`.
 - All new evidence below must identify the actual tested snapshot and backend.
