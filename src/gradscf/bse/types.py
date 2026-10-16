@@ -26,12 +26,13 @@ class BSEConfig:
     block_size: int = 16
     seed: int = 0
     screening_config: LinearSolverConfig | None = None
+    response_config: LinearSolverConfig | None = None
 
     def __post_init__(self):
-        if self.screening_config is not None and not isinstance(
-            self.screening_config, LinearSolverConfig
-        ):
-            raise TypeError("screening_config must be a LinearSolverConfig")
+        for name in ("screening_config", "response_config"):
+            value = getattr(self, name)
+            if value is not None and not isinstance(value, LinearSolverConfig):
+                raise TypeError(f"{name} must be a LinearSolverConfig")
         if (self.singlet is not None and type(self.singlet) is not bool) or type(self.tda) is not bool:
             raise ValueError("singlet must be boolean or None; tda must be boolean")
         if self.solver not in {"dense", "davidson"} or self.gradient_mode not in {

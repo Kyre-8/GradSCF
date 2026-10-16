@@ -196,17 +196,21 @@ def _prepare_basis_grid_context(
             geometry_is_traced=True,
             grid_ao_bundle=None,
         )
-    grid_ao_bundle = _cached_grid_ao_input_bundle(
-        basis_from_molecule_spec=basis_from_molecule_spec,
-        build_molecular_grid_from_spec=build_molecular_grid_from_spec,
-        evaluate_cartesian_ao_with_derivatives=evaluate_cartesian_ao_with_derivatives,
-        spec=spec,
-        basis=basis,
-        max_l=max_l,
-        grids_level=grids_level,
-        precompute_eri_groups=precompute_eri_groups,
-        needs_ao_laplacian=needs_ao_laplacian,
-    )
+    # Fixed coordinates may still be closed over by a JIT of a field or model
+    # parameter. Build/cache their constant grid eagerly: device inspection
+    # cannot consume a tracer, and cached AO arrays must not escape a trace.
+    with jax.ensure_compile_time_eval():
+        grid_ao_bundle = _cached_grid_ao_input_bundle(
+            basis_from_molecule_spec=basis_from_molecule_spec,
+            build_molecular_grid_from_spec=build_molecular_grid_from_spec,
+            evaluate_cartesian_ao_with_derivatives=evaluate_cartesian_ao_with_derivatives,
+            spec=spec,
+            basis=basis,
+            max_l=max_l,
+            grids_level=grids_level,
+            precompute_eri_groups=precompute_eri_groups,
+            needs_ao_laplacian=needs_ao_laplacian,
+        )
     return _BasisGridContext(
         basis=grid_ao_bundle.basis,
         coords=grid_ao_bundle.coords,

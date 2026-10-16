@@ -23,5 +23,7 @@ def test_unsupported_cell_and_coincident_images_are_rejected():
     import pytest
     with pytest.raises(ValueError,match='coincide'):
         gto.M(atom='H 0 0 0; H 5 0 0',a=np.eye(3)*5,unit='Bohr')
-    with pytest.raises(NotImplementedError,match='neutral 3D'):
-        gto.M(atom='He 0 0 0',a=np.eye(3)*5,dimension=2)
+    with pytest.raises(NotImplementedError,match='dimension'):
+        gto.M(atom='He 0 0 0',a=np.eye(3)*5,dimension=0)
+    with pytest.raises(ValueError,match='orthogonal'):
+        gto.M(atom='He 0 0 0',a=np.array([[5.,0.,0.],[0.,5.,0.],[1.,0.,12.]]),dimension=2)

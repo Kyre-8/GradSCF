@@ -22,6 +22,7 @@ from .core import (
 )
 from .convergence import convergence_reached
 from .energy import XCContribution, unrestricted_energy, unrestricted_fock
+from .rsh import local_xc_spec, validate_rsh_inputs
 from .rks import (
     _PYSCF_LIKE_DIIS_SPACE,
     _apply_optional_fock_damping,
@@ -88,6 +89,8 @@ class UKSResult:
     overlap_matrix: Array
     hcore_matrix: Array
     cycles: int
+    range_separated_coefficients: tuple[float, float, float] | None = None
+    dispersion_energy: Array | float | None = None
 
 def _default_spin_mo_occ(nao: int, nelec: int, dtype) -> Array:
     return jnp.zeros((nao,), dtype=dtype).at[:nelec].set(1.0)
@@ -138,6 +141,11 @@ def _point_unrestricted_xc_energy(
 
 
 @lru_cache(maxsize=64)
+def _point_unrestricted_xc_energy_kernel(xc_spec: str, xc_kind: str):
+    return jax.jit(jax.vmap(_point_unrestricted_xc_energy(xc_spec, xc_kind)))
+
+
+@lru_cache(maxsize=64)
 def _point_unrestricted_xc_value_and_grad_kernel(xc_spec: str, xc_kind: str):
     point_energy = _point_unrestricted_xc_energy(xc_spec, xc_kind)
     return jax.jit(jax.vmap(jax.value_and_grad(point_energy)))
@@ -161,11 +169,14 @@ def _unrestricted_xc_energy_and_potential_on_grid(
     density_floor: float,
     potential_clip: float | None,
     xc_kind: str,
-) -> tuple[Array, Array, Array, Array, Array]:
+    compute_potential: bool = True,
+) -> tuple[Array, Array | None, Array | None, Array | None, Array | None]:
     rho_a, grad_a = _spin_density_and_gradient(ao, ao_deriv1, density_a)
     rho_b, grad_b = _spin_density_and_gradient(ao, ao_deriv1, density_b)
     rho_total = rho_a + rho_b
     if xc_kind == "HF":
+        if not compute_potential:
+            return jnp.asarray(0.0, dtype=rho_total.dtype), None, None, None, None
         zeros = jnp.zeros_like(rho_total)
         zero_grads = jnp.zeros((rho_total.shape[0], 3), dtype=rho_total.dtype)
         return jnp.asarray(0.0, dtype=rho_total.dtype), zeros, zeros, zero_grads, zero_grads
@@ -185,15 +196,27 @@ def _unrestricted_xc_energy_and_potential_on_grid(
     else:
         raise ValueError(f"Unsupported XC kind={xc_kind!r}.")
 
-    point_exc, point_grad = _point_unrestricted_xc_value_and_grad_kernel(
-        xc_spec,
-        xc_kind,
-    )(response_variables)
-    point_exc = jnp.nan_to_num(point_exc, nan=0.0, posinf=0.0, neginf=0.0)
-    point_grad = jnp.nan_to_num(point_grad, nan=0.0, posinf=0.0, neginf=0.0)
-    exc = jnp.tensordot(weights, point_exc, axes=(0, 0))
-
     mask = rho_total > density_floor
+    truncate_wb97xd = str(xc_spec).lower() == "hyb_gga_xc_wb97x_d"
+    if truncate_wb97xd:
+        # Match restricted SCF's explicit energy/potential grid cutoff. Safe
+        # inputs prevent invalid inactive-branch Hessians leaking through AD;
+        # the active local functional remains unchanged.
+        response_variables = jnp.where(mask[:, None], response_variables,
+                                       jnp.ones_like(response_variables))
+    if compute_potential:
+        point_exc, point_grad = _point_unrestricted_xc_value_and_grad_kernel(
+            xc_spec, xc_kind)(response_variables)
+    else:
+        point_exc = _point_unrestricted_xc_energy_kernel(xc_spec, xc_kind)(response_variables)
+    point_exc = jnp.nan_to_num(point_exc, nan=0.0, posinf=0.0, neginf=0.0)
+    if truncate_wb97xd:
+        point_exc = jnp.where(mask, point_exc, 0.)
+    exc = jnp.tensordot(weights, point_exc, axes=(0, 0))
+    if not compute_potential:
+        return exc, None, None, None, None
+
+    point_grad = jnp.nan_to_num(point_grad, nan=0.0, posinf=0.0, neginf=0.0)
     vxc_rho_a = jnp.where(mask, point_grad[:, 0], 0.0)
     vxc_rho_b = jnp.where(mask, point_grad[:, 1], 0.0)
     if xc_kind == "GGA":
@@ -320,7 +343,15 @@ def _raw_fock_and_energy_for_state(
     overlap: Array | None = None,
     bound_xc: Any | None = None,
     molecule_template: Any | None = None,
-) -> tuple[Array, Array, Array, Array]:
+    eri_lr: Array | None = None,
+    dispersion_energy: Array | None = None,
+    compute_potential: bool = True,
+) -> tuple[Array, Array, Array | None, Array | None]:
+    if not compute_potential and bound_xc is not None:
+        raise NotImplementedError("Energy-only evaluation is limited to the classic orbital objective.")
+    rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy, jk_backend=cfg.jk_backend)
+    if rsh is not None and bound_xc is not None:
+        raise NotImplementedError("Range-separated wb97xd does not support bound_xc overrides.")
     density_tot, j_tot, k_a, k_b = _spin_jk_matrices(
         eri,
         density_a,
@@ -331,10 +362,14 @@ def _raw_fock_and_energy_for_state(
         mo_occ_a=mo_occ_a,
         mo_occ_b=mo_occ_b,
     )
+    if rsh is not None:
+        sr, delta = rsh.default_sr_hf_fraction, rsh.default_lr_hf_fraction-rsh.default_sr_hf_fraction
+        k_a = sr*k_a + delta*_build_jk(eri_lr, density_a)[1]
+        k_b = sr*k_b + delta*_build_jk(eri_lr, density_b)[1]
     extra_fock_a = extra_fock_b = jnp.zeros_like(h)
     include_hf_energy = bound_xc is None
     if bound_xc is None:
-        alpha_eff = jnp.asarray(alpha, dtype=h.dtype)
+        alpha_eff = jnp.asarray(1.0 if rsh is not None else alpha, dtype=h.dtype)
         ao_laplacian = jnp.zeros_like(ao)
         xc_energy, vxc_rho_a, vxc_rho_b, vxc_grad_a, vxc_grad_b = _unrestricted_xc_energy_and_potential_on_grid(
             ao=ao,
@@ -342,10 +377,11 @@ def _raw_fock_and_energy_for_state(
             weights=weights,
             density_a=density_a,
             density_b=density_b,
-            xc_spec=cfg.xc_spec,
+            xc_spec=local_xc_spec(cfg.xc_spec),
             density_floor=cfg.density_floor,
             potential_clip=cfg.potential_clip,
             xc_kind=xc_kind,
+            compute_potential=compute_potential,
         )
     else:
         molecule_state = _molecule_like_state_for_bound_xc(
@@ -379,22 +415,22 @@ def _raw_fock_and_energy_for_state(
         if ao_laplacian is None:
             ao_laplacian = jnp.zeros_like(ao)
         xc_energy = jnp.asarray(bound_xc.energy_from_molecule(molecule_state), dtype=h.dtype)
-    vxc_matrix_a, vxc_matrix_b = _unrestricted_vxc_matrices(
-        ao=ao,
-        ao_deriv1=ao_deriv1,
-        ao_laplacian=ao_laplacian,
-        weights=weights,
-        vxc_rho_a=vxc_rho_a,
-        vxc_rho_b=vxc_rho_b,
-        vxc_grad_a=vxc_grad_a,
-        vxc_grad_b=vxc_grad_b,
-        xc_kind=xc_kind,
-    )
-    xc=XCContribution(xc_energy,jnp.stack([vxc_matrix_a,vxc_matrix_b]),alpha_eff,
+    potential = 0.
+    if compute_potential:
+        vxc_matrix_a, vxc_matrix_b = _unrestricted_vxc_matrices(
+            ao=ao, ao_deriv1=ao_deriv1, ao_laplacian=ao_laplacian, weights=weights,
+            vxc_rho_a=vxc_rho_a, vxc_rho_b=vxc_rho_b,
+            vxc_grad_a=vxc_grad_a, vxc_grad_b=vxc_grad_b, xc_kind=xc_kind)
+        potential = jnp.stack([vxc_matrix_a, vxc_matrix_b])
+    xc=XCContribution(xc_energy,potential,alpha_eff,
         jnp.stack([extra_fock_a,extra_fock_b]),energy_includes_exact_exchange=not include_hf_energy)
     exchange=jnp.stack([k_a,k_b])
-    fock=unrestricted_fock(h,j_tot,exchange,xc)
     total=unrestricted_energy(jnp.stack([density_a,density_b]),h,j_tot,exchange,xc,nuclear_repulsion=enuc)
+    if dispersion_energy is not None:
+        total = total + dispersion_energy
+    if not compute_potential:
+        return total, xc_energy, None, None
+    fock=unrestricted_fock(h,j_tot,exchange,xc)
     return total,xc_energy,fock[0],fock[1]
 
 
@@ -714,14 +750,17 @@ def run_uks_from_integrals(
     config: UKSConfig | None = None,
     bound_xc: Any | None = None,
     molecule_template: Any | None = None,
+    eri_lr: Array | None = None,
+    dispersion_energy: Array | None = None,
 ) -> UKSResult:
     """Run unrestricted Kohn-Sham SCF from AO integrals and numerical grid data."""
 
     cfg = UKSConfig() if config is None else config
+    rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy, jk_backend=cfg.jk_backend)
     xc_kind = None
     if bound_xc is None:
-        parse_xc(cfg.xc_spec)
-        xc_kind = xc_type(cfg.xc_spec)
+        parse_xc(local_xc_spec(cfg.xc_spec))
+        xc_kind = xc_type(local_xc_spec(cfg.xc_spec))
         if xc_kind == "MGGA":
             raise NotImplementedError(
                 "UKS SCF matrix assembly currently supports LDA/GGA/HF semilocal terms. "
@@ -737,7 +776,7 @@ def run_uks_from_integrals(
     enuc = jnp.asarray(nuclear_repulsion)
     if cfg.jk_backend == "df" and df_factors_arr is None:
         raise ValueError("UKS jk_backend='df' requires df_factors.")
-    traceable_inputs = _contains_jax_tracer((s, h, eri, df_factors_arr, ao, ao_deriv1, weights, enuc))
+    traceable_inputs = _contains_jax_tracer((s, h, eri, eri_lr, dispersion_energy, df_factors_arr, ao, ao_deriv1, weights, enuc))
     nao = int(s.shape[0])
     if nalpha < 0 or nalpha > nao or nbeta < 0 or nbeta > nao or (nalpha + nbeta) <= 0:
         raise ValueError("Invalid occupation counts for UKS.")
@@ -778,7 +817,7 @@ def run_uks_from_integrals(
         density_b = init_density_b
 
     if bound_xc is None:
-        alpha_scalar = float(hybrid_coeff(cfg.xc_spec))
+        alpha_scalar = rsh.default_sr_hf_fraction if rsh is not None else float(hybrid_coeff(cfg.xc_spec))
         alpha = jnp.asarray(alpha_scalar, dtype=h.dtype)
     else:
         alpha = None
@@ -814,6 +853,8 @@ def run_uks_from_integrals(
             overlap=s,
             bound_xc=bound_xc,
             molecule_template=molecule_template,
+            eri_lr=eri_lr,
+            dispersion_energy=dispersion_energy,
         )
 
     def fock_builder(density_spin: Array, mo_coeff_spin: Array, mo_energy_spin: Array) -> tuple[Array, Array, Array]:
@@ -889,7 +930,7 @@ def run_uks_from_integrals(
     return UKSResult(
         converged=converged,
         total_energy=_host_float_unless_traced(energy),
-        electronic_energy=_host_float_unless_traced(energy - enuc),
+        electronic_energy=_host_float_unless_traced(energy - enuc - (0. if dispersion_energy is None else dispersion_energy)),
         nuclear_repulsion=_host_float_unless_traced(enuc),
         xc_energy=_host_float_unless_traced(xc_energy),
         exact_exchange_fraction=float(alpha_scalar),
@@ -906,4 +947,6 @@ def run_uks_from_integrals(
         overlap_matrix=s,
         hcore_matrix=h,
         cycles=cycles,
+        range_separated_coefficients=None if rsh is None else rsh.to_range_separated_hybrid_coefficients(),
+        dispersion_energy=dispersion_energy,
     )

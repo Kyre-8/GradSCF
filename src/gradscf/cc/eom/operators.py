@@ -105,7 +105,8 @@ def run_eom(h1, eri, ground, *, nocc, frozen=None, config=None, cc_config=None):
 
     EA returns E(N+1)-E(N); the conventional electron affinity is its negative.
     Composition with run_cc inside an AD function includes T response. Right/
-    left vectors are forward-only in this first-order eigenvalue interface.
+    left vectors are forward-only by default; vector_response opts into the
+    shared isolated-real-eigenpair response needed by transition properties.
     """
     cfg = EOMConfig() if config is None else config
     op, space, valid = build_eom_operator(
@@ -113,6 +114,8 @@ def run_eom(h1, eri, ground, *, nocc, frozen=None, config=None, cc_config=None):
     )
     solved = solve_nonhermitian(
         op,
+        vector_response=cfg.vector_response,
+        response_config=cfg.response_config,
         config=NonHermitianSolverConfig(
             method=cfg.solver,
             maxiter=cfg.max_cycle,
@@ -150,4 +153,6 @@ def run_eom(h1, eri, ground, *, nocc, frozen=None, config=None, cc_config=None):
         solved.spectral_gaps,
         solved.guard_residual_norms,
         solved.restarts,
+        cfg.vector_response,
+        cfg.sector,
     )

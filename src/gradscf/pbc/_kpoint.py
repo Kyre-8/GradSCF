@@ -107,7 +107,12 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
         raise ValueError('Finite-temperature SCF does not support projector level shifts.')
     config=differentiation or SCFDifferentiationConfig(mode='explicit')
     args=(inputs,jnp.asarray(temperature if thermal else 0.),jnp.asarray(nelec,dtype=float),params)
-    s=inputs.overlap
+    # The implicit response uses live args below, not the numerical trajectory.
+    # Stop before scan linearization so eager AD does not allocate its unused tape.
+    forward_args=args
+    if config.mode=='implicit':
+        forward_args,init_density=jax.tree.map(jax.lax.stop_gradient,(args,init_density))
+    s=forward_args[0].overlap
     def transform(s):
         return jnp.linalg.inv(jnp.linalg.cholesky(s)).conj().swapaxes(-1,-2)
     x=transform(s)
@@ -137,11 +142,11 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
                                    integration=integration if reduce else None)
         entropy=density_entropy(d,a[0].overlap,weights_for(a[0])) if thermal else jnp.array(0.)
         return energy-a[1]*entropy,fock,energy,entropy
-    initial_fock=jnp.broadcast_to(inputs.hcore,(2,nk,n,n)).astype(jnp.complex128)
+    initial_fock=jnp.broadcast_to(forward_args[0].hcore,(2,nk,n,n)).astype(jnp.complex128)
     eps,c=diagonalize(initial_fock)
-    d=mapped(initial_fock,args,reduce=True) if init_density is None else jnp.asarray(init_density,dtype=c.dtype)
+    d=mapped(initial_fock,forward_args,reduce=True) if init_density is None else jnp.asarray(init_density,dtype=c.dtype)
     if d.shape!=(2,nk,n,n):raise ValueError('Spin density must have shape (2,nk,nao,nao).')
-    e,f,_,_=evaluate(d,args,reduce=True)
+    e,f,_,_=evaluate(d,forward_args,reduce=True)
     def error(f,d):return x.conj().swapaxes(-1,-2)@(f@d@s-s@d@f)@x
     def pack(a):return jnp.stack([a.real,a.imag])
     history=jnp.zeros((DIIS_SPACE,2,2,nk,n,n))
@@ -152,14 +157,14 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
             feff,fh,eh,head,count=diis_extrapolate(pack(f),pack(error(f,d)).reshape(-1),fh,eh,head,count)
             feff=feff[0]+1j*feff[1]+level_shift*(s-s@d@s)
             if thermal or reduction is not None:
-                target=mapped(feff,args,reduce=True)
+                target=mapped(feff,forward_args,reduce=True)
             else:
                 eps,c=diagonalize(feff)
                 target=density_from(c)
             dn=(1-damping)*target+damping*d
-            en,fn,_,_=evaluate(dn,args,reduce=True)
+            en,fn,_,_=evaluate(dn,forward_args,reduce=True)
             rms=jnp.sqrt(jnp.mean(jnp.abs(dn-d)**2))
-            residual=(jnp.linalg.norm(mapped(fn,args,reduce=True)-dn)/jnp.sqrt(dn.size) if thermal
+            residual=(jnp.linalg.norm(mapped(fn,forward_args,reduce=True)-dn)/jnp.sqrt(dn.size) if thermal
                       else jnp.linalg.norm(error(fn,dn))/jnp.sqrt(2*nk))
             done=convergence_reached(jnp.abs(en-e),rms,residual,conv_tol=conv_tol,
                 conv_tol_density=conv_tol_density,conv_tol_grad=conv_tol_grad,has_prior_cycle=index>0)
@@ -172,17 +177,17 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
     if reduction is not None:
         # Certify the ORIGINAL full fixed point, including symmetry-breaking
         # directions. Implicit backward below also deliberately uses that space.
-        full_e,full_f,_,_=evaluate(d,args)
+        full_e,full_f,_,_=evaluate(d,forward_args)
         converged &= jnp.max(jnp.abs(full_f-f))<=max(conv_tol_grad,1e-8)
         converged &= jnp.abs(full_e-e)<=max(conv_tol,1e-8)
-        converged &= jnp.linalg.norm(mapped(full_f,args)-d)/jnp.sqrt(d.size)<=max(conv_tol_density,conv_tol_grad)
+        converged &= jnp.linalg.norm(mapped(full_f,forward_args)-d)/jnp.sqrt(d.size)<=max(conv_tol_density,conv_tol_grad)
     if config.mode=='implicit':
         def residual(d,a):
             _,f,_,_=evaluate(d,a)
             return mapped(f,a)-d
         d=attach_scf_backward(args,solution=d,residual=residual,config=config,converged=converged)
     free,f,energy,entropy=evaluate(d,args)
-    eps,c=diagonalize(f)
+    eps,c=diagonalize(f,transform(inputs.overlap) if config.mode=='implicit' else x)
     mu=None
     if thermal:
         population=fermi_occupations(eps,args[2],args[1],weights_for(inputs))

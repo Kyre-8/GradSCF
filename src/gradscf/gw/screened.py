@@ -28,7 +28,8 @@ from jaxtyping import Array
 from dataclasses import dataclass
 from math import isfinite
 from numbers import Integral
-from ..solvers import LinearOperator, LinearSolverConfig, solve_linear
+from typing import NamedTuple
+from ..solvers import LinearOperator, LinearSolverConfig, solve_linear, solve_complex
 from ..scf._pytree import pytree_dataclass
 from ..solvers.diagnostics import require_converged_derivative
 
@@ -224,7 +225,8 @@ def screened_w_imag_axis(
 
 __all__ = ["screened_w_imag_axis", "screened_w_imag_axis_matrix",
            "StaticScreening", "build_static_screening", "apply_static_screening",
-           "solve_static_screening"]
+           "solve_static_screening", "solve_transition_screening",
+           "TransitionHeadWingResult", "transition_head_wing"]
 
 
 def screened_w_imag_axis_matrix(
@@ -255,3 +257,108 @@ def screened_w_imag_axis_matrix(
     if est_bytes > (1 << 31):
         return jax.lax.map(at_frequency, freqs)
     return jax.vmap(at_frequency)(freqs)
+
+
+def solve_transition_screening(gram, weights, projected_rhs, *, config=None):
+    """Solve the exact transition-space screened action with complex weights.
+
+    For Pi=B diag(d) B^dagger, M=B^dagger B and C=B^dagger X, return the
+    checked shared LinearResult for Z=(I-diag(d) M)^-1 diag(d) C. Then
+    (epsilon^-1-I) X=B Z and paired matrix elements are sum(conj(C)*Z,0).
+    Only M, d and C are needed; no auxiliary-space square matrix is formed.
+
+    Weights include the chosen frequency, spin and response k average.
+    Complex retarded weights are not conjugated or made Hermitian. No inverse
+    weight, inverse Gram, rank truncation or new linear solver is used, so
+    zero weights and dependent transition columns remain valid. The reported
+    residual is that of the reduced equation, not an auxiliary-space norm.
+    Direct solves have the shared solve_complex bound on 2*ntransition.
+    This primitive alone does not enable periodic-GW streaming or its AD.
+    """
+    gram, weights, rhs = map(jnp.asarray, (gram, weights, projected_rhs))
+    if gram.ndim != 2 or gram.shape[0] != gram.shape[1] or not gram.shape[0]:
+        raise ValueError("Transition Gram matrix must be nonempty and square")
+    size = gram.shape[0]
+    if weights.shape != (size,) or rhs.ndim not in (1, 2) or rhs.shape[0] != size:
+        raise ValueError("Use weights (ntransition,) and projected RHS (ntransition[,nrhs])")
+    cfg = config or LinearSolverConfig(method="direct", rtol=1e-11, atol=1e-13)
+    if not isinstance(cfg, LinearSolverConfig):
+        raise TypeError("config must be a LinearSolverConfig")
+    dtype = jnp.result_type(gram, weights, rhs, 1j)
+    gram, weights, rhs = (value.astype(dtype) for value in (gram, weights, rhs))
+    def multiply_weights(value):
+        return weights*value if value.ndim == 1 else weights[:, None]*value
+    def apply(value):
+        return value-multiply_weights(gram@value)
+    operator = LinearOperator((size, size), dtype, apply, matmat=apply)
+    solved = solve_complex(operator, multiply_weights(rhs), config=cfg)
+    tolerance = 64*jnp.finfo(gram.real.dtype).eps*jnp.maximum(1., jnp.max(jnp.abs(gram)))
+    valid = (solved.converged & jnp.all(jnp.isfinite(gram))
+             & jnp.all(jnp.isfinite(weights)) & jnp.all(jnp.isfinite(rhs))
+             & (jnp.max(jnp.abs(gram-gram.conj().T)) <= tolerance))
+    solution = require_converged_derivative(jnp.where(valid, solved.solution, jnp.nan), valid)
+    return solved._replace(solution=solution, converged=valid, status=jnp.where(valid, 0, 1))
+
+
+class TransitionHeadWingResult(NamedTuple):
+    head: Array
+    wings: Array
+    schur: Array
+    residual_norm: Array
+    converged: Array
+    status: Array
+
+
+def transition_head_wing(gram, weights, qij, projected_diagonal, q_abs, volume,
+                         *, nkpts=1, config=None):
+    """Compressed q=0 head/wing contraction preserving the existing convention.
+
+    M=B^dagger B, d already includes the response 1/Nk, qij is ordered with
+    those same transition columns, and projected_diagonal=B^dagger b_pp for
+    each selected external orbital. nkpts enters only the finite-size head/
+    wing prefactors here; do not divide these outputs by an outer q average.
+
+    This exactly retains q0_residue_correction's finite-eta convention:
+    schur=eps00-conj(epsP0)@eps_body^-1@epsP0 and twice the real wing.
+    For complex retarded d this is not a general non-Hermitian dielectric
+    block inverse. Agreement with dense code validates the compression, not
+    the physical correctness of that opposite-wing convention. No change to
+    the existing q0 prescription or residue pole selection is made here.
+    """
+    gram, weights, qij, diagonal, q_abs, volume = map(jnp.asarray,
+        (gram, weights, qij, projected_diagonal, q_abs, volume))
+    if gram.ndim != 2 or qij.shape != (gram.shape[0],):
+        raise ValueError("qij must match the transition Gram dimension")
+    if diagonal.ndim not in (1, 2) or diagonal.shape[0] != gram.shape[0]:
+        raise ValueError("Projected diagonal pairs must have a transition leading dimension")
+    if q_abs.shape != (3,) or volume.ndim or jnp.iscomplexobj(q_abs) or jnp.iscomplexobj(volume):
+        raise ValueError("Use real q_abs (3,) and scalar volume")
+    if not isinstance(nkpts, Integral) or nkpts < 1:
+        raise ValueError("nkpts must be a positive integer")
+    solved = solve_transition_screening(gram, weights, qij.conj(), config=config)
+    q2 = jnp.sum(q_abs**2)
+    parameters_valid = (jnp.isfinite(q2) & (q2 > 0) & jnp.isfinite(volume)
+                        & (volume > 0) & jnp.all(jnp.isfinite(qij))
+                        & jnp.all(jnp.isfinite(diagonal)))
+    safe_q2 = jnp.where(parameters_valid, q2, 1.)
+    safe_volume = jnp.where(parameters_valid, volume, 1.)
+    factor = jnp.sqrt(4*jnp.pi/safe_q2)
+    # epsP0=B h and eps_body^-1 epsP0=B u; retain all transition head terms
+    # even if some body factors are zero or linearly dependent.
+    h = -factor*weights*qij.conj()
+    u = -factor*solved.solution
+    epsilon00 = 1-factor**2*jnp.sum(weights*qij.conj()*qij)
+    schur = epsilon00-jnp.vdot(h, gram@u)
+    schur_valid = jnp.isfinite(schur) & (jnp.abs(schur) > 0)
+    inverse00 = 1/jnp.where(schur_valid, schur, 1.)
+    inverse_wing_coefficients = -inverse00*u
+    head_scale = (2/jnp.pi)*(6*jnp.pi**2/safe_volume/nkpts)**(1/3)
+    wing_scale = jnp.sqrt(safe_volume/(4*jnp.pi**3))*(6*jnp.pi**2/safe_volume/nkpts)**(2/3)
+    head = head_scale*(inverse00-1)
+    wings = 2*wing_scale*jnp.real(inverse_wing_coefficients@diagonal.conj())
+    valid = (solved.converged & parameters_valid & schur_valid
+             & jnp.isfinite(head) & jnp.all(jnp.isfinite(wings)))
+    head = require_converged_derivative(jnp.where(valid, head, jnp.nan), valid)
+    wings = require_converged_derivative(jnp.where(valid, wings, jnp.nan), valid)
+    return TransitionHeadWingResult(head, wings, schur, solved.residual_norm,
+                                    valid, jnp.where(valid, 0, 1))

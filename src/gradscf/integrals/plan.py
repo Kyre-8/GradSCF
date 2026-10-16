@@ -1,6 +1,7 @@
 """Reusable static integral plans with freshly bound basis parameters."""
 from dataclasses import dataclass, replace
 from functools import lru_cache
+from numbers import Real
 
 import jax
 import jax.numpy as jnp
@@ -67,17 +68,38 @@ class IntegralPlan:
         if density.shape[-2:]!=(self.topology.nao,)*2:raise ValueError('Density AO dimensions do not match the plan.')
         return direct_jk(atm,bas,env,density,cart=self.topology.cart,cutoff=screening_threshold)
 
-    def evaluate(self, operator, parameters, *, origin=None, ecps=None, aosym='s1'):
+    def evaluate(self, operator, parameters, *, origin=None, ecps=None, aosym='s1', omega=0.0):
         """Bind current values and evaluate an operator.
 
         Reference one-electron calls skip ERI layouts. Reference eager ERI
         calls still rebuild their layouts when binding the current parameters.
+        For native ERIs, fixed ``omega > 0`` selects ``erf(omega*r12)/r12``;
+        zero retains ordinary Coulomb. Omega is a static nonnegative scalar
+        in inverse Bohr; its derivatives and short-range ERIs are unsupported.
+        Long-range s4/s8 values and geometry AD currently gather from the full
+        ERI, so their temporary storage remains O(nao**4).
         """
+        if isinstance(omega, jax.core.Tracer):
+            raise NotImplementedError("omega must be static; omega differentiation is not supported.")
+        if isinstance(omega, (bool, np.bool_)) or not isinstance(omega, Real):
+            raise TypeError("omega must be a static real scalar.")
+        omega = float(omega)
+        if not np.isfinite(omega) or omega < 0 or omega > np.sqrt(np.finfo(np.float64).max) / 2:
+            raise ValueError("omega must be finite, nonnegative and at most sqrt(float64.max)/2.")
+        if omega and operator != "eri":
+            raise ValueError("Nonzero omega applies only to the eri operator.")
+        if omega and self.backend != "native":
+            raise NotImplementedError("Long-range omega requires the native backend.")
         if aosym not in {'s1','s4','s8'}:raise ValueError('aosym must be s1, s4 or s8.')
         if aosym!='s1':
             if operator!='eri' or origin is not None or ecps is not None:
                 raise ValueError('Packed layouts apply only to ordinary ERI.')
             if self.backend!='native':raise NotImplementedError('Packed plans require the native backend.')
+            if omega:
+                full = self.evaluate("eri", parameters, omega=omega)
+                rows, cols = np.tril_indices(self.topology.nao)
+                pair = full[rows[:, None], cols[:, None], rows[None, :], cols[None, :]]
+                return pair if aosym == 's4' else pair[np.tril_indices(len(rows))]
             from .backends.native.eri import evaluate
             atm,bas,env=self.pack(parameters)
             npair=self.topology.nao*(self.topology.nao+1)//2
@@ -116,6 +138,8 @@ class IntegralPlan:
                                              cart=self.topology.cart,exponents=exponents)
             from .backends.native.autodiff.geometry import evaluate_geometry
             atm, bas, env = self.pack(fixed)
+            if omega:
+                env = env.at[8].set(omega)  # libcint PTR_RANGE_OMEGA
             return evaluate_geometry(operator, atm, bas, env, coords, origin,
                                      self.topology.nao, cart=self.topology.cart)
         from .backends import jax_reference

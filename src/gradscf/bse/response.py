@@ -123,6 +123,7 @@ def run_bse(
             ),
             gap_tol=cfg.gap_tol,
             seed=cfg.seed,
+            response_config=cfg.response_config,
         )
         response_valid = solved.response_valid & valid
         energies = require_converged_derivative(solved.values, response_valid)
@@ -165,7 +166,7 @@ def run_bse(
             ),
             gap_atol=cfg.gap_tol,
             gap_rtol=0.0,
-            linear_config=LinearSolverConfig(
+            linear_config=cfg.response_config or LinearSolverConfig(
                 rtol=cfg.adjoint_tol, maxiter=cfg.adjoint_max_cycle
             ),
         ),

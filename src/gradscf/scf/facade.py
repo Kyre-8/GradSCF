@@ -210,6 +210,8 @@ class _BaseKS:
         Eager conversion only: reuse solved inputs/orbitals and complete missing
         response data. Never implicitly run an unconverged or stale SCF source.
         """
+        from .rsh import reject_rsh_response
+        reject_rsh_response(self)
         return self._ensure_reference()
 
     def _check_reference_source(self) -> None:

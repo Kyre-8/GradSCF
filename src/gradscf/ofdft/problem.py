@@ -47,6 +47,18 @@ def _equations(kinetic, xc, xc_energy_fn):
     return energy, gradient, residual, components
 
 
+@lru_cache(maxsize=64)
+def _response_residual(kinetic, xc, xc_energy_fn):
+    raw = _equations(kinetic, xc, xc_energy_fn)[2]
+    def residual(state, args):
+        # Use physical mu rather than extensive eta=N*mu in the response chart.
+        # N remains an input leaf, including its derivatives in this change of units.
+        number = args[0].nelectron
+        physical = raw(state.at[-1].multiply(number), args)
+        return physical.at[:-1].divide(number)
+    return residual
+
+
 def _validate(data):
     if not jax.config.x64_enabled:
         raise ValueError('OFDFT requires float64.')
@@ -105,6 +117,9 @@ def run_ofdft(data, *, kinetic=None, kinetic_params=None, xc_energy_fn=None, xc_
     over traced parameters in the callback. Eager facades are for input building;
     this array/PyTree interface supports JIT, grad, JVP and density-loss training.
     A stationary state is not a certificate of the global minimum.
+    The implicit equations use energy per electron and physical chemical
+    potential; differentiation tolerances/regularization act in this chart.
+    The returned residual and forward tolerance retain their raw KKT units.
     """
     _validate(data)
     cfg = config or OFDFTConfig()
@@ -131,18 +146,21 @@ def run_ofdft(data, *, kinetic=None, kinetic_params=None, xc_energy_fn=None, xc_
         forward_args, seed = jax.tree.map(jax.lax.stop_gradient,(args,x0))
     forward = minimize_sphere(energy,seed,forward_args,
         config=SphereConfig(maxiter=cfg.maxiter,tolerance=cfg.tolerance,
-            response_refinements=3,refine_stationary=cfg.differentiation.mode=='explicit'))
+            response_refinements=3,refine_stationary=cfg.differentiation.mode=='explicit'),
+        energy_scale=forward_args[0].nelectron)
     x = forward.solution
     eta = .5*jnp.vdot(x,gradient(x,forward_args))
     state = jnp.concatenate([x,jnp.asarray([eta])])
     norm = jnp.linalg.norm(residual(state,forward_args))
     valid = forward.converged & jnp.isfinite(norm) & (norm<=cfg.tolerance*1.01)
-    state = attach_scf_backward(args,solution=state,residual=residual,
+    state = state.at[-1].divide(forward_args[0].nelectron)
+    state = attach_scf_backward(args,solution=state,
+        residual=_response_residual(kinetic,cfg.xc,xc_energy_fn),
         config=cfg.differentiation,converged=valid)
     q = _to_coefficients(state[:-1],data)
     phi = amplitude(q,data)
     density = phi**2
     number = jnp.sum(data.weights*q*q) if data.representation=='periodic' else q@data.overlap@q
     pieces = components(state[:-1],args)
-    return OFDFTResult(pieces.total,density,phi,q,state[-1]/data.nelectron,
+    return OFDFTResult(pieces.total,density,phi,q,state[-1],
         number,jnp.sum(data.weights*density),norm,valid,forward.iterations,pieces)

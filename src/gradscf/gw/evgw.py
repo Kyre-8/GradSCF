@@ -31,6 +31,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from dataclasses import replace
+from numbers import Integral
 
 import jax
 import jax.numpy as jnp
@@ -43,7 +44,7 @@ from .g0w0 import (
 )
 from .types import GWResult
 from ..scf.autodiff import SCFDifferentiationConfig
-from ..solvers.nonlinear import attach_root
+from ..solvers.nonlinear import NonlinearConfig, attach_root, solve_nonlinear
 from .outer_response import linear_config, require_valid, require_real
 
 
@@ -54,6 +55,8 @@ def _evgw_loop(
     max_iter: int = 20,
     tol: float = 1e-6,
     damping: float = 0.0,
+    diis_space: int = 0,
+    initial_guess=None,
     differentiation: SCFDifferentiationConfig | None = None,
     **kwargs,
 ) -> GWResult:
@@ -71,13 +74,22 @@ def _evgw_loop(
         raise ValueError("damping must be in [0, 1).")
     if max_iter < 1 or tol <= 0.0:
         raise ValueError("max_iter and tol must be positive.")
+    if not isinstance(diis_space, Integral) or isinstance(diis_space, bool) or diis_space < 0:
+        raise ValueError("diis_space must be a nonnegative integer.")
     e_old = jnp.asarray(mo_energy_mf, dtype=jnp.float64)
-    if differentiation is not None:
-        config = linear_config(differentiation)
-        selected = kwargs.get("orbs")
-        selected = (jnp.arange(e_old.shape[-1]) if selected is None
-                    else jnp.asarray(tuple(selected), dtype=jnp.int32))
-        computed = jnp.zeros_like(e_old, dtype=bool).at[..., selected].set(True)
+    selected = kwargs.get("orbs")
+    selected = (jnp.arange(e_old.shape[-1]) if selected is None
+                else jnp.asarray(tuple(selected), dtype=jnp.int32))
+    computed = jnp.zeros_like(e_old, dtype=bool).at[..., selected].set(True)
+    if initial_guess is not None:
+        guess = jnp.asarray(initial_guess)
+        if guess.shape != e_old.shape or jnp.iscomplexobj(guess):
+            raise ValueError("initial_guess must be real and match the full mean-field spectrum.")
+        require_valid(jnp.all(jnp.isfinite(guess)), jnp.max(jnp.abs(guess)), "evGW initial guess")
+        # Numerical continuation cannot alter frozen levels or the MF base.
+        e_old = jnp.where(computed, jax.lax.stop_gradient(guess), e_old)
+    if differentiation is not None or diis_space:
+        config = linear_config(differentiation or SCFDifferentiationConfig())
 
         def residual(energy):
             result = driver(mo_energy_poles=energy, evaluate_only=True, **kwargs)
@@ -93,11 +105,26 @@ def _evgw_loop(
             energy = energy - jnp.where(done, 0., 1. - damping) * error
             return energy, iteration + 1, norm, done
 
-        seed, _, norm, done = jax.lax.while_loop(
-            lambda state: (state[1] < max_iter) & ~state[3], body,
-            (e_old, jnp.array(0), jnp.array(jnp.inf), jnp.array(False)))
+        if diis_space:
+            # Keep the same physical residual; only the numerical trajectory
+            # changes. The shared solver owns DIIS and implicit JVP/VJP.
+            shape = e_old.shape
+            solved = solve_nonlinear(lambda e: residual(e.reshape(shape)).reshape(-1),
+                e_old.reshape(-1), update=lambda e, error: e-error,
+                # Sum of QP levels is an iteration monitor, not a total energy.
+                observable=jnp.sum,
+                config=NonlinearConfig(maxiter=max_iter, residual_tol=tol, energy_tol=tol,
+                                       diis_space=int(diis_space), damping=damping),
+                linear_config=config)
+            energy, norm = solved.solution.reshape(shape), solved.residual_norm
+            done = solved.converged & (norm < tol)
+        else:
+            energy, _, norm, done = jax.lax.while_loop(
+                lambda state: (state[1] < max_iter) & ~state[3], body,
+                (e_old, jnp.array(0), jnp.array(jnp.inf), jnp.array(False)))
         require_valid(done, norm, "evGW")
-        energy = attach_root(residual, jax.lax.stop_gradient(seed), config=config, converged=done)
+        if not diis_space:
+            energy = attach_root(residual, jax.lax.stop_gradient(energy), config=config, converged=done)
         result = driver(mo_energy_poles=energy, evaluate_only=True, **kwargs)
         return replace(result, converged=done, converged_mask=jnp.abs(result.qp_residual) < tol,
                        qp_computed_mask=computed)
@@ -106,10 +133,6 @@ def _evgw_loop(
         residual = result.qp_residual
         delta = jnp.max(jnp.abs(residual))
         if float(delta) < tol:
-            selected = kwargs.get("orbs")
-            selected = (jnp.arange(e_old.shape[-1]) if selected is None
-                        else jnp.asarray(tuple(selected), dtype=jnp.int32))
-            computed = jnp.zeros_like(e_old, dtype=bool).at[..., selected].set(True)
             return replace(result, converged=True, converged_mask=jnp.abs(residual) < tol,
                            qp_computed_mask=computed)
         e_old = e_old - (1.0 - damping) * residual
@@ -136,6 +159,8 @@ def evgw_cd_restricted(
     max_iter: int = 20,
     tol: float = 1e-6,
     damping: float = 0.0,
+    diis_space: int = 0,
+    initial_guess: Array | None = None,
     update_w: bool = True,
     differentiation: SCFDifferentiationConfig | None = None,
     g_orbitals: Sequence[int] | None = None,
@@ -156,6 +181,14 @@ def evgw_cd_restricted(
     retains its derivative with respect to the original inputs. The default
     eager path is unchanged. Unconverged roots raise; unresolved implicit
     linear solves return NaNs under the shared solver policy.
+    ``diis_space>0`` selects the shared compiled DIIS iteration and its implicit
+    outer response; zero preserves the original iteration. The existing
+    max_iter/tol/damping controls still apply, with an additional tol gate on
+    the change in the sum of QP levels (a convergence monitor, not total energy).
+    ``initial_guess`` supplies numerical pole energies for local continuation;
+    its shape is the full mean-field spectrum. Unrequested levels stay at MF.
+    Its tangent is ignored, while the original MF/G/W inputs retain response.
+    Neither an initial guess nor DIIS selects a global largest-weight branch.
     """
     require_real(mo_energy, mo_coeff, df_factors, fock_matrix, hcore_matrix, density_matrix)
     if type(update_w) is not bool:
@@ -185,6 +218,8 @@ def evgw_cd_restricted(
         max_iter=int(max_iter),
         tol=float(tol),
         damping=float(damping),
+        diis_space=diis_space,
+        initial_guess=initial_guess,
         differentiation=differentiation,
         screening_energy=None if update_w else mo_energy,
         wmn_fixed=None if fixed_w is None else fixed_w["wmn"],
@@ -215,6 +250,8 @@ def evgw_cd_unrestricted(
     max_iter: int = 20,
     tol: float = 1e-6,
     damping: float = 0.0,
+    diis_space: int = 0,
+    initial_guess=None,
     differentiation: SCFDifferentiationConfig | None = None,
     update_w: bool = True,
 ) -> GWResult:
@@ -223,6 +260,10 @@ def evgw_cd_unrestricted(
     ``differentiation`` enables coupled alpha/beta outer implicit response,
     including the initial-spectrum dependence of W0. The unrestricted W0
     arrays are currently reevaluated per step, with the same fixed spectra.
+    ``diis_space>0`` uses the same shared DIIS/implicit contract as the
+    restricted driver, packing both spin spectra into one coupled residual.
+    ``initial_guess`` is an optional real (2,nmo) full numerical pole spectrum;
+    the original MF base and unrequested levels are unchanged.
     """
     require_real(mo_energy, mo_coeff, df_factors, fock_matrix, hcore_matrix, density_matrix)
     if type(update_w) is not bool:
@@ -249,6 +290,8 @@ def evgw_cd_unrestricted(
         max_iter=int(max_iter),
         tol=float(tol),
         damping=float(damping),
+        diis_space=diis_space,
+        initial_guess=initial_guess,
         differentiation=differentiation,
         screening_energy=None if update_w else mo_energy,
     )

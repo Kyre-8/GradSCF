@@ -3,11 +3,11 @@ import pytest
 from gradscf.pbc import gto,dft,scf
 
 
-def test_band_api_rejects_hybrid_exchange():
+def test_off_mesh_hybrid_bands_require_a_matched_cutoff_reference():
     cell=gto.M(atom='He 0 0 0',a=np.eye(3)*5,unit='Bohr',mesh=(15,)*3)
     mf=scf.RHF(cell).run()
-    with pytest.raises(NotImplementedError,match='LDA/GGA'):
-        mf.get_bands(np.zeros((1,3)))
+    with pytest.raises(NotImplementedError,match='vcut_sph'):
+        mf.get_bands(np.array([[.13,0.,0.]]))
 
 
 def test_non_scf_bands_match_pyscf_and_preserve_reference():

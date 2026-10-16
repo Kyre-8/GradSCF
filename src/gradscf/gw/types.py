@@ -18,7 +18,8 @@ class GWResult:
     ----------
     mo_energy:
         Quasiparticle energies, shape ``(nmo,)`` (restricted) or
-        ``(2, nmo)`` (unrestricted).  Orbitals not included in the
+        ``(2, nmo)`` (unrestricted), or ``(nk, nmo)`` (periodic restricted).
+        Orbitals not included in the
         self-energy evaluation are prefilled with the mean-field values
         (unlike PySCF, which fills them with zeros).
     mo_coeff:
@@ -57,10 +58,12 @@ class GWResult:
         slopes are NaN. Inspect QP coverage/convergence as well; Z is not a
         convergence certificate or a differentiable root-selection rule.
     g_orbitals, screening_occupied, screening_virtual:
-        Recorded original-MO correlation windows (restricted molecular CD).
+        Recorded original-MO correlation windows. For restricted periodic CD,
+        these band-index windows apply at every screening/internal k point;
+        qp_computed_mask separately records selected output k/band pairs.
         None denotes unrecorded metadata; explicit empty tuples mean no sums.
     method:
-        Restricted molecular CD method label, or None for other drivers.
+        CD method/backend label, or None for drivers without recorded metadata.
     screening_energy:
         Actual independent-particle pole spectrum used to build W, in the
         returned orbital frame. Restricted/unrestricted CD drivers record it;

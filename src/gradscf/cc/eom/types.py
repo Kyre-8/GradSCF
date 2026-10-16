@@ -4,7 +4,9 @@ from dataclasses import dataclass
 from math import isfinite
 from typing import NamedTuple, TYPE_CHECKING
 import numpy as np
+import jax
 from jaxtyping import Array
+from ...solvers import LinearSolverConfig
 
 if TYPE_CHECKING:
     from ...scf.diagnostics import RestrictedSCFDiagnostics
@@ -28,12 +30,21 @@ class EOMConfig:
     guard_roots: int = 1
     seed: int = 0
     preconditioner_floor: float = 1e-8
+    vector_response: bool = False
+    response_config: LinearSolverConfig | None = None
 
     def __post_init__(self):
         if self.sector not in {"ee", "ip", "ea"}:
             raise ValueError("EOM sector must be ee, ip or ea")
         if self.solver not in {"dense", "davidson"}:
             raise ValueError("EOM solver must be dense or davidson")
+        if not isinstance(self.vector_response, bool):
+            raise TypeError("vector_response must be a static bool")
+        if self.response_config is not None:
+            if not isinstance(self.response_config, LinearSolverConfig):
+                raise TypeError("response_config must be a LinearSolverConfig")
+            if not self.vector_response:
+                raise ValueError("response_config requires vector_response=True")
         if (
             not isinstance(self.seed, int)
             or isinstance(self.seed, bool)
@@ -83,6 +94,26 @@ class EOMResult(NamedTuple):
     spectral_gaps: Array
     guard_residual_norms: Array
     restarts: Array
+    vector_response: bool = False
+    sector: str | None = None
+
+
+# Preserve the established NamedTuple/_replace interface, with the response
+# contract in static pytree metadata just like BSE's amplitude_response.
+jax.tree_util.register_pytree_node(
+    EOMResult, lambda result: (result[:-2], (result.vector_response, result.sector)),
+    lambda metadata, values: EOMResult(*values, vector_response=metadata[0], sector=metadata[1]),
+)
+
+
+class DysonResult(NamedTuple):
+    """Active-MO columns; weights are one-spin signed left/right products."""
+
+    left: Array
+    right: Array
+    weights: Array
+    valid: Array
+    response_valid: Array
 
 
 @dataclass(frozen=True)

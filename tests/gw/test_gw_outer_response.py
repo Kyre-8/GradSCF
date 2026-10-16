@@ -162,6 +162,80 @@ def test_evgw_singular_outer_response_is_nan():
     assert jnp.isnan(jax.jit(jax.grad(loss))(0.))
 
 
+@pytest.mark.parametrize('unrestricted', [False, True])
+@pytest.mark.parametrize('update_w', [False, True])
+def test_shared_diis_preserves_evgw_equation_and_response(unrestricted, update_w):
+    kw = _open_shell_inputs() if unrestricted else _inputs()
+    driver = evgw_cd_unrestricted if unrestricted else evgw_cd_restricted
+    def values(t, history):
+        result = driver(**{**kw, 'df_factors': kw['df_factors']*(1+t)},
+                        update_w=update_w, damping=.3, diis_space=history,
+                        differentiation=_AD)
+        # The unrestricted driver currently exposes energies/W, but no QP
+        # residue field. Do not invent an unimplemented observable for this gate.
+        observables = ((result.mo_energy, result.screening_energy) if unrestricted else
+                       (result.mo_energy, result.qp_weight, result.screening_energy))
+        return jnp.concatenate([jnp.ravel(value) for value in observables])
+    primal, tangent = jax.jit(lambda t: jax.jvp(lambda x: values(x, 6),
+        (t,), (jnp.ones_like(t),)))(jnp.array(0.))
+    baseline = values(0., 0)
+    np.testing.assert_allclose(primal, baseline, atol=3e-9, rtol=1e-8)
+    evaluate = jax.jit(lambda t: values(t, 6))
+    step = 1e-4
+    finite = (evaluate(step)-evaluate(-step))/(2*step)
+    np.testing.assert_allclose(tangent, finite, atol=3e-8, rtol=2e-5)
+    weights = jnp.linspace(.2, .8, primal.size)
+    reverse = jax.jit(jax.grad(lambda t: weights@values(t, 6)))(0.)
+    np.testing.assert_allclose(reverse, weights@tangent, atol=3e-9, rtol=2e-7)
+    final = driver(**kw, update_w=update_w, damping=.3, diis_space=6)
+    assert bool(final.converged) and np.asarray(final.converged_mask).all()
+    assert np.max(abs(np.asarray(final.qp_residual))) < kw['tol']
+
+
+def test_shared_diis_selected_orbitals_and_failed_forward():
+    kw = _inputs()
+    def energy(t):
+        return evgw_cd_restricted(**{**kw, 'mo_energy': kw['mo_energy'].at[1].add(t)},
+            orbs=(0,), diis_space=6, differentiation=_AD).mo_energy
+    _, tangent = jax.jit(lambda t: jax.jvp(energy, (t,), (jnp.ones_like(t),)))(jnp.array(0.))
+    np.testing.assert_allclose(tangent[1], 1., atol=1e-12, rtol=0)
+    with pytest.raises(Exception, match='evGW outer solve failed'):
+        jax.jit(lambda e: evgw_cd_restricted(**{**kw, 'mo_energy': e, 'max_iter': 1},
+            diis_space=6, differentiation=_AD).mo_energy)(kw['mo_energy']).block_until_ready()
+
+
+@pytest.mark.parametrize('history', [-1, True, 1.5])
+def test_shared_diis_invalid_history_rejected_before_driver(history):
+    from gradscf.gw.evgw import _evgw_loop
+    def never_called(**kwargs):
+        pytest.fail('Invalid history must be rejected before evaluating GW')
+    with pytest.raises(ValueError, match='diis_space'):
+        _evgw_loop(never_called, jnp.ones(2), diis_space=history, differentiation=_AD)
+
+
+@pytest.mark.parametrize('unrestricted', [False, True])
+def test_outer_seed_is_numerical_and_unselected_levels_keep_mf(unrestricted):
+    kw = _open_shell_inputs() if unrestricted else _inputs()
+    driver = evgw_cd_unrestricted if unrestricted else evgw_cd_restricted
+    mean_field = jnp.asarray(kw['mo_energy'])
+    def energy(value):
+        result = driver(**kw, orbs=(0,), update_w=False, diis_space=6,
+            initial_guess=mean_field+.03+value, differentiation=_AD)
+        return result.mo_energy
+    value, tangent = jax.jit(lambda t: jax.jvp(energy, (t,), (jnp.ones_like(t),)))(jnp.array(0.))
+    np.testing.assert_allclose(tangent, 0., atol=2e-10, rtol=0)
+    np.testing.assert_allclose(value[..., 1:], mean_field[..., 1:], atol=1e-12, rtol=0)
+    np.testing.assert_allclose(value, energy(.01), atol=3e-10, rtol=0)
+    assert np.isfinite(value).all()
+
+
+def test_outer_seed_rejects_invalid_shapes_and_complex_values():
+    kw = _inputs()
+    for seed in (jnp.zeros(3), jnp.ones(2, dtype=complex)):
+        with pytest.raises(ValueError, match='initial_guess'):
+            evgw_cd_restricted(**kw, initial_guess=seed, diis_space=6)
+
+
 @pytest.mark.parametrize('variable', ['factor', 'frame_rotation'])
 def test_qsgw_fixed_frame_response_matches_reconverged_fd(variable):
     kw = _inputs()

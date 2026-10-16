@@ -36,11 +36,13 @@ class RKSIntegralInputs:
     geometry_is_traced: bool = False
     integral_backend: str = "cpu"
     grid_ao_backend: str = "jax"
+    eri_lr: Array | None = None
+    dispersion_energy: Array | None = None
 
     def as_rks_kwargs(self) -> dict[str, Any]:
         """Return keyword arguments accepted by run_rks_from_integrals."""
 
-        return {
+        kwargs = {
             "overlap": self.overlap,
             "hcore": self.hcore,
             "eri": self.eri,
@@ -57,6 +59,9 @@ class RKSIntegralInputs:
             "init_mo_occ": self.init_mo_occ,
             "init_mo_energy": self.init_mo_energy,
         }
+        if self.eri_lr is not None or self.dispersion_energy is not None:
+            kwargs.update(eri_lr=self.eri_lr, dispersion_energy=self.dispersion_energy)
+        return kwargs
 
     def response_eri_pair_matrix(self) -> Array | None:
         """Return packed AO-pair ERI data for response assembly when available."""
@@ -104,11 +109,13 @@ class UKSIntegralInputs:
     geometry_is_traced: bool = False
     integral_backend: str = "cpu"
     grid_ao_backend: str = "jax"
+    eri_lr: Array | None = None
+    dispersion_energy: Array | None = None
 
     def as_uks_kwargs(self) -> dict[str, Any]:
         """Return keyword arguments accepted by run_uks_from_integrals."""
 
-        return {
+        kwargs = {
             "overlap": self.overlap,
             "hcore": self.hcore,
             "eri": self.eri,
@@ -128,3 +135,6 @@ class UKSIntegralInputs:
             "init_mo_energy_alpha": self.init_mo_energy_alpha,
             "init_mo_energy_beta": self.init_mo_energy_beta,
         }
+        if self.eri_lr is not None or self.dispersion_energy is not None:
+            kwargs.update(eri_lr=self.eri_lr, dispersion_energy=self.dispersion_energy)
+        return kwargs

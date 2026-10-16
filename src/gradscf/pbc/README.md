@@ -395,7 +395,23 @@ Stage 1 is complete within the scalar, neutral 3D Gaussian/GTH scope above.
 The next roadmap gate is stage 2: independent material force/stress comparisons,
 basis/FFT/k convergence and explicit SCF branch tracking. See [ROADMAP.md](ROADMAP.md)
 for the acceptance ledger and numerical evidence.
-Native finite-q OFDFT phonons, Born charges/LO-TO corrections,
-metallic TD/GW/BSE, other smearing schemes, SOC and
-macroscopic Berry-phase fields are not supplied by this increment.
+Native finite-q OFDFT phonons, metallic TD/GW/BSE, other smearing schemes and
+SOC remain outside this increment. Insulating full-mesh Berry polarization
+now supplies fixed-cell Born response and a genuine static macroscopic-field
+electric enthalpy through `gradscf.dfpt.electric`. See the independent
+[Born](../../../reproducibility/ad_showcase/P04_lih_born/README.md) and
+[dielectric](../../../reproducibility/ad_showcase/P04_lih_dielectric/README.md)
+verification records. The [Gamma infrared kernels](INFRARED.md) consume
+matched Born/epsilon/phonon data and provide directional nonanalytic
+corrections; they do not implement finite-q polar IFC subtraction/restoration.
+The separate `pbc.polar_ifc` module now supplies that decomposition through
+`DipoleCorrection` and `PolarForceConstants`, reusing the existing Fourier
+IFC implementation. Its fixed reciprocal sum, directional Gamma limits and
+q/parameter response passed manufactured-model and independent pinned-Phonopy
+checks; see the [numerical capsule](../../../reproducibility/ad_showcase/P05_polar_interpolation/README.md).
+This does not yet establish a converged polar material dispersion. The eager
+IFC construction does not differentiate through the input SCF calculations.
+Material basis/k convergence, matching input checks and branch restrictions
+remain required; general Taylor or material mixed-response coverage is not
+claimed by the separate [small-system mixed tests](../../../reproducibility/ad_showcase/P04_electric_mixed/README.md).
 Nonpolar Fourier interpolation, dispersion and DOS are described in [IFC.md](IFC.md).

@@ -9,13 +9,14 @@ from .rdm import (
     trans_rdm1, trans_rdm12, trans_rdm1s, trans_rdm12s, spin_square,
 )
 from .solver import FCIResult, solve_fci
+from .overlap import overlap
 
 __all__ = [
     'FCISpace','make_fci_space','make_strings','contract_1e','contract_2e',
     'absorb_h1e','contract_hamiltonian','make_hdiag','build_hamiltonian','energy',
     'make_rdm1','make_rdm2','make_rdm12','make_rdm1s','make_rdm12s',
     'trans_rdm1','trans_rdm12','trans_rdm1s','trans_rdm12s','spin_square',
-    'FCIResult','solve_fci',
+    'FCIResult','solve_fci','overlap',
 ]
 from .reference import FCIReference, fold_core
 from .api import FCI, FCISolver, kernel

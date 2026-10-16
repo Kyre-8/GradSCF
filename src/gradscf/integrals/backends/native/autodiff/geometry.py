@@ -3,7 +3,9 @@
 Primal basis data are separate from differentiable coordinates so unsupported
 basis derivatives cannot silently become zero. Coordinate Hessians use native
 shell contractions for bilinear JVPs and their adjoints, without constructing
-an integral-coordinate Jacobian. Third coordinate derivatives are rejected.
+an integral-coordinate Jacobian. Cartesian S/T/nuclear/full-Coulomb ERIs also
+have cubic/quartic products; higher orders, spherical and dipole higher
+products, and mixed basis-parameter derivatives remain explicitly unsupported.
 """
 from functools import lru_cache, partial
 
@@ -71,6 +73,38 @@ def _geometry_function(operator, atoms_key, basis_key, nao, cart):
     mlir.register_lowering(second, mlir.lower_fun(hessian_product, multiple_results=False), platform="cpu")
     mlir.register_lowering(second_adjoint, mlir.lower_fun(hessian_adjoint, multiple_results=False), platform="cpu")
 
+    products, adjoints = {2: second}, {2: second_adjoint}
+
+    def higher_primitives(order):
+        forward = core.Primitive(f"gradscf_geometry_order{order}_jvp_{operator}")
+        reverse = core.Primitive(f"gradscf_geometry_order{order}_vjp_{operator}")
+
+        def call(target, env, direction, vector, extra, output_shape):
+            function = jax.ffi.ffi_call(target, jax.ShapeDtypeStruct(output_shape, jnp.float64),
+                                        vmap_method="sequential")
+            return function(jnp.asarray(atoms), jnp.asarray(basis), env, direction, vector, extra,
+                            operator=np.int32(_OPERATORS[operator]), cart=np.int32(cart), order=np.int32(order))
+
+        def push(env, *vectors):
+            return call("gradscf_geometry_higher_jvp_cpu_v1", env, vectors[0], vectors[1],
+                        jnp.stack(vectors[2:]), shape)
+
+        def pull(env, *vectors):
+            directions, cotangent = vectors[:-1], vectors[-1]
+            return call("gradscf_geometry_higher_vjp_cpu_v1", env, directions[0], cotangent,
+                        jnp.stack(directions[1:]), env.shape)
+
+        forward.def_impl(push)
+        reverse.def_impl(pull)
+        forward.def_abstract_eval(lambda env, *vectors: jax.core.ShapedArray(shape, jnp.float64))
+        reverse.def_abstract_eval(lambda env, *vectors: jax.core.ShapedArray(env.shape, jnp.float64))
+        mlir.register_lowering(forward, mlir.lower_fun(push, multiple_results=False), platform="cpu")
+        mlir.register_lowering(reverse, mlir.lower_fun(pull, multiple_results=False), platform="cpu")
+        return forward, reverse
+
+    for order in (3, 4):
+        products[order], adjoints[order] = higher_primitives(order)
+
     def transpose(other, cotangent, env, vector):
         if ad.is_undefined_primal(env):
             raise NotImplementedError("Geometry transposition requires a fixed environment")
@@ -93,44 +127,61 @@ def _geometry_function(operator, atoms_key, basis_key, nao, cart):
         tangent = sum(terms) if terms else ad.Zero.from_primal_value(primal)
         return primal, tangent
 
-    def second_derivative(primitive, primals, tangents):
-        env, left, right = primals
-        denv, dleft, dright = tangents
+    def multilinear_derivative(order, is_adjoint, primals, tangents):
+        env, *vectors = primals
+        denv, *dvectors = tangents
         if not isinstance(denv, ad.Zero):
-            raise NotImplementedError("Native third geometry derivatives are not supported")
+            if order == 4:
+                raise NotImplementedError("Native fifth geometry derivatives are not supported")
+            if not cart or operator not in ("overlap", "kinetic", "nuclear", "eri"):
+                raise NotImplementedError("Native third geometry derivatives require Cartesian S/T/nuclear/full ERIs")
+        family = adjoints if is_adjoint else products
+        primitive = family[order]
         primal = primitive.bind(*primals)
         terms = []
-        if not isinstance(dleft, ad.Zero):
-            terms.append(primitive.bind(env, dleft, right))
-        if not isinstance(dright, ad.Zero):
-            terms.append(primitive.bind(env, left, dright))
+        if not isinstance(denv, ad.Zero):
+            terms.append(family[order+1].bind(env, denv, *vectors))
+        for index, tangent in enumerate(dvectors):
+            if not isinstance(tangent, ad.Zero):
+                changed = list(vectors)
+                changed[index] = tangent
+                terms.append(primitive.bind(env, *changed))
         return primal, sum(terms) if terms else ad.Zero.from_primal_value(primal)
 
-    def second_transpose(primitive, cotangent, env, left, right):
+    def multilinear_transpose(order, is_adjoint, cotangent, env, *vectors):
         if ad.is_undefined_primal(env):
-            raise NotImplementedError("Native third geometry derivatives are not supported")
-        unknown_left, unknown_right = map(ad.is_undefined_primal, (left, right))
-        if unknown_left and unknown_right:
-            raise NotImplementedError("A bilinear Hessian transpose requires one fixed argument")
+            raise NotImplementedError("Geometry transposition requires a fixed environment")
+        unknown = [index for index, vector in enumerate(vectors) if ad.is_undefined_primal(vector)]
+        if len(unknown) > 1:
+            raise NotImplementedError("A multilinear geometry transpose requires one unknown argument")
+        outputs = [None]*(len(vectors)+1)
+        if not unknown:
+            return tuple(outputs)
+        index = unknown[0]
         if isinstance(cotangent, ad.Zero):
-            return (None, ad.Zero(left.aval) if unknown_left else None,
-                    ad.Zero(right.aval) if unknown_right else None)
-        if primitive is second:
-            return (None, second_adjoint.bind(env, right, cotangent) if unknown_left else None,
-                    second_adjoint.bind(env, left, cotangent) if unknown_right else None)
-        # Hessian symmetry exchanges its coordinate slots. The integral
-        # cotangent slot instead transposes back to the bilinear JVP.
-        return (None, second_adjoint.bind(env, cotangent, right) if unknown_left else None,
-                second.bind(env, left, cotangent) if unknown_right else None)
+            outputs[index+1] = ad.Zero(vectors[index].aval)
+        elif not is_adjoint:
+            fixed = [vector for position, vector in enumerate(vectors) if position != index]
+            outputs[index+1] = adjoints[order].bind(env, *fixed, cotangent)
+        elif index == len(vectors)-1:
+            # Transposing the integral-cotangent slot returns the forward product.
+            outputs[index+1] = products[order].bind(env, *vectors[:-1], cotangent)
+        else:
+            # Coordinate derivative slots are symmetric, including the free
+            # coordinate output of an adjoint. Keep the integral cotangent last.
+            fixed = [vector for position, vector in enumerate(vectors[:-1]) if position != index]
+            outputs[index+1] = adjoints[order].bind(env, *fixed, cotangent, vectors[-1])
+        return tuple(outputs)
 
     for primitive, other in ((linear, adjoint), (adjoint, linear)):
         ad.primitive_transposes[primitive] = partial(transpose, other)
         ad.primitive_jvps[primitive] = partial(derivative, primitive)
         batching.primitive_batchers[primitive] = partial(batch_product, primitive)
-    for primitive in (second, second_adjoint):
-        ad.primitive_transposes[primitive] = partial(second_transpose, primitive)
-        ad.primitive_jvps[primitive] = partial(second_derivative, primitive)
-        batching.primitive_batchers[primitive] = partial(batch_product, primitive)
+    for order in (2, 3, 4):
+        for primitive, is_adjoint in ((products[order], False), (adjoints[order], True)):
+            ad.primitive_transposes[primitive] = partial(multilinear_transpose, order, is_adjoint)
+            ad.primitive_jvps[primitive] = partial(multilinear_derivative, order, is_adjoint)
+            batching.primitive_batchers[primitive] = partial(batch_product, primitive)
 
     @jax.custom_jvp
     def value(env, coords, origin):

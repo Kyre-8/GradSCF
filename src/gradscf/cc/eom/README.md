@@ -100,9 +100,10 @@ the fixed MO frame. `run_cc` supplies implicit T response. Holding a previously
 computed ground result constant gives only a fixed-T partial derivative.
 This is not a nuclear-coordinate gradient or differentiation through HF.
 
-Only **first-order energies** are supported by this interface. Left/right
-vectors and the raw spectrum are forward diagnostics with stopped AD;
-do not differentiate them or take a second derivative of the energy rule.
+By default this interface supports **first-order energies**. Left/right vectors
+and the raw spectrum are forward diagnostics with stopped AD; do not
+differentiate them or take a second derivative of the default energy rule.
+The optional isolated-pair response below retains live left/right vectors.
 Complex selected roots produce NaN real outputs and preserve the raw complex
 spectrum. Unconverged ground states/eigenpairs, unresolved gaps and excessive
 conditioning invalidate energy derivatives (NaN), rather than changing the
@@ -111,6 +112,52 @@ whole requested root set. Dense solving checks the full computed spectrum.
 Davidson checks the projected spectrum and converged guard roots, subject to
 the spectral-completeness limitation below. This first version does not attach a differentiable
 non-Hermitian degenerate-subspace projector.
+
+## Isolated charged-state Dyson properties
+
+```python
+from gradscf.solvers import LinearSolverConfig
+
+ionized = mycc.EOMIP(
+    nroots=2, vector_response=True,
+    response_config=LinearSolverConfig(method="direct", max_dense=256),
+).run()
+dyson = ionized.dyson()  # solves the existing ground-state Lambda equations
+print(dyson.weights)    # signed, one-spin biorthogonal pole weights
+```
+
+The functional form is `cc.dyson_orbitals(ground, lambda_result, eom_result)`.
+Its left/right amplitude columns use the active occupied-then-virtual MO frame.
+The sector is read from the EOM result; an explicit mismatching sector is
+rejected even if EE/IP/EA spaces happen to have the same dimension. Sector and
+`vector_response` are static pytree metadata. Existing NamedTuple access and
+`_replace` remain available.
+
+For IP, the endpoint contractions are
+`D_left[p,k]=<Phi|(1+Lambda) a_bar_p^dagger R_k|Phi>` and
+`D_right[p,k]=<Phi|L_k a_bar_p|Phi>`; EA uses the corresponding creation and
+annihilation endpoints. Weights are `sum_p D_left[p,k]*D_right[p,k]`, rather
+than either individual squared norm. The two amplitudes transform reciprocally
+under a change of EOM normalization, leaving residues and weights invariant.
+A spin-summed closed-shell spectrum includes a factor of two. Negative residues
+are retained, and the convergence flag does not assert spectral positivity.
+
+`vector_response=True` attaches the local right equations
+`[A r-omega*r, (r.T@r-1)/2]=0`, followed by the left equations
+`(A.T-omega*I)l+r*(r.T@l-1)=0`. Both reuse the shared root and checked linear
+solvers. Their capacity is `n+1` and `n` per root, respectively. The default
+forward diagonalization and first-energy rule remain unchanged. Converged
+simple real roots, sufficient spectral separation and acceptable conditioning
+are required; no pseudoinverse defines a response at a defective/degenerate root.
+
+Forward-only EOM results can produce forward Dyson properties, but attempting
+their derivatives is deliberately invalid. Full physical derivatives require
+T, Lambda, both EOM vectors, and any moving reference/integral inputs inside
+the differentiated function. The [H2 example](../../../../examples/cc/h2_dyson_response.py)
+and [independent FCI comparison](../../../../examples/cc/compare_h2_dyson_fci.py)
+demonstrate the complete first bond response in the two-orbital STO-3G limit.
+See its [measured results and spectrum](../../../../reproducibility/ad_showcase/X14_h2_eom_dyson/README.md).
+Its exact-FCI limit does not extend to EA-CCSD in a larger H2 orbital space.
 
 ## Capacity and current limits
 
@@ -158,9 +205,11 @@ before EOM intermediates; it does not estimate peak memory or bound the earlier
 CC calculation. Removing the EOM matrix bottleneck does not make integrals or
 CC intermediates low-memory algorithms.
 
-UHF/ROHF, triplet/SF, higher-rank EOM methods, complex orbitals, transition
-properties, vector/cluster response, GPU performance and nuclear gradients
-remain outside this implementation.
+UHF/ROHF, triplet/SF, higher-rank EOM methods, complex orbitals, degenerate
+cluster response, transition properties beyond the charged-state Dyson
+quantities above, and GPU performance remain outside this implementation.
+The molecular example validates a complete first bond derivative, not a general
+higher-order EOM molecular response facility.
 
 Run [the dense native spectrum example](../../../../examples/cc/eom_ccsd.py),
 [the response example](../../../../examples/cc/eom_response.py) and

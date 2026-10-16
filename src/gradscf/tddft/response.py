@@ -45,6 +45,8 @@ class _RestrictedResponseOperatorData:
     hybrid_fraction: Array | float = 0.0
     nonlocal_xc_a_action_fn: Callable[[Array], Array] | None = None
     nonlocal_xc_b_action_fn: Callable[[Array], Array] | None = None
+    fock_occupied: Array | None = None
+    fock_virtual: Array | None = None
 
 
 def _assert_finite(values: Array, *, label: str) -> None:
@@ -714,6 +716,13 @@ def _restricted_ao_response_action(
     two_electron_mode: str = "auto",
 ) -> Callable[[Array], Array]:
     alpha = jnp.asarray(hybrid_fraction, dtype=dtype)
+    rsh = _restricted_rsh_coefficients(molecule)
+    eri_lr = None
+    if rsh is not None:
+        _validate_restricted_rsh_mode(molecule, two_electron_mode)
+        _, long_range, short_range = rsh
+        alpha = jnp.asarray(short_range, dtype=dtype)
+        eri_lr = jnp.asarray(molecule.eri_lr, dtype=dtype)
     df_factors = getattr(molecule, "df_factors", None)
     mode = str(two_electron_mode).lower()
     if mode == "df" and (df_factors is None or int(jnp.asarray(df_factors).size) == 0):
@@ -749,9 +758,36 @@ def _restricted_ao_response_action(
         if not include_exchange:
             return j_fn(density_ao).reshape(original_shape)
         j_mat, k_mat = jk_fn(density_ao)
-        return (j_mat - 0.5 * alpha * k_mat).reshape(original_shape)
+        exchange = alpha*k_mat
+        if eri_lr is not None:
+            _, k_lr = _jk_from_full_eri(eri_lr, density_ao)
+            exchange = exchange+(long_range-short_range)*k_lr
+        return (j_mat - 0.5 * exchange).reshape(original_shape)
 
     return action
+
+
+def _restricted_rsh_coefficients(molecule):
+    """Validate the fixed full-RSH data carried by a restricted response state."""
+    coefficients = getattr(molecule, "range_separated_coefficients", None)
+    if coefficients is None and getattr(molecule, "eri_lr", None) is None:
+        return None
+    from gradscf.scf.rsh import rsh_preset, validate_rsh_inputs
+
+    expected = rsh_preset("wb97xd").to_range_separated_hybrid_coefficients()
+    if coefficients is None or tuple(coefficients) != expected:
+        raise ValueError("Restricted RSH response requires fixed wb97xd coefficients (0.2, 1, 0.222036).")
+    validate_rsh_inputs("wb97xd", getattr(molecule, "rep_tensor", None),
+                        getattr(molecule, "eri_lr", None), getattr(molecule, "dispersion_energy", None))
+    return expected
+
+
+def _validate_restricted_rsh_mode(molecule, two_electron_mode):
+    if str(two_electron_mode).lower() not in {"auto", "direct"}:
+        raise NotImplementedError("Range-separated restricted response requires full AO ERIs; DF/RIS is unsupported.")
+    factors = getattr(molecule, "df_factors", None)
+    if factors is not None and int(jnp.asarray(factors).size):
+        raise NotImplementedError("Range-separated restricted response requires full AO ERIs, not DF factors.")
 
 
 def _unused_ao_response_action(_density: Array) -> Array:
@@ -855,12 +891,30 @@ def _build_restricted_response_operator_data(
 ) -> _RestrictedResponseOperatorData:
     response_options = normalize_response_kernel_options(response_kernel_options)
     resolved_xc = _resolve_xc_functional(molecule, xc_functional, xc_params)
+    rsh = _restricted_rsh_coefficients(molecule)
+    functional_rsh = getattr(resolved_xc, "range_separated_coefficients", None)
+    if rsh is not None or functional_rsh is not None:
+        if rsh is None or functional_rsh != rsh:
+            raise ValueError("A full RSH reference requires the matching complete wb97xd response functional.")
+        _validate_restricted_rsh_mode(molecule, response_options.two_electron_mode)
     _raise_if_strict_local_hf_response(resolved_xc)
     weights = jnp.asarray(molecule.grid.weights)
     orbo, orbv, delta_eps, _ = _restricted_orbital_data(
         molecule,
         occupation_tolerance,
     )
+    fock_occupied = fock_virtual = None
+    fock = getattr(molecule, "fock_matrix", None)
+    if fock is not None:
+        fock = jnp.asarray(fock)
+        if fock.shape != (orbo.shape[0], orbo.shape[0]) or jnp.iscomplexobj(fock):
+            raise ValueError("Noncanonical restricted response requires a real AO fock_matrix of shape (nao, nao).")
+        _assert_finite(fock, label="AO fock_matrix")
+        fock_occupied = orbo.T @ fock @ orbo
+        fock_virtual = orbv.T @ fock @ orbv
+        # Diagonal entries remain useful as a preconditioner, while the action
+        # below uses both complete blocks. No canonicalization is performed.
+        delta_eps = jnp.diag(fock_virtual)[None, :] - jnp.diag(fock_occupied)[:, None]
 
     xc_response_action_fn = None
     hybrid_fraction = 0.0
@@ -968,7 +1022,7 @@ def _build_restricted_response_operator_data(
 
     response_dtype = jnp.result_type(delta_eps, weights)
     include_exchange = _needs_exchange_terms(hybrid_fraction)
-    ao_mo_response_action_fn = _restricted_lowrank_response_action_for_options(
+    ao_mo_response_action_fn = None if rsh is not None else _restricted_lowrank_response_action_for_options(
         molecule,
         orbo,
         orbv,
@@ -999,6 +1053,8 @@ def _build_restricted_response_operator_data(
         hybrid_fraction=hybrid_fraction,
         nonlocal_xc_a_action_fn=nonlocal_xc_a_action_fn,
         nonlocal_xc_b_action_fn=nonlocal_xc_b_action_fn,
+        fock_occupied=fock_occupied,
+        fock_virtual=fock_virtual,
     )
 
 
@@ -1038,7 +1094,11 @@ def _restricted_ao_mo_action(
 
 
 def _restricted_a_action(data: _RestrictedResponseOperatorData, x: Array) -> Array:
-    out = x * data.delta_eps[None, :, :]
+    if data.fock_occupied is None:
+        out = x * data.delta_eps[None, :, :]
+    else:
+        out = (jnp.einsum("nia,ab->nib", x, data.fock_virtual, precision=Precision.HIGHEST)
+               - jnp.einsum("ij,nja->nia", data.fock_occupied, x, precision=Precision.HIGHEST))
     out = out + _restricted_ao_mo_action(
         data,
         x,

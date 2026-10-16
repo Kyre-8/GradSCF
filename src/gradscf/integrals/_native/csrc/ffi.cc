@@ -13,7 +13,7 @@ static ffi::Error Integrals(ffi::BufferR2<ffi::S32> atoms,
                            ffi::ResultBuffer<ffi::F64> result,
                            int32_t op, int32_t cart) {
   try {
-    IntegralTables tables(atoms, basis, environment, op, cart);
+    IntegralTables tables(atoms, basis, environment, op, cart, true);
     const int natm=tables.natm, nbas=tables.nbas;
     auto& atm=tables.atm;
     auto& bas=tables.bas;

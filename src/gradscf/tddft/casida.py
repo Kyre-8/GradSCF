@@ -87,6 +87,7 @@ def solve_casida_from_tdhf_operator(
     davidson_tol: float = PYSCF_TD_DAVIDSON_TOL,
     davidson_max_iter: int = FULL_TDDFT_DAVIDSON_MAX_CYCLE,
     davidson_max_subspace: int | None = None,
+    davidson_initial_guess_count: int | None = None,
 ) -> TDDFTResult:
     nocc, nvir = delta_eps.shape
     dim = int(nocc * nvir)
@@ -106,6 +107,7 @@ def solve_casida_from_tdhf_operator(
         tol=davidson_tol,
         max_iter=davidson_max_iter,
         max_subspace=davidson_max_subspace,
+        initial_guess_count=davidson_initial_guess_count,
         matrix_eps=matrix_eps,
     )
     return _finalize_casida_result(
@@ -273,5 +275,6 @@ class RestrictedCasidaTDDFT:
             davidson_tol=self.davidson_tol,
             davidson_max_iter=self.davidson_max_iter,
             davidson_max_subspace=self.davidson_max_subspace,
+            davidson_initial_guess_count=self.davidson_initial_guess_count,
         )
         return self._apply_posthoc_correction(result, use_tda=False)

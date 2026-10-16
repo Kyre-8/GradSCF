@@ -13,6 +13,8 @@ Upstream Apache-2.0 licenses are retained at `vendor/pyscf/LICENSE` and
 - `csrc/ffi.cc`: GradSCF C++ value FFI adapter.
 - `csrc/geometry.cc`: streaming analytic coordinate JVP/VJP drivers.
 - `csrc/geometry_hessian.cc`: analytic bilinear coordinate Hessian products and adjoints.
+- `csrc/geometry_contraction.h`: shared second-coordinate contraction and nuclear-center terms.
+- `csrc/geometry_higher.cc`: Cartesian cubic/quartic products by exact Gaussian center recurrence.
 - `csrc/coefficients.cc`: shell-local coefficient JVP/VJP and coefficient Hessian products.
 - `csrc/exponents.cc`: analytic Gaussian-exponent JVP/VJP through Cartesian angular raising.
 - `csrc/tables.h`: shared table validation and owned libcint buffers.
@@ -78,7 +80,8 @@ PYTHONPATH=src python tools/benchmark_native_basis_vjp.py \
 
 All vendor symbols have hidden visibility and a linker export allowlist;
 The derivative exports include `GradSCFGeometryJVP`, `GradSCFGeometryVJP`,
-`GradSCFGeometryHessianJVP` and `GradSCFGeometryHessianVJP`, plus
+`GradSCFGeometryHessianJVP` and `GradSCFGeometryHessianVJP`,
+`GradSCFGeometryHigherJVP` and `GradSCFGeometryHigherVJP`, plus
 `GradSCFCoefficientJVP`, `GradSCFCoefficientVJP`,
 `GradSCFCoefficientHessianJVP` and `GradSCFCoefficientHessianVJP`, and
 `GradSCFExponentJVP`/`GradSCFExponentVJP`; the export lists
@@ -96,8 +99,9 @@ values = evaluate("overlap", atm, bas, env, nao, cart=True)
 `atm` is a static NumPy int32 `(natm, 6)` array, and `bas` is a static NumPy
 int32 `(nshell, 8)` array, using libcint's public table layout. The dynamic
 `env` is a JAX float64 vector. The caller supplies normalized contraction
-coefficients in libcint convention, coordinates in Bohr, and zero
-`env[PTR_RANGE_OMEGA]`. Enable JAX x64 before constructing arrays. Tables may
+coefficients in libcint convention and coordinates in Bohr. The range parameter
+`env[PTR_RANGE_OMEGA]` is zero for ordinary Coulomb and may be positive for the
+full ERI value/geometry paths only. Enable JAX x64 before constructing arrays. Tables may
 be closed over by `jax.jit`; changing coordinates/exponents/coefficients in
 `env` updates values without replacing the static topology.
 
@@ -111,9 +115,10 @@ be closed over by `jax.jit`; changing coordinates/exponents/coefficients in
 
 Both Cartesian and real spherical AOs use libcint/PySCF ordering and
 normalization. This initial interface supports point nuclei, scalar Gaussian
-orbitals with angular momentum 0..12, and ordinary Coulomb integrals. It
+orbitals with angular momentum 0..12, and ordinary or long-range Coulomb ERIs. It
 rejects nonfinite environments, nonpositive exponents, unsupported nuclear
-models/range separation, invalid pointers and inconsistent AO counts.
+models, negative range parameters, range separation on other operators,
+invalid pointers and inconsistent AO counts.
 ERI shell workspaces that exceed the upstream int32 indexing range are rejected
 before allocation. The adapter owns the ERI workspace with checked C++ allocation
 and invokes the unmodified PySCF `GTOnr2e_fill_s1` filling kernel.
@@ -165,12 +170,46 @@ a frozen-density force expression, do not supply that response.
 
 The low-level raw-ENV `backends.native.evaluate` remains value-only: an arbitrary
 ENV vector mixes geometry, exponents and coefficients. Use integral plans for
-geometry and basis-parameter AD. Third-or-higher coordinate derivatives remain
-unsupported and fail explicitly. Geometry AD is limited to the five full
-operators listed above: ECP, RI, packed ERIs and fused J/K do not acquire
-geometry derivatives through this change. GPU FFI, periodic integrals, spinors
-and range separation are outside this interface.
+geometry and basis-parameter AD. Cartesian overlap, kinetic, nuclear attraction
+and full Coulomb ERIs support third/fourth coordinate products and their adjoints.
+They apply exact Gaussian angular raising/lowering to second-derivative kernels,
+including primitive exponent weights, original normalization and independently
+moving nuclear potential centers. No displaced integrals are used in these AD
+rules. Direction and cotangent arguments remain differentiable. Fifth coordinate
+derivatives, third/fourth spherical or dipole derivatives, nonzero-omega higher
+derivatives and mixed basis-parameter/geometry derivatives remain unsupported.
+The higher-order shadow workspace requires original shell angular momentum
+`l <= 10`; numerical higher-order tests cover s/p/d shells, not that entire bound.
+Geometry AD is limited to the five full
+operators listed above: ECP, RI, zero-omega compact ERIs and fused J/K do not acquire
+geometry derivatives through this change. Positive-omega packed layouts use the
+full-ERI gather path described below. GPU FFI, periodic integrals and spinors
+are outside this interface.
 Full integral values still require O(nao^4) memory.
+
+### Fixed long-range ERIs
+
+`plan.evaluate("eri", parameters, omega=0.2)` evaluates the operator
+`erf(omega*r12)/r12`. Omega is a static, finite, nonnegative Python/NumPy real
+scalar in inverse Bohr, at most `sqrt(float64.max)/2` to keep native squared-omega
+arithmetic finite. Both Python and C++ enforce this bound. `omega=0.0` retains the existing ordinary Coulomb
+behavior; it is not the zero-omega limit of the erf operator. Negative omega,
+omega differentiation, dynamic omega under JIT, and nonzero omega on
+one-electron/ECP operators are explicitly rejected. The JAX reference backend
+does not implement this option.
+
+At fixed positive omega, Cartesian and real spherical full ERIs support the
+same first/second coordinate JVP/VJP and Hessian products as ordinary ERIs.
+`aosym="s4"` and `"s8"` gather the long-range full tensor in JAX, retaining
+geometry AD but still allocating O(nao^4) temporary storage. Zero-omega packed
+forward calls retain their original compact implementation and AD limits.
+This option does not add range-separated direct J/K, auxiliary RI,
+exponent/coefficient derivatives of ERIs, or third geometry derivatives.
+
+The focused check is `tests/integrals/test_native_long_range_eri.py`: PySCF
+erf-Coulomb values, ordinary-Coulomb regression, first/second directional finite
+differences, and adjoint identities, using float64 and d shells in both AO
+representations. Build the native library before running it.
 
 ## Contraction-coefficient derivatives
 

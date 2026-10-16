@@ -22,7 +22,9 @@ def evaluate(operator, atm, bas, env, nao, cart=True):
 
     ``atm`` and ``bas`` must be static int32 arrays with shapes ``(natm, 6)``
     and ``(nshell, 8)``. ``env`` is a dynamic float64 vector. Only point nuclei,
-    scalar Gaussian orbitals (l <= 12), and ordinary Coulomb ERIs are supported.
+    scalar Gaussian orbitals (l <= 12), and Coulomb ERIs are supported.
+    For ERIs only, positive ``env[8]`` selects erf-Coulomb long-range values;
+    negative omega and nonzero omega on one-electron operators are rejected.
     Returns ``(nao, nao)``; dipole returns ``(3, nao, nao)`` and ERI returns
     ``(nao, nao, nao, nao)`` in chemists' order, with no symmetry compression.
 

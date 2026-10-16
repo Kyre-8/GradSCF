@@ -14,10 +14,12 @@ from .kpoints import weights_for,time_reversal_plan
 from ._kpoint import run_kpoint_scf
 
 
-def validate_reference(mf, *, integer=True, equal_weights=True, external=False):
+def validate_reference(mf, *, integer=True, equal_weights=True, external=False, low_dimensional=False):
     """Check freshness and the reference domain required by a consumer."""
     if mf.result is None or not mf.converged:
         raise ValueError('Periodic response requires a converged SCF reference.')
+    if getattr(mf.cell,'dimension',3)<3 and not low_dimensional:
+        raise NotImplementedError('This response consumer currently requires 3D electrostatics.')
     if (mf.xc!=mf._computed_xc or mf.cell.mesh!=mf._computed_mesh or mf.cell._version!=mf._cell_version):
         raise ValueError('Run kernel() again after changing the periodic reference.')
     if getattr(mf,'functional',None) is not getattr(mf,'_computed_functional',None):
@@ -62,9 +64,9 @@ class PeriodicSCFResult(NamedTuple):
     chemical_potential: object = None
 
 
-def gamma_energy_and_fock(density,inputs,*,xc='hf',exxdiv='ewald'):
+def gamma_energy_and_fock(density,inputs,*,xc='hf',exxdiv='ewald',mesh=None):
     alpha=hybrid_coeff(xc);kind=xc_type(xc)
-    j,k=get_jk(inputs,density,exxdiv=exxdiv,with_k=alpha!=0)
+    j,k=get_jk(inputs,density,exxdiv=exxdiv,with_k=alpha!=0,mesh=mesh)
     ao=inputs.ao[0,0];deriv=inputs.ao[0]
     exc,va,vb,ga,gb=_unrestricted_xc_energy_and_potential_on_grid(
         ao=ao,ao_deriv1=deriv,weights=inputs.weights,density_a=density[0],density_b=density[1],
@@ -100,15 +102,20 @@ def run_gamma_scf(inputs,*,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
     if any(v<0 or v>n or v!=int(v) for v in nelec) or sum(nelec)==0 or max_cycle<1:
         raise ValueError('Zero-temperature SCF requires integer occupations and positive max_cycle.')
     config=differentiation or SCFDifferentiationConfig(mode='explicit')
-    s=inputs.overlap[0];x=_orthogonalizer(s,1e-10)
-    eps,c=_diagonalize_fock(inputs.hcore[0],x)
+    # Stop before staging the numerical scan: stopping only its output lets
+    # eager reverse AD allocate unused iteration-by-grid residual arrays.
+    forward_inputs=inputs
+    if config.mode=='implicit':
+        forward_inputs,init_density=jax.tree.map(jax.lax.stop_gradient,(inputs,init_density))
+    s=forward_inputs.overlap[0];x=_orthogonalizer(s,1e-10)
+    eps,c=_diagonalize_fock(forward_inputs.hcore[0],x)
     occ=jnp.stack([(jnp.arange(n)<count).astype(s.dtype) for count in nelec])
     coeff=jnp.stack([c,c]);energies=jnp.stack([eps,eps])
     density=jax.vmap(_build_density_from_occ)(coeff,occ) if init_density is None else jnp.asarray(init_density)
     if density.shape!=(2,n,n):raise ValueError('Initial spin density must have shape (2,nao,nao).')
-    def evaluate(d,args):return gamma_energy_and_fock(d,args,xc=xc,exxdiv=exxdiv)
+    def evaluate(d,args):return gamma_energy_and_fock(d,args,xc=xc,exxdiv=exxdiv,mesh=mesh)
     def builder(d,*_):
-        e,f=evaluate(d,inputs)
+        e,f=evaluate(d,forward_inputs)
         return f,f,e
     out=run_unrestricted_scf_scan(fock_builder=builder,density_spin=density,
         mo_coeff_spin=coeff,mo_occ_spin=occ,mo_energy_spin=energies,overlap=s,
@@ -124,7 +131,8 @@ def run_gamma_scf(inputs,*,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
         density=attach_scf_backward(inputs,solution=density,residual=residual,
                                     converged=converged,config=config)
         _,f=evaluate(density,inputs)
-        energies,coeff=jax.vmap(lambda f:_diagonalize_fock(f,x))(f)
+        live_transform=_orthogonalizer(inputs.overlap[0],1e-10)
+        energies,coeff=jax.vmap(lambda f:_diagonalize_fock(f,live_transform))(f)
     energy,fock=evaluate(density,inputs)
     return PeriodicSCFResult(energy,density[:,None],coeff[:,None],energies[:,None],
                              occ[:,None],fock[:,None],converged,cycles,energy)
@@ -171,9 +179,9 @@ class _SCF:
                     or not bool(self.reduction.consistent(self.inputs.hcore))
                     or not bool(self.reduction.weights_consistent(w))):
                 raise ValueError('Inputs violate the requested symmetry; use the full mesh or refine the FFT grid.')
-        if (self.functional is None and hybrid_coeff(self.xc)!=0 and self.exxdiv=='ewald'
+        if (self.functional is None and hybrid_coeff(self.xc)!=0 and self.exxdiv in ('ewald','vcut_sph')
                 and not np.allclose(self.inputs.kweights,1/len(self.kpts),atol=1e-12,rtol=0)):
-            raise NotImplementedError('Ewald exchange correction requires equal k weights; use exxdiv=None for general weights')
+            raise NotImplementedError('Finite-cell exchange quadrature requires equal k weights; use exxdiv=None for general weights')
         density=None
         if dm0 is not None:
             d=jnp.asarray(dm0)

@@ -2,18 +2,24 @@
 
 import jax
 import jax.numpy as jnp
-from ..types import NonHermitianSolverConfig, NonHermitianResult
+from ..types import LinearSolverConfig, NonHermitianSolverConfig, NonHermitianResult
 from ..operators import as_operator, validate_real_square
 from ..diagnostics import require_converged_derivative
 from ._nonhermitian_ritz import paired_eigenvectors
 from .nonhermitian_davidson import davidson_ritz
+from ._nonhermitian_response import attach_pair_response
 
 
-def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None):
+def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
+                      vector_response=False, response_config=None):
     """Lowest-real-part dense eigenpairs or iterative Ritz estimates.
 
-    Only isolated real eigenvalue JVP/VJP is exposed. Left/right vectors are
-    stopped numerical outputs. Complex selected roots give NaN real outputs;
+    By default only isolated real eigenvalue JVP/VJP is exposed and left/right
+    vectors are stopped numerical outputs. Opt-in ``vector_response=True``
+    attaches normalized local left/right response using shared root and linear
+    solves. ``response_config`` controls those solves; direct capacity is n+1
+    per right root and n per left root, not the number of requested roots.
+    Complex selected roots give NaN real outputs;
     raw_eigenvalues holds the dense spectrum or the final projected spectrum.
     Davidson uses bounded storage and true right/left and guard residuals; its
     gaps/order are local Ritz estimates, not a global isolation certificate.
@@ -21,6 +27,12 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None)
     conditioned roots invalidate energy response; no dense fallback is used.
     """
     cfg = NonHermitianSolverConfig() if config is None else config
+    if not isinstance(vector_response, bool):
+        raise TypeError("vector_response must be a static bool")
+    if response_config is not None and not isinstance(response_config, LinearSolverConfig):
+        raise TypeError("response_config must be a LinearSolverConfig")
+    if response_config is not None and not vector_response:
+        raise ValueError("response_config requires vector_response=True")
     op = as_operator(matrix_or_operator)
     validate_real_square(op)
     n = op.shape[0]
@@ -107,15 +119,28 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None)
         & numerical_valid
     )
     r, l = jax.lax.stop_gradient(r), jax.lax.stop_gradient(l)
-    applied = op.apply(r)
-    live_zero = applied - jax.lax.stop_gradient(applied)
-    values = energies + jnp.sum(l * live_zero, axis=0)
+    if vector_response:
+        linear = (LinearSolverConfig(rtol=1e-10, restart=40)
+                  if response_config is None else response_config)
+        values, r, l = attach_pair_response(op, energies, r, l,
+                                            config=linear, valid=valid)
+    else:
+        applied = op.apply(r)
+        live_zero = applied - jax.lax.stop_gradient(applied)
+        values = energies + jnp.sum(l * live_zero, axis=0)
     values = require_converged_derivative(values, valid)
     values = require_converged_derivative(jnp.where(real, values, jnp.nan), valid)
+    r = jnp.where(real[None, :], r, jnp.nan)
+    l = jnp.where(real[None, :], l, jnp.nan)
+    if vector_response:
+        # A complex-root output mask is constant NaN in the primal. Guard after
+        # masking as well, so its tangent cannot be mistaken for a valid zero.
+        r = require_converged_derivative(r, valid)
+        l = require_converged_derivative(l, valid)
     return NonHermitianResult(
         values,
-        jnp.where(real[None, :], r, jnp.nan),
-        jnp.where(real[None, :], l, jnp.nan),
+        r,
+        l,
         right_res,
         left_res,
         conv,

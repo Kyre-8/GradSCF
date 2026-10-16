@@ -17,11 +17,12 @@ from gradscf.scf.core import _unrestricted_spin_electron_counts
 from gradscf.scf.inputs import grid as _grid
 from gradscf.data.molecule import MoleculeSpec, parse_molecule_spec
 from gradscf.dft.libxc_jax.jax_libxc import parse_xc, xc_type
+from gradscf.scf.rsh import local_xc_spec, rsh_preset
 
 
 def _resolve_config(config, xc_spec, config_type):
     name = str(xc_spec if xc_spec is not None else (config.xc_spec if config is not None else "pbe"))
-    parse_xc(name)
+    parse_xc(local_xc_spec(name))
     cfg = config_type(xc_spec=name) if config is None else config
     return (replace(cfg, xc_spec=name) if cfg.xc_spec != name else cfg), name
 
@@ -50,6 +51,9 @@ def _build_common(*, atom, basis, cfg, xc_spec, unit, charge, spin, cart,
         mode = "native"
     if mode not in {"native", "jax"}:
         raise ValueError("integral_backend must be 'native'/'cpu' or 'jax'; the external GPU backend was removed")
+    rsh = rsh_preset(xc_spec)
+    if rsh is not None and (mode != "native" or cfg.jk_backend != "full"):
+        raise NotImplementedError("Range-separated wb97xd requires native full ERI assembly.")
     if grid_ao_backend != "jax":
         raise ValueError("Only grid_ao_backend='jax' is supported")
     if geometry_grad_policy not in {"analytic", "error", "zero"}:
@@ -59,13 +63,17 @@ def _build_common(*, atom, basis, cfg, xc_spec, unit, charge, spin, cart,
     if mol_kwargs:
         raise TypeError(f"Unsupported molecular options: {', '.join(sorted(mol_kwargs))}")
     spec = atom if isinstance(atom, MoleculeSpec) else parse_molecule_spec(atom, unit=unit, charge=charge, spin=spin)
-    laplacian = xc_type(xc_spec) == "MGGA"
-    needs_grid = not (xc_type(xc_spec) == "HF" and np.any(np.asarray(spec.charges) == 0))
+    laplacian = xc_type(local_xc_spec(xc_spec)) == "MGGA"
+    needs_grid = not (xc_type(local_xc_spec(xc_spec)) == "HF" and np.any(np.asarray(spec.charges) == 0))
     context = _prepare_basis_grid_context(spec=spec, basis=basis, max_l=max_l,
         grids_level=grids_level, precompute_eri_groups=(mode == "jax"),
         needs_ao_laplacian=laplacian, needs_grid=needs_grid)
     if context.geometry_is_traced and geometry_grad_policy == "error":
         raise NotImplementedError("Geometry gradients are disabled by geometry_grad_policy='error'")
+    eri_lr = dispersion_energy = None
+    if rsh is not None:
+        from gradscf.dft.dispersion import wb97xd_dispersion_energy
+        dispersion_energy = wb97xd_dispersion_energy(spec.symbols, spec.coords_bohr)
     if mode == "native":
         top, params = prepare_basis(spec, basis, cart=True)
         if geometry_grad_policy == "zero":
@@ -76,7 +84,10 @@ def _build_common(*, atom, basis, cfg, xc_spec, unit, charge, spin, cart,
         h = plan.evaluate("kinetic", params)+plan.evaluate("nuclear", params)
         full_eri=pair=factors=None
         auxiliary=getattr(cfg,'auxbasis',None)
-        if cfg.jk_backend=='direct':
+        if rsh is not None:
+            full_eri = plan.evaluate("eri", params)
+            eri_lr = plan.evaluate("eri", params, omega=rsh.default_omega)
+        elif cfg.jk_backend=='direct':
             if context.geometry_is_traced:raise NotImplementedError('Native direct-SCF geometry AD is not implemented.')
         elif cfg.jk_backend=='df' and auxiliary is not None:
             if context.geometry_is_traced:raise NotImplementedError('Native auxiliary-integral geometry AD is not implemented.')
@@ -107,7 +118,7 @@ def _build_common(*, atom, basis, cfg, xc_spec, unit, charge, spin, cart,
         factorize = eri_pair_matrix_to_df_factors_traceable if context.geometry_is_traced else eri_pair_matrix_to_df_factors
         factors = factorize(pair, nao=s.shape[0], tol=cfg.df_tol, max_rank=cfg.df_max_rank)
     ao, ao_deriv1, ao_laplacian = _grid_ao_payload(context, needs_ao_laplacian=laplacian)
-    return spec, context, s, h, full_eri, pair, factors, dipole, ao, ao_deriv1, ao_laplacian, mode
+    return spec, context, s, h, full_eri, pair, factors, dipole, ao, ao_deriv1, ao_laplacian, mode, eri_lr, dispersion_energy
 
 
 def build_rks_integral_inputs(*, atom, basis, config=None, xc_spec=None,
@@ -128,7 +139,7 @@ def build_rks_integral_inputs(*, atom, basis, config=None, xc_spec=None,
         include_dipole=include_dipole_integrals,precompile_eri=precompile_eri,
         precompile_eri_chunk_size=precompile_eri_chunk_size,precompiler=_precompile_eri_kernels,
         chkfile=chkfile,sap_basis=init_guess_sap_basis,chkfile_project=init_guess_chkfile_project,mol_kwargs=mol_kwargs)
-    spec,ctx,s,h,eri,pair,factors,dipole,ao,dao,lap,mode=values
+    spec,ctx,s,h,eri,pair,factors,dipole,ao,dao,lap,mode,eri_lr,dispersion_energy=values
     initial = restricted_initial_guess(init_guess=init_guess,dtype=h.dtype)
     nelectron = int(np.asarray(spec.charges).sum())-int(spec.charge)
     direct=None
@@ -138,13 +149,13 @@ def build_rks_integral_inputs(*, atom, basis, config=None, xc_spec=None,
             from gradscf.integrals.backends.native.jk import NativeDirectBasis
             top,parameters=prepare_basis(spec,basis,cart=True)
             direct=NativeDirectBasis(make_plan(top),parameters)
-    return RKSIntegralInputs(basis=ctx.basis,overlap=s,hcore=h,eri=None,
+    return RKSIntegralInputs(basis=ctx.basis,overlap=s,hcore=h,eri=eri if eri_lr is not None else None,
         eri_pair_matrix=pair if cfg.jk_backend == "full" else None,df_factors=factors,
         direct_basis=direct,nelectron=nelectron,
         nuclear_repulsion=spec.nuclear_repulsion,coords=ctx.coords,grid_weights=ctx.grid_weights,
         ao=ao,ao_deriv1=dao,ao_laplacian=lap,dipole_integrals=dipole,init_density=initial.density,
         molecule_charge=int(spec.charge),geometry_is_traced=ctx.geometry_is_traced,
-        integral_backend=mode,grid_ao_backend="jax")
+        integral_backend=mode,grid_ao_backend="jax",eri_lr=eri_lr,dispersion_energy=dispersion_energy)
 
 
 def build_uks_integral_inputs(*, atom, basis, config=None, xc_spec=None,
@@ -163,13 +174,13 @@ def build_uks_integral_inputs(*, atom, basis, config=None, xc_spec=None,
         include_dipole=True,precompile_eri=precompile_eri,precompile_eri_chunk_size=precompile_eri_chunk_size,
         precompiler=_precompile_eri_kernels,chkfile=chkfile,sap_basis=init_guess_sap_basis,
         chkfile_project=init_guess_chkfile_project,mol_kwargs=mol_kwargs)
-    spec,ctx,s,h,eri,pair,factors,dipole,ao,dao,lap,mode=values
+    spec,ctx,s,h,eri,pair,factors,dipole,ao,dao,lap,mode,eri_lr,dispersion_energy=values
     initial=unrestricted_initial_guess(init_guess=init_guess,dtype=h.dtype)
     total=int(np.asarray(spec.charges).sum())-int(spec.charge)
     nalpha,nbeta=_unrestricted_spin_electron_counts(total,int(spec.spin))
     if cfg.jk_backend == "df":
         eri=jnp.zeros((0,0,0,0),dtype=h.dtype)
-    elif mode=='native':
+    elif mode=='native' and eri_lr is None:
         eri=pair
     elif eri is None:
         eri=eri_tensor(ctx.basis)
@@ -178,6 +189,6 @@ def build_uks_integral_inputs(*, atom, basis, config=None, xc_spec=None,
         coords=ctx.coords,grid_weights=ctx.grid_weights,ao=ao,ao_deriv1=dao,ao_laplacian=lap,
         dipole_integrals=dipole,init_density_alpha=initial.density_alpha,init_density_beta=initial.density_beta,
         total_electrons=total,molecule_charge=int(spec.charge),geometry_is_traced=ctx.geometry_is_traced,
-        integral_backend=mode,grid_ao_backend="jax")
+        integral_backend=mode,grid_ao_backend="jax",eri_lr=eri_lr,dispersion_energy=dispersion_energy)
 
 __all__ = ["RKSIntegralInputs", "UKSIntegralInputs", "build_rks_integral_inputs", "build_uks_integral_inputs"]

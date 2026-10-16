@@ -1,8 +1,10 @@
-"""Harmonic one-phonon loss/gain spectra with explicit input strengths.
+"""Harmonic spectra, mode charges and the polar long-wavelength limit.
 
 These are kinematic spectral utilities, not a calibrated electron scattering
 cross section or a multiple-scattering EELS simulation. Energies are Hartree,
 temperatures are kelvin, coordinates are bohr, and momenta are inverse bohr.
+The infrared kernels consume supplied Born charges and electronic dielectric
+tensors; they do not calculate electronic response or finite-q polar IFCs.
 All array kernels support JIT and differentiation, including value guards.
 """
 
@@ -139,4 +141,128 @@ def mode_scattering_weights(momentum_cartesian, coordinates_bohr, modes,
     return jnp.real(amplitude * amplitude.conj())
 
 
-__all__ = ["OnePhononSpectrum", "one_phonon_spectrum", "mode_scattering_weights"]
+def _born_charges(born_charges):
+    born = _real_finite(born_charges, "born_charges")
+    if born.ndim != 3 or born.shape[1:] != (3, 3) or not born.shape[0]:
+        raise ValueError("born_charges must have shape (natom,3,3)")
+    return born
+
+
+def _volume(volume):
+    volume = _real_finite(volume, "volume")
+    if volume.ndim:
+        raise ValueError("volume must be scalar in bohr**3")
+    _require(volume > 0, "volume must be strictly positive")
+    return volume
+
+
+def nonanalytic_force_constants(direction, born_charges, dielectric, volume):
+    r"""Unweighted Gamma directional correction in Eh/bohr**2.
+
+    ``born_charges[a,i,j] = volume * dP_i/dR_aj`` is in units of e;
+    ``dielectric`` is the real symmetric positive electronic epsilon_infinity.
+    ``direction`` is a nonzero Cartesian reciprocal-space direction, not a
+    fractional q point. Its magnitude and sign do not change the result.
+    ``volume`` is the primitive-cell volume in bohr**3.
+
+    Phi_NA[aj,bk] = 4*pi/V * (q_i Z_aij)(q_l Z_blk)/(q.epsilon.q).
+
+    Add this matrix to the short-circuit Gamma force constants, then use the
+    existing mass weighting/mode solver. No masses enter this unweighted
+    correction. Raw Born charge-sum defects remain: no neutrality, ASR or
+    symmetry projection is applied. Validate these separately before making
+    a material-level LO-TO claim. This q->0 limit does not implement the
+    dipolar subtraction/restoration needed for finite-q IFC interpolation.
+
+    Convention and formula: Gonze and Lee, Phys. Rev. B 55, 10355 (1997),
+    https://doi.org/10.1103/PhysRevB.55.10355; also
+    https://phonopy.github.io/phonopy/formulation.html#non-analytical-term-correction.
+    """
+    born = _born_charges(born_charges)
+    q = _real_finite(direction, "direction")
+    epsilon = _real_finite(dielectric, "dielectric")
+    volume = _volume(volume)
+    if q.shape != (3,) or epsilon.shape != (3, 3):
+        raise ValueError("direction and dielectric must have shape (3,) and (3,3)")
+    _require(jnp.linalg.norm(q) > 0, "direction must be nonzero")
+    _require(jnp.allclose(epsilon, epsilon.T, rtol=1e-10, atol=1e-12),
+             "dielectric must be symmetric")
+    _require(jnp.all(jnp.linalg.eigvalsh(epsilon) > 0),
+             "dielectric must be positive definite")
+    q = q / jnp.linalg.norm(q)
+    charge = jnp.einsum("i,aij->aj", q, born).reshape(-1)
+    return (4 * jnp.pi / volume) * jnp.outer(charge, charge) / (q @ epsilon @ q)
+
+
+def mode_effective_charges(born_charges, modes, masses_amu):
+    r"""Gamma mode charges Z_mode[i,nu] in e/sqrt(electron_mass).
+
+    Contract Z_mode[i,nu] = sum_aj Z[a,i,j] e[a,j,nu]/sqrt(M_a).
+    ``modes`` are orthonormal mass-weighted eigenvectors in columns, with
+    shape (3*natom,nmode) or (natom,3,nmode). ``masses_amu`` contains one
+    positive mass per atom and is converted to electron masses internally.
+    A normalized subset of modes is allowed. Frequencies do not enter this
+    contraction; callers must select stable optical modes for dielectric
+    spectra. Nonneutral charge tensors retain nonzero translation strengths.
+
+    Complex mode gauges are allowed. Individual strengths within a degenerate
+    group depend on the basis; the sum of Z_mode Z_mode^dagger over a complete
+    group is invariant. No new eigenvector derivative rule is introduced.
+    """
+    born = _born_charges(born_charges)
+    masses = _real_finite(masses_amu, "masses_amu")
+    vectors = jnp.asarray(modes)
+    natom = born.shape[0]
+    if masses.shape != (natom,):
+        raise ValueError("masses_amu must have shape (natom,)")
+    if vectors.ndim == 3 and vectors.shape[:2] == (natom, 3):
+        vectors = vectors.reshape(3 * natom, -1)
+    if (vectors.ndim != 2 or vectors.shape[0] != 3 * natom
+            or not 0 < vectors.shape[1] <= 3 * natom):
+        raise ValueError("modes must have shape (3*natom,nmode) or (natom,3,nmode)")
+    _require(jnp.all(masses > 0), "masses_amu must be strictly positive")
+    _require(jnp.all(jnp.isfinite(vectors)), "modes must be finite")
+    _require(jnp.allclose(vectors.conj().T @ vectors, jnp.eye(vectors.shape[1]),
+                         rtol=1e-8, atol=1e-10), "modes must be orthonormal")
+    displacement = vectors.reshape(natom, 3, -1) / jnp.sqrt(masses[:, None, None] * _AMU_TO_ELECTRON_MASS)
+    return jnp.einsum("aij,ajm->im", born, displacement)
+
+
+def ionic_dielectric(energies, mode_charges, energy_grid, *, volume, broadening):
+    r"""Retarded ionic contribution Delta epsilon(omega), dimensionless.
+
+    Delta epsilon_ij(w) = 4*pi/V sum_n Z_in Z_jn^*/[w_n**2-(w+i*eta)**2].
+
+    ``energies`` contains positive transverse optical hbar*omega in Eh;
+    ``mode_charges`` has shape (3,nmode), in e/sqrt(electron_mass), as returned
+    by ``mode_effective_charges``. ``energy_grid`` is a real vector in Eh.
+    ``broadening`` is a nonnegative scalar eta in Eh; zero is allowed only
+    away from poles (including the exact static limit). No imaginary-mode
+    clipping, acoustic-mode filtering, weight renormalization or electronic
+    background is applied. Add epsilon_infinity to obtain total epsilon.
+
+    This is the harmonic displacement response to a macroscopic transverse
+    field, not a photon absorption cross section or a computed lifetime.
+    Positive eta gives nonnegative diagonal loss at positive frequency.
+    At finite eta the zero-frequency value includes that resolution shift;
+    use eta=0 for the undamped static dielectric tensor and LST identities.
+    """
+    omega = _real_finite(energies, "energies")
+    charges = jnp.asarray(mode_charges)
+    grid = _real_finite(energy_grid, "energy_grid")
+    volume = _volume(volume)
+    eta = _real_finite(broadening, "broadening")
+    if omega.ndim != 1 or not omega.size or charges.shape != (3, omega.size):
+        raise ValueError("energies and mode_charges must have shape (nmode,) and (3,nmode)")
+    if grid.ndim != 1 or not grid.size or eta.ndim:
+        raise ValueError("energy_grid must be a nonempty vector and broadening a scalar")
+    _require(jnp.all(omega > 0), "energies must be strictly positive")
+    _require(jnp.all(jnp.isfinite(charges)), "mode_charges must be finite")
+    _require(eta >= 0, "broadening must be nonnegative")
+    denominator = omega[None, :]**2 - (grid[:, None] + 1j * eta)**2
+    _require(jnp.all(jnp.abs(denominator) > 0), "zero broadening is undefined at a mode pole")
+    return 4 * jnp.pi / volume * jnp.einsum("im,jm,wm->wij", charges, charges.conj(), 1 / denominator)
+
+
+__all__ = ["OnePhononSpectrum", "one_phonon_spectrum", "mode_scattering_weights",
+           "nonanalytic_force_constants", "mode_effective_charges", "ionic_dielectric"]

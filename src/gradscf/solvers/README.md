@@ -118,11 +118,19 @@ Linear `maxiter` counts GMRES restart cycles, not individual Krylov steps.
   tiny RHS are handled by scaling inside the opaque numerical solve. Forward
   and transposed solves are independently checked using the true residual.
 - `solve_hermitian` has one explicit `EigenResponseConfig`: `eigenvalues`
-  differentiates isolated energies with stopped vectors; `eigenpairs` also
+  differentiates isolated energies while returning stopped diagnostic vectors; `eigenpairs` also
   supplies isolated vector response; `subspace` returns the projector action
   on optional probes and the selected energy sum, including internal degeneracy.
-  All targets share one forward solve and one Sylvester response core (rank one
-  for an individual state). They promise first-order JVP/VJP only.
+  All targets share one forward solve and one implicit invariant-space response
+  core (rank one for an individual state). Its first tangent is the projected
+  Sylvester equation; the nonlinear local residual preserves nested response.
+  Isolated energies and invariant cluster observables have small-matrix
+  second/third/fourth-order tests, including exact internal degeneracy. This
+  does not extend the derivative contract of RPA, non-Hermitian EOM, or every
+  downstream electronic-structure method.
+  Forward values/vectors and first energy derivatives do not invoke a response
+  solve. A frame derivative or second energy derivative activates the implicit
+  root and its configured linear-solver capacity/convergence checks.
 - Subspace requests expose `projection` and `eigenvalue_sum`; their `values` and
   `vectors` are None. Stopped `raw_*` fields include guard diagnostics. Individual
   state requests check all internal and boundary gaps; subspace requests check
@@ -134,7 +142,7 @@ Linear `maxiter` counts GMRES restart cycles, not individual Krylov steps.
   the explicit `response` argument is omitted. Mixing nondefault legacy controls
   with an explicit response raises an error. No independent projector or
   isolated-vector AD entry point/forwarding module remains.
-- Failed eigenpairs remain inspectable; their derivatives are NaN. Failed
+- Failed eigenpairs remain inspectable; their first derivatives are NaN. Failed
   linear or adjoint solves return NaNs. Residual predicates stay inside opaque
   linear solves so that the tangent map can still be transposed correctly.
 - Legacy RPA energy response uses the indefinite metric. The real structured
@@ -161,6 +169,11 @@ Linear `maxiter` counts GMRES restart cycles, not individual Krylov steps.
   when AD is requested and failure produces NaN. Dense dispatch reuses
   `solve_stable_rpa` and enforces its dimension cap. See the
   [metric derivation and limitations](../bse/MATRIX_FREE_BSE.md).
+- Always check `response_valid` and convergence before nested differentiation.
+  Differentiating a structurally constant invalid tangent can yield zero at
+  higher order; a finite higher derivative alone is not a validity certificate.
+  This preserves the existing invalid first-response policy without inventing
+  derivatives for cut clusters or nonconverged eigenstates.
 - `regularized_eigh` preserves the existing SCF gap-broadening policy near
   degeneracy. `inverse_sqrt` differentiates the matrix function through a
   Sylvester equation at repeated positive eigenvalues. Existing SCF second,
@@ -170,6 +183,18 @@ Linear `maxiter` counts GMRES restart cycles, not individual Krylov steps.
   its actual unrolled trajectory; domain-level policy chooses between implicit
   and unrolled modes. Regularization changes the response problem and remains
   explicit rather than a silent numerical fallback.
+- `stationary_value(function, solution, parameters)` evaluates a variational
+  scalar objective with its envelope derivative. The caller supplies a
+  stationary coordinate chart: if `dE/dz=0`, then `dE/dp=partial E/partial p`.
+  The state is still differentiable inside that partial derivative, so higher
+  response includes `E_pz dz/dp`. Constraints depending on p must be in the
+  callback; raw constrained AO orbitals/densities are not stationary coordinates.
+  Checked implicit orbital SCF applies this rule only to the final total energy,
+  keeping overlap transport/Pulay terms in the callback. It avoids a spurious
+  first-energy adjoint driven by numerical stationarity noise near a zero mode.
+  Optimizer callbacks, density/orbital response, explicit trajectories and
+  unchecked implicit behavior are unchanged. Higher or nonvariational state
+  observables still require successful, physically defined response solves.
 
 TD-SCF signatures, thresholds, positive-root selection and tuple layouts are
 preserved. Unified Hermitian guesses also explore disconnected invariant sectors
@@ -193,8 +218,9 @@ python -m pytest -q tests/solvers tests/ci tests/test_tddft_eigensolvers.py \
   tests/test_scf_higher_order.py tests/test_scf_implicit_and_xc_energy.py
 ```
 
-Biorthogonal non-Hermitian vector response,
-variable-metric subspace response, and higher-order projector derivatives are future work.
+Biorthogonal non-Hermitian vector response and variable-metric subspace
+response remain future work. Hermitian higher response assumes a fixed real
+Euclidean metric, fixed selected rank and a resolved external spectral gap.
 The present RPA implementation is not a generic non-Hermitian EOM solver.
 GPU behavior has not been validated in this migration.
 

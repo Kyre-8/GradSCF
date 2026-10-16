@@ -14,6 +14,27 @@ from gradscf.integrals.basis import CartesianBasis
 _DOUBLE_FACTORIAL_LOOKUP = (1.0, 1.0, 3.0, 15.0)
 
 
+@jax.custom_jvp
+def _coordinate_power(base: Array, power: Array) -> Array:
+    """Exact nonnegative integer powers with polynomial AD at zero.
+
+    Angular powers are discrete integers. Dynamic ``base**power`` can form
+    ``0 * base**-1`` when differentiating a linear monomial twice at zero.
+    Clamping the lowered integer power avoids that undefined intermediate;
+    the integer prefactor gives the exact zero derivative at every order.
+    """
+    return base**power
+
+
+@_coordinate_power.defjvp
+def _coordinate_power_jvp(primals, tangents):
+    base, power = primals
+    base_tangent, _ = tangents
+    value = _coordinate_power(base, power)
+    lowered = _coordinate_power(base, jnp.maximum(power - 1, 0))
+    return value, power.astype(base.dtype) * lowered * base_tangent
+
+
 def _as_device_array(value, dtype=None):
     if isinstance(value, jax.core.Tracer):
         return jnp.asarray(value, dtype=dtype)
@@ -95,21 +116,21 @@ def _evaluate_cartesian_ao_kernel(
     exp_term = jnp.exp(-exponents[None, :, :] * r2)
     coeff_pref = coefficients[None, :, :] * norms[None, :, :] * prim_mask
 
-    x_l = dx**lx
-    y_l = dy**ly
-    z_l = dz**lz
+    x_l = _coordinate_power(dx, lx)
+    y_l = _coordinate_power(dy, ly)
+    z_l = _coordinate_power(dz, lz)
     xyz = x_l * y_l * z_l
     primitive_values = coeff_pref * xyz * exp_term
     ao = jnp.sum(primitive_values, axis=-1)
     if deriv == 0:
         return ao
 
-    x_lm1 = dx ** jnp.maximum(lx - 1, 0)
-    y_lm1 = dy ** jnp.maximum(ly - 1, 0)
-    z_lm1 = dz ** jnp.maximum(lz - 1, 0)
-    x_lp1 = dx ** (lx + 1)
-    y_lp1 = dy ** (ly + 1)
-    z_lp1 = dz ** (lz + 1)
+    x_lm1 = _coordinate_power(dx, jnp.maximum(lx - 1, 0))
+    y_lm1 = _coordinate_power(dy, jnp.maximum(ly - 1, 0))
+    z_lm1 = _coordinate_power(dz, jnp.maximum(lz - 1, 0))
+    x_lp1 = _coordinate_power(dx, lx + 1)
+    y_lp1 = _coordinate_power(dy, ly + 1)
+    z_lp1 = _coordinate_power(dz, lz + 1)
 
     d_primitive_x = coeff_pref * exp_term * (
         lx.astype(dtype) * x_lm1 * y_l * z_l
@@ -133,9 +154,9 @@ def _evaluate_cartesian_ao_kernel(
     lx_minus_two = jnp.maximum(lx - 2, 0)
     ly_minus_two = jnp.maximum(ly - 2, 0)
     lz_minus_two = jnp.maximum(lz - 2, 0)
-    x_lm2 = dx**lx_minus_two
-    y_lm2 = dy**ly_minus_two
-    z_lm2 = dz**lz_minus_two
+    x_lm2 = _coordinate_power(dx, lx_minus_two)
+    y_lm2 = _coordinate_power(dy, ly_minus_two)
+    z_lm2 = _coordinate_power(dz, lz_minus_two)
 
     lx_f = lx.astype(dtype)
     ly_f = ly.astype(dtype)

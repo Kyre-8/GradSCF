@@ -36,6 +36,7 @@ References
 
 from __future__ import annotations
 
+from numbers import Integral
 import numpy as np
 import jax.numpy as jnp
 from jax.lax import Precision
@@ -64,6 +65,8 @@ def gamma_product_factors(inputs, mo_coeff: Array, *, mesh: tuple[int, int, int]
     ``(mi|jn) = sum_G conj(B_G(i,m)) B_G(j,n)`` (the pair indices
     coincide for real Gamma orbitals).
     """
+    if getattr(inputs, "boundary", None) is not None:
+        raise NotImplementedError("Periodic GW product factors require three-dimensional inputs")
     ao = jnp.asarray(inputs.ao[0, 0])  # (ngrid, nao), real at Gamma
     coeff = jnp.asarray(mo_coeff)
     gvectors = jnp.asarray(inputs.gvectors)
@@ -85,7 +88,95 @@ def gamma_product_factors(inputs, mo_coeff: Array, *, mesh: tuple[int, int, int]
     return (scale[:, None, None] * pairs_g).astype(jnp.complex128)
 
 
-__all__ = ["gamma_product_factors", "kpoint_product_factors"]
+__all__ = ["gamma_product_factors", "kpoint_product_factors",
+           "kpoint_product_factor_builder", "kpoint_transition_block"]
+
+
+def kpoint_product_factor_builder(inputs, mo_coeff_k, *, mesh, momentum_table,
+                                  max_block_bytes=None):
+    """Cache periodic orbital values and build only requested (q,ki,m,n) pairs.
+
+    The returned callable accepts one static q index, ``pairs`` of shape
+    (npair,2), and optional ki indices. Its result has shape
+    (nki,ngrid,npair). The same G-q kernel and reciprocal-wrap phase are used
+    by the legacy full-factor wrapper. No q-dependent pair block is cached.
+    max_block_bytes bounds the estimated pair/FFT/output/phase arrays before
+    their allocation; it is an array bound, not a process-RSS guarantee.
+    """
+    if getattr(inputs, "boundary", None) is not None:
+        raise NotImplementedError("Periodic GW product factors require three-dimensional inputs")
+    ao, coeff = jnp.asarray(inputs.ao[:, 0]), jnp.asarray(mo_coeff_k)
+    if ao.ndim != 3 or coeff.ndim != 3 or coeff.shape[:2] != (ao.shape[0], ao.shape[2]):
+        raise ValueError("Use AO values (nk,ngrid,nao) and coefficients (nk,nao,nmo)")
+    nk, ngrid, _ = ao.shape
+    nmo = coeff.shape[-1]
+    mesh = tuple(int(m) for m in mesh)
+    if len(mesh) != 3 or min(mesh) < 1 or int(np.prod(mesh)) != ngrid:
+        raise ValueError("The FFT mesh must match the AO grid")
+    table = np.asarray(momentum_table)
+    if (table.shape != (nk, nk) or not np.issubdtype(table.dtype, np.integer)
+            or np.any(table < 0) or np.any(table >= nk)
+            or not np.all(np.sort(table, axis=0) == np.arange(nk)[:, None])):
+        raise ValueError("Each momentum-table column must be a permutation of all k points")
+    if max_block_bytes is not None and (not isinstance(max_block_bytes, Integral) or max_block_bytes < 1):
+        raise ValueError("max_block_bytes must be a positive integer or None")
+    psi = jnp.einsum("kgp,kpm->kgm", ao, coeff, precision=Precision.HIGHEST)
+    kpoints, gvectors, coords = map(jnp.asarray, (inputs.kpoints, inputs.gvectors, inputs.coords))
+    volume = float(jnp.asarray(inputs.weights[0]))*ngrid
+
+    def build(q, *, pairs, k_indices=None):
+        if not isinstance(q, Integral) or not 0 <= q < nk:
+            raise ValueError("q must be an in-range momentum-table index")
+        pairs = np.asarray(pairs)
+        indices = np.arange(nk) if k_indices is None else np.asarray(k_indices)
+        if (pairs.ndim != 2 or pairs.shape[1] != 2 or not len(pairs)
+                or not np.issubdtype(pairs.dtype, np.integer)
+                or np.any(pairs < 0) or np.any(pairs >= nmo)):
+            raise ValueError("pairs must be a nonempty integer (npair,2) orbital-index array")
+        if (indices.ndim != 1 or not len(indices) or not np.issubdtype(indices.dtype, np.integer)
+                or np.any(indices < 0) or np.any(indices >= nk)):
+            raise ValueError("k_indices must be a nonempty in-range integer vector")
+        estimate = 16*ngrid*(8*len(indices)*len(pairs)+len(indices)+1)
+        if max_block_bytes is not None and estimate > max_block_bytes:
+            raise ValueError(f"Requested product block exceeds max_block_bytes: {estimate} bytes")
+        partner = table[indices, q]
+        left = psi[jnp.asarray(indices)][:, :, jnp.asarray(pairs[:, 0])]
+        right = psi[jnp.asarray(partner)][:, :, jnp.asarray(pairs[:, 1])]
+        q_cart = kpoints[q]
+        wrap = kpoints[jnp.asarray(partner)]-kpoints[jnp.asarray(indices)]+q_cart
+        phase = jnp.exp(1j*(wrap@coords.T))
+        values = left.conj()*right*phase[:, :, None]
+        transformed = jnp.fft.fftn(values.reshape(len(indices), *mesh, len(pairs)),
+                                   axes=(1, 2, 3)).reshape(len(indices), ngrid, len(pairs))
+        scale = jnp.sqrt(volume*coulomb_kernel(gvectors-q_cart))/ngrid
+        return (scale[None, :, None]*transformed).astype(jnp.complex128)
+    return build
+
+
+def kpoint_transition_block(build, mo_energy_k, nocc, momentum_table, q):
+    """One complete restricted OV space for shared periodic GW/BSE screening.
+
+    Returns factors B(ngrid,nk*nocc*nvir), gram=B^dagger B and unweighted
+    e_occ(ki)-e_virt(ka), ordered (ki,i,a), ka=table[ki,q]. Frequency, spin
+    and 1/Nk weights belong to the caller. Use B to project selected output
+    pairs, then discard it before advancing q; this helper does not create
+    an all-q cache or a QP/optical-window restriction. Callers must budget
+    the complete OV factor/Gram storage, in addition to the builder's block
+    array bound.
+    """
+    energy = jnp.asarray(mo_energy_k)
+    if energy.ndim != 2 or not isinstance(nocc, Integral) or not 0 < nocc < energy.shape[1]:
+        raise ValueError("Use a k-resolved spectrum with nonempty occupied and virtual spaces")
+    nk, nmo = energy.shape
+    table = np.asarray(momentum_table)
+    if table.shape != (nk, nk) or not isinstance(q, Integral) or not 0 <= q < nk:
+        raise ValueError("Transition momentum table/q does not match the spectrum")
+    pairs = np.array([(i, a) for i in range(nocc) for a in range(nocc, nmo)], dtype=int)
+    columns = [build(q, pairs=pairs, k_indices=[ki])[0] for ki in range(nk)]
+    factors = jnp.concatenate(columns, axis=1)
+    differences = jnp.concatenate([(energy[ki, :nocc, None]
+        -energy[int(table[ki, q]), None, nocc:]).reshape(-1) for ki in range(nk)])
+    return dict(factors=factors, gram=factors.conj().T@factors, differences=differences)
 
 
 def kpoint_product_factors(
@@ -125,32 +216,12 @@ def kpoint_product_factors(
     List of length ``nk``; entry ``q`` has shape ``(nk, ngrid, nmo, nmo)``
     (index: ki, G, m, n), complex128.
     """
-    ao = jnp.asarray(inputs.ao[:, 0])  # (nk, ngrid, nao), periodic parts u_k
-    coeff_k = jnp.asarray(mo_coeff_k)
-    gvectors = jnp.asarray(inputs.gvectors)
-    kpoints = jnp.asarray(inputs.kpoints)
-    nk, ngrid, nao = ao.shape
-    mesh = tuple(int(m) for m in mesh)
-    if int(np.prod(mesh)) != ngrid:
-        raise ValueError(f"mesh {mesh} does not match the AO grid size {ngrid}")
-    volume = float(jnp.asarray(inputs.weights[0])) * ngrid
-    nmo = coeff_k.shape[-1]
-
-    psi_k = jnp.einsum("kgp,kpm->kgm", ao, coeff_k, precision=Precision.HIGHEST)
-    table = np.asarray(momentum_table)
-    out = []
-    for q in range(nk):
-        ka = table[:, q]  # partner index per ki
-        q_cart = kpoints[q]
-        kernel = coulomb_kernel(gvectors - q_cart)  # canonical transfer -q
-        scale = jnp.sqrt(volume * kernel) / ngrid
-        # pairs[ki] = conj(u_ki,m) u_ka,n on the grid
-        pairs = psi_k.conj()[:, :, :, None] * psi_k[jnp.asarray(ka)][:, :, None, :]
-        wrap = kpoints[jnp.asarray(ka)] - kpoints + q_cart
-        phase = jnp.exp(1j * (wrap @ jnp.asarray(inputs.coords).T))
-        pairs = pairs * phase[:, :, None, None]
-        pairs_g = jnp.fft.fftn(
-            pairs.reshape(nk, *mesh, nmo, nmo), axes=(1, 2, 3)
-        ).reshape(nk, ngrid, nmo, nmo)
-        out.append((scale[None, :, None, None] * pairs_g).astype(jnp.complex128))
-    return out
+    if getattr(inputs, "boundary", None) is not None:
+        raise NotImplementedError("Periodic GW product factors require three-dimensional inputs")
+    nk, _, ngrid, _ = jnp.asarray(inputs.ao).shape
+    coefficients = jnp.asarray(mo_coeff_k)
+    nmo = coefficients.shape[-1]
+    build = kpoint_product_factor_builder(inputs, coefficients, mesh=mesh,
+                                          momentum_table=momentum_table)
+    pairs = np.array([(m, n) for m in range(nmo) for n in range(nmo)], dtype=int)
+    return [build(q, pairs=pairs).reshape(nk, ngrid, nmo, nmo) for q in range(nk)]

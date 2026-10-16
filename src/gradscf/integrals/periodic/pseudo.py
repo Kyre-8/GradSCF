@@ -30,14 +30,16 @@ def projector(vectors,l,index,radius):
     return (-1j)**l*solid_harmonics(vectors,l)*radial[:,None]
 
 
-def local_potential(gvectors,coords,pseudopotentials):
-    g2=jnp.sum(gvectors*gvectors,axis=1);coul=coulomb_kernel(gvectors)
+def local_potential(gvectors,coords,pseudopotentials,*,boundary=None):
+    g2=jnp.sum(gvectors*gvectors,axis=1);coul=coulomb_kernel(gvectors,boundary=boundary)
     potential=jnp.zeros(len(gvectors),dtype=complex)
     for pos,pp in zip(coords,pseudopotentials):
         charge=sum(pp[0]);radius=pp[1];coefs=pp[3];x=g2*radius**2
         polys=[jnp.ones_like(x),3-x,15-10*x+x*x,105-105*x+21*x*x-x**3]
         gaussian=(2*jnp.pi)**1.5*radius**3*jnp.exp(-x/2)*sum(c*p for c,p in zip(coefs,polys))
-        ionic=jnp.where(g2>0,-charge*coul*jnp.exp(-x/2),2*jnp.pi*charge*radius**2)
+        ionic=-charge*coul*jnp.exp(-x/2)
+        if boundary is None:
+            ionic=jnp.where(g2>0,ionic,2*jnp.pi*charge*radius**2)
         potential=potential+jnp.exp(-1j*gvectors@pos)*(ionic+gaussian)
     return potential
 

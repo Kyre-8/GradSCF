@@ -182,11 +182,12 @@ a complete nuclear response or force constant.
 Reuse the existing OFDFT energy `E(q,a)`, where `q` is the density amplitude or
 its Gaussian coefficients. With a fixed reference whitening map `q=B0*x`, define
 the physical electron count `N(x,a)` from the perturbed grid weights or overlap.
-For `eta=N0*mu`, the square residual is
+The state stores physical chemical potential `mu`; with fixed reference `N0`,
+the square residual is
 
 $$
 R=\begin{pmatrix}
-\nabla_xE-(\eta/N_0)\nabla_xN\\
+(\nabla_xE-\mu\nabla_xN)/N_0\\
 (N(x,a)-N_e(a))/N_0
 \end{pmatrix}.
 $$
@@ -196,6 +197,11 @@ a new Cholesky factor at every Taylor order; the physical metric and particle
 number remain differentiable. AD includes the kinetic-functional Hessian,
 Hartree kernel, and XC kernel. Existing kinetic and XC callbacks and their
 parameter PyTrees are reused without a separate functional implementation.
+Reference validity first checks the original raw stationarity components
+before division by `N0`. `Problem.residual`, response residual norms, and linear
+solver tolerances use the normalized equations above; `OFDFTResult.residual_norm`
+and its forward tolerance keep their original raw units. Neither full residual
+is a purely energy-unit quantity because the number constraint is dimensionless.
 
 ## Implemented scope and limits
 
@@ -203,6 +209,7 @@ parameter PyTrees are reused without a separate functional implementation.
 | --- | --- | --- |
 | Molecular RHF/RKS, real closed shell | AO potential and supplied input tangents | Requires jet-supported builders |
 | Periodic Gamma/k-point KS, fixed integer occupations | q=0, Hermitian AO potential and input tangents | Gamma HF potential path tested |
+| Periodic insulating full equal-weight k mesh | Berry Born charges and macroscopic static electric response via `dfpt.electric` | Disabled; separate nested-AD Maxwell/mixed tests cover a dimer and small H2 only |
 | Periodic HF/KS on a closed equal-weight k mesh | Finite-q electronic potential; integer or Fermi occupations | Not supported in a single q sector |
 | Periodic external `dft.Functional` | q=0; finite-q electronic potential requires `q_energy_fn` | Not supported in the finite-q sector |
 | Molecular Gaussian OFDFT | Potential and input tangents | Potential path tested |
@@ -232,11 +239,24 @@ provided; see [periodic foundations](../pbc/README.md).
 
 Atomic/Pulay response and small commensurate reference phonons are available
 through the separate [geometry adapter](ATOMIC_RESPONSE.md). Scalable native
-primitive-cell phonons, dynamical response, Berry-phase
-electric fields, Born charges, and a turnkey nuclear-Hessian driver are not
+primitive-cell phonons, dynamical response and a turnkey nuclear-Hessian driver are not
 provided here. No all-order geometry capability is implied. The KS chart stores
 full density matrices, so matrix-free linear algebra alone does not make this
 a large plane-wave production implementation.
+
+`from gradscf.dfpt.electric import born_problem, electric_problem` supplies
+fixed-cell zero-temperature Berry response for gapped integer occupations on
+a complete equal-weight k mesh. The first observes `dP/dR`; multiply by cell
+volume to obtain Born charges. The second observes `chi=dP/dE`, with
+`epsilon_inf=I+4*pi*chi`, from the electric enthalpy `E_KS-V E.P`. A Hermitian
+AO-potential perturbation is not a replacement for this macroscopic field.
+The checked reference and fixed local phase branch reuse the shared projector
+residual, occupied-frame construction and root/linear solvers. See the
+separate [LiH Born](../../../reproducibility/ad_showcase/P04_lih_born/README.md),
+[electric-field](../../../reproducibility/ad_showcase/P04_lih_dielectric/README.md)
+and [small mixed-response](../../../reproducibility/ad_showcase/P04_electric_mixed/README.md)
+records. Material convergence, general mixed response and Taylor-jet support
+are not implied; no density/charge/acoustic projection is applied.
 
 Invalid reference states and failed linear solves return `converged=False` and
 NaN response coefficients. Shape errors and unsupported facade/q choices raise

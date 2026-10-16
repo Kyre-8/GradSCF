@@ -132,6 +132,8 @@ def _array_signature(value):
 
 def reference_state_signature(source):
     """Fingerprint a validated eager post-HF input, including mutable arrays."""
+    from .rsh import reject_rsh_response
+    reject_rsh_response(source)
     if isinstance(source, UnrestrictedReference):
         return (source.nocc, tuple(_array_signature(a) for a in (*source.h1, *source.eri)),
                 _array_signature(source.nuclear_repulsion))
@@ -159,6 +161,8 @@ def as_reference(source):
     CI/CC and not a GW/BSE reference conversion. The source owns freshness,
     convergence and spin/representation validation.
     """
+    from .rsh import reject_rsh_response
+    reject_rsh_response(source)
     convert = getattr(source, 'to_reference', None)
     if callable(convert):
         return convert()

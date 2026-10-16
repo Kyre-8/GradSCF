@@ -13,9 +13,11 @@ import numpy as np
 
 from ._pytree import pytree_dataclass
 from ..solvers.nonlinear.minimize import solve_orbitals
+from ..solvers.nonlinear import stationary_value
 from .autodiff import SCFDifferentiationConfig, attach_scf_backward, normalize_scf_gradient_mode
 from .uks import UKSConfig, _raw_fock_and_energy_for_state
 from ..dft.libxc_jax.jax_libxc import hybrid_coeff, xc_type
+from .rsh import local_xc_spec, rsh_preset, validate_rsh_inputs
 
 
 @pytree_dataclass(static_fields=('optimizer_message', 'polishing_status', 'gradient_mode'))
@@ -112,32 +114,39 @@ def _problem_functions(method, xc_spec, collinear, occupation_rows, *, uks_confi
     if generalized:
         from .gks import GKSConfig, generalized_energy_and_fock
         cfg = GKSConfig(xc_spec=xc_spec, collinear=collinear)
-        def evaluate(density, args):
+        def evaluate(density, args, *, compute_potential=True):
             total, _, fock = generalized_energy_and_fock(density=density[0],
                 hcore=args['hcore'], eri=args['eri'], nuclear_repulsion=args['nuclear_repulsion'],
                 ao=args['ao'], ao_deriv1=args['ao_deriv1'], grid_weights=args['grid_weights'], config=cfg)
             return total, fock[None]
     else:
-        kind = xc_type(xc_spec)
+        kind = xc_type(local_xc_spec(xc_spec))
         if kind not in {'HF','LDA','GGA'}:
             raise NotImplementedError('Orbital minimization supports HF, LDA and GGA/global hybrids.')
         cfg = uks_config or UKSConfig(xc_spec=xc_spec)
-        def evaluate(density, args):
+        def evaluate(density, args, *, compute_potential=True):
             total, _, fa, fb = _raw_fock_and_energy_for_state(
                 density_a=density[0], density_b=density[1], ao=args['ao'],
                 ao_deriv1=args['ao_deriv1'], weights=args['grid_weights'], h=args['hcore'],
                 eri=args['eri'], df_factors=None, enuc=args['nuclear_repulsion'],
-                alpha=jnp.asarray(hybrid_coeff(xc_spec), dtype=density.dtype), cfg=cfg, xc_kind=kind)
-            return total, jnp.stack([fa,fb])
+                alpha=jnp.asarray(1. if rsh_preset(xc_spec) is not None else hybrid_coeff(xc_spec),
+                                  dtype=density.dtype), cfg=cfg, xc_kind=kind,
+                eri_lr=args.get('eri_lr'), dispersion_energy=args.get('dispersion_energy'),
+                compute_potential=compute_potential)
+            return total, jnp.stack([fa,fb]) if compute_potential else None
 
     def energy(angles, base, args):
-        return evaluate(density_from(rotate(angles, base)), args)[0]
+        return evaluate(density_from(rotate(angles, base)), args, compute_potential=False)[0]
     return dimension, rotate, density_from, evaluate, energy
 
 
 def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
               grid_weights, mo_coeff, mo_occ, xc_spec, collinear, max_iterations,
-              gradient_tolerance, gradient_mode, differentiation, orthonormalize_initial):
+              gradient_tolerance, gradient_mode, differentiation, orthonormalize_initial,
+              eri_lr=None, dispersion_energy=None):
+    rsh = validate_rsh_inputs(xc_spec, eri, eri_lr, dispersion_energy)
+    if rsh is not None and method == 'gks':
+        raise NotImplementedError('Range-separated GKS orbital minimization is not supported.')
     if max_iterations < 1 or gradient_tolerance <= 0:
         raise ValueError('Optimizer iterations and gradient tolerance must be positive.')
     config = differentiation or SCFDifferentiationConfig(mode=gradient_mode or 'implicit')
@@ -168,6 +177,8 @@ def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
         metric, coeff = s, c[None] if method=='roks' else c
     if not np.all(np.isfinite(occ)) or np.any((occ!=0.) & (occ!=1.)):
         raise ValueError('Orbital minimization requires integer occupations 0/1.')
+    if rsh is not None and method == 'roks' and not np.array_equal(occ[0], occ[1]):
+        raise NotImplementedError('Range-separated shared orbitals currently require closed-shell occupations.')
     for array in (coeff, metric):
         concrete = _concrete(array)
         if concrete is not None and not np.all(np.isfinite(concrete)):
@@ -182,6 +193,10 @@ def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
     args = dict(metric=metric, hcore=jnp.asarray(hcore), eri=jnp.asarray(eri),
         nuclear_repulsion=jnp.asarray(nuclear_repulsion), ao=jnp.asarray(ao),
         ao_deriv1=jnp.asarray(ao_deriv1), grid_weights=jnp.asarray(grid_weights))
+    if rsh is not None:
+        # Both arrays cross the custom implicit boundary as ordinary dynamic
+        # leaves, including their geometry/field dependence.
+        args.update(eri_lr=jnp.asarray(eri_lr), dispersion_energy=jnp.asarray(dispersion_energy))
     initial = _orthonormalize(coeff, metric)
     initial_energy = evaluate(density_from(initial),args)[0]
     solve_args, solve_coeff = args, initial
@@ -210,6 +225,12 @@ def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
     density = density_from(final)
     total, fock = evaluate(density,args)
     stationary &= jnp.isfinite(total)
+    if config.mode == 'implicit' and config.require_converged and dimension:
+        # The orbital-angle chart is stationary, not the raw AO coefficients.
+        # Its partial input derivative retains metric transport (Pulay terms).
+        # Only the reported energy uses this rule; state response and the
+        # optimizer/residual callbacks remain unchanged, including failures.
+        total = stationary_value(tangent_energy, angles, (args, anchor), converged=stationary)
     polishing_steps = sum((row['accepted'].astype(jnp.int32) for row in history), jnp.asarray(0))
     allowance = (jnp.max(jnp.stack([row['energy_allowance'] for row in history]))
                  if history else jnp.asarray(0., dtype=coeff.real.dtype))
@@ -228,7 +249,8 @@ def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
 
 def minimize_uks_from_integrals(*, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
     grid_weights, mo_coeff, mo_occ, xc_spec='hf', max_iterations=500, gradient_tolerance=1e-7,
-    gradient_mode=None, differentiation=None, orthonormalize_initial=False):
+    gradient_mode=None, differentiation=None, orthonormalize_initial=False,
+    eri_lr=None, dispersion_energy=None):
     """UHF/UKS fixed occupations; backward mode is ``implicit`` or ``explicit``.
 
     Supply static ``mo_occ`` of shape (2,nao), and float64 coefficients of shape
@@ -242,7 +264,8 @@ def minimize_uks_from_integrals(*, overlap, hcore, eri, nuclear_repulsion, ao, a
 
 def minimize_roks_from_integrals(*, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
     grid_weights, mo_coeff, mo_occ, xc_spec='hf', max_iterations=500, gradient_tolerance=1e-7,
-    gradient_mode=None, differentiation=None, orthonormalize_initial=False):
+    gradient_mode=None, differentiation=None, orthonormalize_initial=False,
+    eri_lr=None, dispersion_energy=None):
     """ROHF/ROKS shared spatial orbitals; see ``minimize_uks_from_integrals``."""
     return _minimize(method='roks', collinear='col', **locals())
 

@@ -309,3 +309,34 @@ See [the OH example](../../../examples/bse/oh_unrestricted.py) and
 closed-shell reduction, optical JVP/VJP, windows and QP provenance checks.
 The spin-resolved static kernel follows Monino and Loos, JCTC **17**,
 2852–2867 (2021), DOI: [10.1021/acs.jctc.1c00074](https://doi.org/10.1021/acs.jctc.1c00074).
+
+## Response linear-solver controls
+
+The forward eigenproblem and its differentiated state equations have separate
+convergence checks. `BSEConfig.response_config` accepts the existing shared
+`LinearSolverConfig`; the facade accepts the same keyword:
+
+```python
+from gradscf import bse
+from gradscf.solvers import LinearSolverConfig
+
+response = bse.BSE(
+    mygw, tda=False, solver="dense", nroots=6,
+    response_config=LinearSolverConfig(method="direct", rtol=1e-10, max_dense=256),
+).run()
+```
+
+This configures state response for both TDA and full BSE. `screening_config`
+continues to configure W, and `solver` continues to select the forward
+eigensolver. Omitting `response_config` preserves the previous checked GMRES
+settings. Its `max_dense` bounds the actual response equation: N for TDA or
+the dense stable-RPA reduction, and 2N for the structured RPA metric equation,
+where N is the optical excitation-space dimension. It is not multiplied by
+the number of requested roots.
+
+The same keyword is available on shared `solve_rpa` and `solve_stable_rpa`.
+No BSE-local linear solver is introduced. Both primal and transpose solves
+retain true-residual checks; failed solves still invalidate derivatives.
+Changing this setting on a completed facade invalidates its cached optical
+properties. A converged forward eigenpair and a valid isolated-root gap alone
+do not certify that the subsequently requested response solve will converge.

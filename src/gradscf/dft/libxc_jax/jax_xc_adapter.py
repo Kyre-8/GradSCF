@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import importlib
 from dataclasses import dataclass
+from functools import lru_cache, update_wrapper
+from types import FunctionType
 from typing import Any, Literal
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 
 class MissingJAXXCError(ImportError):
@@ -182,6 +185,18 @@ def _active_jax_xc_names() -> set[str]:
 
 def jax_xc_functional_info(name: str) -> JAXXCFunctionalInfo:
     canonical = str(name).strip().lower()
+    if canonical == "hyb_gga_xc_wb97x_d":
+        return JAXXCFunctionalInfo(
+            name=canonical,
+            status="wrapped",
+            family="GGA",
+            reason=(
+                "Local omegaB97X-D channel at fixed omega=0.2 bohr^-1; "
+                "B97 coefficient vectors are preserved by a parameter wrapper. "
+                "Energy, potential and kernel are checked against LibXC. "
+                "Exact exchange and CHG dispersion must be supplied separately."
+            ),
+        )
     if canonical in _STRICT_JAX_XC_FUNCTIONALS:
         return JAXXCFunctionalInfo(
             name=canonical,
@@ -260,6 +275,7 @@ def list_jax_xc_functionals(status: JAXXCStatus | None = None) -> tuple[JAXXCFun
         _STRICT_JAX_XC_FUNCTIONALS
         | set(SAFE_JAX_XC_WRAPPED_COMPOSITES)
         | _EXPERIMENTAL_JAX_XC_FUNCTIONALS
+        | {"hyb_gga_xc_wb97x_d"}
         | active_functionals
     )
     infos = tuple(jax_xc_functional_info(name) for name in names)
@@ -282,6 +298,42 @@ def _raise_if_not_allowed(
         )
 
 
+@lru_cache(maxsize=4)
+def _wb97xd_parameter_factory(factory):
+    """Restore B97 coefficient vectors lost by the legacy jax_xc converter.
+
+    In jax_xc 0.0.9, ``get_p`` repeats the first element of every C array.
+    Use the factory's actual scalar arguments and a factored local kernel to
+    avoid overflow in high derivatives of expanded B97 polynomials. As in the
+    PW compatibility layer, the cloned function has private globals; the
+    installed package is never modified.
+    """
+    if not isinstance(factory, FunctionType) or "get_p" not in factory.__globals__:
+        return factory
+    upstream_get_p = factory.__globals__["get_p"]
+
+    def get_p(name, polarized, *values):
+        p = upstream_get_p(name, polarized, *values)
+        if name != "hyb_gga_xc_wb97x_d":
+            return p
+        fields = ("c_x", "c_ss", "c_ab")
+        if len(values) != 18 or not hasattr(p, "params") or not all(
+            hasattr(p.params, field) for field in fields
+        ):
+            raise RuntimeError("Unsupported upstream omegaB97X-D parameter layout")
+        arrays = {field: np.asarray(values[5*i:5*i+5], dtype=np.float64)
+                  for i, field in enumerate(fields)}
+        return p._replace(params=p.params._replace(**arrays))
+
+    from .wb97_local import invoke
+
+    namespace = dict(factory.__globals__, get_p=get_p, invoke=invoke)
+    wrapped = FunctionType(factory.__code__, namespace, factory.__name__,
+                           factory.__defaults__, factory.__closure__)
+    wrapped.__kwdefaults__ = factory.__kwdefaults__
+    return update_wrapper(wrapped, factory)
+
+
 class _JAXXCModule:
     """Proxy an installed jax_xc module and expose GradSCF composites."""
 
@@ -295,6 +347,8 @@ class _JAXXCModule:
         if name == "lda_c_pw":
             from .jax_xc_compat import pw_parameter_factory
             return pw_parameter_factory(getattr(self._module, name))
+        if name == "hyb_gga_xc_wb97x_d":
+            return _wb97xd_parameter_factory(getattr(self._module, name))
         return getattr(self._module, name)
 
     def _hybrid_factory(self, name: str):
@@ -332,6 +386,9 @@ _SafeJAXXCModule = _JAXXCModule
 
 
 def _factory_kwargs(name: str, omega: Any | None) -> dict[str, Any]:
+    if name == "hyb_gga_xc_wb97x_d" and omega is not None:
+        if isinstance(omega, jax.core.Tracer) or float(omega) != 0.2:
+            raise ValueError("omegaB97X-D local channel is validated only at fixed omega=0.2 bohr^-1")
     if name == "gga_x_wpbeh" and omega is not None:
         return {"_omega": omega}
     return {}

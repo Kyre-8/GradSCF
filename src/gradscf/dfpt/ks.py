@@ -48,7 +48,7 @@ def ks_problem(coefficients, nocc, inputs, fock, energy, *, overlap, occupation=
     It remains regular at degeneracy within a fully occupied/empty block.
     """
     c = jnp.asarray(coefficients)
-    if c.ndim != 3 or c.shape[1] != c.shape[2] or len(nocc) != len(c):
+    if c.ndim != 3 or len(c) == 0 or c.shape[1] != c.shape[2] or len(nocc) != len(c):
         raise ValueError('KS coefficients require complete square orbital blocks')
     n = c.shape[-1]
     if any(isinstance(k, bool) or not isinstance(k, (int, np.integer)) or not 0 <= k <= n for k in nocc):
@@ -56,14 +56,19 @@ def ks_problem(coefficients, nocc, inputs, fock, energy, *, overlap, occupation=
     if not isfinite(gap_tolerance) or gap_tolerance < 0:
         raise ValueError('gap_tolerance must be nonnegative and finite')
     adjoint = c.conj().swapaxes(-1, -2)
-    q0 = jnp.stack([jnp.eye(n)*(jnp.arange(n)<no) for no in nocc])
+    occupied = jnp.arange(n)[None, :] < jnp.asarray(nocc)[:, None]
+    q0 = jnp.eye(n)*occupied[:, None, :]
     s0 = overlap(inputs)
     f0 = fock(occupation*(c @ q0 @ adjoint), inputs)
     chart = _Hermitian(n, any(jnp.iscomplexobj(a) for a in (c, s0, f0)))
-    initial = jnp.concatenate([chart.pack(q) for q in q0])
+    pack = jax.vmap(chart.pack)
+    unpack = jax.vmap(chart.unpack)
+    initial = pack(q0).reshape(-1)
+    same_sector = occupied[:, :, None] == occupied[:, None, :]
+    vo = ~occupied[:, :, None] & occupied[:, None, :]
 
     def projectors(x):
-        return jnp.stack([chart.unpack(y) for y in x.reshape(len(c), chart.size)])
+        return unpack(x.reshape(len(c), chart.size))
 
     def density(x):
         return occupation * (c @ projectors(x) @ adjoint)
@@ -74,15 +79,10 @@ def ks_problem(coefficients, nocc, inputs, fock, energy, *, overlap, occupation=
         f = adjoint @ fock(density(x), args) @ c
         idem = q @ s @ q-q
         comm = f @ q @ s-s @ q @ f
-        result = []
-        for block, no in enumerate(nocc):
-            # Assemble the independent equations with additive, jet-safe ops.
-            mask = (jnp.arange(n)[:, None] < no) == (jnp.arange(n)[None, :] < no)
-            vo = (jnp.arange(n)[:, None] >= no) & (jnp.arange(n)[None, :] < no)
-            lower = jnp.where(vo, comm[block], 0.)
-            value = jnp.where(mask, idem[block], 0.) + lower + lower.conj().T
-            result.append(chart.pack(value))
-        return jnp.concatenate(result)
+        # Batch spin/k blocks without expanding the additive, jet-safe chart.
+        lower = jnp.where(vo, comm, 0.)
+        value = jnp.where(same_sector, idem, 0.) + lower + lower.conj().swapaxes(-1, -2)
+        return pack(value).reshape(-1)
 
     def quantities(x, args):
         d = density(x)

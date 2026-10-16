@@ -12,7 +12,7 @@ import numpy as np
 from typing import NamedTuple
 from .core import Problem
 from ..pbc._kpoint import energy_and_fock
-from ..pbc.response import q_kernel,q_density
+from ..pbc.response import q_kernel,q_density,_validate_q_domain
 from ..pbc.occupations import _fermi_divided_difference
 from ..pbc.kpoints import weights_for,reciprocal_vectors
 
@@ -80,6 +80,7 @@ def finite_q_problem(inputs,result,transfer,*,mesh,xc='hf',exxdiv='ewald',
     External Functional models require q_energy_fn; params remain differentiable
     along with the reference. Construct this problem inside the AD function.
     """
+    _validate_q_domain(inputs, exxdiv)
     if np.allclose(np.asarray(transfer.q)-np.rint(transfer.q),0.,atol=1e-10,rtol=0):
         raise ValueError('Use periodic_problem for q=0, including chemical-potential response')
     shape=result.density_spin.shape;size=result.density_spin.size

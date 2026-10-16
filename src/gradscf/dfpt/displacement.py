@@ -12,7 +12,7 @@ from .finite_q import QSource
 from ..pbc import _kpoint
 from ..pbc.kpoints import weights_for,reciprocal_vectors
 from ..pbc.momentum import momentum_transfer
-from ..pbc.response import _fields,_project,_shifted_ao
+from ..pbc.response import _fields,_project,_shifted_ao,_validate_q_domain
 from ..integrals.periodic.ao import bloch_grid
 from ..integrals.periodic.coulomb import coulomb_kernel
 from ..integrals.periodic.pseudo import local_potential,_projector_overlap
@@ -90,6 +90,7 @@ def displacement_source(source,q,displacements):
 
 def _displacement_source(source,q,displacements):
     """Array assembly after the public entry point has validated the snapshot."""
+    _validate_q_domain(source.inputs, source.exxdiv)
     cell=source.cell;data=source.inputs;d=source.result.density_spin
     q=np.asarray(q,dtype=float)
     if q.shape!=(3,) or not np.isfinite(q).all():raise ValueError('q must be a finite three-vector')

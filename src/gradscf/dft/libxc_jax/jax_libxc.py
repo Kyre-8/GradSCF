@@ -198,9 +198,15 @@ _RSH_PRESETS: dict[str, RSHFunctionalPreset] = {
         optxc_omega_bounds=(0.10, 0.24),
         has_dispersion=True,
         dispersion_form="Chai-Head-Gordon empirical damped atom-atom dispersion",
+        jax_local_xc_spec="hyb_gga_xc_wb97x_d",
+        local_term_specs=(
+            LocalXCTermSpec("hyb_gga_xc_wb97x_d", 1.0, "fixed", 0.2),
+        ),
         notes=(
             "omegaB97X-D is a re-optimized B97-family RSH with empirical dispersion; "
-            "it is not representable by PBE semilocal exchange/correlation."
+            "its local channel is validated at fixed omega=0.2 bohr^-1. "
+            "A complete calculation must add both SR/LR exact exchange and "
+            "the original CHG geometry-only dispersion correction."
         ),
     ),
 }

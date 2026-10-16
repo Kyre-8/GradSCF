@@ -24,6 +24,8 @@ def register_integrals():
                "gradscf_geometry_vjp_cpu_v1": "GradSCFGeometryVJP",
                "gradscf_geometry_hessian_jvp_cpu_v1": "GradSCFGeometryHessianJVP",
                "gradscf_geometry_hessian_vjp_cpu_v1": "GradSCFGeometryHessianVJP",
+               "gradscf_geometry_higher_jvp_cpu_v1": "GradSCFGeometryHigherJVP",
+               "gradscf_geometry_higher_vjp_cpu_v1": "GradSCFGeometryHigherVJP",
                "gradscf_coefficient_jvp_cpu_v1": "GradSCFCoefficientJVP",
                "gradscf_coefficient_vjp_cpu_v1": "GradSCFCoefficientVJP",
                "gradscf_coefficient_hessian_jvp_cpu_v1": "GradSCFCoefficientHessianJVP",

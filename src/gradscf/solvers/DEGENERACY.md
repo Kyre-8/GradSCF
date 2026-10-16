@@ -122,7 +122,7 @@ As usual for partial eigensolves, physically appropriate starting spaces and
 comparison tests matter.
 
 If k cuts a degenerate cluster, the numerical primal is retained for inspection,
-`response_valid` is false, and derivatives are nonfinite. Increase `nroots`
+`response_valid` is false, and first derivatives are nonfinite. Increase `nroots`
 until the complete cluster is included. A fixed count preserves JIT shapes;
 there is no silent root-count expansion. For Davidson, an explicit
 `max_subspace` must be at least `min(n,k+3)`: the guard root plus expansion room.
@@ -151,9 +151,10 @@ projector. Davidson basis and GMRES workspaces additionally depend on their
 configured subspace/restart sizes. Set `max_subspace` for bounded Davidson
 storage; its legacy default can reach the full matrix dimension.
 
-At an invalid boundary, the auxiliary zero-RHS primal response solve uses an
-identity operator solely to preserve the inspectable Ritz-projector value.
-Its derivatives remain invalid. This is not a regularized physical response.
+At an invalid boundary, the numerical Ritz frame/projector remains inspectable
+without a response solve. If its response is requested, an identity extension
+keeps the auxiliary chart well defined while the physical validity guard
+rejects differentiation. This is not a regularized physical response.
 
 Shared Davidson restart retention and accepted correction counts are bounded
 by actual buffer capacity. When preconditioning produces a direction parallel
@@ -163,14 +164,65 @@ The generic real API scales its orthogonalization cutoff with the requested
 residual tolerance and diagonal magnitude to avoid premature rejection of small
 corrections. Removed low-level AD wrappers are not retained as forwarding aliases.
 
-The derivative attachment uses stopped forward Ritz vectors and a zero-valued
-RHS with a live tangent, as in the existing isolated-vector implementation.
-The contract is **first-order only**. Nested differentiation is not validated
-and is not a subspace Hessian implementation. Individual state observables
-must explicitly request eigenpair response rather than being interpreted as
-projector observables. State targets reject unresolved internal gaps for the
-entire requested set, even when a particular aggregate might be invariant.
-Use the subspace energy sum for that aggregate instead.
+### Nonlinear local chart for higher response
+
+The numerical Ritz frame X is held fixed as a local coordinate anchor. Define
+`P = X X.T`, `Q = I-P`, and write a nearby invariant frame as
+
+```text
+Y = X + QZ,          X.T Y = I.
+```
+
+Invariance requires `AY = YH`. Multiplying on the left by X.T gives
+`H = X.T AY`, so a square residual for Z is
+
+```text
+R(Z,A) = Q [AY - Y (X.T AY)] + PZ = 0.
+```
+
+At the converged numerical reference, Z=0 supplies the root. The first
+differential is the Sylvester equation above. Differentiating the full
+nonlinear residual retains its state-dependent coefficients and quadratic
+terms in subsequent response equations. Freezing X and H in a single linear
+correction would omit these terms. The shared `attach_root` mechanism supplies
+the nested derivatives; no forward eigensolver trajectory is differentiated.
+
+Normalize the chart with its small Gram matrix: if `Y.T Y = L L.T`, use
+`U = Y L^(-T)`. A rank-one column has a locally fixed sign. At rank k the frame
+is private; only `U U.T` actions and the selected energy trace are physical AD
+outputs. Neither construction divides by internal cluster gaps. The external
+gap must remain resolved and the selected rank fixed.
+
+The stationary energy differential is
+
+```text
+d lambda = u.T (dA) u,
+d sum(lambda_cluster) = trace(U.T (dA) U).
+```
+
+Operator parameters are made explicit in this custom JVP. The frame is a
+lazy differentiable coefficient: forward evaluation returns the existing Ritz
+frame; differentiating it activates the local implicit chart. Consequently,
+forward eigenvalues/vectors and a first energy derivative do not need a
+linear response solve or its `max_dense` capacity. Second energy derivatives
+and first vector/projector derivatives do. All active response solves retain
+the shared true-residual checks. Isolated roots are batched with `vmap` rather
+than placing `custom_root` in `lax.map`: the latter lost third/fourth-order
+terms in the tested JAX 0.10 composition, covered by closed-form regressions.
+
+Tests cover isolated and exactly degenerate invariant observables through
+fourth order, mixed-parameter Hessians, normalization, and existing JVP/VJP
+contracts. They do not establish higher response for RPA, EOM, a varying AO
+metric, or an entire electronic-structure chain. Individual state observables
+must request eigenpair response. State targets reject unresolved internal gaps
+for the whole requested set; use the subspace energy sum for an invariant
+aggregate instead.
+
+Validity flags remain authoritative at every derivative order. At an invalid
+boundary, first response is rejected. A further derivative of a structurally
+constant invalid tangent can become zero under AD; that zero does not restore
+validity. Check the primal/response flags and the intervening derivative
+results before interpreting a higher-order observable.
 
 See [the executable example](../../../examples/solvers/degenerate_subspace.py) and
 [validation](VALIDATION.md) for the test coverage and numerical evidence.

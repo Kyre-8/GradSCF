@@ -13,7 +13,7 @@ from .finite_q import finite_q_problem
 from ..pbc import _kpoint
 from ..pbc.kpoints import weights_for,reciprocal_vectors
 from ..pbc.momentum import momentum_transfer
-from ..pbc.response import _fields,_shifted_ao,q_kernel
+from ..pbc.response import _fields,_shifted_ao,q_kernel,_validate_q_domain
 from ..integrals.periodic.coulomb import coulomb_kernel,ewald_curvature
 from ..integrals.periodic.fft import _pair_potential
 from ..integrals.periodic.pseudo import local_potential,_projector_overlap
@@ -72,6 +72,7 @@ def geometry_curvature(source,q,u,v):
     u is the real amplitude of the -q row and v of the +q column. This is
     an internal numerical assembly, not an SCF/training facade.
     """
+    _validate_q_domain(source.inputs, source.exxdiv)
     cell=source.cell;data=source.inputs;density=source.result.density_spin
     q=np.asarray(q,dtype=float);kw=weights_for(data);volume=jnp.linalg.det(cell.lattice)
     fractional=np.asarray(source.kpts)@np.asarray(cell.lattice).T/(2*np.pi)

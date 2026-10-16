@@ -143,6 +143,14 @@ formed. For Gaussian amplitudes, M is the overlap matrix. The KKT residual is
 F(x,\eta;\theta)=\left(\nabla_x E-2\eta x,\;x^T x-1\right),\quad \mu=\eta/N.
 \]
 
+Forward optimization uses `E/N` with tolerance divided by the same dynamic `N`;
+returned energy, `residual_norm` and the configured forward tolerance retain
+the original physical/raw units. Implicit response uses the equivalent state
+`(x,mu)` and residual `(grad(E)/N-2*mu*x, x.T*x-1)`. Electron number remains a
+differentiable input in this change of units. Linear-solve tolerances and any
+regularization act in this normalized response chart. The constraint component
+is dimensionless, so the full residual norm is not a strictly Hartree quantity.
+
 `SCFDifferentiationConfig` and `attach_scf_backward` are shared with DFT. Implicit
 response solves the constrained transposed Jacobian system with shared GMRES (a failed incremental true-residual check retries the upstream
 batched path inside the opaque numerical solve);

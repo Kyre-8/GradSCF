@@ -127,3 +127,88 @@ The timing table above was recorded at `ae24d0e`, before the subsequent
 molecular static-W contour subtraction. It remains a historical measurement,
 not a timing claim for later self-energy evaluation graphs. Re-run the same
 benchmark to measure the current revision; the default root method is unchanged.
+
+## Implicit JVP, branch continuation and root precision
+
+The current implicit rule is a custom JVP; reverse mode is its transpose.
+For external physical parameters theta, it holds the converged frequency
+fixed in the partial residual differential and evaluates
+
+```
+f(omega, theta) = omega - epsilon_mf(theta) - delta_v(theta)
+                 - Re Sigma(omega, theta),
+domega = -partial_theta(f) dtheta / partial_omega(f).
+```
+
+The numerical seed has zero implicit tangent. The returned root remains live
+when this rule is differentiated again, retaining mixed and higher response.
+No root-iteration trajectory is differentiated in implicit mode. Failed roots
+and nonfinite or singular frequency slopes retain the original rejection
+policy, including under JIT. The shared scalar forward solver is unchanged.
+
+Restricted `g0w0_cd_restricted` additionally accepts `qp_initial`, a real
+full-MO spectrum, and `qp_tol`, the positive absolute root step/residual
+tolerance in Hartree. The defaults preserve the mean-field-offset seed and
+`1e-6` tolerance. `qp_initial` supplies only the requested entries to the
+nonlinear solve; it does not alter the mean-field base or G/W spectra and is
+rejected for linearized/evaluate-only calls. These controls currently belong
+to the restricted array driver, not to the `GW` facade or the evGW outer loop.
+
+For small geometry displacements, a previously identified root can initialize
+both neighbors. This is conditional continuation, not automatic selection of
+the largest-Z peak. Multiple roots can each have a small Dyson residual while
+independent seeds select different branches. A derivative across that discrete
+selection change is not the local implicit derivative of either root.
+
+The residue `Z=1/(1-Sigma_omega)` is more sensitive to root precision than the
+energy itself. On a smooth branch,
+
+```
+dZ/dtheta = Z^2 * (Sigma_omega,theta + Sigma_omega,omega * domega/dtheta).
+```
+
+Both partials include the supplied physical input dependence. In evGW the
+full outer response is a coupled spectrum Jacobian; a local fixed-G/W Z is
+not a replacement for that inverse Jacobian.
+
+The [2026-10-16 response record](../../../reproducibility/ad_showcase/GW_BSE_response_gates/README.md)
+contains the failed independent-seed water comparisons, continued branches,
+source boundaries and focused tests. The complete small H2 geometry chain
+and root controls passed 27 tests in 246.69 s after adding explicit precision.
+This is not a whole-suite or large-system validation. Water residue checks
+use `qp_tol=1e-11` without relaxing the observable-error gate.
+
+## Optional shared DIIS for the outer spectrum
+
+The restricted/unrestricted `evgw_cd_*` array drivers accept `diis_space=0`
+and `initial_guess=None`. Their defaults retain the original numerical
+iteration and MF starting spectrum. Positive `diis_space` uses the shared
+`solve_nonlinear` implementation; it does not introduce a GW-local DIIS or
+change the physical residual
+
+```
+F_p(E, theta) = E_p - epsilon_mf,p(theta) - delta_v,p(theta)
+               - Re Sigma_p(E_p; G[E,theta], W[E,theta]).
+```
+
+For evGW0, W is W0 throughout this iteration but still depends on theta.
+Both spin channels are packed into the same residual in the unrestricted
+driver. The existing iteration limit, damping and true residual tolerance
+apply. The change in the sum of QP levels is an additional scalar convergence
+monitor; it is not a total-energy functional. Shared implicit response gives
+`dE = -(partial_E F)^-1 partial_theta F dtheta`, with checked linear solves.
+The iteration trajectory is not differentiated.
+
+`initial_guess` supplies a full real spectrum (two spin rows for unrestricted
+inputs). Only requested entries initialize the iteration; all other entries
+stay at their original MF values. It does not replace the MF base or W0 input.
+Its implicit tangent is zero. Local continuation is useful because DIIS may
+converge to distinct roots at nearby geometries; convergence alone does not
+establish branch identity or globally largest spectral weight.
+
+These controls belong to the array drivers and the molecular response helper;
+the eager `GW` facade has not acquired these options. The 2026-10-16 remote
+outer-response group passed 35 tests in 413.23 s, including R/U DIIS response,
+selected/frozen orbitals, numerical-seed tangents and previous outer-method
+regressions. UGW tests cover its existing energies and screening outputs;
+the unrestricted driver does not currently expose `qp_weight`.

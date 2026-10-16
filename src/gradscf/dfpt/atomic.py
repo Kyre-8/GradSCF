@@ -60,7 +60,7 @@ def atomic_problem(source,*,tolerance=1e-7):
         def inputs_at(r):
             return inputs_from_cell(cell,parameters=cell.parameters_at(r),representation=source.inputs.representation)
         def forces(state,r):
-            mu=state[-1]/source.inputs.nelectron
+            mu=base.quantities(state,args_at(r))['chemical_potential']
             def lagrangian(coords):
                 values=base.quantities(state,args_at(coords))
                 return values['energy']-mu*values['electron_number']

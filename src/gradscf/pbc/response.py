@@ -13,6 +13,14 @@ from ..integrals.periodic.fft import _kpoint_exchange
 from ..dft.libxc_jax.jax_libxc import hybrid_coeff,xc_type
 
 
+def _validate_q_domain(inputs, exxdiv):
+    """Keep array and geometry sources within the same electrostatic model."""
+    if getattr(inputs, 'boundary', None) is not None:
+        raise NotImplementedError('Finite-q response currently requires 3D electrostatics.')
+    if exxdiv not in ('ewald', None):
+        raise NotImplementedError('Finite-q response does not support vcut_sph; use exxdiv=ewald or None.')
+
+
 def _shifted_ao(inputs,transfer):
     g=jnp.asarray(transfer.shifts)@reciprocal_vectors(inputs.lattice)
     phase=jnp.exp(1j*g@inputs.coords.T)
@@ -73,6 +81,7 @@ def project_q_potential(inputs,transfer,potential):
 
 def q_kernel(inputs,density,transfer,*,mesh,xc='hf',exxdiv='ewald',functional=None,params=None):
     """Return the complex-linear finite-q Fock derivative on a fixed AO basis."""
+    _validate_q_domain(inputs, exxdiv)
     if functional is None:
         if params is not None:raise ValueError('params requires an external functional')
         kind=xc_type(xc);alpha=hybrid_coeff(xc)
@@ -82,7 +91,6 @@ def q_kernel(inputs,density,transfer,*,mesh,xc='hf',exxdiv='ewald',functional=No
         kind='HF';alpha=0.
         external_action=finite_q_kernel(functional,params,inputs,density,transfer)
     if kind not in ('HF','LDA','GGA','MGGA'):raise NotImplementedError('Unsupported finite-q XC kernel')
-    if exxdiv not in ('ewald',None):raise NotImplementedError('Unsupported exchange correction')
     ao=inputs.ao;plus=_shifted_ao(inputs,transfer);kw=weights_for(inputs)
     mesh=tuple(mesh)
     wavevector=jnp.asarray(transfer.q)@reciprocal_vectors(inputs.lattice)
