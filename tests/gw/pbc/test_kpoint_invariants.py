@@ -50,7 +50,7 @@ def _toy(nk=3):
         ao=jnp.asarray(ao), coords=jnp.asarray(coords), gvectors=jnp.asarray(gv),
         kpoints=jnp.asarray(kpts), weights=jnp.full(mesh[0], volume / mesh[0]),
         overlap=jnp.tile(jnp.eye(2), (nk, 1, 1)), madelung=0.0,
-        pair_potential=jnp.asarray(potential),
+        pair_potential=jnp.asarray(potential), boundary=None, lattice=jnp.eye(3)*length,
     )
     coeff = []
     for k in range(nk):

@@ -22,6 +22,7 @@ from ...pbc.momentum import momentum_transfer_table, wrap_to_kmesh
 from .krgw import KRGW, evgw_cd_gamma, g0w0_cd_gamma
 from .kugw import KUGW, g0w0_cd_gamma_unrestricted
 from .ksigma import g0w0_cd_kpoints
+from .query import g0w0_bands
 
 
 __all__ = [
@@ -30,6 +31,7 @@ __all__ = [
     "g0w0_cd_gamma",
     "g0w0_cd_gamma_unrestricted",
     "g0w0_cd_kpoints",
+    "g0w0_bands",
     "evgw_cd_gamma",
     "gamma_product_factors",
     "kpoint_product_factors",
