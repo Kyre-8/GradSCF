@@ -1,0 +1,438 @@
+{
+  "passed": true,
+  "reference_sha256": "28c6a7cea4ea0d56bb6dd6af8d0646ae289c4487eaf3d30859f1e18d6358a28b",
+  "reference_stage": "Completed G0W0 stage only",
+  "full_gw_bse_complete": true,
+  "records": [
+    {
+      "orbital_zero_based": 0,
+      "orbital_fortran": 1,
+      "selected_energy_hartree": -20.0940566681203,
+      "selected_z": 0.875489294,
+      "candidates_printed_ev_z": [
+        [
+          -546.787113,
+          0.875489
+        ],
+        [
+          -581.703869,
+          0.001148
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 1,
+      "orbital_fortran": 2,
+      "selected_energy_hartree": -1.19667741327603,
+      "selected_z": 0.538064952,
+      "candidates_printed_ev_z": [
+        [
+          -32.56325,
+          0.538065
+        ],
+        [
+          -33.962256,
+          0.378784
+        ],
+        [
+          -43.71966,
+          0.003688
+        ],
+        [
+          -45.296072,
+          0.002657
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 2,
+      "orbital_fortran": 3,
+      "selected_energy_hartree": -0.683957716838933,
+      "selected_z": 0.956294096,
+      "candidates_printed_ev_z": [
+        [
+          -18.611437,
+          0.956294
+        ],
+        [
+          -41.405181,
+          0.000713
+        ],
+        [
+          -35.761561,
+          0.000545
+        ],
+        [
+          -40.003431,
+          0.000116
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 3,
+      "orbital_fortran": 4,
+      "selected_energy_hartree": -0.531267588053444,
+      "selected_z": 0.950688214,
+      "candidates_printed_ev_z": [
+        [
+          -14.456527,
+          0.950688
+        ],
+        [
+          -37.787884,
+          0.002958
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 4,
+      "orbital_fortran": 5,
+      "selected_energy_hartree": -0.447551018891498,
+      "selected_z": 0.949761239,
+      "candidates_printed_ev_z": [
+        [
+          -12.178483,
+          0.949761
+        ],
+        [
+          -35.762141,
+          0.001675
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 5,
+      "orbital_fortran": 6,
+      "selected_energy_hartree": 0.198478272624758,
+      "selected_z": 0.987278103,
+      "candidates_printed_ev_z": [
+        [
+          5.400869,
+          0.987278
+        ],
+        [
+          32.734703,
+          0.000212
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 6,
+      "orbital_fortran": 7,
+      "selected_energy_hartree": 0.291154806061292,
+      "selected_z": 0.98426526,
+      "candidates_printed_ev_z": [
+        [
+          7.922726,
+          0.984265
+        ],
+        [
+          32.100133,
+          0.002951
+        ],
+        [
+          30.194811,
+          0.000311
+        ],
+        [
+          30.442858,
+          8.4e-05
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 7,
+      "orbital_fortran": 8,
+      "selected_energy_hartree": 0.985449715586872,
+      "selected_z": 0.969111119,
+      "candidates_printed_ev_z": [
+        [
+          26.815452,
+          0.969111
+        ],
+        [
+          38.016948,
+          0.002624
+        ],
+        [
+          30.448576,
+          0.002045
+        ],
+        [
+          32.038761,
+          0.002021
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 8,
+      "orbital_fortran": 9,
+      "selected_energy_hartree": 1.0942903921944,
+      "selected_z": 0.933201212,
+      "candidates_printed_ev_z": [
+        [
+          29.777157,
+          0.933201
+        ],
+        [
+          27.836214,
+          0.03168
+        ],
+        [
+          35.490043,
+          0.007526
+        ],
+        [
+          52.988207,
+          0.000926
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 9,
+      "orbital_fortran": 10,
+      "selected_energy_hartree": 1.12755704152618,
+      "selected_z": 0.758338433,
+      "candidates_printed_ev_z": [
+        [
+          30.682389,
+          0.758338
+        ],
+        [
+          30.416591,
+          0.207094
+        ],
+        [
+          53.974042,
+          0.00115
+        ],
+        [
+          52.607642,
+          0.000554
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 10,
+      "orbital_fortran": 11,
+      "selected_energy_hartree": 1.1044168143883,
+      "selected_z": 0.937748061,
+      "candidates_printed_ev_z": [
+        [
+          30.052711,
+          0.937748
+        ],
+        [
+          27.870113,
+          0.012952
+        ],
+        [
+          35.460161,
+          0.002535
+        ],
+        [
+          54.15042,
+          0.0024
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 11,
+      "orbital_fortran": 12,
+      "selected_energy_hartree": 1.28612446938444,
+      "selected_z": 0.843177452,
+      "candidates_printed_ev_z": [
+        [
+          34.997228,
+          0.843177
+        ],
+        [
+          38.344133,
+          0.10053
+        ],
+        [
+          30.42282,
+          0.00356
+        ],
+        [
+          61.459966,
+          0.001877
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 12,
+      "orbital_fortran": 13,
+      "selected_energy_hartree": 1.4001315293182,
+      "selected_z": 0.898872715,
+      "candidates_printed_ev_z": [
+        [
+          38.099518,
+          0.898873
+        ],
+        [
+          35.285496,
+          0.050735
+        ],
+        [
+          34.504368,
+          0.021101
+        ],
+        [
+          49.030305,
+          0.001823
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 13,
+      "orbital_fortran": 14,
+      "selected_energy_hartree": 1.9677628576011,
+      "selected_z": 0.531595184,
+      "candidates_printed_ev_z": [
+        [
+          53.545553,
+          0.531595
+        ],
+        [
+          54.549815,
+          0.146105
+        ],
+        [
+          54.151519,
+          0.094432
+        ],
+        [
+          53.86769,
+          0.093778
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 14,
+      "orbital_fortran": 15,
+      "selected_energy_hartree": 1.99038926182694,
+      "selected_z": 0.551201878,
+      "candidates_printed_ev_z": [
+        [
+          54.161249,
+          0.551202
+        ],
+        [
+          54.04295,
+          0.247242
+        ],
+        [
+          55.235371,
+          0.08229
+        ],
+        [
+          53.490368,
+          0.061713
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 15,
+      "orbital_fortran": 16,
+      "selected_energy_hartree": 2.03373355456532,
+      "selected_z": 0.910145901,
+      "candidates_printed_ev_z": [
+        [
+          55.340707,
+          0.910146
+        ],
+        [
+          53.917462,
+          0.018916
+        ],
+        [
+          52.540881,
+          0.018304
+        ],
+        [
+          54.31623,
+          0.010912
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 16,
+      "orbital_fortran": 17,
+      "selected_energy_hartree": 2.56976136633947,
+      "selected_z": 0.572490833,
+      "candidates_printed_ev_z": [
+        [
+          69.926766,
+          0.572491
+        ],
+        [
+          68.445531,
+          0.124981
+        ],
+        [
+          67.604798,
+          0.107572
+        ],
+        [
+          72.912759,
+          0.031684
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 17,
+      "orbital_fortran": 18,
+      "selected_energy_hartree": 2.80608115478853,
+      "selected_z": 0.260569354,
+      "candidates_printed_ev_z": [
+        [
+          76.357355,
+          0.260569
+        ],
+        [
+          77.239347,
+          0.174663
+        ],
+        [
+          79.73679,
+          0.164252
+        ],
+        [
+          81.157599,
+          0.049211
+        ]
+      ]
+    },
+    {
+      "orbital_zero_based": 18,
+      "orbital_fortran": 19,
+      "selected_energy_hartree": 3.88407313169662,
+      "selected_z": 0.239747739,
+      "candidates_printed_ev_z": [
+        [
+          105.69101,
+          0.239748
+        ],
+        [
+          105.869021,
+          0.125232
+        ],
+        [
+          106.250292,
+          0.102388
+        ],
+        [
+          100.15316,
+          0.084239
+        ]
+      ]
+    }
+  ],
+  "source_sha256": "9cb238e779b6ca06e3ce37bf18ccb85f4c40f19e61c3dec94e35baf8fd456b0d",
+  "algorithm": "Adjacent-grid sign changes, linearly interpolated roots and interval-slope Z; reject Z<1e-5, retain up to four greatest-Z candidates, select greatest Z.",
+  "scan": "400001 points, 5e-6 Eh spacing, +/-1 Eh around each input HF orbital energy",
+  "precision": "Selected energies use ENERGY_QP and selected Z uses YAML; candidate table is stdout rounded to six decimals in eV and Z. Grid-slope Z is not an exact derivative.",
+  "fallback_used": false,
+  "scope": "Independent single-point MolGW root-selection record; selecting maximum Z differs from a seeded local secant/Newton solve."
+}

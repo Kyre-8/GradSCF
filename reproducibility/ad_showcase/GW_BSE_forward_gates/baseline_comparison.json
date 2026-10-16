@@ -1,0 +1,19 @@
+{
+  "errors": {
+    "qp_energy_hartree": 5.525357948954479e-12,
+    "qp_weight": 5.428674176854997e-10,
+    "tda_energy_hartree": 8.09041722504844e-12,
+    "tda_strength": 2.2241729291661017e-11,
+    "full_energy_hartree": 8.110845328701544e-12,
+    "full_strength": 1.4874196319070165e-10
+  },
+  "gates": {
+    "qp_energy_hartree": 1e-08,
+    "qp_weight": 1e-06,
+    "tda_energy_hartree": 1e-08,
+    "tda_strength": 1e-07,
+    "full_energy_hartree": 1e-08,
+    "full_strength": 1e-07
+  },
+  "passed": true
+}

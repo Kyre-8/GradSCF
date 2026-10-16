@@ -1,0 +1,544 @@
+{
+  "passed": true,
+  "mode_checks": [
+    {
+      "point": 0,
+      "mode": 0,
+      "finite_differences": [
+        {
+          "step_bohr": 0.00044721359549995795,
+          "reference_nac_per_bohr": 4.938594667795109,
+          "absolute_error": 0.0003551972971633788,
+          "minimum_tracked_overlap": 0.9999974610016008
+        },
+        {
+          "step_bohr": 0.00013416407864998739,
+          "reference_nac_per_bohr": 4.938271437171057,
+          "absolute_error": 3.1966673111227806e-05,
+          "minimum_tracked_overlap": 0.9999997742697351
+        },
+        {
+          "step_bohr": 4.4721359549995795e-05,
+          "reference_nac_per_bohr": 4.9382430226720135,
+          "absolute_error": 3.552174067777969e-06,
+          "minimum_tracked_overlap": 0.9999999750061009
+        }
+      ]
+    },
+    {
+      "point": 0,
+      "mode": 1,
+      "finite_differences": [
+        {
+          "step_bohr": 0.00044721359549995795,
+          "reference_nac_per_bohr": -10.089526778205387,
+          "absolute_error": 9.192765826426808e-05,
+          "minimum_tracked_overlap": 0.9999896713109907
+        },
+        {
+          "step_bohr": 0.00013416407864998739,
+          "reference_nac_per_bohr": -10.08961043401987,
+          "absolute_error": 8.271843782381438e-06,
+          "minimum_tracked_overlap": 0.999999076501807
+        },
+        {
+          "step_bohr": 4.4721359549995795e-05,
+          "reference_nac_per_bohr": -10.089617786943357,
+          "absolute_error": 9.18920294523673e-07,
+          "minimum_tracked_overlap": 0.9999998975820721
+        }
+      ]
+    },
+    {
+      "point": 1,
+      "mode": 0,
+      "finite_differences": [
+        {
+          "step_bohr": 0.00022360679774997898,
+          "reference_nac_per_bohr": 9.939017607733774,
+          "absolute_error": 0.0007177460908813771,
+          "minimum_tracked_overlap": 0.9999974723280101
+        },
+        {
+          "step_bohr": 6.708203932499369e-05,
+          "reference_nac_per_bohr": 9.938364455788681,
+          "absolute_error": 6.459414578863232e-05,
+          "minimum_tracked_overlap": 0.999999775331725
+        },
+        {
+          "step_bohr": 2.2360679774997898e-05,
+          "reference_nac_per_bohr": 9.938307040709766,
+          "absolute_error": 7.179066873419515e-06,
+          "minimum_tracked_overlap": 0.999999975125435
+        }
+      ]
+    },
+    {
+      "point": 1,
+      "mode": 1,
+      "finite_differences": [
+        {
+          "step_bohr": 0.00022360679774997898,
+          "reference_nac_per_bohr": -20.088946280197696,
+          "absolute_error": 0.00019211568541166457,
+          "minimum_tracked_overlap": 0.9999898044219848
+        },
+        {
+          "step_bohr": 6.708203932499369e-05,
+          "reference_nac_per_bohr": -20.089121108840374,
+          "absolute_error": 1.7287042734182023e-05,
+          "minimum_tracked_overlap": 0.9999990882566987
+        },
+        {
+          "step_bohr": 2.2360679774997898e-05,
+          "reference_nac_per_bohr": -20.089136475594607,
+          "absolute_error": 1.9202885006563974e-06,
+          "minimum_tracked_overlap": 0.9999998988810662
+        }
+      ]
+    },
+    {
+      "point": 2,
+      "mode": 0,
+      "finite_differences": [
+        {
+          "step_bohr": 0.00011180339887498949,
+          "reference_nac_per_bohr": 19.93974731469805,
+          "absolute_error": 0.0014427901633204954,
+          "minimum_tracked_overlap": 0.9999974670254975
+        },
+        {
+          "step_bohr": 3.3541019662496847e-05,
+          "reference_nac_per_bohr": 19.9384343703563,
+          "absolute_error": 0.00012984582157216096,
+          "minimum_tracked_overlap": 0.9999997748755621
+        },
+        {
+          "step_bohr": 1.1180339887498949e-05,
+          "reference_nac_per_bohr": 19.938318950847695,
+          "absolute_error": 1.4426312965554189e-05,
+          "minimum_tracked_overlap": 0.9999999750754105
+        }
+      ]
+    },
+    {
+      "point": 2,
+      "mode": 1,
+      "finite_differences": [
+        {
+          "step_bohr": 0.00011180339887498949,
+          "reference_nac_per_bohr": -40.08852371845113,
+          "absolute_error": 0.0003922341553845854,
+          "minimum_tracked_overlap": 0.9999898609230831
+        },
+        {
+          "step_bohr": 3.3541019662496847e-05,
+          "reference_nac_per_bohr": -40.08888065653457,
+          "absolute_error": 3.5296071942525487e-05,
+          "minimum_tracked_overlap": 0.9999990932310663
+        },
+        {
+          "step_bohr": 1.1180339887498949e-05,
+          "reference_nac_per_bohr": -40.0889120357594,
+          "absolute_error": 3.916847113316635e-06,
+          "minimum_tracked_overlap": 0.9999998994302782
+        }
+      ]
+    },
+    {
+      "point": 3,
+      "mode": 0,
+      "finite_differences": [
+        {
+          "step_bohr": 5.5901699437494744e-05,
+          "reference_nac_per_bohr": 39.94119334422497,
+          "absolute_error": 0.002892862856761269,
+          "minimum_tracked_overlap": 0.9999974617305437
+        },
+        {
+          "step_bohr": 1.6770509831248423e-05,
+          "reference_nac_per_bohr": 39.93856083665028,
+          "absolute_error": 0.0002603552820730215,
+          "minimum_tracked_overlap": 0.9999997744095297
+        },
+        {
+          "step_bohr": 5.5901699437494744e-06,
+          "reference_nac_per_bohr": 39.938329414929456,
+          "absolute_error": 2.893356124644697e-05,
+          "minimum_tracked_overlap": 0.9999999750239595
+        }
+      ]
+    },
+    {
+      "point": 3,
+      "mode": 1,
+      "finite_differences": [
+        {
+          "step_bohr": 5.5901699437494744e-05,
+          "reference_nac_per_bohr": -80.08801670494047,
+          "absolute_error": 0.0007923433357888143,
+          "minimum_tracked_overlap": 0.9999898865925682
+        },
+        {
+          "step_bohr": 1.6770509831248423e-05,
+          "reference_nac_per_bohr": -80.08873774045419,
+          "absolute_error": 7.130782206843378e-05,
+          "minimum_tracked_overlap": 0.9999990954863979
+        },
+        {
+          "step_bohr": 5.5901699437494744e-06,
+          "reference_nac_per_bohr": -80.08880112775648,
+          "absolute_error": 7.920519777826485e-06,
+          "minimum_tracked_overlap": 0.9999998996791373
+        }
+      ]
+    },
+    {
+      "point": 4,
+      "mode": 0,
+      "finite_differences": [
+        {
+          "step_bohr": 2.7950849718747372e-05,
+          "reference_nac_per_bohr": 79.94408982668304,
+          "absolute_error": 0.005792961306198663,
+          "minimum_tracked_overlap": 0.9999974584333324
+        },
+        {
+          "step_bohr": 8.385254915624212e-06,
+          "reference_nac_per_bohr": 79.9388182245393,
+          "absolute_error": 0.0005213591624624314,
+          "minimum_tracked_overlap": 0.9999997741180365
+        },
+        {
+          "step_bohr": 2.7950849718747372e-06,
+          "reference_nac_per_bohr": 79.93835492880677,
+          "absolute_error": 5.806342993253111e-05,
+          "minimum_tracked_overlap": 0.9999999749917368
+        }
+      ]
+    },
+    {
+      "point": 4,
+      "mode": 1,
+      "finite_differences": [
+        {
+          "step_bohr": 2.7950849718747372e-05,
+          "reference_nac_per_bohr": -160.08716416993983,
+          "absolute_error": 0.00159249279766982,
+          "minimum_tracked_overlap": 0.9999898987729887
+        },
+        {
+          "step_bohr": 8.385254915624212e-06,
+          "reference_nac_per_bohr": -160.08861335981146,
+          "absolute_error": 0.00014330292603403905,
+          "minimum_tracked_overlap": 0.999999096555284
+        },
+        {
+          "step_bohr": 2.7950849718747372e-06,
+          "reference_nac_per_bohr": -160.08874054770047,
+          "absolute_error": 1.611503702747541e-05,
+          "minimum_tracked_overlap": 0.9999998997970396
+        }
+      ]
+    },
+    {
+      "point": 5,
+      "mode": 0,
+      "finite_differences": [
+        {
+          "step_bohr": 1.3975424859373686e-05,
+          "reference_nac_per_bohr": 159.94988791505114,
+          "absolute_error": 0.011593255749659193,
+          "minimum_tracked_overlap": 0.9999974566236307
+        },
+        {
+          "step_bohr": 4.192627457812106e-06,
+          "reference_nac_per_bohr": 159.9393381387442,
+          "absolute_error": 0.0010434794427283123,
+          "minimum_tracked_overlap": 0.9999997739577919
+        },
+        {
+          "step_bohr": 1.3975424859373686e-06,
+          "reference_nac_per_bohr": 159.93841007631661,
+          "absolute_error": 0.00011541701513806402,
+          "minimum_tracked_overlap": 0.9999999749740132
+        }
+      ]
+    },
+    {
+      "point": 5,
+      "mode": 1,
+      "finite_differences": [
+        {
+          "step_bohr": 1.3975424859373686e-05,
+          "reference_nac_per_bohr": -320.0855380340069,
+          "absolute_error": 0.0031927013193921994,
+          "minimum_tracked_overlap": 0.9999899046984383
+        },
+        {
+          "step_bohr": 4.192627457812106e-06,
+          "reference_nac_per_bohr": -320.088443420922,
+          "absolute_error": 0.00028731440431783994,
+          "minimum_tracked_overlap": 0.9999990970749252
+        },
+        {
+          "step_bohr": 1.3975424859373686e-06,
+          "reference_nac_per_bohr": -320.08869823605886,
+          "absolute_error": 3.249926743364995e-05,
+          "minimum_tracked_overlap": 0.9999998998543461
+        }
+      ]
+    }
+  ],
+  "cartesian_checks": [
+    {
+      "point": 1,
+      "finite_differences": [
+        {
+          "step_bohr": 0.00022360679774997898,
+          "nac_per_bohr": [
+            [
+              -11.585916592029799,
+              -5.739641017220459,
+              0.0
+            ],
+            [
+              0.8269830029619678,
+              12.92240531617135,
+              0.0
+            ],
+            [
+              10.763841514035526,
+              -7.185599189048818,
+              0.0
+            ]
+          ],
+          "max_absolute_error": 0.00016097073985932298,
+          "max_scaled_error": 2.0487983344291518e-05,
+          "minimum_tracked_overlap": 0.9999958072273313
+        },
+        {
+          "step_bohr": 6.708203932499369e-05,
+          "nac_per_bohr": [
+            [
+              -11.585950268715017,
+              -5.739515364981766,
+              0.0
+            ],
+            [
+              0.8269596433544159,
+              12.922551798721008,
+              0.0
+            ],
+            [
+              10.763830867229371,
+              -7.185472132366414,
+              0.0
+            ]
+          ],
+          "max_absolute_error": 1.448819020133385e-05,
+          "max_scaled_error": 1.8438429912817964e-06,
+          "minimum_tracked_overlap": 0.9999996227739872
+        },
+        {
+          "step_bohr": 2.2360679774997898e-05,
+          "nac_per_bohr": [
+            [
+              -11.585953229454974,
+              -5.73950431585602,
+              0.0
+            ],
+            [
+              0.8269575944344092,
+              12.922564677059723,
+              0.0
+            ],
+            [
+              10.763829928821885,
+              -7.185460961064914,
+              0.0
+            ]
+          ],
+          "max_absolute_error": 1.6098514858953195e-06,
+          "max_scaled_error": 2.0438592050147753e-07,
+          "minimum_tracked_overlap": 0.9999999580900912
+        }
+      ]
+    },
+    {
+      "point": 5,
+      "finite_differences": [
+        {
+          "step_bohr": 1.3975424859373686e-05,
+          "nac_per_bohr": [
+            [
+              -184.79130145811726,
+              -92.34275019435032,
+              0.0
+            ],
+            [
+              12.427416393691322,
+              206.22178904768714,
+              0.0
+            ],
+            [
+              172.36545169675227,
+              -113.88617752123169,
+              0.0
+            ]
+          ],
+          "max_absolute_error": 0.0025452986709808556,
+          "max_scaled_error": 3.0571435098737464e-05,
+          "minimum_tracked_overlap": 0.999995844036978
+        },
+        {
+          "step_bohr": 4.192627457812106e-06,
+          "nac_per_bohr": [
+            [
+              -184.79186072270593,
+              -92.34071990071743,
+              0.0
+            ],
+            [
+              12.427042786609489,
+              206.22410536721802,
+              0.0
+            ],
+            [
+              172.3652334793197,
+              -113.88416488998263,
+              0.0
+            ]
+          ],
+          "max_absolute_error": 0.000228979140104002,
+          "max_scaled_error": 2.746387257544356e-06,
+          "minimum_tracked_overlap": 0.9999996261334604
+        },
+        {
+          "step_bohr": 1.3975424859373686e-06,
+          "nac_per_bohr": [
+            [
+              -184.79190964685478,
+              -92.34054130996435,
+              0.0
+            ],
+            [
+              12.427009059704941,
+              206.22430934604964,
+              0.0
+            ],
+            [
+              172.36521365817552,
+              -113.88398805266159,
+              0.0
+            ]
+          ],
+          "max_absolute_error": 2.5000308482958644e-05,
+          "max_scaled_error": 2.3766201394806356e-07,
+          "minimum_tracked_overlap": 0.9999999584648432
+        }
+      ]
+    }
+  ],
+  "generator_checks": [
+    {
+      "point": 1,
+      "translation_nac": [
+        0.004833549036252549,
+        -0.002396217482312224,
+        0.0
+      ],
+      "electronic_translation_generator": [
+        0.004833549036243334,
+        -0.0023962174823049937,
+        0.0
+      ],
+      "rotation_nac": [
+        0.0,
+        0.0,
+        -0.5351631891792952
+      ],
+      "electronic_rotation_generator": [
+        0.0,
+        0.0,
+        -0.535163189179289
+      ],
+      "translation_max_error": 9.2148511043888e-15,
+      "rotation_max_error": 6.217248937900877e-15
+    },
+    {
+      "point": 5,
+      "translation_nac": [
+        0.0003015765519478464,
+        -0.00015070782295367735,
+        0.0
+      ],
+      "electronic_translation_generator": [
+        0.0003015765515069768,
+        -0.00015070782288281737,
+        0.0
+      ],
+      "rotation_nac": [
+        0.0,
+        0.0,
+        -0.5352975173210837
+      ],
+      "electronic_rotation_generator": [
+        0.0,
+        0.0,
+        -0.5352975173212108
+      ],
+      "translation_max_error": 4.4086956307864966e-13,
+      "rotation_max_error": 1.2712053631958042e-13
+    }
+  ],
+  "complete_pair_checks": [
+    {
+      "mode": 0,
+      "step_bohr": 0.001,
+      "energy_trace_error": 2.8399593712458995e-07,
+      "projector_error": 2.1594887443521227e-07
+    },
+    {
+      "mode": 0,
+      "step_bohr": 0.0003,
+      "energy_trace_error": 2.555437267919399e-08,
+      "projector_error": 1.9433773937316268e-08
+    },
+    {
+      "mode": 0,
+      "step_bohr": 0.0001,
+      "energy_trace_error": 2.8177452835538655e-09,
+      "projector_error": 2.164439835694587e-09
+    },
+    {
+      "mode": 1,
+      "step_bohr": 0.001,
+      "energy_trace_error": 8.875563581231573e-13,
+      "projector_error": 1.7662137114654586e-07
+    },
+    {
+      "mode": 1,
+      "step_bohr": 0.0003,
+      "energy_trace_error": 3.701365476994157e-12,
+      "projector_error": 1.5893009970568972e-08
+    },
+    {
+      "mode": 1,
+      "step_bohr": 0.0001,
+      "energy_trace_error": 4.4415141600775944e-12,
+      "projector_error": 1.7694465406781212e-09
+    }
+  ],
+  "pyscf": "2.13.0",
+  "elapsed_seconds": 0.8782426440156996,
+  "native_json_sha256": "a495e0502119b4116db05d7c7f27f31c370ab9fe6fedf596faa2a471fe24086c",
+  "script_sha256": "f1a8a0e7bb031979e0825a981aba16fe7846c7df87d4319e25116e94407e5d20",
+  "gates": {
+    "nac_atol_per_bohr": 1e-05,
+    "nac_rtol": 2e-05,
+    "generator_atol": 1e-07,
+    "complete_pair_fd_atol": 3e-06
+  },
+  "scope": "Independent PySCF integrals/FCI and public addons.overlap + gto.intor_cross, including electronic rigid-motion generators. Exact crossing uses the complete pair, never individual NACs."
+}

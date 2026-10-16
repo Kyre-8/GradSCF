@@ -1,0 +1,287 @@
+{
+  "canonical": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        0.19971577897859702,
+        -0.0002435656205436147,
+        0.00019755821925654754,
+        4.6007401287067156e-05
+      ]
+    },
+    "nested_jvp": {
+      "passed": true,
+      "value": [
+        0.19971577897859702,
+        -0.0002435656205436147,
+        0.00019755821925654754,
+        4.6007401287067156e-05
+      ]
+    },
+    "nested_vjp": {
+      "passed": true,
+      "value": 0.19971577897859707
+    },
+    "raw_fd_error": 5.457748294100673e-12
+  },
+  "qp": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        0.0009419871742142544
+      ]
+    },
+    "nested_jvp": {
+      "passed": true,
+      "value": [
+        0.0009419871742142544
+      ]
+    },
+    "nested_vjp": {
+      "passed": true,
+      "value": 0.0009419871742142544
+    },
+    "raw_fd_error": 1.6007139190532538e-13
+  },
+  "screening": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        -0.004939083468265939,
+        -0.0011376178792720346,
+        -0.0011376178792720344,
+        -0.001407258198949844
+      ]
+    },
+    "nested_jvp": {
+      "passed": true,
+      "value": [
+        -0.004939083468265939,
+        -0.0011376178792720346,
+        -0.0011376178792720344,
+        -0.001407258198949844
+      ]
+    },
+    "nested_vjp": {
+      "passed": true,
+      "value": -0.008621577425759853
+    },
+    "raw_fd_error": 1.0203853820917042e-12
+  },
+  "tda_action": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        -0.01584835169969624,
+        -0.0010145613187520191
+      ]
+    },
+    "nested_jvp": {
+      "passed": true,
+      "value": [
+        -0.01584835169969624,
+        -0.0010145613187520191
+      ]
+    },
+    "nested_vjp": {
+      "passed": true,
+      "value": -0.01686291301844826
+    },
+    "raw_fd_error": 3.7167773199453524e-13
+  },
+  "tda_materialized": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        -0.05382294700678275,
+        -2.3628785803272164e-05,
+        2.3628785803272164e-05
+      ]
+    },
+    "nested_jvp": {
+      "passed": true,
+      "value": [
+        -0.05382294700678275,
+        -2.3628785803272164e-05,
+        2.3628785803272164e-05
+      ]
+    },
+    "nested_vjp": {
+      "passed": true,
+      "value": -0.05382294700678275
+    },
+    "raw_fd_error": 2.8227420401094605e-13
+  },
+  "tda_public": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        -0.053822947006782744,
+        -2.3628785803272148e-05,
+        2.3628785803272148e-05
+      ]
+    },
+    "nested_jvp": {
+      "passed": false,
+      "error": "No constant handler for type: <class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>",
+      "exception": "TypeError"
+    },
+    "nested_vjp": {
+      "passed": false,
+      "error": "No constant handler for type: <class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>",
+      "exception": "TypeError"
+    },
+    "raw_fd_error": 2.8228114290484996e-13
+  },
+  "tda_energy_only": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        -0.053822947006782744
+      ]
+    },
+    "nested_jvp": {
+      "passed": false,
+      "error": "No constant handler for type: <class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>",
+      "exception": "TypeError"
+    },
+    "nested_vjp": {
+      "passed": false,
+      "error": "No constant handler for type: <class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>",
+      "exception": "TypeError"
+    },
+    "raw_fd_error": 2.8228114290484996e-13
+  },
+  "full_dense": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        -0.053835213985580437,
+        -1.7813178007368056e-05,
+        2.3832123229949558e-05
+      ]
+    },
+    "nested_jvp": {
+      "passed": true,
+      "value": [
+        -0.053835213985580437,
+        -1.7813178007368056e-05,
+        2.3832123229949558e-05
+      ]
+    },
+    "nested_vjp": {
+      "passed": true,
+      "value": -0.05382919504035784
+    },
+    "raw_fd_error": 1.1388737175543895e-12
+  },
+  "full_davidson": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        -0.05383521398558043,
+        -1.7813178007375933e-05,
+        2.3832123229949646e-05
+      ]
+    },
+    "nested_jvp": {
+      "passed": false,
+      "error": "No constant handler for type: <class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>",
+      "exception": "TypeError"
+    },
+    "nested_vjp": {
+      "passed": false,
+      "error": "No constant handler for type: <class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>",
+      "exception": "TypeError"
+    },
+    "raw_fd_error": 1.0815653928020197e-12
+  },
+  "toy_bool_guard": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        0.09975157103328777,
+        -0.0002636348261165519,
+        0.0002636348261165519
+      ]
+    },
+    "nested_jvp": {
+      "passed": false,
+      "error": "No constant handler for type: <class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>",
+      "exception": "TypeError"
+    },
+    "nested_vjp": {
+      "passed": false,
+      "error": "No constant handler for type: <class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>",
+      "exception": "TypeError"
+    },
+    "raw_fd_error": 8.957193060182833e-12
+  },
+  "toy_float_guard": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        0.09975157103328777,
+        -0.0002636348261165519,
+        0.0002636348261165519
+      ]
+    },
+    "nested_jvp": {
+      "passed": true,
+      "value": [
+        0.09975157103328777,
+        -0.0002636348261165519,
+        0.0002636348261165519
+      ]
+    },
+    "nested_vjp": {
+      "passed": true,
+      "value": 0.09975157103328777
+    },
+    "raw_fd_error": 8.957193060182833e-12
+  },
+  "toy_traced_indices": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        0.09975157103328776,
+        0.00026363482611655196,
+        -0.00026363482611655196
+      ]
+    },
+    "nested_jvp": {
+      "passed": false,
+      "error": "No constant handler for type: <class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>",
+      "exception": "TypeError"
+    },
+    "nested_vjp": {
+      "passed": false,
+      "error": "No constant handler for type: <class 'jax._src.interpreters.partial_eval.DynamicJaxprTracer'>",
+      "exception": "TypeError"
+    },
+    "raw_fd_error": 8.957193005972724e-12
+  },
+  "toy_host_indices": {
+    "raw_jvp": {
+      "passed": true,
+      "value": [
+        0.09975157103328776,
+        0.00026363482611655196,
+        -0.00026363482611655196
+      ]
+    },
+    "nested_jvp": {
+      "passed": true,
+      "value": [
+        0.09975157103328776,
+        0.00026363482611655196,
+        -0.00026363482611655196
+      ]
+    },
+    "nested_vjp": {
+      "passed": true,
+      "value": 0.09975157103328777
+    },
+    "raw_fd_error": 8.957193005972724e-12
+  }
+}

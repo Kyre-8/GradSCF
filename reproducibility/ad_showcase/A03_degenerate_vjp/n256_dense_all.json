@@ -1,0 +1,918 @@
+{
+  "complete": true,
+  "passed": true,
+  "dimension": 256,
+  "rank": 4,
+  "nparameters": 4,
+  "nprobes": 3,
+  "seed": 1703,
+  "units": "dimensionless",
+  "method": "dense",
+  "response": "shared implicit subspace / GMRES",
+  "settings": {
+    "max_subspace": 64,
+    "eig_tol": 1e-10,
+    "response_tol": 1e-10,
+    "restart": 40,
+    "maxiter": 100
+  },
+  "source_python_sha256": "d0e419a50cc96ebbcaebe8f491879343011f3b019c65582344741d587590d01e",
+  "script_sha256": "3fe9f0674ab57cc210de86547990f4d9c5d51b2c49821be106654ff80a207cf0",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "process_id": 21067,
+  "started_utc": "2026-10-16T02:37:09.036380+00:00",
+  "numpy": "2.4.4",
+  "devices": [
+    "cpu:0"
+  ],
+  "dtype": "float64",
+  "persistent_compilation_cache_enabled": false,
+  "threads": {
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2"
+  },
+  "scope": "Complete fixed-rank projector VJP; no individual-state derivative or forward-speed claim.",
+  "model_structure": "Full-support structured diagonal-plus-low-rank operator; not a generic dense or molecular cost model.",
+  "spectral_probe_norms": {
+    "cluster": 1.7320508075688772,
+    "bath": 1.7320508075688772
+  },
+  "cluster_bath_perturbation_norms": [
+    0.15009967267199792,
+    0.1502464060498734,
+    0.15001947618222683,
+    0.15020023998089924
+  ],
+  "cases": [
+    {
+      "internal_gap": 0.1,
+      "external_gap": 0.7,
+      "converged": true,
+      "response_valid": true,
+      "status": 0,
+      "boundary_gap": 0.6999999999999993,
+      "values": [
+        0.14031404921276397,
+        4.0
+      ],
+      "vjp": [
+        -0.028550990954611957,
+        -0.0230614301922287,
+        0.003888424482676578,
+        -0.0069027978301709255
+      ],
+      "raw_eigenvalues": [
+        0.9499999999999994,
+        0.9833333333333342,
+        1.0166666666666653,
+        1.0500000000000014,
+        1.7500000000000007
+      ],
+      "ritz_residuals": [
+        1.6212580693414262e-15,
+        3.5906489201156575e-15,
+        3.981715141680385e-15,
+        3.0920253452993087e-15,
+        2.8677377066175415e-15
+      ],
+      "timing_seconds": {
+        "forward_state": 0.3614463040000828,
+        "vjp_preparation": 0.8830239779999829,
+        "retained_pullback_first": 0.6194104100000004,
+        "retained_pullback_warm": [
+          0.0034180929999365617,
+          0.002748823000047196,
+          0.002672996000001149
+        ],
+        "value_and_grad_first": 0.7251744760001202,
+        "value_and_grad_warm": [
+          0.009215001000029588,
+          0.008854953000081878,
+          0.009042829999998503
+        ],
+        "jvp_first": 0.7919081729999107
+      },
+      "process_peak_rss_mib": {
+        "before_prepare": 884.21875,
+        "after_prepare": 932.16796875,
+        "after_pullback": 983.01953125
+      },
+      "adjoint_residual": null,
+      "adjoint_iterations": null,
+      "operator_calls": null,
+      "adjoint_diagnostics": "Shared true-residual guard is active; actual residual/counts are not exposed.",
+      "reference_vjp": [
+        -0.028550990954631296,
+        -0.023061430192231006,
+        0.0038884244826861824,
+        -0.006902797830175046
+      ],
+      "reference_vjp_norm": 0.037546732345763514,
+      "vjp_max_error": 1.9338697310189445e-14,
+      "vjp_relative_error": 5.88673392363166e-13,
+      "trace_vjp": [
+        -0.0805740623856031,
+        -0.026181959400547978,
+        0.1261300112720226,
+        -0.10247950726160969
+      ],
+      "jvp": [
+        -0.005637747059293095,
+        0.0388302921901772
+      ],
+      "jvp_vjp_error": 1.9437576548320123e-15,
+      "direction": [
+        0.5477225575051661,
+        -0.3651483716701107,
+        0.7302967433402214,
+        0.18257418583505536
+      ],
+      "finite_differences": {
+        "performed": true,
+        "perturbation_norm_upper_bound": 0.7353050010604869,
+        "steps": [
+          {
+            "step": 0.0007,
+            "derivative": [
+              -0.005637746996229558,
+              0.038830292095377264
+            ],
+            "max_error": 9.479993873240389e-11
+          },
+          {
+            "step": 0.00020999999999999998,
+            "derivative": [
+              -0.005637747053723251,
+              0.03883029219434572
+            ],
+            "max_error": 5.569844065134166e-12
+          },
+          {
+            "step": 7e-05,
+            "derivative": [
+              -0.005637747061256907,
+              0.03883029219434572
+            ],
+            "max_error": 4.168519696090556e-12
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "internal_gap": 0.001,
+      "external_gap": 0.7,
+      "converged": true,
+      "response_valid": true,
+      "status": 0,
+      "boundary_gap": 0.7000000000000031,
+      "values": [
+        0.14031404921276322,
+        3.9999999999999973
+      ],
+      "vjp": [
+        -0.028305948160926984,
+        -0.02473166276747657,
+        0.004542518731301975,
+        -0.007030804959741894
+      ],
+      "raw_eigenvalues": [
+        0.9994999999999994,
+        0.9998333333333324,
+        1.0001666666666666,
+        1.0004999999999988,
+        1.700500000000002
+      ],
+      "ritz_residuals": [
+        8.067544286573346e-16,
+        3.009175144393837e-15,
+        3.2248614734103347e-15,
+        3.24470016100445e-15,
+        3.1605458544432172e-15
+      ],
+      "timing_seconds": {
+        "forward_state": 0.00693268200006969,
+        "vjp_preparation": 0.007624847999977646,
+        "retained_pullback_first": 0.0028831680001530913,
+        "retained_pullback_warm": [
+          0.002624696000111726,
+          0.0025035810001554637,
+          0.002463021000039589
+        ],
+        "value_and_grad_first": 0.00879404100010106,
+        "value_and_grad_warm": [
+          0.009060930000032386,
+          0.008804712999790354,
+          0.00862469499998042
+        ],
+        "jvp_first": 0.008837249999942287
+      },
+      "process_peak_rss_mib": {
+        "before_prepare": 1079.55859375,
+        "after_prepare": 1080.58984375,
+        "after_pullback": 1080.58984375
+      },
+      "adjoint_residual": null,
+      "adjoint_iterations": null,
+      "operator_calls": null,
+      "adjoint_diagnostics": "Shared true-residual guard is active; actual residual/counts are not exposed.",
+      "reference_vjp": [
+        -0.028305948160937178,
+        -0.024731662767446566,
+        0.0045425187312518826,
+        -0.007030804959707655
+      ],
+      "reference_vjp_norm": 0.03850907087086872,
+      "vjp_max_error": 5.009274245404427e-14,
+      "vjp_relative_error": 1.7775649934016827e-12,
+      "trace_vjp": [
+        -0.08057406238560286,
+        -0.02618195940054783,
+        0.12613001127202222,
+        -0.10247950726160968
+      ],
+      "jvp": [
+        -0.004439336786341328,
+        0.038830292190177036
+      ],
+      "jvp_vjp_error": 9.962516922534803e-15,
+      "direction": [
+        0.5477225575051661,
+        -0.3651483716701107,
+        0.7302967433402214,
+        0.18257418583505536
+      ],
+      "finite_differences": {
+        "performed": true,
+        "perturbation_norm_upper_bound": 0.7353050010604869,
+        "steps": [
+          {
+            "step": 0.0007,
+            "derivative": [
+              -0.004439336724972241,
+              0.038830292086178275
+            ],
+            "max_error": 1.0399876099187466e-10
+          },
+          {
+            "step": 0.00020999999999999998,
+            "derivative": [
+              -0.004439336782703839,
+              0.03883029217742804
+            ],
+            "max_error": 1.2748996303102444e-11
+          },
+          {
+            "step": 7e-05,
+            "derivative": [
+              -0.004439336788254954,
+              0.03883029218800159
+            ],
+            "max_error": 2.1754473222834747e-12
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "internal_gap": 1e-06,
+      "external_gap": 0.7,
+      "converged": true,
+      "response_valid": true,
+      "status": 0,
+      "boundary_gap": 0.6999999999999997,
+      "values": [
+        0.1403140492127636,
+        4.0
+      ],
+      "vjp": [
+        -0.028303438217560664,
+        -0.024750029914319974,
+        0.004549573833030544,
+        -0.007032231791905877
+      ],
+      "raw_eigenvalues": [
+        0.9999995000000004,
+        0.9999998333333339,
+        1.0000001666666658,
+        1.000000500000001,
+        1.7000005000000007
+      ],
+      "ritz_residuals": [
+        1.0180100167566478e-15,
+        2.8477005361815488e-15,
+        3.512691076368162e-15,
+        3.43461229886071e-15,
+        4.189599766712893e-15
+      ],
+      "timing_seconds": {
+        "forward_state": 0.006591031999960251,
+        "vjp_preparation": 0.007331930999953329,
+        "retained_pullback_first": 0.0026586159999624215,
+        "retained_pullback_warm": [
+          0.0025480689998857997,
+          0.002478477000067869,
+          0.0024522209998849576
+        ],
+        "value_and_grad_first": 0.009176330000173039,
+        "value_and_grad_warm": [
+          0.008771960000103718,
+          0.008820188000072449,
+          0.008599258999993253
+        ],
+        "jvp_first": 0.008628750000070795
+      },
+      "process_peak_rss_mib": {
+        "before_prepare": 1082.65234375,
+        "after_prepare": 1082.65234375,
+        "after_pullback": 1082.65234375
+      },
+      "adjoint_residual": null,
+      "adjoint_iterations": null,
+      "operator_calls": null,
+      "adjoint_diagnostics": "Shared true-residual guard is active; actual residual/counts are not exposed.",
+      "reference_vjp": [
+        -0.02830343821757024,
+        -0.024750029914289824,
+        0.0045495738329804376,
+        -0.007032231791873107
+      ],
+      "reference_vjp_norm": 0.038520118142737154,
+      "vjp_max_error": 5.0106620241852085e-14,
+      "vjp_relative_error": 1.7578928420548074e-12,
+      "trace_vjp": [
+        -0.08057406238560297,
+        -0.02618195940054799,
+        0.12613001127202245,
+        -0.1024795072616097
+      ],
+      "jvp": [
+        -0.004426363484883832,
+        0.038830292190177175
+      ],
+      "jvp_vjp_error": 1.0000680839006293e-14,
+      "direction": [
+        0.5477225575051661,
+        -0.3651483716701107,
+        0.7302967433402214,
+        0.18257418583505536
+      ],
+      "finite_differences": {
+        "performed": true,
+        "perturbation_norm_upper_bound": 0.7353050010604869,
+        "steps": [
+          {
+            "step": 0.0007,
+            "derivative": [
+              -0.004426363423967342,
+              0.03883029208395783
+            ],
+            "max_error": 1.0621934581900305e-10
+          },
+          {
+            "step": 0.00020999999999999998,
+            "derivative": [
+              -0.004426363481170262,
+              0.0388302921901163
+            ],
+            "max_error": 3.71357024991914e-12
+          },
+          {
+            "step": 7e-05,
+            "derivative": [
+              -0.0044263634828884645,
+              0.038830292181657455
+            ],
+            "max_error": 8.519719651989277e-12
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "internal_gap": 0.0,
+      "external_gap": 0.7,
+      "converged": true,
+      "response_valid": true,
+      "status": 0,
+      "boundary_gap": 0.6999999999999971,
+      "values": [
+        0.14031404921276497,
+        4.000000000000003
+      ],
+      "vjp": [
+        -0.02830343570472987,
+        -0.02475004831645899,
+        0.004549580900133878,
+        -0.007032233221678162
+      ],
+      "raw_eigenvalues": [
+        0.9999999999999998,
+        1.0000000000000002,
+        0.9999999999999994,
+        1.0000000000000029,
+        1.7
+      ],
+      "ritz_residuals": [
+        3.1263909571887716e-15,
+        3.2639810417109514e-15,
+        7.265407281902903e-16,
+        4.289620040783322e-15,
+        2.829252784711253e-15
+      ],
+      "timing_seconds": {
+        "forward_state": 0.006975520999958462,
+        "vjp_preparation": 0.007070671000064976,
+        "retained_pullback_first": 0.0026385389999177278,
+        "retained_pullback_warm": [
+          0.00256545999991431,
+          0.0024869999999737047,
+          0.0024753150000833557
+        ],
+        "value_and_grad_first": 0.008623535999959131,
+        "value_and_grad_warm": [
+          0.008722381000097812,
+          0.00915617900000143,
+          0.008825130999866815
+        ],
+        "jvp_first": 0.008638407000034931
+      },
+      "process_peak_rss_mib": {
+        "before_prepare": 1083.68359375,
+        "after_prepare": 1083.68359375,
+        "after_pullback": 1083.68359375
+      },
+      "adjoint_residual": null,
+      "adjoint_iterations": null,
+      "operator_calls": null,
+      "adjoint_diagnostics": "Shared true-residual guard is active; actual residual/counts are not exposed.",
+      "reference_vjp": [
+        -0.028303435704739435,
+        -0.024750048316428873,
+        0.004549580900083844,
+        -0.007032233221645316
+      ],
+      "reference_vjp_norm": 0.03852012921587754,
+      "vjp_max_error": 5.003376185586106e-14,
+      "vjp_relative_error": 1.75704374255393e-12,
+      "trace_vjp": [
+        -0.08057406238560315,
+        -0.026181959400548075,
+        0.12613001127202259,
+        -0.10247950726160981
+      ],
+      "jvp": [
+        -0.004426350488995578,
+        0.03883029219017715
+      ],
+      "jvp_vjp_error": 9.992874583364397e-15,
+      "direction": [
+        0.5477225575051661,
+        -0.3651483716701107,
+        0.7302967433402214,
+        0.18257418583505536
+      ],
+      "finite_differences": {
+        "performed": true,
+        "perturbation_norm_upper_bound": 0.7353050010604869,
+        "steps": [
+          {
+            "step": 0.0007,
+            "derivative": [
+              -0.00442635042936195,
+              0.038830292085226654
+            ],
+            "max_error": 1.0495049274084067e-10
+          },
+          {
+            "step": 0.00020999999999999998,
+            "derivative": [
+              -0.004426350482837693,
+              0.038830292183772167
+            ],
+            "max_error": 6.404980712471087e-12
+          },
+          {
+            "step": 7e-05,
+            "derivative": [
+              -0.0044263504794012885,
+              0.03883029217531333
+            ],
+            "max_error": 1.4863818509347482e-11
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "internal_gap": 0.0,
+      "external_gap": 0.1,
+      "converged": true,
+      "response_valid": true,
+      "status": 0,
+      "boundary_gap": 0.09999999999999942,
+      "values": [
+        0.14031404921276452,
+        4.0
+      ],
+      "vjp": [
+        -0.05166678397415087,
+        -0.05007004169067526,
+        0.00949304962862663,
+        -0.032850782014316834
+      ],
+      "raw_eigenvalues": [
+        1.000000000000001,
+        1.0000000000000009,
+        0.9999999999999982,
+        1.0000000000000002,
+        1.0999999999999996
+      ],
+      "ritz_residuals": [
+        3.313356175667816e-15,
+        1.3687316018105288e-15,
+        2.9601374162114455e-15,
+        4.552325527436404e-15,
+        2.583490463169226e-15
+      ],
+      "timing_seconds": {
+        "forward_state": 0.006512108000151784,
+        "vjp_preparation": 0.0069626669999252044,
+        "retained_pullback_first": 0.005492312999876958,
+        "retained_pullback_warm": [
+          0.005467690000159564,
+          0.005261603000008108,
+          0.005248245000075258
+        ],
+        "value_and_grad_first": 0.011684043000059319,
+        "value_and_grad_warm": [
+          0.01198604000001069,
+          0.011607469999944442,
+          0.012577433999922505
+        ],
+        "jvp_first": 0.010486204000017096
+      },
+      "process_peak_rss_mib": {
+        "before_prepare": 1083.68359375,
+        "after_prepare": 1083.68359375,
+        "after_pullback": 1083.68359375
+      },
+      "adjoint_residual": null,
+      "adjoint_iterations": null,
+      "operator_calls": null,
+      "adjoint_diagnostics": "Shared true-residual guard is active; actual residual/counts are not exposed.",
+      "reference_vjp": [
+        -0.05166678397449803,
+        -0.050070041690508306,
+        0.009493049628602446,
+        -0.03285078201475463
+      ],
+      "reference_vjp_norm": 0.07966026306376801,
+      "vjp_max_error": 4.3779563307921876e-13,
+      "vjp_relative_error": 7.326707555373722e-12,
+      "trace_vjp": [
+        -0.0805740623856029,
+        -0.026181959400547933,
+        0.12613001127202234,
+        -0.10247950726160976
+      ],
+      "jvp": [
+        -0.009081030415812643,
+        0.038830292190177106
+      ],
+      "jvp_vjp_error": 7.278032343460694e-14,
+      "direction": [
+        0.5477225575051661,
+        -0.3651483716701107,
+        0.7302967433402214,
+        0.18257418583505536
+      ],
+      "finite_differences": {
+        "performed": true,
+        "perturbation_norm_upper_bound": 0.7353050010604869,
+        "steps": [
+          {
+            "step": 0.0001,
+            "derivative": [
+              -0.009081030427071646,
+              0.03883029217499612
+            ],
+            "max_error": 1.5180988410801177e-11
+          },
+          {
+            "step": 2.9999999999999997e-05,
+            "derivative": [
+              -0.009081030423926014,
+              0.038830292218664894
+            ],
+            "max_error": 2.8487788517050916e-11
+          },
+          {
+            "step": 1e-05,
+            "derivative": [
+              -0.009081030569180193,
+              0.03883029184859055
+            ],
+            "max_error": 3.415865576505972e-10
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "internal_gap": 0.0,
+      "external_gap": 0.01,
+      "converged": true,
+      "response_valid": true,
+      "status": 0,
+      "boundary_gap": 0.010000000000000342,
+      "values": [
+        0.1403140492127641,
+        4.0
+      ],
+      "vjp": [
+        -0.09092792117169199,
+        -0.06537594648754042,
+        0.013290110090178959,
+        -0.09875551062099572
+      ],
+      "raw_eigenvalues": [
+        1.0000000000000002,
+        1.000000000000001,
+        0.9999999999999993,
+        0.9999999999999994,
+        1.0099999999999998
+      ],
+      "ritz_residuals": [
+        4.034305117732357e-15,
+        3.567985796568849e-15,
+        1.267288402601421e-15,
+        4.6431264013724445e-15,
+        2.2332689076353262e-15
+      ],
+      "timing_seconds": {
+        "forward_state": 0.006620485999974335,
+        "vjp_preparation": 0.00724564699999064,
+        "retained_pullback_first": 0.018251588999874002,
+        "retained_pullback_warm": [
+          0.01776511599996411,
+          0.017639472999917416,
+          0.017641774999901827
+        ],
+        "value_and_grad_first": 0.023432097000068097,
+        "value_and_grad_warm": [
+          0.02320321399997738,
+          0.02315196700010347,
+          0.023211911000089458
+        ],
+        "jvp_first": 0.020595198000137316
+      },
+      "process_peak_rss_mib": {
+        "before_prepare": 1085.80078125,
+        "after_prepare": 1086.05859375,
+        "after_pullback": 1086.05859375
+      },
+      "adjoint_residual": null,
+      "adjoint_iterations": null,
+      "operator_calls": null,
+      "adjoint_diagnostics": "Shared true-residual guard is active; actual residual/counts are not exposed.",
+      "reference_vjp": [
+        -0.09092792117542521,
+        -0.06537594648786967,
+        0.013290110092060643,
+        -0.09875551062392815
+      ],
+      "reference_vjp_norm": 0.14990389966015233,
+      "vjp_max_error": 3.7332220648167436e-12,
+      "vjp_relative_error": 3.413621734139588e-11,
+      "trace_vjp": [
+        -0.08057406238560286,
+        -0.02618195940054839,
+        0.12613001127202214,
+        -0.10247950726160984
+      ],
+      "jvp": [
+        -0.03425583595577188,
+        0.03883029219017715
+      ],
+      "jvp_vjp_error": 1.5604670333679849e-12,
+      "direction": [
+        0.5477225575051661,
+        -0.3651483716701107,
+        0.7302967433402214,
+        0.18257418583505536
+      ],
+      "finite_differences": {
+        "performed": true,
+        "perturbation_norm_upper_bound": 0.7353050010604869,
+        "steps": [
+          {
+            "step": 1e-05,
+            "derivative": [
+              -0.034255836003915796,
+              0.03883029200402177
+            ],
+            "max_error": 1.861553758364387e-10
+          },
+          {
+            "step": 2.9999999999999997e-06,
+            "derivative": [
+              -0.0342558360103921,
+              0.038830292166854484
+            ],
+            "max_error": 5.4620225009571755e-11
+          },
+          {
+            "step": 1.0000000000000002e-06,
+            "derivative": [
+              -0.034255836861563076,
+              0.038830291870795
+            ],
+            "max_error": 9.057911989907019e-10
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "internal_gap": 0.0,
+      "external_gap": 0.001,
+      "converged": true,
+      "response_valid": true,
+      "status": 0,
+      "boundary_gap": 0.0010000000000014442,
+      "values": [
+        0.1403140492127556,
+        3.9999999999999982
+      ],
+      "vjp": [
+        -0.3927611817339967,
+        -0.06588623310021473,
+        0.07483515336855025,
+        -0.4649332842067744
+      ],
+      "raw_eigenvalues": [
+        1.0,
+        0.9999999999999992,
+        0.9999999999999991,
+        0.9999999999999996,
+        1.001000000000001
+      ],
+      "ritz_residuals": [
+        2.3541364645361414e-15,
+        9.621844695717883e-16,
+        3.1556872820107827e-15,
+        4.016778810228607e-15,
+        2.9042364871937495e-15
+      ],
+      "timing_seconds": {
+        "forward_state": 0.0067846679999092885,
+        "vjp_preparation": 0.00706412099998488,
+        "retained_pullback_first": 0.0295775520000916,
+        "retained_pullback_warm": [
+          0.0291290109998954,
+          0.028367727000158993,
+          0.02841726099995867
+        ],
+        "value_and_grad_first": 0.035526246000017636,
+        "value_and_grad_warm": [
+          0.03621001300007265,
+          0.036316570000053616,
+          0.03706906699994761
+        ],
+        "jvp_first": 0.04362659200000962
+      },
+      "process_peak_rss_mib": {
+        "before_prepare": 1086.57421875,
+        "after_prepare": 1086.57421875,
+        "after_pullback": 1086.57421875
+      },
+      "adjoint_residual": null,
+      "adjoint_iterations": null,
+      "operator_calls": null,
+      "adjoint_diagnostics": "Shared true-residual guard is active; actual residual/counts are not exposed.",
+      "reference_vjp": [
+        -0.39276118177070374,
+        -0.0658862330996901,
+        0.07483515337622432,
+        -0.46493328425020325
+      ],
+      "reference_vjp_norm": 0.6167378702516246,
+      "vjp_max_error": 4.3428871610018405e-11,
+      "vjp_relative_error": 9.304037632299965e-11,
+      "trace_vjp": [
+        -0.08057406238560429,
+        -0.026181959400548144,
+        0.12613001127202245,
+        -0.1024795072616116
+      ],
+      "jvp": [
+        -0.22129885524882187,
+        0.03883029219017614
+      ],
+      "jvp_vjp_error": 6.50537956836672e-12,
+      "direction": [
+        0.5477225575051661,
+        -0.3651483716701107,
+        0.7302967433402214,
+        0.18257418583505536
+      ],
+      "finite_differences": {
+        "performed": true,
+        "perturbation_norm_upper_bound": 0.7353050010604869,
+        "steps": [
+          {
+            "step": 1e-06,
+            "derivative": [
+              -0.22129885654531556,
+              0.03883029187079501
+            ],
+            "max_error": 1.2964936901838087e-09
+          },
+          {
+            "step": 3e-07,
+            "derivative": [
+              -0.22129887524332167,
+              0.03883028417324871
+            ],
+            "max_error": 1.9994499805831012e-08
+          },
+          {
+            "step": 1.0000000000000001e-07,
+            "derivative": [
+              -0.22129889171162984,
+              0.03883030785800656
+            ],
+            "max_error": 3.6462807967430066e-08
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "internal_gap": 0.0,
+      "external_gap": 1e-10,
+      "converged": true,
+      "response_valid": false,
+      "status": 2,
+      "boundary_gap": 9.999778782798785e-11,
+      "values": [
+        0.14031394522727772,
+        4.000000000000002
+      ],
+      "vjp": [
+        NaN,
+        NaN,
+        NaN,
+        NaN
+      ],
+      "raw_eigenvalues": [
+        0.9999999999999999,
+        0.9999999999999998,
+        1.0000000000000009,
+        1.0000000000000018,
+        1.0000000000999996
+      ],
+      "ritz_residuals": [
+        5.639701326294258e-16,
+        2.382348426847622e-15,
+        3.821020023814833e-15,
+        3.720198169416779e-15,
+        3.366287262027408e-15
+      ],
+      "timing_seconds": {
+        "forward_state": 0.008086000999810494,
+        "vjp_preparation": 0.007395631999997931,
+        "retained_pullback_first": 0.0007990139999947132
+      },
+      "process_peak_rss_mib": {
+        "before_prepare": 1086.57421875,
+        "after_prepare": 1086.57421875,
+        "after_pullback": 1086.57421875
+      },
+      "adjoint_residual": null,
+      "adjoint_iterations": null,
+      "operator_calls": null,
+      "adjoint_diagnostics": "Shared true-residual guard is active; actual residual/counts are not exposed.",
+      "expected_boundary_rejection": true,
+      "derivative_nonfinite": true,
+      "passed": true
+    }
+  ],
+  "gauge_and_cut_checks": {
+    "rotated_frame_vjp": [
+      -0.02830343570472978,
+      -0.024750048316458984,
+      0.004549580900133929,
+      -0.007032233221678094
+    ],
+    "rotated_frame_vjp_error": 5.0084936198402374e-14,
+    "cut_rank": 3,
+    "cut_response_valid": false,
+    "cut_derivative_nonfinite": true
+  },
+  "elapsed_seconds": 21.563394763999895,
+  "process_peak_rss_mib": 2066.6328125
+}

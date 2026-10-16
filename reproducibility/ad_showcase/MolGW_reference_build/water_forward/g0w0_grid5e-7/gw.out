@@ -1,0 +1,1775 @@
+ ======================================================================
+
+
+            Welcome to the fascinating world of MOLGW
+
+                        3.4
+
+
+ ======================================================================
+
+ MOLGW commit git SHA: Stopping at filesystem boundary (GIT_DIS
+
+ compiled with Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.9.0 Build 20230302_000000
+ with options: 
+      FCFLAGS -I/home/yjiao/opt/miniconda3/envs/jax_scf/lib/python3.11/site-packages/pyscf/lib/deps/include 
+      FCFLAGS -fpp 
+      FCFLAGS -O2 
+ 
+ Today is 10/16/2026
+ It is now 04:31
+ And it is too early to work. Go back to sleep
+
+ Preprocessing and runtime options:
+ Running with LIBXC
+     LIBXC version:  7. 0. 0
+ Code compiled with LIBCINT support with max angular momentum:     8
+ Current LIBCINT compilation uses PXPYPZ ordering for p pure orbitals
+ Current LIBCINT compilation has range-separation capability
+ Running with external LIBINT or LIBCINT calculation of the one-body operators (faster)
+ 
+ 
+ Opening input file: gw.in
+
+  === Echo the entire list of input variables  ===
+
+                               a1  (  0.00000000E+00    0.00000000E+00    0.00000000E+00  )
+                               a2  (  0.00000000E+00    0.00000000E+00    0.00000000E+00  )
+                               a3  (  0.00000000E+00    0.00000000E+00    0.00000000E+00  )
+                     acfd_nlambda        21
+                     alpha_hybrid    0.00000000E+00
+                     alpha_mixing    7.00000000E-01
+                     analytic_chi      no 
+                     approx_h_x2c      yes
+             assume_scf_converged      no 
+                  auto_auxil_fsam    1.50000000E+00
+               auto_auxil_lmaxinc         1
+                  auto_occupation      no 
+                      auxil_basis      
+                            basis      6-31Gs
+                       basis_path      /home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/molgw-stock/basis/
+                      beta_hybrid    0.00000000E+00
+                   bogoliubov_scf      no 
+                 bogoliubov_sigma    1.00000000E+00
+                     c_speedlight    1.37035999E+02
+                 calc_charge_step    1.00000000E+00
+                   calc_dens_disc      no 
+                    calc_q_matrix      no 
+                    calc_spectrum      no 
+                       cc4s_input      molgw
+                      cc4s_output      molgw
+                           charge    0.00000000E+00
+                   check_cdsc_x2c      yes
+               ci_greens_function      holes
+                        ci_nstate         1
+                   ci_nstate_self         1
+             ci_spin_multiplicity         1
+                          ci_type      all
+                          comment      
+                      complex_scf      no 
+                      cphf_cpks_0      no 
+                          cube_nx        30
+                          cube_ny        30
+                          cube_nz        30
+                   cube_state_max         1
+                   cube_state_min         1
+           density_matrix_damping    0.00000000E+00
+                         dft_core         0
+                      diis_switch    5.00000000E-02
+                  ecp_auxil_basis      
+                        ecp_basis      
+                     ecp_elements      
+                      ecp_quality      high
+                  ecp_small_basis      
+                         ecp_type      
+                 electric_field_x    0.00000000E+00
+                 electric_field_y    0.00000000E+00
+                 electric_field_z    0.00000000E+00
+                     eri3_genuine      no 
+                      eri3_nbatch         1
+                       eri3_npcol         1
+                       eri3_nprow         1
+                              eta    1.00000000E-05
+              even_tempered_alpha    1.00000000E+00
+               even_tempered_beta    5.00000000E-01
+             even_tempered_n_list      1
+                        excit_dir  (  1.00000000E+00    0.00000000E+00    0.00000000E+00  )
+                      excit_kappa    2.00000000E-05
+                       excit_name      no
+                      excit_time0    3.00000000E+00
+                      excit_width    2.00000000E-01
+               fft_coulomb_cutoff    0.00000000E+00
+             fft_coulomb_exchange      spherical
+              fft_coulomb_hartree      bare
+                         fft_ecut    1.20000000E+02
+                 fft_ecut_postscf    9.99990000E+04
+                    fft_neighbors         1
+                 fft_read_density      no 
+                  fft_renormalize      yes
+                  force_energy_qp      no 
+                       frozencore      no
+                     g3w2_skip_vv      no 
+                    g3w2_skip_vvv      no 
+        g3w2_static_approximation      no 
+                     gamma_hybrid    1.00000000E+06
+                    gaussian_type      CART
+                      grid_memory    4.00000000E+02
+                     grid_quality      high
+                    gwgamma_tddft      no 
+                        harmonium      no 
+                ignore_bigrestart      no 
+                           incore      yes
+                 init_hamiltonian      guess
+                 integral_quality      high
+                     kappa_hybrid    0.00000000E+00
+                        kerker_k0    0.00000000E+00
+                      length_unit      bohr
+            level_shifting_energy    0.00000000E+00
+                    magnetization    0.00000000E+00
+                memory_evaluation      no 
+                      min_overlap    1.00000000E-05
+                    mixing_scheme      pulay
+                      move_nuclei      no
+                      mpi_poorman      Fal
+                        mu_origin   -1.00000000E+02
+                           n_iter         2
+                  n_restart_tddft        50
+                            natom         3
+                      ncore_tddft         0
+                           ncoreg         0
+                           ncorew         0
+                      nexcitation         0
+                           nghost         0
+                     noft_complex      no 
+                         noft_dft      no 
+                        noft_dft0      yes
+                     noft_fcidump      no 
+                  noft_functional      GNOF
+                     noft_hessian      no 
+              noft_ithresh_lambda         5
+                   noft_lowmemeri      yes
+                      noft_lpower    5.30000000E-01
+                    noft_ncoupled         2
+                       noft_ndiis         5
+                    noft_nophases      no 
+                noft_notupdateocc      no 
+                noft_notupdateorb      no 
+                      noft_notvxc      no 
+                      noft_npairs         1
+                      noft_nr_occ      no 
+                        noft_nscf      1000
+                    noft_printdmn      no 
+                   noft_printints      no 
+                  noft_printswdmn      no 
+                      noft_qc_orb      no 
+                    noft_readcoef      no 
+                   noft_readfdiag      no 
+                  noft_readgammas      no 
+                     noft_readocc      no 
+                     noft_restart      no 
+                     noft_rsinter      no 
+                        noft_tole    1.00000000E-09
+                  nomega_chi_imag         0
+                  nomega_chi_real         2
+                     nomega_sigma   4000001
+                nomega_sigma_calc         1
+                      npulay_hist         6
+                             nscf       100
+                            nspin         1
+                            nstep        50
+                        nstep_dav        15
+                         nstep_gw         1
+                  nvel_projectile         1
+                        nvirtualg        20
+                        nvirtualw        20
+                   parabolic_conf      no 
+                 partition_scheme      ssf
+                   pbe_plus_alpha    0.00000000E+00
+                      poscar_file      
+                          postscf      G0W0
+             postscf_diago_flavor      
+            print_all_mo_wfn_file      no 
+                print_bare_energy      no 
+                 print_bigrestart      yes
+        print_c_matrix_cmplx_hdf5      no 
+                 print_cc4s_files      no 
+               print_charge_tddft      no 
+                       print_cube      no 
+            print_cube_diff_tddft      no 
+             print_cube_rho_tddft      no 
+                  print_dens_traj      no 
+       print_dens_traj_points_set      no 
+            print_dens_traj_tddft      no 
+             print_density_matrix      no 
+                        print_eri      no 
+                    print_hartree      no 
+                       print_hdf5      no 
+        print_line_rho_diff_tddft      no 
+             print_line_rho_tddft      no 
+                     print_molden      no 
+                  print_multipole      no 
+     print_p_matrix_mo_block_hdf5      no 
+                       print_pdos      no 
+                    print_restart      yes
+                   print_rho_grid      no 
+                      print_sigma      no 
+          print_spatial_extension      no 
+             print_tddft_matrices      no 
+              print_tddft_restart      yes
+         print_transition_density      no 
+          print_transition_dipole      no 
+                          print_w      yes
+                        print_wfn      no 
+                  print_wfn_files      no 
+                       print_yaml      yes
+        projectile_charge_scaling    1.00000000E+00
+                   pt3_a_diagrams      yes
+                pt_density_matrix      no
+                           r_disc    2.00000000E+02
+                        rcut_mbpt    1.00000000E+00
+                 rdm_filtering_mo         0
+                 rdm_filtering_no         0
+                        read_fchk      no
+                      read_molden      
+                     read_restart      no                                                                                                                                          
+               read_tddft_restart      no 
+                    restart_input      RESTART
+                    rwconfinement    0.00000000E+00
+              scalapack_block_min    100000
+                              scf      HF
+                 scf_diago_flavor      
+                 scf_energy_shift    0.00000000E+00
+                          scissor    0.00000000E+00
+             selfenergy_state_max        19
+             selfenergy_state_min         1
+           selfenergy_state_range    100000
+            selfenergy_tdhf_alpha    0.00000000E+00
+             selfenergy_tdhf_beta    0.00000000E+00
+            selfenergy_tdhf_delta    2.00000000E+00
+          selfenergy_tdhf_epsilon    0.00000000E+00
+            selfenergy_tdhf_gamma    1.00000000E+00
+             selfenergy_tdhf_zeta    0.00000000E+00
+                      small_basis      
+                       step_sigma    5.00000000E-07
+                  step_sigma_calc    3.00000000E-02
+                         stopping      no
+                      stopping_dq    2.00000000E-02
+                      stopping_nq       500
+                              tda      no 
+                     tddft_charge   -9.99000000E+02
+               tddft_energy_shift    0.00000000E+00
+                      tddft_force      no 
+               tddft_grid_quality      high
+                    tddft_history         2
+              tddft_magnetization    0.00000000E+00
+        tddft_predictor_corrector      PC2B
+                 tddft_propagator      CN
+                     tddft_wfn_t0      SCF
+                      temperature    0.00000000E+00
+                         time_sim    1.00000000E+01
+                        time_step    1.00000000E+00
+                           toldav    1.00000000E-04
+                         tolforce    1.00000000E-05
+                           tolscf    1.00000000E-12
+                     tolscf_tddft    1.00000000E-04
+                          triplet      no 
+    use_correlated_density_matrix      no 
+                   vel_projectile  (  0.00000000E+00    0.00000000E+00    1.00000000E+00  )
+                      virtual_fno      no 
+                      w_screening      rpa
+                       write_step    1.00000000E+00
+                              x2c      no 
+                         xyz_file      
+                      yaml_output      molgw.yaml
+
+  ================================================
+
+
+ Summary of important input parameters 
+
+                    SCF type:   HF                                                                                                  
+               Post SCF type:   G0W0                                                                                                
+             number of atoms:    3
+     number of basis centers:    3
+                   electrons:    10.0000
+                      charge:     0.0000
+           spin polarization:    1
+               magnetization:     0.0000
+              basis file path:  /home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/molgw-stock/basis/
+                   basis set:   6-31Gs                                                                                              
+         auxiliary basis set:                                                                                                       
+               gaussian type:   CART
+             global exchange:     1.0000
+    long-range-only exchange:     0.0000
+   range-separation (bohr-1):  none
+ 
+
+ ================================
+       Atom list
+                        bohr                                        angstrom
+ atom    1   O      :      0.000000     0.000000     0.000000           0.000000     0.000000     0.000000
+ atom    2   H      :      0.000000     1.430000     1.110000           0.000000     0.756723     0.587387
+ atom    3   H      :      0.000000    -1.430000     1.110000           0.000000    -0.756723     0.587387
+ ================================
+
+ Number of bonds     2
+ Molecule does not have inversion symmetry
+ Molecule is not linear
+ Molecule is planar
+ 
+
+ Setting up the cartesian to pure transforms up to l=  8
+ Transformations set up completed for both CARTESIAN and PURE Gaussians
+ 
+ Setting up the basis set for wavefunctions
+
+                  Total number of basis functions:      19
+                                 Number of shells:      10
+        Maximum angular momentum in the basis set:       2
+                                                         d
+ Basis set is fit and ready
+
+
+ Initialize LIBCINT internal data for 1 basis set (basis or auxiliary basis)
+ LIBCINT environment maximum index:       75
+   Allocate:                                   Overlap matrix S,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Setup overlap matrix S (LIBCINT)
+
+ Calculate the transformation matrix X 
+   Allocate:                           Overlap X * X**H = S**-1,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Filtering basis functions that induce overcompleteness
+   S condition number                 2.10E+02
+   Lowest S eigenvalue is             2.23E-02
+   Tolerance on overlap eigenvalues   1.00E-05
+   Retaining    19 among    19
+
+ === Occupations ===
+     1      2.00000
+     2      2.00000
+     3      2.00000
+     4      2.00000
+     5      2.00000
+     6      0.00000
+     7      0.00000
+     8      0.00000
+     9      0.00000
+    10      0.00000
+    11      0.00000
+    12      0.00000
+    13      0.00000
+    14      0.00000
+    15      0.00000
+ 
+
+ Tolerance on integrals set to  1.00E-08
+
+ Cauchy-Schwartz screening of the 3- or 4-center integrals (LIBCINT)
+
+ Non negligible shellpairs to be computed      55  over a total of      55
+ Saving (%):       0.0000
+   Allocate:                                         index pair,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                        index basis,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Number of integrals to be stored:            18145
+   Allocate:                                 4-center integrals,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Calculate and store the 4-center Coulomb integrals (LIBCINT)
+ All 4-center ERI have been calculated
+
+   Allocate:                                 Kinetic operator T,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                 Nucleus operator V,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                    Fock operator F,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                    Wavefunctions C,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Setup kinetic part of the Hamiltonian (LIBCINT)
+
+ Setup nucleus-electron part of the Hamiltonian (LIBCINT)
+
+ Calculate approximate HXC potential with a superposition of atomic densities
+ Simple LDA functional on a coarse grid
+
+ Setup the DFT quadrature
+ Total number of grid points:         1116
+
+ Distributing the grid among procs
+ Maximum number of grid points for a single proc        1116
+ discretization grid per atom [radial , angular max - angular min]   25   26    6
+ total number of real-space points for this mpi task    1116
+
+ Number of electrons:     10.036063
+      XC energy (Ha):     -8.500793
+
+ Approximate hamiltonian
+ Generalized diagonalization for spin:   1
+
+ Initialize the SCF mixing
+   Allocate:                               Input density matrix,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                Hamiltonian history,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                             Density matrix history,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                   Residual history,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ 
+   Allocate:                                Total Hamiltonian H,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                               Hartree potential Vh,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                             Exchange operator Sigx,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                    XC operator Vxc,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                   Density matrix P,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Build density matrix
+
+ -------------------------------------------
+ *** SCF cycle No:    1
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       1.36332E+00
+ Alpha DIIS:       1.000000
+ DIIS predicted residual:   1.36332E+00
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -19.92677   -542.23494      2.0000
+     2     -1.13510    -30.88770      2.0000
+     3     -0.54889    -14.93619      2.0000
+     4     -0.37214    -10.12636      2.0000
+     5     -0.28288     -7.69750      2.0000
+  -----------------------------
+     6      0.23826      6.48327      0.0000
+     7      0.33725      9.17699      0.0000
+     8      1.08984     29.65599      0.0000
+     9      1.21570     33.08081      0.0000
+    10      1.32981     36.18599      0.0000
+    11      1.34855     36.69593      0.0000
+    12      1.54616     42.07308      0.0000
+    13      1.57373     42.82325      0.0000
+    14      2.18976     59.58637      0.0000
+    15      2.20343     59.95848      0.0000
+    16      2.24125     60.98744      0.0000
+    17      2.76327     75.19240      0.0000
+    18      3.09225     84.14439      0.0000
+    19      4.20791    114.50303      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):      -7.697502
+ gKS LUMO energy    (eV):       6.483274
+ gKS HOMO-LUMO gap  (eV):      14.180775
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       78.2605759135
+    Nucleus Energy  (Ha):     -204.0507956759
+    Hartree Energy  (Ha):       50.0819620580
+    Exchange Energy (Ha):       -9.3249439470
+
+    Total Energy    (Ha):      -75.8449862645
+
+ Build density matrix
+ Convergence criterium on the density matrix:  8.59811E-01
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:    2
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       8.19913E-01   1.36332E+00
+ Alpha DIIS:       0.631902      0.368098
+ DIIS predicted residual:   2.50796E-01
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56507   -559.60403      2.0000
+     2     -1.34013    -36.46688      2.0000
+     3     -0.70602    -19.21173      2.0000
+     4     -0.57040    -15.52150      2.0000
+     5     -0.49457    -13.45804      2.0000
+  -----------------------------
+     6      0.20626      5.61274      0.0000
+     7      0.29958      8.15196      0.0000
+     8      1.01878     27.72237      0.0000
+     9      1.13193     30.80143      0.0000
+    10      1.16593     31.72644      0.0000
+    11      1.16626     31.73551      0.0000
+    12      1.37596     37.44184      0.0000
+    13      1.43161     38.95619      0.0000
+    14      2.01872     54.93226      0.0000
+    15      2.03241     55.30469      0.0000
+    16      2.06680     56.24053      0.0000
+    17      2.61860     71.25583      0.0000
+    18      2.94312     80.08639      0.0000
+    19      3.96936    108.01186      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.458039
+ gKS LUMO energy    (eV):       5.612743
+ gKS HOMO-LUMO gap  (eV):      19.070782
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       74.0970422204
+    Nucleus Energy  (Ha):     -195.4432196589
+    Hartree Energy  (Ha):       44.9331097537
+    Exchange Energy (Ha):       -8.7297795349
+
+    Total Energy    (Ha):      -75.9546318326
+
+ Build density matrix
+ Convergence criterium on the density matrix:  3.41768E-01
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:    3
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       3.10803E-02   8.19913E-01   1.36332E+00
+ Alpha DIIS:       1.081959     -0.048886     -0.033073
+ DIIS predicted residual:   2.39994E-02
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.55908   -559.44096      2.0000
+     2     -1.34057    -36.47863      2.0000
+     3     -0.70620    -19.21668      2.0000
+     4     -0.57102    -15.53821      2.0000
+     5     -0.49613    -13.50036      2.0000
+  -----------------------------
+     6      0.21008      5.71670      0.0000
+     7      0.30370      8.26402      0.0000
+     8      1.02163     27.80007      0.0000
+     9      1.13291     30.82815      0.0000
+    10      1.16962     31.82690      0.0000
+    11      1.17153     31.87886      0.0000
+    12      1.38128     37.58665      0.0000
+    13      1.43475     39.04142      0.0000
+    14      2.02095     54.99298      0.0000
+    15      2.03503     55.37591      0.0000
+    16      2.06886     56.29649      0.0000
+    17      2.62189     71.34526      0.0000
+    18      2.94648     80.17777      0.0000
+    19      3.97137    108.06640      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.500360
+ gKS LUMO energy    (eV):       5.716702
+ gKS HOMO-LUMO gap  (eV):      19.217062
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8018778987
+    Nucleus Energy  (Ha):     -198.8647200824
+    Hartree Energy  (Ha):       46.8167439405
+    Exchange Energy (Ha):       -8.9524243084
+
+    Total Energy    (Ha):      -76.0103071647
+
+ Build density matrix
+ Convergence criterium on the density matrix:  1.98621E-02
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:    4
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       8.29302E-03   3.10803E-02   8.19913E-01   1.36332E+00
+ Alpha DIIS:       1.399275     -0.418078      0.009003      0.009800
+ DIIS predicted residual:   3.21929E-03
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56036   -559.47599      2.0000
+     2     -1.34133    -36.49956      2.0000
+     3     -0.70604    -19.21228      2.0000
+     4     -0.57125    -15.54456      2.0000
+     5     -0.49754    -13.53862      2.0000
+  -----------------------------
+     6      0.21051      5.72833      0.0000
+     7      0.30398      8.27179      0.0000
+     8      1.02167     27.80094      0.0000
+     9      1.13180     30.79784      0.0000
+    10      1.16797     31.78213      0.0000
+    11      1.17141     31.87569      0.0000
+    12      1.38059     37.56781      0.0000
+    13      1.43461     39.03774      0.0000
+    14      2.02002     54.96752      0.0000
+    15      2.03421     55.35356      0.0000
+    16      2.06789     56.27008      0.0000
+    17      2.62141     71.33212      0.0000
+    18      2.94593     80.16294      0.0000
+    19      3.97006    108.03092      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.538619
+ gKS LUMO energy    (eV):       5.728334
+ gKS HOMO-LUMO gap  (eV):      19.266953
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8081103399
+    Nucleus Energy  (Ha):     -198.8487432303
+    Hartree Energy  (Ha):       46.7936635816
+    Exchange Energy (Ha):       -8.9517199903
+
+    Total Energy    (Ha):      -76.0104739121
+
+ Build density matrix
+ Convergence criterium on the density matrix:  9.64446E-03
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:    5
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       1.27214E-03   8.29302E-03   3.10803E-02   8.19913E-01   1.36332E+00
+ Alpha DIIS:       1.441736     -0.584651      0.149424     -0.003164     -0.003346
+ DIIS predicted residual:   6.69061E-04
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56062   -559.48292      2.0000
+     2     -1.34156    -36.50561      2.0000
+     3     -0.70624    -19.21768      2.0000
+     4     -0.57125    -15.54455      2.0000
+     5     -0.49791    -13.54890      2.0000
+  -----------------------------
+     6      0.21057      5.72997      0.0000
+     7      0.30398      8.27185      0.0000
+     8      1.02163     27.79994      0.0000
+     9      1.13173     30.79581      0.0000
+    10      1.16778     31.77697      0.0000
+    11      1.17146     31.87717      0.0000
+    12      1.38052     37.56589      0.0000
+    13      1.43459     39.03708      0.0000
+    14      2.01988     54.96373      0.0000
+    15      2.03409     55.35029      0.0000
+    16      2.06776     56.26648      0.0000
+    17      2.62131     71.32954      0.0000
+    18      2.94583     80.16021      0.0000
+    19      3.96992    108.02713      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.548900
+ gKS LUMO energy    (eV):       5.729971
+ gKS HOMO-LUMO gap  (eV):      19.278870
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8177394708
+    Nucleus Energy  (Ha):     -198.8601798128
+    Hartree Energy  (Ha):       46.7962886058
+    Exchange Energy (Ha):       -8.9525558131
+
+    Total Energy    (Ha):      -76.0104921623
+
+ Build density matrix
+ Convergence criterium on the density matrix:  2.61880E-03
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:    6
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       2.04465E-04   1.27214E-03   8.29302E-03   3.10803E-02   8.19913E-01   1.36332E+00
+ Alpha DIIS:       1.235583     -0.287472      0.066018     -0.014815      0.000337      0.000349
+ DIIS predicted residual:   1.30999E-04
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48267      2.0000
+     2     -1.34156    -36.50565      2.0000
+     3     -0.70624    -19.21771      2.0000
+     4     -0.57121    -15.54348      2.0000
+     5     -0.49793    -13.54925      2.0000
+  -----------------------------
+     6      0.21057      5.72983      0.0000
+     7      0.30396      8.27112      0.0000
+     8      1.02161     27.79956      0.0000
+     9      1.13171     30.79534      0.0000
+    10      1.16774     31.77576      0.0000
+    11      1.17146     31.87698      0.0000
+    12      1.38048     37.56481      0.0000
+    13      1.43458     39.03688      0.0000
+    14      2.01985     54.96300      0.0000
+    15      2.03407     55.34977      0.0000
+    16      2.06773     56.26582      0.0000
+    17      2.62129     71.32897      0.0000
+    18      2.94581     80.15950      0.0000
+    19      3.96990    108.02646      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549249
+ gKS LUMO energy    (eV):       5.729828
+ gKS HOMO-LUMO gap  (eV):      19.279077
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188161187
+    Nucleus Energy  (Ha):     -198.8611549815
+    Hartree Energy  (Ha):       46.7962085402
+    Exchange Energy (Ha):       -8.9525778687
+
+    Total Energy    (Ha):      -76.0104928044
+
+ Build density matrix
+ Convergence criterium on the density matrix:  3.26884E-04
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:    7
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       4.29559E-05   2.04465E-04   1.27214E-03   8.29302E-03   3.10803E-02   8.19913E-01
+ Alpha DIIS:       1.318959     -0.352294      0.032557      0.001494     -0.000718      0.000002
+ DIIS predicted residual:   2.20374E-05
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48266      2.0000
+     2     -1.34156    -36.50562      2.0000
+     3     -0.70625    -19.21791      2.0000
+     4     -0.57120    -15.54323      2.0000
+     5     -0.49792    -13.54912      2.0000
+  -----------------------------
+     6      0.21057      5.72986      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79959      0.0000
+     9      1.13171     30.79551      0.0000
+    10      1.16774     31.77595      0.0000
+    11      1.17146     31.87715      0.0000
+    12      1.38048     37.56484      0.0000
+    13      1.43458     39.03690      0.0000
+    14      2.01986     54.96314      0.0000
+    15      2.03407     55.34993      0.0000
+    16      2.06774     56.26596      0.0000
+    17      2.62130     71.32909      0.0000
+    18      2.94581     80.15963      0.0000
+    19      3.96990    108.02660      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549125
+ gKS LUMO energy    (eV):       5.729862
+ gKS HOMO-LUMO gap  (eV):      19.278987
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188782209
+    Nucleus Energy  (Ha):     -198.8612339643
+    Hartree Energy  (Ha):       46.7962251256
+    Exchange Energy (Ha):       -8.9525775870
+
+    Total Energy    (Ha):      -76.0104928177
+
+ Build density matrix
+ Convergence criterium on the density matrix:  5.17569E-05
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:    8
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       5.95835E-06   4.29559E-05   2.04465E-04   1.27214E-03   8.29302E-03   3.10803E-02
+ Alpha DIIS:       1.178854     -0.206921      0.029941     -0.001663     -0.000295      0.000084
+ DIIS predicted residual:   4.18634E-06
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48262      2.0000
+     2     -1.34156    -36.50559      2.0000
+     3     -0.70625    -19.21791      2.0000
+     4     -0.57120    -15.54321      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79552      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56484      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96316      0.0000
+    15      2.03407     55.34996      0.0000
+    16      2.06774     56.26598      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96991    108.02662      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549085
+ gKS LUMO energy    (eV):       5.729882
+ gKS HOMO-LUMO gap  (eV):      19.278968
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188629196
+    Nucleus Energy  (Ha):     -198.8612156906
+    Hartree Energy  (Ha):       46.7962210332
+    Exchange Energy (Ha):       -8.9525764674
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  6.29284E-06
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:    9
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       1.24841E-06   5.95835E-06   4.29559E-05   2.04465E-04   1.27214E-03   8.29302E-03
+ Alpha DIIS:       1.183786     -0.182662     -0.005288      0.004845     -0.000657     -0.000023
+ DIIS predicted residual:   8.61097E-07
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48264      2.0000
+     2     -1.34156    -36.50560      2.0000
+     3     -0.70625    -19.21792      2.0000
+     4     -0.57120    -15.54322      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79551      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56483      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96315      0.0000
+    15      2.03407     55.34995      0.0000
+    16      2.06774     56.26597      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96990    108.02661      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549089
+ gKS LUMO energy    (eV):       5.729881
+ gKS HOMO-LUMO gap  (eV):      19.278970
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188594543
+    Nucleus Energy  (Ha):     -198.8612104989
+    Hartree Energy  (Ha):       46.7962189807
+    Exchange Energy (Ha):       -8.9525761413
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  1.80095E-06
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:   10
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       3.51983E-07   1.24841E-06   5.95835E-06   4.29559E-05   2.04465E-04   1.27214E-03
+ Alpha DIIS:       0.844543      0.215243     -0.059464     -0.001334      0.001101     -0.000089
+ DIIS predicted residual:   2.35716E-07
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48263      2.0000
+     2     -1.34156    -36.50560      2.0000
+     3     -0.70625    -19.21792      2.0000
+     4     -0.57120    -15.54321      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79552      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56484      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96315      0.0000
+    15      2.03407     55.34995      0.0000
+    16      2.06774     56.26598      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96991    108.02661      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549086
+ gKS LUMO energy    (eV):       5.729881
+ gKS HOMO-LUMO gap  (eV):      19.278967
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188611778
+    Nucleus Energy  (Ha):     -198.8612134988
+    Hartree Energy  (Ha):       46.7962204336
+    Exchange Energy (Ha):       -8.9525763178
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  2.59002E-07
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:   11
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       9.88022E-08   3.51983E-07   1.24841E-06   5.95835E-06   4.29559E-05   2.04465E-04
+ Alpha DIIS:       0.965535      0.092323     -0.063461      0.005020      0.000753     -0.000170
+ DIIS predicted residual:   5.01161E-08
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48263      2.0000
+     2     -1.34156    -36.50560      2.0000
+     3     -0.70625    -19.21792      2.0000
+     4     -0.57120    -15.54321      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79552      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56483      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96315      0.0000
+    15      2.03407     55.34995      0.0000
+    16      2.06774     56.26598      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96990    108.02661      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549086
+ gKS LUMO energy    (eV):       5.729881
+ gKS HOMO-LUMO gap  (eV):      19.278968
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188603362
+    Nucleus Energy  (Ha):     -198.8612118889
+    Hartree Energy  (Ha):       46.7962195536
+    Exchange Energy (Ha):       -8.9525762062
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  1.14108E-07
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:   12
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       1.50456E-08   9.88022E-08   3.51983E-07   1.24841E-06   5.95835E-06   4.29559E-05
+ Alpha DIIS:       1.121084     -0.075791     -0.048023      0.001791      0.001043     -0.000104
+ DIIS predicted residual:   9.47302E-09
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48263      2.0000
+     2     -1.34156    -36.50560      2.0000
+     3     -0.70625    -19.21792      2.0000
+     4     -0.57120    -15.54321      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79552      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56483      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96315      0.0000
+    15      2.03407     55.34995      0.0000
+    16      2.06774     56.26598      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96990    108.02661      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549086
+ gKS LUMO energy    (eV):       5.729881
+ gKS HOMO-LUMO gap  (eV):      19.278968
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188605261
+    Nucleus Energy  (Ha):     -198.8612122238
+    Hartree Energy  (Ha):       46.7962197173
+    Exchange Energy (Ha):       -8.9525762248
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  1.08154E-08
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:   13
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       4.26597E-09   1.50456E-08   9.88022E-08   3.51983E-07   1.24841E-06   5.95835E-06
+ Alpha DIIS:       1.297596     -0.329788      0.026761      0.005204      0.000326     -0.000099
+ DIIS predicted residual:   2.42617E-09
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48263      2.0000
+     2     -1.34156    -36.50560      2.0000
+     3     -0.70625    -19.21792      2.0000
+     4     -0.57120    -15.54321      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79552      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56483      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96315      0.0000
+    15      2.03407     55.34995      0.0000
+    16      2.06774     56.26598      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96990    108.02661      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549086
+ gKS LUMO energy    (eV):       5.729881
+ gKS HOMO-LUMO gap  (eV):      19.278968
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188605145
+    Nucleus Energy  (Ha):     -198.8612122040
+    Hartree Energy  (Ha):       46.7962197074
+    Exchange Energy (Ha):       -8.9525762231
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  6.38991E-09
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:   14
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       1.02833E-09   4.26597E-09   1.50456E-08   9.88022E-08   3.51983E-07   1.24841E-06
+ Alpha DIIS:       1.333907     -0.383274      0.051132     -0.001018     -0.000650     -0.000095
+ DIIS predicted residual:   5.93976E-10
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48263      2.0000
+     2     -1.34156    -36.50560      2.0000
+     3     -0.70625    -19.21792      2.0000
+     4     -0.57120    -15.54321      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79552      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56483      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96315      0.0000
+    15      2.03407     55.34995      0.0000
+    16      2.06774     56.26598      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96990    108.02661      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549086
+ gKS LUMO energy    (eV):       5.729881
+ gKS HOMO-LUMO gap  (eV):      19.278968
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188605096
+    Nucleus Energy  (Ha):     -198.8612121977
+    Hartree Energy  (Ha):       46.7962197055
+    Exchange Energy (Ha):       -8.9525762227
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  1.66489E-09
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:   15
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       2.05980E-10   1.02833E-09   4.26597E-09   1.50456E-08   9.88022E-08   3.51983E-07
+ Alpha DIIS:       1.295701     -0.334415      0.036670      0.002953     -0.001030      0.000122
+ DIIS predicted residual:   1.21545E-10
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48263      2.0000
+     2     -1.34156    -36.50560      2.0000
+     3     -0.70625    -19.21792      2.0000
+     4     -0.57120    -15.54321      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79552      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56483      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96315      0.0000
+    15      2.03407     55.34995      0.0000
+    16      2.06774     56.26598      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96990    108.02661      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549086
+ gKS LUMO energy    (eV):       5.729881
+ gKS HOMO-LUMO gap  (eV):      19.278968
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188605084
+    Nucleus Energy  (Ha):     -198.8612121959
+    Hartree Energy  (Ha):       46.7962197049
+    Exchange Energy (Ha):       -8.9525762226
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  2.45758E-10
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:   16
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       4.38675E-11   2.05980E-10   1.02833E-09   4.26597E-09   1.50456E-08   9.88022E-08
+ Alpha DIIS:       1.287405     -0.342654      0.059357     -0.003601     -0.000564      0.000057
+ DIIS predicted residual:   2.28949E-11
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48263      2.0000
+     2     -1.34156    -36.50560      2.0000
+     3     -0.70625    -19.21792      2.0000
+     4     -0.57120    -15.54321      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79552      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56483      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96315      0.0000
+    15      2.03407     55.34995      0.0000
+    16      2.06774     56.26598      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96990    108.02661      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549086
+ gKS LUMO energy    (eV):       5.729881
+ gKS HOMO-LUMO gap  (eV):      19.278968
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188605084
+    Nucleus Energy  (Ha):     -198.8612121959
+    Hartree Energy  (Ha):       46.7962197049
+    Exchange Energy (Ha):       -8.9525762226
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  4.16699E-11
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:   17
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       6.86241E-12   4.38675E-11   2.05980E-10   1.02833E-09   4.26597E-09   1.50456E-08
+ Alpha DIIS:       1.079002     -0.084371      0.003491      0.004553     -0.003034      0.000361
+ DIIS predicted residual:   4.96823E-12
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48263      2.0000
+     2     -1.34156    -36.50560      2.0000
+     3     -0.70625    -19.21792      2.0000
+     4     -0.57120    -15.54321      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79552      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56483      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96315      0.0000
+    15      2.03407     55.34995      0.0000
+    16      2.06774     56.26598      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96990    108.02661      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549086
+ gKS LUMO energy    (eV):       5.729881
+ gKS HOMO-LUMO gap  (eV):      19.278968
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188605085
+    Nucleus Energy  (Ha):     -198.8612121960
+    Hartree Energy  (Ha):       46.7962197049
+    Exchange Energy (Ha):       -8.9525762226
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  1.12735E-11
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:   18
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       2.71110E-12   6.86241E-12   4.38675E-11   2.05980E-10   1.02833E-09   4.26597E-09
+ Alpha DIIS:       0.926886      0.116620     -0.042951     -0.002080      0.001687     -0.000161
+ DIIS predicted residual:   9.21934E-13
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48263      2.0000
+     2     -1.34156    -36.50560      2.0000
+     3     -0.70625    -19.21792      2.0000
+     4     -0.57120    -15.54321      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79552      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56483      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96315      0.0000
+    15      2.03407     55.34995      0.0000
+    16      2.06774     56.26598      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96990    108.02661      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549086
+ gKS LUMO energy    (eV):       5.729881
+ gKS HOMO-LUMO gap  (eV):      19.278968
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188605085
+    Nucleus Energy  (Ha):     -198.8612121960
+    Hartree Energy  (Ha):       46.7962197049
+    Exchange Energy (Ha):       -8.9525762226
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  2.19431E-12
+  ===> convergence not reached yet
+ 
+
+ Writing a small RESTART file
+
+ -------------------------------------------
+ *** SCF cycle No:   19
+
+ Calculate Hartree term using the 8 permutation symmetries
+ Calculate Exchange term using the 8 permutation symmetries
+
+ Pulay DIIS mixing
+  Residuals:       4.74219E-13   2.71110E-12   6.86241E-12   4.38675E-11   2.05980E-10   1.02833E-09
+ Alpha DIIS:       0.999901      0.040846     -0.045159      0.004485     -0.000033     -0.000040
+ DIIS predicted residual:   2.04129E-13
+
+ Generalized diagonalization for spin:   1
+
+ === Energies ===
+   #       (Ha)         (eV)      
+     1    -20.56061   -559.48263      2.0000
+     2     -1.34156    -36.50560      2.0000
+     3     -0.70625    -19.21792      2.0000
+     4     -0.57120    -15.54321      2.0000
+     5     -0.49792    -13.54909      2.0000
+  -----------------------------
+     6      0.21057      5.72988      0.0000
+     7      0.30396      8.27105      0.0000
+     8      1.02162     27.79960      0.0000
+     9      1.13171     30.79552      0.0000
+    10      1.16775     31.77598      0.0000
+    11      1.17146     31.87718      0.0000
+    12      1.38048     37.56483      0.0000
+    13      1.43458     39.03693      0.0000
+    14      2.01986     54.96315      0.0000
+    15      2.03407     55.34995      0.0000
+    16      2.06774     56.26598      0.0000
+    17      2.62130     71.32911      0.0000
+    18      2.94581     80.15964      0.0000
+    19      3.96990    108.02661      0.0000
+ 
+ 
+ gKS HOMO energy    (eV):     -13.549086
+ gKS LUMO energy    (eV):       5.729881
+ gKS HOMO-LUMO gap  (eV):      19.278968
+ 
+ 
+    Nucleus-Nucleus (Ha):        9.1882153870
+    Kinetic Energy  (Ha):       75.8188605085
+    Nucleus Energy  (Ha):     -198.8612121960
+    Hartree Energy  (Ha):       46.7962197049
+    Exchange Energy (Ha):       -8.9525762226
+
+    Total Energy    (Ha):      -76.0104928182
+
+ Build density matrix
+ Convergence criterium on the density matrix:  6.17325E-13
+  ===> convergence has been reached
+ 
+
+ ==================================================
+ The SCF loop ends here
+ ==================================================
+ Deallocate:                               Input density matrix,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                Hamiltonian history,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                   Residual history,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                             Density matrix history,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                   Density matrix P,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                Total Hamiltonian H,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                               Hartree potential Vh,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                             Exchange operator Sigx,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                    XC operator Vxc,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+
+   SCF Total Energy (Ha):      -76.0104928182
+
+         EXX Energy (Ha):       -8.9525762226
+   Total EXX Energy (Ha):      -76.0104928182
+
+ Writing a big RESTART file
+
+ Initialize LIBCINT internal data for 1 basis set (basis or auxiliary basis)
+ LIBCINT environment maximum index:       75
+ Deallocate:                                   Overlap matrix S,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                 Kinetic operator T,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                 Nucleus operator V,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                           Overlap X * X**H = S**-1,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                         Sigx - Vxc,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Calculate the (Sigma_x - Vxc) matrix
+ Deallocate:                                    Fock operator F,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+
+ ==================================================
+ Self-energy evaluation starts here
+ ==================================================
+
+ Calculate state range from    1 to   19
+
+ Try to read spectral function from file SCREENED_COULOMB
+ File does not exist
+
+
+ Prepare a polarizability spectral function with
+                               Occupied states:        5
+                                Virtual states:       14
+                              Transition space:       70
+
+ Calculating the polarizability
+ Singlet final state
+
+ Summarize the linear response calculation:
+   RPA:          T
+   BSE:          F
+   TDHF:         F
+   TDDFT:        F
+   hybrid alpha: 0.0000
+   hybrid beta:  0.0000
+ 
+   Allocate:                                                A+B,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                                A-B,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Build the electron-hole hamiltonian
+ Build Common part: Energies + Hartree + possibly Exchange
+ Content of Exchange:    0.000
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ AO to MO transform using the 8 permutation symmetries
+ Make sure OMP_STACKSIZE is larger than     0.052 (Mb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                                A-B,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                                X+Y,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Performing the SCALAPACK block diago when A-B is diagonal
+ Deallocate (A+B) and possibly (A-B)
+ Deallocate:                                                A+B,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Calculate the RPA energy using the Tamm-Dancoff decomposition
+ Eq. (9) from J. Chem. Phys. 132, 234114 (2010)
+
+ RPA correlation energy (Ha):    -0.2090418269
+
+ Lowest neutral excitation energy (eV):   19.834144
+
+ Build Wp = v * chi * v
+
+ Spectral function initialized with Coulomb basis functions:      190
+ Spectral function initialized with resonant poles         :       70
+   Allocate:                          Self-energy Lehman weight,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                          TMP array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                          TMP array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Writing the spectral function on file: SCREENED_COULOMB
+
+ Number of poles written down:          70
+ Deallocate eigenvector array
+ Deallocate:                                                X+Y,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ RPA Total energy (Ha):      -76.2195346451
+ 
+ Perform a one-shot G0W0 calculation
+   Allocate:                                    Temporary array,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Sigma_c(omega) is calculated
+ Correlation energy 1/2 Tr[ Sig_c * G ] (Ha):       -0.3714383521
+ Deallocate:                                    Temporary array,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                          Self-energy Lehman weight,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Spectral function destroyed
+
+ Graphical solution to the QP equation
+ Scanning range around the input energy (eV):  -27.211  -- +27.211
+ Number of discretization points:             ******
+
+ state spin    QP energy (eV)  QP spectral weight
+     1    1    -546.787113       0.875489    -581.703869       0.001145
+     2    1     -32.563250       0.538084     -33.962256       0.378810     -43.719660       0.003685     -45.296072       0.002662
+     3    1     -18.611437       0.956294     -41.405181       0.000711     -35.761560       0.000546     -40.003429       0.000118
+     4    1     -14.456527       0.950688     -37.787884       0.002957
+     5    1     -12.178483       0.949761     -35.762141       0.001680
+     6    1       5.400869       0.987278      32.734702       0.000214
+     7    1       7.922726       0.984265      32.100133       0.002951      30.194811       0.000313      30.442857       0.000087
+     8    1      26.815452       0.969111      38.016948       0.002616      30.448575       0.002056      32.038761       0.002008
+     9    1      29.777157       0.933200      27.836214       0.031673      35.490043       0.007510      52.988207       0.000923
+    10    1      30.682389       0.758286      30.416591       0.206978      53.974042       0.001152      52.607642       0.000559
+    11    1      30.052711       0.937748      27.870114       0.012934      35.460161       0.002532      54.150420       0.002398
+    12    1      34.997228       0.843178      38.344133       0.100547      30.422820       0.003578      61.459966       0.001882
+    13    1      38.099518       0.898870      35.285496       0.050739      34.504368       0.021123      49.030305       0.001834
+    14    1      53.545553       0.531552      54.549815       0.145985      54.151519       0.094447      53.867690       0.093763
+    15    1      54.161249       0.551002      54.042950       0.246928      55.235371       0.082361      53.490368       0.061767
+    16    1      55.340707       0.910145      53.917462       0.018872      52.540881       0.018345      54.316231       0.010878
+    17    1      69.926766       0.572505      68.445531       0.125014      67.604798       0.107534      72.912759       0.031687
+    18    1      76.357355       0.260555      77.239347       0.174651      79.736790       0.164241      81.157599       0.049212
+    19    1     105.691010       0.239713     105.869021       0.125368     106.250292       0.102335     100.153160       0.084261
+
+ GW eigenvalues (eV)
+   #        E0         SigX-Vxc       SigC          Z        E_qp^lin     E_qp^graph
+   1   -559.482633     0.000000    12.695520     0.875489  -547.162319  -546.787113
+   2    -36.505598    -0.000000     3.942349     0.538084   -33.473259   -32.563250
+   3    -19.217918     0.000000     0.606481     0.956294   -18.611644   -18.611437
+   4    -15.543215     0.000000     1.086688     0.950688   -14.457368   -14.456527
+   5    -13.549086    -0.000000     1.370603     0.949761   -12.179860   -12.178483
+   6      5.729881    -0.000000    -0.329013     0.987278     5.400883     5.400869
+   7      8.271051    -0.000000    -0.348326     0.984265     7.922750     7.922726
+   8     27.799601     0.000000    -0.984149     0.969111    26.817986    26.815452
+   9     30.795516    -0.000000    -1.018358     0.933200    29.772582    29.777157
+  10     31.775979     0.000000    -1.093590     0.758286    30.643127    30.682389
+  11     31.877179     0.000000    -1.824468     0.937748    30.057130    30.052711
+  12     37.564835    -0.000000    -2.567607     0.843178    36.887632    34.997228
+  13     39.036928    -0.000000    -0.937410     0.898870    38.086690    38.099518
+  14     54.963153     0.000000    -1.417601     0.531552    54.250670    53.545553
+  15     55.349952     0.000000    -1.188704     0.551002    55.144984    54.161249
+  16     56.265976     0.000000    -0.925269     0.910145    55.329142    55.340707
+  17     71.329111    -0.000000    -1.402345     0.572505    69.968039    69.926766
+  18     80.159641    -0.000000    -3.802286     0.260555    79.978393    76.357355
+  19    108.026613    -0.000000    -2.335604     0.239713   108.024774   105.691010
+ Automatic extrapolation to CBS not possible because the basis set is not recogn
+ ized
+ only fitted for a Dunning basis cc-pVXZ or aug-cc-pVXZ
+ only fitted for the same basis on all atoms
+
+ Writing ENERGY_QP file
+ 
+ GW HOMO energy    (eV):     -12.178483
+ GW LUMO energy    (eV):       5.400869
+ GW HOMO-LUMO gap  (eV):      17.579352
+ 
+ Deallocate:                                         Sigx - Vxc,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                    Wavefunctions C,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                 4-center integrals,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                         index pair,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+ Deallocate:                                        index basis,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+                 ----------------------------
+
+                 --- Memory usage summary ---
+
+ Memory that was not deallocated properly
+                 Memory (Gb):     0.000
+
+ Maximum memory used during the run
+            Peak memory (Gb):     0.000
+ 
+
+                 --- Timings in (s) and # of calls ---
+
+                                           Total         1556.74
+
+                 -------------------------------------
+
+                                   Total pre SCF            0.02
+                                       Total SCF            0.04
+                                  Total post SCF         1556.67
+
+                 -------------------------------------
+
+                             Pre SCF
+
+ |----------------------- Integral pre-screening            0.00         1
+ |--------------------------- 4-center integrals            0.01         1
+ |----------------------------- Overlap matrix S            0.00         1
+ |---------------- Approximate guess Hamiltonian            0.00         1
+ |-------------------------- Kinetic Hamiltonian            0.00         1
+ |----------------- Electron-nucleus Hamiltonian            0.00         1
+
+                 -------------------------------------
+
+                                 SCF
+
+ |---------------------- DFT grid initialization            0.00         1
+       |------------------------ Grid generation            0.00         1
+ |------------------------------- Density matrix            0.00        20
+ |---------------------------- Hartree potential            0.01        19
+ |---------------------------- Exchange operator            0.02        19
+ |------------------ Hamiltonian diagonalization            0.00        20
+ |---------------------------- Pulay DIIS mixing            0.00        19
+ |------------------------- RESTART file writing            0.01        19
+
+                 -------------------------------------
+
+                            Post SCF
+
+ |-------------------------------- Sigma_x - Vxc            0.00         1
+ |------------------------ Response function chi            0.01         1
+       |------------ 4-center AO to MO transform            0.00        10
+       |----------- Build 2-particle Hamiltonian            0.00         1
+             |------------------------- RPA part            0.00         1
+       |--------------------- Diago 2 particle H            0.00         1
+       |-------------------------------- Build W            0.00         1
+ |------------------------------- GW self-energy         1555.65         1
+
+                 -------------------------------------
+
+
+                 -------------------------------------
+
+
+ When using MOLGW for a publication, citation to the following article is appreciated:
+          Bruneval, Rangel, Hamed, Shao, Yang, Neaton, Comput. Phys. Comm. 208, 149 (2016).
+
+ This is the end
+

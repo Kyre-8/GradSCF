@@ -1,0 +1,24 @@
+AD Hessian column  1/12: 44.06 s
+AD Hessian column  2/12: 23.09 s
+AD Hessian column  3/12: 23.73 s
+AD Hessian column  4/12: 24.67 s
+AD Hessian column  5/12: 25.10 s
+AD Hessian column  6/12: 23.19 s
+AD Hessian column  7/12: 23.16 s
+AD Hessian column  8/12: 23.87 s
+AD Hessian column  9/12: 23.59 s
+AD Hessian column 10/12: 23.01 s
+AD Hessian column 11/12: 23.65 s
+AD Hessian column 12/12: 23.47 s
+direction 0, step 1.0e-03 Bohr: HVP-FD error 1.003e-07 Eh/Bohr^2
+direction 0, step 3.0e-04 Bohr: HVP-FD error 8.965e-09 Eh/Bohr^2
+direction 0, step 1.0e-04 Bohr: HVP-FD error 2.307e-09 Eh/Bohr^2
+direction 1, step 1.0e-03 Bohr: HVP-FD error 3.915e-08 Eh/Bohr^2
+direction 1, step 3.0e-04 Bohr: HVP-FD error 4.753e-09 Eh/Bohr^2
+direction 1, step 1.0e-04 Bohr: HVP-FD error 1.553e-09 Eh/Bohr^2
+direction 2, step 1.0e-03 Bohr: HVP-FD error 4.708e-08 Eh/Bohr^2
+direction 2, step 3.0e-04 Bohr: HVP-FD error 4.192e-09 Eh/Bohr^2
+direction 2, step 1.0e-04 Bohr: HVP-FD error 1.495e-09 Eh/Bohr^2
+Excited harmonic frequencies / cm^-1: [ 496.9651493   978.06894936 1425.80267396 1646.35051434 3200.164035
+ 3294.65275882]
+Native excited-state AD Hessian gates passed in 597.66 s

@@ -10,6 +10,7 @@ and expose their physical inputs directly. See the
 | [01_molecular_response.py](01_molecular_response.py) | Molecular static response and Taylor coefficients. | None |
 | [02_periodic_response.py](02_periodic_response.py) | Periodic static response. | None |
 | [03_ofdft_response.py](03_ofdft_response.py) | Grid OFDFT screened response and Taylor energy coefficients. | None |
+| [P08 parameter/density response](../ofdft/parameter_density_response.py) | Fixed-N TF/vW analytic model, external KEDF parameters, independent Fourier/KKT checks and response maps; [record](../../reproducibility/ad_showcase/P08_ofdft_parameter_response/README.md). | None |
 | [04_finite_q_response.py](04_finite_q_response.py) | Primitive-cell finite-q electronic response. | None |
 | [03_external_finite_q.py](03_external_finite_q.py) | External XC energy, AD-derived finite-q kernel and screened response. | None |
 | [05_atomic_phonons.py](05_atomic_phonons.py) | Atomic perturbations and phonon response. | None |

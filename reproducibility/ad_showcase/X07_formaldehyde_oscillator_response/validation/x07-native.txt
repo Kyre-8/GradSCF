@@ -1,0 +1,7 @@
+Mode 1 final moment/f derivative error 1.412363034858366e-08
+Mode 2 final moment/f derivative error 1.0046248985484674e-08
+Mode 3 final moment/f derivative error 7.467224716339871e-08
+Mode 4 final moment/f derivative error 1.0225397857333007e-06
+Mode 5 final moment/f derivative error 3.4732254405867025e-07
+Mode 6 final moment/f derivative error 5.873621589103095e-10
+X07 native transition/intensity-response gates passed 717.004114499985 s

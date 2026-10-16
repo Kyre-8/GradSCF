@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "native_rayleigh_hartree_per_bohr2": -0.007335242225150866,
+  "independent_rayleigh_hartree_per_bohr2": [
+    -0.007335449472465499,
+    -0.007335447401768588
+  ],
+  "input_sha256": "15dcb71c49436e854c52f10aa62a2aab50aebb830ba85f5d7e7f191aaa2787ac",
+  "script_sha256": "1532ffcd6ccb92bd859c88cfec486d2a0cbbd695f8621a4307b8d74e1a2a0e6a",
+  "scope": "One fixed negative Cartesian direction of the specified finite model; no basis/k/FFT or material stability conclusion."
+}

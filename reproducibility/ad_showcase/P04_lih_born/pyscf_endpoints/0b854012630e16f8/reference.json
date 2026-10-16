@@ -1,0 +1,63 @@
+{
+  "complete": true,
+  "signature": {
+    "input_sha256": "0b854012630e16f8cec1a88f80a85053c7213631da92670944fd6a8a961180a4",
+    "calculate_sha256": "b53903f07a9d591d65dd47185e3bb77a4f98f72c1facf943df4f78d621b713bf",
+    "coordinates_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        3.8900161383501435,
+        3.8900161383501435,
+        3.8900161383501435
+      ]
+    ],
+    "anchor": null,
+    "python": "3.11.15",
+    "numpy": "2.4.4",
+    "pyscf": "2.13.0"
+  },
+  "signature_sha256": "26f21fba5b4a6bce73496301bd8b5f4b3a3bbdf5c6386a2129d2ade5066c5266",
+  "record": {
+    "polarization_e_per_bohr2": [
+      1.3877787807814457e-17,
+      1.3877787807814457e-17,
+      1.3877787807814457e-17
+    ],
+    "phases": [
+      [
+        3.1415926535897714,
+        -3.1415926535897856,
+        -3.141592653589785,
+        -3.141592653589785
+      ],
+      [
+        3.141592653589772,
+        -3.1415926535897856,
+        -3.141592653589785,
+        -3.141592653589785
+      ],
+      [
+        3.1415926535897722,
+        -3.1415926535897856,
+        -3.1415926535897856,
+        -3.141592653589786
+      ]
+    ],
+    "energy_hartree": -8.007631878665087,
+    "sampled_gap_hartree": 0.14272639802081938,
+    "orbital_gradient_norm": 2.298123973260519e-12,
+    "minimum_link_singular_value": 0.742708096964616,
+    "maximum_phase_change": 0.0
+  },
+  "record_sha256": "c4b1b9cc3ab3e9019566d70978d99c4dab35fe84f756eac4be4db5aeaab799b2",
+  "seconds": null,
+  "origin": {
+    "legacy_script_sha256": "b05716f2a88e91d1d48cf0c7d2aebdf3d42aa8c3ca93951ff96f73261d2a33c7",
+    "legacy_partial_sha256": "bed53bea5b9354a519190e2c2194c6b3fb461f244329b89e0d7096c8a5c4ddee",
+    "migration": "Observed legacy run used this unchanged native input. Scientific calculate function verified byte-for-byte unchanged. Legacy endpoint timings were not measured individually."
+  }
+}

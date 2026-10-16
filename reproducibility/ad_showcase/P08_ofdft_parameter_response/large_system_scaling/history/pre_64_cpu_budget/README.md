@@ -1,0 +1,3 @@
+# Before the shared 64-CPU budget
+
+These completed Al1 records used the frozen 0ce87d1a6e6f86c4847f7139eae5996fa3557310da63612e84e91b1a55914a2c source before the new project-wide logical-CPU limit. OMP/OpenBLAS were set to two threads, but the launcher did not set process affinity. The continuing Al27 process from the same batch allowed CPUs 0-191 at the policy transition; the already-finished Al1 process was not directly sampled. Numerical accuracy checks passed. These timing records must remain distinct from any later runs under the centrally allocated CPU set. The active Al27 and KS k12 jobs are not copied here as completed cases.

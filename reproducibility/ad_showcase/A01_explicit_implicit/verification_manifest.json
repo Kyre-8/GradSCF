@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "source_unchanged": true,
+  "source_python_sha256": "ca37f375d0e4cc673d1ca2e5b50f189b9047ad8bce56e00f7f397156fac3e43f",
+  "checked": "Completion, independent-native linkage, executed scripts, frozen source/binary, CPU float64/cache, positive iterations and same seed where applicable.",
+  "executed_scripts": {
+    "explicit_implicit_response.py": "0d13b7f9c681d9e5cb1e6ef847d75126cef0a6d3ffd7b76b43942f2422750002",
+    "compare_explicit_implicit_pyscf.py": "6242ca13bfa55e52918f850d836385c2e64e454802d189adfb2e01b13f01c444",
+    "plot_explicit_implicit_response.py": "accec8283371ed8287bbbfc2b65c9cfac61f2527cf72b4a4d4253474c2b6e13d",
+    "pyscf_field_reference.py": "a52a303272b55c3cfb7120153867b6701010cee9db2f97fc9df6b65561906d84"
+  },
+  "artifacts": {
+    "gradscf.json": "84c2cf502eb0d5bb8f8c46d2f99d5f75a2364fdd9641718c975c53dd842598c5",
+    "hf_explicit_dipole_z.json": "d64ce50a2c71a731721082e72096ea1ff0077e24d1f7c97daa36adc036eddc48",
+    "hf_explicit_energy.json": "db80040f2a57c602f479c5c5f7631e43f7d90a3f74bbc89c478668c85edf7d24",
+    "hf_implicit_dipole_z.json": "b7231e37ee27d2b15bccc30e3326920523242fd3f5d76471518de73208390fbe",
+    "hf_implicit_energy.json": "857cb61f7110faa72f2639d189e88cde1f0560e0994c47a33a25cccc7fca7ca3",
+    "native.log": "43916029d979463352825717b3f7b3dd4acc4ed2a25ceec4b4060f05c49b0b3e",
+    "pbe_explicit_dipole_z.json": "8d91b515ad4c1e0be8ba99cabbf21c07d36192a50b4c6675bfc4a31a06474123",
+    "pbe_explicit_energy.json": "1884e25979d687896cbc33f0eb12b5be11d099755cbabbec82443a523093afa9",
+    "pbe_implicit_dipole_z.json": "22a39bc495ede1e1e1969c286005f56806fceb628fcceb8496c11da71acb21b3",
+    "pbe_implicit_energy.json": "1e1915e49e4dac1bc40baf575d5e25272caa9f4ee732010e697b690fb71e0cac",
+    "phase_timing.pdf": "831772feb347f124ba17de223406b27e3ce059b296848ca7a283e362302ddc6b",
+    "phase_timing.png": "2a40dcfd24f063ebe5e5aab7328a01aeb309d26cee47716df07d13766b774b85",
+    "plot.log": "777127c062a5ec66212ebe30c32aca3477eeedf781b8e11a360762b5e343eaa0",
+    "plot_settings.json": "ad4f855121033081aff6ff4f6e59cd6ad744fc97207c2da6b324b169acad402c",
+    "pyscf.json": "9589fc678ddca9275da684dc4ee5257e5a1104650701469afe3d426363cc3070",
+    "pyscf.log": "1012fac10a98bf86314a2aa3e12daf0b6564def6ed4e9b9529a7f146dbe74fc6",
+    "source_manifest.json": "91a0b5092e40e236b34ffaae239cf74964d21c3f3665f59bcb1f06645a309f38",
+    "timing_summary.csv": "69494f704dd769a9274994188ebae6a608d92681761c7ad2179d2d3c373a78ca",
+    "validation_and_memory.pdf": "58947f9ebf0ca26eb8dd8d3fdeb805885c80c287461e30c928beca55f8d79678",
+    "validation_and_memory.png": "adc0c439335e428e523ef13d299a453cfd2a364c571de9791f6373831bab9879"
+  }
+}

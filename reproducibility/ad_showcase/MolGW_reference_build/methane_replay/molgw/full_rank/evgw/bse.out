@@ -1,0 +1,902 @@
+ ======================================================================
+
+
+            Welcome to the fascinating world of MOLGW
+
+                        3.4
+
+
+ ======================================================================
+
+ MOLGW commit git SHA: Stopping at filesystem boundary (GIT_DIS
+
+ compiled with Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.9.0 Build 20230302_000000
+ with options: 
+      FCFLAGS -I/home/yjiao/opt/miniconda3/envs/jax_scf/lib/python3.11/site-packages/pyscf/lib/deps/include 
+      FCFLAGS -fpp 
+      FCFLAGS -O2 
+ 
+ Today is 10/16/2026
+ It is now 03:58
+ And it is too early to work. Go back to sleep
+
+ Preprocessing and runtime options:
+ Running with LIBXC
+     LIBXC version:  7. 0. 0
+ Code compiled with LIBCINT support with max angular momentum:     8
+ Current LIBCINT compilation uses PXPYPZ ordering for p pure orbitals
+ Current LIBCINT compilation has range-separation capability
+ Running with external LIBINT or LIBCINT calculation of the one-body operators (faster)
+ 
+ 
+ Opening input file: bse.in
+
+  === Echo the entire list of input variables  ===
+
+                               a1  (  0.00000000E+00    0.00000000E+00    0.00000000E+00  )
+                               a2  (  0.00000000E+00    0.00000000E+00    0.00000000E+00  )
+                               a3  (  0.00000000E+00    0.00000000E+00    0.00000000E+00  )
+                     acfd_nlambda        21
+                     alpha_hybrid    0.00000000E+00
+                     alpha_mixing    7.00000000E-01
+                     analytic_chi      no 
+                     approx_h_x2c      yes
+             assume_scf_converged      no 
+                  auto_auxil_fsam    1.50000000E+00
+               auto_auxil_lmaxinc         1
+                  auto_occupation      no 
+                      auxil_basis      weigend
+                            basis      AUG-CC-PVDZ
+                       basis_path      /home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/methane-basis/
+                      beta_hybrid    0.00000000E+00
+                   bogoliubov_scf      no 
+                 bogoliubov_sigma    1.00000000E+00
+                     c_speedlight    1.37035999E+02
+                 calc_charge_step    1.00000000E+00
+                   calc_dens_disc      no 
+                    calc_q_matrix      no 
+                    calc_spectrum      no 
+                       cc4s_input      molgw
+                      cc4s_output      molgw
+                           charge    0.00000000E+00
+                   check_cdsc_x2c      yes
+               ci_greens_function      holes
+                        ci_nstate         1
+                   ci_nstate_self         1
+             ci_spin_multiplicity         1
+                          ci_type      all
+                          comment      
+                      complex_scf      no 
+                      cphf_cpks_0      no 
+                          cube_nx        30
+                          cube_ny        30
+                          cube_nz        30
+                   cube_state_max         1
+                   cube_state_min         1
+           density_matrix_damping    0.00000000E+00
+                         dft_core         0
+                      diis_switch    5.00000000E-02
+                  ecp_auxil_basis      
+                        ecp_basis      
+                     ecp_elements      
+                      ecp_quality      high
+                  ecp_small_basis      
+                         ecp_type      
+                 electric_field_x    0.00000000E+00
+                 electric_field_y    0.00000000E+00
+                 electric_field_z    0.00000000E+00
+                     eri3_genuine      no 
+                      eri3_nbatch         1
+                       eri3_npcol         1
+                       eri3_nprow         1
+                              eta    5.51239833E-03
+              even_tempered_alpha    1.00000000E+00
+               even_tempered_beta    5.00000000E-01
+             even_tempered_n_list      1
+                        excit_dir  (  1.00000000E+00    0.00000000E+00    0.00000000E+00  )
+                      excit_kappa    2.00000000E-05
+                       excit_name      no
+                      excit_time0    3.00000000E+00
+                      excit_width    2.00000000E-01
+               fft_coulomb_cutoff    0.00000000E+00
+             fft_coulomb_exchange      spherical
+              fft_coulomb_hartree      bare
+                         fft_ecut    1.20000000E+02
+                 fft_ecut_postscf    9.99990000E+04
+                    fft_neighbors         1
+                 fft_read_density      no 
+                  fft_renormalize      yes
+                  force_energy_qp      no 
+                       frozencore      no
+                     g3w2_skip_vv      no 
+                    g3w2_skip_vvv      no 
+        g3w2_static_approximation      no 
+                     gamma_hybrid    1.00000000E+06
+                    gaussian_type      CART
+                      grid_memory    4.00000000E+02
+                     grid_quality      high
+                    gwgamma_tddft      no 
+                        harmonium      no 
+                ignore_bigrestart      no 
+                           incore      yes
+                 init_hamiltonian      guess
+                 integral_quality      high
+                     kappa_hybrid    0.00000000E+00
+                        kerker_k0    0.00000000E+00
+                      length_unit      angstrom
+            level_shifting_energy    0.00000000E+00
+                    magnetization    0.00000000E+00
+                memory_evaluation      no 
+                      min_overlap    1.00000000E-05
+                    mixing_scheme      pulay
+                      move_nuclei      no
+                      mpi_poorman      Fal
+                        mu_origin   -1.00000000E+02
+                           n_iter         2
+                  n_restart_tddft        50
+                            natom         5
+                      ncore_tddft         0
+                           ncoreg         0
+                           ncorew         0
+                      nexcitation         0
+                           nghost         0
+                     noft_complex      no 
+                         noft_dft      no 
+                        noft_dft0      yes
+                     noft_fcidump      no 
+                  noft_functional      GNOF
+                     noft_hessian      no 
+              noft_ithresh_lambda         5
+                   noft_lowmemeri      yes
+                      noft_lpower    5.30000000E-01
+                    noft_ncoupled         2
+                       noft_ndiis         5
+                    noft_nophases      no 
+                noft_notupdateocc      no 
+                noft_notupdateorb      no 
+                      noft_notvxc      no 
+                      noft_npairs         1
+                      noft_nr_occ      no 
+                        noft_nscf      1000
+                    noft_printdmn      no 
+                   noft_printints      no 
+                  noft_printswdmn      no 
+                      noft_qc_orb      no 
+                    noft_readcoef      no 
+                   noft_readfdiag      no 
+                  noft_readgammas      no 
+                     noft_readocc      no 
+                     noft_restart      no 
+                     noft_rsinter      no 
+                        noft_tole    1.00000000E-09
+                  nomega_chi_imag         0
+                  nomega_chi_real         2
+                     nomega_sigma      4001
+                nomega_sigma_calc         1
+                      npulay_hist         6
+                             nscf       100
+                            nspin         1
+                            nstep        50
+                        nstep_dav        15
+                         nstep_gw         1
+                  nvel_projectile         1
+                        nvirtualg        62
+                        nvirtualw        62
+                   parabolic_conf      no 
+                 partition_scheme      ssf
+                   pbe_plus_alpha    0.00000000E+00
+                      poscar_file      
+                          postscf      BSE
+             postscf_diago_flavor      
+            print_all_mo_wfn_file      no 
+                print_bare_energy      no 
+                 print_bigrestart      yes
+        print_c_matrix_cmplx_hdf5      no 
+                 print_cc4s_files      no 
+               print_charge_tddft      no 
+                       print_cube      no 
+            print_cube_diff_tddft      no 
+             print_cube_rho_tddft      no 
+                  print_dens_traj      no 
+       print_dens_traj_points_set      no 
+            print_dens_traj_tddft      no 
+             print_density_matrix      no 
+                        print_eri      no 
+                    print_hartree      no 
+                       print_hdf5      no 
+        print_line_rho_diff_tddft      no 
+             print_line_rho_tddft      no 
+                     print_molden      no 
+                  print_multipole      no 
+     print_p_matrix_mo_block_hdf5      no 
+                       print_pdos      no 
+                    print_restart      yes
+                   print_rho_grid      no 
+                      print_sigma      no 
+          print_spatial_extension      no 
+             print_tddft_matrices      no 
+              print_tddft_restart      yes
+         print_transition_density      no 
+          print_transition_dipole      no 
+                          print_w      no 
+                        print_wfn      no 
+                  print_wfn_files      no 
+                       print_yaml      yes
+        projectile_charge_scaling    1.00000000E+00
+                   pt3_a_diagrams      yes
+                pt_density_matrix      no
+                           r_disc    2.00000000E+02
+                        rcut_mbpt    1.00000000E+00
+                 rdm_filtering_mo         0
+                 rdm_filtering_no         0
+                        read_fchk      no
+                      read_molden      
+                     read_restart      yes                                                                                                                                         
+               read_tddft_restart      no 
+                    restart_input      RESTART
+                    rwconfinement    0.00000000E+00
+              scalapack_block_min    100000
+                              scf      HF
+                 scf_diago_flavor      
+                 scf_energy_shift    0.00000000E+00
+                          scissor    0.00000000E+00
+             selfenergy_state_max        34
+             selfenergy_state_min         1
+           selfenergy_state_range    100000
+            selfenergy_tdhf_alpha    0.00000000E+00
+             selfenergy_tdhf_beta    0.00000000E+00
+            selfenergy_tdhf_delta    2.00000000E+00
+          selfenergy_tdhf_epsilon    0.00000000E+00
+            selfenergy_tdhf_gamma    1.00000000E+00
+             selfenergy_tdhf_zeta    0.00000000E+00
+                      small_basis      
+                       step_sigma    5.00000000E-04
+                  step_sigma_calc    3.00000000E-02
+                         stopping      no
+                      stopping_dq    2.00000000E-02
+                      stopping_nq       500
+                              tda      no 
+                     tddft_charge   -9.99000000E+02
+               tddft_energy_shift    0.00000000E+00
+                      tddft_force      no 
+               tddft_grid_quality      high
+                    tddft_history         2
+              tddft_magnetization    0.00000000E+00
+        tddft_predictor_corrector      PC2B
+                 tddft_propagator      CN
+                     tddft_wfn_t0      SCF
+                      temperature    0.00000000E+00
+                         time_sim    1.00000000E+01
+                        time_step    1.00000000E+00
+                           toldav    1.00000000E-04
+                         tolforce    1.00000000E-05
+                           tolscf    1.00000000E-10
+                     tolscf_tddft    1.00000000E-04
+                          triplet      no 
+    use_correlated_density_matrix      no 
+                   vel_projectile  (  0.00000000E+00    0.00000000E+00    1.00000000E+00  )
+                      virtual_fno      no 
+                      w_screening      rpa
+                       write_step    1.00000000E+00
+                              x2c      no 
+                         xyz_file      
+                      yaml_output      molgw.yaml
+
+  ================================================
+
+
+ Summary of important input parameters 
+
+                    SCF type:   HF                                                                                                  
+               Post SCF type:   BSE                                                                                                 
+             number of atoms:    5
+     number of basis centers:    5
+                   electrons:    10.0000
+                      charge:     0.0000
+           spin polarization:    1
+               magnetization:     0.0000
+              basis file path:  /home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/methane-basis/
+                   basis set:   AUG-CC-PVDZ                                                                                         
+         auxiliary basis set:   weigend                                                                                             
+               gaussian type:   CART
+             global exchange:     1.0000
+    long-range-only exchange:     0.0000
+   range-separation (bohr-1):  none
+ 
+
+ ================================
+       Atom list
+                        bohr                                        angstrom
+ atom    1   C      :      0.000000     0.000000     0.000000           0.000000     0.000000     0.000000
+ atom    2   H      :      1.188638     1.188638     1.188638           0.629000     0.629000     0.629000
+ atom    3   H      :      1.188638    -1.188638    -1.188638           0.629000    -0.629000    -0.629000
+ atom    4   H      :     -1.188638     1.188638    -1.188638          -0.629000     0.629000    -0.629000
+ atom    5   H      :     -1.188638    -1.188638     1.188638          -0.629000    -0.629000     0.629000
+ ================================
+
+ Number of bonds     4
+ Molecule does not have inversion symmetry
+ Molecule is not linear
+ Molecule is not planar
+ 
+
+ Setting up the cartesian to pure transforms up to l=  8
+ Transformations set up completed for both CARTESIAN and PURE Gaussians
+ 
+ Setting up the basis set for wavefunctions
+
+                  Total number of basis functions:      61
+                                 Number of shells:      29
+        Maximum angular momentum in the basis set:       2
+                                                         d
+ Basis set is fit and ready
+
+
+ Setting up the auxiliary basis set for Coulomb integrals
+
+                  Total number of basis functions:     109
+                                 Number of shells:      35
+        Maximum angular momentum in the basis set:       4
+                                                         g
+ Basis set is fit and ready
+
+
+ Initialize LIBCINT internal data for 2 basis sets (basis and auxiliary basis)
+ LIBCINT environment maximum index:      267
+
+ Initialize LIBCINT internal data for 1 basis set (basis or auxiliary basis)
+ LIBCINT environment maximum index:      147
+   Allocate:                                   Overlap matrix S,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Setup overlap matrix S (LIBCINT)
+
+ Calculate the transformation matrix X 
+   Allocate:                           Overlap X * X**H = S**-1,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Filtering basis functions that induce overcompleteness
+   S condition number                 1.78E+05
+   Lowest S eigenvalue is             6.92E-05
+   Tolerance on overlap eigenvalues   1.00E-05
+   Retaining    61 among    61
+
+ === Occupations ===
+     1      2.00000
+     2      2.00000
+     3      2.00000
+     4      2.00000
+     5      2.00000
+     6      0.00000
+     7      0.00000
+     8      0.00000
+     9      0.00000
+    10      0.00000
+    11      0.00000
+    12      0.00000
+    13      0.00000
+    14      0.00000
+    15      0.00000
+ 
+
+ Tolerance on integrals set to  1.00E-08
+
+ Cauchy-Schwartz screening of the 3- or 4-center integrals (LIBCINT)
+
+ Non negligible shellpairs to be computed     435  over a total of     435
+ Saving (%):       0.0000
+   Allocate:                                         index pair,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+   Allocate:                                        index basis,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ 2-center integrals (LIBCINT)
+
+ SCALAPACK block size for auxiliary basis:   32
+   Allocate:                                 2-center integrals,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+ 2-center integrals inverse square-root
+
+ Distribute auxiliary basis functions among processors
+ Auxiliary basis functions load unbalance (Max - Min):    109 -    109
+   Allocate:             2-center integrals inverse square-root,  Mem:   +0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ All 2-center integrals have been calculated, diagonalized and stored
+ Lowest eigenvalue:     2.451575E-07
+ Some have been eliminated due to too large overlap      0
+ because their eigenvalue was lower than:    1.000000E-10
+ Deallocate:                    2-center integrals eigenvectors,  Mem:   -0.000 (Gb),  Total Mem:    0.000 (Gb)
+
+ Calculate and store all the 3-center Electron Repulsion Integrals (LIBCINT 3center)
+   Allocate:                       3-center integrals SCALAPACK,  Mem:   +0.002 (Gb),  Total Mem:    0.002 (Gb)
+   Allocate:                             TMP 3-center integrals,  Mem:   +0.002 (Gb),  Total Mem:    0.003 (Gb)
+ Deallocate:                             TMP 3-center integrals,  Mem:   -0.002 (Gb),  Total Mem:    0.002 (Gb)
+ Number of calls to libint of this proc:                15225
+ Total number of calls to libint:                       15225
+ Redundant calls due to parallelization and batches (%):     0.00
+ Deallocate:             2-center integrals inverse square-root,  Mem:   -0.000 (Gb),  Total Mem:    0.002 (Gb)
+
+ All 3-center integrals have been calculated and stored
+
+   Allocate:                                 Kinetic operator T,  Mem:   +0.000 (Gb),  Total Mem:    0.002 (Gb)
+   Allocate:                                 Nucleus operator V,  Mem:   +0.000 (Gb),  Total Mem:    0.002 (Gb)
+   Allocate:                                    Fock operator F,  Mem:   +0.000 (Gb),  Total Mem:    0.002 (Gb)
+   Allocate:                                    Wavefunctions C,  Mem:   +0.000 (Gb),  Total Mem:    0.002 (Gb)
+ Restarting from a finalized RESTART file
+
+ Setup kinetic part of the Hamiltonian (LIBCINT)
+
+ Setup nucleus-electron part of the Hamiltonian (LIBCINT)
+
+ Writing a big RESTART file
+
+ Initialize LIBCINT internal data for 2 basis sets (basis and auxiliary basis)
+ LIBCINT environment maximum index:      267
+
+ Initialize LIBCINT internal data for 1 basis set (basis or auxiliary basis)
+ LIBCINT environment maximum index:      147
+ Deallocate:                                   Overlap matrix S,  Mem:   -0.000 (Gb),  Total Mem:    0.002 (Gb)
+ Deallocate:                                 Kinetic operator T,  Mem:   -0.000 (Gb),  Total Mem:    0.002 (Gb)
+ Deallocate:                                 Nucleus operator V,  Mem:   -0.000 (Gb),  Total Mem:    0.002 (Gb)
+ Deallocate:                           Overlap X * X**H = S**-1,  Mem:   -0.000 (Gb),  Total Mem:    0.002 (Gb)
+ Deallocate:                                    Fock operator F,  Mem:   -0.000 (Gb),  Total Mem:    0.002 (Gb)
+
+ Prepare a polarizability spectral function with
+                               Occupied states:        5
+                                Virtual states:       56
+                              Transition space:      280
+ Comparison adapter optical transitions:         145
+
+ Reading ENERGY_QP file
+
+ Calculating the polarizability
+ Singlet final state
+
+ Calculate 3-center integrals on molecular orbitals: AO -> MO transform
+   Allocate:                              3-center MO integrals,  Mem:   +0.003 (Gb),  Total Mem:    0.005 (Gb)
+   Allocate:                                  TMP 3-center ints,  Mem:   +0.000 (Gb),  Total Mem:    0.005 (Gb)
+   Allocate:                                  TMP 3-center ints,  Mem:   +0.000 (Gb),  Total Mem:    0.005 (Gb)
+   Allocate:                                  TMP 3-center ints,  Mem:   +0.000 (Gb),  Total Mem:    0.005 (Gb)
+ Deallocate:                                  TMP 3-center ints,  Mem:   -0.000 (Gb),  Total Mem:    0.005 (Gb)
+ Deallocate:                                  TMP 3-center ints,  Mem:   -0.000 (Gb),  Total Mem:    0.005 (Gb)
+ Deallocate:                                  TMP 3-center ints,  Mem:   -0.000 (Gb),  Total Mem:    0.005 (Gb)
+
+ Summarize the linear response calculation:
+   RPA:          F
+   BSE:          T
+   TDHF:         F
+   TDDFT:        F
+   hybrid alpha: 1.0000
+   hybrid beta:  0.0000
+ 
+
+ Reading ENERGY_QP file
+ Reading OK
+
+ Prepare a polarizability spectral function with
+                               Occupied states:        5
+                                Virtual states:       56
+                              Transition space:      280
+
+ Try to read spectral function from file SCREENED_COULOMB
+ File does not exist
+
+
+ Calculate the static polarizability within RPA
+   Allocate:                                           Static W,  Mem:   +0.000 (Gb),  Total Mem:    0.005 (Gb)
+   Allocate:                                   temp chi0 matrix,  Mem:   +0.000 (Gb),  Total Mem:    0.005 (Gb)
+ Deallocate:                                   temp chi0 matrix,  Mem:   -0.000 (Gb),  Total Mem:    0.005 (Gb)
+   Allocate:                                                A+B,  Mem:   +0.000 (Gb),  Total Mem:    0.005 (Gb)
+   Allocate:                                                A-B,  Mem:   +0.000 (Gb),  Total Mem:    0.005 (Gb)
+
+ Build the electron-hole hamiltonian
+ Build diagonal part with auxil basis: Energies
+ Build Hartree part with auxil basis
+ Build W part Auxil
+ Content of Exchange:    1.000
+   Allocate:                              Temporary array for W,  Mem:   +0.000 (Gb),  Total Mem:    0.005 (Gb)
+ Deallocate:                              Temporary array for W,  Mem:   -0.000 (Gb),  Total Mem:    0.005 (Gb)
+ Deallocate:                                                Chi,  Mem:   -0.000 (Gb),  Total Mem:    0.005 (Gb)
+
+ Spectral function destroyed
+   Allocate:                                                X+Y,  Mem:   +0.000 (Gb),  Total Mem:    0.005 (Gb)
+   Allocate:                                                X-Y,  Mem:   +0.000 (Gb),  Total Mem:    0.005 (Gb)
+
+ Performing the block diago with Cholesky
+ Deallocate (A+B) and possibly (A-B)
+ Deallocate:                                                A+B,  Mem:   -0.000 (Gb),  Total Mem:    0.005 (Gb)
+ Deallocate:                                                A-B,  Mem:   -0.000 (Gb),  Total Mem:    0.005 (Gb)
+
+ Lowest neutral excitation energy (eV):   10.808672
+
+ Calculate the optical spectrum
+
+ Setup dipole matrix (LIBCINT)
+
+     Excitation energies (eV)     Oscil. strengths   [Symmetry] 
+ Exc. 0001 :        10.80867184          0.11427917       1                               
+           3 ->    6      0.52300
+           3 ->   13      0.21927
+           4 ->    6      0.35604
+           4 ->   13      0.14927
+ 
+ Exc. 0002 :        10.80867184          0.11427917       1                               
+           3 ->    6      0.33532
+           3 ->   13      0.14059
+           4 ->    6     -0.52450
+           4 ->   13     -0.21990
+           5 ->    6     -0.13930
+ 
+ Exc. 0003 :        10.80867184          0.11427917       1                               
+           3 ->    6      0.14484
+           5 ->    6      0.61716
+           5 ->   13      0.25875
+ 
+ Exc. 0004 :        12.04702422          0.01182347       1                               
+           3 ->    7     -0.43795
+           3 ->   10      0.10514
+           4 ->    8      0.42777
+           4 ->    9     -0.11960
+           4 ->   11     -0.10229
+           5 ->    7      0.18467
+ 
+ Exc. 0005 :        12.04702422          0.01182347       1                               
+           3 ->    6     -0.10726
+           3 ->    8      0.14404
+           3 ->    9      0.31859
+           4 ->    7      0.23990
+           4 ->    8      0.25077
+           4 ->    9      0.12681
+           5 ->    7     -0.29599
+           5 ->    9      0.27883
+ 
+ Exc. 0006 :        12.04702422          0.01182347       1                               
+           3 ->    8      0.18336
+           3 ->    9      0.27025
+           4 ->    8     -0.11219
+           4 ->    9     -0.27665
+           5 ->    7     -0.21051
+           5 ->    8      0.33170
+           5 ->    9     -0.26149
+ 
+ Exc. 0007 :        12.15836314          0.00000000       1                               
+           3 ->    8      0.39409
+           3 ->    9     -0.21228
+           3 ->   11     -0.14007
+           4 ->    7      0.38933
+           4 ->    9     -0.17407
+           4 ->   10     -0.14648
+           5 ->    7      0.16454
+ 
+ Exc. 0008 :        12.15836314          0.00000000       1                               
+           3 ->    7     -0.25694
+           4 ->    8     -0.11607
+           4 ->    9      0.27684
+           4 ->   12      0.12032
+           5 ->    7     -0.17032
+           5 ->    8     -0.30678
+           5 ->    9     -0.35088
+           5 ->   10      0.10610
+           5 ->   11      0.10079
+           5 ->   12     -0.14954
+ 
+ Exc. 0009 :        12.18581163          0.00000000       1                               
+           3 ->    7     -0.13928
+           3 ->    8     -0.38794
+           3 ->    9      0.11401
+           3 ->   10      0.11575
+           3 ->   11      0.10516
+           4 ->    7      0.43035
+           4 ->    8     -0.15706
+           4 ->   10     -0.11908
+           4 ->   11      0.12230
+           5 ->    8      0.14393
+ 
+ Exc. 0010 :        12.18581163          0.00000000       1                               
+           3 ->    7      0.17948
+           3 ->    8      0.13014
+           3 ->    9      0.33483
+           3 ->   12      0.13233
+           4 ->    9      0.23940
+           5 ->    7      0.41100
+           5 ->    9     -0.16766
+           5 ->   10     -0.15372
+ 
+ Exc. 0011 :        12.18581163          0.00000000       1                               
+           3 ->    9     -0.25673
+           3 ->   12     -0.10057
+           4 ->    9      0.37807
+           4 ->   12      0.14148
+           5 ->    8      0.43175
+           5 ->   11     -0.16100
+ 
+ Exc. 0012 :        12.40192402          0.00000000       1                               
+           3 ->    7      0.34849
+           3 ->    8     -0.16156
+           3 ->    9     -0.12401
+           4 ->    7      0.13934
+           4 ->    8      0.36838
+           5 ->    7     -0.14854
+           5 ->    9     -0.37382
+ 
+ Exc. 0013 :        13.25945564          0.00000000       1                               
+           3 ->    8      0.12279
+           3 ->   10      0.31708
+           3 ->   11      0.26820
+           3 ->   14     -0.15368
+           3 ->   15      0.10421
+           4 ->    7     -0.12635
+           4 ->   10     -0.28547
+           4 ->   11      0.31148
+           4 ->   14     -0.10624
+           4 ->   15     -0.13792
+           5 ->   11     -0.11219
+ 
+ Exc. 0014 :        13.25945564          0.00000000       1                               
+           3 ->   10      0.10142
+           3 ->   12     -0.31583
+           3 ->   15      0.10689
+           3 ->   16     -0.10672
+           4 ->   12     -0.26212
+           5 ->    7      0.12240
+           5 ->   10      0.40495
+           5 ->   12      0.11433
+           5 ->   15      0.14158
+           5 ->   16      0.13243
+ 
+ Exc. 0015 :        13.25945564          0.00000000       1                               
+           3 ->   12      0.27814
+           3 ->   16      0.10319
+           4 ->    9      0.10616
+           4 ->   12     -0.32432
+           4 ->   16     -0.13672
+           5 ->    8      0.12719
+           5 ->   11      0.40577
+           5 ->   14     -0.18556
+ 
+ Exc. 0016 :        13.35127057          0.00000000       1                               
+           3 ->    8      0.14095
+           3 ->   10      0.19313
+           3 ->   11      0.30295
+           3 ->   12      0.21537
+           3 ->   14     -0.15074
+           4 ->    7      0.14040
+           4 ->   10      0.33090
+           4 ->   11     -0.20376
+           4 ->   12      0.12816
+           4 ->   15      0.10309
+           4 ->   16      0.12309
+           5 ->   10      0.13746
+ 
+ Exc. 0017 :        13.35127057          0.00000000       1                               
+           3 ->   10     -0.16740
+           3 ->   11      0.20373
+           4 ->   11     -0.10097
+           4 ->   12     -0.26307
+           5 ->    8     -0.11228
+           5 ->    9     -0.12770
+           5 ->   10     -0.23050
+           5 ->   11     -0.23238
+           5 ->   12      0.33492
+           5 ->   15     -0.13186
+           5 ->   16      0.10289
+ 
+ Exc. 0018 :        13.53096410          0.00000000       1                               
+           3 ->   10      0.23575
+           3 ->   11     -0.28547
+           4 ->   10      0.27371
+           4 ->   11      0.24406
+           4 ->   14     -0.11437
+           5 ->   10     -0.10290
+           5 ->   12      0.36121
+ 
+ Exc. 0019 :        13.76582814          0.07458775       1                               
+           3 ->    6     -0.10523
+           3 ->   10     -0.12539
+           3 ->   11     -0.19670
+           3 ->   12      0.38282
+           3 ->   13      0.20535
+           4 ->   10     -0.17840
+           5 ->   10      0.31202
+           5 ->   11     -0.26394
+ 
+ Exc. 0020 :        13.76582814          0.07458775       1                               
+           3 ->    7      0.10357
+           3 ->   10      0.37554
+           3 ->   11     -0.22700
+           4 ->   10     -0.15545
+           4 ->   11     -0.35215
+           4 ->   12     -0.19399
+           5 ->   10     -0.12410
+           5 ->   13      0.18487
+ 
+ Exc. 0021 :        13.76582814          0.07458775       1                               
+           4 ->   10     -0.24920
+           4 ->   11     -0.22089
+           4 ->   12      0.27179
+           4 ->   13     -0.18435
+           5 ->   10      0.12590
+           5 ->   11      0.24879
+           5 ->   12      0.36562
+ 
+ Exc. 0022 :        14.09345810          0.15333100       1                               
+           4 ->    6     -0.25685
+           4 ->   11     -0.12909
+           4 ->   13      0.60006
+           4 ->   19      0.10217
+ 
+ Exc. 0023 :        14.09345810          0.15333100       1                               
+           3 ->    6      0.15855
+           3 ->   10     -0.11010
+           3 ->   13     -0.37040
+           5 ->    6     -0.20211
+           5 ->   10      0.11260
+           5 ->   13      0.47217
+ 
+ Exc. 0024 :        14.09345810          0.15333100       1                               
+           3 ->    6     -0.20276
+           3 ->   11      0.10457
+           3 ->   12     -0.12142
+           3 ->   13      0.47369
+           5 ->    6     -0.15872
+           5 ->   11      0.10392
+           5 ->   13      0.37081
+ 
+ Exc. 0025 :        15.42075612          0.00000000       1                               
+           3 ->    8     -0.12276
+           3 ->   10     -0.12170
+           3 ->   11     -0.10453
+           3 ->   14     -0.35044
+           3 ->   15      0.22318
+           3 ->   16      0.10239
+           4 ->    7      0.12871
+           4 ->   10      0.11305
+           4 ->   11     -0.12143
+           4 ->   14     -0.24256
+           4 ->   15     -0.32407
+           4 ->   16     -0.17690
+           5 ->   14      0.12403
+ 
+ Exc. 0026 :        15.42075612          0.00000000       1                               
+           3 ->    9      0.12210
+           3 ->   12     -0.15241
+           3 ->   14     -0.11447
+           3 ->   15     -0.23377
+           3 ->   16      0.31655
+           4 ->   16     -0.17923
+           5 ->   11     -0.15656
+           5 ->   14     -0.35977
+           5 ->   15     -0.15049
+           5 ->   16     -0.19214
+ 
+ Exc. 0027 :        15.42075612          0.00000000       1                               
+           3 ->   15      0.16970
+           3 ->   16     -0.10710
+           4 ->    9     -0.12232
+           4 ->   12      0.14799
+           4 ->   15      0.21866
+           4 ->   16     -0.33746
+           5 ->   10     -0.15242
+           5 ->   14     -0.22488
+           5 ->   15      0.28399
+           5 ->   16      0.24090
+ 
+ Exc. 0028 :        15.52814738          0.04336746       1                               
+           3 ->   15      0.27288
+           3 ->   16      0.16606
+           3 ->   17      0.17491
+           4 ->    8      0.12278
+           4 ->   14      0.40517
+           4 ->   15     -0.13650
+           5 ->   15     -0.10324
+           5 ->   17      0.20415
+           5 ->   18      0.25528
+ 
+ Exc. 0029 :        15.52814738          0.04336746       1                               
+           3 ->   14     -0.15823
+           3 ->   16     -0.28809
+           3 ->   17      0.19134
+           4 ->   15     -0.11924
+           4 ->   16      0.20546
+           4 ->   17      0.27484
+           5 ->   14     -0.32315
+           5 ->   15     -0.16240
+           5 ->   16      0.11358
+           5 ->   18     -0.15887
+ 
+ Exc. 0030 :        15.52814738          0.04336746       1                               
+           3 ->   15      0.25354
+           3 ->   16     -0.16964
+           3 ->   18      0.26207
+           4 ->   15      0.25591
+           4 ->   17      0.13685
+           4 ->   18     -0.21329
+           5 ->   15     -0.18648
+           5 ->   16     -0.32875
+           5 ->   17      0.10511
+ 
+
+ TRK sum rule: the two following numbers should compare well
+ Sum over oscillator strengths:     6.272524
+   Number of valence electrons:    10.000000
+
+ Mean excitation energy (eV):    19.590621
+
+ Static dipole polarizability:
+       15.004495       -0.000000       -0.000000
+       -0.000000       15.004495        0.000000
+       -0.000000        0.000000       15.004495
+ Static dipole polarizability trace:    15.004495
+ Deallocate:                                                X-Y,  Mem:   -0.000 (Gb),  Total Mem:    0.005 (Gb)
+ Deallocate eigenvector array
+ Deallocate:                                                X+Y,  Mem:   -0.000 (Gb),  Total Mem:    0.005 (Gb)
+
+ Destroy 3-center integrals on MO
+ Deallocate:                              3-center MO integrals,  Mem:   -0.003 (Gb),  Total Mem:    0.002 (Gb)
+
+ Spectral function destroyed
+ Deallocate:                                    Wavefunctions C,  Mem:   -0.000 (Gb),  Total Mem:    0.002 (Gb)
+ Deallocate:                                         index pair,  Mem:   -0.000 (Gb),  Total Mem:    0.002 (Gb)
+ Deallocate:                                        index basis,  Mem:   -0.000 (Gb),  Total Mem:    0.002 (Gb)
+ Deallocate:                                 3-center integrals,  Mem:   -0.002 (Gb),  Total Mem:    0.000 (Gb)
+
+                 ----------------------------
+
+                 --- Memory usage summary ---
+
+ Memory that was not deallocated properly
+                 Memory (Gb):     0.000
+
+ Maximum memory used during the run
+            Peak memory (Gb):     0.005
+ 
+
+                 --- Timings in (s) and # of calls ---
+
+                                           Total            0.15
+
+                 -------------------------------------
+
+                                   Total pre SCF            0.06
+                                  Total post SCF            0.08
+
+                 -------------------------------------
+
+                             Pre SCF
+
+ |----------------------- Integral pre-screening            0.01         1
+ |--------------------------- 2-center integrals            0.00         1
+       |------------------- Integrals evaluation            0.00         1
+       |-------------------- Matrix inverse sqrt            0.00         1
+ |--------------------------- 3-center integrals            0.04         1
+       |------------------- Integrals evaluation            0.03         1
+       |------------------ Matrix multiplication            0.01         1
+ |----------------------------- Overlap matrix S            0.00         1
+ |-------------------------- Kinetic Hamiltonian            0.00         1
+ |----------------- Electron-nucleus Hamiltonian            0.00         1
+
+                 -------------------------------------
+
+                                 SCF
+
+ |------------------------- RESTART file writing            0.00         1
+
+                 -------------------------------------
+
+                            Post SCF
+
+ |------------------------ Response function chi            0.08         1
+       |----- 3-center AO to MO transform in chi            0.02         1
+       |------------ Static polarization for BSE            0.00         1
+       |----------- Build 2-particle Hamiltonian            0.01         1
+             |------------------------- RPA part            0.00         1
+             |------------------------- BSE part            0.00         1
+       |--------------------- Diago 2 particle H            0.01         1
+       |----------------------- Optical spectrum            0.04         1
+
+                 -------------------------------------
+
+ |---------------------------- temporary timer 2            0.01         1
+
+                 -------------------------------------
+
+
+ When using MOLGW for a publication, citation to the following article is appreciated:
+          Bruneval, Rangel, Hamed, Shao, Yang, Neaton, Comput. Phys. Comm. 208, 149 (2016).
+
+ This is the end
+

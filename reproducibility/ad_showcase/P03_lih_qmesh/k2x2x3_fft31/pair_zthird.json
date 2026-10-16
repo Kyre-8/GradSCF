@@ -1,0 +1,79 @@
+{
+  "complete": true,
+  "passed": true,
+  "qpoints": [
+    [
+      0.0,
+      0.0,
+      0.3333333333333333
+    ],
+    [
+      0.0,
+      0.0,
+      -0.3333333333333333
+    ]
+  ],
+  "conjugacy_error_hartree_per_bohr2": 1.950364486533572e-14,
+  "conjugacy_gate_hartree_per_bohr2": 1e-08,
+  "max_imaginary_hartree_per_bohr2": 0.010696549174257665,
+  "input_sha256": {
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft31/q_0_0_1.json": "8f0f6fc77b13f026057fc931cda0808fe658b555997085fc71ffa4e3805162ad",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft31/q_0_0_m1.json": "dc56b2abcdbf26c2ae47e519d83f200a0be9f7fd25b7bceda8b0eb03e62f3a68"
+  },
+  "identity": {
+    "source_python_sha256": "acc255538482dbbd7b243b5e3a577e2bd820086936fe29d67f6aaa28c66ef9b5",
+    "script_sha256": "adf9b950d4ae5d6a3ce5de2d1d559ab4ec6aa9eb9c4a4ff1421609f1a1d573b5",
+    "helper_sha256": {
+      "lih_forces_stress.py": "4431a8c0439a2b60b4d4befb9c8c1792fd65d2bd0b1107937aa5f75a03bc8d68",
+      "lih_gamma_phonons.py": "52753c5e997b4b221e8004f48b9ed3218aaa744d4f11ffa13fa0f13a5741fa44"
+    },
+    "settings": {
+      "a_bohr": 7.780032276700287,
+      "xc": "pbe",
+      "basis": "gth-szv",
+      "pseudo": "gth-pade",
+      "mesh": [
+        31,
+        31,
+        31
+      ],
+      "kmesh": [
+        2,
+        2,
+        3
+      ],
+      "precision": 1e-10,
+      "displacement_bohr": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "masses_amu": [
+      7.0160034366,
+      1.00782503223
+    ],
+    "linear_solver": {
+      "method": "gmres",
+      "rtol": 1e-10,
+      "atol": 1e-12,
+      "maxiter": 100,
+      "restart": 40,
+      "max_dense": 2048
+    },
+    "gates": {
+      "linear_residual": 1e-09,
+      "hermiticity_hartree_per_bohr2": 1e-08
+    },
+    "phase": "Phi_ab(q)=sum_R C_ab(R)*exp(2*pi*i*q.R); lattice translation only"
+  },
+  "asr_projected": false,
+  "scope": "Raw independent positive/negative q matrices; no averaged or repaired pair."
+}

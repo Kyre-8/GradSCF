@@ -1,0 +1,136 @@
+{
+  "pyscf_version": "2.13.0",
+  "records": [
+    {
+      "bond_bohr": 1.0,
+      "rhf_energy_hartree": -1.0785232408017036,
+      "gradient_hartree_per_bohr": -0.32522989342820274,
+      "curvature_hartree_per_bohr2": 1.572800477534761,
+      "selected_energy_hartree": -1.0785232408017036,
+      "spin_square": -1.3322676295501878e-15,
+      "gradient_error": 2.731148640577885e-13,
+      "curvature_error": 2.55351295663786e-14
+    },
+    {
+      "bond_bohr": 1.4,
+      "rhf_energy_hartree": -1.1267427044518366,
+      "gradient_hartree_per_bohr": 0.008177759271538854,
+      "curvature_hartree_per_bohr2": 0.3835480137045907,
+      "selected_energy_hartree": -1.1267427044518357,
+      "spin_square": 0.0,
+      "gradient_error": 3.054501096499962e-13,
+      "curvature_error": 4.4575454438700035e-14
+    },
+    {
+      "bond_bohr": 1.7999999999999998,
+      "rhf_energy_hartree": -1.1032258968689537,
+      "gradient_hartree_per_bohr": 0.09029507820780913,
+      "curvature_hartree_per_bohr2": 0.08868328551929644,
+      "selected_energy_hartree": -1.1032258968689541,
+      "spin_square": -1.3322676295501878e-15,
+      "gradient_error": 7.258083023486961e-13,
+      "curvature_error": 1.2530254611675673e-13
+    },
+    {
+      "bond_bohr": 2.2,
+      "rhf_energy_hartree": -1.0629274520709027,
+      "gradient_hartree_per_bohr": 0.10580750767568015,
+      "curvature_hartree_per_bohr2": 0.0057365075992997505,
+      "selected_energy_hartree": -1.0629274520709024,
+      "spin_square": -3.1086244689504383e-15,
+      "gradient_error": 0.0,
+      "curvature_error": 8.777700788442644e-16
+    },
+    {
+      "bond_bohr": 2.5999999999999996,
+      "rhf_energy_hartree": -1.0209781162442888,
+      "gradient_hartree_per_bohr": 0.10240690746955086,
+      "curvature_hartree_per_bohr2": -0.017843375098130623,
+      "selected_energy_hartree": -1.0298231949625842,
+      "spin_square": 0.4190514986962989,
+      "gradient_error": 8.049116928532385e-16,
+      "curvature_error": 2.3245294578089215e-16
+    },
+    {
+      "bond_bohr": 3.0,
+      "rhf_energy_hartree": -0.9816709084007249,
+      "gradient_hartree_per_bohr": 0.0937153233832825,
+      "curvature_hartree_per_bohr2": -0.024224731593811943,
+      "selected_energy_hartree": -1.0132464810756068,
+      "spin_square": 0.6870681640021998,
+      "gradient_error": 1.2184697695261093e-14,
+      "curvature_error": 3.3063829452117943e-15
+    },
+    {
+      "bond_bohr": 3.4,
+      "rhf_energy_hartree": -0.9461782482470025,
+      "gradient_hartree_per_bohr": 0.08365885253187523,
+      "curvature_hartree_per_bohr2": -0.025600051899036302,
+      "selected_energy_hartree": -1.004958538564306,
+      "spin_square": 0.831203526593762,
+      "gradient_error": 1.638550406468653e-13,
+      "curvature_error": 4.769795669545829e-14
+    },
+    {
+      "bond_bohr": 3.8,
+      "rhf_energy_hartree": -0.9147557816927938,
+      "gradient_hartree_per_bohr": 0.07349666594558048,
+      "curvature_hartree_per_bohr2": -0.024964428680116994,
+      "selected_energy_hartree": -1.0007830938875482,
+      "spin_square": 0.9090805043513899,
+      "gradient_error": 8.128220319036927e-14,
+      "curvature_error": 2.597574932927671e-14
+    },
+    {
+      "bond_bohr": 4.199999999999999,
+      "rhf_energy_hartree": -0.8873125245151297,
+      "gradient_hartree_per_bohr": 0.06383836744103877,
+      "curvature_hartree_per_bohr2": -0.02319433603443699,
+      "selected_energy_hartree": -0.9986755725047343,
+      "spin_square": 0.9512095071923717,
+      "gradient_error": 8.253120409307257e-14,
+      "curvature_error": 3.194666753358888e-14
+    },
+    {
+      "bond_bohr": 4.6,
+      "rhf_energy_hartree": -0.8635739988126345,
+      "gradient_hartree_per_bohr": 0.055005229450660525,
+      "curvature_hartree_per_bohr2": -0.02093792032781497,
+      "selected_energy_hartree": -0.997614365535417,
+      "spin_square": 0.9739712723398245,
+      "gradient_error": 8.772149673319518e-14,
+      "curvature_error": 4.3940545646492524e-14
+    },
+    {
+      "bond_bohr": 5.0,
+      "rhf_energy_hartree": -0.8431855683728684,
+      "gradient_hartree_per_bohr": 0.04708844069687877,
+      "curvature_hartree_per_bohr2": -0.01866818732955114,
+      "selected_energy_hartree": -0.9970803387824598,
+      "spin_square": 0.9862312441275681,
+      "gradient_error": 6.361577931102147e-14,
+      "curvature_error": 4.123090757701675e-14
+    },
+    {
+      "bond_bohr": 5.3999999999999995,
+      "rhf_energy_hartree": -0.8257865872299023,
+      "gradient_hartree_per_bohr": 0.04004575275339834,
+      "curvature_hartree_per_bohr2": -0.0165784267275594,
+      "selected_energy_hartree": -0.9968090081182387,
+      "spin_square": 0.9928007293062163,
+      "gradient_error": 5.062616992290714e-14,
+      "curvature_error": 4.128641872824801e-14
+    },
+    {
+      "bond_bohr": 5.8,
+      "rhf_energy_hartree": -0.8110424580147576,
+      "gradient_hartree_per_bohr": 0.03380278769817402,
+      "curvature_hartree_per_bohr2": -0.014658604265592784,
+      "selected_energy_hartree": -0.9966666791090345,
+      "spin_square": 0.9962931108432822,
+      "gradient_error": 2.5521251778570786e-14,
+      "curvature_error": 2.547094479776746e-14
+    }
+  ],
+  "elapsed_seconds": 1.8004653399984818
+}

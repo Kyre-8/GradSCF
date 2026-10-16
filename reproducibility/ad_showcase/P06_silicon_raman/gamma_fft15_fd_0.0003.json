@@ -1,0 +1,70 @@
+{
+  "complete": true,
+  "validation_passed": true,
+  "endpoints": [
+    {
+      "q_sqrt_me_bohr": 0.09599693862133835,
+      "chi_column": [
+        0.04253293027944518,
+        0.3723827442509446,
+        0.04269531796922509
+      ],
+      "linear_residual": 6.095665638916614e-12,
+      "energy_hartree": -7.100070130161386,
+      "gap_hartree": 0.0956206593582346,
+      "minimum_link": 0.5143150664616821,
+      "maximum_phase_change": 1.7319479184152442e-14
+    },
+    {
+      "q_sqrt_me_bohr": -0.09599693862133835,
+      "chi_column": [
+        0.042929863256180485,
+        0.37238227242934513,
+        0.04276747575243311
+      ],
+      "linear_residual": 4.9519864079320714e-15,
+      "energy_hartree": -7.100070116462266,
+      "gap_hartree": 0.09562062379254488,
+      "minimum_link": 0.5143150667565014,
+      "maximum_phase_change": 1.6431300764452317e-14
+    }
+  ],
+  "maximum_displacement_bohr": 0.0003,
+  "q_step_sqrt_me_bohr": 0.09599693862133835,
+  "finite_difference": [
+    -0.0020674251826978338,
+    2.4574825313864004e-06,
+    -0.0003758337726406217
+  ],
+  "absolute_error": [
+    1.191608495036689e-09,
+    3.2974055136308726e-12,
+    2.0617388433443948e-10
+  ],
+  "gate": "abs(error) < 2e-8 + 5e-4*abs(AD dchi/dQ)",
+  "settings": {
+    "a_angstrom": 5.43,
+    "mesh": [
+      15,
+      15,
+      15
+    ],
+    "kmesh": [
+      1,
+      1,
+      1
+    ],
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "xc": "pbe",
+    "precision": 1e-10
+  },
+  "elapsed_seconds": 209.84698743599984,
+  "peak_rss_kib": 4567716,
+  "source_sha256": {
+    "src/gradscf/dfpt/electric.py": "c1f42df314bc6a646b975b0f44e6188097884b8095f86f30017f5fcd25cd2c1d",
+    "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+    "examples/pbc/silicon_raman.py": "263f8cba918ec38368be6bdc53bd6d3aa9efe0eea87a7b03af852946ecf92ef1",
+    "examples/pbc/check_silicon_raman.py": "779e461750aee75438e94a98f2d91715243ad6b1b3711259527302a6392aee94"
+  }
+}

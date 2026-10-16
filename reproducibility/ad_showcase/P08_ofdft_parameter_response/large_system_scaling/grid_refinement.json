@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "coarse_mesh": [
+    17,
+    17,
+    17
+  ],
+  "fine_mesh": [
+    23,
+    23,
+    23
+  ],
+  "coarse_energy_hartree": -2.0873919368183866,
+  "fine_energy_hartree": -2.087392047529247,
+  "absolute_energy_increment_hartree": 1.1071086047920176e-07,
+  "density_relative_l2_increment": 6.693567001478464e-05,
+  "density_jvp_relative_l2_increment": 8.474499004986403e-05,
+  "coarse_directional_energy_curvature": -6.546999283982247,
+  "fine_directional_energy_curvature": -6.546998584226644,
+  "relative_curvature_increment": 1.0688189309851615e-07,
+  "native_diagnostics": {
+    "euler_rms_hartree": 2.7413538600476633e-13,
+    "sphere_constraint": 2.220446049250313e-16,
+    "response_chart_constraint": 2.9605947323337506e-16,
+    "full_kkt_residual": 1.6448123426733433e-12,
+    "normalized_response_residual": 5.482708519437638e-13,
+    "forward_iterations": 220
+  },
+  "reference_diagnostics": {
+    "convergence_code": 0,
+    "euler_rms_hartree": 1.5552525967654218e-07,
+    "electron_number": 2.999999999999997,
+    "fixed_density_potential_fd_error_hartree_per_atom": 2.0816681711721685e-15,
+    "attempts": [
+      {
+        "attempt": 0,
+        "convergence_code": 0,
+        "euler_rms_hartree": 1.5552525967654218e-07,
+        "energy_hartree": -2.087392047529263,
+        "density_min": 0.007216016455825309,
+        "density_max": 0.030357790359788764,
+        "objective_evaluations": 322,
+        "optimizer_iterations": null,
+        "iteration_note": "DFTpy prints iterations to the run log; no public counter is stored"
+      }
+    ]
+  },
+  "independent_energy_error_hartree": 1.5987211554602254e-14,
+  "independent_density_relative_l2_error": 9.95359815668521e-08,
+  "source_sha256": "124faf9f7813a8a18dccc2f698c3a02ac27ad1af00b0ac47e6dbba105c8cdf22",
+  "driver_sha256": "b457af301ea554ebffea5e8ac46911dea7dadb4b6051abd3990e7adb1463bd26",
+  "elapsed_seconds": 306.42272212899843,
+  "definition": "Parseval relative L2 difference of complete periodic Fourier interpolants; no smoothing",
+  "scope": "Successive fixed-cell discretization increments, not rigorous continuum error bounds"
+}

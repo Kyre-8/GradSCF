@@ -1,0 +1,116 @@
+...FFFFFFF                                                               [100%]
+=================================== FAILURES ===================================
+_ test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[0] _
+
+guess_count = 0
+
+    @pytest.mark.parametrize("guess_count", [0, -1, 2.5, True, False, np.float64(3), "3"])
+    def test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values(guess_count):
+        from gradscf.solvers.eigen.rpa import implicit_differential_davidson_lowest_tdhf
+    
+        def operator(rows):
+            return jnp.concatenate([rows[:, :1], -rows[:, 1:]], axis=1)
+    
+>       with pytest.raises(ValueError, match="initial_guess_count must be a positive integer"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_tddft_initial_subspace.py:43: Failed
+_ test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[-1] _
+
+guess_count = -1
+
+    @pytest.mark.parametrize("guess_count", [0, -1, 2.5, True, False, np.float64(3), "3"])
+    def test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values(guess_count):
+        from gradscf.solvers.eigen.rpa import implicit_differential_davidson_lowest_tdhf
+    
+        def operator(rows):
+            return jnp.concatenate([rows[:, :1], -rows[:, 1:]], axis=1)
+    
+>       with pytest.raises(ValueError, match="initial_guess_count must be a positive integer"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_tddft_initial_subspace.py:43: Failed
+_ test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[2.5] _
+
+guess_count = 2.5
+
+    @pytest.mark.parametrize("guess_count", [0, -1, 2.5, True, False, np.float64(3), "3"])
+    def test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values(guess_count):
+        from gradscf.solvers.eigen.rpa import implicit_differential_davidson_lowest_tdhf
+    
+        def operator(rows):
+            return jnp.concatenate([rows[:, :1], -rows[:, 1:]], axis=1)
+    
+>       with pytest.raises(ValueError, match="initial_guess_count must be a positive integer"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_tddft_initial_subspace.py:43: Failed
+_ test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[True] _
+
+guess_count = True
+
+    @pytest.mark.parametrize("guess_count", [0, -1, 2.5, True, False, np.float64(3), "3"])
+    def test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values(guess_count):
+        from gradscf.solvers.eigen.rpa import implicit_differential_davidson_lowest_tdhf
+    
+        def operator(rows):
+            return jnp.concatenate([rows[:, :1], -rows[:, 1:]], axis=1)
+    
+>       with pytest.raises(ValueError, match="initial_guess_count must be a positive integer"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_tddft_initial_subspace.py:43: Failed
+_ test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[False] _
+
+guess_count = False
+
+    @pytest.mark.parametrize("guess_count", [0, -1, 2.5, True, False, np.float64(3), "3"])
+    def test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values(guess_count):
+        from gradscf.solvers.eigen.rpa import implicit_differential_davidson_lowest_tdhf
+    
+        def operator(rows):
+            return jnp.concatenate([rows[:, :1], -rows[:, 1:]], axis=1)
+    
+>       with pytest.raises(ValueError, match="initial_guess_count must be a positive integer"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_tddft_initial_subspace.py:43: Failed
+_ test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[3.0] _
+
+guess_count = np.float64(3.0)
+
+    @pytest.mark.parametrize("guess_count", [0, -1, 2.5, True, False, np.float64(3), "3"])
+    def test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values(guess_count):
+        from gradscf.solvers.eigen.rpa import implicit_differential_davidson_lowest_tdhf
+    
+        def operator(rows):
+            return jnp.concatenate([rows[:, :1], -rows[:, 1:]], axis=1)
+    
+>       with pytest.raises(ValueError, match="initial_guess_count must be a positive integer"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_tddft_initial_subspace.py:43: Failed
+_ test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[3] _
+
+guess_count = '3'
+
+    @pytest.mark.parametrize("guess_count", [0, -1, 2.5, True, False, np.float64(3), "3"])
+    def test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values(guess_count):
+        from gradscf.solvers.eigen.rpa import implicit_differential_davidson_lowest_tdhf
+    
+        def operator(rows):
+            return jnp.concatenate([rows[:, :1], -rows[:, 1:]], axis=1)
+    
+>       with pytest.raises(ValueError, match="initial_guess_count must be a positive integer"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_tddft_initial_subspace.py:43: Failed
+=========================== short test summary info ============================
+FAILED tests/test_tddft_initial_subspace.py::test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[0]
+FAILED tests/test_tddft_initial_subspace.py::test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[-1]
+FAILED tests/test_tddft_initial_subspace.py::test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[2.5]
+FAILED tests/test_tddft_initial_subspace.py::test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[True]
+FAILED tests/test_tddft_initial_subspace.py::test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[False]
+FAILED tests/test_tddft_initial_subspace.py::test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[3.0]
+FAILED tests/test_tddft_initial_subspace.py::test_full_td_initial_guess_count_rejects_nonpositive_or_noninteger_values[3]
+7 failed, 3 passed in 15.67s

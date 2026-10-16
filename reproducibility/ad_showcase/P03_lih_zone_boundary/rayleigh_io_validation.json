@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "same_physical_model_seed_reused",
+    "changed_direction_rejected_on_resume",
+    "nonunit_direction_rejected"
+  ],
+  "scope": "Synthetic IO/input validation only; no SCF or physical reference was computed.",
+  "script_sha256": "a19e88607d0e757bd2ff6c3ca8e5e5e3336d642d892fe1a09b7866c1b195833d"
+}

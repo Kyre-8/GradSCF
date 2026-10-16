@@ -1,0 +1,272 @@
+{
+  "complete": true,
+  "full_tensor": false,
+  "validation_passed": true,
+  "settings": {
+    "a_bohr": 7.6,
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pade",
+    "mesh": [
+      31,
+      31,
+      31
+    ],
+    "kmesh": [
+      2,
+      2,
+      2
+    ],
+    "precision": 1e-10
+  },
+  "energy_hartree": -8.007241003231696,
+  "sampled_indirect_gap_hartree": 0.1501316628175538,
+  "minimum_link_singular_value": 0.7452620265424114,
+  "principal_response_valid": false,
+  "local_phase_anchor": [
+    [
+      [
+        3.141592653589792,
+        3.1415926535897913,
+        3.141592653589792,
+        3.141592653589791
+      ],
+      [
+        3.1415926535897913,
+        3.1415926535897913,
+        3.1415926535897913,
+        3.141592653589791
+      ]
+    ],
+    [
+      [
+        3.1415926535897905,
+        3.141592653589792,
+        3.1415926535897913,
+        3.141592653589791
+      ],
+      [
+        3.1415926535897905,
+        3.1415926535897913,
+        3.1415926535897913,
+        3.141592653589791
+      ]
+    ],
+    [
+      [
+        -3.1415926535897922,
+        -3.1415926535897913,
+        -3.141592653589792,
+        -3.1415926535897922
+      ],
+      [
+        -3.1415926535897922,
+        -3.1415926535897913,
+        -3.141592653589792,
+        -3.141592653589792
+      ]
+    ]
+  ],
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      3.8,
+      3.8,
+      3.8
+    ]
+  ],
+  "lattice_bohr": [
+    [
+      0.0,
+      3.8,
+      3.8
+    ],
+    [
+      3.8,
+      0.0,
+      3.8
+    ],
+    [
+      3.8,
+      3.8,
+      0.0
+    ]
+  ],
+  "fractional_kpoints": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      2.3652938306756724e-17,
+      2.3652938306756724e-17,
+      -0.5
+    ],
+    [
+      -6.075940959049775e-17,
+      -0.5,
+      -7.706462660625463e-17
+    ],
+    [
+      -3.3572521637670455e-17,
+      -0.5,
+      -0.5000000000000001
+    ],
+    [
+      -0.5,
+      -6.075940959049775e-17,
+      -6.075940959049775e-17
+    ],
+    [
+      -0.5,
+      -3.3572521637670455e-17,
+      -0.5000000000000001
+    ],
+    [
+      -0.5000000000000001,
+      -0.5000000000000001,
+      -1.3429008655068182e-16
+    ],
+    [
+      -0.5,
+      -0.5,
+      -0.5000000000000001
+    ]
+  ],
+  "pseudopotential_charges": [
+    3,
+    1
+  ],
+  "explicit_electrons": 4,
+  "nao": 3,
+  "occupations": [
+    2,
+    2
+  ],
+  "volume_bohr3": 109.74399999999999,
+  "basis_data": {
+    "Li": [
+      [
+        0,
+        [
+          7.2610457926,
+          -0.2798628497,
+          0.0501840556
+        ],
+        [
+          2.1056583087,
+          -0.447742079,
+          0.1084202571
+        ],
+        [
+          0.6439906571,
+          -0.3912929157,
+          0.1448363201
+        ],
+        [
+          0.0797152017,
+          -0.0282408543,
+          -0.4643021689
+        ],
+        [
+          0.029402959,
+          0.0106542324,
+          -0.6220213304
+        ]
+      ]
+    ],
+    "H": [
+      [
+        0,
+        [
+          8.3744350009,
+          -0.0283380461
+        ],
+        [
+          1.805868146,
+          -0.1333810052
+        ],
+        [
+          0.4852528328,
+          -0.3995676063
+        ],
+        [
+          0.1658236932,
+          -0.5531027541
+        ]
+      ]
+    ]
+  },
+  "pseudopotential_data": [
+    [
+      [
+        3
+      ],
+      0.4,
+      4,
+      [
+        -14.03486849,
+        9.55347627,
+        -1.76648817,
+        0.08436998
+      ],
+      0
+    ],
+    [
+      [
+        1
+      ],
+      0.2,
+      2,
+      [
+        -4.1802368,
+        0.72507482
+      ],
+      0
+    ]
+  ],
+  "born_charge_e": null,
+  "directions": [
+    {
+      "atom": 1,
+      "axis": 0,
+      "charge_e": [
+        -0.9547108119254769,
+        -1.3146656528489908e-08,
+        -1.3146656259909735e-08
+      ],
+      "ionic_charge_e": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "linear_residual": 2.8167648960034993e-14,
+      "converged": true,
+      "seconds": 56.1326527770143
+    }
+  ],
+  "finite_differences": [],
+  "charge_axes": "atom, polarization Cartesian alpha, displacement Cartesian beta",
+  "definition": "Z*[atom,alpha,beta] = volume * dP_alpha/dR_atom,beta at zero field and fixed cell; charge in e",
+  "scf_reference_seconds": 32.80948499898659,
+  "elapsed_seconds": 91.26729483099189,
+  "peak_rss_kib": 4873836,
+  "source_sha256": {
+    "src/gradscf/dfpt/electric.py": "3fbd3a7a5986c82e4f2c64de8fe105fd5b01ab101bb4154d564cf8bcf7edca5c",
+    "src/gradscf/pbc/polarization.py": "077565628d985b990abb270b5e80603003109a6c98be5f54178121bc5a7c4aa5",
+    "src/gradscf/dfpt/periodic.py": "ab00412522f45c0c65ce2660291f56c4881239550063663ebc8d6d8accf29bcc",
+    "src/gradscf/dfpt/ks.py": "f5dc7b4ba7ba70a3a704359f98f9609ee51db18ddccbb5e6f1406d0f45104e93",
+    "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a"
+  },
+  "script_sha256": "9e1ade6826476d0c422a84ef3ca19f440734827f6cf37278cf321ddaf7dbccf7",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "dtype": "float64",
+  "scope": "Small PBE/GTH-Pade/SZV, FFT31/k2 finite model. No acoustic/cubic projection, no field/dielectric response, no convergence or experimental claim."
+}

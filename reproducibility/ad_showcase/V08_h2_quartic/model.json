@@ -1,0 +1,334 @@
+{
+  "method": "RHF",
+  "symbols": [
+    "H",
+    "H"
+  ],
+  "basis": "6-31g",
+  "cart": true,
+  "equilibrium_length_bohr": 1.3794239869227614,
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      -0.6897119934613807
+    ],
+    [
+      0.0,
+      0.0,
+      0.6897119934613807
+    ]
+  ],
+  "coordinate": "q=R-Re; centers move by (-q/2,+q/2) along z",
+  "hydrogen_mass_amu": 1.00782503223,
+  "reduced_mass_electron_masses": 918.5763237198094,
+  "mass_metric": "sum_A m_A |dR_A/dq|^2=m_H/2",
+  "derivatives": [
+    -1.1268278290098817,
+    -2.0816681711721685e-16,
+    0.4116596065025233,
+    -1.4142092727177094,
+    4.785027113105025
+  ],
+  "coefficients": [
+    {
+      "powers": [
+        1
+      ],
+      "coefficient": -2.0816681711721685e-16
+    },
+    {
+      "powers": [
+        2
+      ],
+      "coefficient": 0.20582980325126166
+    },
+    {
+      "powers": [
+        3
+      ],
+      "coefficient": -0.23570154545295155
+    },
+    {
+      "powers": [
+        4
+      ],
+      "coefficient": 0.19937612971270938
+    }
+  ],
+  "harmonic_frequency_hartree": 0.021169544018867593,
+  "certificate": {
+    "quartic_status": "positive",
+    "stationary_status": "unique",
+    "method": "exact scalar inequalities",
+    "quartic_certificate": {},
+    "quartic_derivative_lower_bound": 4.785027113105024,
+    "radial_status": "positive",
+    "radial_certificate": {},
+    "radial_curvature_lower_bound": 0.25492163356894737,
+    "stationary_radius": 8.165914136154121e-16,
+    "hessian_lower_bound_in_radius": 0.2549216335689462
+  },
+  "nuclear_optimization": [
+    {
+      "length_bohr": 1.1,
+      "energy": -1.1040726314640583,
+      "gradient": -0.19379441805309422
+    },
+    {
+      "length_bohr": 1.7,
+      "energy": -1.1117462399900617,
+      "gradient": 0.07939980865654482
+    },
+    {
+      "length_bohr": 1.5256189899482746,
+      "energy": -1.1230831193481474,
+      "gradient": 0.04725707034945476
+    },
+    {
+      "length_bohr": 1.319501636627533,
+      "energy": -1.1260353513318544,
+      "gradient": -0.027388504800725896
+    },
+    {
+      "length_bohr": 1.3951289743442066,
+      "energy": -1.1267779628056191,
+      "gradient": 0.006293747841047408
+    },
+    {
+      "length_bohr": 1.3809975147135,
+      "energy": -1.1268273202944878,
+      "gradient": 0.0006460101498346818
+    },
+    {
+      "length_bohr": 1.3794183511189646,
+      "energy": -1.1268278290033433,
+      "gradient": -2.3200552332833246e-06
+    },
+    {
+      "length_bohr": 1.3794240021695143,
+      "energy": -1.126827829009882,
+      "gradient": 6.276471994914878e-09
+    },
+    {
+      "length_bohr": 1.3794239869229095,
+      "energy": -1.1268278290098819,
+      "gradient": 6.098593852144063e-14
+    },
+    {
+      "length_bohr": 1.3794239869227614,
+      "energy": -1.1268278290098817,
+      "gradient": -2.0816681711721685e-16
+    },
+    {
+      "length_bohr": 1.3794239869228182,
+      "energy": -1.1268278290098819,
+      "gradient": 2.340488913787908e-14
+    },
+    {
+      "length_bohr": 1.3794239869227614,
+      "energy": -1.1268278290098817,
+      "gradient": -2.0816681711721685e-16
+    }
+  ],
+  "orbital_gradient_norm": 6.753223014464259e-16,
+  "minimum_internal_orbital_curvature": 2.5422380159945055,
+  "curvature_finite_differences": [
+    {
+      "step_bohr": 0.003,
+      "cubic_error": 2.7207623181979557e-05,
+      "quartic_error": 6.224040202695846e-05
+    },
+    {
+      "step_bohr": 0.001,
+      "cubic_error": 3.0230385137386406e-06,
+      "quartic_error": 6.916348047170118e-06
+    },
+    {
+      "step_bohr": 0.0003,
+      "cubic_error": 2.7207172625942633e-07,
+      "quartic_error": 6.300679098458772e-07
+    }
+  ],
+  "sampled_true_rhf_potential": [
+    {
+      "displacement_bohr": -0.6,
+      "energy_relative": 0.1720691624863251,
+      "quartic_energy": 0.15084940939905897,
+      "error": -0.02121975308726612
+    },
+    {
+      "displacement_bohr": -0.5499999999999999,
+      "energy_relative": 0.13262622819155245,
+      "quartic_energy": 0.11972252207776515,
+      "error": -0.0129037061137873
+    },
+    {
+      "displacement_bohr": -0.5,
+      "energy_relative": 0.10093320355591295,
+      "quartic_energy": 0.0933811521014788,
+      "error": -0.007552051454434147
+    },
+    {
+      "displacement_bohr": -0.44999999999999996,
+      "energy_relative": 0.07554966123843854,
+      "quartic_energy": 0.07133450590681256,
+      "error": -0.004215155331625975
+    },
+    {
+      "displacement_bohr": -0.4,
+      "energy_relative": 0.05533824336767457,
+      "quartic_energy": 0.05312169634983622,
+      "error": -0.002216547017838348
+    },
+    {
+      "displacement_bohr": -0.35,
+      "energy_relative": 0.03939152071535634,
+      "quartic_energy": 0.03831174270607626,
+      "error": -0.0010797780092800802
+    },
+    {
+      "displacement_bohr": -0.3,
+      "energy_relative": 0.026979054186945906,
+      "quartic_energy": 0.026503570670516247,
+      "error": -0.0004754835164296582
+    },
+    {
+      "displacement_bohr": -0.25,
+      "energy_relative": 0.017508244703557718,
+      "quartic_energy": 0.017326012357596544,
+      "error": -0.00018223234596117382
+    },
+    {
+      "displacement_bohr": -0.2,
+      "energy_relative": 0.010494860500839032,
+      "quartic_energy": 0.010437806301214455,
+      "error": -5.705419962457638e-05
+    },
+    {
+      "displacement_bohr": -0.15000000000000002,
+      "energy_relative": 0.005540556809428221,
+      "quartic_energy": 0.005527597454724192,
+      "error": -1.2959354704029057e-05
+    },
+    {
+      "displacement_bohr": -0.10000000000000003,
+      "energy_relative": 0.0023155734742164036,
+      "quartic_energy": 0.0023139371909368617,
+      "error": -1.6362832795419231e-06
+    },
+    {
+      "displacement_bohr": -0.050000000000000044,
+      "energy_relative": 0.0005453324096582612,
+      "quartic_energy": 0.0005452833021204889,
+      "error": -4.9107537772319354e-08
+    },
+    {
+      "displacement_bohr": 0.0,
+      "energy_relative": 0.0,
+      "quartic_energy": 0.0,
+      "error": 0.0
+    },
+    {
+      "displacement_bohr": 0.04999999999999993,
+      "energy_relative": 0.00048631241477492537,
+      "quartic_energy": 0.000486357915757228,
+      "error": 4.550098230262983e-08
+    },
+    {
+      "displacement_bohr": 0.09999999999999998,
+      "energy_relative": 0.0018411295495628366,
+      "quartic_energy": 0.0018425341000309142,
+      "error": 1.404550468077576e-06
+    },
+    {
+      "displacement_bohr": 0.1499999999999999,
+      "energy_relative": 0.003926309663020655,
+      "quartic_energy": 0.0039366120229167,
+      "error": 1.0302359896044617e-05
+    },
+    {
+      "displacement_bohr": 0.19999999999999996,
+      "energy_relative": 0.006624594344265322,
+      "quartic_energy": 0.006666581573967144,
+      "error": 4.1987229701822074e-05
+    },
+    {
+      "displacement_bohr": 0.25,
+      "energy_relative": 0.009836269352849758,
+      "quartic_energy": 0.009960339062191705,
+      "error": 0.00012406970934194725
+    },
+    {
+      "displacement_bohr": 0.29999999999999993,
+      "energy_relative": 0.013476425688549343,
+      "quartic_energy": 0.013775687216056733,
+      "error": 0.0002992615275073905
+    },
+    {
+      "displacement_bohr": 0.35,
+      "energy_relative": 0.01747269026535614,
+      "quartic_energy": 0.018100335183485528,
+      "error": 0.0006276449181293886
+    },
+    {
+      "displacement_bohr": 0.3999999999999999,
+      "energy_relative": 0.021763329416207622,
+      "quartic_energy": 0.02295189853185823,
+      "error": 0.0011885691156506076
+    },
+    {
+      "displacement_bohr": 0.44999999999999984,
+      "energy_relative": 0.0262956533747416,
+      "quartic_energy": 0.028377899248011956,
+      "error": 0.0020822458732703553
+    },
+    {
+      "displacement_bohr": 0.4999999999999999,
+      "energy_relative": 0.03102466781576707,
+      "quartic_energy": 0.03445576573824069,
+      "error": 0.0034310979224736193
+    },
+    {
+      "displacement_bohr": 0.5499999999999999,
+      "energy_relative": 0.035911931173982836,
+      "quartic_energy": 0.04129283282829533,
+      "error": 0.0053809016543124935
+    },
+    {
+      "displacement_bohr": 0.6,
+      "energy_relative": 0.04092458524548581,
+      "quartic_energy": 0.04902634176338368,
+      "error": 0.008101756517897865
+    },
+    {
+      "displacement_bohr": 0.65,
+      "energy_relative": 0.04603453267325919,
+      "quartic_energy": 0.057823440208170436,
+      "error": 0.011788907534911248
+    },
+    {
+      "displacement_bohr": 0.6999999999999998,
+      "energy_relative": 0.05121773925104112,
+      "quartic_energy": 0.0678811822467772,
+      "error": 0.016663442995736077
+    },
+    {
+      "displacement_bohr": 0.7499999999999999,
+      "energy_relative": 0.05645364220635152,
+      "quartic_energy": 0.07942652838278252,
+      "error": 0.022972886176431007
+    },
+    {
+      "displacement_bohr": 0.8,
+      "energy_relative": 0.061724648202720056,
+      "quartic_energy": 0.09271634553922187,
+      "error": 0.03099169733650181
+    }
+  ],
+  "seconds_including_compilation": 82.74540714299656,
+  "scf_energy_tolerance": 1e-13,
+  "scf_gradient_tolerance": 1e-11,
+  "implicit_response_tolerance": 1e-10,
+  "scope": "Local RHF-derived one-coordinate quartic; fixed rotor, no dipole IR, no experimental accuracy claim"
+}

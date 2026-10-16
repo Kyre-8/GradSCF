@@ -1,0 +1,70 @@
+{
+  "complete": true,
+  "validation_passed": true,
+  "endpoints": [
+    {
+      "q_sqrt_me_bohr": 0.09599693862133835,
+      "chi_column": [
+        0.007172605188629445,
+        0.36150143855242456,
+        0.007302180470633315
+      ],
+      "linear_residual": 2.2526425169644426e-11,
+      "energy_hartree": -7.712504249993765,
+      "gap_hartree": 0.09115568080728997,
+      "minimum_link": 0.5818502248746874,
+      "maximum_phase_change": 5.773159728050814e-15
+    },
+    {
+      "q_sqrt_me_bohr": -0.09599693862133835,
+      "chi_column": [
+        0.0074318515137653,
+        0.36150102455048405,
+        0.00730227632417471
+      ],
+      "linear_residual": 1.3163692358375556e-11,
+      "energy_hartree": -7.712504200477677,
+      "gap_hartree": 0.09114630418600958,
+      "minimum_link": 0.5818502654959486,
+      "maximum_phase_change": 5.773159728050814e-15
+    }
+  ],
+  "maximum_displacement_bohr": 0.0003,
+  "q_step_sqrt_me_bohr": 0.09599693862133835,
+  "finite_difference": [
+    -0.0013502843364539832,
+    2.1563288707595407e-06,
+    -4.99253115632925e-07
+  ],
+  "absolute_error": [
+    5.78916405915772e-10,
+    1.5830747725994229e-12,
+    3.500959201805424e-11
+  ],
+  "gate": "abs(error) < 2e-8 + 5e-4*abs(AD dchi/dQ)",
+  "settings": {
+    "a_angstrom": 5.43,
+    "mesh": [
+      15,
+      15,
+      15
+    ],
+    "kmesh": [
+      2,
+      2,
+      2
+    ],
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "xc": "pbe",
+    "precision": 1e-10
+  },
+  "elapsed_seconds": 243.8785171620002,
+  "peak_rss_kib": 6620192,
+  "source_sha256": {
+    "src/gradscf/dfpt/electric.py": "c1f42df314bc6a646b975b0f44e6188097884b8095f86f30017f5fcd25cd2c1d",
+    "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+    "examples/pbc/silicon_raman.py": "4157e35f94bd6428396dd100b3ecd21afba0934621cdcb599e07e7005012220c",
+    "examples/pbc/check_silicon_raman.py": "c1a46c1c644e8c62ba6cfac90b86a56833256339cf6d08e72c2d43bdd471bb66"
+  }
+}

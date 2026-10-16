@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "-c",
+    "from examples.pbc.lih_gamma_phonons import SETTINGS,run; run('pbe_szv_k2_fft41',dict(SETTINGS,mesh=[41]*3),max_grid=70_000,max_pair_elements=40_000_000)"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 28427384,
+  "budget_kib": 50331648,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true
+}

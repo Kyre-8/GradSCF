@@ -1,0 +1,117 @@
+{
+  "tda": true,
+  "solver": "davidson",
+  "screening": "direct",
+  "nroots": 6,
+  "energy_hartree": [
+    0.32733495097092913,
+    0.40638918144833236,
+    0.431067856341891,
+    0.5130027259886425,
+    0.5716683560110877,
+    0.7054287302038795
+  ],
+  "strength": [
+    0.015918360670984653,
+    5.01459157189848e-28,
+    0.11347758133492676,
+    0.09945090918744956,
+    0.4141795751397666,
+    0.23942790177639584
+  ],
+  "reported_residual_hartree": [
+    5.5497849355748444e-15,
+    1.0158176656516283e-14,
+    9.510975183018745e-15,
+    9.427761218462379e-15,
+    9.054428219669056e-15,
+    9.48361504972056e-15
+  ],
+  "recomputed_residual_hartree": [
+    5.548975054455657e-15,
+    1.0155730925059766e-14,
+    9.513982842519451e-15,
+    9.426794054010303e-15,
+    9.054428219669056e-15,
+    9.483615049720562e-15
+  ],
+  "screening_rhs_pairs": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      0,
+      5
+    ],
+    [
+      0,
+      10
+    ],
+    [
+      5,
+      5
+    ],
+    [
+      5,
+      10
+    ]
+  ],
+  "screening_absolute_residual": [
+    1.0148923305874852e-15,
+    4.626767109918617e-16,
+    3.754547544735374e-17,
+    4.7529761963353474e-17,
+    2.362527779419796e-16,
+    7.027814690010294e-17
+  ],
+  "screening_relative_residual": [
+    4.664076807081499e-16,
+    5.338402226487025e-16,
+    3.33731144756336e-16,
+    2.646604392995775e-16,
+    4.0802993604231896e-16,
+    3.601885078203831e-16
+  ],
+  "converged": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "stable": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "response_valid": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "stability_certified": false,
+  "cold_seconds": 2.892923745996086,
+  "warm_seconds": [
+    0.0352598869940266,
+    0.035054744977969676,
+    0.03575376502703875
+  ],
+  "passed": true,
+  "xla_argument_bytes": 549062,
+  "xla_output_bytes": 6924,
+  "xla_temporary_bytes": 4994840,
+  "memory_scope": "Compiled solve buffers; process RSS separately includes residual probes.",
+  "script_sha256": "88fd27cffcd0fd1b71f3ec2ec5ad9347e7950219a9a17d7daeac203e98858b6d"
+}

@@ -1,0 +1,83 @@
+{
+  "passed": true,
+  "physical_scope": "Gamma finite-model verification only; no complete P03 dispersion claim.",
+  "native_matrix_records": {
+    "pbe_szv_k2_fft31": {
+      "snapshot": "fft31",
+      "json_sha256": "6356e9e23e6df18c019fba1c8dcaa9aa240ee6a1fa5c714e3903086012f7e571",
+      "npz_sha256": "d281690375f678e12768a34796f9ac9b60c093e9162f18c7238c24af5e75495d"
+    },
+    "pbe_szv_k2_fft41": {
+      "snapshot": "grids",
+      "json_sha256": "f55dfd89de1c27e0efd75c0f1229da6e35f7f60ee22f8ad652f1d13926627f87",
+      "npz_sha256": "e3e8d81b0eae0b3b70f138bb3bfac80c22facd37e69803b17c10858298b383b0"
+    },
+    "pbe_szv_k2_fft51": {
+      "snapshot": "grids",
+      "json_sha256": "93e686884039e73504c2281cb678abbd068779b316f29c27819d74573bbeb800",
+      "npz_sha256": "f00a504fdcaa7d61c647d6cb53efe8602314437d5c8cb2e4c94b5cd1f7c37fa1"
+    },
+    "pbe_szv_k2_fft31_direct": {
+      "snapshot": "linear",
+      "json_sha256": "27532fb740aae18d52ba2bef8cd841a8c3dd519adaeb5d8c43a577d3eeb09f6a",
+      "npz_sha256": "d281690375f678e12768a34796f9ac9b60c093e9162f18c7238c24af5e75495d"
+    },
+    "pbe_szv_k2_fft31_gmres": {
+      "snapshot": "linear",
+      "json_sha256": "57316d2013a4f3e63360cb7893bcef32876536dd577eb58efa56566ec36971da",
+      "npz_sha256": "c6d23ecf607c41a49c7201e48dfe42ae8c45d54f586b83ff8b31dbc21cb93027"
+    },
+    "pbe_szv_k2_fft51_gmres": {
+      "snapshot": "linear",
+      "json_sha256": "7c0d3a5431d7ef197844b587e1bdc2c600aded5dea183e7a2f1aaf332fcbddae",
+      "npz_sha256": "cb03ae69021fd401eb24ff70a4f7a07f9f00934249ea319bd0d10bdff3aaaefe"
+    },
+    "pbe_szv_k2_fft61_gmres": {
+      "snapshot": "linear",
+      "json_sha256": "dbaa5e53f46055d4389826df1dcd5a51e2298a1b4ceb2fef113cb0c942581249",
+      "npz_sha256": "7b599601c31016b6ae59601e5f0336222cfba8b3b957946a073ac7c955dd8b3d"
+    },
+    "pbe_szv_k2_fft71_gmres": {
+      "snapshot": "linear",
+      "json_sha256": "936f06cedacfd6d4d17d077e7efc8c033d71b239210a65f7119c805179757c46",
+      "npz_sha256": "fd7773c34d04bf64cac3f2c26dee23679e2e49e7dc8ff1567cb7d8c31c8fea2f"
+    }
+  },
+  "independent_gradient_fd_pairs": 12,
+  "independent_scf_gradient_evaluations": 26,
+  "independent_fft_mesh": [
+    31,
+    31,
+    31
+  ],
+  "final_native_fft_mesh": [
+    71,
+    71,
+    71
+  ],
+  "failed_refinements_preserved": [
+    51,
+    61
+  ],
+  "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+  "unchanged_grid_gates": {
+    "last_force_constant_increment_hartree_per_bohr2": 2e-06,
+    "last_optical_frequency_increment_cm1": 1.0,
+    "final_raw_asr_frobenius_hartree_per_bohr2": 1e-06,
+    "final_max_absolute_acoustic_frequency_cm1": 1.0
+  },
+  "final_metrics": {
+    "last_force_constant_increment_hartree_per_bohr2": 4.02835123411438e-07,
+    "last_optical_frequency_increment_cm1": 0.0001752600553004413,
+    "final_raw_asr_frobenius_hartree_per_bohr2": 3.596611608262572e-08,
+    "final_max_absolute_acoustic_frequency_cm1": 0.23125338797386674
+  },
+  "plot_validation_sha256": "3de2d85d6e9256a49054b91aa6ad1f8bc777177a6f329fdd58ec4cf08cc8f713",
+  "unvalidated": [
+    "Gamma Hessian k/basis convergence",
+    "Independent PySCF Hessian at FFT71",
+    "Finite-q force constants, IFC interpolation and dispersion",
+    "Nonanalytic LO-TO corrections"
+  ],
+  "note": "The direct-grid-to51 and GMRES-to61 gate failures remain failures. Final acceptance is at FFT71 without ASR; source families and example versions are explicitly recorded."
+}

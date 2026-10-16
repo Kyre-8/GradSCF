@@ -1,0 +1,107 @@
+{
+  "complete": false,
+  "method": "g0w0",
+  "basis": "6-31G*",
+  "molgw_basis_alias": "6-31Gs",
+  "cart": true,
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.43,
+      1.11
+    ],
+    [
+      0.0,
+      -1.43,
+      1.11
+    ]
+  ],
+  "nmo": 19,
+  "nocc": 5,
+  "qp_orbitals": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "g_orbitals": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "screening_occupied": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "screening_virtual": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "auxiliary_basis": null,
+  "sigma_points": 400001,
+  "sigma_step_hartree": 5e-06,
+  "eta_gw_hartree": 1e-05,
+  "executable_sha256": "a3cb4799eaa416885b2969d5e2b219ec5f9e03a9ea2b063ab685731f663c8b58",
+  "script_sha256": "5410dee60f9ff2d77aac6cd20ac743c32ec95c79d07ad5b3f324ccd7ec6483e9",
+  "scope": "Independent full-space single-geometry forward reference; not nuclear-response validation.",
+  "optical": [],
+  "elapsed_seconds": 109.25945045799017,
+  "output_sha256": {
+    "RESTART": "1340a800f2eeb71655f4cefb85efd362485ce66c79a47caafc82a08d29c7a568",
+    "SCREENED_COULOMB": "cc15f048d56bbabb4285afcf3ac7e5dfcb59a388ece8cce83f6aec226495bc49",
+    "gw.in": "82d426f0a425b232795155c0d48f10a2722285f127829102943774d37a9dc624",
+    "gw.out": "6d24970cb047b8c15d5199a9ad989f0589644a23f7cd2d27479c57aaedf02dc2",
+    "molgw.yaml": "d4545a8a0ba8474e06528a9b62048f229b07dcda0ca357728ad57565a2b346d6"
+  }
+}

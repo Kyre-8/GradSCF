@@ -1,0 +1,54 @@
+{
+  "complete": true,
+  "passed": true,
+  "errors": {
+    "force_constants_hartree_per_bohr2": 9.376180387654642e-16,
+    "signed_frequencies_cm1": 3.1887381624073896e-10,
+    "raw_asr_hartree_per_bohr2": 4.101469055876883e-16
+  },
+  "gates": {
+    "force_constants_hartree_per_bohr2": 1e-08,
+    "signed_frequencies_cm1": 0.0001,
+    "raw_asr_hartree_per_bohr2": 1e-08
+  },
+  "direct_config_from_verified_source": {
+    "method": "direct",
+    "rtol": 1e-10,
+    "atol": 1e-12,
+    "max_dense": 256
+  },
+  "gmres_config": {
+    "method": "gmres",
+    "rtol": 1e-10,
+    "atol": 1e-12,
+    "maxiter": 100,
+    "restart": 40,
+    "max_dense": 256
+  },
+  "input_files": [
+    "/home/yjiao/gradscf_checks/ad-showcase-lih-gamma-grids-20261016/reproducibility/ad_showcase/P03_lih_gamma_phonons/pbe_szv_k2_fft51.json",
+    "/home/yjiao/gradscf_checks/ad-showcase-lih-gamma-linear-20261016/reproducibility/ad_showcase/P03_lih_gamma_phonons/pbe_szv_k2_fft51_gmres.json"
+  ],
+  "input_sha256": [
+    "93e686884039e73504c2281cb678abbd068779b316f29c27819d74573bbeb800",
+    "7c0d3a5431d7ef197844b587e1bdc2c600aded5dea183e7a2f1aaf332fcbddae"
+  ],
+  "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+  "example_script_sha256": [
+    "e70f4b7dfff4d6bbf45afb0cbf2bf1755a80189a8149013fa1c366559e8e6d6b",
+    "52753c5e997b4b221e8004f48b9ed3218aaa744d4f11ffa13fa0f13a5741fa44"
+  ],
+  "methods": {
+    "direct": {
+      "linear_residual_norm": 3.3949527552166503e-17,
+      "elapsed_seconds": 260.95898451900575,
+      "peak_rss_kib": 47546468
+    },
+    "gmres": {
+      "linear_residual_norm": 3.762338319748122e-13,
+      "elapsed_seconds": 144.1245680700231,
+      "peak_rss_kib": 15375864
+    }
+  },
+  "scope": "Common production source and physical FFT51 model; old direct example v2 versus parameterized example v3, whose direct behavior was exactly reproduced in the prior FFT31 paired gate. No physical formula changed."
+}

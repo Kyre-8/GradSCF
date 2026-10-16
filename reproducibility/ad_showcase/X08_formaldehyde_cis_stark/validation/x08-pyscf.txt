@@ -1,0 +1,4 @@
+Independent field step 0.001 mu / alpha errors 2.4949179085131945e-05 0.002448867287917267
+Independent field step 0.0003 mu / alpha errors 2.2453846850178927e-06 0.00021769678031091644
+Independent field step 0.0001 mu / alpha errors 2.5124649716268266e-07 6.814494477325184e-05
+Independent X08 field gates passed 56.00033538098796 s

@@ -1,0 +1,11 @@
+{
+  "slice_z_bohr": 0.0,
+  "mesh": [
+    9,
+    9,
+    3
+  ],
+  "normalization": "Raw density/response values; fixed integrated N",
+  "display": "Nearest cell values with duplicated periodic boundary samples; no numerical grid refinement",
+  "model_scope": "3D periodic box, exactly uniform in z; x/y collocation grids 5,7,9,11; not a material benchmark"
+}

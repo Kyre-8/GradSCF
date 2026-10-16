@@ -1,0 +1,109 @@
+{
+  "symbols": [
+    "O",
+    "H",
+    "H"
+  ],
+  "basis": "sto-3g",
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.43,
+      1.11
+    ],
+    [
+      0.0,
+      -1.43,
+      1.11
+    ]
+  ],
+  "direction": [
+    [
+      0.0,
+      0.0,
+      -0.3059424195626852
+    ],
+    [
+      0.0,
+      0.6555908990628969,
+      0.15297120978134263
+    ],
+    [
+      0.0,
+      -0.6555908990628969,
+      0.15297120978134263
+    ]
+  ],
+  "coordinate_definition": "q is a bohr displacement along a fixed unit-norm A1 direction",
+  "case": "water_sto3g",
+  "method": "RHF",
+  "cart": true,
+  "field": null,
+  "derivative_method": "reverse first derivative, then nested forward JVP; native integrals and implicit SCF",
+  "derivative_units": [
+    "Eh",
+    "Eh/bohr",
+    "Eh/bohr^2",
+    "Eh/bohr^3",
+    "Eh/bohr^4"
+  ],
+  "derivatives": [
+    -74.96308293133251,
+    -0.058958185110130304,
+    0.9454321646569568,
+    -2.2596452616912193,
+    5.4126566256531445
+  ],
+  "seconds_including_compilation": [
+    4.872161256003892,
+    5.400257267028792,
+    7.1902766580169555,
+    13.274502282001777,
+    26.871905961015727
+  ],
+  "native_curvature_differences": [
+    {
+      "step_bohr": 0.003,
+      "cubic": -2.25967006450987,
+      "quartic": 5.412703837618753,
+      "cubic_error": 2.480281865091527e-05,
+      "quartic_error": 4.721196560808494e-05
+    },
+    {
+      "step_bohr": 0.001,
+      "cubic": -2.2596480175514078,
+      "quartic": 5.412661903569926,
+      "cubic_error": 2.755860188496939e-06,
+      "quartic_error": 5.277916781842862e-06
+    },
+    {
+      "step_bohr": 0.0003,
+      "cubic": -2.2596455097521435,
+      "quartic": 5.412657081797317,
+      "cubic_error": 2.480609242461185e-07,
+      "quartic_error": 4.5614417221173653e-07
+    }
+  ],
+  "density_directional_derivative_norm": 0.4776333812385184,
+  "center_orbital_gradient_norm": 3.603738447916554e-15,
+  "orbital_stability_eigenvalues": [
+    2.092946652094579,
+    2.322019297068916,
+    2.5070503328935048
+  ],
+  "orbital_stability_residuals": [
+    1.2557312134914802e-15,
+    9.66031520537346e-17,
+    1.0905798669689397e-14
+  ],
+  "scf_energy_tolerance": 1e-13,
+  "scf_gradient_tolerance": 1e-11,
+  "implicit_response_tolerance": 1e-10,
+  "backend": "CPU float64",
+  "threads": 2
+}

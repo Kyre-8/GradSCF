@@ -1,0 +1,24 @@
+{
+  "purpose": "Immutable accepted four-functional data before the original omegaB97X-D extension",
+  "source_revision": "8f8c93d25fcc150aace9ad5c6a8e070c4f2937af",
+  "source_python_sha256": "53c09a10b44229dea9be673f1754cf7de3bc1b59c5986ec9066b9bf60460acd0",
+  "executed_native_script_sha256": "bc6aa5e85ac090065098341e0203ac1355b31f448112f48b525c13edcac83bd3",
+  "files": {
+    "README.md": "265f4cb44a144827401701b8fcd3ade8ac3d93dd75a592825f359873307e0966",
+    "absorption_comparison.pdf": "add488152addb420918fa8910b2bc4610615a736f3555c88314e1db76642cb89",
+    "absorption_comparison.png": "a3d4c9e4877a9d3c0930577002b317ec6b5f53ae6b779150747f69f2f5bb3d6e",
+    "broadened.csv": "e81de8c309a884d28a252eeef73f3a02d277fb9f4d4c59f84ed9fde04a7fd703",
+    "comparison.csv": "22b0af7ffd63c9cec195fcadc12d1e19de35d40dc921c2e3305072d17f257c13",
+    "gradscf.json": "dc18e4d1e11c5c2b89e1d5f48cb608c4f564fefc4a6505173fa669127efb7046",
+    "initial_count_validation_green.txt": "a83dfada353861dfa0265aaa9ef99ea8f678a242a22c13d62576936e974dec93",
+    "initial_count_validation_red.txt": "3b08db75b8bb644ef34466e9f7df6d355a5ab63f8c33d80d6b94cc8abba36a77",
+    "initial_subspace_green.log": "3a34120e5622b7107e00b6086523e0b70509ab7dcf309b46bbf34732b0731cdf",
+    "initial_subspace_green.txt": "3a34120e5622b7107e00b6086523e0b70509ab7dcf309b46bbf34732b0731cdf",
+    "initial_subspace_red.log": "10f714256892952969c7aca3032ba280bc562c90336b4efadab2800565c4d695",
+    "initial_subspace_red.txt": "10f714256892952969c7aca3032ba280bc562c90336b4efadab2800565c4d695",
+    "plot_settings.json": "36d470e51bae39f93f6bdeb4a381b7f94dcf84aff7662c520c1d99991d1b5f89",
+    "pyscf.json": "e9a95db3aa780f629a52e35aaee73cc9fc7fd04b728795b6b8a48b5801757326",
+    "root_coverage.json": "6608265d095ea17b158357d7bbaa4203d33ad8d9fe98e13839da4e2cda2ed1fc",
+    "sticks.csv": "d2d44484b7607298e357837527c2b0bcc4605de75f67153b1903eedd89fa7a31"
+  }
+}

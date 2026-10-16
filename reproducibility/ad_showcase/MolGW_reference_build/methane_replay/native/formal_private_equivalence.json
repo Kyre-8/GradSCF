@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "differences": {
+    "g0w0": {
+      "qp_energy_ha": 0.0,
+      "screening_energy_ha": 0.0,
+      "qp_weight_selected": 0.0,
+      "excitation_ev": 1.0402345651527867e-11,
+      "oscillator_strength": 8.266928808176033e-13
+    },
+    "evgw0": {
+      "qp_energy_ha": 0.0,
+      "screening_energy_ha": 0.0,
+      "qp_weight_selected": 0.0,
+      "excitation_ev": 1.0459189070388675e-11,
+      "oscillator_strength": 4.13169498614252e-13
+    },
+    "evgw": {
+      "qp_energy_ha": 0.0,
+      "screening_energy_ha": 0.0,
+      "qp_weight_selected": 0.0,
+      "excitation_ev": 1.0231815394945443e-11,
+      "oscillator_strength": 4.302669331934794e-13
+    }
+  }
+}

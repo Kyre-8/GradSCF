@@ -1,0 +1,349 @@
+{
+  "basis": "6-31g*",
+  "cart": true,
+  "records": [
+    {
+      "bond_bohr": 1.0,
+      "rhf_energy_hartree": -1.0785232408017018,
+      "gradient_hartree_per_bohr": -0.32522989342792963,
+      "curvature_hartree_per_bohr2": 1.5728004775347355,
+      "occupied_overlap_previous": 1.0,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 9.858793181827252e-07,
+          "curvature_error": 4.201557890937124e-06
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 8.872826107175769e-08,
+          "curvature_error": 3.78142001711268e-07
+        }
+      ],
+      "spin_minimum_curvature": 1.741280979388395,
+      "spin_stable": true,
+      "selected_energy_hartree": -1.0785232408017031,
+      "selected_model": "RHF",
+      "spin_square": 0.0,
+      "selection_status": "stable",
+      "selection_restarts": 0
+    },
+    {
+      "bond_bohr": 1.4,
+      "rhf_energy_hartree": -1.1267427044518366,
+      "gradient_hartree_per_bohr": 0.008177759271844304,
+      "curvature_hartree_per_bohr2": 0.3835480137045461,
+      "occupied_overlap_previous": 0.9847474752368707,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 2.1991373247431945e-07,
+          "curvature_error": 7.381263683048367e-07
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 1.9791813438141403e-08,
+          "curvature_error": 6.643127065109056e-08
+        }
+      ],
+      "spin_minimum_curvature": 1.0668997935294326,
+      "spin_stable": true,
+      "selected_energy_hartree": -1.1267427044518348,
+      "selected_model": "RHF",
+      "spin_square": 0.0,
+      "selection_status": "stable",
+      "selection_restarts": 0
+    },
+    {
+      "bond_bohr": 1.7999999999999998,
+      "rhf_energy_hartree": -1.103225896868953,
+      "gradient_hartree_per_bohr": 0.09029507820853494,
+      "curvature_hartree_per_bohr2": 0.08868328551917114,
+      "occupied_overlap_previous": 0.987317677946963,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 6.064356744550636e-08,
+          "curvature_error": 1.912166038425811e-07
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 5.4593398829405615e-09,
+          "curvature_error": 1.7209704689102878e-08
+        }
+      ],
+      "spin_minimum_curvature": 0.4968139739223563,
+      "spin_stable": true,
+      "selected_energy_hartree": -1.1032258968689541,
+      "selected_model": "RHF",
+      "spin_square": 0.0,
+      "selection_status": "stable",
+      "selection_restarts": 0
+    },
+    {
+      "bond_bohr": 2.2,
+      "rhf_energy_hartree": -1.0629274520709013,
+      "gradient_hartree_per_bohr": 0.10580750767568015,
+      "curvature_hartree_per_bohr2": 0.005736507599298873,
+      "occupied_overlap_previous": 0.9894038151574491,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 1.734694476951404e-08,
+          "curvature_error": 5.436973417663471e-08
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 1.5616087589709338e-09,
+          "curvature_error": 4.8932279521698985e-09
+        }
+      ],
+      "spin_minimum_curvature": 0.04944521334919605,
+      "spin_stable": true,
+      "selected_energy_hartree": -1.0629274520708998,
+      "selected_model": "RHF",
+      "spin_square": 0.0,
+      "selection_status": "stable",
+      "selection_restarts": 0
+    },
+    {
+      "bond_bohr": 2.5999999999999996,
+      "rhf_energy_hartree": -1.020978116244288,
+      "gradient_hartree_per_bohr": 0.10240690746955167,
+      "curvature_hartree_per_bohr2": -0.01784337509813039,
+      "occupied_overlap_previous": 0.9907638014742515,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 4.811937015514189e-09,
+          "curvature_error": 1.5796649436433663e-08
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 4.3336542687733015e-10,
+          "curvature_error": 1.4217453915554845e-09
+        }
+      ],
+      "spin_minimum_curvature": -0.29659770100311833,
+      "spin_stable": false,
+      "selected_energy_hartree": -1.0298231949625833,
+      "selected_model": "UKS",
+      "spin_square": 0.41905149791855534,
+      "selection_status": "stable",
+      "selection_restarts": 1
+    },
+    {
+      "bond_bohr": 3.0,
+      "rhf_energy_hartree": -0.9816709084007238,
+      "gradient_hartree_per_bohr": 0.09371532338327032,
+      "curvature_hartree_per_bohr2": -0.024224731593808637,
+      "occupied_overlap_previous": 0.9913994942551423,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 1.2400195870121422e-09,
+          "curvature_error": 4.527606480703161e-09
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 1.1256959253636012e-10,
+          "curvature_error": 4.0823034189174656e-10
+        }
+      ],
+      "spin_minimum_curvature": -0.5689920533598563,
+      "spin_stable": false,
+      "selected_energy_hartree": -1.0132464810756043,
+      "selected_model": "UKS",
+      "spin_square": 0.6870681639609619,
+      "selection_status": "stable",
+      "selection_restarts": 1
+    },
+    {
+      "bond_bohr": 3.4,
+      "rhf_energy_hartree": -0.9461782482470027,
+      "gradient_hartree_per_bohr": 0.08365885253171138,
+      "curvature_hartree_per_bohr2": -0.025600051898988604,
+      "occupied_overlap_previous": 0.9915231645648431,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 7.029013482373614e-11,
+          "curvature_error": 1.969462190554161e-09
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 6.415298847706197e-12,
+          "curvature_error": 1.777125703539273e-10
+        }
+      ],
+      "spin_minimum_curvature": -0.788968004969411,
+      "spin_stable": false,
+      "selected_energy_hartree": -1.0049585385643078,
+      "selected_model": "UKS",
+      "spin_square": 0.8312035264222876,
+      "selection_status": "stable",
+      "selection_restarts": 1
+    },
+    {
+      "bond_bohr": 3.8,
+      "rhf_energy_hartree": -0.914755781692794,
+      "gradient_hartree_per_bohr": 0.0734966659454992,
+      "curvature_hartree_per_bohr2": -0.02496442868009102,
+      "occupied_overlap_previous": 0.9913711002084235,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 5.480340625751978e-10,
+          "curvature_error": 1.1793663788617348e-09
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 4.919235851996717e-11,
+          "curvature_error": 1.0651854745469258e-10
+        }
+      ],
+      "spin_minimum_curvature": -0.9708135365417712,
+      "spin_stable": false,
+      "selected_energy_hartree": -1.0007830938875482,
+      "selected_model": "UKS",
+      "spin_square": 0.9090805043496255,
+      "selection_status": "stable",
+      "selection_restarts": 1
+    },
+    {
+      "bond_bohr": 4.199999999999999,
+      "rhf_energy_hartree": -0.8873125245151299,
+      "gradient_hartree_per_bohr": 0.0638383674411213,
+      "curvature_hartree_per_bohr2": -0.023194336034468938,
+      "occupied_overlap_previous": 0.9911019179002325,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 8.811230217675714e-10,
+          "curvature_error": 4.90517987339345e-10
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 7.906091059606268e-11,
+          "curvature_error": 4.389145297212238e-11
+        }
+      ],
+      "spin_minimum_curvature": -1.1240336890888727,
+      "spin_stable": false,
+      "selected_energy_hartree": -0.998675572504736,
+      "selected_model": "UKS",
+      "spin_square": 0.9512095072023125,
+      "selection_status": "stable",
+      "selection_restarts": 1
+    },
+    {
+      "bond_bohr": 4.6,
+      "rhf_energy_hartree": -0.863573998812635,
+      "gradient_hartree_per_bohr": 0.055005229450572804,
+      "curvature_hartree_per_bohr2": -0.020937920327771028,
+      "occupied_overlap_previous": 0.9908031203373407,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 9.659987670884718e-10,
+          "curvature_error": 1.3187315822671408e-11
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 8.707221055281877e-11,
+          "curvature_error": 1.1749351491729954e-12
+        }
+      ],
+      "spin_minimum_curvature": -1.2550846997625809,
+      "spin_stable": false,
+      "selected_energy_hartree": -0.9976143655354188,
+      "selected_model": "UKS",
+      "spin_square": 0.9739712723404204,
+      "selection_status": "stable",
+      "selection_restarts": 1
+    },
+    {
+      "bond_bohr": 5.0,
+      "rhf_energy_hartree": -0.8431855683728682,
+      "gradient_hartree_per_bohr": 0.047088440696815156,
+      "curvature_hartree_per_bohr2": -0.018668187329509908,
+      "occupied_overlap_previous": 0.9905188324690141,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 9.127955197252291e-10,
+          "curvature_error": 2.056852604903625e-10
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 8.238570936569545e-11,
+          "curvature_error": 1.81500890705788e-11
+        }
+      ],
+      "spin_minimum_curvature": -1.3683422374567327,
+      "spin_stable": false,
+      "selected_energy_hartree": -0.9970803387824609,
+      "selected_model": "UKS",
+      "spin_square": 0.9862312441284412,
+      "selection_status": "stable",
+      "selection_restarts": 1
+    },
+    {
+      "bond_bohr": 5.3999999999999995,
+      "rhf_energy_hartree": -0.8257865872299023,
+      "gradient_hartree_per_bohr": 0.040045752753347715,
+      "curvature_hartree_per_bohr2": -0.016578426727518112,
+      "occupied_overlap_previous": 0.990268732231159,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 8.308358931397031e-10,
+          "curvature_error": 1.8191997561145534e-10
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 7.47000031275924e-11,
+          "curvature_error": 1.6215719739198775e-11
+        }
+      ],
+      "spin_minimum_curvature": -1.4666849834974756,
+      "spin_stable": false,
+      "selected_energy_hartree": -0.9968090081182394,
+      "selected_model": "UKS",
+      "spin_square": 0.992800729306585,
+      "selection_status": "stable",
+      "selection_restarts": 1
+    },
+    {
+      "bond_bohr": 5.8,
+      "rhf_energy_hartree": -0.8110424580147575,
+      "gradient_hartree_per_bohr": 0.0338027876981485,
+      "curvature_hartree_per_bohr2": -0.014658604265567313,
+      "occupied_overlap_previous": 0.9900590041505398,
+      "finite_difference_checks": [
+        {
+          "step_bohr": 0.001,
+          "gradient_error": 7.750543401519039e-10,
+          "curvature_error": 9.643135942538628e-11
+        },
+        {
+          "step_bohr": 0.0003,
+          "gradient_error": 6.943359776023783e-11,
+          "curvature_error": 8.66129216958722e-12
+        }
+      ],
+      "spin_minimum_curvature": -1.5519877939803415,
+      "spin_stable": false,
+      "selected_energy_hartree": -0.9966666791090347,
+      "selected_model": "UKS",
+      "spin_square": 0.9962931108429816,
+      "selection_status": "stable",
+      "selection_restarts": 1
+    }
+  ],
+  "elapsed_seconds": 142.38051663700026,
+  "hostname": "c20",
+  "jax_version": "0.10.0",
+  "dtype": "float64",
+  "differentiation": "implicit on fixed RHF branch; selection is not differentiated"
+}

@@ -1,0 +1,52 @@
+{
+  "validation_passed": true,
+  "nw": 200,
+  "qp_reference_directory": "reproducibility/ad_showcase/MolGW_reference_build/water_forward/g0w0_grid5e-7",
+  "optical_reference_directory": "reproducibility/ad_showcase/MolGW_reference_build/water_forward/g0w0",
+  "qp_reference_step_hartree": 5e-07,
+  "optical_reference_qp_step_hartree": 5e-06,
+  "source_sha256": {
+    "reproducibility/ad_showcase/X02_water_gw_bse_response/primary/nw200/native.json": "982a2c13790cb94a2ec36932314ae3882bd913b9281e1b9b222097a82727a226",
+    "reproducibility/ad_showcase/MolGW_reference_build/water_forward/g0w0_grid5e-7/reference.json": "dff9648df058555b2b022d1bb56051d103f1f1a641a7b5031810e0762d82c5ba",
+    "reproducibility/ad_showcase/MolGW_reference_build/water_forward/g0w0/reference.json": "28c6a7cea4ea0d56bb6dd6af8d0646ae289c4487eaf3d30859f1e18d6358a28b",
+    "/home/yjiao/gradscf_checks/ad-showcase-gw-outer-20261016/examples/gw/compare_water_molgw.py": "1f3a3abc5e072a907b1cc626aeae797a86dd9b6da783a55e10c2c48f337b973b"
+  },
+  "errors": {
+    "hf_hartree": 4.5062620301905554e-11,
+    "qp_hartree": 3.122536118560504e-08,
+    "qp_weight": 3.52844105157013e-05
+  },
+  "limits": {
+    "hf_hartree": 1e-07,
+    "qp_hartree": 2e-06,
+    "qp_weight": 5e-05
+  },
+  "optical_limits": {
+    "energy_hartree": 3e-06,
+    "oscillator_strength": 2e-05,
+    "static_polarizability_au": 0.0003,
+    "cross_section_au": 0.0002
+  },
+  "optical": [
+    {
+      "tda": true,
+      "errors": {
+        "energy_hartree": 5.033891969929982e-08,
+        "oscillator_strength": 1.3200949089409164e-07,
+        "static_polarizability_au": 4.091449845589068e-09,
+        "cross_section_au": 4.3796210054125595e-06
+      }
+    },
+    {
+      "tda": false,
+      "errors": {
+        "energy_hartree": 3.464830111710171e-08,
+        "oscillator_strength": 7.306936422590837e-08,
+        "static_polarizability_au": 4.995412972164104e-09,
+        "cross_section_au": 1.495907244741801e-06
+      }
+    }
+  ],
+  "reference_hartree_to_ev": 27.21138505,
+  "scope": "Separate native and MolGW wavefunctions, full G/W/QP and optical spaces, matched Cartesian basis. QP and optical reference directories are recorded separately; finer QP data do not imply recalculated optical data."
+}

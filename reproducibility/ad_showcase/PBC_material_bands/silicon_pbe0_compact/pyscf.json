@@ -1,0 +1,29 @@
+{
+  "complete": true,
+  "passed": true,
+  "energy_hartree": -7.568516036963688,
+  "total_energy_error_hartree": 1.723332587744153e-10,
+  "frontier_band_error_hartree": 3.6860724472731476e-09,
+  "all_band_error_hartree": 1.2609684088005224e-06,
+  "path_gap_error_hartree": 9.434125702867391e-11,
+  "gates": {
+    "energy_hartree_per_atom": 1e-05,
+    "frontier_bands_hartree": 1e-05
+  },
+  "frontier_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "native_sha256": "c2c75055b346bf432c47da55a1ff495276e4b7aee4b576140914e036dd0424f1",
+  "script_sha256": "3fbfc789b5a91f8b1a05d676a65f02783106911a521c197ebb537bb232cad145",
+  "pyscf": "2.13.0",
+  "elapsed_seconds": 63.40866462900158,
+  "peak_rss_kib": 1211380,
+  "scope": "Independent same-input finite-grid SCF/bands; not material discretization convergence."
+}

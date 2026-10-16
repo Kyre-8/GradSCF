@@ -1,0 +1,11 @@
+{
+  "examples/pbc/lih_born_charges.py": "a51b175f918383c5032d7dacadaee76358d1f3186fd74fc7e5167624e0bef81e",
+  "src/gradscf/dfpt/electric.py": "61aeb686bb38c047c719240d1a39e79bbc41b08f0e3e11853fe295ae186fd5f2",
+  "src/gradscf/dfpt/ks.py": "f5dc7b4ba7ba70a3a704359f98f9609ee51db18ddccbb5e6f1406d0f45104e93",
+  "src/gradscf/dfpt/periodic.py": "ab00412522f45c0c65ce2660291f56c4881239550063663ebc8d6d8accf29bcc",
+  "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+  "src/gradscf/pbc/ifc.py": "f9177f8621ff4908d46c9dfbd3ad939f073527353769efcdd027ea1be54be3d2",
+  "src/gradscf/pbc/phonon.py": "09994ce50edb468ba54730dee1f1f412b0b233f6312ee0e193c575aff2c640c3",
+  "src/gradscf/pbc/polar_ifc.py": "3aa119b84c4f223a8409f2ed2dbf27609cfecb0a97a8abc7a0a3c09e2b76a889",
+  "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096"
+}

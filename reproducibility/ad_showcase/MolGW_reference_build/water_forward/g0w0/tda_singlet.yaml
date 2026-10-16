@@ -1,0 +1,723 @@
+---
+input parameters:
+    a1:                            [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00]
+    a2:                            [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00]
+    a3:                            [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00]
+    acfd_nlambda:                        21
+    alpha_hybrid:                    1.00000000E+00
+    alpha_mixing:                    7.00000000E-01
+    analytic_chi:                  False
+    approx_h_x2c:                  True 
+    assume_scf_converged:          False
+    auto_auxil_fsam:                 1.50000000E+00
+    auto_auxil_lmaxinc:                   1
+    auto_occupation:               False
+    auxil_basis:                   
+    basis:                         6-31Gs
+    basis_path:                    /home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/molgw-stock/basis/
+    beta_hybrid:                     0.00000000E+00
+    bogoliubov_scf:                False
+    bogoliubov_sigma:                1.00000000E+00
+    c_speedlight:                    1.37035999E+02
+    calc_charge_step:                1.00000000E+00
+    calc_dens_disc:                False
+    calc_q_matrix:                 False
+    calc_spectrum:                 False
+    cc4s_input:                    molgw
+    cc4s_output:                   molgw
+    charge:                          0.00000000E+00
+    check_cdsc_x2c:                True 
+    ci_greens_function:            HOLES
+    ci_nstate:                            1
+    ci_nstate_self:                       1
+    ci_spin_multiplicity:                 1
+    ci_type:                       ALL
+    comment:                       
+    complex_scf:                   False
+    cphf_cpks_0:                   False
+    cube_nx:                             30
+    cube_ny:                             30
+    cube_nz:                             30
+    cube_state_max:                       1
+    cube_state_min:                       1
+    density_matrix_damping:          0.00000000E+00
+    dft_core:                             0
+    diis_switch:                     5.00000000E-02
+    ecp_auxil_basis:               
+    ecp_basis:                     
+    ecp_elements:                  
+    ecp_quality:                   HIGH
+    ecp_small_basis:               
+    ecp_type:                      
+    electric_field_x:                0.00000000E+00
+    electric_field_y:                0.00000000E+00
+    electric_field_z:                0.00000000E+00
+    eri3_genuine:                  False
+    eri3_nbatch:                          1
+    eri3_npcol:                           1
+    eri3_nprow:                           1
+    eta:                             1.00000000E-02
+    even_tempered_alpha:             1.00000000E+00
+    even_tempered_beta:              5.00000000E-01
+    even_tempered_n_list:          1
+    excit_dir:                     [  1.00000000E+00,   0.00000000E+00,   0.00000000E+00]
+    excit_kappa:                     2.00000000E-05
+    excit_name:                    NO
+    excit_time0:                     3.00000000E+00
+    excit_width:                     2.00000000E-01
+    fft_coulomb_cutoff:              0.00000000E+00
+    fft_coulomb_exchange:          spherical
+    fft_coulomb_hartree:           bare
+    fft_ecut:                        1.20000000E+02
+    fft_ecut_postscf:                9.99990000E+04
+    fft_neighbors:                        1
+    fft_read_density:              False
+    fft_renormalize:               True 
+    force_energy_qp:               False
+    frozencore:                    NO
+    g3w2_skip_vv:                  False
+    g3w2_skip_vvv:                 False
+    g3w2_static_approximation:     False
+    gamma_hybrid:                    1.00000000E+06
+    gaussian_type:                 CART
+    grid_memory:                     4.00000000E+02
+    grid_quality:                  HIGH
+    gwgamma_tddft:                 False
+    harmonium:                     False
+    ignore_bigrestart:             False
+    incore:                        True 
+    init_hamiltonian:              GUESS
+    integral_quality:              HIGH
+    kappa_hybrid:                    0.00000000E+00
+    kerker_k0:                       0.00000000E+00
+    length_unit:                   BOHR
+    level_shifting_energy:           0.00000000E+00
+    magnetization:                   0.00000000E+00
+    memory_evaluation:             False
+    min_overlap:                     1.00000000E-05
+    mixing_scheme:                 PULAY
+    move_nuclei:                   no
+    mpi_poorman:                   False
+    mu_origin:                      -1.00000000E+02
+    n_iter:                               2
+    n_restart_tddft:                     50
+    natom:                                3
+    ncore_tddft:                          0
+    ncoreg:                               0
+    ncorew:                               0
+    nexcitation:                          0
+    nghost:                               0
+    noft_complex:                  False
+    noft_dft:                      False
+    noft_dft0:                     True 
+    noft_fcidump:                  False
+    noft_functional:               GNOF
+    noft_hessian:                  False
+    noft_ithresh_lambda:                  5
+    noft_lowmemeri:                True 
+    noft_lpower:                     5.30000000E-01
+    noft_ncoupled:                        2
+    noft_ndiis:                           5
+    noft_nophases:                 False
+    noft_notupdateocc:             False
+    noft_notupdateorb:             False
+    noft_notvxc:                   False
+    noft_npairs:                          1
+    noft_nr_occ:                   False
+    noft_nscf:                         1000
+    noft_printdmn:                 False
+    noft_printints:                False
+    noft_printswdmn:               False
+    noft_qc_orb:                   False
+    noft_readcoef:                 False
+    noft_readfdiag:                False
+    noft_readgammas:               False
+    noft_readocc:                  False
+    noft_restart:                  False
+    noft_rsinter:                  False
+    noft_tole:                       1.00000000E-09
+    nomega_chi_imag:                      0
+    nomega_chi_real:                      2
+    nomega_sigma:                    400001
+    nomega_sigma_calc:                    1
+    npulay_hist:                          6
+    nscf:                               100
+    nspin:                                1
+    nstep:                                1
+    nstep_dav:                           15
+    nstep_gw:                             1
+    nvel_projectile:                      1
+    nvirtualg:                           20
+    nvirtualw:                           20
+    parabolic_conf:                False
+    partition_scheme:              SSF
+    pbe_plus_alpha:                  0.00000000E+00
+    poscar_file:                   
+    postscf:                       BSE
+    postscf_diago_flavor:          
+    print_all_mo_wfn_file:         False
+    print_bare_energy:             False
+    print_bigrestart:              True 
+    print_c_matrix_cmplx_hdf5:     False
+    print_cc4s_files:              False
+    print_charge_tddft:            False
+    print_cube:                    False
+    print_cube_diff_tddft:         False
+    print_cube_rho_tddft:          False
+    print_dens_traj:               False
+    print_dens_traj_points_set:    False
+    print_dens_traj_tddft:         False
+    print_density_matrix:          False
+    print_eri:                     False
+    print_hartree:                 False
+    print_hdf5:                    False
+    print_line_rho_diff_tddft:     False
+    print_line_rho_tddft:          False
+    print_molden:                  False
+    print_multipole:               False
+    print_p_matrix_mo_block_hdf5:  False
+    print_pdos:                    False
+    print_restart:                 True 
+    print_rho_grid:                False
+    print_sigma:                   False
+    print_spatial_extension:       False
+    print_tddft_matrices:          False
+    print_tddft_restart:           True 
+    print_transition_density:      False
+    print_transition_dipole:       False
+    print_w:                       False
+    print_wfn:                     False
+    print_wfn_files:               False
+    print_yaml:                    True 
+    projectile_charge_scaling:       1.00000000E+00
+    pt3_a_diagrams:                YES
+    pt_density_matrix:             NO
+    r_disc:                          2.00000000E+02
+    rcut_mbpt:                       1.00000000E+00
+    rdm_filtering_mo:                     0
+    rdm_filtering_no:                     0
+    read_fchk:                     NO
+    read_molden:                   
+    read_restart:                  True 
+    read_tddft_restart:            False
+    restart_input:                 RESTART
+    rwconfinement:                   0.00000000E+00
+    scalapack_block_min:             100000
+    scf:                           HF
+    scf_diago_flavor:              
+    scf_energy_shift:                0.00000000E+00
+    scissor:                         0.00000000E+00
+    selfenergy_state_max:                19
+    selfenergy_state_min:                 1
+    selfenergy_state_range:          100000
+    selfenergy_tdhf_alpha:           0.00000000E+00
+    selfenergy_tdhf_beta:            0.00000000E+00
+    selfenergy_tdhf_delta:           2.00000000E+00
+    selfenergy_tdhf_epsilon:         0.00000000E+00
+    selfenergy_tdhf_gamma:           1.00000000E+00
+    selfenergy_tdhf_zeta:            0.00000000E+00
+    small_basis:                   
+    step_sigma:                      5.00000000E-06
+    step_sigma_calc:                 3.00000000E-02
+    stopping:                      no
+    stopping_dq:                     2.00000000E-02
+    stopping_nq:                        500
+    tda:                           True 
+    tddft_charge:                   -9.99000000E+02
+    tddft_energy_shift:              0.00000000E+00
+    tddft_force:                   False
+    tddft_grid_quality:            HIGH
+    tddft_history:                        2
+    tddft_magnetization:             0.00000000E+00
+    tddft_predictor_corrector:     PC2B
+    tddft_propagator:              CN
+    tddft_wfn_t0:                  SCF
+    temperature:                     0.00000000E+00
+    time_sim:                        1.00000000E+01
+    time_step:                       1.00000000E+00
+    toldav:                          1.00000000E-04
+    tolforce:                        1.00000000E-05
+    tolscf:                          1.00000000E-12
+    tolscf_tddft:                    1.00000000E-04
+    triplet:                       False
+    use_correlated_density_matrix: False
+    vel_projectile:                [  0.00000000E+00,   0.00000000E+00,   1.00000000E+00]
+    virtual_fno:                   False
+    w_screening:                   RPA
+    write_step:                      1.00000000E+00
+    x2c:                           False
+    xyz_file:                      
+    yaml_output:                   molgw.yaml
+
+physical system:
+    electrons:     1.00000000E+01
+    length unit: bohr
+    atom list:
+        - [  O,     0.00000000E+00,     0.00000000E+00,     0.00000000E+00]
+        - [  H,     0.00000000E+00,     1.43000000E+00,     1.11000000E+00]
+        - [  H,     0.00000000E+00,    -1.43000000E+00,     1.11000000E+00]
+    basis list:
+        - [  O, 6-31Gs, ]
+        - [  H, 6-31Gs, ]
+        - [  H, 6-31Gs, ]
+
+calculation parameters:
+    basis functions:                  19
+    independent basis functions:      19
+    auxiliary basis functions:         0
+
+optical spectrum:
+    excitations:
+        spin multiplicity: singlet
+        energies:
+            units: eV
+            1     :     8.90723739E+00
+            2     :     1.10584125E+01
+            3     :     1.17299534E+01
+            4     :     1.39595147E+01
+            5     :     1.55558878E+01
+            6     :     1.91956928E+01
+            7     :     2.78565764E+01
+            8     :     2.95890504E+01
+            9     :     3.05866047E+01
+            10    :     3.13049021E+01
+            11    :     3.18110336E+01
+            12    :     3.21965814E+01
+            13    :     3.23564345E+01
+            14    :     3.35945001E+01
+            15    :     3.37397347E+01
+            16    :     3.54321460E+01
+            17    :     3.63478393E+01
+            18    :     3.74449679E+01
+            19    :     3.78407837E+01
+            20    :     3.81143560E+01
+            21    :     3.81350684E+01
+            22    :     3.96172820E+01
+            23    :     3.98392922E+01
+            24    :     4.19840294E+01
+            25    :     4.59968670E+01
+            26    :     4.88453796E+01
+            27    :     4.91172289E+01
+            28    :     5.15337967E+01
+            29    :     5.19066230E+01
+            30    :     5.32623531E+01
+            31    :     5.42462068E+01
+            32    :     5.50449889E+01
+            33    :     5.57017634E+01
+            34    :     5.59345970E+01
+            35    :     5.67519945E+01
+            36    :     5.84441982E+01
+            37    :     6.14178557E+01
+            38    :     6.15060260E+01
+            39    :     6.19028562E+01
+            40    :     6.29417142E+01
+            41    :     6.35206254E+01
+            42    :     7.23137301E+01
+            43    :     7.31529690E+01
+            44    :     7.46474467E+01
+            45    :     7.49811557E+01
+            46    :     7.60825953E+01
+            47    :     7.63538119E+01
+            48    :     7.68847920E+01
+            49    :     8.08982742E+01
+            50    :     8.41820267E+01
+            51    :     9.04928566E+01
+            52    :     9.69852249E+01
+            53    :     1.05554389E+02
+            54    :     1.08463699E+02
+            55    :     1.12312235E+02
+            56    :     1.27732331E+02
+            57    :     5.42133285E+02
+            58    :     5.44006898E+02
+            59    :     5.61657855E+02
+            60    :     5.61674729E+02
+            61    :     5.62018337E+02
+            62    :     5.64603876E+02
+            63    :     5.66596918E+02
+            64    :     5.72406152E+02
+            65    :     5.86695873E+02
+            66    :     5.87262202E+02
+            67    :     5.88465663E+02
+            68    :     6.03383303E+02
+            69    :     6.09731339E+02
+            70    :     6.38188080E+02
+        transitions:
+            1     :
+                - [     5,      6,     7.05436258E-01, "1(A2, B1 or App)" ]
+            2     :
+                - [     5,      7,    -7.03581172E-01, "1(A2, B1 or App)" ]
+            3     :
+                - [     3,      7,    -7.62539076E-02, "1(A1, B2 or Ap )" ]
+                - [     4,      6,    -7.00268665E-01, "1(A1, B2 or Ap )" ]
+            4     :
+                - [     3,      6,    -1.02018660E-01, "1(A1, B2 or Ap )" ]
+                - [     4,      7,    -6.96869560E-01, "1(A1, B2 or Ap )" ]
+            5     :
+                - [     3,      6,    -6.98075770E-01, "1(A1, B2 or Ap )" ]
+                - [     4,      7,     1.02507735E-01, "1(A1, B2 or Ap )" ]
+            6     :
+                - [     3,      7,    -6.89774583E-01, "1(A1, B2 or Ap )" ]
+                - [     4,      6,     6.89668316E-02, "1(A1, B2 or Ap )" ]
+                - [     4,     11,     6.73472269E-02, "1(A1, B2 or Ap )" ]
+                - [     5,     10,    -1.04504740E-01, "1(A1, B2 or Ap )" ]
+            7     :
+                - [     5,      7,     5.10295437E-02, "1(A2, B1 or App)" ]
+                - [     5,      8,     7.04975116E-01, "1(A2, B1 or App)" ]
+            8     :
+                - [     2,      6,     6.80034278E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     11,     5.57293656E-02, "1(A1, B2 or Ap )" ]
+                - [     5,     10,    -1.78202592E-01, "1(A1, B2 or Ap )" ]
+            9     :
+                - [     5,      9,    -3.33919732E-01, "1(A2, B1 or App)" ]
+                - [     5,     11,    -6.19291869E-01, "1(A2, B1 or App)" ]
+                - [     5,     13,    -5.61652735E-02, "1(A2, B1 or App)" ]
+            10    :
+                - [     2,      7,     4.37252007E-01, "1(A1, B2 or Ap )" ]
+                - [     3,      9,     6.51887473E-02, "1(A1, B2 or Ap )" ]
+                - [     3,     11,    -8.28962815E-02, "1(A1, B2 or Ap )" ]
+                - [     4,      8,    -5.43074690E-01, "1(A1, B2 or Ap )" ]
+            11    :
+                - [     4,     10,     8.58976271E-02, "1(A2, B1 or App)" ]
+                - [     5,      9,     6.14291010E-01, "1(A2, B1 or App)" ]
+                - [     5,     11,    -3.32927451E-01, "1(A2, B1 or App)" ]
+            12    :
+                - [     2,      7,     5.50114588E-01, "1(A1, B2 or Ap )" ]
+                - [     3,     11,     9.97441337E-02, "1(A1, B2 or Ap )" ]
+                - [     4,      8,     4.21851928E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     15,     5.08707128E-02, "1(A1, B2 or Ap )" ]
+            13    :
+                - [     2,      6,    -9.80744668E-02, "1(A1, B2 or Ap )" ]
+                - [     4,      9,    -2.11744432E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     11,    -4.37495984E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     10,    -4.99118706E-01, "1(A1, B2 or Ap )" ]
+            14    :
+                - [     4,     10,    -7.00752565E-01, "1(A2, B1 or App)" ]
+                - [     5,      9,     8.82016707E-02, "1(A2, B1 or App)" ]
+            15    :
+                - [     2,      6,     6.99634517E-02, "1(A1, B2 or Ap )" ]
+                - [     3,      8,    -1.18909680E-01, "1(A1, B2 or Ap )" ]
+                - [     4,      9,     5.63088524E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     11,    -3.88242621E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     13,     5.20904130E-02, "1(A1, B2 or Ap )" ]
+                - [     5,     10,     8.79139086E-02, "1(A1, B2 or Ap )" ]
+            16    :
+                - [     3,     10,    -6.15408546E-02, "1(A2, B1 or App)" ]
+                - [     5,     12,     7.02491542E-01, "1(A2, B1 or App)" ]
+            17    :
+                - [     3,      8,    -6.76488517E-01, "1(A1, B2 or Ap )" ]
+                - [     4,      9,    -1.56555002E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     14,    -5.59391452E-02, "1(A1, B2 or Ap )" ]
+                - [     5,     10,     8.18783232E-02, "1(A1, B2 or Ap )" ]
+                - [     5,     16,     5.73756885E-02, "1(A1, B2 or Ap )" ]
+            18    :
+                - [     3,      9,     3.66466592E-01, "1(A1, B2 or Ap )" ]
+                - [     3,     11,     4.68699260E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     12,     3.76289475E-01, "1(A1, B2 or Ap )" ]
+            19    :
+                - [     3,     10,    -7.04380190E-01, "1(A2, B1 or App)" ]
+                - [     5,     12,    -6.16968746E-02, "1(A2, B1 or App)" ]
+            20    :
+                - [     3,      9,    -2.90971170E-01, "1(A1, B2 or Ap )" ]
+                - [     3,     11,    -2.41758016E-01, "1(A1, B2 or Ap )" ]
+                - [     3,     13,    -5.59077411E-02, "1(A1, B2 or Ap )" ]
+                - [     4,     12,     5.91866378E-01, "1(A1, B2 or Ap )" ]
+            21    :
+                - [     2,      6,    -8.84387389E-02, "1(A1, B2 or Ap )" ]
+                - [     2,      9,     5.43640577E-02, "1(A1, B2 or Ap )" ]
+                - [     3,      7,     8.54667115E-02, "1(A1, B2 or Ap )" ]
+                - [     3,      8,    -1.26712941E-01, "1(A1, B2 or Ap )" ]
+                - [     3,     12,     4.16431279E-01, "1(A1, B2 or Ap )" ]
+                - [     4,      9,     2.79035803E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     11,     3.04076668E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     13,    -1.41319608E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     10,    -3.13664585E-01, "1(A1, B2 or Ap )" ]
+            22    :
+                - [     3,      9,     5.21537014E-01, "1(A1, B2 or Ap )" ]
+                - [     3,     11,    -4.43855153E-01, "1(A1, B2 or Ap )" ]
+                - [     4,      8,     1.32421709E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     12,     6.56145060E-02, "1(A1, B2 or Ap )" ]
+                - [     5,     15,     7.92176825E-02, "1(A1, B2 or Ap )" ]
+            23    :
+                - [     5,     13,    -7.01801437E-01, "1(A2, B1 or App)" ]
+            24    :
+                - [     3,     12,     2.02580430E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     13,     6.73574391E-01, "1(A1, B2 or Ap )" ]
+            25    :
+                - [     3,     13,     6.96470978E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     15,     8.92628201E-02, "1(A1, B2 or Ap )" ]
+            26    :
+                - [     2,      8,     7.04491416E-01, "1(A1, B2 or Ap )" ]
+            27    :
+                - [     2,      6,     9.40040160E-02, "1(A1, B2 or Ap )" ]
+                - [     2,      9,    -3.59844679E-01, "1(A1, B2 or Ap )" ]
+                - [     2,     11,     2.88657076E-01, "1(A1, B2 or Ap )" ]
+                - [     2,     13,     9.89898105E-02, "1(A1, B2 or Ap )" ]
+                - [     3,     12,     4.20964697E-01, "1(A1, B2 or Ap )" ]
+                - [     4,      9,    -1.17937858E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     11,    -1.57920200E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     13,    -1.02737381E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     10,     1.91301164E-01, "1(A1, B2 or Ap )" ]
+            28    :
+                - [     2,      9,     3.90063858E-01, "1(A1, B2 or Ap )" ]
+                - [     2,     11,     5.80152198E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     16,    -6.89508196E-02, "1(A1, B2 or Ap )" ]
+            29    :
+                - [     2,     10,    -6.90715628E-01, "1(A2, B1 or App)" ]
+                - [     5,     14,    -1.41801496E-01, "1(A2, B1 or App)" ]
+            30    :
+                - [     2,     10,     1.28108946E-01, "1(A2, B1 or App)" ]
+                - [     3,     15,    -7.91090412E-02, "1(A2, B1 or App)" ]
+                - [     4,     16,     1.21062392E-01, "1(A2, B1 or App)" ]
+                - [     5,     14,    -6.78999719E-01, "1(A2, B1 or App)" ]
+            31    :
+                - [     2,      6,    -5.46139411E-02, "1(A1, B2 or Ap )" ]
+                - [     2,      9,    -4.26037399E-01, "1(A1, B2 or Ap )" ]
+                - [     2,     11,     2.60993216E-01, "1(A1, B2 or Ap )" ]
+                - [     2,     13,    -3.22583904E-01, "1(A1, B2 or Ap )" ]
+                - [     3,      7,     5.24280825E-02, "1(A1, B2 or Ap )" ]
+                - [     3,     12,    -2.60407326E-01, "1(A1, B2 or Ap )" ]
+                - [     4,      9,     9.59015245E-02, "1(A1, B2 or Ap )" ]
+                - [     4,     11,     1.30963005E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     13,     8.52801576E-02, "1(A1, B2 or Ap )" ]
+                - [     5,     10,    -1.81459364E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     16,     5.13232867E-02, "1(A1, B2 or Ap )" ]
+            32    :
+                - [     4,     14,    -4.58180001E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     16,    -5.37664034E-01, "1(A1, B2 or Ap )" ]
+            33    :
+                - [     2,     12,     4.17383267E-01, "1(A1, B2 or Ap )" ]
+                - [     3,     13,     5.83528522E-02, "1(A1, B2 or Ap )" ]
+                - [     3,     14,    -1.77802304E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     15,    -5.32328330E-01, "1(A1, B2 or Ap )" ]
+            34    :
+                - [     4,     15,     7.07051949E-01, "1(A2, B1 or App)" ]
+            35    :
+                - [     2,     12,     5.62238243E-01, "1(A1, B2 or Ap )" ]
+                - [     3,     14,     2.34457659E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     15,     3.50852188E-01, "1(A1, B2 or Ap )" ]
+            36    :
+                - [     3,     15,     3.59488699E-01, "1(A2, B1 or App)" ]
+                - [     4,     16,     6.02090130E-01, "1(A2, B1 or App)" ]
+                - [     5,     14,     5.54364504E-02, "1(A2, B1 or App)" ]
+                - [     5,     17,    -5.66580386E-02, "1(A2, B1 or App)" ]
+            37    :
+                - [     3,     16,    -7.07058484E-01, "1(A2, B1 or App)" ]
+            38    :
+                - [     2,     12,     8.72153073E-02, "1(A1, B2 or Ap )" ]
+                - [     3,     14,    -6.37903586E-01, "1(A1, B2 or Ap )" ]
+                - [     3,     17,    -7.33366758E-02, "1(A1, B2 or Ap )" ]
+                - [     4,      8,    -5.18007881E-02, "1(A1, B2 or Ap )" ]
+                - [     4,     18,    -7.04977381E-02, "1(A1, B2 or Ap )" ]
+                - [     5,     15,     2.59738847E-01, "1(A1, B2 or Ap )" ]
+            39    :
+                - [     2,     11,    -6.53076383E-02, "1(A1, B2 or Ap )" ]
+                - [     2,     13,    -8.98515106E-02, "1(A1, B2 or Ap )" ]
+                - [     3,      8,    -8.52637068E-02, "1(A1, B2 or Ap )" ]
+                - [     3,     18,    -8.44970041E-02, "1(A1, B2 or Ap )" ]
+                - [     4,     14,     5.24220132E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     16,    -4.38422659E-01, "1(A1, B2 or Ap )" ]
+            40    :
+                - [     2,      9,     1.73520578E-01, "1(A1, B2 or Ap )" ]
+                - [     2,     11,    -6.98099309E-02, "1(A1, B2 or Ap )" ]
+                - [     2,     13,    -6.12166960E-01, "1(A1, B2 or Ap )" ]
+                - [     3,      7,    -6.47300057E-02, "1(A1, B2 or Ap )" ]
+                - [     3,     12,     1.79228041E-01, "1(A1, B2 or Ap )" ]
+                - [     4,      9,    -8.47868792E-02, "1(A1, B2 or Ap )" ]
+                - [     4,     11,    -1.15285965E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     13,    -5.10766874E-02, "1(A1, B2 or Ap )" ]
+                - [     5,     10,     1.48036755E-01, "1(A1, B2 or Ap )" ]
+            41    :
+                - [     2,     10,    -5.30324502E-02, "1(A2, B1 or App)" ]
+                - [     3,     15,    -5.70401154E-01, "1(A2, B1 or App)" ]
+                - [     4,     16,     3.01338885E-01, "1(A2, B1 or App)" ]
+                - [     5,     14,     9.80779167E-02, "1(A2, B1 or App)" ]
+                - [     5,     17,    -2.58833281E-01, "1(A2, B1 or App)" ]
+            42    :
+                - [     2,     14,     6.12047308E-02, "1(A1, B2 or Ap )" ]
+                - [     4,     17,    -7.03148712E-01, "1(A1, B2 or Ap )" ]
+            43    :
+                - [     2,     16,    -1.34240553E-01, "1(A2, B1 or App)" ]
+                - [     3,     15,    -1.83198805E-01, "1(A2, B1 or App)" ]
+                - [     4,     16,     1.59972596E-01, "1(A2, B1 or App)" ]
+                - [     5,     14,     6.29041144E-02, "1(A2, B1 or App)" ]
+                - [     5,     17,     6.44773652E-01, "1(A2, B1 or App)" ]
+            44    :
+                - [     2,     14,    -7.02346340E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     17,    -5.88490289E-02, "1(A1, B2 or Ap )" ]
+            45    :
+                - [     2,     15,     6.98814684E-01, "1(A2, B1 or App)" ]
+                - [     5,     18,    -1.07429335E-01, "1(A2, B1 or App)" ]
+            46    :
+                - [     2,     15,     1.07420806E-01, "1(A2, B1 or App)" ]
+                - [     5,     18,     6.98722491E-01, "1(A2, B1 or App)" ]
+            47    :
+                - [     2,     16,     6.93613935E-01, "1(A2, B1 or App)" ]
+                - [     3,     15,    -5.60422059E-02, "1(A2, B1 or App)" ]
+                - [     5,     17,     1.14068288E-01, "1(A2, B1 or App)" ]
+            48    :
+                - [     3,     17,    -6.53187625E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     18,     2.66646466E-01, "1(A1, B2 or Ap )" ]
+            49    :
+                - [     3,     14,     6.01892293E-02, "1(A1, B2 or Ap )" ]
+                - [     3,     17,    -2.57524892E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     18,    -6.49069653E-01, "1(A1, B2 or Ap )" ]
+                - [     5,     15,    -7.95679494E-02, "1(A1, B2 or Ap )" ]
+            50    :
+                - [     3,     18,    -6.99520393E-01, "1(A1, B2 or Ap )" ]
+                - [     4,     14,    -6.12564343E-02, "1(A1, B2 or Ap )" ]
+                - [     5,     16,     5.67100192E-02, "1(A1, B2 or Ap )" ]
+            51    :
+                - [     2,     17,    -7.05860320E-01, "1(A1, B2 or Ap )" ]
+            52    :
+                - [     2,     18,    -7.06920254E-01, "1(A1, B2 or Ap )" ]
+            53    :
+                - [     5,     19,     7.07008585E-01, "1(A2, B1 or App)" ]
+            54    :
+                - [     4,     19,     7.05649295E-01, "1(A1, B2 or Ap )" ]
+            55    :
+                - [     3,     19,     7.06975259E-01, "1(A1, B2 or Ap )" ]
+            56    :
+                - [     2,     19,    -7.04877013E-01, "1(A1, B2 or Ap )" ]
+            57    :
+                - [     1,      6,     7.00151228E-01, "1(A1, B2 or Ap )" ]
+                - [     1,     11,    -8.40295659E-02, "1(A1, B2 or Ap )" ]
+            58    :
+                - [     1,      7,     6.95052623E-01, "1(A1, B2 or Ap )" ]
+                - [     1,      8,    -6.98426686E-02, "1(A1, B2 or Ap )" ]
+                - [     1,     12,    -1.09618844E-01, "1(A1, B2 or Ap )" ]
+            59    :
+                - [     1,      7,     8.37187810E-02, "1(A1, B2 or Ap )" ]
+                - [     1,      8,     6.96585409E-01, "1(A1, B2 or Ap )" ]
+                - [     1,     12,     8.71856529E-02, "1(A1, B2 or Ap )" ]
+            60    :
+                - [     1,      6,    -7.75235916E-02, "1(A1, B2 or Ap )" ]
+                - [     1,      9,    -2.65980617E-01, "1(A1, B2 or Ap )" ]
+                - [     1,     11,    -6.43715322E-01, "1(A1, B2 or Ap )" ]
+                - [     1,     13,    -9.37553830E-02, "1(A1, B2 or Ap )" ]
+            61    :
+                - [     1,     10,     7.07078149E-01, "1(A2, B1 or App)" ]
+            62    :
+                - [     1,      9,     6.50788146E-01, "1(A1, B2 or Ap )" ]
+                - [     1,     11,    -2.69433673E-01, "1(A1, B2 or Ap )" ]
+            63    :
+                - [     1,      7,     9.94261688E-02, "1(A1, B2 or Ap )" ]
+                - [     1,      8,    -9.85817907E-02, "1(A1, B2 or Ap )" ]
+                - [     1,     12,     6.93067322E-01, "1(A1, B2 or Ap )" ]
+            64    :
+                - [     1,      9,     7.16308216E-02, "1(A1, B2 or Ap )" ]
+                - [     1,     11,     7.68753618E-02, "1(A1, B2 or Ap )" ]
+                - [     1,     13,    -6.97629247E-01, "1(A1, B2 or Ap )" ]
+            65    :
+                - [     1,     14,    -7.06990866E-01, "1(A1, B2 or Ap )" ]
+            66    :
+                - [     1,     15,     7.07106770E-01, "1(A2, B1 or App)" ]
+            67    :
+                - [     1,     16,    -7.07086172E-01, "1(A2, B1 or App)" ]
+            68    :
+                - [     1,     17,     7.06899471E-01, "1(A1, B2 or Ap )" ]
+            69    :
+                - [     1,     18,     7.06963389E-01, "1(A1, B2 or Ap )" ]
+            70    :
+                - [     1,     19,     7.06754569E-01, "1(A1, B2 or Ap )" ]
+        oscillator strengths:
+            1     :     1.59183607E-02
+            2     :     2.26141871E-29
+            3     :     1.13477581E-01
+            4     :     9.94509093E-02
+            5     :     4.14179575E-01
+            6     :     2.39427902E-01
+            7     :     3.30133965E-29
+            8     :     1.61136679E-02
+            9     :     1.53369958E-01
+            10    :     2.09582104E-01
+            11    :     5.00745842E-02
+            12    :     3.40516265E-02
+            13    :     4.06643214E-02
+            14    :     1.71706074E-03
+            15    :     6.25636746E-03
+            16    :     2.44866090E-29
+            17    :     3.53098385E-01
+            18    :     6.85975716E-03
+            19    :     1.78193301E-27
+            20    :     6.11005903E-02
+            21    :     4.29465522E-03
+            22    :     5.53984270E-01
+            23    :     5.05874275E-01
+            24    :     7.45863257E-02
+            25    :     3.24303507E-02
+            26    :     7.80877142E-04
+            27    :     2.06964126E-03
+            28    :     1.84791772E-01
+            29    :     2.61641802E-01
+            30    :     2.86913975E-02
+            31    :     1.65826573E-02
+            32    :     2.66794870E-03
+            33    :     7.96887453E-01
+            34    :     2.74742929E-29
+            35    :     5.26222034E-03
+            36    :     1.12924313E-01
+            37    :     2.17384181E-26
+            38    :     8.49565707E-01
+            39    :     1.95132802E+00
+            40    :     2.15587175E-01
+            41    :     1.08907226E+00
+            42    :     4.17416382E-03
+            43    :     1.02701825E+00
+            44    :     6.96495461E-02
+            45    :     3.37599111E-27
+            46    :     2.99954559E-27
+            47    :     1.67894384E-01
+            48    :     2.81745992E-02
+            49    :     2.83715098E-01
+            50    :     9.94880701E-02
+            51    :     3.20629580E-03
+            52    :     2.33774794E-03
+            53    :     6.33878893E-04
+            54    :     3.24848356E-03
+            55    :     2.08999369E-03
+            56    :     1.14682276E-03
+            57    :     2.14604671E-02
+            58    :     4.56649857E-02
+            59    :     6.37678451E-03
+            60    :     1.01440566E-01
+            61    :     1.16731250E-01
+            62    :     1.33624543E-03
+            63    :     1.03304916E-01
+            64    :     1.31758471E-02
+            65    :     5.59061675E-06
+            66    :     2.23778811E-29
+            67    :     2.23564136E-06
+            68    :     5.21079739E-05
+            69    :     2.34715426E-05
+            70    :     1.09320039E-03
+        trk sum rule:     1.06078109E+01
+        mean excitation energy:     5.52310655E+01
+        static polarizability:
+            -     3.03362186E+00
+            -     2.21202226E-15
+            -    -1.15635916E-15
+            -     2.21202226E-15
+            -     7.58887572E+00
+            -     1.17504108E-14
+            -    -1.15635916E-15
+            -     1.17504108E-14
+            -     5.59545057E+00
+
+warnings:
+    - reading spectral function from SCREENED_COULOMB obtained from G0W0                                                              
+    - Tamm-Dancoff approximation is switched on                                                                                       
+
+run:
+    MOLGW version:   3.4
+    mpi tasks:            1
+    omp threads:          1
+    timing:
+        unit: s
+        total:       2.99000000E-02
+        prescf:      0.00000000E+00
+        scf:         0.00000000E+00
+        postscf:     1.71000000E-02
+    memory:
+        unit: Gb
+        peak:        4.14319336E-04
+...

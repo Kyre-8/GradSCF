@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "native_cases": 12,
+  "independent_cases": 9,
+  "native_only_cases": [
+    "pbe_szv_k5_fft31",
+    "pbe_szv_k6_fft31",
+    "pbe_szv_k8_fft31"
+  ],
+  "eos_native_points": 9,
+  "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+  "figures": [
+    "lih_convergence.png",
+    "lih_convergence_increments.png",
+    "lih_equation_of_state.png",
+    "lih_forces.png"
+  ],
+  "checks": [
+    "All plotted native records complete, gapped, four-electron SCF states with exact frozen source hash",
+    "All independent plotted references complete/passed and tied to native and helper hashes",
+    "All native EOS point hashes match their saved states",
+    "Final independent SR41, HF, EOS, k8 monitor and plotting jobs exit zero",
+    "Separate final FFT/k increment gates pass",
+    "Reviewed figures reran with exit zero; EOS curve is explicitly an interpolation guide."
+  ],
+  "boundary": "Original PBE multi-step FD is archived in the original source family; repaired primary comparison does not repeat it. Native-only k5/k6/k8 convergence is distinct from independent comparisons.",
+  "plot_validation_sha256": "bcb331723f0edc9c9d0e67ec8368a564bb140f76e065cde31493176470bd8c38"
+}

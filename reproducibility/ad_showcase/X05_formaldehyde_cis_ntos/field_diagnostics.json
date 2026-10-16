@@ -1,0 +1,61 @@
+{
+  "grid_shape": [
+    65,
+    80,
+    79
+  ],
+  "grid_bounds_bohr": [
+    [
+      -8.0,
+      8.0
+    ],
+    [
+      -9.762836506413908,
+      9.762836506413908
+    ],
+    [
+      -9.10154250528496,
+      10.286568610723725
+    ]
+  ],
+  "grid_spacing_bohr": [
+    0.25,
+    0.2471604178838973,
+    0.24856552712831714
+  ],
+  "orbital_isovalue_bohr_minus_three_halves": 0.05,
+  "transition_isovalue_electrons_per_bohr3": 0.003,
+  "boundary_maxima": [
+    [
+      3.239891523666969e-05,
+      0.0026655711662518333,
+      5.717677354839627e-08
+    ],
+    [
+      0.00035595570682059915,
+      0.005163825064825619,
+      2.200853884682591e-06
+    ]
+  ],
+  "common_display_limits_angstrom": [
+    [
+      -2.0423709483653347,
+      2.0423712006966923
+    ],
+    [
+      -2.0423712272164503,
+      2.042370921845577
+    ],
+    [
+      -1.6244058986097245,
+      2.4603362504523023
+    ]
+  ],
+  "scope": "Leading pair is visualized; all weights and full transition matrices are retained",
+  "native_sha256": "65e240cf93e218dde364d60f8ae6203c0f8c127d384a056f76cb31f3ab360f1a",
+  "reference_sha256": "a0651a73a70fed96aeca5e06005748e0752b2aac7badfad62b24648473df00ed",
+  "script_sha256": "86e868fdf45aa5ae3e3b9af64be98b5cee0e1b73243ed179c9633062cea2b64f",
+  "volume_helper_sha256": "2716c9ee63f18302b7adcbed328ebe03c368ed7de6264c7eea0eac686d909e80",
+  "elapsed_seconds": 15.87144302300294,
+  "hostname": "c20"
+}

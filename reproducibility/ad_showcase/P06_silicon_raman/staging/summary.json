@@ -1,0 +1,33 @@
+{
+  "cases": [
+    {
+      "side": 1,
+      "passed": true,
+      "old_captured_array_bytes": 3780694,
+      "new_captured_array_bytes": 2726566,
+      "maximum_output_error": 0.0,
+      "elapsed_seconds": 402.4194726789992,
+      "peak_rss_kib": 10513324,
+      "observed_peak_mappings": 15985,
+      "pid": 347502,
+      "old_source_sha256": "4157e35f94bd6428396dd100b3ecd21afba0934621cdcb599e07e7005012220c",
+      "new_source_sha256": "c6728c307ffa457348ddead7fc77c36b9d683ce9c0a0f7a7651f2747bfec5e36"
+    },
+    {
+      "side": 2,
+      "passed": true,
+      "old_captured_array_bytes": 17445483,
+      "new_captured_array_bytes": 3415939,
+      "maximum_output_error": 0.0,
+      "elapsed_seconds": 514.1418693830001,
+      "peak_rss_kib": 11655684,
+      "observed_peak_mappings": 26541,
+      "pid": 348606,
+      "old_source_sha256": "4157e35f94bd6428396dd100b3ecd21afba0934621cdcb599e07e7005012220c",
+      "new_source_sha256": "c6728c307ffa457348ddead7fc77c36b9d683ce9c0a0f7a7651f2747bfec5e36"
+    }
+  ],
+  "timing_scope": "Includes both old/new tracing and new execution; not a matched performance benchmark.",
+  "constant_scope": "Unique captured array objects across nested JAX graphs; not LLVM folded allocations or VMAs.",
+  "physical_scope": "All optical, zero and rigid-translation reported keys at Gamma and k2; original residual gates unchanged."
+}

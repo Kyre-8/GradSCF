@@ -1,0 +1,159 @@
+{
+  "complete": true,
+  "full_tensor": true,
+  "settings": {
+    "a_bohr": 7.780032276700287,
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pade",
+    "mesh": [
+      31,
+      31,
+      31
+    ],
+    "kmesh": [
+      2,
+      2,
+      2
+    ],
+    "precision": 1e-10
+  },
+  "energy_hartree": -8.00763182486617,
+  "reference_gap_hartree": 0.14272638774851437,
+  "reference_minimum_link": 0.7427081003725751,
+  "reference_phase_anchor": [
+    [
+      [
+        -3.1415926535897922,
+        -3.141592653589793,
+        -3.141592653589793,
+        -3.141592653589793
+      ],
+      [
+        -3.1415926535897922,
+        -3.141592653589793,
+        -3.141592653589793,
+        3.141592653589793
+      ]
+    ],
+    [
+      [
+        3.141592653589793,
+        -3.1415926535897927,
+        -3.141592653589793,
+        3.141592653589793
+      ],
+      [
+        3.141592653589793,
+        -3.141592653589793,
+        -3.141592653589793,
+        3.141592653589793
+      ]
+    ],
+    [
+      [
+        3.1415926535897913,
+        3.1415926535897927,
+        3.141592653589792,
+        3.1415926535897922
+      ],
+      [
+        3.141592653589792,
+        3.1415926535897922,
+        3.1415926535897922,
+        3.141592653589792
+      ]
+    ]
+  ],
+  "volume_bohr3": 117.72920324884807,
+  "directions": [
+    {
+      "axis": 0,
+      "chi_column": [
+        0.044876360144078746,
+        0.00023728036333796245,
+        0.00023728036333781766
+      ],
+      "residual": 1.8276120680106945e-15,
+      "converged": true,
+      "seconds": 75.09930689999601
+    },
+    {
+      "axis": 1,
+      "chi_column": [
+        0.00023728036333796204,
+        0.0448763601440788,
+        0.00023728036333783853
+      ],
+      "residual": 2.024077208999881e-15,
+      "converged": true,
+      "seconds": 1.0259475909988396
+    },
+    {
+      "axis": 2,
+      "chi_column": [
+        0.00023728036333781841,
+        0.00023728036333785202,
+        0.04487636014407928
+      ],
+      "residual": 1.7531092306511977e-15,
+      "converged": true,
+      "seconds": 1.003654916974483
+    }
+  ],
+  "susceptibility": [
+    [
+      0.044876360144078746,
+      0.00023728036333796204,
+      0.00023728036333781841
+    ],
+    [
+      0.00023728036333796245,
+      0.0448763601440788,
+      0.00023728036333785202
+    ],
+    [
+      0.00023728036333781766,
+      0.00023728036333783853,
+      0.04487636014407928
+    ]
+  ],
+  "epsilon_infinity": [
+    [
+      1.5639329733939502,
+      0.0029817529852146337,
+      0.0029817529852128287
+    ],
+    [
+      0.002981752985214639,
+      1.563932973393951,
+      0.002981752985213251
+    ],
+    [
+      0.002981752985212819,
+      0.0029817529852130815,
+      1.5639329733939569
+    ]
+  ],
+  "definition": "chi[alpha,beta]=dP_alpha/dE_beta, epsilon_inf=I+4*pi*chi; fixed nuclei/cell",
+  "field_units": "Eh/(e bohr)",
+  "polarization_units": "e/bohr^2",
+  "elapsed_seconds": 118.84491656700266,
+  "peak_rss_kib": 5646932,
+  "source_sha256": {
+    "src/gradscf/dfpt/electric.py": "61aeb686bb38c047c719240d1a39e79bbc41b08f0e3e11853fe295ae186fd5f2",
+    "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+    "src/gradscf/dfpt/ks.py": "f5dc7b4ba7ba70a3a704359f98f9609ee51db18ddccbb5e6f1406d0f45104e93",
+    "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+    "examples/pbc/lih_born_charges.py": "411860077b0dda6a0c8f2111b01aed5e1031f24f0f30b9a20d1da3d8d2930e86"
+  },
+  "script_sha256": "3c2b907c1d242e2a20e0aac3e0ad6153a2514cab4bc1087621abea7deff6aebe",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "dtype": "float64",
+  "raw_maximum_asymmetry": 1.349831704744453e-17,
+  "raw_maximum_cubic_deviation": 0.00023728036333796245,
+  "minimum_symmetric_chi_eigenvalue": 0.04463907978074081,
+  "scope": "FFT31/k2/SZV finite model. Electronic static clamped-ion response, no ionic relaxation, no symmetry projection or material convergence claim."
+}

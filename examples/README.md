@@ -5,16 +5,37 @@ installation. Examples are ordinary Python scripts; numerical settings are
 written directly in the code. Individual files describe optional dependencies,
 units, convergence criteria and measured outputs where available.
 
+The [AD showcase plan](AD_SHOWCASE_PLAN.md) catalogs geometry derivatives,
+IR/Raman spectra, excited-state properties and periodic response examples.
+It distinguishes planned extensions from measured results. Selected figures
+and data live in [`reproducibility/ad_showcase`](../reproducibility/ad_showcase/).
+The [implementation inventory](AD_SHOWCASE_STATUS.md) records the verified
+scope and remaining checks for each entry; the plan alone is not a feature list.
+
+This directory contains the maintained runnable examples. Figures and numerical
+outputs are organized in `reproducibility/ad_showcase/`; copied execution
+scripts, job logs and development drafts are kept in the ignored
+`artifacts/ad_showcase/` archive. A result directory does not contain a second
+maintained copy of its example source.
+
+Electronic-structure calculations and solvers are implemented under `src/`.
+Examples define inputs and call those implementations. Do not import or execute
+code from `reproducibility/` or the development archive.
+
 ## Directory guide
 
 | Directory | Examples |
 | --- | --- |
 | [basis](basis/README.md) | Basis optimization, counterpoise and neural basis assembly. |
-| [bse](bse/) | Optical spectra and BSE electron-phonon effects. |
+| [geometry](geometry/) | Nuclear gradients and independent derivative checks. |
+| [response](response/) | Electric-field derivatives and static polarizabilities. |
+| [vibrations](vibrations/) | Harmonic IR/Raman intensities and mode response. |
+| [tdscf](tdscf/README.md) | Absorption spectra, state tracking, excited-state derivatives and relaxed CIS densities. |
+| [bse](bse/README.md) | Optical spectra, temperature response and matched frozen/relaxed BSE electron-vibration vertices. |
 | [cc](cc/) | Ground-state and EOM coupled cluster. |
 | [ci](ci/) / [fci](fci/) | Truncated and full configuration interaction. |
 | [dfpt](dfpt/README.md) | Static response, finite q and phonons. |
-| [gw](gw/) | Quasiparticles, Matsubara scGW and electron-phonon effects. |
+| [gw](gw/README.md) | Quasiparticles, complete molecular GW/BSE response, Matsubara scGW and electron-phonon effects. |
 | [localization](localization/README.md) | Boys orbitals and optimization animations. |
 | [mp](mp/README.md) | Perturbation series and convergence studies. |
 | [ofdft](ofdft/) | Orbital-free DFT and external comparisons. |

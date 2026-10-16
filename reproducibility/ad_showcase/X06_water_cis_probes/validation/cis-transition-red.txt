@@ -1,0 +1,38 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+__ test_cis_transition_geometry_response_matches_independent_energy_state_fd ___
+
+hydrogen = (array([[ 0.2, -0.1, -0.7],
+       [ 0.2, -0.1,  0.7]]), RHF(mol=Mole(atom=[('H', array([ 0.2, -0.1, -0.7])), ('H', ar...l=0.0, compute_local_hfx_features=False, compute_local_hfx_aux=False, hfx_omega_values=(0.0, 0.4), hfx_chunk_size=512))
+
+    def test_cis_transition_geometry_response_matches_independent_energy_state_fd(hydrogen):
+        from pyscf import gto as pgto, scf as pscf
+        from scipy.linalg import eigh
+    
+        coordinates, mf = hydrogen
+        policy = EigenResponseConfig(target="eigenpairs",
+            linear_config=LinearSolverConfig(method="direct", max_dense=8, rtol=1e-11))
+        model = CISGeometry(mf, nroots=2, response=policy)
+>       values, jacobian, state = model.transition_derivatives(coordinates, 0)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'CISGeometry' object has no attribute 'transition_derivatives'
+
+tests/test_cis_transition_response.py:31: AttributeError
+____________ test_transition_derivative_rejects_stopped_amplitudes _____________
+
+hydrogen = (array([[ 0.2, -0.1, -0.7],
+       [ 0.2, -0.1,  0.7]]), RHF(mol=Mole(atom=[('H', array([ 0.2, -0.1, -0.7])), ('H', ar...l=0.0, compute_local_hfx_features=False, compute_local_hfx_aux=False, hfx_omega_values=(0.0, 0.4), hfx_chunk_size=512))
+
+    def test_transition_derivative_rejects_stopped_amplitudes(hydrogen):
+        coordinates, mf = hydrogen
+        model = CISGeometry(mf, nroots=2)
+        with pytest.raises(ValueError, match="eigenpairs"):
+>           model.transition_derivatives(coordinates, 0)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'CISGeometry' object has no attribute 'transition_derivatives'
+
+tests/test_cis_transition_response.py:73: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_cis_transition_response.py::test_cis_transition_geometry_response_matches_independent_energy_state_fd
+FAILED tests/test_cis_transition_response.py::test_transition_derivative_rejects_stopped_amplitudes
+2 failed, 1 passed in 16.69s

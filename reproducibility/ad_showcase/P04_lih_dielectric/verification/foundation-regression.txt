@@ -1,0 +1,6 @@
+.....................FFT 31 native/PySCF same-grid cross-k AO error 3.673587040782455e-10
+FFT 61 native/PySCF same-grid cross-k AO error 2.8098637688642344e-14
+.H2 Berry dP/dR step 0.0001 polarization error 5.71219759318807e-11 density error 4.406011347435346e-09
+H2 Berry dP/dR step 3e-05 polarization error 5.933177397738493e-12 density error 5.683404163958627e-10
+.
+23 passed in 93.05s (0:01:33)

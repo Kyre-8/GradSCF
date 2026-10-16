@@ -1,0 +1,6 @@
+{
+  "timing": "Each phase measured directly. VJP preparation includes a primal; no stacked totals or wall-time subtraction.",
+  "warm_summary": "Median of five calls, with min/max whiskers.",
+  "memory": "Fresh-process high-water RSS after timed phases; not backward-only allocated memory.",
+  "scope": "Observed small-system shared-node wall times; not an asymptotic scaling or universal speedup claim."
+}

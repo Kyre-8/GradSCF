@@ -1,0 +1,104 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-lih-field-20261016",
+  "source_python_sha256": "b2e96cd4daadaf04ae8ba1c90b8c31209dd73aa0a5c3b2d63619c527f298cabf",
+  "actual_source_archive_sha256": "94eba8e0920978966e175a4b0d84d61090f9ba61a4139fad29d9342377e8780c",
+  "actual_selected_source_sha256": {
+    "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+    "src/gradscf/dfpt/electric.py": "61aeb686bb38c047c719240d1a39e79bbc41b08f0e3e11853fe295ae186fd5f2",
+    "src/gradscf/dfpt/ks.py": "f5dc7b4ba7ba70a3a704359f98f9609ee51db18ddccbb5e6f1406d0f45104e93",
+    "src/gradscf/dfpt/core.py": "4765b5e80c2804f07e22ebcec7584bbed1d271fecdf4dd89949895b307e054bb",
+    "src/gradscf/solvers/nonlinear/iterate.py": "985caa51531077be9ca98b558d1658971b5f3ca0c91c56f3fca9d76a82ac071b",
+    "src/gradscf/solvers/nonlinear/root.py": "6896011c23957975ad5420cbd14edd47a69d2b837189723841484f07f6108981",
+    "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+    "examples/pbc/lih_born_charges.py": "411860077b0dda6a0c8f2111b01aed5e1031f24f0f30b9a20d1da3d8d2930e86",
+    "examples/pbc/lih_dielectric.py": "3c2b907c1d242e2a20e0aac3e0ad6153a2514cab4bc1087621abea7deff6aebe",
+    "examples/pbc/check_lih_finite_field.py": "dec67170380c60afbdf3b72c4ede246b4b43c3f0fd0a64b50ce78fd2e2f142bd"
+  },
+  "presented_example_sha256": {
+    "examples/pbc/lih_dielectric.py": "eb8026c6ea9b0b4b0318d5466d925f50a441fbdad8d18ba32f1a6e9260add93d",
+    "examples/pbc/check_lih_finite_field.py": "dec67170380c60afbdf3b72c4ede246b4b43c3f0fd0a64b50ce78fd2e2f142bd",
+    "examples/pbc/plot_lih_dielectric.py": "83963fe6e6b2123fdd52303c2e0bff8372af6c035d1abbfe09213b64e3e1804b"
+  },
+  "native_example_ast_identical_to_executed": true,
+  "numerical_environment": "jy_gpu_1 (hostname c20), Xeon Platinum 8457C, CPU float64, Python3.11.15, JAX0.10.0; two OMP/BLAS threads, no affinity changes; detailed environment in verification/calculation_runtime.json",
+  "runs": {
+    "probe": {
+      "exit": 0,
+      "seconds": 118.6881155600131,
+      "peak_rss_kib": 4979516
+    },
+    "full_zero_field": {
+      "exit": 0,
+      "seconds": 118.84491656700266,
+      "peak_rss_kib": 5646932
+    },
+    "finite_field": {
+      "exit": 0,
+      "seconds": 123.11481365101645,
+      "peak_rss_kib": 7614116,
+      "endpoints": 12,
+      "central_differences": 6
+    },
+    "foundation_field_dimer": {
+      "exit": 0,
+      "tests_passed": 5,
+      "pytest_seconds": 128.03
+    },
+    "foundation_berry_and_born": {
+      "exit": 0,
+      "tests_passed": 23,
+      "pytest_seconds": 93.05
+    },
+    "foundation_h2_field": {
+      "exit": 0,
+      "tests_passed": 1,
+      "pytest_seconds": 59.69
+    },
+    "foundation_full_root_enthalpy_hessian": {
+      "exit": 0,
+      "tests_passed": 1,
+      "pytest_seconds": 91.61,
+      "peak_rss_kib": 2024112
+    }
+  },
+  "test_source_boundary": "Five original field tests, additional H2 and additional full-root Hessian ran separately with unchanged field production source. The final field test file contains all seven cases; a combined final-file run is not claimed.",
+  "scope": "Fixed-cell finite FFT31/k2/SZV model. Raw anisotropy retained; local branch derivatives only. No Maxwell, mixed response, material convergence or IR claim.",
+  "artifacts": {
+    "dielectric_validation.pdf": "cb8297d82469ffc1e05bca1545ffd6eda0f26ca8f3396b1dc653a9624a961bd8",
+    "dielectric_validation.png": "9f8b32f085e6c5e48b495712905bbe1f5660194ad3d383be78d341ac1ca4050c",
+    "finite_field.json": "711dbf66c4e065aad178a8279e0b563a12f846f2a191511e95c701dd433bafd8",
+    "gradscf.json": "6599d045022b3a52476c4a39203f18ade7891fe150d175427dfc3034a95e9a1a",
+    "gradscf_response.npz": "44f6a3f9d5637d95c200b064f244a8be766bf84b5b45906865a679f956219101",
+    "probe.json": "ef49ca9ca64bd2112b35cdc924faf25bb83e4aa1becbd4cbf0916dca96c7edb3",
+    "probe_response.npz": "f23f0a21c0797f0def28c1b95df307a675d2a852082c6a860fc01b3c00f69111",
+    "verification/calculation_runtime.json": "a3b127436b3a7d1ca67bdb41cc2f1fc7b7c9037fcc8cdff13b3670e1e0ad4cae",
+    "verification/calculation_sources.tar.gz": "94eba8e0920978966e175a4b0d84d61090f9ba61a4139fad29d9342377e8780c",
+    "verification/finite-resources.txt": "98d146a4dd26eb9f003da66f594f823810b12ad8997b8ed373445442fa381bd7",
+    "verification/finite.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "verification/finite.txt": "ff44efa754b5e7f47076c1a4bd1f21b7595204e3bc8bda8ee4fbefe5973afe6f",
+    "verification/foundation-green-resources.txt": "fa44fb6cf7f98cf35971592fa026f1a14fd93f5ec5483d9a9db3a3ddfbe32e60",
+    "verification/foundation-green.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "verification/foundation-green.txt": "3d78041d912977e7da3820af83568615f801e79ee871621b3f2152f23dc088f1",
+    "verification/foundation-h2-resources.txt": "1540f84f494637567054f4c497277b5cf29283ae3cd00afca4194f24a73584c1",
+    "verification/foundation-h2.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "verification/foundation-h2.txt": "77888839a8cda287fb7c745785b20dacf745186569d469fe84b1208ba2a4ce1e",
+    "verification/foundation-hessian-resources.txt": "c5a1ed0654c030022207124bd598b5492f826355446d0e2c423122a679090cef",
+    "verification/foundation-hessian.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "verification/foundation-hessian.txt": "29c5f1a6a1db4404ee39ad62572c5077b03177da0a8a05d02f3d140740586c3e",
+    "verification/foundation-regression-resources.txt": "2eeabe3195b5eb0aea0efdbce454403cff8551a3c6f5d6045e6cdf14e98ee5b4",
+    "verification/foundation-regression.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "verification/foundation-regression.txt": "1fd55e8d7c9494cd467c9af79027fbdd283b937a304e51d5a7144a9070ef64a1",
+    "verification/full-resources.txt": "d781eb42b88c403c5dfaf534fdcfa6fcc5d69b311f026760f40673cf72970b56",
+    "verification/full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "verification/full.txt": "ea41ee42fb102845b397101b4852ebb0835da93ac5dd7f4b6bf72f543ba03bf7",
+    "verification/lih_dielectric_executed.py": "3c2b907c1d242e2a20e0aac3e0ad6153a2514cab4bc1087621abea7deff6aebe",
+    "verification/plot.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "verification/plot.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "verification/probe-resources.txt": "a7892a664a74de041dd3d0cbbc18dd7fdd7461fee9cb759e18dbe3f48a1a13d2",
+    "verification/probe.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "verification/probe.txt": "ecba93712a27c792c7caf156e547d0baba6ba1bdee4c94b520c9fdfa87ff1dc7",
+    "verification/test_born.py": "9a136522bf71bbce6108df10bf9782227a673862a7ce9d32ae35a14360e48b78",
+    "verification/test_electric_field.py": "56f44db3a654aa43d2197242d80e1957a037181ef7afd559c5006dc01fe7a218",
+    "verification/test_polarization.py": "0be22b8b9da847e1675f6fcb17882c2cd07d2a1b22b09579b673d229ee17e41b"
+  }
+}

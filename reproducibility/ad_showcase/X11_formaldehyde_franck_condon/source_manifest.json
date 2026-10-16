@@ -1,0 +1,27 @@
+{
+  "source_python_sha256": "f5630d7d21019689822a63ce0867ef0e6abec33ee5d75aac16845e012389569f",
+  "files": {
+    "src/gradscf_tools/franck_condon.py": "b9294bf503f9168220484b3915618632955cb4f01cb48e4a7cc88170221c3224",
+    "examples/tdscf/formaldehyde_franck_condon.py": "a8da59e93b1bd9749b790c39d7a2472fccd5f829e6685d18dd74af7f9058d207",
+    "examples/tdscf/plot_formaldehyde_franck_condon.py": "33153a92217864e0c04a961b7fdc4bd1274fc69f2d25f15c6755d52fcf9d92cf",
+    "tests/test_franck_condon.py": "4bc82a55d039c604dea3b59c584cefd3ebdc56799099e2e88e0e2df8dd591146",
+    "src/gradscf/bse/ep_coupling/vibronic.py": "d6b984357933991755136e72a0ee911b6cef53aec64c51750f0eff4a85aa50a4",
+    "src/gradscf/solvers/eigen/api.py": "b481a4501129c18e022a079e3bdfa2dfbab7b3d662506ad9cdcb1db27f4f7aa1",
+    "src/gradscf/solvers/eigen/response.py": "8566c795e5a098ab72d7255a6b607fe0545e41d585e3c4646bd6aec389406e7b"
+  },
+  "input_hashes": {
+    "emission.json": "0a33ef395c89dbb6f52a7fb9bb216f603c1829d35e9f1e49d18222e1d33da28b",
+    "excited_ad.json": "c0dc6f69e82f1cdd564979412d806ae46378ad070d62d1a6bde5ea66d9a57668"
+  },
+  "input_source_python_sha256": "5dc52b70f7b130ed5b58a22f0f8a2be693b8fc039232dbddff44f73ecaabcc86",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "source_origin": "Final validated spectral snapshot plus new Franck-Condon workflow helper; X10 electronic data retained unchanged.",
+  "environment": {
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2"
+  }
+}

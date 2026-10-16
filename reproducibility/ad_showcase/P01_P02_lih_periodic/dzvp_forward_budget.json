@@ -1,0 +1,43 @@
+{
+  "settings": {
+    "a_bohr": 7.6,
+    "xc": "pbe",
+    "basis": "gth-dzvp",
+    "pseudo": "gth-pade",
+    "mesh": [
+      31,
+      31,
+      31
+    ],
+    "kmesh": [
+      2,
+      2,
+      2
+    ],
+    "precision": 1e-10,
+    "displacement_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.025,
+        -0.015,
+        0.01
+      ]
+    ]
+  },
+  "scf_converged": false,
+  "scf_cycles": 150,
+  "sampled_indirect_gap_hartree": 0.10358151255844783,
+  "mo_fock_occupied_virtual_norm": 2.765021371326298e-13,
+  "minimum_overlap_eigenvalue": 5.098554535306797e-08,
+  "nao": 20,
+  "energy_hartree": -8.057919214490825,
+  "elapsed_seconds": 69.85347130100126,
+  "peak_rss_kib": 7236064,
+  "scope": "Forward SCF only; this does not validate full force/stress memory or accuracy.",
+  "accepted_forward": false,
+  "rejection": "A resolved, positively gapped sampled closed-shell reference is required."
+}

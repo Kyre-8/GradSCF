@@ -1,0 +1,54 @@
+[
+  {
+    "mesh": 9,
+    "native_converged": true,
+    "reference_converged": true,
+    "native_energy": -1.0883006598284624,
+    "reference_energy": -1.0800013875279053,
+    "difference": -0.008299272300557048,
+    "overlap_error": 0.00032083157159013,
+    "hcore_error": 0.009966353549794582,
+    "nuclear_error": 5.828670879282072e-16,
+    "density_error": 0.007761010295773196,
+    "elapsed_seconds": 17.411396479999894
+  },
+  {
+    "mesh": 15,
+    "native_converged": true,
+    "reference_converged": true,
+    "native_energy": -1.1024978937482017,
+    "reference_energy": -1.1022343865496649,
+    "difference": -0.0002635071985368498,
+    "overlap_error": 1.5270374226217243e-05,
+    "hcore_error": 0.00033108972782630586,
+    "nuclear_error": 5.828670879282072e-16,
+    "density_error": 0.00026675330595271607,
+    "elapsed_seconds": 9.123716502999741
+  },
+  {
+    "mesh": 21,
+    "native_converged": true,
+    "reference_converged": true,
+    "native_energy": -1.1042126832964054,
+    "reference_energy": -1.1042465675942417,
+    "difference": 3.3884297836239696e-05,
+    "overlap_error": 3.211266801361745e-07,
+    "hcore_error": 4.655618077270551e-05,
+    "nuclear_error": 5.828670879282072e-16,
+    "density_error": 7.988488761212498e-05,
+    "elapsed_seconds": 9.606080916999417
+  },
+  {
+    "mesh": 31,
+    "native_converged": true,
+    "reference_converged": true,
+    "native_energy": -1.1043119444207439,
+    "reference_energy": -1.1043120299501572,
+    "difference": 8.552941332951036e-08,
+    "overlap_error": 4.1235015402207864e-11,
+    "hcore_error": 1.1590468079747396e-07,
+    "nuclear_error": 5.828670879282072e-16,
+    "density_error": 1.564480878735175e-07,
+    "elapsed_seconds": 12.68155899500016
+  }
+]

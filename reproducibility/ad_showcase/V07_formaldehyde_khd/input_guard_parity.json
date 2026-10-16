@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "identical_prefix_vertices": 3003,
+  "full_intermediate_states": 593775,
+  "photon_indices": [
+    0,
+    160,
+    320
+  ],
+  "gamma_ev": 0.03,
+  "resonant_max_error": 0.0,
+  "antiresonant_max_error": 0.0,
+  "wall_seconds": 4.343651686009252,
+  "calculation_helper_sha256": "15c420f92d440110f5f7078feccba906f45ebf49dc0b5487f96932f35e015958",
+  "final_helper_sha256": "816df911eb723f038d41ecdf9eb6517b403d71b1771876cbd299ae5d2c7f4e9e",
+  "scope": "Input validation only: complex energies explicitly rejected; Gamma must be a real scalar. Valid-input formulas unchanged."
+}

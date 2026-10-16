@@ -1,0 +1,28 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-crystal-ir-20261016",
+  "hostname": "c20",
+  "cpu": "model name\t: Intel(R) Xeon(R) Platinum 8457C",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "numpy": "2.4.4",
+  "scipy": "1.17.1",
+  "source_sha256": {
+    "src/gradscf/pbc/vibrational.py": "42a875fbe498acb5a3c39971522c3ff1a31f4a17fd27cbd6c9838a85200a3941",
+    "src/gradscf/gw/ep_coupling/types.py": "6534904394298cfcdfea8ca82783c8bcd9b26bc2c44db98d5265306dfd6bb6f6",
+    "tests/pbc/test_infrared.py": "7ead658b63beacf3e54663e687e70c616797d931061594a9cce6f8c000c1d3d2",
+    "tests/pbc/test_vibrational.py": "2e63a546d72112b35f9f0aa49bd75c1f3f16dc7c29f670a34ec3669a32270d26",
+    "tests/conftest.py": "3d07a50a2c30d74d4cb0fcf7f05a8338d893a584de728498755bfd0fa8495e74"
+  },
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONPATH": "src"
+  },
+  "command": "timeout 600 python -m pytest -q tests/pbc/test_infrared.py tests/pbc/test_vibrational.py",
+  "final_exit": "0",
+  "scope": "Analytic polar oscillators and array AD; no electronic or material calculation."
+}

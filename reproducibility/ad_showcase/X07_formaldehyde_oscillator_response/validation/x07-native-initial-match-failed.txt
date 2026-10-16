@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/yjiao/gradscf_checks/ad-showcase-excited-character-20261015/examples/tdscf/formaldehyde_oscillator_response.py", line 61, in <module>
+    match = model.match(coordinates, state, old_anchor)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yjiao/gradscf_checks/ad-showcase-excited-character-20261015/src/gradscf_tools/excited.py", line 328, in match
+    return select_tracked_root(overlaps, state.excitation_energies)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yjiao/gradscf_checks/ad-showcase-excited-character-20261015/src/gradscf_tools/excited.py", line 131, in select_tracked_root
+    raise RuntimeError(f"Tracked-state overlap {best:.6f} is below {minimum_overlap}.")
+RuntimeError: Tracked-state overlap 0.722308 is below 0.85.

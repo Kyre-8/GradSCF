@@ -1,0 +1,9 @@
+{
+  "figure": "2x3 complete-space frequency response and validation",
+  "frequency_units": "eV",
+  "damping_units": "Hartree",
+  "polarizability_units": "bohr^3",
+  "activity_units": "angstrom^4/amu",
+  "components_normalized": false,
+  "approximation": "Harmonic frequency-dependent Placzek activity. Phenomenological damping; no full resonant vibronic KHD, thermal, scattered-frequency or absolute cross-section factors."
+}

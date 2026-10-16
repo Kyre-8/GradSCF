@@ -1,0 +1,460 @@
+{
+  "complete": true,
+  "passed": true,
+  "settings": {
+    "a_bohr": 7.780032276700287,
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pade",
+    "mesh": [
+      41,
+      41,
+      41
+    ],
+    "kmesh": [
+      2,
+      2,
+      3
+    ],
+    "precision": 1e-10,
+    "displacement_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ]
+    ]
+  },
+  "qmesh": [
+    2,
+    2,
+    3
+  ],
+  "source_python_sha256": "acc255538482dbbd7b243b5e3a577e2bd820086936fe29d67f6aaa28c66ef9b5",
+  "script_sha256": "673b4ae59745d04d405bc723eec687e201fb1dceccb222fed30ae85b5fdc42df",
+  "interpolation_source_sha256": {
+    "ifc.py": "f9177f8621ff4908d46c9dfbd3ad939f073527353769efcdd027ea1be54be3d2",
+    "phonon.py": "09994ce50edb468ba54730dee1f1f412b0b233f6312ee0e193c575aff2c640c3"
+  },
+  "input_sha256": {
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_0_0_0.json": "14e107ff047e93797b32eb68f5fcb1b358ac150566c66fe2689caf0629cc38d7",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_0_0_1.json": "c9cfed30effa25eba88b4a800c2d456dddd1bd7b4457a24716da5c8d369ab68c",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_0_0_m1.json": "e77c2a4d275d072c84154706e4130e10ac2911cfb81021c96a8a9bbc7c3ee942",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_0_m1_0.json": "5fe4b02af0e38dd59dced38e4ed898cf06b7d595723babbf1956ffdee074616a",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_0_m1_1.json": "ac996ff9bdf87025985544376f0339553c9e62a598b009122c7b081ffce9e7e3",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_0_m1_m1.json": "29b9b00778ff9fb39f0b1b136e9987cd61f21fda8dab1d407e1a307707dfe155",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_m1_0_0.json": "15f797eff25a71028b84929e6af8efa6cebfe5e8b2281ea8f897c20e49f8afa3",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_m1_0_1.json": "d3657865e57ed471fa3a7dcbdb35ce087edee95fc652fecebfd9b5b47688ffa3",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_m1_0_m1.json": "09051aabf529e3f00599801de3e12d85a9b5487153d4c6a7bc8cac584314c659",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_m1_m1_0.json": "8023e233e513a7ba7afcb089ace4272142cbce59d28da8d59df90b899da5abe1",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_m1_m1_1.json": "601678180043ac5ce766b9c25b5a7608c04eeabfbbfccca5952126df85b503f8",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/q_m1_m1_m1.json": "1a0c1504d581569c8f089c96f311a7944ffe97b777cf8dc9d9e74b9bdb737688"
+  },
+  "arrays_sha256": "5012f43bfc2ab2b99a439b86341347b1aa9586a061c7f58cf713f1908081e0c8",
+  "lattice_bohr": [
+    [
+      0.0,
+      3.8900161383501435,
+      3.8900161383501435
+    ],
+    [
+      3.8900161383501435,
+      0.0,
+      3.8900161383501435
+    ],
+    [
+      3.8900161383501435,
+      3.8900161383501435,
+      0.0
+    ]
+  ],
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      3.8900161383501435,
+      3.8900161383501435,
+      3.8900161383501435
+    ]
+  ],
+  "masses_amu": [
+    7.0160034366,
+    1.00782503223
+  ],
+  "reference": {
+    "settings": {
+      "a_bohr": 7.780032276700287,
+      "xc": "pbe",
+      "basis": "gth-szv",
+      "pseudo": "gth-pade",
+      "mesh": [
+        41,
+        41,
+        41
+      ],
+      "kmesh": [
+        2,
+        2,
+        3
+      ],
+      "precision": 1e-10,
+      "displacement_bohr": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "explicit_nelectron": 4,
+    "pseudopotential_valence_charges": [
+      3,
+      1
+    ],
+    "electron_number": 4.000000000000002,
+    "nao": 3,
+    "occupied_orbitals": 2,
+    "sampled_indirect_gap_hartree": 0.15770609293849588,
+    "mo_fock_occupied_virtual_norm": 7.290183594997623e-16,
+    "minimum_overlap_eigenvalue": 0.015429803271159484,
+    "occupation_values": [
+      0.0,
+      2.0
+    ],
+    "scf_converged": true,
+    "scf_cycles": 12,
+    "energy_hartree": -8.035799168470177,
+    "coordinates_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        3.8900161383501435,
+        3.8900161383501435,
+        3.8900161383501435
+      ]
+    ],
+    "lattice_bohr": [
+      [
+        0.0,
+        3.8900161383501435,
+        3.8900161383501435
+      ],
+      [
+        3.8900161383501435,
+        0.0,
+        3.8900161383501435
+      ],
+      [
+        3.8900161383501435,
+        3.8900161383501435,
+        0.0
+      ]
+    ],
+    "fractional_kpoints": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        -1.3188084371957864e-17,
+        -1.3188084371957864e-17,
+        0.3333333333333333
+      ],
+      [
+        1.22163907995804e-17,
+        1.22163907995804e-17,
+        -0.33333333333333337
+      ],
+      [
+        -3.842356836066713e-17,
+        -0.49999999999999994,
+        -3.128373098836689e-17
+      ],
+      [
+        -8.695114919333072e-17,
+        -0.49999999999999994,
+        0.3333333333333333
+      ],
+      [
+        -2.620717756108673e-17,
+        -0.49999999999999994,
+        -0.3333333333333334
+      ],
+      [
+        -0.49999999999999994,
+        -3.842356836066713e-17,
+        -3.842356836066713e-17
+      ],
+      [
+        -0.49999999999999994,
+        -8.695114919333072e-17,
+        0.33333333333333326
+      ],
+      [
+        -0.49999999999999994,
+        -2.620717756108673e-17,
+        -0.3333333333333334
+      ],
+      [
+        -0.5,
+        -0.5,
+        -6.873560577665656e-17
+      ],
+      [
+        -0.5000000000000001,
+        -0.5000000000000001,
+        0.33333333333333326
+      ],
+      [
+        -0.49999999999999994,
+        -0.49999999999999994,
+        -0.3333333333333334
+      ]
+    ],
+    "basis_data": {
+      "Li": [
+        [
+          0,
+          [
+            7.2610457926,
+            -0.2798628497,
+            0.0501840556
+          ],
+          [
+            2.1056583087,
+            -0.447742079,
+            0.1084202571
+          ],
+          [
+            0.6439906571,
+            -0.3912929157,
+            0.1448363201
+          ],
+          [
+            0.0797152017,
+            -0.0282408543,
+            -0.4643021689
+          ],
+          [
+            0.029402959,
+            0.0106542324,
+            -0.6220213304
+          ]
+        ]
+      ],
+      "H": [
+        [
+          0,
+          [
+            8.3744350009,
+            -0.0283380461
+          ],
+          [
+            1.805868146,
+            -0.1333810052
+          ],
+          [
+            0.4852528328,
+            -0.3995676063
+          ],
+          [
+            0.1658236932,
+            -0.5531027541
+          ]
+        ]
+      ]
+    },
+    "pseudopotential_data": [
+      [
+        [
+          3
+        ],
+        0.4,
+        4,
+        [
+          -14.03486849,
+          9.55347627,
+          -1.76648817,
+          0.08436998
+        ],
+        0
+      ],
+      [
+        [
+          1
+        ],
+        0.2,
+        2,
+        [
+          -4.1802368,
+          0.72507482
+        ],
+        0
+      ]
+    ],
+    "masses_amu": [
+      7.0160034366,
+      1.00782503223
+    ],
+    "mass_sources": [
+      "https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=Li",
+      "https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=H"
+    ],
+    "source_python_sha256": "acc255538482dbbd7b243b5e3a577e2bd820086936fe29d67f6aaa28c66ef9b5",
+    "script_sha256": "52753c5e997b4b221e8004f48b9ed3218aaa744d4f11ffa13fa0f13a5741fa44",
+    "helper_sha256": "4431a8c0439a2b60b4d4befb9c8c1792fd65d2bd0b1107937aa5f75a03bc8d68",
+    "hostname": "c20",
+    "python": "3.11.15",
+    "jax": "0.10.0",
+    "dtype": "float64",
+    "scope": "Gamma local curvatures of the specified finite periodic model; no ASR or stability assumption."
+  },
+  "raw_errors_hartree_per_bohr2": {
+    "hermiticity": 8.497729554372948e-14,
+    "conjugacy": 2.8552939426389968e-11
+  },
+  "sample_reconstruction_error_hartree_per_bohr2": 1.4276470855399242e-11,
+  "reciprocal_periodicity_error_hartree_per_bohr2": 3.12282252466686e-17,
+  "raw_asr_residual_hartree_per_bohr2": 0.00019479383593315824,
+  "asr_projected": false,
+  "asr_correction_norm": 0.0,
+  "polar_correction": false,
+  "path": [
+    [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.0,
+        0.5
+      ],
+      [
+        0.625,
+        0.25,
+        0.625
+      ]
+    ],
+    [
+      [
+        0.375,
+        0.375,
+        0.75
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.5,
+        0.5
+      ],
+      [
+        0.5,
+        0.25,
+        0.75
+      ]
+    ]
+  ],
+  "path_labels": [
+    "Gamma",
+    "X",
+    "U|K",
+    "Gamma",
+    "L",
+    "W"
+  ],
+  "path_source": "https://phonopy.github.io/phonopy/phonopy-module.html#band-structure",
+  "path_ticks": [
+    0.0,
+    0.8076040154738854,
+    1.0931351534014202,
+    1.949728567184025,
+    2.649134160782731,
+    3.2201964366378006
+  ],
+  "dos_sampling": [
+    10,
+    10,
+    10
+  ],
+  "dos_width_cm1": 25.0,
+  "dos_integral_states_per_cell": 6.000000000000001,
+  "negative_dos_mode_samples": 152,
+  "scope": "Complete finite-model raw IFC interpolation and signed DOS; no converged material-stability or fine-grid claim.",
+  "animation": {
+    "q": [
+      0.0,
+      0.0,
+      0.3333333333333333
+    ],
+    "mode": 5,
+    "frequency_signed_hartree": 0.004517429619704261,
+    "frequency_cm1": 991.4612004935274,
+    "illustrative_amplitude_bohr": 0.25,
+    "primitive_mode_real": [
+      [
+        0.006351110148406694,
+        0.006351110148415113,
+        -0.007327282673970101
+      ],
+      [
+        -0.1086496933353151,
+        -0.10864969333542858,
+        0.19720671458208344
+      ]
+    ],
+    "primitive_mode_imag": [
+      [
+        -0.011000445461513188,
+        -0.011000445461524889,
+        0.012691225872742084
+      ],
+      [
+        -4.518742106947716e-15,
+        -2.01829207660061e-15,
+        2.4683612731311762e-17
+      ]
+    ],
+    "repeat_translations": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        2
+      ]
+    ],
+    "scope": "Real phase evolution of one positive numerical mode; no mode AD or MD claim."
+  },
+  "elapsed_seconds": 30.057384491999983
+}

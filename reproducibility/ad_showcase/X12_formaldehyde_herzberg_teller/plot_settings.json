@@ -1,0 +1,8 @@
+{
+  "components": "FC, HT, signed interference and total use their original raw oscillator strengths; all three Cartesian moment components are summed.",
+  "near_dark": "The dedicated FC-only and interference panels keep their own labeled raw scales. Their numerical-residual ratios are not interpreted as physical enhancement factors.",
+  "spectrum": "Gaussian sigma=.02/.01 eV; no fitted lifetime or experimental broadening.",
+  "line_selection": "Twenty largest total oscillator strengths in the stick panel; the curves use all retained states except the reported relative <=1e-12 L1 plot screen.",
+  "log_display_floor": 1e-16,
+  "scope": "One local well, zero-temperature double-harmonic/linear-HT model using validated full electronic nuclear derivatives. No anharmonic/tunneling or experimental prediction; signed interference is not a negative absorption spectrum."
+}

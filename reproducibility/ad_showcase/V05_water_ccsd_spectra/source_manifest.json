@@ -1,0 +1,52 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-correlated-ccsd-20261015",
+  "hostname": "c20",
+  "python_version": "3.11.15",
+  "python_source_tree_sha256": "412865fd6b6d7cd5397e3276d86c2cbcb813424a9981fdc5180dcc3899c88b2d",
+  "python_source_count": 483,
+  "source_hash_algorithm": "SHA256 of sorted newline-joined path + space + file SHA256",
+  "physics_source_sha256": {
+    "src/gradscf_tools/correlated_response.py": "2aef64387e3a788f7ddb9aadc78f76a3898f3ddb34872276189c547180eb86a1",
+    "src/gradscf_tools/molecular_response.py": "c815909cbc61b8fb2f12240636c22c35701b7b94391783250fc3cb921a5a3b1a",
+    "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+    "src/gradscf/cc/ground.py": "fbb5b2ef1bae99c939cc6d5f3132f99152979f4e925d3f9828e5778d097d18c7",
+    "src/gradscf/cc/rccsd.py": "206faab2c4b5415cef1e3c343ad768f1c70ae119acbfe1a23baf198654e7977e",
+    "src/gradscf/solvers/nonlinear/iterate.py": "985caa51531077be9ca98b558d1658971b5f3ca0c91c56f3fca9d76a82ac071b",
+    "src/gradscf/solvers/nonlinear/root.py": "6896011c23957975ad5420cbd14edd47a69d2b837189723841484f07f6108981"
+  },
+  "native_libraries": {
+    "src/gradscf/integrals/_native/lib/libgradscf_integrals.so": "e02844ce6c1b5eebc2dc00a6eec5f1803fd33ad4150aa82e9858d5c0890b9904"
+  },
+  "example_scripts": {
+    "examples/geometry/plot_water_pbe_modes.py": "a1e82b2b12e30e934bd23859eaf768a20e33daaafd28376bf37a3d7615d518bf",
+    "examples/geometry/plot_water_pbe_optimization.py": "cbeef97c2aa2f7ffb332dd8df8d6d7994a8b872a6fa08b99e18994b6d40f0711",
+    "examples/vibrations/compare_water_correlated_pyscf.py": "ca26dab88ca011f17fccc0bd70095edf23456bcd7a981bea1be9c3cafbd292fb",
+    "examples/vibrations/plot_water_correlated_spectra.py": "1275b6a5f8fbd43c16a29852db18b275c70e8ac01261c9da2eb79dffffe73842",
+    "examples/vibrations/plot_water_spectra.py": "b984d9b41295ed5dfa9f81e92f9450afb8073b044a76af96211af096109a3e2c",
+    "examples/vibrations/water_correlated_spectra.py": "31c2d1ca5389be8e78b3258be2a87035d83b311554fd0d64ed26428c7157d453",
+    "examples/vibrations/water_ir_raman.py": "103643bb09624d94a4c30cd55a4b90af51835ae487aa40e5f1380f1609d997d2"
+  },
+  "artifacts": {
+    "broadened.csv": "c5d415c18dc52446f1f4f96ff8e892d423fb75789baba767d9c397c9d2d58bfe",
+    "geometry.json": "ed8f2b1d7210fc7e7a7b2ce6a494a1ba2611fc0def6e869c5bf6cdc101f9e690",
+    "gradscf.json": "ee9eb6d98b7ea1ddecb2329516b3d94d8e77d6a694585a776f31b2cbd9ceb8c4",
+    "harmonic_checks.pdf": "062e5f14aa93b41f787e23e10010298c2f8595833a76ce0245dd53d68aec0d90",
+    "harmonic_checks.png": "22a8091394c7176470df1e5053d2c376fccfa3084acb443db674254022988288",
+    "hessian.json": "a19baaf6ecdac255b0cdc7988debab5301f4f0a84c8e3d856d443ce20934ca12",
+    "ir_raman.pdf": "0109356c673748ed7797e274d4739d000029c15111228695fbd43b27beeecf12",
+    "ir_raman.png": "e9bae44685d18e7c30527229e6f71ae9f7ddbddf200290bd91cd371af6a56778",
+    "isotope_frequencies.csv": "9c424226383cfc840acdc6f796b751aef9cc2a147243924a72df49b633751e28",
+    "optimization.pdf": "dda04e307b3b3f8751c5a7e93ae9348ec2ef8753c3b13e78525e1dcba85b4793",
+    "optimization.png": "74559072d2d4a33c92eadec47b728fdbfe47a469b906888d5200e398e9301b14",
+    "pyscf.json": "d2134ef3c7fdc6506f494452a8aacf9aaeefa03c558a1987366cbf406a8a37e7",
+    "pyscf_geometry.json": "2e30cd58f6c4817ffc6c3b819122e1a6c0df575de5e3ff137e1baa7fa06ac5b2",
+    "sticks.csv": "7e800403748082ae00193bbd9653cfc7884d703eb433c41d68673e760a1a30e5",
+    "water_modes.gif": "4469f0396d49dd6cc6d03f5c6de8dcc9dd2c2d54ce613873b0a4f6c0c0cf2b09"
+  },
+  "animation": {
+    "frames": 40,
+    "frame0_sha256": "7118288af54ae3d2cdf3bae87e24665d2e64c221dbad51cf03a80f0ce16474d9",
+    "frame10_sha256": "3d384df26a376540f572559d74be12c98e250999cbad5225cefb1814943cb546"
+  },
+  "boundary": "Frozen executed CCSD source; predates the subsequent Hermitian nested-JIT integration"
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "test": "tests/solvers/test_stable_rpa.py",
+    "returncode": 0,
+    "elapsed_seconds": 73.87709337100387,
+    "log": "rpa-regression-tests_solvers_test_stable_rpa.log"
+  },
+  {
+    "test": "tests/solvers/test_matrix_free_rpa.py",
+    "returncode": 0,
+    "elapsed_seconds": 182.11278677202063,
+    "log": "rpa-regression-tests_solvers_test_matrix_free_rpa.log"
+  },
+  {
+    "test": "tests/bse/test_full.py",
+    "returncode": 0,
+    "elapsed_seconds": 86.73699443598161,
+    "log": "rpa-regression-tests_bse_test_full.log"
+  },
+  {
+    "test": "tests/bse/test_api.py",
+    "returncode": 0,
+    "elapsed_seconds": 67.8949311680044,
+    "log": "rpa-regression-tests_bse_test_api.log"
+  },
+  {
+    "test": "tests/bse/test_matrix_free.py",
+    "returncode": 0,
+    "elapsed_seconds": 110.29905917900032,
+    "log": "rpa-regression-tests_bse_test_matrix_free.log"
+  },
+  {
+    "test": "tests/bse/test_dense_capacity.py",
+    "returncode": 0,
+    "elapsed_seconds": 19.61995257399394,
+    "log": "rpa-regression-tests_bse_test_dense_capacity.log"
+  }
+]

@@ -1,0 +1,200 @@
+{
+  "complete": true,
+  "continuum_polarization": [
+    -0.0,
+    -0.0,
+    -0.0
+  ],
+  "lattice_bohr": [
+    [
+      0.0,
+      2.0,
+      2.0
+    ],
+    [
+      2.0,
+      0.0,
+      2.0
+    ],
+    [
+      2.0,
+      2.0,
+      0.0
+    ]
+  ],
+  "positions_bohr": [
+    [
+      0.2,
+      0.2,
+      0.2
+    ],
+    [
+      0.2,
+      -0.2,
+      -0.2
+    ],
+    [
+      -0.2,
+      0.2,
+      -0.2
+    ],
+    [
+      -0.2,
+      -0.2,
+      0.2
+    ]
+  ],
+  "equal_probabilities": [
+    0.25,
+    0.25,
+    0.25,
+    0.25
+  ],
+  "unimodular_change": [
+    [
+      0,
+      1,
+      -1
+    ],
+    [
+      1,
+      0,
+      -1
+    ],
+    [
+      0,
+      0,
+      -1
+    ]
+  ],
+  "rows": [
+    {
+      "side": 2,
+      "polarization": [
+        -0.00031617344667569204,
+        -0.00031617344667569204,
+        -0.00031617344667569204
+      ],
+      "analytic_finite": [
+        -0.00031617344667569204,
+        -0.00031617344667569204,
+        -0.00031617344667569204
+      ],
+      "analytic_error": 0.0,
+      "norm": 0.0005476284736464677,
+      "minimum_link": 0.9635254915624211,
+      "branch_clearance": 3.133646348171101,
+      "equivalent_basis_polarization": [
+        0.00031617344667569204,
+        0.00031617344667569204,
+        -0.00031617344667569204
+      ],
+      "basis_invariance_defect": 0.0008942735527020204,
+      "coordinate_covariance_error": 0.0,
+      "scaled_norm_N2": 0.002190513894585871
+    },
+    {
+      "side": 4,
+      "polarization": [
+        -7.758406856874021e-05,
+        -7.758406856874021e-05,
+        -7.758406856874021e-05
+      ],
+      "analytic_finite": [
+        -7.758406856874021e-05,
+        -7.758406856874021e-05,
+        -7.758406856874021e-05
+      ],
+      "analytic_error": 0.0,
+      "norm": 0.00013437954861896564,
+      "minimum_link": 0.9907805981198271,
+      "branch_clearance": 3.1396427532709836,
+      "equivalent_basis_polarization": [
+        7.758406856874021e-05,
+        7.758406856874021e-05,
+        -7.758406856874021e-05
+      ],
+      "basis_invariance_defect": 0.00021944088398799313,
+      "coordinate_covariance_error": 0.0,
+      "scaled_norm_N2": 0.0021500727779034503
+    },
+    {
+      "side": 8,
+      "polarization": [
+        -1.9306331618520402e-05,
+        -1.9306331618520402e-05,
+        -1.9306331618520402e-05
+      ],
+      "analytic_finite": [
+        -1.9306331618520402e-05,
+        -1.9306331618520402e-05,
+        -1.9306331618520402e-05
+      ],
+      "analytic_error": 0.0,
+      "norm": 3.343954727105081e-05,
+      "minimum_link": 0.9976888932543935,
+      "branch_clearance": 3.141107432553149,
+      "equivalent_basis_polarization": [
+        1.9306331618520402e-05,
+        1.9306331618520402e-05,
+        -1.9306331618520402e-05
+      ],
+      "basis_invariance_defect": 5.460655202916812e-05,
+      "coordinate_covariance_error": 0.0,
+      "scaled_norm_N2": 0.002140131025347252
+    },
+    {
+      "side": 16,
+      "polarization": [
+        -4.821001230252567e-06,
+        -4.821001230252567e-06,
+        -4.821001230252567e-06
+      ],
+      "analytic_finite": [
+        -4.821001230252565e-06,
+        -4.821001230252565e-06,
+        -4.821001230252565e-06
+      ],
+      "analytic_error": 2.541098841762901e-21,
+      "norm": 8.35021907414951e-06,
+      "minimum_link": 0.9994218329363848,
+      "branch_clearance": 3.14147148861341,
+      "equivalent_basis_polarization": [
+        4.821001230252567e-06,
+        4.821001230252567e-06,
+        -4.821001230252567e-06
+      ],
+      "basis_invariance_defect": 1.3635850648081114e-05,
+      "coordinate_covariance_error": 0.0,
+      "scaled_norm_N2": 0.0021376560829822746
+    },
+    {
+      "side": 32,
+      "polarization": [
+        -1.2049018223861443e-06,
+        -1.2049018223861443e-06,
+        -1.2049018223861443e-06
+      ],
+      "analytic_finite": [
+        -1.2049018223861443e-06,
+        -1.2049018223861443e-06,
+        -1.2049018223861443e-06
+      ],
+      "analytic_error": 0.0,
+      "norm": 2.086951174505133e-06,
+      "minimum_link": 0.9998554338454488,
+      "branch_clearance": 3.141562371104085,
+      "equivalent_basis_polarization": [
+        1.2049018223861443e-06,
+        1.2049018223861443e-06,
+        -1.2049018223861443e-06
+      ],
+      "basis_invariance_defect": 3.4079769970930865e-06,
+      "coordinate_covariance_error": 0.0,
+      "scaled_norm_N2": 0.002137038002693256
+    }
+  ],
+  "source_sha256": "764e959db53ce3726a8210e0ed7dd37062b630ac109dfaeb3c0591d067cf3911",
+  "berry_sha256": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+  "interpretation": "Finite primitive-string discretization can violate the nonpolar point-group constraint while its algebra and coordinate covariance remain correct. This is not a quantitative assignment of the silicon Raman leakage to a particular cause."
+}

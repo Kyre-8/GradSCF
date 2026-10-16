@@ -1,0 +1,25 @@
+RHF objective  1: E=-113.869913959172, max|g|=4.673e-02
+RHF objective  2: E=-113.870185990978, max|g|=4.930e-02
+RHF objective  3: E=-113.870919673028, max|g|=6.358e-03
+RHF objective  4: E=-113.871092161058, max|g|=4.780e-03
+RHF objective  5: E=-113.871153629650, max|g|=6.949e-04
+RHF objective  6: E=-113.871154616222, max|g|=5.088e-04
+RHF objective  7: E=-113.871156150717, max|g|=2.402e-04
+RHF objective  8: E=-113.871156833390, max|g|=5.682e-05
+RHF objective  9: E=-113.871156836089, max|g|=1.183e-05
+RHF objective 10: E=-113.871156836218, max|g|=2.260e-08
+RHF Hessian column  1: 18.90 s
+RHF Hessian column  2: 10.14 s
+RHF Hessian column  3: 11.05 s
+RHF Hessian column  4: 10.77 s
+RHF Hessian column  5: 11.19 s
+RHF Hessian column  6: 10.34 s
+RHF Hessian column  7: 8.75 s
+RHF Hessian column  8: 11.21 s
+RHF Hessian column  9: 9.33 s
+RHF Hessian column 10: 7.51 s
+RHF Hessian column 11: 11.06 s
+RHF Hessian column 12: 11.10 s
+Paired electronic energies / Hartree: {'ground_at_ground': -113.87115683621795, 'excited_at_ground': -113.69778674054403, 'ground_at_excited': -113.85388191569513, 'excited_at_excited': -113.70536255786142}
+Gaps and reorganization energies / Hartree: {'vertical_absorption': 0.17337009567391704, 'vertical_emission': 0.14851935783370607, 'adiabatic_electronic': 0.16579427835652893, 'harmonic_zero_zero': 0.16180165998910115, 'excited_relaxation': 0.0075758173173881005, 'ground_reorganization': 0.017274920522822867, 'stokes_shift': 0.024850737840210968}
+Native paired-minimum gates passed in 244.08 s

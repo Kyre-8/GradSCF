@@ -1,0 +1,25 @@
+{
+  "purpose": "Historical uppercase basis input on a case-sensitive filesystem; unchanged file contents",
+  "files": [
+    {
+      "source": "/home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/molgw-stock/basis/C_aug-cc-pVDZ",
+      "alias": "/home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/methane-basis/C_AUG-CC-PVDZ",
+      "sha256": "b57f5063a5fca226d7f58f4972be47daa47f853fc32cd30218e36a2ab64611fc"
+    },
+    {
+      "source": "/home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/molgw-stock/basis/C_weigend",
+      "alias": "/home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/methane-basis/C_weigend",
+      "sha256": "129c4381a0eeca54fcf4275ddb8d6bec3be44cc7a2ad4617df8af0e59a1ada3e"
+    },
+    {
+      "source": "/home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/molgw-stock/basis/H_aug-cc-pVDZ",
+      "alias": "/home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/methane-basis/H_AUG-CC-PVDZ",
+      "sha256": "0a6e21b554fe4c478351dbe6d97933ae11d0e8e1063b494cca89d83e59ed3cdb"
+    },
+    {
+      "source": "/home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/molgw-stock/basis/H_weigend",
+      "alias": "/home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/methane-basis/H_weigend",
+      "sha256": "d40f080165efebdbb98a8b3f64e2becbc6da0e32f057693288051e525955ed92"
+    }
+  ]
+}

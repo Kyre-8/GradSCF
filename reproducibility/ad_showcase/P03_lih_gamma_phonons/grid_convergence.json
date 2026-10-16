@@ -1,0 +1,145 @@
+{
+  "complete": true,
+  "passed": false,
+  "rows": [
+    {
+      "mesh": 31,
+      "acoustic_modes": [
+        2,
+        1,
+        0
+      ],
+      "optical_modes": [
+        3,
+        4,
+        5
+      ],
+      "translation_weights": [
+        0.9997957031226417,
+        0.9997940747261143,
+        0.9997940747261134,
+        0.00020592527388620934,
+        0.00020592527388605384,
+        0.0002042968773581471
+      ],
+      "translation_weight_gap": 0.9995881494522272,
+      "acoustic_frequencies_signed_cm1": [
+        74.34426022717551,
+        74.35737125212017,
+        74.35737125229915
+      ],
+      "optical_frequencies_signed_cm1": [
+        441.6006875555162,
+        441.6006875555338,
+        441.6239656830716
+      ],
+      "raw_asr_frobenius_hartree_per_bohr2": 0.003035375001706453,
+      "peak_rss_kib": 13990620,
+      "elapsed_seconds": 118.33593712799484
+    },
+    {
+      "mesh": 41,
+      "acoustic_modes": [
+        1,
+        2,
+        0
+      ],
+      "optical_modes": [
+        3,
+        4,
+        5
+      ],
+      "translation_weights": [
+        0.9999994012080498,
+        0.9999994012050801,
+        0.999999401205081,
+        5.987949201652144e-07,
+        5.987949201457254e-07,
+        5.987919508597752e-07
+      ],
+      "translation_weight_gap": 0.9999988024101599,
+      "acoustic_frequencies_signed_cm1": [
+        18.679120741417744,
+        18.679127097168024,
+        18.679127097512367
+      ],
+      "optical_frequencies_signed_cm1": [
+        441.44199182308074,
+        441.4419918230951,
+        441.44199258404234
+      ],
+      "raw_asr_frobenius_hartree_per_bohr2": 0.00018677221313790832,
+      "peak_rss_kib": 28427384,
+      "elapsed_seconds": 171.4602321179991
+    },
+    {
+      "mesh": 51,
+      "acoustic_modes": [
+        2,
+        1,
+        0
+      ],
+      "optical_modes": [
+        3,
+        4,
+        5
+      ],
+      "translation_weights": [
+        0.9999999979217528,
+        0.9999999979217522,
+        0.9999999979217515,
+        2.0782480329749787e-09,
+        2.0782480294691805e-09,
+        2.0782480267279283e-09
+      ],
+      "translation_weight_gap": 0.9999999958435035,
+      "acoustic_frequencies_signed_cm1": [
+        4.758887843735584,
+        4.75888784669959,
+        4.758887847604408
+      ],
+      "optical_frequencies_signed_cm1": [
+        441.4133062571175,
+        441.41330625716773,
+        441.4133062574261
+      ],
+      "raw_asr_frobenius_hartree_per_bohr2": 1.1963171043673805e-05,
+      "peak_rss_kib": 47546468,
+      "elapsed_seconds": 260.95898451900575
+    }
+  ],
+  "metrics": {
+    "last_force_constant_increment_hartree_per_bohr2": 0.00010153971814171048,
+    "last_optical_frequency_increment_cm1": 0.0286863266162527,
+    "final_raw_asr_frobenius_hartree_per_bohr2": 1.1963171043673805e-05,
+    "final_max_absolute_acoustic_frequency_cm1": 4.758887847604408
+  },
+  "gates": {
+    "last_force_constant_increment_hartree_per_bohr2": 2e-06,
+    "last_optical_frequency_increment_cm1": 1.0,
+    "final_raw_asr_frobenius_hartree_per_bohr2": 1e-06,
+    "final_max_absolute_acoustic_frequency_cm1": 1.0
+  },
+  "checks": {
+    "last_force_constant_increment_hartree_per_bohr2": false,
+    "last_optical_frequency_increment_cm1": true,
+    "final_raw_asr_frobenius_hartree_per_bohr2": false,
+    "final_max_absolute_acoustic_frequency_cm1": false
+  },
+  "input_sha256": {
+    "pbe_szv_k2_fft31": {
+      "json": "6356e9e23e6df18c019fba1c8dcaa9aa240ee6a1fa5c714e3903086012f7e571",
+      "npz": "d281690375f678e12768a34796f9ac9b60c093e9162f18c7238c24af5e75495d"
+    },
+    "pbe_szv_k2_fft41": {
+      "json": "f55dfd89de1c27e0efd75c0f1229da6e35f7f60ee22f8ad652f1d13926627f87",
+      "npz": "e3e8d81b0eae0b3b70f138bb3bfac80c22facd37e69803b17c10858298b383b0"
+    },
+    "pbe_szv_k2_fft51": {
+      "json": "93e686884039e73504c2281cb678abbd068779b316f29c27819d74573bbeb800",
+      "npz": "f00a504fdcaa7d61c647d6cb53efe8602314437d5c8cb2e4c94b5cd1f7c37fa1"
+    }
+  },
+  "script_sha256": "9e539b9162587e051a548da15308961b718664ba275cc9c5e7a106080ed19995",
+  "scope": "Fixed a=7.780032276700287 bohr, PBE/GTH-Pade/SZV, k2^3. Raw Gamma FFT convergence only; no ASR, k/basis convergence, finite-q or LO-TO claim."
+}

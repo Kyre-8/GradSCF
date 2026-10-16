@@ -1,0 +1,3 @@
+LiH reference -8.007241003231696 gap 0.1501316628175538 minimum Berry singular value 0.7452620265424114
+Born direction 1 0 {'atom': 1, 'axis': 0, 'charge_e': [-0.9547108119254769, -1.3146656528489908e-08, -1.3146656259909735e-08], 'ionic_charge_e': [1.0, 0.0, 0.0], 'linear_residual': 2.8167648960034993e-14, 'converged': True, 'seconds': 56.1326527770143}
+LiH Born completed 91.26729483099189 seconds; peak RSS 4873836 KiB

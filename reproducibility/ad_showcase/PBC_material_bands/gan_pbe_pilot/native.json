@@ -1,0 +1,29 @@
+{
+  "complete": false,
+  "passed": false,
+  "material": "gan",
+  "method": "pbe",
+  "settings": {
+    "basis": "gth-dzvp-molopt-sr",
+    "pseudo": "gth-pbe",
+    "mesh": [
+      41,
+      41,
+      65
+    ],
+    "kmesh": [
+      2,
+      2,
+      2
+    ],
+    "temperature": null,
+    "vacuum": 20.0,
+    "path_points": 121,
+    "chunk_size": 2
+  },
+  "discretization_converged": false,
+  "stage": "scf",
+  "scf_converged": true,
+  "energy_hartree": -169.08000762643692,
+  "scf_seconds": 176.1366169060002
+}

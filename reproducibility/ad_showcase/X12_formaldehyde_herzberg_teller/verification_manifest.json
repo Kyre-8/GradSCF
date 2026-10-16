@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "source_unchanged": true,
+  "tests": "16 passed in 13.55s (8 existing FC plus 8 HT)",
+  "molecular": "Complete; input hash/phase/unit, molecular rigid/mode-gauge covariance, scalar/tensor/coordinate closure, raw cutoff, positive-photon and component decomposition gates passed.",
+  "remote_raw_artifact": {
+    "path": "/home/yjiao/gradscf_checks/ad-showcase-x12-20261016/reproducibility/ad_showcase/X12_formaldehyde_herzberg_teller/herzberg_teller_lines.npz",
+    "bytes": 75557041,
+    "sha256": "81aa93fc1b0045e2fad80d19f8df11cc2968ab25e0ba2471ce8a6295e7bdb9cf",
+    "local_bundle": "Not copied into the compact local bundle. The photon energy and four oscillator-strength arrays share the hash-bound X11 state ordering."
+  },
+  "curated_artifacts": {
+    "gradscf.json": "cbf73084393be2fae4904787347eaae80089f7b04fa05c8918584ed11e35868d",
+    "herzberg_teller_activation.pdf": "a0935b0bbee60d938e45f0344824b471af9157bc48d687e202637412fcc93928",
+    "herzberg_teller_activation.png": "b8bb408027115d82943319c3095c7eb49d5f10e8ba68b36c0483041b96e07e4b",
+    "plot_settings.json": "fde374c2cc56ee68a40f94e9528109595d092d8dd0265d391969572f884c9a04",
+    "source_manifest.json": "fa90ea2f6c2fbd6e238cc32922f56f0159e00ac617f609b075dd4ec255debea1",
+    "spectrum.csv": "c21aeda2738ce1b4a4160bd514318fef9f78252d99c2e29a48e64bc793347f5d",
+    "x12-formaldehyde.log": "da2625dd452defc445fb3583c9f16f1c5b23a368b42395467e851fa7d7a93726",
+    "x12-ht-green.log": "57c702aa2215d478021d787b39a2113415c24b8c78850889fa8ce220192259e2",
+    "x12-ht-red.log": "1d80275556bdde97164c9cc576385ed0e530b7d8ca8a15ececfe80220c4e86fb",
+    "x12-plot.log": "9320e02045dc8558cf6e088c99ad37fb71e94449eb31b07136cb29901533ec65"
+  }
+}

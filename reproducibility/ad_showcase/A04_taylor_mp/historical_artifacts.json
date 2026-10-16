@@ -1,0 +1,14 @@
+{
+  "evidence_kind": "Previously recorded 2026-10-10 report/figures, not a successful current MP30 rerun.",
+  "packaging_commit": "1242c9346ab0ddc9fc6bc741efa2b0d3fc32ccf1",
+  "original_runtime_source_hash": "not recorded in the available report",
+  "original_raw_json_and_logs": "not present in this local worktree; do not imply archived raw data",
+  "files": {
+    "examples/mp/CONVERGENCE.md": "dafa60d07b40a5a25c07e6cf3cd41627120c07c333af9cf61c8078be9a460432",
+    "examples/mp/he2_convergence.png": "b0c995245fab732d8d9dae9b66b946eae16b0e652b762431be92550fbdc05e15",
+    "examples/mp/he2_convergence.pdf": "9624b33e6963d31c55621774402ee4a2b654dc5f3d61033f18d63ddd6ecfe8cc",
+    "examples/mp/ne_f_convergence.png": "ae4de74a9fa5971f58597f531a36cfeaf3eec4522bbe55db645adde925435b15",
+    "examples/mp/ne_f_convergence.pdf": "99170a6fbe2fdf291e5591780f048f2ca94ea225da1f663bb79511599f5d322d",
+    "examples/mp/convergence_literature.json": "5295f7203e31d6e8f82588f995d1c840cbe944543df84e2728f7ea9259f289f5"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "source_unchanged": true,
+  "source_python_sha256": "ca37f375d0e4cc673d1ca2e5b50f189b9047ad8bce56e00f7f397156fac3e43f",
+  "hostname": "c20",
+  "status": "passed",
+  "executed_script_hashes": {
+    "examples/basis/optimize_exponents.py": "8b63bfab3d01ce16ca6ab8c88e58592254cd844ad362a69f950b8daaa07f3443",
+    "examples/basis/compare_exponents_pyscf.py": "611d73eb1c0f5e90f8d40163c007088b8f0d8d228951b9537889f477c5ac48ff",
+    "examples/basis/plot_exponents.py": "63e9d6eaf43d8679362330a48a3d095e4e653596ad37a031529e767b0b8f06c8"
+  },
+  "artifacts": {
+    "A05_native.log": "2794d9b4b632efd2da4300dfceab4e67c5702e9f974335c39c484af6da2c415d",
+    "A05_pyscf.log": "04e0e1ce89500269a98730a5414ac5b5feddcbc1187a70eba1f5169a5f0e19e5",
+    "bounded_exponents.pdf": "81f70f2ad9bdb23f2875e3d5363a9cd008b09064dce21a091497378d31a7c923",
+    "bounded_exponents.png": "a45e3d0d3603a79afb9d31d39752bbd7b87a7a742d0f8b07570984d6ac477141",
+    "gradscf.json": "8638edd4b6946a19165b6d0e84eb33d9a8934db3400488e74e20ebd5d36bf162",
+    "pyscf.json": "7db29deac8a0e53e7024e592656f31519e04954b2b8a8852070410f51191fc26",
+    "source_manifest.json": "91a0b5092e40e236b34ffaae239cf74964d21c3f3665f59bcb1f06645a309f38"
+  }
+}

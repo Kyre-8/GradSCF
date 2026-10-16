@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "checks": [
+    "interrupted_fd_is_incomplete",
+    "folding_probe_is_immutable",
+    "completed_plus_endpoint_is_reused",
+    "altered_density_cache_is_rejected"
+  ],
+  "scope": "Synthetic I/O state-machine regression only; no physics or reference result is fabricated.",
+  "compare_script_sha256": "a19e88607d0e757bd2ff6c3ca8e5e5e3336d642d892fe1a09b7866c1b195833d",
+  "test_script_sha256": "7cc7da63c41908e8729d9b5e16cc9d5c5d089f1141be37f1f7fc45d2a84f84e0"
+}

@@ -1,0 +1,53 @@
+{
+  "settings": {
+    "a_bohr": 7.6,
+    "xc": "pbe",
+    "basis": "gth-dzvp-molopt-sr",
+    "pseudo": "gth-pade",
+    "mesh": [
+      31,
+      31,
+      31
+    ],
+    "kmesh": [
+      2,
+      2,
+      2
+    ],
+    "precision": 1e-10,
+    "displacement_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.025,
+        -0.015,
+        0.01
+      ]
+    ]
+  },
+  "scf_converged": true,
+  "scf_cycles": 13,
+  "sampled_indirect_gap_hartree": 0.07886487458146363,
+  "mo_fock_occupied_virtual_norm": 4.216109077388766e-14,
+  "minimum_overlap_eigenvalue": 0.0001778605247148346,
+  "nao": 11,
+  "energy_hartree": -8.0422234261093,
+  "elapsed_seconds": 28.46673572799773,
+  "peak_rss_kib": 2897892,
+  "scope": "Forward SCF only; this does not validate full force/stress memory or accuracy.",
+  "explicit_nelectron": 4,
+  "pseudopotential_valence_charges": [
+    3,
+    1
+  ],
+  "electron_number": 4.000000000000002,
+  "occupied_orbitals": 2,
+  "occupation_values": [
+    0.0,
+    2.0
+  ],
+  "accepted_forward": true
+}

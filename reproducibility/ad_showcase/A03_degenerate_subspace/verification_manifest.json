@@ -1,0 +1,18 @@
+{
+  "source_unchanged": true,
+  "source_python_sha256": "ca37f375d0e4cc673d1ca2e5b50f189b9047ad8bce56e00f7f397156fac3e43f",
+  "hostname": "c20",
+  "status": "passed",
+  "executed_script_hashes": {
+    "examples/solvers/degenerate_subspace.py": "a454d8dc81975f39acce583f503098c4e8e3f7bfed3effa15c41d439ec5a8100",
+    "examples/solvers/plot_degenerate_subspace.py": "065b697962becbcda19917c79abfa9cda9ba085cddad8877572d1e505f1ab195"
+  },
+  "artifacts": {
+    "A03_native.log": "b18eeae9300153e850f8eaeba29db14704118438dbdc015422612bf57b7ac379",
+    "A03_plot_final.log": "216c8909e8142a797dbe155fa576874dd8a72e1c40cbede33a33caa05d0b84ee",
+    "crossing_response.pdf": "4ee6edb755622610dc41e96204f8184e071499d5cb65cc6c6f8d7b3a478328e4",
+    "crossing_response.png": "4120b6bc2854c4da4bd9fca7260d9dd4749c2c65cb66d35422450dd961dbca50",
+    "results.json": "0b6b890a57bbbeee18aae574e576c01be0d85cc907c1133f8fb3d7a89604eea3",
+    "source_manifest.json": "91a0b5092e40e236b34ffaae239cf74964d21c3f3665f59bcb1f06645a309f38"
+  }
+}

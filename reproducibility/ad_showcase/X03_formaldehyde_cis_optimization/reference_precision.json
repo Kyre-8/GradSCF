@@ -1,0 +1,163 @@
+{
+  "scope": "Fixed native result, geometry, basis and curvature step; only independent reference numerical controls vary.",
+  "cases": [
+    {
+      "label": "original",
+      "scf_gradient_tolerance": 1e-10,
+      "cphf_tolerance": 1e-10,
+      "krylov_lindep": 1e-13,
+      "derivative_jk": "standard",
+      "passed": false,
+      "errors": {
+        "ground_energy_hartree": 8.526512829121202e-14,
+        "excitation_hartree": 1.2933265569614605e-11,
+        "total_energy_hartree": 1.2846612662542611e-11,
+        "gradient_hartree_per_bohr": 6.507918370174393e-08,
+        "chart_curvature_hartree_per_bohr2": 2.033653355379872e-05
+      },
+      "raw_curvature_asymmetry": 2.2388607819529005e-05
+    },
+    {
+      "label": "tighter_cphf",
+      "scf_gradient_tolerance": 1e-10,
+      "cphf_tolerance": 1e-12,
+      "krylov_lindep": 1e-13,
+      "derivative_jk": "standard",
+      "passed": false,
+      "errors": {
+        "ground_energy_hartree": 2.842170943040401e-14,
+        "excitation_hartree": 1.2931211657019048e-11,
+        "total_energy_hartree": 1.2960299500264227e-11,
+        "gradient_hartree_per_bohr": 6.507917481995973e-08,
+        "chart_curvature_hartree_per_bohr2": 2.0336528927869524e-05
+      },
+      "raw_curvature_asymmetry": 2.2388613370644128e-05
+    },
+    {
+      "label": "tighter_scf",
+      "scf_gradient_tolerance": 1e-12,
+      "cphf_tolerance": 1e-12,
+      "krylov_lindep": 1e-13,
+      "derivative_jk": "standard",
+      "passed": false,
+      "errors": {
+        "ground_energy_hartree": 2.842170943040401e-14,
+        "excitation_hartree": 1.017519402068956e-13,
+        "total_energy_hartree": 7.105427357601002e-14,
+        "gradient_hartree_per_bohr": 6.508095384133439e-08,
+        "chart_curvature_hartree_per_bohr2": 2.0320660695215655e-05
+      },
+      "raw_curvature_asymmetry": 2.236832959597035e-05
+    },
+    {
+      "label": "generic_derivative_jk",
+      "scf_gradient_tolerance": 1e-12,
+      "cphf_tolerance": 1e-12,
+      "krylov_lindep": 1e-13,
+      "derivative_jk": "generic without prescreen optimizer",
+      "passed": false,
+      "errors": {
+        "ground_energy_hartree": 1.4210854715202004e-13,
+        "excitation_hartree": 1.1013412404281553e-13,
+        "total_energy_hartree": 2.842170943040401e-14,
+        "gradient_hartree_per_bohr": 6.508094051865809e-08,
+        "chart_curvature_hartree_per_bohr2": 2.0320662915661704e-05
+      },
+      "raw_curvature_asymmetry": 2.2368327745603267e-05
+    },
+    {
+      "label": "matched_krylov_cutoff",
+      "scf_gradient_tolerance": 1e-12,
+      "cphf_tolerance": 1e-13,
+      "krylov_lindep": 1e-26,
+      "derivative_jk": "standard",
+      "passed": true,
+      "errors": {
+        "ground_energy_hartree": 1.7053025658242404e-13,
+        "excitation_hartree": 1.1535217225855376e-13,
+        "total_energy_hartree": 5.684341886080802e-14,
+        "gradient_hartree_per_bohr": 3.8114650324772015e-13,
+        "chart_curvature_hartree_per_bohr2": 7.942315789419285e-10
+      },
+      "raw_curvature_asymmetry": 2.4976687384992147e-08
+    }
+  ],
+  "single_point_cutoff_diagnostic": [
+    {
+      "lindep": 1e-13,
+      "records": [
+        {
+          "max_cycle": 100,
+          "tol": 1e-12,
+          "rhs_norm": 0.6856037792151568,
+          "residual_norm": 2.1109928183290323e-06,
+          "max_residual": 5.480840131431852e-07
+        }
+      ],
+      "max_gradient_error": 6.508094940044229e-08,
+      "gradient": [
+        [
+          5.5301612289504476e-08,
+          3.2656338522230044e-08,
+          5.378753531459779e-08
+        ],
+        [
+          -3.6361611638335845e-08,
+          -4.737026858964155e-08,
+          -8.37923792573747e-08
+        ],
+        [
+          -1.0192182511165049e-08,
+          1.9892072655736115e-08,
+          -1.511164926526476e-08
+        ],
+        [
+          -8.747818913690253e-09,
+          -5.178143691608739e-09,
+          4.5116487878971157e-08
+        ]
+      ],
+      "krylov_callback_counts": [
+        9
+      ]
+    },
+    {
+      "lindep": 1e-20,
+      "records": [
+        {
+          "max_cycle": 100,
+          "tol": 1e-12,
+          "rhs_norm": 0.6856037792151474,
+          "residual_norm": 6.174670981305429e-09,
+          "max_residual": 2.3378079472280433e-09
+        }
+      ],
+      "max_gradient_error": 6.640122479639743e-11,
+      "gradient": [
+        [
+          -4.5896846323500995e-09,
+          1.764327528519516e-08,
+          -1.1359815310640897e-08
+        ],
+        [
+          1.6435386607227542e-08,
+          -3.413013134612175e-08,
+          -4.598399350186355e-08
+        ],
+        [
+          -6.387543202701629e-10,
+          -3.1059854688209043e-09,
+          -1.440042529665675e-09
+        ],
+        [
+          -1.120694781420184e-08,
+          1.959283846275639e-08,
+          5.878382447477293e-08
+        ]
+      ],
+      "krylov_callback_counts": [
+        13
+      ]
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "lifted": [
+    {
+      "dtype": "float64",
+      "shape": [
+        2,
+        1,
+        2
+      ],
+      "type": "DynamicJaxprTracer"
+    },
+    {
+      "dtype": "float64",
+      "shape": [
+        1,
+        2
+      ],
+      "type": "DynamicJaxprTracer"
+    },
+    {
+      "dtype": "float64",
+      "shape": [
+        2,
+        3,
+        3
+      ],
+      "type": "DynamicJaxprTracer"
+    },
+    {
+      "dtype": "float64",
+      "shape": [
+        2,
+        2
+      ],
+      "type": "DynamicJaxprTracer"
+    },
+    {
+      "dtype": "float64",
+      "shape": [
+        2,
+        2
+      ],
+      "type": "DynamicJaxprTracer"
+    },
+    {
+      "dtype": "float64",
+      "shape": [
+        2,
+        1,
+        1
+      ],
+      "type": "DynamicJaxprTracer"
+    }
+  ],
+  "retained_tracers": [
+    {
+      "path": "closure_consts[0]",
+      "type": "DynamicJaxprTracer",
+      "dtype": "int64",
+      "shape": [
+        2
+      ]
+    },
+    {
+      "path": "closure_consts[1]",
+      "type": "DynamicJaxprTracer",
+      "dtype": "bool",
+      "shape": []
+    }
+  ]
+}

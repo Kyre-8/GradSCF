@@ -1,0 +1,3 @@
+S1: f=1.84732875e-31, leading NTO weight=0.997578885, centroid separation=0.885041987 Bohr
+S4: f=0.324693186, leading NTO weight=0.732594908, centroid separation=0.888249644 Bohr
+Native X05 normalization/reconstruction gates passed in 1.53 s

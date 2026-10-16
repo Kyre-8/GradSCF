@@ -1,0 +1,29 @@
+{
+  "planar_reference": {
+    "co_angstrom": 1.2099999999611282,
+    "ch_angstrom": [
+      1.099999999964662,
+      1.099999999964662
+    ],
+    "hch_angle_degrees": 116.00000000000001,
+    "co_angle_to_chh_plane_degrees": 0.0
+  },
+  "distorted_start": {
+    "co_angstrom": 1.2099999999611282,
+    "ch_angstrom": [
+      1.099999999964662,
+      1.1028602094709854
+    ],
+    "hch_angle_degrees": 115.92754839741319,
+    "co_angle_to_chh_plane_degrees": 3.8915390707073305
+  },
+  "optimized": {
+    "co_angstrom": 1.2552889176636317,
+    "ch_angstrom": [
+      1.085358774416839,
+      1.0853587434413925
+    ],
+    "hch_angle_degrees": 118.2835417951386,
+    "co_angle_to_chh_plane_degrees": 24.817630606557465
+  }
+}

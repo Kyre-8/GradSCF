@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/pbc/test_raman_checkpoint.py"
+  ],
+  "return_code": 1,
+  "peak_rss_kib": 190200,
+  "budget_kib": 8388608,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": false,
+  "elapsed_seconds": 2.002665762000106
+}

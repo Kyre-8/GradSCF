@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "scope": "Local AST/text/hash check only; no numerical calculation. Trailing comments quote measured remote logs.",
+  "scripts": {
+    "lih_gamma_phonons.py": {
+      "executed_source": "verification/source_linear/lih_gamma_phonons.py",
+      "executed_sha256": "52753c5e997b4b221e8004f48b9ed3218aaa744d4f11ffa13fa0f13a5741fa44",
+      "public_sha256": "4bbeefd248737b31e6c074f1b54dcbf3e44c880e4cef75646cba3110105cb99b",
+      "parsed_code_unchanged": true,
+      "measured_output_source": "verification/linear_jobs/gamma-gmres-fft71/job.log"
+    },
+    "compare_lih_gamma_phonons.py": {
+      "executed_source": "verification/source_fft31/compare_lih_gamma_phonons.py",
+      "executed_sha256": "cafbb74086c289b36315cc24e4ba7f1e7a484e9d8447f96eaa2ed41f4fc46178",
+      "public_sha256": "7fd8455d92cd75e87f0cfc407801b81c5f5ab707b6326275b55a983250d41585",
+      "parsed_code_unchanged": true,
+      "measured_output_source": "verification/fft31_jobs/pyscf-gradient-fd/job.log"
+    },
+    "lih_gamma_rotation.py": {
+      "executed_source": "verification/source_fft31/lih_gamma_rotation.py",
+      "executed_sha256": "4ea0d723ccd21f33ae05f605cf65b5d74c5c962af39402c35a7467263deee9bc",
+      "public_sha256": "3332c3aaf0d3dfc5ba1a3974918aacffda34515189e87ee4160f017d2ce4e0be",
+      "parsed_code_unchanged": true,
+      "measured_output_source": "verification/fft31_jobs/rotation-covariance/job.log"
+    },
+    "compare_lih_gamma_grids.py": {
+      "executed_source": "verification/source_linear/compare_lih_gamma_grids.py",
+      "executed_sha256": "4042b31210d35939057a14404ea461e03e558a0a74102428e5febc2014360f3f",
+      "public_sha256": "2cfdecde2e708f2931a02e4d6b5145b0fca15bc4096988de71ece1c499e9be70",
+      "parsed_code_unchanged": true,
+      "measured_output_source": "verification/linear_jobs/grid-extension-to71-gates/job.log"
+    },
+    "compare_lih_gamma_solvers.py": {
+      "executed_source": "verification/source_linear/compare_lih_gamma_solvers.py",
+      "executed_sha256": "7174bd482734e0bf1d62445651e335b7dee9c5a2e0d86b7aaaf81360619afa59",
+      "public_sha256": "8f4d701b459bc7b2b67838dfd49b85980e488f15024e431eb34feca1249d6812",
+      "parsed_code_unchanged": true,
+      "measured_output_source": "verification/linear_jobs/linear-method-gates/job.log"
+    },
+    "plot_lih_gamma_phonons.py": {
+      "executed_source": "verification/source_linear/plot_lih_gamma_phonons.py",
+      "executed_sha256": "a4592f9c23911f6bf2965f4a55708998d1ee5b7cb3a26348516adb22a18ceebb",
+      "public_sha256": "3bbf248f4e9cadce2b3e7d0820862324dac3b1ef82a817214aa6f5fa9464bf23",
+      "parsed_code_unchanged": true,
+      "measured_output_source": "verification/linear_jobs/final-gamma-figures/job.log"
+    }
+  }
+}

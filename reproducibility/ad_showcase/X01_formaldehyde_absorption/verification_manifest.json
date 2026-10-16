@@ -1,0 +1,28 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-wb97-x01-20261015",
+  "source_python_sha256": "7521426cab6bc5bf9806d7256a2839f9c24ed62f9d63d7ed20af9ef6c2dd6093",
+  "native_library_sha256": {
+    "src/gradscf/integrals/_native/lib/libgradscf_integrals.so": "e02844ce6c1b5eebc2dc00a6eec5f1803fd33ad4150aa82e9858d5c0890b9904"
+  },
+  "cases": 10,
+  "transitions": 60,
+  "independent_reference_passed": true,
+  "baseline_files_verified": 16,
+  "baseline_source_python_sha256": "53c09a10b44229dea9be673f1754cf7de3bc1b59c5986ec9066b9bf60460acd0",
+  "result_files_sha256": {
+    "README.md": "2a5077e3071adb1abfb48c584cee49ab59eb448bfba43ac213f30c9f6abd4065",
+    "absorption_comparison.pdf": "332a7be3b013bcabed74c56274167d258d4965c742833e07a5524342926c99d1",
+    "absorption_comparison.png": "ac1993d817b5eae971f71c4c2b8acbd4f242cc4a0f8ca43ca157851c5e53c93f",
+    "broadened.csv": "44dd6bbc04b06eb9a0f39a195f8f0d7f1668aa0113804ebea374d63839d45cfb",
+    "comparison.csv": "bbe34a6349b129f7cbcc23b7fee476ba8e41fdeb60eb8aa353272ecacbca1e38",
+    "gradscf.json": "bdb49fba8ae105b890c2ab718c9c8c010137d678b9a48ac53c5ea6288fcdb078",
+    "plot_settings.json": "36d470e51bae39f93f6bdeb4a381b7f94dcf84aff7662c520c1d99991d1b5f89",
+    "pyscf.json": "0763c42a28c7ea5902aeb2e45bba18e6f5c46689a34c37aa83ed55b29c9303d7",
+    "pyscf_b3lyp_ab.npz": "b2ff186118557233fabd684da5f01222dbc23f4efbbcb9dbfc6ffc8ff57efcae",
+    "pyscf_hf_ab.npz": "dc850eab9dd424157dac564f871604fa1c4b668887001780335f41967bb1438e",
+    "pyscf_pbe0_ab.npz": "ec42c0bfe6e4afef451a3f3d559df4443aa8521a4a3d983287f3f3d3db9ae63a",
+    "pyscf_pbe_ab.npz": "c12527e75f2ea9f952fea07af9cd913931aa621d1040d65b3a1a3e5f6294901a",
+    "pyscf_wb97xd_ab.npz": "ce43327ae930f6d177a70e6774856b578f3cfcd14333e6da30be3418ba5d2710",
+    "sticks.csv": "cee2067823834ead6c2f62c888ba731d916f6b6e2542ad84e7e75cc3af96ca4c"
+  }
+}

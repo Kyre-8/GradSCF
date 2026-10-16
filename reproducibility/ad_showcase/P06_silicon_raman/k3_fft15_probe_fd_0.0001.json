@@ -1,0 +1,71 @@
+{
+  "complete": true,
+  "validation_passed": true,
+  "endpoints": [
+    {
+      "q_sqrt_me_bohr": 0.03199897954044612,
+      "chi_column": [
+        0.006685951665860968,
+        0.42240368050808114,
+        0.006732254180301625
+      ],
+      "linear_residual": 1.226929668973753e-11,
+      "energy_hartree": -7.788284867559329,
+      "gap_hartree": 0.07795855091222892,
+      "minimum_link": 0.5960262628961004,
+      "maximum_phase_change": 3.9968028886505635e-15
+    },
+    {
+      "q_sqrt_me_bohr": -0.03199897954044612,
+      "chi_column": [
+        0.006774605354134164,
+        0.4224035356067015,
+        0.006728302852732248
+      ],
+      "linear_residual": 1.8808510304779702e-11,
+      "energy_hartree": -7.788284847066296,
+      "gap_hartree": 0.07795515390912502,
+      "minimum_link": 0.5960262765711517,
+      "maximum_phase_change": 3.9968028886505635e-15
+    }
+  ],
+  "maximum_displacement_bohr": 0.0001,
+  "q_step_sqrt_me_bohr": 0.03199897954044612,
+  "comparison_source": "single-column probe",
+  "finite_difference": [
+    -0.0013852580542629458,
+    2.264156259016947e-06,
+    6.174146216729976e-05
+  ],
+  "absolute_error": [
+    4.2081737833959965e-11,
+    1.2574821123140516e-13,
+    1.7555796172265964e-11
+  ],
+  "gate": "abs(error) < 2e-8 + 5e-4*abs(AD dchi/dQ)",
+  "settings": {
+    "a_angstrom": 5.43,
+    "mesh": [
+      15,
+      15,
+      15
+    ],
+    "kmesh": [
+      3,
+      3,
+      3
+    ],
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "xc": "pbe",
+    "precision": 1e-10
+  },
+  "elapsed_seconds": 427.7052839599992,
+  "peak_rss_kib": 12133704,
+  "source_sha256": {
+    "src/gradscf/dfpt/electric.py": "c1f42df314bc6a646b975b0f44e6188097884b8095f86f30017f5fcd25cd2c1d",
+    "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+    "examples/pbc/silicon_raman.py": "4157e35f94bd6428396dd100b3ecd21afba0934621cdcb599e07e7005012220c",
+    "examples/pbc/check_silicon_raman.py": "762e5101e40b24b8e99e3cd7420952bb07870a1efae2baf5d5e23a5dfb33f3db"
+  }
+}
