@@ -23,17 +23,19 @@ listed below. Remote publication is a separate action.
 finite-model checks and figures. Material/basis/grid convergence and exhaustive
 method combinations are follow-up benchmarks, rather than prerequisites for
 every example. The matched Si PBE/PBE0 band pair and selected Si GW points
-are now present. Al125 native AD completed remotely, while its independent
-reference and combined third-size plot remain pending. A usable periodic BSE
-spectrum remains missing. Scientific limitations stay visible in each record.
+are now present. Al125 native AD and its independent
+reference are now packaged with the three-size summary plot. Small 3D, wire
+and layer BSE spectra and direct H2/Si GW segments are now packaged; full
+q-cell corrections and periodic BSE AD remain open. Scientific limitations
+stay visible in each record.
 
 **Workspace organization:** runnable examples, selected results and local
 development evidence now have separate locations. Executed-source copies and
 raw job records are under `artifacts/ad_showcase/provenance/`; earlier local
 diagnostics are under `artifacts/ad_showcase/development/`. The relocation map
-preserves original paths and hashes. The two unrun periodic BSE examples are
-development drafts: the screened two-k physical test has an unresolved
-Hermiticity failure, so no periodic BSE spectrum is counted as validated.
+preserves original paths and hashes. The earlier periodic BSE drafts remain archived. The current SRC body
+module now passes the corrected full-channel static-screening checks and has
+a runnable H2 spectrum; source and raw execution records have separate locations.
 
 All numerical tests, calculations, benchmarks and plotting for this project
 run on **`jy_gpu_1`**, using bounded jobs and an isolated source snapshot.
@@ -118,7 +120,7 @@ forward solver do not establish a complete nuclear-coordinate response.
 | P05 | [Gamma IR](pbc/lih_infrared.py); [polar bands](pbc/lih_polar_bands.py); [material results](../reproducibility/ad_showcase/P05_lih_polar_bands/README.md); [independent Phonopy](pbc/compare_lih_polar_phonopy.py) | **Finite-model polar-spectrum demonstration available**: matched Born/dielectric and coarse-q IFC data give IR, LO–TO limits and polar bands; analytic and independent Phonopy checks pass. No ASR or charge projection. | Coarse-grid polar decomposition remains width-sensitive, so the figure illustrates the finite model rather than a converged material prediction. Further parameter/q-grid scans are optional follow-up work. |
 | P06 | [Si Raman tensor](pbc/silicon_raman_tensor.py); [response checks](pbc/check_silicon_raman.py); [results](../reproducibility/ad_showcase/P06_silicon_raman/README.md) | **Finite-model mixed-response demonstration available**: Gamma/k2 full tensors, gauge/zero/translation checks and two independent cold-SCF differences are archived. k4/FFT25 single-column response also passes its true residual gates. | Raw forbidden components remain visible; k4/FFT25 zy/xy is about 6.73%. This does not establish a converged Raman selection rule. Finer-grid/FD attempts reached the 32 GiB budget and are not repeated for the showcase. |
 | P07 | [Strain example/results](../reproducibility/ad_showcase/P07_periodic_strain/README.md); [positive-temperature example](pbc/h2_temperature_response.py); [thermal results](../reproducibility/ad_showcase/P07_periodic_temperature/README.md); [graphite workflow](thermally_excited_graphite/README.md) | **partial; local strain, thermal and XC-parameter gates passed**: H2 Gamma/FFT9 energy/free-energy Hessians agree with projector DFPT; both log-volume and positive-kBT curvature/mode derivatives pass three-step rebuilt differences. The thermal path checks fixed N and F_theta=-S/kB. No new core solver was needed. | The coarse/unoptimized model has three negative raw curvatures. The [external XC parameter example](../reproducibility/ad_showcase/P07_periodic_xc/README.md) now passes independent FFT41 energy/Hessian/mixed-response gates, with failed FFT9/31 retained. Converged material sensitivities remain; volume and electronic temperature are separate paths, with no thermal-expansion or anharmonic claim. Use complete subspace invariants at degeneracy. |
-| P08 | [Parameter response](ofdft/parameter_density_response.py); [large-system response](ofdft/large_system_response.py); [large-system results](../reproducibility/ad_showcase/P08_ofdft_parameter_response/large_system_scaling/README.md) | **validated-component**: the original manufactured TF/vW fixed-N response and independent KKT/Taylor gates pass. Material Al1/Al27 WGC forward/JVP/VJP/HVP and DFTpy-optimizer + NumPy-WGC reference checks are archived on a common GPU6 protocol. | Al125 is the single additional size in the compact scope. Two sizes alone do not establish asymptotic scaling; the KS comparison does not isolate a KEDF-only physical error. Al343 is optional. |
+| P08 | [Parameter response](ofdft/parameter_density_response.py); [large-system response](ofdft/large_system_response.py); [large-system results](../reproducibility/ad_showcase/P08_ofdft_parameter_response/large_system_scaling/README.md) | **validated-component**: the original manufactured TF/vW fixed-N response and independent KKT/Taylor gates pass. Material Al1/Al27/Al125 WGC forward/JVP/VJP/HVP and DFTpy-optimizer + NumPy-WGC reference checks are archived on a common GPU6 protocol, with three-size figures. | Three sizes do not establish asymptotic scaling; the KS comparison does not isolate a KEDF-only physical error. Al343 is optional. |
 
 ## AD demonstrations and cross-links
 
@@ -126,7 +128,7 @@ forward solver do not establish a complete nuclear-coordinate response.
 | --- | --- | --- | --- |
 | A01 | [Explicit/implicit molecular response](response/explicit_implicit_response.py); [results and timings](../reproducibility/ad_showcase/A01_explicit_implicit/README.md) | **validated-component**: H2/6-31G HF and PBE energy/dipole, eight fresh processes, same seed/controls and nine nonzero iterations each; mode derivative parity ≤1.26e-16 and independent multistep FD ≤8.10e-10 at the smallest step. Forward, VJP preparation and retained pullback are timed separately. | Frozen v7 CPU source; RSS is process high-water, not backward-only allocation. Small shared-node timings do not establish universal speedups or later-core performance. |
 | A02 | [Molecular JVP/VJP/HVP](response/molecular_ad_products.py); [scaled matrices and independent checks](../reproducibility/ad_showcase/A02_molecular_products/README.md) | **validated-component**: water RHF/Cartesian 6-31G*, energy/dipole in 12 scaled coordinate/field variables; dense/adjoint errors ≤1.22e-14, native multistep FD and independent PySCF Jacobian/four-energy HVP passed. | H is d²(E/Eh)/dtheta², not an unscaled Cartesian Hessian; fixed nonminimum geometry, no vibrational-frequency or third-nuclear-derivative claim. |
-| A03 | [Degenerate projector crossing](solvers/degenerate_subspace.py); [figure and diagnostics](../reproducibility/ad_showcase/A03_degenerate_subspace/README.md) | **validated-component**: the original crossing and new [high-dimensional/benzene backward capsule](../reproducibility/ad_showcase/A03_degenerate_vjp/README.md) pass. n=256/1024/4096 complete-subspace VJPs agree with analytic references. Ordinary eigh AD on the same smooth projector loss gives NaN at exact degeneracy; shared implicit remains finite. Native benzene/Cartesian 6-31G*, 1701 singles, complete bright-doublet VJP passes independent PySCF FD (final error 7.91e-9). | Benzene is fixed-reference CIS response to AO source potentials, without HF/geometry relaxation. Actual loss-dependent adjoint residuals/counts are not exposed; no automatic Davidson speed/memory advantage is claimed. Cut clusters and sorted crossing roots remain undefined. |
+| A03 | [Degenerate projector crossing](solvers/degenerate_subspace.py); [figure and diagnostics](../reproducibility/ad_showcase/A03_degenerate_subspace/README.md) | **validated-component**: the original crossing and [high-dimensional/benzene backward capsule](../reproducibility/ad_showcase/A03_degenerate_vjp/README.md) pass. n=256/1024/4096 complete-subspace VJPs agree with analytic references. Ordinary eigh AD on the same smooth projector loss gives NaN at exact degeneracy; shared implicit remains finite. Native benzene/6-31G*, 1701 singles, fixed-reference bright-doublet VJP passes independent PySCF FD. The new [CH4 geometry example](solvers/ch4_cis_cluster.py) adds complete HF/AO/integral/dipole relaxation, a 15-coordinate VJP and two independent geometry differences; its [frame check and figure](../reproducibility/ad_showcase/A03_ch4_cluster_geometry/README.md) pass. | Actual loss-dependent adjoint residuals/counts are not exposed; no automatic Davidson speed/memory advantage is claimed. CH4's random MO frame requires full 90-vector forward capacity at the unchanged Ritz gate; capacities 32/64 are retained failures. Cut clusters and sorted crossing roots remain undefined. |
 | A04 | [Taylor MP](mp/taylor_series.py); [recorded convergence report](mp/CONVERGENCE.md); [current and historical evidence](../reproducibility/ad_showcase/A04_taylor_mp/README.md) | **reusable**: historical native He2 MP2–30 and external atomic curves retained. Current H6 MP2–6 and independent water MP2–8 gates passed (max coefficient error 7.08e-14 Eh). | Current full He2 MP30 attempt exited 134 with LLVM allocation failure; incomplete rows are not a pass. Historical figures/source provenance and the failure log remain separate; no shared cache change. |
 | A05 | [Bounded DF-HF exponent optimization](basis/optimize_exponents.py); [independent results](../reproducibility/ad_showcase/A05_basis_exponents/README.md); [existing contractions](basis/optimize_bsse_contractions.py) | **validated-component**: H2 fixed-topology/fixed-auxiliary DF-HF converged in 15 updates; positive bounded exponent scales, normalization and relaxed gradients checked; independent FD error ≤2.58e-9 Eh. | DF approximation explicitly separated from exact four-center energy. First main-basis exponent derivatives only; no auxiliary, geometry, higher/mixed exponent AD or global basis-optimum claim. |
 | A06 | [Existing Boys example](localization/ethylene_boys.py); [archive wrapper](localization/archive_ethylene_boys.py); [figure/results](../reproducibility/ad_showcase/A06_boys_localization/README.md) | **validated-component**: current ethylene fixed-occupied-space run passed gradient/HVP FD, analytic local gradient, density/orthogonality invariance and independent PySCF multistart score comparison (6.40e-14 bohr²). | Eight occupied orbitals including cores, 28 rotation variables; no SCF/nuclear derivative, unique gauge or global optimum claim. Existing animation scripts remain linked. |
@@ -196,16 +198,23 @@ No higher-order RPA or whole-worktree validation is inferred.
   within their declared model. Preserve frozen QP/kernel, temperature, Condon
   and coupling-scale-derivative qualifications in any index, plot or results file.
 
-## Remaining functional examples at the local checkpoint
+## Completion worktree: delivered examples and open directions
 
 | Item | Implementation status | Remaining delivery |
 | --- | --- | --- |
-| Periodic static BSE absorption | Development draft; the screened two-k matrix fails its Hermiticity check. | A validated kernel and a runnable public independent-particle/BSE spectrum example. |
-| One-/two-dimensional GW and BSE | SCF, Coulomb boundaries and bands are demonstrated; excitation support is not implemented. | Matched long-wave screening, GW/BSE kernels and sheet/line optical normalization. Gapless graphene additionally needs occupations/intraband treatment. |
-| Continuous material GW bands | Si has four directly requested QP points, three converged and one failed. | A validated path calculation/interpolation example; the partial point plot is not a GW band structure. |
-| Fully relaxed degenerate molecular response | Fixed-reference benzene CIS and high-dimensional invariant VJPs are demonstrated. | Complete HF/geometry/dipole/integral response of the degenerate cluster and its independent geometry check. |
-| Larger OFDFT scaling | Al1/Al27 are packaged; Al125 native forward/JVP/VJP/HVP finished remotely within budget. | Independent Al125 DFTpy/NumPy-WGC reference, retrieval and a third-size summary. The existing API supports this case; this is unfinished execution rather than a missing KEDF. |
-| Expanded material/method matrix | LDA/PBE/r2SCAN workflows and Si PBE0 are present. | Additional hybrid material runs and some reference/result packaging. GaN compact r2SCAN native completed remotely; its comparison is not yet packaged here. |
+| Periodic static BSE absorption | Validated 3D static TDA body kernel and [H2 spectrum](bse/periodic_hydrogen.py); 18 core and 4 optical tests passed. | Direct q0 head/wing corrections, larger material examples and periodic BSE AD remain open. |
+| One-/two-dimensional GW and BSE | [H2 wire/layer examples](bse/reduced_hydrogen.py) now compute G0W0 and static TDA-BSE with matching Coulomb boundaries, checked FFT metrics and explicit bare finite heads. [Line/sheet polarizability and independent signed-v checks](../reproducibility/ad_showcase/reduced_bse_body/README.md) are packaged. | No missing compact insulating example. Singular q-cell integration, material convergence and periodic BSE AD remain method extensions. Gapless graphene additionally needs occupations/intraband treatment. |
+| Off-mesh GW points and short paths | [Arbitrary-k API and H2 path](gw/periodic_bands.py) now have independent full-response NumPy and analytic contour checks. [Si's three-point generic segment](../reproducibility/ad_showcase/periodic_gw_query/silicon/README.md) computes all six requested levels successfully. | No missing compact path example. Full high-symmetry paths, degenerate subspace self-energies, q-cell corrections and interpolation remain separate extensions; the old four-point attempt remains preserved with its one failed root. |
+| Fully relaxed degenerate molecular response | [CH4 complete-cluster geometry response](../reproducibility/ad_showcase/A03_ch4_cluster_geometry/README.md) now passes two independent PySCF directional differences and a random occupied/virtual frame check; nine focused tests pass. | No missing compact geometry example. Fifteen-coordinate VJP is computed, with directional FD validation; broader systems and componentwise FD remain separate extensions. |
+| Larger OFDFT scaling | Al1/Al27/Al125 native forward/JVP/VJP/HVP, independent DFTpy/NumPy-WGC references and three-size plots are packaged. | No missing compact scaling example; Al343 and asymptotic/material-accuracy studies remain optional. |
+| Expanded material/method matrix | LDA/PBE/r2SCAN workflows and Si PBE0 are present. | Additional hybrid material runs and some reference/result packaging. [GaN compact r2SCAN](../reproducibility/ad_showcase/PBC_material_bands/gan_r2scan_compact/README.md) fails its independent comparison. A fixed-DM diagnosis locates an AO/integral representation difference before SCF; identical-input XC checks pass. The failed model remains unvalidated and is not plotted as accepted. |
+
+The [saved band gallery](../reproducibility/ad_showcase/PBC_material_bands/saved_bands/README.md)
+plots all 17 complete material records (Si 5, GaAs 3, GaN 3, graphene 6),
+plus the two separate Si GW data sets. Thirteen material comparisons pass,
+three have no saved independent reference and one fails; these states remain
+visible in the figures. Three incomplete records have no arrays to plot.
+The gallery reused the saved numerical inputs and ran no new SCF/GW.
 
 Al343, Mg, additional basis/k/grid/vacuum scans and the remaining phonon/Raman
 convergence studies are optional benchmarks. They are not required to establish
@@ -229,3 +238,24 @@ bytes match the verified source manifest. The existing native library matched
 checked separately; there are no executable code files in the result tree.
 Raw commands, logs, source manifests and resource records remain in the local
 ignored development archive.
+
+The new `feat/ad-showcase-completion` worktree adds separate remote batches of
+18 periodic-BSE core tests, four optical tests and nine CIS-cluster tests.
+It also packages the H2 body spectrum, the fully relaxed CH4 cluster and the
+Al125 independent reference. Those focused checks do not repeat or extend
+the earlier 175-test integration claim. Current source identities and measured
+responses are recorded in each result capsule. GaN's fixed-density diagnostic
+locates the retained coarse-model discrepancy; it is not a passing SCF parity
+test. Integration and publication are tracked separately by the release Git
+history; these records describe the bounded numerical checks above.
+
+The later periodic extensions have their own bounded checks: 16 full-Lehmann
+and mixed-Fourier tests plus 22 BSE tests passed together; three existing
+regressions passed separately after their old toy fixture received its missing
+boundary/lattice metadata. The query API has 18 distinct 3D checks, followed
+by 25 low-dimensional and related scalar/domain checks (four tests deselected).
+Reduced interactions have 13 focused passes; BSE low-dimensional callers have
+23 passes and a 10-case exact-zero-head follow-up that overlaps that batch.
+These counts must not be added into a new whole-suite claim. The wire and
+layer each have four converged QP roots, independent signed-v BSE matrices
+and complex line/sheet spectral checks.

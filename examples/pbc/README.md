@@ -17,6 +17,9 @@ postprocessing. Read the result records before combining calculations:
 | Finite-q phonon dispersion (P03/P05) | [lih_qmesh_phonons.py](lih_qmesh_phonons.py), [lih_ifc_bands.py](lih_ifc_bands.py) and [lih_polar_bands.py](lih_polar_bands.py) reuse saved response matrices to show bands and DOS. |
 | Material bands | [band_structures](band_structures/README.md): Si, GaAs, GaN and graphene; separate native and independent scripts. |
 | One- and two-dimensional cells | [reduced_dimensions.py](reduced_dimensions.py): neutral H2 wire/slab SCF and off-mesh bands using consistent truncated electrostatics. |
+| Periodic static BSE | [H2 workflow](../bse/periodic_hydrogen.py) and [spectrum](../../reproducibility/ad_showcase/periodic_bse_body/README.md): PBE/G0W0/static singlet TDA on two k points, using the same KS vertices and QP energies for IP and BSE. Three-dimensional body-only forward example; no direct q0 correction or periodic BSE AD. |
+| Direct off-mesh GW | [Periodic bands](../gw/periodic_bands.py): H2 and a short Si generic segment, complete OV+VO screening and shifted internal bands. [Results and independent H2 check](../../reproducibility/ad_showcase/periodic_gw_query/README.md); eager body-only forward, without interpolation or a degenerate-band self-energy. |
+| Low-dimensional GW/BSE | [H2 wire/layer](../bse/reduced_hydrogen.py) and [line/sheet response](../../reproducibility/ad_showcase/reduced_bse_body/README.md): matching finite-part Coulomb boundaries, explicit bare heads and independent signed-v BSE checks. No q-cell integration, periodic BSE AD or material-convergence claim. |
 
 The Gamma correction does not supply polar finite-q IFC interpolation. Keep
 raw charge sums, acoustic defects and grid failures visible; selecting a

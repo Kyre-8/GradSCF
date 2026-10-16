@@ -1,0 +1,200 @@
+{
+  "core_tests": 18,
+  "optical_tests": 4,
+  "combined_run": false,
+  "test_source_sha256": "baef290d0e8f3351843903cf24b6b5136937f7d8766821c0a100fb79e2f1f920",
+  "static_channel_diagnostic": {
+    "nk": 2,
+    "legacy_hermiticity": 0.0001472813879207033,
+    "full_hermiticity": 1.1150912609939193e-16,
+    "bare_hermiticity": 9.177756981012399e-17,
+    "q": [
+      {
+        "q": 0,
+        "qbar": 0,
+        "exact_rows": 343,
+        "legacy_epsilon": 0.0016154820862009543,
+        "legacy_epsilon_exact_rows": 0.0016154820862009543,
+        "full_epsilon": 2.2204471080412447e-16,
+        "full_epsilon_exact_rows": 2.2204471080412447e-16,
+        "legacy_inverse": 0.0010005709240455364,
+        "legacy_inverse_exact_rows": 0.0010005709240455364,
+        "full_inverse": 7.771561172376522e-16,
+        "full_inverse_exact_rows": 7.771561172376522e-16
+      },
+      {
+        "q": 1,
+        "qbar": 1,
+        "exact_rows": 294,
+        "legacy_epsilon": 0.0021167557801719155,
+        "legacy_epsilon_exact_rows": 0.0014021883687374004,
+        "full_epsilon": 2.7755575615628914e-17,
+        "full_epsilon_exact_rows": 2.7755575615628914e-17,
+        "legacy_inverse": 0.0011560197343128697,
+        "legacy_inverse_exact_rows": 0.0007748212796407862,
+        "full_inverse": 6.661338147751235e-16,
+        "full_inverse_exact_rows": 6.661338147751235e-16
+      }
+    ]
+  },
+  "remote_jobs": {
+    "static-full-channels-green": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "-m",
+        "pytest",
+        "-q",
+        "-s",
+        "tests/bse/test_periodic_body.py"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 2454792,
+      "budget_kib": 8388608,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true,
+      "elapsed_seconds": 58.876981922003324,
+      "allowed_cpu_ids": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    "optical-wrappers-green": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "-m",
+        "pytest",
+        "-q",
+        "-s",
+        "tests/bse/test_periodic_body.py",
+        "-k",
+        "ks_reference or independent_particles"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 1926688,
+      "budget_kib": 8388608,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true,
+      "elapsed_seconds": 36.814472651996766,
+      "allowed_cpu_ids": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    "periodic-hydrogen-example": [
+      {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-u",
+          "examples/bse/periodic_hydrogen.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 1910904,
+        "budget_kib": 8388608,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 36.05295768900032,
+        "allowed_cpu_ids": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-u",
+          "examples/bse/plot_periodic_hydrogen.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 1910904,
+        "budget_kib": 8388608,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 2.5026793950019055,
+        "allowed_cpu_ids": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      }
+    ]
+  },
+  "executed_calculation_sources_match_current": false,
+  "png_visually_checked": true,
+  "scope": "Frozen initial 3D H2 body spectrum. The executed hashes in results.json are retained; later full-channel sharing and reduced-dimensional extensions changed some current files.",
+  "current_source_differences": {
+    "src/gradscf/bse/pbc/kernel.py": {
+      "executed_sha256": "da621edd72981feb300e0e209e049a2bd6a163d74517a59cfbcd3c6054267c78",
+      "current_sha256": "15fbab2bf2d67346a2046e267d9773114c460b445c6c0ccf1abc87e991539f41"
+    },
+    "src/gradscf/bse/pbc/properties.py": {
+      "executed_sha256": "9c6982215ef556e4b2d5e63197ba288fec9e7d04cf27e5b296f62dd4395e4a96",
+      "current_sha256": "441612af643149cc0d2a86855fcefc6dc5d33fa5d37c6ec0fa86f999633dae94"
+    },
+    "src/gradscf/gw/pbc/product_basis.py": {
+      "executed_sha256": "b7e69e1e24f5c916c622ac53704b414ec621cfd1c14346134f809f8f6bc3305d",
+      "current_sha256": "3c8819a167dfed28a5f176248958cf6f04f8918cf2b0b5305adfb1bf497ab189"
+    }
+  },
+  "later_validation": "../reduced_bse_body/README.md records the later final-source wire/layer executions; this initial 3D result is not relabelled as a new calculation."
+}

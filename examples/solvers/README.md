@@ -23,6 +23,29 @@ subspace benchmark and native benzene example add controlled backward checks.
   SCF/integrals and projector differences. This is fixed-reference source-potential
   response, not relaxed nuclear response. [Results and plots](../../reproducibility/ad_showcase/A03_degenerate_vjp/README.md).
 
+- [ch4_cis_cluster.py](ch4_cis_cluster.py): complete geometry response of a
+  bright, triply degenerate singlet CIS cluster with native HF relaxation,
+  moving integrals and dipoles. The 15-coordinate VJP, independent PySCF
+  directional differences and occupied/virtual frame check are recorded in
+  [the CH4 capsule](../../reproducibility/ad_showcase/A03_ch4_cluster_geometry/README.md).
+
+For the CH4 example, run each stage in a bounded process from the repository
+root with `PYTHONPATH=src:.`. Use fresh result directories to preserve earlier
+evidence:
+
+```python
+from pathlib import Path
+from examples.solvers.ch4_cis_cluster import run, check_frame
+from examples.solvers.compare_ch4_cis_cluster import run as compare, plot
+
+output = Path("reproducibility/ad_showcase/my_ch4_cluster")
+run("forward", output=output)
+run("response", output=output)
+compare(output)
+check_frame(output, max_subspace=90)
+plot(output)
+```
+
 See the [solver API](../../src/gradscf/solvers/README.md) and
 [degeneracy contract](../../src/gradscf/solvers/DEGENERACY.md) for supported
 observables and differentiation modes.

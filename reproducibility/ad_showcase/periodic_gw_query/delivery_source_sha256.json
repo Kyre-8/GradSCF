@@ -1,0 +1,19 @@
+{
+  "scope": "Frozen three-dimensional query delivery after direct-solver preflight, before the reduced-dimensional caller extension. These hashes identify that stage, not the current whole worktree.",
+  "source_sha256": {
+    "src/gradscf/gw/pbc/query.py": "cae03b9436fbdd609427d52bdcff0e668fdba96a9263d57bc911aafa55405d0c",
+    "src/gradscf/gw/pbc/__init__.py": "0972983ac5abcdd95dd986d29cba41e8f33d57483df91f6ff8f209bba7ba9df7",
+    "src/gradscf_tools/periodic_gw_reference.py": "d7c2acc7100440c632009f2f459f78867e1001c4e2dbc50bfd10111fba136b44",
+    "src/gradscf_tools/periodic_gw_plot.py": "60efef2a80adea20f60f7d75af8af426c1a9ff4b874aef90d27f7b00dcf85eab",
+    "tests/gw/pbc/test_query.py": "c3a2031c2d70e3ed2d05a12b073f11425a61955b3ae823834fe68e2f6cc26698",
+    "examples/gw/periodic_bands.py": "c337a337522ef14fe27e239aff2a558458674353ed9309673acb88aa73bd1c5f",
+    "examples/gw/compare_periodic_bands.py": "0fb6b0b708c4371a6d2280808ac820881276dadda5c671634380b9421ae86816"
+  },
+  "final_source_validation": "lowdim_caller_validation.json",
+  "current_source_differences": {
+    "src/gradscf/gw/pbc/query.py": {
+      "frozen_sha256": "cae03b9436fbdd609427d52bdcff0e668fdba96a9263d57bc911aafa55405d0c",
+      "current_sha256": "67f8777c7d2f50b9da25e5df3dd2d3897d11908bd25a462e8bc41b50b9cc223b"
+    }
+  }
+}

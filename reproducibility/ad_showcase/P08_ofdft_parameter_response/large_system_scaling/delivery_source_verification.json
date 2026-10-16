@@ -1,0 +1,49 @@
+{
+  "base_commit": "58e9f5d5ccffd450f35a527b9c7617db9b7a483c",
+  "head_at_verification": "58e9f5d5ccffd450f35a527b9c7617db9b7a483c",
+  "branch": "feat/ad-showcase-completion",
+  "native_frozen_source_sha256": "124faf9f7813a8a18dccc2f698c3a02ac27ad1af00b0ac47e6dbba105c8cdf22",
+  "files": [
+    {
+      "path": "src/gradscf/ofdft/problem.py",
+      "sha256": "9891fd3df1feea50f640a62eda0f2f80285696dfeacf05a4e1f8e0783488e0cd",
+      "matches_native_snapshot": true
+    },
+    {
+      "path": "src/gradscf/dfpt/ofdft.py",
+      "sha256": "531276124f1f0a664dd2f3cf9498237ddccab6dc4c66449ade665f9b0ad44ef8",
+      "matches_native_snapshot": true
+    },
+    {
+      "path": "src/gradscf/dfpt/atomic.py",
+      "sha256": "a71b18c37fb7a4b80bd9871a1da29111cd506976c9ae9e79e3d0bf4226e25bb5",
+      "matches_native_snapshot": true
+    },
+    {
+      "path": "src/gradscf/solvers/nonlinear/sphere.py",
+      "sha256": "99db882377466578b8d4c26c6990d27152666bc84467fe6339bc6432e2c722fd",
+      "matches_native_snapshot": true
+    },
+    {
+      "path": "examples/ofdft/large_system_response.py",
+      "sha256": "20f1ef8df0bd3092d25cfd1724ee1ec1e35dc9633778c96a4c9dcb8ca7fb4ccd",
+      "matches_native_snapshot": true
+    },
+    {
+      "path": "examples/ofdft/large_reference.py",
+      "sha256": "0d1971372f961ea44aae68178688ae385c392292336910b37c44c883bff0534d",
+      "matches_native_snapshot": true
+    },
+    {
+      "path": "examples/ofdft/wgc_dftpy.py",
+      "sha256": "a16ab34be96f5fa98929c7f0e506fc2e24394068864ceef9f4c6a53369e519cf",
+      "matches_native_snapshot": true
+    },
+    {
+      "path": "examples/ofdft/large_plot.py",
+      "sha256": "3ba611d89fce5cbcb9ec6910bcdc886abc9f96d598f02c71fdffdf5c6be1dc4b",
+      "matches_native_snapshot": true
+    }
+  ],
+  "scope": "Static byte-for-byte source audit only. Native timings remain measurements of the original frozen GPU6 snapshot; no full repository rerun is claimed."
+}

@@ -6,6 +6,13 @@ The fixed geometries are example inputs; each functional does not receive a
 separately optimized lattice. ASE constructs structures/paths, GradSCF performs
 the primary electronic calculation, and PySCF is an independent comparison.
 
+The [saved-data gallery](../../../reproducibility/ad_showcase/PBC_material_bands/saved_bands/README.md)
+now plots all 17 completed material cases and both Si GW data sets. It contains
+a semilocal overview and separate Si/GaAs/GaN/graphene PNG/PDF figures.
+Different numerical protocols are separated into panels. Missing references
+and the failed GaN r2SCAN comparison remain labelled explicitly; no new
+electronic calculation was needed for the gallery.
+
 The intended method ladder is LDA/PBE/r2SCAN/PBE0, periodic G0W0 and static BSE.
 The native script supports the three pure DFT methods and PBE0. Hybrid
 off-mesh bands use `exxdiv='vcut_sph'` consistently in SCF and the independent
@@ -48,11 +55,13 @@ numerical input. Reduced-dimensional GW long-wave corrections remain open.
 Gapless graphene GW/BSE also requires occupation/intraband validation; an
 artificial insulating gap will not be used to bypass that requirement.
 
-Periodic BSE is to use matched QP energies and screening, complex momentum-
-conserving electron-hole actions and shared numerical solvers. Bulk dielectric
-spectra and sheet/line polarizabilities have different normalizations and will
-be reported accordingly. Unsupported stages remain explicit until their
-independent numerical gates pass.
+The [small periodic H2 BSE example](../../bse/periodic_hydrogen.py) now uses
+matched QP energies and screening, a complex momentum-conserving electron-hole
+kernel and shared numerical solvers. It demonstrates a three-dimensional
+static singlet TDA body spectrum with per-cell oscillator strengths. Direct
+q0 head/wing corrections, periodic BSE AD and material absorption coefficients
+remain outside that example. Bulk dielectric spectra and sheet/line
+polarizabilities require their respective normalizations.
 
 See the [project plan](../../AD_SHOWCASE_PLAN.md#added-material-bands-periodic-gwbse-and-reduced-dimensional-cells)
 for the dependencies and acceptance boundaries. All numerical work stays on
@@ -63,3 +72,10 @@ check: frontier-band discrepancies are 3.06e-9 and 3.69e-9 Eh. Its sampled
 path gaps are 0.30049 and 1.93646 eV. See the
 [band comparison figure](../../../reproducibility/ad_showcase/PBC_material_bands/silicon_hybrid.png)
 and [result inventory](../../../reproducibility/ad_showcase/PBC_material_bands/).
+
+The [direct GW query example](../../gw/periodic_bands.py) now also supplies a
+[three-point Si generic segment](../../../reproducibility/ad_showcase/periodic_gw_query/silicon/README.md).
+All six requested QP values converge, with full occupied/virtual screening
+and shifted internal bands. This deliberately small GTH-SZV, two-q, body-only
+model is a functional demonstration; it is not a complete high-symmetry
+path or a bulk Si prediction. Nondegenerate selected bands are required.

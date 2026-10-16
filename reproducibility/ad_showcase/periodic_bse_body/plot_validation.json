@@ -1,0 +1,11 @@
+{
+  "complete": true,
+  "fwhm_ev": 0.3,
+  "integrated_strength_errors": [
+    0.0,
+    5.551115123125783e-17
+  ],
+  "results_sha256": "77b1653412448272a7a8c4f3850aa82bd1c96541f4f4e5278fb1f29a345a1581",
+  "arrays_sha256": "8d9a20d72cfba682a160279f7df1f9b77eaab394a635d57cc8707531a52dc4ba",
+  "scope": "Finite-model per-cell oscillator strengths, not a macroscopic absorption coefficient."
+}
