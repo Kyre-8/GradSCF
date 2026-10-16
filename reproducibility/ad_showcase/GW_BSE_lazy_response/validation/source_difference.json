@@ -1,0 +1,8 @@
+{
+  "changed_python_files": [
+    "src/gradscf/solvers/eigen/structured_rpa.py"
+  ],
+  "baseline": "f7935ab41520682d90cad609242747d1eb68fa1c2664958b033fb2adc2ff2122",
+  "final": "fcd8968cc85f1cb6223925a6ea0ee15887b04068c67c8b34306de0ec91641df6",
+  "same_all_other_python_files": true
+}

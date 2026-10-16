@@ -1,0 +1,88 @@
+{
+  "complete": true,
+  "passed": true,
+  "explicit_nelectron": 4,
+  "pseudopotential_valence_charges": [
+    3,
+    1
+  ],
+  "electron_number": 4.000000000000001,
+  "nao": 3,
+  "occupied_orbitals": 2,
+  "sampled_indirect_gap_hartree": 0.14272638774851448,
+  "mo_fock_occupied_virtual_norm": 1.0947160338616064e-15,
+  "minimum_overlap_eigenvalue": 0.015429803271097092,
+  "occupation_values": [
+    0.0,
+    2.0
+  ],
+  "scf_converged": true,
+  "scf_cycles": 12,
+  "native_sha256": "6356e9e23e6df18c019fba1c8dcaa9aa240ee6a1fa5c714e3903086012f7e571",
+  "script_sha256": "4ea0d723ccd21f33ae05f605cf65b5d74c5c962af39402c35a7467263deee9bc",
+  "rotation": [
+    [
+      0.9755473667907053,
+      -0.1790267246337395,
+      0.12750202749225792
+    ],
+    [
+      0.18655061177506096,
+      0.9811902821466963,
+      -0.049643725356151226
+    ],
+    [
+      -0.11621619678027574,
+      0.0722153867801156,
+      0.9905951410733481
+    ]
+  ],
+  "original_direction": [
+    [
+      0.4982728791224398,
+      -0.3321819194149599,
+      0.16609095970747995
+    ],
+    [
+      -0.6643638388299198,
+      0.2491364395612199,
+      0.3321819194149599
+    ]
+  ],
+  "rotated_action_hartree_per_bohr2": [
+    [
+      0.008929853166379592,
+      -0.0026743024860775913,
+      -0.002083262947859099
+    ],
+    [
+      -0.007897323296960065,
+      0.002245079454906285,
+      0.002201856651504344
+    ]
+  ],
+  "expected_action_hartree_per_bohr2": [
+    [
+      0.008929853166377105,
+      -0.0026743024860775367,
+      -0.0020832629478597466
+    ],
+    [
+      -0.007897323296959856,
+      0.002245079454907132,
+      0.002201856651505235
+    ]
+  ],
+  "errors": {
+    "energy_hartree": 0.0,
+    "force_constant_action_hartree_per_bohr2": 2.4875934645507414e-15
+  },
+  "gates": {
+    "energy_hartree": 1e-09,
+    "force_constant_action_hartree_per_bohr2": 2e-08
+  },
+  "linear_residual_norm": 6.590190175026565e-17,
+  "elapsed_seconds": 67.09669124297216,
+  "peak_rss_kib": 12016704,
+  "scope": "Joint cell/atoms/k/grid rotation covariance; no atom-only rotation sum rule or ASR projection."
+}

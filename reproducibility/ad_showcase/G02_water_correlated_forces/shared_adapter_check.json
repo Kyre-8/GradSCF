@@ -1,0 +1,67 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-integration-20261015",
+  "date": "2026-10-16",
+  "boundary": "Shared CorrelatedEnergy adapter; original data and timing preserved separately",
+  "rows": [
+    {
+      "basis": "sto-3g",
+      "method": "hf",
+      "old_new_energy_error": 1.4210854715202004e-14,
+      "old_new_gradient_error": 8.326672684688674e-15,
+      "pyscf_gradient_error": 1.4976908602193362e-13,
+      "smallest_step_fd_error": 6.418972506305742e-10
+    },
+    {
+      "basis": "sto-3g",
+      "method": "mp2",
+      "old_new_energy_error": 0.0,
+      "old_new_gradient_error": 3.430589146091734e-14,
+      "pyscf_gradient_error": 2.419175970658216e-13,
+      "smallest_step_fd_error": 5.475134616517163e-10
+    },
+    {
+      "basis": "sto-3g",
+      "method": "ccsd",
+      "old_new_energy_error": 0.0,
+      "old_new_gradient_error": 1.8984813721090177e-14,
+      "pyscf_gradient_error": 8.63320526178768e-12,
+      "smallest_step_fd_error": 5.623951998545706e-10
+    },
+    {
+      "basis": "sto-3g",
+      "method": "fci",
+      "old_new_energy_error": 0.0,
+      "old_new_gradient_error": 1.4155343563970746e-14,
+      "pyscf_gradient_error": 2.9790288347264493e-08,
+      "smallest_step_fd_error": 1.0299432348648274e-09
+    },
+    {
+      "basis": "6-31g*",
+      "method": "hf",
+      "old_new_energy_error": 0.0,
+      "old_new_gradient_error": 5.5892790395972725e-15,
+      "pyscf_gradient_error": 4.548889043221038e-12,
+      "smallest_step_fd_error": 1.5806146582558744e-10
+    },
+    {
+      "basis": "6-31g*",
+      "method": "mp2",
+      "old_new_energy_error": 0.0,
+      "old_new_gradient_error": 1.182665076981948e-13,
+      "pyscf_gradient_error": 5.9065365654031865e-09,
+      "smallest_step_fd_error": 1.1317479418904153e-10
+    },
+    {
+      "basis": "6-31g*",
+      "method": "ccsd",
+      "old_new_energy_error": 0.0,
+      "old_new_gradient_error": 5.2513549064769904e-14,
+      "pyscf_gradient_error": 7.665920613575405e-08,
+      "smallest_step_fd_error": 4.341436325022707e-11
+    }
+  ],
+  "sources": {
+    "examples/geometry/water_correlated_forces.py": "65ea3fae13bab96371c093fe0eada9698f6d5ae3c27b90746762b979871bd198",
+    "src/gradscf_tools/correlated_response.py": "2aef64387e3a788f7ddb9aadc78f76a3898f3ddb34872276189c547180eb86a1"
+  }
+}

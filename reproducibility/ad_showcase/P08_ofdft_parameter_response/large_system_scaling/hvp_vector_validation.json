@@ -1,0 +1,69 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "atoms": 1,
+      "native_hvp": [
+        -3.784403522919371,
+        -5.34544646278828
+      ],
+      "reference_hvp": [
+        [
+          -3.7841376017410338,
+          -5.345170174508549
+        ],
+        [
+          -3.7843643600831585,
+          -5.345425508133484
+        ],
+        [
+          -3.784275130229962,
+          -5.345363786293798
+        ]
+      ],
+      "relative_l2_error": [
+        5.8549818575944175e-05,
+        6.781697388739786e-06,
+        2.3316274592653535e-05
+      ],
+      "steps_hartree": [
+        0.003,
+        0.001,
+        0.0003
+      ]
+    },
+    {
+      "atoms": 27,
+      "native_hvp": [
+        -94.23983983681427,
+        -131.80081491093424
+      ],
+      "reference_hvp": [
+        [
+          -94.23511990787878,
+          -131.79588200054962
+        ],
+        [
+          -94.23898648491316,
+          -131.79952280396873
+        ],
+        [
+          -94.24387007932555,
+          -131.8045042404986
+        ]
+      ],
+      "relative_l2_error": [
+        4.2136609480761634e-05,
+        9.556871786417154e-06,
+        3.372214088569969e-05
+      ],
+      "steps_hartree": [
+        0.003,
+        0.001,
+        0.0003
+      ]
+    }
+  ],
+  "definition": "Independent DFTpy density central differences contracted with P.T@diag(weights); potential linear in theta",
+  "scope": "Full two-component energy HVP; the separate VJP check is directional"
+}

@@ -1,0 +1,23 @@
+{
+  "pyscf_version": "2.13.0",
+  "energy_hartree": -129.24630560126337,
+  "gradient_hartree_per_bohr": [
+    [
+      3.081180335061151e-16,
+      -2.358716112974089e-17,
+      -0.058040664974358336
+    ],
+    [
+      -3.081180335061845e-16,
+      2.3587161129771655e-17,
+      0.0580406649743459
+    ]
+  ],
+  "max_gradient_error": 1.3972462076239367e-11,
+  "orbital_gradient_norm": 4.8232590595196356e-12,
+  "spin_square": 0.8007272607711906,
+  "max_density_difference": 7.890132991406063e-12,
+  "initial_guess": "native density for pi orientation only; independently reconverged",
+  "grid_response": false,
+  "elapsed_seconds": 0.18150261099799536
+}

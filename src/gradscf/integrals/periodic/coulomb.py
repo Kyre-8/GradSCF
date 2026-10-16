@@ -1,9 +1,26 @@
 """3D Ewald electrostatics with a uniform compensating background."""
 import itertools
+from dataclasses import dataclass
 import numpy as np
 import jax
 import jax.numpy as jnp
 from jax.scipy.special import erfc
+
+
+@jax.tree_util.register_pytree_node_class
+@dataclass(frozen=True)
+class ReducedBoundary:
+    """Static periodicity/grid and a live lattice for reduced-D electrostatics."""
+    lattice: object
+    dimension: int
+    mesh: tuple
+
+    def tree_flatten(self):
+        return (self.lattice,), (self.dimension, self.mesh)
+
+    @classmethod
+    def tree_unflatten(cls, metadata, children):
+        return cls(children[0], *metadata)
 
 
 def _integer_box(n):
@@ -80,6 +97,44 @@ def ewald_curvature(lattice,coords,charges,q,u,v,*,precision=1e-9,reference_latt
     return real+4*jnp.pi/jnp.linalg.det(lattice)*reciprocal_part
 
 
-def coulomb_kernel(gvectors):
+def coulomb_kernel(gvectors, *, boundary=None):
+    if boundary is not None:
+        from .truncated import slab_kernel, wire_kernel
+        if boundary.dimension == 2:
+            return slab_kernel(gvectors, boundary.lattice)
+        if boundary.dimension != 1:
+            raise ValueError('Reduced boundary dimension must be 1 or 2.')
+        from .ao import reciprocal_grid
+        if gvectors.shape != (int(np.prod(boundary.mesh)), 3):
+            raise ValueError('Wire Coulomb action requires the complete FFT grid.')
+        axis = boundary.lattice[0]/jnp.linalg.norm(boundary.lattice[0])
+        shift = gvectors[0]
+        wave = shift@axis
+        valid = (jnp.max(abs(shift-wave*axis)) < 1e-10)
+        valid &= jnp.max(abs(gvectors-shift-reciprocal_grid(boundary.lattice, boundary.mesh))) < 1e-10
+        return wire_kernel(boundary.lattice, boundary.mesh, wave=wave).reshape(-1)*jnp.where(valid, 1., jnp.nan)
     g2=jnp.sum(gvectors*gvectors,axis=-1)
     return jnp.where(g2>1e-24,4*jnp.pi/jnp.where(g2>1e-24,g2,1.),0.)
+
+
+def exchange_kernel(gvectors, *, lattice, nk, exxdiv='ewald', boundary=None):
+    """Exchange quadrature kernel; Hartree retains its own boundary.
+
+    vcut_sph uses Rc=(3*Nk*V/(4*pi))**(1/3), with an analytic finite G=0
+    limit. The sinc expression avoids subtraction and square-root derivatives
+    at zero. This is the finite-cell spherical truncation used by PySCF
+    (Phys. Rev. B 77, 193110); k convergence remains necessary.
+    """
+    if exxdiv in ('ewald',None):
+        return coulomb_kernel(gvectors,boundary=boundary)
+    if exxdiv!='vcut_sph':
+        raise NotImplementedError('Use exxdiv=ewald, vcut_sph or None.')
+    if boundary is not None:
+        raise NotImplementedError('Spherical exchange quadrature currently requires a 3D cell.')
+    radius=(3*nk*jnp.linalg.det(lattice)/(4*jnp.pi))**(1/3)
+    square=jnp.sum(gvectors**2,axis=-1)*radius**2
+    # sinc(sqrt(x)/(2*pi))**2 = (1-cos(sqrt(x)))/(x/2).
+    small=square<1e-8
+    argument=jnp.sqrt(jnp.where(small,1.,square))/(2*jnp.pi)
+    factor=jnp.where(small,1-square/12+square**2/360-square**3/20160,jnp.sinc(argument)**2)
+    return 2*jnp.pi*radius**2*factor

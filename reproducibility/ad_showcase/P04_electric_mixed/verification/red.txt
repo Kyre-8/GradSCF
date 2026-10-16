@@ -1,0 +1,24 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+____________ test_dimer_full_root_maxwell_and_mixed_susceptibility _____________
+
+    def test_dimer_full_root_maxwell_and_mixed_susceptibility():
+>       from gradscf.dfpt.electric import _electric_model, _solve_electric
+E       ImportError: cannot import name '_solve_electric' from 'gradscf.dfpt.electric' (/home/yjiao/gradscf_checks/ad-showcase-electric-mixed-20261016/src/gradscf/dfpt/electric.py)
+
+tests/dfpt/test_electric_mixed.py:10: ImportError
+______ test_periodic_h2_full_root_maxwell_and_directional_dielectric_mode ______
+
+    def test_periodic_h2_full_root_maxwell_and_directional_dielectric_mode():
+        from gradscf.pbc import gto, scf
+        from gradscf.pbc._kpoint import energy_and_fock as evaluate_hf
+        from gradscf.pbc.scf import run_kpoint_scf
+        from gradscf.integrals.periodic.fft import build_inputs
+>       from gradscf.dfpt.electric import _electric_model, _field_problem, _solve_electric, born_problem
+E       ImportError: cannot import name '_solve_electric' from 'gradscf.dfpt.electric' (/home/yjiao/gradscf_checks/ad-showcase-electric-mixed-20261016/src/gradscf/dfpt/electric.py)
+
+tests/dfpt/test_electric_mixed.py:71: ImportError
+=========================== short test summary info ============================
+FAILED tests/dfpt/test_electric_mixed.py::test_dimer_full_root_maxwell_and_mixed_susceptibility
+FAILED tests/dfpt/test_electric_mixed.py::test_periodic_h2_full_root_maxwell_and_directional_dielectric_mode
+2 failed in 1.20s

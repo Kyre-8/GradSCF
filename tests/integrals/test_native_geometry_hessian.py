@@ -78,13 +78,15 @@ def test_origin_origin_zero_and_translation_sum_rule():
 
 
 @pytest.mark.parametrize('zero_direction', [False, True])
-def test_geometry_third_order_remains_unsupported(zero_direction):
+def test_geometry_fifth_order_remains_unsupported(zero_direction):
     value,x=problem('overlap')
     first=lambda r:jax.jvp(value,(r,),(jnp.ones_like(r),))[1]
     second=lambda r:jax.jvp(first,(r,),(jnp.ones_like(r),))[1]
+    third=lambda r:jax.jvp(second,(r,),(jnp.ones_like(r),))[1]
+    fourth=lambda r:jax.jvp(third,(r,),(jnp.ones_like(r),))[1]
     direction = jnp.zeros_like(x) if zero_direction else jnp.ones_like(x)
-    with pytest.raises(NotImplementedError,match='(?i)third.*geometry'):
-        jax.jvp(second,(x,),(direction,))
+    with pytest.raises(NotImplementedError,match='(?i)fifth.*geometry'):
+        jax.jvp(fourth,(x,),(direction,))
 
 
 def test_second_products_differentiate_directions_and_cotangents():

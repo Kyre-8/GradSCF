@@ -1,0 +1,20 @@
+LiH reference -8.00763182486617 gap 0.14272638774851437 minimum Berry singular value 0.7427081003725751
+Born direction 0 0 {'atom': 0, 'axis': 0, 'charge_e': [0.9966941800957086, 2.7531385096456066e-08, 2.75313842716288e-08], 'ionic_charge_e': [3.0, 0.0, 0.0], 'linear_residual': 9.026225235745665e-14, 'converged': True, 'seconds': 51.35413680199417}
+Born direction 0 1 {'atom': 0, 'axis': 1, 'charge_e': [2.7531394331366442e-08, 0.9966941800957059, 2.7531394014794952e-08], 'ionic_charge_e': [0.0, 3.0, 0.0], 'linear_residual': 8.525971614526411e-13, 'converged': True, 'seconds': 1.0831799400039017}
+Born direction 0 2 {'atom': 0, 'axis': 2, 'charge_e': [2.753138391577401e-08, 2.753138391577401e-08, 0.996694180095711], 'ionic_charge_e': [0.0, 0.0, 3.0], 'linear_residual': 2.432076451440557e-13, 'converged': True, 'seconds': 1.1456237609963864}
+Born direction 1 0 {'atom': 1, 'axis': 0, 'charge_e': [-0.9967546291835723, -2.7432570088550184e-08, -2.7432569813607763e-08], 'ionic_charge_e': [1.0, 0.0, 0.0], 'linear_residual': 4.5248833733478924e-14, 'converged': True, 'seconds': 1.1738882590143476}
+Born direction 1 1 {'atom': 1, 'axis': 1, 'charge_e': [-2.743256995496575e-08, -0.9967546291835723, -2.7432570256956e-08], 'ionic_charge_e': [0.0, 1.0, 0.0], 'linear_residual': 2.6910211972756855e-14, 'converged': True, 'seconds': 1.1307459040253889}
+Born direction 1 2 {'atom': 1, 'axis': 2, 'charge_e': [-2.7432569329638492e-08, -2.7432569329638492e-08, -0.9967546291835752], 'ionic_charge_e': [0.0, 0.0, 1.0], 'linear_residual': 2.297532248702057e-14, 'converged': True, 'seconds': 1.1235112270223908}
+FD 0 0 0.0003 Born error 3.398472614435377e-10
+FD 0 0 0.0001 Born error 4.303668532656957e-11
+FD 0 1 0.0003 Born error 3.371215528957805e-10
+FD 0 1 0.0001 Born error 3.486477773151364e-11
+FD 0 2 0.0003 Born error 3.3746705430104385e-10
+FD 0 2 0.0001 Born error 3.384881264167916e-11
+FD 1 0 0.0003 Born error 1.1068785887857757e-09
+FD 1 0 0.0001 Born error 1.265862970001308e-10
+FD 1 1 0.0003 Born error 1.1068785887857757e-09
+FD 1 1 0.0001 Born error 1.2250167547023239e-10
+FD 1 2 0.0003 Born error 1.1092641249987878e-09
+FD 1 2 0.0001 Born error 1.2454681730389439e-10
+LiH Born completed 123.75694288199884 seconds; peak RSS 5145848 KiB

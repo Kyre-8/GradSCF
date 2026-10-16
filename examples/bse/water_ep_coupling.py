@@ -523,3 +523,10 @@ print(folder / "water_bse_phonons.png")
 # Linear-coupling-scale derivative / Mb: 152.6769102802.
 # Recomputed central finite difference / Mb: 152.6767882203.
 # Frozen GW correction/kernel, harmonic vacuum: no experimental spectrum claim.
+
+# Refreshed on jy_gpu_1, CPU float64, JAX 0.10.0 (2026-10-16):
+# Modes / cm^-1: [1799.2881713, 3812.3761608, 3945.8318650].
+# BSE / eV: [8.9263327801, 11.1390116905, 11.5445338880].
+# Cutoffs 28 / 40; final eta10/eta3 spectral L1 changes: 8.6891e-5 / 5.5421e-4.
+# Coupling-scale derivative / Mb: AD152.67699523, FD152.67687317 (original gate PASS).
+# Calculation body347.889s; process peak9,263,848KiB. The frozen model is unchanged.

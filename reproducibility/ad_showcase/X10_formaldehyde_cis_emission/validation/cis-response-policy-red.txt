@@ -1,0 +1,130 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+_________ test_cis_explicit_direct_response_retains_second_derivative __________
+
+    def test_cis_explicit_direct_response_retains_second_derivative():
+        policy = EigenResponseConfig(linear_config=LinearSolverConfig(method="direct", max_dense=2, rtol=1e-12))
+        config = ci.CIConfig(nroots=1, solver="dense", conv_tol=1e-12)
+        energy = lambda t: ci.solve_cis(*problem(t), nocc=1, config=config, response=policy).excitation_energies[0]
+        expected = lambda t: 2.-jnp.sqrt(1.+t*t)
+>       np.testing.assert_allclose(jax.jit(jax.grad(jax.grad(energy)))(.13),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                   jax.grad(jax.grad(expected))(.13), atol=1e-11, rtol=0)
+
+tests/test_cis_response_policy.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+t = GradTracer(primal=GradTracer(primal=JitTracer(~float64[]), typeof(tangent)=f64[]), typeof(tangent)=f64[])
+
+>   energy = lambda t: ci.solve_cis(*problem(t), nocc=1, config=config, response=policy).excitation_energies[0]
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: solve_cis() got an unexpected keyword argument 'response'
+E   --------------------
+E   For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+
+tests/test_cis_response_policy.py:20: TypeError
+_____ test_cis_response_capacity_is_enforced_only_when_response_is_needed ______
+
+    def test_cis_response_capacity_is_enforced_only_when_response_is_needed():
+        policy = EigenResponseConfig(linear_config=LinearSolverConfig(method="direct", max_dense=1, rtol=1e-12))
+        config = ci.CIConfig(nroots=1, solver="dense", conv_tol=1e-12)
+        energy = lambda t: ci.solve_cis(*problem(t), nocc=1, config=config, response=policy).excitation_energies[0]
+>       assert np.isfinite(energy(.1))
+                           ^^^^^^^^^^
+
+tests/test_cis_response_policy.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+t = 0.1
+
+>   energy = lambda t: ci.solve_cis(*problem(t), nocc=1, config=config, response=policy).excitation_energies[0]
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: solve_cis() got an unexpected keyword argument 'response'
+
+tests/test_cis_response_policy.py:29: TypeError
+_________ test_cis_explicit_eigenpair_target_marks_amplitude_response __________
+
+    def test_cis_explicit_eigenpair_target_marks_amplitude_response():
+        policy = EigenResponseConfig(target="eigenpairs",
+            linear_config=LinearSolverConfig(method="direct", max_dense=2, rtol=1e-12))
+        config = ci.CIConfig(nroots=1, solver="dense", conv_tol=1e-12)
+>       result = ci.solve_cis(*problem(.1), nocc=1, config=config, response=policy)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: solve_cis() got an unexpected keyword argument 'response'
+
+tests/test_cis_response_policy.py:40: TypeError
+____ test_cis_explicit_response_rejects_nondefault_legacy_controls[legacy0] ____
+
+legacy = {'gradient_mode': 'implicit_eigenvector'}
+
+    @pytest.mark.parametrize("legacy", [dict(gradient_mode="implicit_eigenvector"),
+                                        dict(adjoint_tol=1e-9), dict(adjoint_max_cycle=50)])
+    def test_cis_explicit_response_rejects_nondefault_legacy_controls(legacy):
+        with pytest.raises(ValueError, match="legacy"):
+>           ci.solve_cis(*problem(.1), nocc=1, config=ci.CIConfig(solver="dense", **legacy),
+                         response=EigenResponseConfig())
+E           TypeError: solve_cis() got an unexpected keyword argument 'response'
+
+tests/test_cis_response_policy.py:51: TypeError
+____ test_cis_explicit_response_rejects_nondefault_legacy_controls[legacy1] ____
+
+legacy = {'adjoint_tol': 1e-09}
+
+    @pytest.mark.parametrize("legacy", [dict(gradient_mode="implicit_eigenvector"),
+                                        dict(adjoint_tol=1e-9), dict(adjoint_max_cycle=50)])
+    def test_cis_explicit_response_rejects_nondefault_legacy_controls(legacy):
+        with pytest.raises(ValueError, match="legacy"):
+>           ci.solve_cis(*problem(.1), nocc=1, config=ci.CIConfig(solver="dense", **legacy),
+                         response=EigenResponseConfig())
+E           TypeError: solve_cis() got an unexpected keyword argument 'response'
+
+tests/test_cis_response_policy.py:51: TypeError
+____ test_cis_explicit_response_rejects_nondefault_legacy_controls[legacy2] ____
+
+legacy = {'adjoint_max_cycle': 50}
+
+    @pytest.mark.parametrize("legacy", [dict(gradient_mode="implicit_eigenvector"),
+                                        dict(adjoint_tol=1e-9), dict(adjoint_max_cycle=50)])
+    def test_cis_explicit_response_rejects_nondefault_legacy_controls(legacy):
+        with pytest.raises(ValueError, match="legacy"):
+>           ci.solve_cis(*problem(.1), nocc=1, config=ci.CIConfig(solver="dense", **legacy),
+                         response=EigenResponseConfig())
+E           TypeError: solve_cis() got an unexpected keyword argument 'response'
+
+tests/test_cis_response_policy.py:51: TypeError
+___________ test_cis_individual_root_result_rejects_subspace_target ____________
+
+    def test_cis_individual_root_result_rejects_subspace_target():
+        with pytest.raises(ValueError, match="subspace"):
+>           ci.solve_cis(*problem(.1), nocc=1, response=EigenResponseConfig(target="subspace"))
+E           TypeError: solve_cis() got an unexpected keyword argument 'response'
+
+tests/test_cis_response_policy.py:57: TypeError
+___________________ test_cis_response_policy_has_shared_type ___________________
+
+    def test_cis_response_policy_has_shared_type():
+        with pytest.raises(TypeError, match="EigenResponseConfig"):
+>           ci.solve_cis(*problem(.1), nocc=1, response={})
+E           TypeError: solve_cis() got an unexpected keyword argument 'response'
+
+tests/test_cis_response_policy.py:62: TypeError
+
+During handling of the above exception, another exception occurred:
+
+    def test_cis_response_policy_has_shared_type():
+>       with pytest.raises(TypeError, match="EigenResponseConfig"):
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'EigenResponseConfig'
+E         Actual message: "solve_cis() got an unexpected keyword argument 'response'"
+
+tests/test_cis_response_policy.py:61: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_cis_response_policy.py::test_cis_explicit_direct_response_retains_second_derivative
+FAILED tests/test_cis_response_policy.py::test_cis_response_capacity_is_enforced_only_when_response_is_needed
+FAILED tests/test_cis_response_policy.py::test_cis_explicit_eigenpair_target_marks_amplitude_response
+FAILED tests/test_cis_response_policy.py::test_cis_explicit_response_rejects_nondefault_legacy_controls[legacy0]
+FAILED tests/test_cis_response_policy.py::test_cis_explicit_response_rejects_nondefault_legacy_controls[legacy1]
+FAILED tests/test_cis_response_policy.py::test_cis_explicit_response_rejects_nondefault_legacy_controls[legacy2]
+FAILED tests/test_cis_response_policy.py::test_cis_individual_root_result_rejects_subspace_target
+FAILED tests/test_cis_response_policy.py::test_cis_response_policy_has_shared_type
+8 failed in 1.01s

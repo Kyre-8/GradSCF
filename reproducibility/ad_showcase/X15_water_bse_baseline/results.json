@@ -1,0 +1,236 @@
+{
+  "molecule": "H2O",
+  "basis": "3-21g",
+  "method": "native RHF -> G0W0 -> three-root singlet TDA-BSE",
+  "approximation": "RHF-screened vertices, frozen GW correction/kernel; linear vibronic Hamiltonian; Condon vacuum",
+  "hardware": "x86_64",
+  "backend": "cpu",
+  "jax_version": "0.10.0",
+  "dtype": "float64",
+  "temperature_k": 0.0,
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      1.47486325434209,
+      0.0,
+      1.077820601412644
+    ],
+    [
+      -1.47486325434209,
+      0.0,
+      1.077820601412644
+    ]
+  ],
+  "hf_energy_ha": -75.58595974300839,
+  "max_gradient_ha_bohr": 2.2162203495990074e-10,
+  "hessian_asymmetry_ha_bohr2": 5.896810817418441e-12,
+  "mode_frequencies_cm1": [
+    1799.2881712926262,
+    3812.3761607797105,
+    3945.831865009008
+  ],
+  "excitation_energies_ev": [
+    8.926332780145978,
+    11.139011690544558,
+    11.54453388803153
+  ],
+  "oscillator_strengths": [
+    0.005826402122827038,
+    2.3702264208814513e-29,
+    0.09305361805016255
+  ],
+  "qp_max_residual_ha": 5.465407466875849e-11,
+  "symmetry_residual_ha": 7.121178654917232e-16,
+  "huang_rhys": [
+    [
+      0.028048662296421206,
+      0.2867114825990146,
+      2.766917930374533
+    ],
+    [
+      1.19013265952484,
+      1.376046479621273,
+      1.7527476163689977
+    ],
+    [
+      9.579715124267812e-28,
+      7.643829688636503e-28,
+      5.33783922975211e-30
+    ]
+  ],
+  "diagonal_fc_envelope_std_ev": [
+    0.5170073607538646,
+    0.5671916207984327,
+    0.727529836622748
+  ],
+  "fc_retained_weight": [
+    1.0,
+    0.9999999999999998,
+    0.9999999999999992
+  ],
+  "numerical_eta_ev": 0.01,
+  "smaller_eta_ev": 0.003,
+  "vibrational_convergence": [
+    {
+      "max_quanta": 4,
+      "paired_max_quanta": 4,
+      "sector_dimensions": [
+        70,
+        15
+      ],
+      "seconds": 9.80515869500232,
+      "relative_l1_change": null,
+      "paired_relative_l1_change": null,
+      "fine_eta_relative_l1_change": null,
+      "paired_fine_eta_relative_l1_change": null,
+      "lowest_transition_ev": 8.259839198704958,
+      "max_residual_ha": 1.449960149736605e-15
+    },
+    {
+      "max_quanta": 8,
+      "paired_max_quanta": 8,
+      "sector_dimensions": [
+        330,
+        45
+      ],
+      "seconds": 8.480005866993451,
+      "relative_l1_change": 1.6174113510376884,
+      "paired_relative_l1_change": 1.4915999827804276,
+      "fine_eta_relative_l1_change": 1.8441532744429856,
+      "paired_fine_eta_relative_l1_change": 1.7918152601878898,
+      "lowest_transition_ev": 8.240409342542046,
+      "max_residual_ha": 1.3381869544309435e-15
+    },
+    {
+      "max_quanta": 12,
+      "paired_max_quanta": 12,
+      "sector_dimensions": [
+        910,
+        91
+      ],
+      "seconds": 8.572165571007645,
+      "relative_l1_change": 1.4346271496932614,
+      "paired_relative_l1_change": 0.47808763150960654,
+      "fine_eta_relative_l1_change": 1.7392900975361143,
+      "paired_fine_eta_relative_l1_change": 0.7984641239882857,
+      "lowest_transition_ev": 8.240309152188608,
+      "max_residual_ha": 2.0458700651065927e-15
+    },
+    {
+      "max_quanta": 16,
+      "paired_max_quanta": 16,
+      "sector_dimensions": [
+        1938,
+        153
+      ],
+      "seconds": 9.584566434001317,
+      "relative_l1_change": 1.259863950340221,
+      "paired_relative_l1_change": 0.05763442487384864,
+      "fine_eta_relative_l1_change": 1.5976968427126992,
+      "paired_fine_eta_relative_l1_change": 0.1265435333679801,
+      "lowest_transition_ev": 8.240309048994565,
+      "max_residual_ha": 2.1306681708734022e-15
+    },
+    {
+      "max_quanta": 20,
+      "paired_max_quanta": 20,
+      "sector_dimensions": [
+        3542,
+        231
+      ],
+      "seconds": 17.275371498981258,
+      "relative_l1_change": 0.8220810097131894,
+      "paired_relative_l1_change": 0.019843712489495853,
+      "fine_eta_relative_l1_change": 1.2136526027617542,
+      "paired_fine_eta_relative_l1_change": 0.04389373233029789,
+      "lowest_transition_ev": 8.240309048958634,
+      "max_residual_ha": 1.8047424690344956e-15
+    },
+    {
+      "max_quanta": 24,
+      "paired_max_quanta": 24,
+      "sector_dimensions": [
+        5850,
+        325
+      ],
+      "seconds": 54.50214959200821,
+      "relative_l1_change": 0.2585299791253471,
+      "paired_relative_l1_change": 0.0042143554892089775,
+      "fine_eta_relative_l1_change": 0.5947903218062309,
+      "paired_fine_eta_relative_l1_change": 0.011702507155721605,
+      "lowest_transition_ev": 8.24030904895863,
+      "max_residual_ha": 2.921201510603237e-15
+    },
+    {
+      "max_quanta": 28,
+      "paired_max_quanta": 28,
+      "sector_dimensions": [
+        8990,
+        435
+      ],
+      "seconds": 155.94046719002654,
+      "relative_l1_change": 0.054643568624741165,
+      "paired_relative_l1_change": 0.00024934215681529366,
+      "fine_eta_relative_l1_change": 0.21371437457475306,
+      "paired_fine_eta_relative_l1_change": 0.0008604019932443971,
+      "lowest_transition_ev": 8.240309048958622,
+      "max_residual_ha": 4.220686829576258e-15
+    },
+    {
+      "max_quanta": 32,
+      "paired_max_quanta": 28,
+      "sector_dimensions": [
+        8990,
+        561
+      ],
+      "seconds": 4.226208246982424,
+      "relative_l1_change": 0.00930306596254377,
+      "paired_relative_l1_change": 0.00024934215681529366,
+      "fine_eta_relative_l1_change": 0.04952889356092709,
+      "paired_fine_eta_relative_l1_change": 0.0008604019932443971,
+      "lowest_transition_ev": 8.240309048958622,
+      "max_residual_ha": 4.220686829576258e-15
+    },
+    {
+      "max_quanta": 36,
+      "paired_max_quanta": 28,
+      "sector_dimensions": [
+        8990,
+        703
+      ],
+      "seconds": 4.144144534977386,
+      "relative_l1_change": 0.0011123143450405674,
+      "paired_relative_l1_change": 0.00024934215681529366,
+      "fine_eta_relative_l1_change": 0.006886343000970136,
+      "paired_fine_eta_relative_l1_change": 0.0008604019932443971,
+      "lowest_transition_ev": 8.240309048958622,
+      "max_residual_ha": 4.220686829576258e-15
+    },
+    {
+      "max_quanta": 40,
+      "paired_max_quanta": 28,
+      "sector_dimensions": [
+        8990,
+        861
+      ],
+      "seconds": 4.3360484190052375,
+      "relative_l1_change": 8.689056652762157e-05,
+      "paired_relative_l1_change": 0.00024934215681529366,
+      "fine_eta_relative_l1_change": 0.0005542148441502587,
+      "paired_fine_eta_relative_l1_change": 0.0008604019932443971,
+      "lowest_transition_ev": 8.240309048958622,
+      "max_residual_ha": 4.220686829576258e-15
+    }
+  ],
+  "probe_energy_ev": 8.993257770646395,
+  "probe_absorption_mb": 1.1853232491636945,
+  "probe_max_quanta": 4,
+  "probe_differentiation": "linear vertex scale at fixed H_X, phonon energies, dipoles and finite basis",
+  "coupling_scale_derivative_mb": 152.67699523149543,
+  "coupling_scale_finite_difference_mb": 152.67687317238597,
+  "wall_seconds": 347.8890532819787
+}

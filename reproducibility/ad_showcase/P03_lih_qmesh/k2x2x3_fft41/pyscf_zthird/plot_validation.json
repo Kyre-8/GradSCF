@@ -1,0 +1,31 @@
+{
+  "complete": true,
+  "passed": true,
+  "input_sha256": "43389fc6fb1d55b4c13b26114566d3273b8affa52393ad124d674a6e16f7935e",
+  "native_sha256": "c9cfed30effa25eba88b4a800c2d456dddd1bd7b4457a24716da5c8d369ab68c",
+  "script_sha256": "6a060dd0fdd8a7b69a3ca14ce99f25e5e1d54cef87074fb744eb5fa9f304ba71",
+  "errors_hartree_per_bohr2": [
+    [
+      2.4991975270168316e-09,
+      2.8702878014620953e-08
+    ],
+    [
+      4.672911870504058e-09,
+      2.864251556804185e-08
+    ],
+    [
+      3.5860543277889806e-09,
+      2.867269676299174e-08
+    ]
+  ],
+  "patterns": [
+    "cosine",
+    "sine",
+    "combined"
+  ],
+  "steps_bohr": [
+    0.0003,
+    0.0001
+  ],
+  "scope": "Independent complex H-x action at the specified q/model; not independent validation of all q-mesh matrix columns."
+}

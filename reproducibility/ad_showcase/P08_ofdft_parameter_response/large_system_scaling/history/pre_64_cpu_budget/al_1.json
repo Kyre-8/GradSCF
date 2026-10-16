@@ -1,0 +1,167 @@
+{
+  "complete": true,
+  "repeat": 1,
+  "atom_count": 1,
+  "mesh": [
+    17,
+    17,
+    17
+  ],
+  "model": "WGC99 second-order + Hartree + OEPP + PZ-LDA",
+  "forces_validated": false,
+  "source_sha256": "0ce87d1a6e6f86c4847f7139eae5996fa3557310da63612e84e91b1a55914a2c",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "backend": "gpu",
+  "device_kinds": [
+    "NVIDIA GeForce RTX 5090"
+  ],
+  "dtype": "float64",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "0",
+    "JAX_PLATFORMS": "cuda",
+    "JAX_ENABLE_X64": "1",
+    "XLA_PYTHON_CLIENT_PREALLOCATE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2"
+  },
+  "diagnostics": {
+    "euler_rms_hartree": 9.373697935605763e-10,
+    "sphere_constraint": 2.220446049250313e-16,
+    "response_chart_constraint": 0.0,
+    "full_kkt_residual": 5.624218761363458e-09,
+    "normalized_response_residual": 1.8747395871211527e-09,
+    "forward_iterations": 308
+  },
+  "density_min": 0.0072176061125947075,
+  "density_max": 0.03020032425962418,
+  "native_euler_tolerance_hartree": 1e-09,
+  "adjoint_linear_residual": null,
+  "adjoint_diagnostic": "Unavailable from public result; implicit solver rejects unsuccessful solves with NaNs",
+  "stage": "complete",
+  "energy_hartree": -2.0873919368183866,
+  "input_preparation_seconds": 4.386849489999804,
+  "forward_timing": {
+    "lower_compile_seconds": 133.17992536600104,
+    "first_execution_seconds": 5.445893981001063,
+    "warm_seconds": [
+      5.185708033999617,
+      5.087284670000372,
+      5.058381520999319
+    ],
+    "warm_median_seconds": 5.087284670000372
+  },
+  "total_elapsed_seconds": 1122.3551598569993,
+  "energy_hartree_per_atom": -2.0873919368183866,
+  "energy_components": {
+    "kinetic": 0.7714798593257579,
+    "external": 0.5170304479333763,
+    "hartree": 0.0037792274910053185,
+    "xc": -0.7760937740906301,
+    "nuclear": -2.603587697477896
+  },
+  "electron_number": 3.0000000000000004,
+  "density_response_rms": 0.0539933032709261,
+  "relative_electron_number_response": 6.066998755234939e-13,
+  "adjoint_identity_error": 1.1368683772161603e-13,
+  "vjp": [
+    -2.2676240367638614,
+    -0.5442975814021551
+  ],
+  "hvp": [
+    -3.784403522918952,
+    -5.3454464627876455
+  ],
+  "directional_energy_curvature": -6.546999283981487,
+  "finite_differences": [
+    {
+      "step_hartree": 0.001,
+      "density_jvp_relative_l2_error": 8.266762343451097e-06,
+      "energy_curvature_per_atom": -6.546976720755993,
+      "energy_curvature_error_per_atom": 2.256322549420986e-05
+    },
+    {
+      "step_hartree": 0.0003,
+      "density_jvp_relative_l2_error": 7.440113998141277e-07,
+      "energy_curvature_per_atom": -6.546997245572408,
+      "energy_curvature_error_per_atom": 2.0384090788638787e-06
+    },
+    {
+      "step_hartree": 0.0001,
+      "density_jvp_relative_l2_error": 8.265395790936087e-08,
+      "energy_curvature_per_atom": -6.546999031797895,
+      "energy_curvature_error_per_atom": 2.5218359134271395e-07
+    }
+  ],
+  "timings": {
+    "forward": {
+      "lower_compile_seconds": 133.17992536600104,
+      "first_execution_seconds": 5.445893981001063,
+      "warm_seconds": [
+        5.185708033999617,
+        5.087284670000372,
+        5.058381520999319
+      ],
+      "warm_median_seconds": 5.087284670000372
+    },
+    "jvp_including_forward": {
+      "lower_compile_seconds": 146.04918165299932,
+      "first_execution_seconds": 11.368700811999588,
+      "warm_seconds": [
+        10.798186115000135,
+        10.447450317000403,
+        10.495877268000186
+      ],
+      "warm_median_seconds": 10.495877268000186
+    },
+    "vjp_preparation_seconds": 141.67734224899868,
+    "vjp_pullback_only": {
+      "lower_compile_seconds": 24.3481704980004,
+      "first_execution_seconds": 5.131534942000144,
+      "warm_seconds": [
+        4.85069345500051,
+        4.959289585000079,
+        4.8685617099999945
+      ],
+      "warm_median_seconds": 4.8685617099999945
+    },
+    "vjp_including_forward": {
+      "lower_compile_seconds": 198.66558139900008,
+      "first_execution_seconds": 10.72365794399957,
+      "warm_seconds": [
+        10.194151346999206,
+        9.960220605998984,
+        10.155381227999897
+      ],
+      "warm_median_seconds": 10.155381227999897
+    },
+    "hvp_including_forward": {
+      "lower_compile_seconds": 223.09896487200058,
+      "first_execution_seconds": 19.36331750499994,
+      "warm_seconds": [
+        19.405263103000834,
+        19.50586287599981,
+        19.45467290799934
+      ],
+      "warm_median_seconds": 19.45467290799934
+    }
+  },
+  "process_peak_rss_kib": 5822612,
+  "devices": [
+    "cuda:0"
+  ],
+  "probe_seed": 1729,
+  "probe_normalization": "each potential column zero mean, unit RMS; path norm 1",
+  "direction": [
+    0.6,
+    0.8
+  ],
+  "pseudopotential": {
+    "file": "Al_lda.oe01.recpot",
+    "sha256": "7104d4d2c41f2564e31cc6c6fd6e077125147cd099a27271133230b45d094375",
+    "source_commit": "fbc47b4e1df3def1a2206e58c5a1a1a4d51db1d0",
+    "source_path": "examples/DATA/Al_lda.oe01.recpot"
+  },
+  "scope": "Fixed-ion periodic Al; no force/stress validation and no claim of near-linear total cost"
+}

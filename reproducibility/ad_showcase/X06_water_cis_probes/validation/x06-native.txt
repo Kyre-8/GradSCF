@@ -1,0 +1,10 @@
+geometry 0 last FD error 8.887100777510426e-10
+geometry 1 last FD error 2.4218121986996355e-09
+geometry 2 last FD error 9.175721432663764e-10
+amplitude 0 last FD error 6.725430073961647e-10
+amplitude 1 last FD error 9.17799558575183e-10
+amplitude 2 last FD error 7.91950477418979e-10
+reference_rotation 0 last FD error 3.0826156183867345e-10
+reference_rotation 1 last FD error 2.0574123654748533e-10
+reference_rotation 2 last FD error 1.0191684302052195e-11
+X06 native probe gates passed 65.59400820999872 s

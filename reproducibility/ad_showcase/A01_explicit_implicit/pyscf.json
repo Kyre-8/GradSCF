@@ -1,0 +1,216 @@
+{
+  "complete": true,
+  "passed": true,
+  "cases": [
+    {
+      "method": "HF",
+      "values": [
+        -1.126435110650481,
+        0.0,
+        0.0,
+        0.013343485178790089
+      ],
+      "value_errors": {
+        "explicit_energy": 4.440892098500626e-16,
+        "explicit_dipole_z": 5.0693824138470234e-14,
+        "implicit_energy": 4.440892098500626e-16,
+        "implicit_dipole_z": 5.0693824138470234e-14
+      },
+      "finite_difference_checks": [
+        {
+          "step_theta": 0.02,
+          "jacobian_theta": [
+            [
+              0.0017350342493172022,
+              -6.671742390773616e-05
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0014242045571574973,
+              0.033357914644371184
+            ]
+          ],
+          "errors": {
+            "explicit_energy": 8.091577798595428e-08,
+            "explicit_dipole_z": 9.643548667948032e-10,
+            "implicit_energy": 8.091577796318604e-08,
+            "implicit_dipole_z": 9.643548598559093e-10
+          }
+        },
+        {
+          "step_theta": 0.007,
+          "jacobian_theta": [
+            [
+              0.0017351052528884786,
+              -6.671742558417293e-05
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.001424204618249669,
+              0.033357915453071214
+            ]
+          ],
+          "errors": {
+            "explicit_energy": 9.912206709507959e-09,
+            "explicit_dipole_z": 1.5565483624246923e-10,
+            "implicit_energy": 9.912206686739714e-09,
+            "implicit_dipole_z": 1.5565482930357533e-10
+          }
+        },
+        {
+          "step_theta": 0.002,
+          "jacobian_theta": [
+            [
+              0.0017351143554167336,
+              -6.671742636132905e-05
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0014242042994110256,
+              0.03335791538999246
+            ]
+          ],
+          "errors": {
+            "explicit_energy": 8.096784544914248e-10,
+            "explicit_dipole_z": 2.3524589979999344e-10,
+            "implicit_energy": 8.096784317231792e-10,
+            "implicit_dipole_z": 2.3524589979999344e-10
+          }
+        }
+      ],
+      "passed": true
+    },
+    {
+      "method": "PBE",
+      "values": [
+        -1.1610367353904474,
+        0.0,
+        0.0,
+        0.013086371348237577
+      ],
+      "value_errors": {
+        "explicit_energy": 1.3722356584366935e-13,
+        "explicit_dipole_z": 6.846195485521456e-12,
+        "implicit_energy": 1.376676550535194e-13,
+        "implicit_dipole_z": 6.8462197716501194e-12
+      },
+      "finite_difference_checks": [
+        {
+          "step_theta": 0.02,
+          "jacobian_theta": [
+            [
+              -0.00012501603084968949,
+              -6.543185473439905e-05
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0012381123621914899,
+              0.0327151340353455
+            ]
+          ],
+          "errors": {
+            "explicit_energy": 4.399301490633223e-08,
+            "explicit_dipole_z": 7.468714780748537e-10,
+            "implicit_energy": 4.399301490714538e-08,
+            "implicit_dipole_z": 7.468713527410825e-10
+          }
+        },
+        {
+          "step_theta": 0.007,
+          "jacobian_theta": [
+            [
+              -0.0001249774269312149,
+              -6.54318564726911e-05
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0012381117030674385,
+              0.032715135558889136
+            ]
+          ],
+          "errors": {
+            "explicit_energy": 5.389096431748178e-09,
+            "explicit_dipole_z": 9.18716200337677e-10,
+            "implicit_energy": 5.38909643256133e-09,
+            "implicit_dipole_z": 9.187161864598892e-10
+          }
+        },
+        {
+          "step_theta": 0.002,
+          "jacobian_theta": [
+            [
+              -0.000124972478032781,
+              -6.543185648855143e-05
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.001238111136425777,
+              0.03271513393354915
+            ]
+          ],
+          "errors": {
+            "explicit_energy": 4.401979978446713e-10,
+            "explicit_dipole_z": 7.066237872610515e-10,
+            "implicit_energy": 4.401979986578229e-10,
+            "implicit_dipole_z": 7.066238011388393e-10
+          }
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "pyscf_version": "2.13.0",
+  "hostname": "c20",
+  "native_sha256": "84c2cf502eb0d5bb8f8c46d2f99d5f75a2364fdd9641718c975c53dd842598c5",
+  "reference_script_sha256": "6242ca13bfa55e52918f850d836385c2e64e454802d189adfb2e01b13f01c444",
+  "field_reference_sha256": "a52a303272b55c3cfb7120153867b6701010cee9db2f97fc9df6b65561906d84",
+  "value_tolerances": {
+    "energy": 1e-08,
+    "dipole_z": 1e-07
+  },
+  "gradient_theta_atol": 2e-06,
+  "energy_definition": "Electronic finite-field SCF plus Enuc minus F dot sum(ZR); no common GradSCF arrays.",
+  "elapsed_seconds": 1.7832410319824703
+}

@@ -1,0 +1,69 @@
+{
+  "grid_shape": [
+    65,
+    80,
+    79
+  ],
+  "grid_bounds_bohr": [
+    [
+      -8.0,
+      8.0
+    ],
+    [
+      -9.762836506413908,
+      9.762836506413908
+    ],
+    [
+      -9.10154250528496,
+      10.286568610723725
+    ]
+  ],
+  "grid_spacing_bohr": [
+    0.25,
+    0.2471604178838973,
+    0.24856552712831714
+  ],
+  "isovalue_electrons_per_bohr3": 0.003,
+  "boundary_maxima": {
+    "relaxed_difference": 7.622224626821176e-06,
+    "unrelaxed_difference": 7.182998036199846e-06,
+    "attachment": 7.1830039737671e-06,
+    "detachment": 1.0511776069951206e-09
+  },
+  "finite_box_uniform_grid_integrals": {
+    "relaxed_difference": -0.0007660396853527143,
+    "unrelaxed_difference": -0.0008469941387896554,
+    "attachment": 0.9994534461323368,
+    "detachment": 1.0003004402711269
+  },
+  "integral_scope": "Visualization-grid diagnostics only; electron-count gates use exact AO metric traces",
+  "surface_triangle_counts": [
+    8928,
+    8640
+  ],
+  "common_display_limits_angstrom": [
+    [
+      -1.9424025635089484,
+      1.9424025635089484
+    ],
+    [
+      -1.9424027161943855,
+      1.9424024108235112
+    ],
+    [
+      -1.509239974592194,
+      2.3755651524257027
+    ]
+  ],
+  "native_sha256": "e38a21f585bede907eb06d300bdae0d841a29bde13745abfa92860e2b7633b0e",
+  "reference_sha256": "5493fcdac6b9f0e8d1d4a6726f91a3229448678bf72733062b522e993dcc0e00",
+  "elapsed_seconds": 11.973225787980482,
+  "hostname": "c20",
+  "package_versions": {
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.9",
+    "scikit-image": "0.25.2"
+  },
+  "script_sha256": "0691325e2757187b196c843c38404bf3ea339ef9cc5a99a4b80d3ec4e49fbffb",
+  "volume_helper_sha256": "2716c9ee63f18302b7adcbed328ebe03c368ed7de6264c7eea0eac686d909e80"
+}

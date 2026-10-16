@@ -26,6 +26,8 @@ class QuadratureGrid:
         "runtime_scf_options",
         "hfx_nu_api",
         "response_df_metadata",
+        "range_separated_coefficients",
+        "xc_density_floor",
     )
 )
 @dataclass(frozen=True)
@@ -71,6 +73,14 @@ class RestrictedMolecule:
     scf_cycles: int | None = None
     runtime_scf_backend: str | None = None
     runtime_scf_options: Any | None = None
+    eri_lr: jnp.ndarray | None = None
+    dispersion_energy: jnp.ndarray | None = None
+    range_separated_coefficients: tuple[float, float, float] | None = None
+    xc_density_floor: float = 1e-12
+    # Optional real AO Fock matrix for noncanonical restricted TD response.
+    # A dynamic pytree leaf: occupied/virtual projections retain input AD.
+    # None preserves the canonical mo_energy-difference contract.
+    fock_matrix: jnp.ndarray | None = None
 
     def density(self) -> jnp.ndarray:
         return jnp.einsum("spq,rp,rq->rs", self.rdm1, self.ao, self.ao)
@@ -123,6 +133,9 @@ class UnrestrictedMolecule:
     scf_cycles: int | None = None
     runtime_scf_backend: str | None = None
     runtime_scf_options: Any | None = None
+    eri_lr: jnp.ndarray | None = None
+    dispersion_energy: jnp.ndarray | None = None
+    range_separated_coefficients: tuple[float, float, float] | None = None
 
     @property
     def eri_pair_matrix(self):

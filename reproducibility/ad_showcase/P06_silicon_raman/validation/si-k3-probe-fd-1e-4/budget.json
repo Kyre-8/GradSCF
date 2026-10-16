@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "-c",
+    "from silicon_raman import SETTINGS; from check_silicon_raman import run_finite_difference; run_finite_difference(1e-4,'k3_fft15',dict(SETTINGS,kmesh=[3]*3),use_probe=True)"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 12133704,
+  "budget_kib": 33554432,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true,
+  "elapsed_seconds": 432.23951915199996
+}

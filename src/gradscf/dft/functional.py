@@ -106,14 +106,25 @@ class Functional:
     densities and a real energy per cell. Include all desired baseline XC in
     energy_fn; no separate hybrid fraction or implicit baseline is added.
     Molecular TD response uses the adiabatic Hessian. Periodic external models
-    support static q=0 DFPT; their TD, band-query and hybrid operators are not
-    inferred from a scalar energy callback.
+    support static q=0 DFPT. Finite q additionally requires q_energy_fn; TD,
+    band-query and hybrid operators are not inferred from a scalar callback.
+
+    q_energy_fn(params, periodic_inputs, reference_density, transfer, delta_q)
+    optionally supplies a real XC energy per primitive cell for the physical
+    density D + Z_q + Z_q.adjoint(), with delta_q[s,k] the row k+q / column k
+    blocks of Z_q. It must agree with energy_fn at delta_q=0 and describe the
+    same translation-invariant functional on the commensurate supercell.
+    Include BOTH q and -q terms even when q is self-inverse; no factor of 1/2
+    is applied to Z_q. The callback receives raw periodic arrays, not input_fn
+    features: diagonal-k features alone do not define a finite-q extension.
+    GradSCF derives the kernel by AD, including feature/parameter derivatives.
     """
     input_fn: Callable
     energy_fn: Callable
     init_fn: Callable | None = None
     name: str = 'external_xc'
     exact_exchange_fraction: float = 0.0
+    q_energy_fn: Callable | None = None
     include_hfx_channel: ClassVar[bool] = False
     require_converged_scf: ClassVar[bool] = True
 
@@ -167,6 +178,11 @@ class Functional:
     def kernel_action(self, params, molecule, density, tangent):
         return xc_kernel_action(params, molecule=molecule, density=density,
             tangent=tangent, xc_energy_fn=self.energy_for_density,density_weights=_density_weights(molecule,density))
+
+    def q_kernel_action(self, params, inputs, density, transfer, tangent):
+        """Complex-linear nonzero-q XC Hessian action from q_energy_fn."""
+        from ..pbc.functional import finite_q_kernel
+        return finite_q_kernel(self,params,inputs,density,transfer)(tangent)
 
     def bind_to_molecule_for_response(self, params, molecule):
         return _BoundFunctional(self, params)

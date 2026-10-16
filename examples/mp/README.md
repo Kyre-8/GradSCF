@@ -1,5 +1,11 @@
 # Moller--Plesset examples
 
+[A04 showcase evidence](../../reproducibility/ad_showcase/A04_taylor_mp/README.md)
+links the historical convergence report and figures, current small H6/water
+Taylor-MP checks, and the retained resource failure of the new full MP30 attempt.
+The current small checks do not relabel the historical MP30/atomic figures as
+successful new remote runs.
+
 Run scripts from the repository root with `PYTHONPATH=src`; numerical examples
 enable JAX float64. Native calculations require a built CPU integral library.
 PySCF is used only where an independent comparison is explicitly identified.

@@ -4,6 +4,17 @@ The native periodic path uses Cartesian Gaussian orbitals, GTH pseudopotentials
 and FFT Coulomb integration on neutral 3D cells. Orbital basis data are offline;
 see [basis provenance and coverage](../integrals/periodic/NOTICE.md).
 
+The [development acceptance ledger](ROADMAP.md#status-review-2026-10-15)
+records the completed stage-1 scope, 21 remaining acceptance items across
+stages 2–5, implementation ownership, dependencies and outstanding validation.
+
+[Projected phonons and vibrational spectra](VIBRATIONS.md) document the shared
+force-response projection, local energy-expansion tools and relative loss/gain
+spectra used by the [thermally excited graphite example](../../../examples/thermally_excited_graphite/README.md).
+
+[Periodic r2SCAN](META_GGA.md) describes the orbital kinetic-density convention,
+shared meta-GGA potential/kernel assembly and finite-q geometry response.
+
 ## Sampling and weights
 
 ```python
@@ -12,14 +23,16 @@ mf = scf.KRHF(cell, kpts=kpts).run()
 ```
 
 `shift` is in grid steps; zero preserves the original Gamma-centered convention.
-Absolute k points are in inverse Bohr, and lattice vectors are rows. SCF currently
-evaluates the **full uniform Cartesian-product mesh**, including shifted meshes.
+Absolute k points are in inverse Bohr, and lattice vectors are rows. SCF inputs
+use the **full uniform Cartesian-product mesh**, including shifted meshes.
+`symmetry=True` optionally reduces target contractions and iteration
+diagonalization as described below; source-k sums remain complete.
 `kweights` can be supplied explicitly as strictly positive normalized weights.
 The weights enter density, Hartree/exchange contractions, XC, energies, particle
 counts, entropy, and semilocal band queries. They are independent of FFT grid
 quadrature weights. Arbitrary weights do not automatically represent an
-irreducible Brillouin zone: the missing AO/Bloch transformations must also be
-implemented before evaluating only symmetry representatives.
+irreducible Brillouin zone: AO/Bloch transformations and reciprocal-space sums
+must be applied consistently before evaluating only symmetry representatives.
 
 For HF/global hybrids, `exxdiv='ewald'` retains the supercell Madelung correction
 and requires equal weights. Use `exxdiv=None` for a general weighted quadrature;
@@ -34,7 +47,7 @@ sums, not an irreducible-SCF backend or an automatic space-group finder. Users
 must supply symmetries valid for their Hamiltonian. Symmetry matching is discrete
 host preprocessing, not part of the AD graph.
 
-`KRKS(..., time_reversal=True)` (also `KRHF/KUHF/KUKS`) uses one member of
+Without `symmetry=True`, `KRKS(..., time_reversal=True)` (also `KRHF/KUHF/KUKS`) uses one member of
 each k/-k pair for SCF-iteration diagonalization and expands the density by
 complex conjugation. Input overlap/core matrices and pair weights must obey
 time reversal; external XC potentials are checked in the iteration as well.
@@ -52,6 +65,105 @@ response/correlation and GW. Coordinates are fractional reciprocal coordinates;
 the table satisfies `k[j] = k[i] - q` modulo reciprocal lattice vectors. Shifted
 k meshes generally require a separate unshifted q mesh. The former internal
 `gw.pbc.momentum` module has moved here; exports from `gw.pbc` remain available.
+
+## Spatial symmetry and AO/Bloch maps
+
+```python
+from gradscf.pbc import symmetry
+
+operations = symmetry.space_group(cell)  # optional spglib discovery
+operation = operations[0]
+k_fractional = k_absolute @ cell.lattice.T / (2 * jnp.pi)
+coefficients_rotated = operation.coefficients(k_fractional, coefficients)
+density_rotated = operation.density(k_fractional, density)
+operator_rotated = operation.operator(k_fractional, operator)
+```
+
+Install the optional `symmetry` extra for automatic discovery. Alternatively,
+`symmetry.Operation.from_cell(cell, rotation, translation)` accepts an explicit
+operation without spglib. The supplied fractional rotation must be integral,
+unimodular and an isometry of the lattice. The translation is fractional and
+may include whole lattice vectors. The geometry tolerance is a positive length
+in Bohr. GradSCF verifies the atom permutation, matching GTH potentials, shell
+types, contraction counts and actual radial parameters. It conservatively
+treats different raw basis/PP data as distinct atomic types. Floating basis
+centers and nonfinite geometry are rejected.
+
+With row lattice A and the fractional column convention of
+[spglib](https://spglib.readthedocs.io/en/stable/definition.html),
+
+\[
+x'=Wx+t,\quad Q=A^{\mathsf T}WA^{-\mathsf T},\quad k'=kW^{-1}.
+\]
+
+All operation methods consume **fractional reciprocal k vectors**, whereas
+`cell.make_kpts()` returns absolute vectors in inverse Bohr. `rotate_k()` leaves
+the result unwrapped, so it does not introduce a wrap discontinuity in AD.
+If atom i transforms into atom j plus integer lattice shift L_i, its source
+AO columns acquire phase `exp(-2*pi*1j*dot(k_prime,L_i))`. This is the native
+lattice-translation Bloch gauge, retaining both atoms outside the home cell
+and non-symmorphic translations. Shell rotations are obtained by expanding
+the Cartesian monomials; no spherical-harmonic normalization is imposed.
+
+Let T be `operation.matrix(k)`. Native Cartesian d/f shells share radial
+normalization and generally do not have Euclidean-unitary T. Therefore:
+
+\[
+C'=TC,\qquad P'=TPT^\dagger,\qquad F'=T^{-\dagger}FT^{-1}.
+\]
+
+Overlap matrices transform like F. These rules preserve `C† S C` and `Tr(P F)`.
+Using `T F T†` for a general Cartesian shell is incorrect. The methods accept
+leading spin/batch dimensions on same-k coefficients and matrices, and support
+JIT/JVP/VJP in k and their array inputs. Collinear spin blocks can be transformed
+independently; spin rotations and magnetic-state symmetry are not inferred.
+
+Discovery and atom/shell matching are discrete eager operations, not an AD
+path through changing geometry. The operation is a static snapshot;
+`operation.validate(cell)` rejects stale geometry, basis or potential data.
+Rebuild it after edits. A physical space-group operation need not preserve the
+finite FFT cutoff or quadrature grid, and a density may break crystal symmetry.
+These maps underlie the optional integration path below. They do not remove
+symmetry-breaking response directions. See
+[the AO-map example](../../../examples/pbc/periodic_symmetry.py).
+
+## Irreducible SCF integration
+
+```python
+mf = scf.KRHF(cell, kpts=kpts, symmetry=True, time_reversal=True).run()
+print(mf.reduction.representatives)
+```
+
+The same flags apply to KRKS, KUHF and KUKS. `symmetry=True` discovers spatial
+operations with spglib; `time_reversal=True` additionally permits their
+antiunitary compositions. The array-level SCF accepts an explicit
+`pbc.reduction.SpatialReduction.from_cell(cell, kpts, operations=...)` plan
+without spglib. Its constructor takes absolute Cartesian k points.
+
+Only operations preserving the actual finite reciprocal box, real FFT grid,
+unwrapped k mesh and k weights are retained. Reciprocal-lattice folding that
+changes the finite plane-wave set is not treated as an exact symmetry.
+Automatic discovery can therefore return identity only. Explicit incompatible
+operations are rejected. Density checks include representative stabilizers,
+not just mappings between distinct k points.
+
+During SCF iterations, J/K and built-in XC matrix projection are evaluated only
+at representative targets. One-body and J/K energy traces and occupation sums
+use orbit-summed weights. The Hartree grid density, exchange source-k sum and
+XC grid energy still use the full density. External XC energy/potential AD also
+retains its full input, and its potential must satisfy the declared symmetry.
+Full Fock matrices are reconstructed with the covariant operator map; density
+matrices use the distinct contravariant map above. A broken symmetry is rejected
+or produces a nonconverged/nonfinite array result, never silently projected.
+
+Full AO arrays, one-body input construction and final reported orbitals remain
+on the complete mesh. The final energy, Fock and fixed point are certified there.
+Implicit backward differentiates the full residual, preserving symmetry-breaking
+response. Explicit differentiation of reduced iterations requires perturbations
+that preserve the declared symmetry and finite sampling. Rebuild static plans
+after geometry/basis edits; symmetry discovery itself is not differentiated.
+These are target-contraction savings, not a claim of full input compression or
+an end-to-end speedup. See [the SCF example](../../../examples/pbc/periodic_irreducible.py).
 
 ## Finite-temperature SCF
 
@@ -138,6 +250,13 @@ The bounded supercell path remains an independent reference and supports OFDFT.
 Primitive response still requires an equal-weight closed k mesh and FFT
 convergence; full AO contractions and k-pair exchange work remain.
 
+`Phonons.mesh(qmesh, method='primitive')` samples unweighted force constants and
+returns a `ForceConstants` object for shortest-image Fourier interpolation,
+band paths and Gaussian DOS. The input q mesh must close on the reference k
+mesh. Raw ASR diagnostics are retained; Gamma projection is opt-in and imaginary
+frequencies stay visible. See [IFC conventions, units and validation](IFC.md)
+for the phase gauge, numerical postprocessing boundary and polar limitations.
+
 ### External XC functionals
 
 The same `dft.Functional(input_fn, energy_fn)` used for molecules accepts
@@ -168,11 +287,22 @@ For parameter training, use `pbc.scf.run_kpoint_scf(..., functional=..., params=
 and `dfpt.periodic_problem(inputs, result, ..., functional=..., params=...)`
 inside the differentiated function. Model parameters are explicit leaves of
 the SCF/response residual. Fixed-density, explicit and implicit energy training
-are demonstrated in `examples/training/periodic_xc.py`; the molecular `Trainer`
-facade is not yet a periodic sample adapter. Rebuild response snapshots after
+are demonstrated with the shared `training.Sample`/`training.Trainer` in
+`examples/training/periodic_xc.py`, for energy and grid-density labels.
+Rebuild response snapshots after
 changing parameters. Response-loss parameter gradients are tested for
 nondegenerate thermal references; this does not extend the higher-derivative
 guarantees at degeneracy.
+
+For finite-q response, supply
+`Functional(..., q_energy_fn=...)`: a real XC energy per primitive cell for the
+physical density `D + Z_q + Z_q†`. An arbitrary diagonal-k callback alone does
+not define this extension. GradSCF obtains the complex-linear response kernel
+from its AD Hessian action, including the self-inverse-q normalization, and
+retains parameter and reference-density derivatives. `dfpt.DFPT(mf, q=q)` uses
+the model and parameters of the converged reference. See the
+[energy contract and derivation](../dfpt/FINITE_Q.md#external-energy-functionals)
+and [example](../../../examples/dfpt/03_external_finite_q.py).
 
 `dfpt.DFPT(mf).response(potential=...)` supports static q=0 thermal response using
 the Fermi-density residual, including changes of occupations and chemical
@@ -239,7 +369,7 @@ convergence separately. For the off-grid H2 regression, the largest residual
 total-force component decreases from `1.18e-5` at mesh 31 cubed to
 `2.82e-8 Eh/Bohr` at mesh 41 cubed; rigid-translation energy differences reproduce
 the residual. No artificial zero-force projection is applied.
-`examples/periodic_forces.py` demonstrates HF and OFDFT.
+`examples/pbc/periodic_forces.py` demonstrates HF and OFDFT.
 
 ## Validation and remaining steps
 
@@ -250,12 +380,38 @@ PySCF Fermi-smearing energy/free-energy/entropy/occupation comparisons. Al stati
 response is checked against independently perturbed SCF solutions. Optional
 `jax_xc` comparisons remain separate from the handwritten PBE tests.
 
-`examples/periodic_temperature.py` demonstrates FCC Al with a small shifted mesh,
+`examples/pbc/periodic_temperature.py` demonstrates FCC Al with a small shifted mesh,
 free-energy AD and q=0 response. Its coarse sampling is an API demonstration,
 not a material convergence benchmark.
 
-The next foundation work remains physical space-group/AO transformations,
-irreducible J/K evaluation and periodic Trainer sample adapters.
-Native finite-q OFDFT phonons, Born charges/LO-TO corrections, general phonon
-interpolation, metallic TD/GW/BSE, other smearing schemes, SOC and
-macroscopic Berry-phase fields are not supplied by this increment.
+The shared `training.Sample`/`training.Trainer` now accepts periodic snapshots
+through `mf.to_reference()`, preserving fixed-density, explicit and implicit
+modes. External `dft.Functional` models support energy and grid-density labels;
+energy labels mean internal E/cell even at finite temperature. See the
+[training contract](../model/neural_xc/training/README.md#periodic-references)
+and [example](../../../examples/training/periodic_xc.py).
+
+Stage 1 is complete within the scalar, neutral 3D Gaussian/GTH scope above.
+The next roadmap gate is stage 2: independent material force/stress comparisons,
+basis/FFT/k convergence and explicit SCF branch tracking. See [ROADMAP.md](ROADMAP.md)
+for the acceptance ledger and numerical evidence.
+Native finite-q OFDFT phonons, metallic TD/GW/BSE, other smearing schemes and
+SOC remain outside this increment. Insulating full-mesh Berry polarization
+now supplies fixed-cell Born response and a genuine static macroscopic-field
+electric enthalpy through `gradscf.dfpt.electric`. See the independent
+[Born](../../../reproducibility/ad_showcase/P04_lih_born/README.md) and
+[dielectric](../../../reproducibility/ad_showcase/P04_lih_dielectric/README.md)
+verification records. The [Gamma infrared kernels](INFRARED.md) consume
+matched Born/epsilon/phonon data and provide directional nonanalytic
+corrections; they do not implement finite-q polar IFC subtraction/restoration.
+The separate `pbc.polar_ifc` module now supplies that decomposition through
+`DipoleCorrection` and `PolarForceConstants`, reusing the existing Fourier
+IFC implementation. Its fixed reciprocal sum, directional Gamma limits and
+q/parameter response passed manufactured-model and independent pinned-Phonopy
+checks; see the [numerical capsule](../../../reproducibility/ad_showcase/P05_polar_interpolation/README.md).
+This does not yet establish a converged polar material dispersion. The eager
+IFC construction does not differentiate through the input SCF calculations.
+Material basis/k convergence, matching input checks and branch restrictions
+remain required; general Taylor or material mixed-response coverage is not
+claimed by the separate [small-system mixed tests](../../../reproducibility/ad_showcase/P04_electric_mixed/README.md).
+Nonpolar Fourier interpolation, dispersion and DOS are described in [IFC.md](IFC.md).

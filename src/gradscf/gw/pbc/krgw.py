@@ -45,6 +45,17 @@ from .product_basis import gamma_product_factors
 from .q0 import screened_w_imag_axis_head_wing, transition_moments_gamma
 
 
+def _validate_gw_reference(mf):
+    from ...dft.libxc_jax.jax_libxc import hybrid_coeff
+    from ...pbc.scf import validate_reference
+
+    validate_reference(mf)
+    if mf.exxdiv != "ewald" and hybrid_coeff(mf.xc) != 0:
+        raise NotImplementedError(
+            "Periodic GW currently requires Ewald exchange for HF/hybrid references."
+        )
+
+
 def g0w0_cd_gamma(
     *,
     inputs,
@@ -192,8 +203,7 @@ class KRGW:
 
     def kernel(self, orbs: Sequence[int] | None = None):
         mf = self._scf
-        from ...pbc.scf import validate_reference
-        validate_reference(mf)
+        _validate_gw_reference(mf)
         result = mf.result
         kpts = np.asarray(mf.kpts)
         if kpts.shape == (1, 3) and not np.any(kpts):

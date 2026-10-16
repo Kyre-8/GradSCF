@@ -42,6 +42,16 @@ PySCF is a numerical comparison dependency in tests, not a dependency of these
 production kernels. See [REFERENCES.md](REFERENCES.md) for scientific method
 attribution, which is distinct from the source-code attribution above.
 
+The restricted IP/EA Dyson endpoint contractions in `eom/properties.py` are
+adapted separately from PySCF **2.13.0**,
+[`cc/momgfccsd.py`](https://github.com/pyscf/pyscf/blob/v2.13.0/pyscf/cc/momgfccsd.py),
+`build_bra_hole`, `build_bra_part`, `build_ket_hole`, and `build_ket_part`.
+The installed upstream file SHA-256 is
+`eefcee6acdfbe5e88aaa38fc10903c2f78aa6ce3e6183b8b711f8857ad2344fb`.
+Only the physical endpoint contractions are adapted to real JAX arrays and
+the existing EOM packing. The particle-moment outer minus sign is absorbed in
+the particle ket. No moment reconstruction or numerical solver is copied.
+
 OpenMolcas was subsequently consulted for triples-method definitions and
 iteration controls. Its inspected revision and source hashes are recorded in
 [OPENMOLCAS.md](OPENMOLCAS.md). No OpenMolcas Fortran source was incorporated.

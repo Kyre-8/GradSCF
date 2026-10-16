@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "source_unchanged": true,
+  "source_python_sha256": "ca37f375d0e4cc673d1ca2e5b50f189b9047ad8bce56e00f7f397156fac3e43f",
+  "checked": "Completion, independent-native linkage, executed scripts, frozen source/binary, CPU float64/cache, positive iterations and same seed where applicable.",
+  "executed_scripts": {
+    "molecular_ad_products.py": "76e974bf39a5a45f4a62100736739a94e8b9806fb95bf2a281830852213b19ec",
+    "compare_molecular_ad_products_pyscf.py": "e1a40e079343d112886e3aff1f8c5c1e0e3cc68c823f4f895135394b171415fb",
+    "plot_molecular_ad_products.py": "704e5143d1fe98aebae3673a59eb3b6e424c598c72155091c443ddd2faa8f08b",
+    "pyscf_field_reference.py": "a52a303272b55c3cfb7120153867b6701010cee9db2f97fc9df6b65561906d84"
+  },
+  "artifacts": {
+    "gradscf.json": "12066b3cab59fce051a8b2cf4d74f2004b781c09ced2d07b44269965275f4059",
+    "hessian_theta.csv": "0e7db47f27808c92681328b3c10b62b656483176a22ba3d2c8dcc9707ec807b3",
+    "jacobian_theta.csv": "0a5efa8d14691960c45c34d2c384a70345996c72f7592cf86bb6f3df586325e3",
+    "molecular_products.pdf": "76ef1ad92be02f2ad596ac19b5698b430274aecaa763f5a71e47a5cf9f9846da",
+    "molecular_products.png": "a08d2636fbd339d6f687f9415026e2d4b1035bc9d7a72a89c20b52393cce6417",
+    "native.log": "a014a6703134d2a7e39b206d7ce68c8bd035b5a2fb0b7afeedb057e5cf20a6eb",
+    "plot.log": "6bfd7e16b657ac1e1620ec28c72ac7931cd22d7b73b0f6a7ffb9c45560229e05",
+    "plot_settings.json": "5dafcf6b90eb6e9017b019fc89943368f6c211aa5719067bcfc0961b2cc50def",
+    "pyscf.json": "3d477021ac50eeaf537f501dbf8ff70b1d2e1460de01828a2d935a9f8141450c",
+    "pyscf.log": "9b431a7d6f68cf4d09bb1a21f9fb29d5dfd39185adb038a1de504cc83f05e9ae",
+    "source_manifest.json": "91a0b5092e40e236b34ffaae239cf74964d21c3f3665f59bcb1f06645a309f38"
+  }
+}

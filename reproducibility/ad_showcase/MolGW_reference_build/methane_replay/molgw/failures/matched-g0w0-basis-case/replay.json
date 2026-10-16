@@ -1,0 +1,28 @@
+{
+  "complete": false,
+  "mode": "matched_cutoff",
+  "method": "g0w0",
+  "inputs": {
+    "gw": {
+      "original_sha256": "a5f87a84912bf5446c305a8ed17c43b8eb0ef7176f7a5af127189cad9cd3fcfd",
+      "executed_sha256": "176186b8efb2f6dd5a66244ce900306a1e810f271c39672733e9822409f10ffa",
+      "adaptation": "basis_path only"
+    }
+  },
+  "stage_seconds": {},
+  "executable_sha256": {
+    "gw": "a91a590b5402e5ae265adecee607e158b8fba1e29e40be41acba3a1a5d899fa9",
+    "bse": "a91a590b5402e5ae265adecee607e158b8fba1e29e40be41acba3a1a5d899fa9"
+  },
+  "native_sha256": null,
+  "native_comparison": "pending",
+  "script_sha256": "9b75e2f2f5e63528d418086f2bf3a18db1f844ebca008eb5d11e4f00ebced2f9",
+  "recorded_utc": "2026-10-15T19:54:05.733867+00:00",
+  "boundary": "Fresh execution of historical parameters; default RI truncation is a different approximation, not a matched-equation pass.",
+  "elapsed_seconds": 0.04012734899879433,
+  "output_sha256": {
+    "gw.in": "176186b8efb2f6dd5a66244ce900306a1e810f271c39672733e9822409f10ffa",
+    "gw.out": "01a7c2915ceeb36a39f00cda12725401819f9cc41641caf845e4c8ca12dda33d",
+    "molgw.yaml": "796cf465cbe9fa294ca7892b8eb8bfd6db88a59f2727f63702bb593282408529"
+  }
+}

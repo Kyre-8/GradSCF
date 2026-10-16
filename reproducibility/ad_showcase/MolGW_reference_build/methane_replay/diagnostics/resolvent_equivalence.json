@@ -1,0 +1,1581 @@
+{
+  "passed": true,
+  "errors": {
+    "imaginary": {
+      "max_absolute_hartree": 9.769962616701378e-15,
+      "max_scaled": 9.769962616701378e-15
+    },
+    "static": {
+      "max_absolute_hartree": 8.43769498715119e-15,
+      "max_scaled": 8.43769498715119e-15
+    },
+    "real": {
+      "max_absolute_hartree": 3.402169455914192e-10,
+      "max_scaled": 1.4612969414700101e-10
+    }
+  },
+  "limits": {
+    "imaginary_scaled": 1e-10,
+    "static_scaled": 1e-10,
+    "real_scaled": 1e-08,
+    "scaled_backward_residual": 1e-12
+  },
+  "direct_residuals": [
+    {
+      "frequency_hartree": 1.7982825473264292e-05,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7181237509627045e-16,
+      "scaled_backward_residual": 4.4667700770325886e-17
+    },
+    {
+      "frequency_hartree": 9.476013532945743e-05,
+      "real_axis": false,
+      "rhs_relative_residual": 3.812142859242062e-16,
+      "scaled_backward_residual": 4.5797199782451993e-17
+    },
+    {
+      "frequency_hartree": 0.00023292799208402668,
+      "real_axis": false,
+      "rhs_relative_residual": 4.719176875805618e-16,
+      "scaled_backward_residual": 5.669385755832742e-17
+    },
+    {
+      "frequency_hartree": 0.0004325849487299279,
+      "real_axis": false,
+      "rhs_relative_residual": 4.314947099709565e-16,
+      "scaled_backward_residual": 5.183763953949184e-17
+    },
+    {
+      "frequency_hartree": 0.0006938329031454508,
+      "real_axis": false,
+      "rhs_relative_residual": 3.1685317755933987e-16,
+      "scaled_backward_residual": 3.8065170833768337e-17
+    },
+    {
+      "frequency_hartree": 0.0010168012578556803,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4568232490452895e-16,
+      "scaled_backward_residual": 4.152855721583383e-17
+    },
+    {
+      "frequency_hartree": 0.0014016493161394265,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7256753591870125e-16,
+      "scaled_backward_residual": 4.475840466280053e-17
+    },
+    {
+      "frequency_hartree": 0.0018485668700355352,
+      "real_axis": false,
+      "rhs_relative_residual": 3.928435646585252e-16,
+      "scaled_backward_residual": 4.719425201470833e-17
+    },
+    {
+      "frequency_hartree": 0.00235777451126879,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8489983744962367e-16,
+      "scaled_backward_residual": 4.623991294477226e-17
+    },
+    {
+      "frequency_hartree": 0.00292952390017309,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8617865729524015e-16,
+      "scaled_backward_residual": 4.639351612112573e-17
+    },
+    {
+      "frequency_hartree": 0.0035640980450284193,
+      "real_axis": false,
+      "rhs_relative_residual": 4.082480466205379e-16,
+      "scaled_backward_residual": 4.9044778970874385e-17
+    },
+    {
+      "frequency_hartree": 0.00426181160689632,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8565406222564524e-16,
+      "scaled_backward_residual": 4.6330406143432096e-17
+    },
+    {
+      "frequency_hartree": 0.005023011235349483,
+      "real_axis": false,
+      "rhs_relative_residual": 4.504582450993459e-16,
+      "scaled_backward_residual": 5.411555667870238e-17
+    },
+    {
+      "frequency_hartree": 0.005848075937534381,
+      "real_axis": false,
+      "rhs_relative_residual": 3.600611516610841e-16,
+      "scaled_backward_residual": 4.3255674182701924e-17
+    },
+    {
+      "frequency_hartree": 0.006737417482001339,
+      "real_axis": false,
+      "rhs_relative_residual": 5.038301503880464e-16,
+      "scaled_backward_residual": 6.052712009480445e-17
+    },
+    {
+      "frequency_hartree": 0.007691480838387046,
+      "real_axis": false,
+      "rhs_relative_residual": 3.6908875078388115e-16,
+      "scaled_backward_residual": 4.4339979028196205e-17
+    },
+    {
+      "frequency_hartree": 0.00871074465392423,
+      "real_axis": false,
+      "rhs_relative_residual": 4.4208483248178456e-16,
+      "scaled_backward_residual": 5.3109089147209264e-17
+    },
+    {
+      "frequency_hartree": 0.009795721767744528,
+      "real_axis": false,
+      "rhs_relative_residual": 3.6497726363560853e-16,
+      "scaled_backward_residual": 4.384573188635649e-17
+    },
+    {
+      "frequency_hartree": 0.010946959763974622,
+      "real_axis": false,
+      "rhs_relative_residual": 4.1152406815246097e-16,
+      "scaled_backward_residual": 4.943729519596552e-17
+    },
+    {
+      "frequency_hartree": 0.012165041564683333,
+      "real_axis": false,
+      "rhs_relative_residual": 3.984851454651845e-16,
+      "scaled_backward_residual": 4.787063403648025e-17
+    },
+    {
+      "frequency_hartree": 0.013450586063806459,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4562063350644143e-16,
+      "scaled_backward_residual": 4.1519668389573544e-17
+    },
+    {
+      "frequency_hartree": 0.01480424880325358,
+      "real_axis": false,
+      "rhs_relative_residual": 4.2713781045222553e-16,
+      "scaled_backward_residual": 5.131200042038251e-17
+    },
+    {
+      "frequency_hartree": 0.016226722692483916,
+      "real_axis": false,
+      "rhs_relative_residual": 4.067933108062846e-16,
+      "scaled_backward_residual": 4.886759217409564e-17
+    },
+    {
+      "frequency_hartree": 0.017718738772927938,
+      "real_axis": false,
+      "rhs_relative_residual": 4.084546782266602e-16,
+      "scaled_backward_residual": 4.90666788342871e-17
+    },
+    {
+      "frequency_hartree": 0.01928106702872372,
+      "real_axis": false,
+      "rhs_relative_residual": 3.878239276046912e-16,
+      "scaled_backward_residual": 4.658782386732651e-17
+    },
+    {
+      "frequency_hartree": 0.020914517245335735,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8624192240594514e-16,
+      "scaled_backward_residual": 4.6397181305153095e-17
+    },
+    {
+      "frequency_hartree": 0.022619939917726737,
+      "real_axis": false,
+      "rhs_relative_residual": 3.416781932836593e-16,
+      "scaled_backward_residual": 4.1043375951044606e-17
+    },
+    {
+      "frequency_hartree": 0.024398227209862088,
+      "real_axis": false,
+      "rhs_relative_residual": 3.137319023587203e-16,
+      "scaled_backward_residual": 3.76857636482441e-17
+    },
+    {
+      "frequency_hartree": 0.02625031396743925,
+      "real_axis": false,
+      "rhs_relative_residual": 4.0459007069813073e-16,
+      "scaled_backward_residual": 4.859882926742014e-17
+    },
+    {
+      "frequency_hartree": 0.02817717878585493,
+      "real_axis": false,
+      "rhs_relative_residual": 3.644953387507994e-16,
+      "scaled_backward_residual": 4.378179547024808e-17
+    },
+    {
+      "frequency_hartree": 0.03017984513554923,
+      "real_axis": false,
+      "rhs_relative_residual": 3.9286736855425565e-16,
+      "scaled_backward_residual": 4.7188646624993875e-17
+    },
+    {
+      "frequency_hartree": 0.03225938254699719,
+      "real_axis": false,
+      "rhs_relative_residual": 3.1979622558664906e-16,
+      "scaled_backward_residual": 3.841083625799026e-17
+    },
+    {
+      "frequency_hartree": 0.03441690785775984,
+      "real_axis": false,
+      "rhs_relative_residual": 3.691059813017596e-16,
+      "scaled_backward_residual": 4.4332189247655205e-17
+    },
+    {
+      "frequency_hartree": 0.03665358652415285,
+      "real_axis": false,
+      "rhs_relative_residual": 3.3802201174870613e-16,
+      "scaled_backward_residual": 4.059751525267016e-17
+    },
+    {
+      "frequency_hartree": 0.03897063400024769,
+      "real_axis": false,
+      "rhs_relative_residual": 4.0868642362366027e-16,
+      "scaled_backward_residual": 4.908283841616577e-17
+    },
+    {
+      "frequency_hartree": 0.04136931718708391,
+      "real_axis": false,
+      "rhs_relative_residual": 3.683299254493043e-16,
+      "scaled_backward_residual": 4.423438150867266e-17
+    },
+    {
+      "frequency_hartree": 0.04385095595514596,
+      "real_axis": false,
+      "rhs_relative_residual": 4.118830712997172e-16,
+      "scaled_backward_residual": 4.946281073052921e-17
+    },
+    {
+      "frequency_hartree": 0.04641692474334096,
+      "real_axis": false,
+      "rhs_relative_residual": 3.770676813501175e-16,
+      "scaled_backward_residual": 4.52797832616608e-17
+    },
+    {
+      "frequency_hartree": 0.04906865423790976,
+      "real_axis": false,
+      "rhs_relative_residual": 4.026491750436651e-16,
+      "scaled_backward_residual": 4.8349299570732355e-17
+    },
+    {
+      "frequency_hartree": 0.05180763313490903,
+      "real_axis": false,
+      "rhs_relative_residual": 3.9146936873571693e-16,
+      "scaled_backward_residual": 4.7004294714588093e-17
+    },
+    {
+      "frequency_hartree": 0.05463540999012166,
+      "real_axis": false,
+      "rhs_relative_residual": 3.6815539085534043e-16,
+      "scaled_backward_residual": 4.4202334323019096e-17
+    },
+    {
+      "frequency_hartree": 0.0575535951604842,
+      "real_axis": false,
+      "rhs_relative_residual": 4.098111271789872e-16,
+      "scaled_backward_residual": 4.920053624154623e-17
+    },
+    {
+      "frequency_hartree": 0.06056386284136701,
+      "real_axis": false,
+      "rhs_relative_residual": 3.771791047987876e-16,
+      "scaled_backward_residual": 4.5279683268284554e-17
+    },
+    {
+      "frequency_hartree": 0.06366795320430353,
+      "real_axis": false,
+      "rhs_relative_residual": 3.651376353908636e-16,
+      "scaled_backward_residual": 4.383080820334608e-17
+    },
+    {
+      "frequency_hartree": 0.06686767464004406,
+      "real_axis": false,
+      "rhs_relative_residual": 3.759329849672349e-16,
+      "scaled_backward_residual": 4.512297601152005e-17
+    },
+    {
+      "frequency_hartree": 0.07016490611210349,
+      "real_axis": false,
+      "rhs_relative_residual": 4.244280721527583e-16,
+      "scaled_backward_residual": 5.093929736638789e-17
+    },
+    {
+      "frequency_hartree": 0.07356159962628847,
+      "real_axis": false,
+      "rhs_relative_residual": 4.402161299355677e-16,
+      "scaled_backward_residual": 5.2829109839384407e-17
+    },
+    {
+      "frequency_hartree": 0.07705978282202189,
+      "real_axis": false,
+      "rhs_relative_residual": 3.660472899433545e-16,
+      "scaled_backward_residual": 4.3923787828465783e-17
+    },
+    {
+      "frequency_hartree": 0.08066156169164115,
+      "real_axis": false,
+      "rhs_relative_residual": 4.128850998448325e-16,
+      "scaled_backward_residual": 4.9538585724201005e-17
+    },
+    {
+      "frequency_hartree": 0.08436912343422422,
+      "real_axis": false,
+      "rhs_relative_residual": 3.469946486683266e-16,
+      "scaled_backward_residual": 4.162797858470801e-17
+    },
+    {
+      "frequency_hartree": 0.08818473945090255,
+      "real_axis": false,
+      "rhs_relative_residual": 4.558587099833047e-16,
+      "scaled_backward_residual": 5.46810798982838e-17
+    },
+    {
+      "frequency_hartree": 0.09211076848905256,
+      "real_axis": false,
+      "rhs_relative_residual": 3.780726301035348e-16,
+      "scaled_backward_residual": 4.534425210119059e-17
+    },
+    {
+      "frequency_hartree": 0.09614965994321589,
+      "real_axis": false,
+      "rhs_relative_residual": 4.884744300994327e-16,
+      "scaled_backward_residual": 5.85766695398875e-17
+    },
+    {
+      "frequency_hartree": 0.10030395732109175,
+      "real_axis": false,
+      "rhs_relative_residual": 4.2307263617372894e-16,
+      "scaled_backward_residual": 5.072581315505508e-17
+    },
+    {
+      "frequency_hartree": 0.10457630188346874,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7274803174178965e-16,
+      "scaled_backward_residual": 4.4684388519805135e-17
+    },
+    {
+      "frequency_hartree": 0.10896943646752559,
+      "real_axis": false,
+      "rhs_relative_residual": 3.6424230960492565e-16,
+      "scaled_backward_residual": 4.3656819348849227e-17
+    },
+    {
+      "frequency_hartree": 0.11348620950352906,
+      "real_axis": false,
+      "rhs_relative_residual": 4.1779492835400374e-16,
+      "scaled_backward_residual": 5.006574397489102e-17
+    },
+    {
+      "frequency_hartree": 0.11812957923560023,
+      "real_axis": false,
+      "rhs_relative_residual": 3.9684542278333164e-16,
+      "scaled_backward_residual": 4.7545449794736386e-17
+    },
+    {
+      "frequency_hartree": 0.12290261815790694,
+      "real_axis": false,
+      "rhs_relative_residual": 3.79109205497763e-16,
+      "scaled_backward_residual": 4.541046346222218e-17
+    },
+    {
+      "frequency_hartree": 0.12780851767837542,
+      "real_axis": false,
+      "rhs_relative_residual": 3.6846043652039045e-16,
+      "scaled_backward_residual": 4.4124530449529176e-17
+    },
+    {
+      "frequency_hartree": 0.13285059302280405,
+      "real_axis": false,
+      "rhs_relative_residual": 4.383789673110514e-16,
+      "scaled_backward_residual": 5.248435147110591e-17
+    },
+    {
+      "frequency_hartree": 0.1380322883931049,
+      "real_axis": false,
+      "rhs_relative_residual": 3.3765215030411745e-16,
+      "scaled_backward_residual": 4.0414148437738475e-17
+    },
+    {
+      "frequency_hartree": 0.14335718239430695,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7555457900200987e-16,
+      "scaled_backward_residual": 4.493795172287509e-17
+    },
+    {
+      "frequency_hartree": 0.14882899374592704,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4419813544453435e-16,
+      "scaled_backward_residual": 4.1173438527706604e-17
+    },
+    {
+      "frequency_hartree": 0.15445158729435862,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7974955830090083e-16,
+      "scaled_backward_residual": 4.54115170625042e-17
+    },
+    {
+      "frequency_hartree": 0.16022898034405053,
+      "real_axis": false,
+      "rhs_relative_residual": 4.574434940251932e-16,
+      "scaled_backward_residual": 5.468365790802463e-17
+    },
+    {
+      "frequency_hartree": 0.1661653493264535,
+      "real_axis": false,
+      "rhs_relative_residual": 3.582634718473331e-16,
+      "scaled_backward_residual": 4.2811930157851526e-17
+    },
+    {
+      "frequency_hartree": 0.17226503682701014,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7409452781617684e-16,
+      "scaled_backward_residual": 4.4686479514543847e-17
+    },
+    {
+      "frequency_hartree": 0.17853255899185808,
+      "real_axis": false,
+      "rhs_relative_residual": 4.033549679570189e-16,
+      "scaled_backward_residual": 4.8162003304101623e-17
+    },
+    {
+      "frequency_hartree": 0.18497261333741896,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4090109549281356e-16,
+      "scaled_backward_residual": 4.068714356069729e-17
+    },
+    {
+      "frequency_hartree": 0.1915900869876648,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8618357387079605e-16,
+      "scaled_backward_residual": 4.607051460518396e-17
+    },
+    {
+      "frequency_hartree": 0.19839006536559736,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8630451708878723e-16,
+      "scaled_backward_residual": 4.6062525711206323e-17
+    },
+    {
+      "frequency_hartree": 0.20537784136735657,
+      "real_axis": false,
+      "rhs_relative_residual": 3.5370926997321173e-16,
+      "scaled_backward_residual": 4.2154190518574444e-17
+    },
+    {
+      "frequency_hartree": 0.21255892504940654,
+      "real_axis": false,
+      "rhs_relative_residual": 3.460659614600843e-16,
+      "scaled_backward_residual": 4.122081777723307e-17
+    },
+    {
+      "frequency_hartree": 0.2199390538614369,
+      "real_axis": false,
+      "rhs_relative_residual": 4.602709141007726e-16,
+      "scaled_backward_residual": 5.479249664397826e-17
+    },
+    {
+      "frequency_hartree": 0.2275242034599874,
+      "real_axis": false,
+      "rhs_relative_residual": 3.9510437138671956e-16,
+      "scaled_backward_residual": 4.700618664309791e-17
+    },
+    {
+      "frequency_hartree": 0.23532059914036454,
+      "real_axis": false,
+      "rhs_relative_residual": 3.488832750320766e-16,
+      "scaled_backward_residual": 4.1480509689088506e-17
+    },
+    {
+      "frequency_hartree": 0.24333472792718566,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7131281571110905e-16,
+      "scaled_backward_residual": 4.4117312571776765e-17
+    },
+    {
+      "frequency_hartree": 0.2515733513668876,
+      "real_axis": false,
+      "rhs_relative_residual": 4.102664250378074e-16,
+      "scaled_backward_residual": 4.871065609341521e-17
+    },
+    {
+      "frequency_hartree": 0.260043519068781,
+      "real_axis": false,
+      "rhs_relative_residual": 4.101706862542638e-16,
+      "scaled_backward_residual": 4.866250838417062e-17
+    },
+    {
+      "frequency_hartree": 0.26875258304475186,
+      "real_axis": false,
+      "rhs_relative_residual": 4.08138280485698e-16,
+      "scaled_backward_residual": 4.838283267352703e-17
+    },
+    {
+      "frequency_hartree": 0.27770821290152914,
+      "real_axis": false,
+      "rhs_relative_residual": 3.669271721677486e-16,
+      "scaled_backward_residual": 4.346096452974897e-17
+    },
+    {
+      "frequency_hartree": 0.28691841194357615,
+      "real_axis": false,
+      "rhs_relative_residual": 3.417010461300269e-16,
+      "scaled_backward_residual": 4.0437281665229054e-17
+    },
+    {
+      "frequency_hartree": 0.29639153424916637,
+      "real_axis": false,
+      "rhs_relative_residual": 3.574729114601881e-16,
+      "scaled_backward_residual": 4.2264403857011106e-17
+    },
+    {
+      "frequency_hartree": 0.3061363027870871,
+      "real_axis": false,
+      "rhs_relative_residual": 3.825946386637644e-16,
+      "scaled_backward_residual": 4.519031998114695e-17
+    },
+    {
+      "frequency_hartree": 0.3161618286467351,
+      "real_axis": false,
+      "rhs_relative_residual": 3.71598878366882e-16,
+      "scaled_backward_residual": 4.3846401090940584e-17
+    },
+    {
+      "frequency_hartree": 0.32647763146015046,
+      "real_axis": false,
+      "rhs_relative_residual": 4.011625296636811e-16,
+      "scaled_backward_residual": 4.72835581494557e-17
+    },
+    {
+      "frequency_hartree": 0.33709366110083605,
+      "real_axis": false,
+      "rhs_relative_residual": 4.0882935153076166e-16,
+      "scaled_backward_residual": 4.813249735850333e-17
+    },
+    {
+      "frequency_hartree": 0.34802032075107703,
+      "real_axis": false,
+      "rhs_relative_residual": 4.3787413623344003e-16,
+      "scaled_backward_residual": 5.1490552074173504e-17
+    },
+    {
+      "frequency_hartree": 0.3592684914369642,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7167110501968916e-16,
+      "scaled_backward_residual": 4.3650923429891e-17
+    },
+    {
+      "frequency_hartree": 0.37084955813849796,
+      "real_axis": false,
+      "rhs_relative_residual": 3.640070098136218e-16,
+      "scaled_backward_residual": 4.269473030840255e-17
+    },
+    {
+      "frequency_hartree": 0.3827754375910823,
+      "real_axis": false,
+      "rhs_relative_residual": 3.582672922024218e-16,
+      "scaled_backward_residual": 4.196373455869051e-17
+    },
+    {
+      "frequency_hartree": 0.39505860790447583,
+      "real_axis": false,
+      "rhs_relative_residual": 4.433023291616241e-16,
+      "scaled_backward_residual": 5.1849074844768106e-17
+    },
+    {
+      "frequency_hartree": 0.4077121401359522,
+      "real_axis": false,
+      "rhs_relative_residual": 4.0945400284770306e-16,
+      "scaled_backward_residual": 4.7817928970971245e-17
+    },
+    {
+      "frequency_hartree": 0.42074973196611504,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8958497130222136e-16,
+      "scaled_backward_residual": 4.5425751317903335e-17
+    },
+    {
+      "frequency_hartree": 0.43418574363862794,
+      "real_axis": false,
+      "rhs_relative_residual": 3.708714355910441e-16,
+      "scaled_backward_residual": 4.317240634646664e-17
+    },
+    {
+      "frequency_hartree": 0.4480352363391821,
+      "real_axis": false,
+      "rhs_relative_residual": 3.3869002826105083e-16,
+      "scaled_backward_residual": 3.935826264549523e-17
+    },
+    {
+      "frequency_hartree": 0.46231401320445326,
+      "real_axis": false,
+      "rhs_relative_residual": 3.649450215932354e-16,
+      "scaled_backward_residual": 4.233292888472488e-17
+    },
+    {
+      "frequency_hartree": 0.47703866316875776,
+      "real_axis": false,
+      "rhs_relative_residual": 3.993184257582092e-16,
+      "scaled_backward_residual": 4.6233136496894214e-17
+    },
+    {
+      "frequency_hartree": 0.492226607874766,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8379905138980076e-16,
+      "scaled_backward_residual": 4.4349207617495695e-17
+    },
+    {
+      "frequency_hartree": 0.5078961518951569,
+      "real_axis": false,
+      "rhs_relative_residual": 3.3672098750095644e-16,
+      "scaled_backward_residual": 3.8829698430024655e-17
+    },
+    {
+      "frequency_hartree": 0.5240665365347121,
+      "real_axis": false,
+      "rhs_relative_residual": 3.5159767480747027e-16,
+      "scaled_backward_residual": 4.0458957648143454e-17
+    },
+    {
+      "frequency_hartree": 0.5407579975072923,
+      "real_axis": false,
+      "rhs_relative_residual": 3.3278315182499113e-16,
+      "scaled_backward_residual": 3.8209118284252646e-17
+    },
+    {
+      "frequency_hartree": 0.5579918268096645,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7407450604137736e-16,
+      "scaled_backward_residual": 4.2851109248875717e-17
+    },
+    {
+      "frequency_hartree": 0.5757904391445763,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4905055403994333e-16,
+      "scaled_backward_residual": 3.9888806011559284e-17
+    },
+    {
+      "frequency_hartree": 0.594177443279117,
+      "real_axis": false,
+      "rhs_relative_residual": 3.9014630087931206e-16,
+      "scaled_backward_residual": 4.447425243845415e-17
+    },
+    {
+      "frequency_hartree": 0.6131777187616664,
+      "real_axis": false,
+      "rhs_relative_residual": 3.425504914581126e-16,
+      "scaled_backward_residual": 3.894782490657027e-17
+    },
+    {
+      "frequency_hartree": 0.6328174984620241,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4548645147520704e-16,
+      "scaled_backward_residual": 3.917648006069365e-17
+    },
+    {
+      "frequency_hartree": 0.6531244574451356,
+      "real_axis": false,
+      "rhs_relative_residual": 3.922129871346474e-16,
+      "scaled_backward_residual": 4.435165803941275e-17
+    },
+    {
+      "frequency_hartree": 0.6741278087397226,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4246270433228e-16,
+      "scaled_backward_residual": 3.861462722928259e-17
+    },
+    {
+      "frequency_hartree": 0.69585840661973,
+      "real_axis": false,
+      "rhs_relative_residual": 3.1603072036071404e-16,
+      "scaled_backward_residual": 3.5528366823072596e-17
+    },
+    {
+      "frequency_hartree": 0.7183488580795072,
+      "real_axis": false,
+      "rhs_relative_residual": 3.824967356653705e-16,
+      "scaled_backward_residual": 4.2868408494234005e-17
+    },
+    {
+      "frequency_hartree": 0.7416336432538747,
+      "real_axis": false,
+      "rhs_relative_residual": 4.2620494776764843e-16,
+      "scaled_backward_residual": 4.761543861590453e-17
+    },
+    {
+      "frequency_hartree": 0.765749245612604,
+      "real_axis": false,
+      "rhs_relative_residual": 3.880656368107687e-16,
+      "scaled_backward_residual": 4.3212553302526805e-17
+    },
+    {
+      "frequency_hartree": 0.7907342928463975,
+      "real_axis": false,
+      "rhs_relative_residual": 3.2563018396351e-16,
+      "scaled_backward_residual": 3.613769640468561e-17
+    },
+    {
+      "frequency_hartree": 0.8166297094594201,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4669584078472294e-16,
+      "scaled_backward_residual": 3.834167775731671e-17
+    },
+    {
+      "frequency_hartree": 0.8434788821931514,
+      "real_axis": false,
+      "rhs_relative_residual": 4.1008677651340525e-16,
+      "scaled_backward_residual": 4.518981840418039e-17
+    },
+    {
+      "frequency_hartree": 0.8713278395293909,
+      "real_axis": false,
+      "rhs_relative_residual": 3.1308121376287015e-16,
+      "scaled_backward_residual": 3.437320755474333e-17
+    },
+    {
+      "frequency_hartree": 0.9002254466584536,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8545225280615428e-16,
+      "scaled_backward_residual": 4.2158781251858065e-17
+    },
+    {
+      "frequency_hartree": 0.9302236174540164,
+      "real_axis": false,
+      "rhs_relative_residual": 3.6483814712998875e-16,
+      "scaled_backward_residual": 3.974923180631971e-17
+    },
+    {
+      "frequency_hartree": 0.9613775451711047,
+      "real_axis": false,
+      "rhs_relative_residual": 3.2023326299088737e-16,
+      "scaled_backward_residual": 3.475067072355777e-17
+    },
+    {
+      "frequency_hartree": 0.9937459537811179,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8127158582531495e-16,
+      "scaled_backward_residual": 4.1205708225479615e-17
+    },
+    {
+      "frequency_hartree": 1.0273913720807202,
+      "real_axis": false,
+      "rhs_relative_residual": 3.326628938984201e-16,
+      "scaled_backward_residual": 3.580241414414579e-17
+    },
+    {
+      "frequency_hartree": 1.0623804329636246,
+      "real_axis": false,
+      "rhs_relative_residual": 4.3653717920941327e-16,
+      "scaled_backward_residual": 4.678149014699141e-17
+    },
+    {
+      "frequency_hartree": 1.098784200529968,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7282849582387046e-16,
+      "scaled_backward_residual": 3.9780279807887855e-17
+    },
+    {
+      "frequency_hartree": 1.1366785280321416,
+      "real_axis": false,
+      "rhs_relative_residual": 3.467301807217535e-16,
+      "scaled_backward_residual": 3.6831443356091266e-17
+    },
+    {
+      "frequency_hartree": 1.1761444500243439,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8412218294467085e-16,
+      "scaled_backward_residual": 4.0618963153695404e-17
+    },
+    {
+      "frequency_hartree": 1.2172686125024967,
+      "real_axis": false,
+      "rhs_relative_residual": 4.106965943784565e-16,
+      "scaled_backward_residual": 4.322934348510818e-17
+    },
+    {
+      "frequency_hartree": 1.2601437452994169,
+      "real_axis": false,
+      "rhs_relative_residual": 4.0648223513598674e-16,
+      "scaled_backward_residual": 4.258580693982833e-17
+    },
+    {
+      "frequency_hartree": 1.3048691815464117,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4894951167610644e-16,
+      "scaled_backward_residual": 3.638492573284961e-17
+    },
+    {
+      "frequency_hartree": 1.3515514296376454,
+      "real_axis": false,
+      "rhs_relative_residual": 3.688317390618515e-16,
+      "scaled_backward_residual": 3.827321294172885e-17
+    },
+    {
+      "frequency_hartree": 1.400304803850379,
+      "real_axis": false,
+      "rhs_relative_residual": 4.156983318512085e-16,
+      "scaled_backward_residual": 4.2926684243829566e-17
+    },
+    {
+      "frequency_hartree": 1.4512521205974718,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8209099922453004e-16,
+      "scaled_backward_residual": 3.9262299096354706e-17
+    },
+    {
+      "frequency_hartree": 1.5045254682361147,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8459377326257075e-16,
+      "scaled_backward_residual": 3.9323430735199285e-17
+    },
+    {
+      "frequency_hartree": 1.5602670594494785,
+      "real_axis": false,
+      "rhs_relative_residual": 3.6636289817369714e-16,
+      "scaled_backward_residual": 3.7272144877905146e-17
+    },
+    {
+      "frequency_hartree": 1.6186301764807522,
+      "real_axis": false,
+      "rhs_relative_residual": 3.6169439316808464e-16,
+      "scaled_backward_residual": 3.661215342415898e-17
+    },
+    {
+      "frequency_hartree": 1.679780220961426,
+      "real_axis": false,
+      "rhs_relative_residual": 3.725255557545297e-16,
+      "scaled_backward_residual": 3.751807384804147e-17
+    },
+    {
+      "frequency_hartree": 1.7438958817729115,
+      "real_axis": false,
+      "rhs_relative_residual": 4.741849746476457e-16,
+      "scaled_backward_residual": 4.751462192232513e-17
+    },
+    {
+      "frequency_hartree": 1.8111704363548622,
+      "real_axis": false,
+      "rhs_relative_residual": 3.9386870811249854e-16,
+      "scaled_backward_residual": 3.926665543542672e-17
+    },
+    {
+      "frequency_hartree": 1.8818132031754427,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4738824913613916e-16,
+      "scaled_backward_residual": 3.445739339378833e-17
+    },
+    {
+      "frequency_hartree": 1.9560511657690465,
+      "real_axis": false,
+      "rhs_relative_residual": 2.99847459234607e-16,
+      "scaled_backward_residual": 2.959160991638267e-17
+    },
+    {
+      "frequency_hartree": 2.03413079189897,
+      "real_axis": false,
+      "rhs_relative_residual": 3.6686927163089993e-16,
+      "scaled_backward_residual": 3.6023905387750166e-17
+    },
+    {
+      "frequency_hartree": 2.116320075104936,
+      "real_axis": false,
+      "rhs_relative_residual": 3.668314851133328e-16,
+      "scaled_backward_residual": 3.584032702481035e-17
+    },
+    {
+      "frequency_hartree": 2.202910830255775,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8346070869595775e-16,
+      "scaled_backward_residual": 3.7279599875813433e-17
+    },
+    {
+      "frequency_hartree": 2.294221279876982,
+      "real_axis": false,
+      "rhs_relative_residual": 3.755832204659565e-16,
+      "scaled_backward_residual": 3.6335001670296884e-17
+    },
+    {
+      "frequency_hartree": 2.390598974121111,
+      "real_axis": false,
+      "rhs_relative_residual": 3.5716954173801295e-16,
+      "scaled_backward_residual": 3.438667934976126e-17
+    },
+    {
+      "frequency_hartree": 2.4924240944921365,
+      "real_axis": false,
+      "rhs_relative_residual": 3.447330939994311e-16,
+      "scaled_backward_residual": 3.3031509914017036e-17
+    },
+    {
+      "frequency_hartree": 2.6001132000637868,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4801186503940535e-16,
+      "scaled_backward_residual": 3.318995006871481e-17
+    },
+    {
+      "frequency_hartree": 2.714123485243886,
+      "real_axis": false,
+      "rhs_relative_residual": 4.2855205983771303e-16,
+      "scaled_backward_residual": 4.068416601271646e-17
+    },
+    {
+      "frequency_hartree": 2.834957630500107,
+      "real_axis": false,
+      "rhs_relative_residual": 3.947384594574599e-16,
+      "scaled_backward_residual": 3.73067575231949e-17
+    },
+    {
+      "frequency_hartree": 2.9631693423353482,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7304288988218536e-16,
+      "scaled_backward_residual": 3.5103049095846314e-17
+    },
+    {
+      "frequency_hartree": 3.0993696967549185,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8770885026979655e-16,
+      "scaled_backward_residual": 3.63292555702002e-17
+    },
+    {
+      "frequency_hartree": 3.244234422219989,
+      "real_axis": false,
+      "rhs_relative_residual": 3.318859885233579e-16,
+      "scaled_backward_residual": 3.097177775921847e-17
+    },
+    {
+      "frequency_hartree": 3.398512284535182,
+      "real_axis": false,
+      "rhs_relative_residual": 3.4676613987689127e-16,
+      "scaled_backward_residual": 3.22334816559905e-17
+    },
+    {
+      "frequency_hartree": 3.5630347684150157,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8240493164734003e-16,
+      "scaled_backward_residual": 3.5412741064443594e-17
+    },
+    {
+      "frequency_hartree": 3.7387272900661954,
+      "real_axis": false,
+      "rhs_relative_residual": 3.5274238161049504e-16,
+      "scaled_backward_residual": 3.2548946866603727e-17
+    },
+    {
+      "frequency_hartree": 3.9266222238647632,
+      "real_axis": false,
+      "rhs_relative_residual": 3.833006952227381e-16,
+      "scaled_backward_residual": 3.5248898563373174e-17
+    },
+    {
+      "frequency_hartree": 4.127874086479871,
+      "real_axis": false,
+      "rhs_relative_residual": 3.924434787129015e-16,
+      "scaled_backward_residual": 3.597484850848176e-17
+    },
+    {
+      "frequency_hartree": 4.343777296672647,
+      "real_axis": false,
+      "rhs_relative_residual": 4.616941940091706e-16,
+      "scaled_backward_residual": 4.2197567991628415e-17
+    },
+    {
+      "frequency_hartree": 4.575787022467685,
+      "real_axis": false,
+      "rhs_relative_residual": 4.3504224152881964e-16,
+      "scaled_backward_residual": 3.965306746977478e-17
+    },
+    {
+      "frequency_hartree": 4.825543744663853,
+      "real_axis": false,
+      "rhs_relative_residual": 3.678419236487655e-16,
+      "scaled_backward_residual": 3.344459156522612e-17
+    },
+    {
+      "frequency_hartree": 5.094902313559957,
+      "real_axis": false,
+      "rhs_relative_residual": 3.7490862109786617e-16,
+      "scaled_backward_residual": 3.401117338850368e-17
+    },
+    {
+      "frequency_hartree": 5.385966463361306,
+      "real_axis": false,
+      "rhs_relative_residual": 3.0173402426084886e-16,
+      "scaled_backward_residual": 2.731923335588118e-17
+    },
+    {
+      "frequency_hartree": 5.701129988037632,
+      "real_axis": false,
+      "rhs_relative_residual": 3.721178738062257e-16,
+      "scaled_backward_residual": 3.3635052813438227e-17
+    },
+    {
+      "frequency_hartree": 6.043126089546713,
+      "real_axis": false,
+      "rhs_relative_residual": 3.8528175255245107e-16,
+      "scaled_backward_residual": 3.477581461489135e-17
+    },
+    {
+      "frequency_hartree": 6.41508680609125,
+      "real_axis": false,
+      "rhs_relative_residual": 4.1266319820731305e-16,
+      "scaled_backward_residual": 3.720483837702996e-17
+    },
+    {
+      "frequency_hartree": 6.820614944059096,
+      "real_axis": false,
+      "rhs_relative_residual": 4.0152927096773745e-16,
+      "scaled_backward_residual": 3.616904069487545e-17
+    },
+    {
+      "frequency_hartree": 7.263871613138933,
+      "real_axis": false,
+      "rhs_relative_residual": 3.367095165444298e-16,
+      "scaled_backward_residual": 3.0310406360027306e-17
+    },
+    {
+      "frequency_hartree": 7.749683356021668,
+      "real_axis": false,
+      "rhs_relative_residual": 3.218794751985246e-16,
+      "scaled_backward_residual": 2.8962157485246723e-17
+    },
+    {
+      "frequency_hartree": 8.283674050584235,
+      "real_axis": false,
+      "rhs_relative_residual": 3.847796632735712e-16,
+      "scaled_backward_residual": 3.461105186055714e-17
+    },
+    {
+      "frequency_hartree": 8.872428354165148,
+      "real_axis": false,
+      "rhs_relative_residual": 6.631142599762712e-16,
+      "scaled_backward_residual": 5.963408649095506e-17
+    },
+    {
+      "frequency_hartree": 9.52369561408289,
+      "real_axis": false,
+      "rhs_relative_residual": 3.715233703101196e-16,
+      "scaled_backward_residual": 3.3404556261038257e-17
+    },
+    {
+      "frequency_hartree": 10.246646112835062,
+      "real_axis": false,
+      "rhs_relative_residual": 4.860405861136033e-16,
+      "scaled_backward_residual": 4.369032668613241e-17
+    },
+    {
+      "frequency_hartree": 11.052195580947615,
+      "real_axis": false,
+      "rhs_relative_residual": 3.911768914086263e-16,
+      "scaled_backward_residual": 3.5150357341890136e-17
+    },
+    {
+      "frequency_hartree": 11.953419582551154,
+      "real_axis": false,
+      "rhs_relative_residual": 5.865461143984478e-16,
+      "scaled_backward_residual": 5.267773495049599e-17
+    },
+    {
+      "frequency_hartree": 12.966087386531344,
+      "real_axis": false,
+      "rhs_relative_residual": 4.930701159003015e-16,
+      "scaled_backward_residual": 4.4249247181112363e-17
+    },
+    {
+      "frequency_hartree": 14.10935638274488,
+      "real_axis": false,
+      "rhs_relative_residual": 2.497606945435108e-16,
+      "scaled_backward_residual": 2.239153336252212e-17
+    },
+    {
+      "frequency_hartree": 15.406684685367669,
+      "real_axis": false,
+      "rhs_relative_residual": 2.8411769681871886e-16,
+      "scaled_backward_residual": 2.543930938695496e-17
+    },
+    {
+      "frequency_hartree": 16.887043937349706,
+      "real_axis": false,
+      "rhs_relative_residual": 4.0558018052331296e-16,
+      "scaled_backward_residual": 3.625924990783363e-17
+    },
+    {
+      "frequency_hartree": 18.586550713408176,
+      "real_axis": false,
+      "rhs_relative_residual": 2.884065370525139e-16,
+      "scaled_backward_residual": 2.5738385683863082e-17
+    },
+    {
+      "frequency_hartree": 20.550690161699233,
+      "real_axis": false,
+      "rhs_relative_residual": 4.123910299481068e-16,
+      "scaled_backward_residual": 3.6731382093144925e-17
+    },
+    {
+      "frequency_hartree": 22.837390964268057,
+      "real_axis": false,
+      "rhs_relative_residual": 2.948251805756914e-16,
+      "scaled_backward_residual": 2.6205165461237486e-17
+    },
+    {
+      "frequency_hartree": 25.521345535068487,
+      "real_axis": false,
+      "rhs_relative_residual": 3.6030017401465255e-16,
+      "scaled_backward_residual": 3.195598775944345e-17
+    },
+    {
+      "frequency_hartree": 28.700186945254313,
+      "real_axis": false,
+      "rhs_relative_residual": 4.0624092461572027e-16,
+      "scaled_backward_residual": 3.5953284714668903e-17
+    },
+    {
+      "frequency_hartree": 32.503493833370406,
+      "real_axis": false,
+      "rhs_relative_residual": 5.416862289656152e-16,
+      "scaled_backward_residual": 4.784111457246309e-17
+    },
+    {
+      "frequency_hartree": 37.10620585229608,
+      "real_axis": false,
+      "rhs_relative_residual": 3.5794118498455385e-16,
+      "scaled_backward_residual": 3.1551631504493016e-17
+    },
+    {
+      "frequency_hartree": 42.749102896465295,
+      "real_axis": false,
+      "rhs_relative_residual": 3.607558469987493e-16,
+      "scaled_backward_residual": 3.174385151584681e-17
+    },
+    {
+      "frequency_hartree": 49.7709418288024,
+      "real_axis": false,
+      "rhs_relative_residual": 3.292441919842258e-16,
+      "scaled_backward_residual": 2.892641847901186e-17
+    },
+    {
+      "frequency_hartree": 58.66050005482607,
+      "real_axis": false,
+      "rhs_relative_residual": 2.995939763974863e-16,
+      "scaled_backward_residual": 2.6287046131621794e-17
+    },
+    {
+      "frequency_hartree": 70.1439738305534,
+      "real_axis": false,
+      "rhs_relative_residual": 6.146403943935047e-16,
+      "scaled_backward_residual": 5.38721976662175e-17
+    },
+    {
+      "frequency_hartree": 85.33809878978246,
+      "real_axis": false,
+      "rhs_relative_residual": 3.832856277145065e-16,
+      "scaled_backward_residual": 3.356593681577692e-17
+    },
+    {
+      "frequency_hartree": 106.03219213930149,
+      "real_axis": false,
+      "rhs_relative_residual": 3.6541902655440546e-16,
+      "scaled_backward_residual": 3.1980736555406674e-17
+    },
+    {
+      "frequency_hartree": 135.23990073196228,
+      "real_axis": false,
+      "rhs_relative_residual": 2.398460955462652e-16,
+      "scaled_backward_residual": 2.0981053671489098e-17
+    },
+    {
+      "frequency_hartree": 178.3613041588583,
+      "real_axis": false,
+      "rhs_relative_residual": 6.529875456673245e-16,
+      "scaled_backward_residual": 5.71030959062633e-17
+    },
+    {
+      "frequency_hartree": 245.8690900198353,
+      "real_axis": false,
+      "rhs_relative_residual": 4.477029223191053e-16,
+      "scaled_backward_residual": 3.914298984823716e-17
+    },
+    {
+      "frequency_hartree": 360.3173024320981,
+      "real_axis": false,
+      "rhs_relative_residual": 3.452313785331767e-16,
+      "scaled_backward_residual": 3.0180059971988615e-17
+    },
+    {
+      "frequency_hartree": 577.9211707064741,
+      "real_axis": false,
+      "rhs_relative_residual": 3.1521330335121705e-16,
+      "scaled_backward_residual": 2.7554045271007215e-17
+    },
+    {
+      "frequency_hartree": 1073.293071232996,
+      "real_axis": false,
+      "rhs_relative_residual": 5.455787803230563e-16,
+      "scaled_backward_residual": 4.768976415163092e-17
+    },
+    {
+      "frequency_hartree": 2638.2402170576493,
+      "real_axis": false,
+      "rhs_relative_residual": 2.9146534620567596e-16,
+      "scaled_backward_residual": 2.5477109546502212e-17
+    },
+    {
+      "frequency_hartree": 13902.15349482671,
+      "real_axis": false,
+      "rhs_relative_residual": 2.319960617483643e-16,
+      "scaled_backward_residual": 2.0278834194873908e-17
+    },
+    {
+      "frequency_hartree": 0.0,
+      "real_axis": false,
+      "rhs_relative_residual": 3.5496060180235685e-16,
+      "scaled_backward_residual": 4.264321203260568e-17
+    },
+    {
+      "frequency_hartree": 0.0,
+      "real_axis": true,
+      "rhs_relative_residual": 4.776145302158275e-16,
+      "scaled_backward_residual": 5.737824867809348e-17
+    },
+    {
+      "frequency_hartree": 0.3,
+      "real_axis": true,
+      "rhs_relative_residual": 3.670384147802872e-16,
+      "scaled_backward_residual": 4.4972168428416203e-17
+    },
+    {
+      "frequency_hartree": 0.5809493130627024,
+      "real_axis": true,
+      "rhs_relative_residual": 6.147720388512081e-16,
+      "scaled_backward_residual": 7.102315825329801e-17
+    },
+    {
+      "frequency_hartree": 0.5818493130627024,
+      "real_axis": true,
+      "rhs_relative_residual": 2.930113241078095e-15,
+      "scaled_backward_residual": 3.313283327774362e-17
+    },
+    {
+      "frequency_hartree": 0.5819393130627024,
+      "real_axis": true,
+      "rhs_relative_residual": 1.1079998817995445e-14,
+      "scaled_backward_residual": 2.767038882396883e-17
+    },
+    {
+      "frequency_hartree": 0.5819493130627024,
+      "real_axis": true,
+      "rhs_relative_residual": 1.5061882366483493e-14,
+      "scaled_backward_residual": 3.364646685134023e-17
+    },
+    {
+      "frequency_hartree": 0.5819593130627023,
+      "real_axis": true,
+      "rhs_relative_residual": 1.1165476992129751e-14,
+      "scaled_backward_residual": 2.7873550235523556e-17
+    },
+    {
+      "frequency_hartree": 0.5820493130627024,
+      "real_axis": true,
+      "rhs_relative_residual": 2.3909304247688163e-15,
+      "scaled_backward_residual": 2.6930910021658472e-17
+    },
+    {
+      "frequency_hartree": 0.5829493130627024,
+      "real_axis": true,
+      "rhs_relative_residual": 3.9920545239449923e-16,
+      "scaled_backward_residual": 3.6587857866952934e-17
+    },
+    {
+      "frequency_hartree": 0.7,
+      "real_axis": true,
+      "rhs_relative_residual": 1.6352167885129167e-15,
+      "scaled_backward_residual": 3.222556207370431e-17
+    },
+    {
+      "frequency_hartree": 1.0,
+      "real_axis": true,
+      "rhs_relative_residual": 5.199540100683046e-16,
+      "scaled_backward_residual": 6.41172045833321e-17
+    }
+  ],
+  "shared_shifted_residuals": [
+    {
+      "frequency_hartree": 0.0,
+      "rhs_relative_residual": 1.987327974290594e-14,
+      "scaled_backward_residual": 1.6618759552647052e-16
+    },
+    {
+      "frequency_hartree": 0.3,
+      "rhs_relative_residual": 2.1877216805142736e-14,
+      "scaled_backward_residual": 1.656177511088587e-16
+    },
+    {
+      "frequency_hartree": 0.5809493130627024,
+      "rhs_relative_residual": 6.40842456399254e-14,
+      "scaled_backward_residual": 1.4886280085364118e-16
+    },
+    {
+      "frequency_hartree": 0.5818493130627024,
+      "rhs_relative_residual": 8.519015852486348e-14,
+      "scaled_backward_residual": 5.898214001086257e-17
+    },
+    {
+      "frequency_hartree": 0.5819393130627024,
+      "rhs_relative_residual": 2.640267206944076e-13,
+      "scaled_backward_residual": 4.1782939648793176e-17
+    },
+    {
+      "frequency_hartree": 0.5819493130627024,
+      "rhs_relative_residual": 2.94145615096059e-13,
+      "scaled_backward_residual": 4.165452436789775e-17
+    },
+    {
+      "frequency_hartree": 0.5819593130627023,
+      "rhs_relative_residual": 2.6540677776195625e-13,
+      "scaled_backward_residual": 4.2001971725911077e-17
+    },
+    {
+      "frequency_hartree": 0.5820493130627024,
+      "rhs_relative_residual": 8.75357077738176e-14,
+      "scaled_backward_residual": 6.059065425469312e-17
+    },
+    {
+      "frequency_hartree": 0.5829493130627024,
+      "rhs_relative_residual": 6.760464874835442e-14,
+      "scaled_backward_residual": 1.5020168362580447e-16
+    },
+    {
+      "frequency_hartree": 0.7,
+      "rhs_relative_residual": 3.5159483980982876e-12,
+      "scaled_backward_residual": 1.3974326057826298e-16
+    },
+    {
+      "frequency_hartree": 1.0,
+      "rhs_relative_residual": 6.885029868731441e-14,
+      "scaled_backward_residual": 9.918870719188898e-17
+    }
+  ],
+  "imaginary_nodes": [
+    1.7982825473264292e-05,
+    9.476013532945743e-05,
+    0.00023292799208402668,
+    0.0004325849487299279,
+    0.0006938329031454508,
+    0.0010168012578556803,
+    0.0014016493161394265,
+    0.0018485668700355352,
+    0.00235777451126879,
+    0.00292952390017309,
+    0.0035640980450284193,
+    0.00426181160689632,
+    0.005023011235349483,
+    0.005848075937534381,
+    0.006737417482001339,
+    0.007691480838387046,
+    0.00871074465392423,
+    0.009795721767744528,
+    0.010946959763974622,
+    0.012165041564683333,
+    0.013450586063806459,
+    0.01480424880325358,
+    0.016226722692483916,
+    0.017718738772927938,
+    0.01928106702872372,
+    0.020914517245335735,
+    0.022619939917726737,
+    0.024398227209862088,
+    0.02625031396743925,
+    0.02817717878585493,
+    0.03017984513554923,
+    0.03225938254699719,
+    0.03441690785775984,
+    0.03665358652415285,
+    0.03897063400024769,
+    0.04136931718708391,
+    0.04385095595514596,
+    0.04641692474334096,
+    0.04906865423790976,
+    0.05180763313490903,
+    0.05463540999012166,
+    0.0575535951604842,
+    0.06056386284136701,
+    0.06366795320430353,
+    0.06686767464004406,
+    0.07016490611210349,
+    0.07356159962628847,
+    0.07705978282202189,
+    0.08066156169164115,
+    0.08436912343422422,
+    0.08818473945090255,
+    0.09211076848905256,
+    0.09614965994321589,
+    0.10030395732109175,
+    0.10457630188346874,
+    0.10896943646752559,
+    0.11348620950352906,
+    0.11812957923560023,
+    0.12290261815790694,
+    0.12780851767837542,
+    0.13285059302280405,
+    0.1380322883931049,
+    0.14335718239430695,
+    0.14882899374592704,
+    0.15445158729435862,
+    0.16022898034405053,
+    0.1661653493264535,
+    0.17226503682701014,
+    0.17853255899185808,
+    0.18497261333741896,
+    0.1915900869876648,
+    0.19839006536559736,
+    0.20537784136735657,
+    0.21255892504940654,
+    0.2199390538614369,
+    0.2275242034599874,
+    0.23532059914036454,
+    0.24333472792718566,
+    0.2515733513668876,
+    0.260043519068781,
+    0.26875258304475186,
+    0.27770821290152914,
+    0.28691841194357615,
+    0.29639153424916637,
+    0.3061363027870871,
+    0.3161618286467351,
+    0.32647763146015046,
+    0.33709366110083605,
+    0.34802032075107703,
+    0.3592684914369642,
+    0.37084955813849796,
+    0.3827754375910823,
+    0.39505860790447583,
+    0.4077121401359522,
+    0.42074973196611504,
+    0.43418574363862794,
+    0.4480352363391821,
+    0.46231401320445326,
+    0.47703866316875776,
+    0.492226607874766,
+    0.5078961518951569,
+    0.5240665365347121,
+    0.5407579975072923,
+    0.5579918268096645,
+    0.5757904391445763,
+    0.594177443279117,
+    0.6131777187616664,
+    0.6328174984620241,
+    0.6531244574451356,
+    0.6741278087397226,
+    0.69585840661973,
+    0.7183488580795072,
+    0.7416336432538747,
+    0.765749245612604,
+    0.7907342928463975,
+    0.8166297094594201,
+    0.8434788821931514,
+    0.8713278395293909,
+    0.9002254466584536,
+    0.9302236174540164,
+    0.9613775451711047,
+    0.9937459537811179,
+    1.0273913720807202,
+    1.0623804329636246,
+    1.098784200529968,
+    1.1366785280321416,
+    1.1761444500243439,
+    1.2172686125024967,
+    1.2601437452994169,
+    1.3048691815464117,
+    1.3515514296376454,
+    1.400304803850379,
+    1.4512521205974718,
+    1.5045254682361147,
+    1.5602670594494785,
+    1.6186301764807522,
+    1.679780220961426,
+    1.7438958817729115,
+    1.8111704363548622,
+    1.8818132031754427,
+    1.9560511657690465,
+    2.03413079189897,
+    2.116320075104936,
+    2.202910830255775,
+    2.294221279876982,
+    2.390598974121111,
+    2.4924240944921365,
+    2.6001132000637868,
+    2.714123485243886,
+    2.834957630500107,
+    2.9631693423353482,
+    3.0993696967549185,
+    3.244234422219989,
+    3.398512284535182,
+    3.5630347684150157,
+    3.7387272900661954,
+    3.9266222238647632,
+    4.127874086479871,
+    4.343777296672647,
+    4.575787022467685,
+    4.825543744663853,
+    5.094902313559957,
+    5.385966463361306,
+    5.701129988037632,
+    6.043126089546713,
+    6.41508680609125,
+    6.820614944059096,
+    7.263871613138933,
+    7.749683356021668,
+    8.283674050584235,
+    8.872428354165148,
+    9.52369561408289,
+    10.246646112835062,
+    11.052195580947615,
+    11.953419582551154,
+    12.966087386531344,
+    14.10935638274488,
+    15.406684685367669,
+    16.887043937349706,
+    18.586550713408176,
+    20.550690161699233,
+    22.837390964268057,
+    25.521345535068487,
+    28.700186945254313,
+    32.503493833370406,
+    37.10620585229608,
+    42.749102896465295,
+    49.7709418288024,
+    58.66050005482607,
+    70.1439738305534,
+    85.33809878978246,
+    106.03219213930149,
+    135.23990073196228,
+    178.3613041588583,
+    245.8690900198353,
+    360.3173024320981,
+    577.9211707064741,
+    1073.293071232996,
+    2638.2402170576493,
+    13902.15349482671
+  ],
+  "real_frequencies_hartree": [
+    0.0,
+    0.3,
+    0.5809493130627024,
+    0.5818493130627024,
+    0.5819393130627024,
+    0.5819493130627024,
+    0.5819593130627023,
+    0.5820493130627024,
+    0.5829493130627024,
+    0.7,
+    1.0
+  ],
+  "first_rpa_pole_hartree": 0.5819493130627024,
+  "eta_hartree": 1e-05,
+  "nao": 61,
+  "naux": 109,
+  "transition_dimension": 280,
+  "native_source_python_sha256": "c792320a88f24c695049469ac317d26953efc0888cd3236c44cb0fb393220abc",
+  "source_snapshot": "/home/yjiao/gradscf_checks/ad-showcase-integration-20261015",
+  "script_sha256": "f7332de54662ded7b051c095d1d60d1692a626cf63ea05bcd74ea292ac58864d",
+  "original_example_sha256": "03c41e945e4ff2f8e2cd48643b2222b7aeb599b624abf2b4de49cfc1b7396ff1",
+  "elapsed_seconds": 18.501755519973813,
+  "recorded_utc": "2026-10-15T20:03:01.098613+00:00",
+  "boundary": "Same discrete CD W values; finite eta retained. No QP result, derivative, or unchanged-facade success is claimed by this gate."
+}

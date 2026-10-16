@@ -1,0 +1,114 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-v07-20261016",
+  "hostname": "c20",
+  "cpu": "Intel(R) Xeon(R) Platinum 8457C",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "numpy": "2.4.4",
+  "backend": "cpu",
+  "dtype": "float64",
+  "source_origin": "Frozen X12 source snapshot, with V07 quadratic Gaussian moments and KHD helper. This fixed-input calculation performs no core SCF or integral calculation.",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "PYTHONPATH": "src"
+  },
+  "thread_scope": "OMP/BLAS settings do not cap all JAX runtime/compiler threads. No exclusive CPU timing.",
+  "calculation_runtime_sha256": "de161adb890595cdeb4386959753adde3ec50fdf7f3e1c0c6396eaaf56555bab",
+  "calculation_archive": {
+    "remote_path": "/home/yjiao/gradscf_checks/ad-showcase-v07-20261016/artifacts/v07/calculation_source.tar.gz",
+    "local_ignored_path": "artifacts/ad_showcase/V07_khd/remote/calculation_source.tar.gz",
+    "sha256": "9a523233327655f9f774d643514503a63e74613838cab731c695cab569f33680",
+    "bytes": 14101831
+  },
+  "calculation_source_sha256": {
+    "src/gradscf_tools/franck_condon.py": "064bd739b694d1a94bdaf1d10a4a45b3523cd0cb2844047cca818dd58100e155",
+    "src/gradscf_tools/khd_raman.py": "15c420f92d440110f5f7078feccba906f45ebf49dc0b5487f96932f35e015958",
+    "examples/vibrations/formaldehyde_khd_raman.py": "6c6d338ebafc26bb1efa9cb2a5b2956948d3df56c1145c7ba349d49c18348578"
+  },
+  "final_source_sha256": {
+    "src/gradscf_tools/franck_condon.py": "064bd739b694d1a94bdaf1d10a4a45b3523cd0cb2844047cca818dd58100e155",
+    "src/gradscf_tools/khd_raman.py": "816df911eb723f038d41ecdf9eb6517b403d71b1771876cbd299ae5d2c7f4e9e",
+    "tests/test_khd_raman.py": "daaca917e4620205fac9cd26bcdb2a46c8ba54ed99a0275192de6d5ff638549b",
+    "tests/test_franck_condon.py": "4bc82a55d039c604dea3b59c584cefd3ebdc56799099e2e88e0e2df8dd591146",
+    "tests/test_herzberg_teller.py": "f6a29636cc4b47c68a3125948e8ffc91d5be94df67488e3cd776169beeff87cb",
+    "examples/vibrations/formaldehyde_khd_raman.py": "9e674a3613e0d85ac81363ec43bf81277d4702ba6cc7523b339c58ec75130410",
+    "examples/vibrations/compare_khd_resolvent.py": "77dc402f4fc8b3e185fce6c208e97bebb6c5ad178c5aa3cb9ec33318ac709be9",
+    "examples/vibrations/plot_formaldehyde_khd.py": "05278d19f3517f043f47c044e8a8cb1d5a63a130d5dafeb9912584b43b7c9f29"
+  },
+  "post_calculation_changes": "Only explicit real-energy/scalar-Gamma guards in khd_raman.py, covered by 30 tests and exact valid-input parity; main script later adds measured-output comments. No scientific formula/input changed.",
+  "input_sha256": {
+    "reproducibility/ad_showcase/X12_formaldehyde_herzberg_teller/gradscf.json": "cbf73084393be2fae4904787347eaae80089f7b04fa05c8918584ed11e35868d"
+  },
+  "remote_only_vertices": {
+    "path": "/home/yjiao/gradscf_checks/ad-showcase-v07-20261016/reproducibility/ad_showcase/V07_formaldehyde_khd/intermediate_vertices.npz",
+    "bytes": 104625438,
+    "sha256": "b773b95d7f46ba5c4eaa382cbc62117822bb050181ad5754bf4cf5847fc0cbaa"
+  },
+  "exit_codes": {
+    "red": 1,
+    "plot": 0,
+    "input-parity": 0,
+    "green": 0,
+    "molecular": 0,
+    "resolvent": 0,
+    "input-green": 0,
+    "input-red": 1
+  },
+  "validation_summary": {
+    "initial_api_red": "8 failed in 1.33s",
+    "initial_green": "24 passed in 15.76s",
+    "input_guard_red": "6 failed, 8 deselected, 4 warnings in 1.92s",
+    "final_green": "30 passed in 13.68s",
+    "parity": "3003 prefix vertices exactly equal; all 593775-state tensors at 3 lasers exactly equal; 4.34s",
+    "main_seconds": 355.6921675070189,
+    "main_peak_rss_kib": 1496436,
+    "independent_reference_seconds": 3.2000729590072297
+  },
+  "artifact_sha256": {
+    "README.md": "66b83636c5831219623477d2b9029c77698691602421e307d544d685915d3b75",
+    "calculation_runtime.json": "de161adb890595cdeb4386959753adde3ec50fdf7f3e1c0c6396eaaf56555bab",
+    "excitation_profiles.csv": "f3aee0b6c33f4a37512cf479ce206d9bb272b634e309539480f7f511d1217f1f",
+    "gradscf.json": "cc18b3e50b7f2f20b8a1d58723308d12756c2f91078c9147d74b339a12dc2876",
+    "input_guard_parity.json": "a6d0e0fef8f0005f7639e95c9fcb78e9b867773097fc71d58ae2874487bc3c61",
+    "khd_complex_tensor.pdf": "368d5a78e27e3c12640eb9b522304324f5b6bc51cea3c73f84df9882d68b4490",
+    "khd_complex_tensor.png": "afdfde2847da917e034da4e83cf74af188f5a9a621528e26f4a0bb75e0d3a876",
+    "khd_excitation_profiles.pdf": "1488580b82f2d6ab2e805d3b2f8b95e89238844568d79120052bfa10498d4e3b",
+    "khd_excitation_profiles.png": "7e1dcc77e9ce3635a3352a4155dbcb2c354f8e6f8e9f168b90f3b83e12162b03",
+    "khd_tensors.npz": "e5d3683c43205977fb5323f4249322649f44e20e39438d3adaf8ab4e2ccb1f36",
+    "resolvent_reference.json": "3839105fb9b7986016f4351c93f6b13c1a4e9718bf16a91a0a640fc391e19d9b",
+    "validation/README.md": "1dd02af12e3becef8b55ad0d8f637d38f22b9874b4925d1b3331235cc2e70fcc",
+    "validation/freeze_runtime.py": "b26a1041970c3a84187993177f77481b8925b0cf99807da73529c8eb121f6f2e",
+    "validation/green.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/green.txt": "d17255b6cca5ada345f4d48c2e134843a203a3262b00019c5d92eb38f62d2792",
+    "validation/input-green.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/input-green.txt": "276c8b21508ecb905d79e4b9eac8be18a213d1fcdcb0e6d65f6f386c16362220",
+    "validation/input-parity.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/input-parity.txt": "76612c1a8247a620f2892074320970f544bbc9d4395bc3be3103b65a8c05e953",
+    "validation/input-red.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "validation/input-red.txt": "8dcdecc16af36f628420cead42ac612b53c3a7c13d48812b3c62e700847a7213",
+    "validation/molecular.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/molecular.txt": "e26429bb6b5d34b44e6c38da33866c3e256f3237d7a69d07e651d4b33eb868b1",
+    "validation/plot.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/plot.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "validation/red.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "validation/red.txt": "b51e7fee3cad1aa099ecb86beec1dde698ef13c3010b706bcf8cc028f2a89410",
+    "validation/resolvent.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/resolvent.txt": "793d09c47c0809c85f08948932dca5284bc660edadf7d58d9135ff4a629eeb70",
+    "validation/verify_input_guard.py": "394a314d1f1982efe1773467347fe4b202d744933acd73f225edbd3cb85f90cf"
+  },
+  "reproduction_commands": {
+    "api_red": "timeout 900 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python -m pytest -q tests/test_khd_raman.py",
+    "initial_green_and_final_green": "timeout 900 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python -m pytest -q tests/test_khd_raman.py tests/test_franck_condon.py tests/test_herzberg_teller.py",
+    "input_red": "timeout 900 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python -m pytest -q tests/test_khd_raman.py -k energy_inputs",
+    "independent_reference": "timeout 900 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python examples/vibrations/compare_khd_resolvent.py",
+    "main": "timeout 5400 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python examples/vibrations/formaldehyde_khd_raman.py",
+    "input_guard_parity": "timeout 300 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python artifacts/v07/verify_input_guard.py",
+    "plots": "timeout 300 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python examples/vibrations/plot_formaldehyde_khd.py"
+  },
+  "command_scope": "Replay commands for the recorded selections and bounded tasks; original stdout and exit codes are preserved separately."
+}

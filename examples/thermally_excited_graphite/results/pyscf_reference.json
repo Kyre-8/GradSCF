@@ -1,0 +1,53 @@
+{
+  "calculations": [
+    {
+      "displacement_bohr": -0.0004,
+      "energy_Eh_cell": -22.477820745069174,
+      "free_energy_Eh_cell": -22.47840117276374
+    },
+    {
+      "displacement_bohr": 0.0,
+      "energy_Eh_cell": -22.47782081794097,
+      "free_energy_Eh_cell": -22.478401245399947
+    },
+    {
+      "displacement_bohr": 0.0004,
+      "energy_Eh_cell": -22.47782074508055,
+      "free_energy_Eh_cell": -22.47840117282588
+    }
+  ],
+  "curvature_Eh_Bohr2": 0.9075642237732495,
+  "gradscf_fit_curvature_Eh_Bohr2": 0.942300915569165,
+  "gradscf_matched_step_curvature_Eh_Bohr2": 0.9399718559066628,
+  "gradscf_dfpt_curvature_Eh_Bohr2": 0.942508323908003,
+  "finite_difference_step_bohr": 0.0004,
+  "curvature_difference_Eh_Bohr2": 0.03473669179591543,
+  "seconds": 127.95291324600112,
+  "scope": "independent finite displacement; compare discretization before physical claims",
+  "settings": {
+    "a_angstrom": 2.46,
+    "c_angstrom": 6.708,
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "xc": "pbe",
+    "fft_mesh": [
+      15,
+      15,
+      31
+    ],
+    "k_mesh": [
+      3,
+      3,
+      1
+    ],
+    "scf_controls": {
+      "max_cycle": 200,
+      "damping": 0.25,
+      "conv_tol": 1e-12,
+      "conv_tol_density": 1e-11,
+      "conv_tol_grad": 1e-10
+    },
+    "geometry": "fixed AB graphite, not relaxed",
+    "exxdiv": null
+  }
+}

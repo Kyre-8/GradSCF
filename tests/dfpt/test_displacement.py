@@ -6,7 +6,7 @@ import pytest
 from gradscf.pbc import gto,scf
 
 
-@pytest.mark.parametrize('xc',['hf','pbe','pbe-runtime'])
+@pytest.mark.parametrize('xc',['hf','pbe','pbe-runtime','r2scan'])
 def test_primitive_displacement_matches_supercell(xc,monkeypatch):
     from gradscf.dfpt import displacement_source
     from gradscf.pbc import _kpoint,dft

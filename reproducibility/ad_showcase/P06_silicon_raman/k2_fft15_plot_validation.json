@@ -1,0 +1,30 @@
+{
+  "complete": true,
+  "tensor_sha256": "6ee9ef77f42c1135564ce152284780fd192d80aa01003161466ca6474ac9ccbf",
+  "phonon_sha256": "4f2edb7bf23446cc3011bf4df735a2d0205cb861b942d4eec83d94ae38e7aa28",
+  "optical_modes": [
+    4,
+    5,
+    6
+  ],
+  "optical_fractions": [
+    9.445129443853406e-32,
+    1.4477214960583723e-31,
+    1.1125352386627647e-31,
+    1.0000000000000007,
+    0.9999999999999994,
+    0.9999999999999992
+  ],
+  "raw_negative_mode_count": 2,
+  "normalized_probe_recovery_error": 4.447100850004e-15,
+  "optical_diagonal_norm_fraction": 0.001765740864327251,
+  "optical_offdiagonal_singular_values": [
+    0.5161752185371651,
+    0.5156031307452388,
+    0.5156031307452321
+  ],
+  "angular_common_scale": 0.133446939263309,
+  "spectral_common_scale": 0.00844234714304482,
+  "display_halfwidth_cm1": 5.0,
+  "interpretation": "Plot raw Si mode tensors and relative polarized weights, without projection.\n\nThe chosen Lorentzian width is a display resolution. It is not a computed\nphonon lifetime. The spectral weights are |e_s^T (d alpha_cell/dQ) e_i|^2;\nfrequency-dependent photon/thermal factors and absolute cross sections are\nnot included. Negative raw modes remain visible in the frequency table.\n"
+}

@@ -1,0 +1,186 @@
+{
+  "jax": "0.10.0",
+  "rows": [
+    {
+      "size": 1,
+      "case": "zero_first",
+      "expected_jvp": 1.0,
+      "actual_jvp": 1.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 1,
+      "case": "zero_last",
+      "expected_jvp": 1.0,
+      "actual_jvp": 1.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 1,
+      "case": "two_zeros",
+      "expected_jvp": 1.0,
+      "actual_jvp": 1.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 1,
+      "case": "zero_matrix",
+      "expected_jvp": 1.0,
+      "actual_jvp": 1.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 2,
+      "case": "zero_first",
+      "expected_jvp": 1.0,
+      "actual_jvp": 1.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 2,
+      "case": "zero_last",
+      "expected_jvp": 1.0,
+      "actual_jvp": 1.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 2,
+      "case": "two_zeros",
+      "expected_jvp": 0.0,
+      "actual_jvp": 0.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 2,
+      "case": "zero_matrix",
+      "expected_jvp": 0.0,
+      "actual_jvp": 0.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 3,
+      "case": "zero_first",
+      "expected_jvp": 1.0,
+      "actual_jvp": 1.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 3,
+      "case": "zero_last",
+      "expected_jvp": 1.0,
+      "actual_jvp": 1.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 3,
+      "case": "two_zeros",
+      "expected_jvp": 0.0,
+      "actual_jvp": 0.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 3,
+      "case": "zero_matrix",
+      "expected_jvp": 0.0,
+      "actual_jvp": 0.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 4,
+      "case": "zero_first",
+      "expected_jvp": 1.0,
+      "actual_jvp": 0.0,
+      "finite": true,
+      "max_reverse_error": 1.0,
+      "jvp_error": 1.0
+    },
+    {
+      "size": 4,
+      "case": "zero_last",
+      "expected_jvp": 1.0,
+      "actual_jvp": 1.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 4,
+      "case": "two_zeros",
+      "expected_jvp": 0.0,
+      "actual_jvp": 0.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 4,
+      "case": "zero_matrix",
+      "expected_jvp": 0.0,
+      "actual_jvp": 0.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 5,
+      "case": "zero_first",
+      "expected_jvp": 1.0,
+      "actual_jvp": 0.0,
+      "finite": true,
+      "max_reverse_error": 1.0,
+      "jvp_error": 1.0
+    },
+    {
+      "size": 5,
+      "case": "zero_last",
+      "expected_jvp": 1.0,
+      "actual_jvp": 1.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 5,
+      "case": "two_zeros",
+      "expected_jvp": 0.0,
+      "actual_jvp": 0.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    },
+    {
+      "size": 5,
+      "case": "zero_matrix",
+      "expected_jvp": 0.0,
+      "actual_jvp": 0.0,
+      "finite": true,
+      "max_reverse_error": 0.0,
+      "jvp_error": 0.0
+    }
+  ],
+  "boundary": "First derivative only; scalar determinant compared with independent cofactor minors. No GradSCF source is edited."
+}

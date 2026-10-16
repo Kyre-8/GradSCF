@@ -1,0 +1,969 @@
+{
+  "complete": true,
+  "basis": {
+    "H": [
+      [
+        0,
+        [
+          3.42525091,
+          0.15432897
+        ],
+        [
+          0.62391373,
+          0.53532814
+        ],
+        [
+          0.1688554,
+          0.44463454
+        ]
+      ],
+      [
+        0,
+        [
+          0.08,
+          1.0
+        ]
+      ]
+    ]
+  },
+  "auxiliary_basis": "def2-universal-jkfit",
+  "cart": true,
+  "symbols": [
+    "H",
+    "H"
+  ],
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      -0.7
+    ],
+    [
+      0.0,
+      0.0,
+      0.7
+    ]
+  ],
+  "topology": {
+    "angular_momenta": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "primitive_counts": [
+      3,
+      1,
+      3,
+      1
+    ],
+    "contraction_counts": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "nuclear_charges": [
+      1,
+      1
+    ],
+    "cart": true
+  },
+  "fixed_auxiliary_metric_signature": "393e15a3a8d1981987eea797076e6d3e4d9d39a2a96a83c7efa50ee0eb9d0c6d",
+  "metric_method": "cholesky",
+  "metric_lindep": 1e-12,
+  "theta_definition": "Two dimensionless log scales, shared by both H atoms: contracted s then diffuse s.",
+  "exponent_units": "bohr^-2",
+  "energy_units": "Hartree",
+  "bounds_theta": [
+    -0.7,
+    0.7
+  ],
+  "seed_coefficients_sha256": "d789f06b0068dbd2f0f6aa066b95cf8d6c1f94cede732ed8a4bce810de40db67",
+  "initial_energy": -1.1199118212206445,
+  "final_energy": -1.1200445639724483,
+  "optimized_theta": [
+    0.08447177148705315,
+    0.578478466749716
+  ],
+  "optimized_scale": [
+    1.0881421271643328,
+    1.7833229802393928
+  ],
+  "projected_gradient_max": 6.703804178442851e-11,
+  "optimizer_iterations": 15,
+  "optimizer_message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL",
+  "trajectory": [
+    {
+      "theta": [
+        0.0,
+        0.0
+      ],
+      "energy": -1.1199118212206445,
+      "gradient_theta": [
+        0.001149784102166826,
+        -0.000274983210094958
+      ],
+      "orbital_iterations": 3,
+      "orbital_gradient_norm": 8.08254562088053e-16,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.053548108685444275
+    },
+    {
+      "theta": [
+        -0.001149784102166826,
+        0.000274983210094958
+      ],
+      "energy": -1.1199130854691308,
+      "gradient_theta": [
+        0.000923173464919455,
+        -0.0002530494845314211
+      ],
+      "orbital_iterations": 3,
+      "orbital_gradient_norm": 9.222205069512407e-16,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.05352351302227911
+    },
+    {
+      "theta": [
+        -0.005945659266719711,
+        0.00229188661985365
+      ],
+      "energy": -1.1199156436959314,
+      "gradient_theta": [
+        -2.9126556473258652e-05,
+        -0.00016512227950270914
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.6616296724220897e-15,
+      "normalization_error": 1.1102230246251565e-16,
+      "minimum_overlap_eigenvalue": 0.053437498414988384
+    },
+    {
+      "theta": [
+        -0.0065038431950210675,
+        0.007241244804057418
+      ],
+      "energy": -1.1199163525383429,
+      "gradient_theta": [
+        -0.00021784859440116585,
+        -0.00014925827264605245
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 4.577566798522237e-16,
+      "normalization_error": 1.1102230246251565e-16,
+      "minimum_overlap_eigenvalue": 0.05351998233719982
+    },
+    {
+      "theta": [
+        -0.006696427457305921,
+        0.043851678717740476
+      ],
+      "energy": -1.1199207928381205,
+      "gradient_theta": [
+        -0.0008454240139577995,
+        -9.917383314640688e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.8209011484034673e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.05420163347401724
+    },
+    {
+      "theta": [
+        -0.0024608052088078798,
+        0.16616819409084566
+      ],
+      "energy": -1.1199333066482815,
+      "gradient_theta": [
+        -0.001973336444900882,
+        -5.204230986890746e-06
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 9.155133597044475e-16,
+      "normalization_error": 0.0,
+      "minimum_overlap_eigenvalue": 0.0561812406678321
+    },
+    {
+      "theta": [
+        0.013909405032704865,
+        0.4583800811992823
+      ],
+      "energy": -1.119946667802386,
+      "gradient_theta": [
+        -0.0034736917743616222,
+        0.00027783760994612287
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.616509124176106e-15,
+      "normalization_error": 0.0,
+      "minimum_overlap_eigenvalue": 0.05780642065605639
+    },
+    {
+      "theta": [
+        0.013533812956063759,
+        0.37045700543281695
+      ],
+      "energy": -1.1199623718209146,
+      "gradient_theta": [
+        -0.0026861218574185984,
+        0.00010873881840199575
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.1801832636420706e-15,
+      "normalization_error": 1.1102230246251565e-16,
+      "minimum_overlap_eigenvalue": 0.058077463485411755
+    },
+    {
+      "theta": [
+        0.029238991498224252,
+        0.39303056046885304
+      ],
+      "energy": -1.1199944082236994,
+      "gradient_theta": [
+        -0.001518403229342906,
+        -3.616157050587175e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.5543122344752192e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.05878397639286396
+    },
+    {
+      "theta": [
+        0.07969484880416064,
+        0.6294354156388716
+      ],
+      "energy": -1.120031426188631,
+      "gradient_theta": [
+        -0.0008707525518762335,
+        0.0004271604864106566
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.368774871883577e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.059427160509449094
+    },
+    {
+      "theta": [
+        0.07251264845509216,
+        0.516346283114186
+      ],
+      "energy": -1.120038183224806,
+      "gradient_theta": [
+        0.00014368072107604616,
+        -0.00021276866721993827
+      ],
+      "orbital_iterations": 5,
+      "orbital_gradient_norm": 1.0175362097255202e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06038795935713799
+    },
+    {
+      "theta": [
+        0.07968723772497315,
+        0.5637078108433927
+      ],
+      "energy": -1.1200440863239254,
+      "gradient_theta": [
+        -9.348773042472951e-05,
+        -3.327281170326388e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.1957467920563633e-15,
+      "normalization_error": 4.440892098500626e-16,
+      "minimum_overlap_eigenvalue": 0.060324537972919264
+    },
+    {
+      "theta": [
+        0.08535395933049274,
+        0.5837113637923749
+      ],
+      "energy": -1.12004450618945,
+      "gradient_theta": [
+        -1.8847528006409914e-05,
+        2.5429568254237363e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 2.175583928816829e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06040255423881232
+    },
+    {
+      "theta": [
+        0.08435295614332537,
+        0.5781381154742634
+      ],
+      "energy": -1.1200445636898233,
+      "gradient_theta": [
+        -2.6153365851436642e-06,
+        -7.472280170994079e-07
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 8.005932084973442e-16,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06041488170384031
+    },
+    {
+      "theta": [
+        0.08446674906717241,
+        0.5784677798067359
+      ],
+      "energy": -1.120044563972011,
+      "gradient_theta": [
+        -1.6317726841285487e-07,
+        -5.091617284843617e-09
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 2.1065000811460206e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06041723240234871
+    },
+    {
+      "theta": [
+        0.08447177148705315,
+        0.578478466749716
+      ],
+      "energy": -1.1200445639724483,
+      "gradient_theta": [
+        -5.4331979386524116e-11,
+        6.703805954331028e-11
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.4895204919483639e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06041738249432276
+    }
+  ],
+  "evaluations": [
+    {
+      "theta": [
+        0.0,
+        0.0
+      ],
+      "energy": -1.1199118212206445,
+      "gradient_theta": [
+        0.001149784102166826,
+        -0.000274983210094958
+      ],
+      "orbital_iterations": 3,
+      "orbital_gradient_norm": 8.08254562088053e-16,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.053548108685444275
+    },
+    {
+      "theta": [
+        0.0,
+        0.0
+      ],
+      "energy": -1.1199118212206445,
+      "gradient_theta": [
+        0.001149784102166826,
+        -0.000274983210094958
+      ],
+      "orbital_iterations": 3,
+      "orbital_gradient_norm": 8.08254562088053e-16,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.053548108685444275
+    },
+    {
+      "theta": [
+        -0.001149784102166826,
+        0.000274983210094958
+      ],
+      "energy": -1.1199130854691308,
+      "gradient_theta": [
+        0.000923173464919455,
+        -0.0002530494845314211
+      ],
+      "orbital_iterations": 3,
+      "orbital_gradient_norm": 9.222205069512407e-16,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.05352351302227911
+    },
+    {
+      "theta": [
+        -0.001149784102166826,
+        0.000274983210094958
+      ],
+      "energy": -1.1199130854691308,
+      "gradient_theta": [
+        0.000923173464919455,
+        -0.0002530494845314211
+      ],
+      "orbital_iterations": 3,
+      "orbital_gradient_norm": 9.222205069512407e-16,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.05352351302227911
+    },
+    {
+      "theta": [
+        -0.005945659266719711,
+        0.00229188661985365
+      ],
+      "energy": -1.1199156436959314,
+      "gradient_theta": [
+        -2.9126556473258652e-05,
+        -0.00016512227950270914
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.6616296724220897e-15,
+      "normalization_error": 1.1102230246251565e-16,
+      "minimum_overlap_eigenvalue": 0.053437498414988384
+    },
+    {
+      "theta": [
+        -0.005945659266719711,
+        0.00229188661985365
+      ],
+      "energy": -1.1199156436959314,
+      "gradient_theta": [
+        -2.9126556473258652e-05,
+        -0.00016512227950270914
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.6616296724220897e-15,
+      "normalization_error": 1.1102230246251565e-16,
+      "minimum_overlap_eigenvalue": 0.053437498414988384
+    },
+    {
+      "theta": [
+        -0.0060572960523799825,
+        0.0032817582566944037
+      ],
+      "energy": -1.1199158001941685,
+      "gradient_theta": [
+        -6.706878571975195e-05,
+        -0.00016192915158605672
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 6.280369834735101e-16,
+      "normalization_error": 3.3306690738754696e-16,
+      "minimum_overlap_eigenvalue": 0.05345409651567378
+    },
+    {
+      "theta": [
+        -0.0065038431950210675,
+        0.007241244804057418
+      ],
+      "energy": -1.1199163525383429,
+      "gradient_theta": [
+        -0.00021784859440116585,
+        -0.00014925827264605245
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 4.577566798522237e-16,
+      "normalization_error": 1.1102230246251565e-16,
+      "minimum_overlap_eigenvalue": 0.05351998233719982
+    },
+    {
+      "theta": [
+        -0.0065038431950210675,
+        0.007241244804057418
+      ],
+      "energy": -1.1199163525383429,
+      "gradient_theta": [
+        -0.00021784859440116585,
+        -0.00014925827264605245
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 4.577566798522237e-16,
+      "normalization_error": 1.1102230246251565e-16,
+      "minimum_overlap_eigenvalue": 0.05351998233719982
+    },
+    {
+      "theta": [
+        -0.006696427457305921,
+        0.043851678717740476
+      ],
+      "energy": -1.1199207928381205,
+      "gradient_theta": [
+        -0.0008454240139577995,
+        -9.917383314640688e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.8209011484034673e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.05420163347401724
+    },
+    {
+      "theta": [
+        -0.006696427457305921,
+        0.043851678717740476
+      ],
+      "energy": -1.1199207928381205,
+      "gradient_theta": [
+        -0.0008454240139577995,
+        -9.917383314640688e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.8209011484034673e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.05420163347401724
+    },
+    {
+      "theta": [
+        -0.0024608052088078798,
+        0.16616819409084566
+      ],
+      "energy": -1.1199333066482815,
+      "gradient_theta": [
+        -0.001973336444900882,
+        -5.204230986890746e-06
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 9.155133597044475e-16,
+      "normalization_error": 0.0,
+      "minimum_overlap_eigenvalue": 0.0561812406678321
+    },
+    {
+      "theta": [
+        -0.0024608052088078798,
+        0.16616819409084566
+      ],
+      "energy": -1.1199333066482815,
+      "gradient_theta": [
+        -0.001973336444900882,
+        -5.204230986890746e-06
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 9.155133597044475e-16,
+      "normalization_error": 0.0,
+      "minimum_overlap_eigenvalue": 0.0561812406678321
+    },
+    {
+      "theta": [
+        0.013909405032704865,
+        0.4583800811992823
+      ],
+      "energy": -1.119946667802386,
+      "gradient_theta": [
+        -0.0034736917743616222,
+        0.00027783760994612287
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.616509124176106e-15,
+      "normalization_error": 0.0,
+      "minimum_overlap_eigenvalue": 0.05780642065605639
+    },
+    {
+      "theta": [
+        0.013909405032704865,
+        0.4583800811992823
+      ],
+      "energy": -1.119946667802386,
+      "gradient_theta": [
+        -0.0034736917743616222,
+        0.00027783760994612287
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.616509124176106e-15,
+      "normalization_error": 0.0,
+      "minimum_overlap_eigenvalue": 0.05780642065605639
+    },
+    {
+      "theta": [
+        0.013533812956063759,
+        0.37045700543281695
+      ],
+      "energy": -1.1199623718209146,
+      "gradient_theta": [
+        -0.0026861218574185984,
+        0.00010873881840199575
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.1801832636420706e-15,
+      "normalization_error": 1.1102230246251565e-16,
+      "minimum_overlap_eigenvalue": 0.058077463485411755
+    },
+    {
+      "theta": [
+        0.013533812956063759,
+        0.37045700543281695
+      ],
+      "energy": -1.1199623718209146,
+      "gradient_theta": [
+        -0.0026861218574185984,
+        0.00010873881840199575
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.1801832636420706e-15,
+      "normalization_error": 1.1102230246251565e-16,
+      "minimum_overlap_eigenvalue": 0.058077463485411755
+    },
+    {
+      "theta": [
+        0.029238991498224252,
+        0.39303056046885304
+      ],
+      "energy": -1.1199944082236994,
+      "gradient_theta": [
+        -0.001518403229342906,
+        -3.616157050587175e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.5543122344752192e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.05878397639286396
+    },
+    {
+      "theta": [
+        0.029238991498224252,
+        0.39303056046885304
+      ],
+      "energy": -1.1199944082236994,
+      "gradient_theta": [
+        -0.001518403229342906,
+        -3.616157050587175e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.5543122344752192e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.05878397639286396
+    },
+    {
+      "theta": [
+        0.07969484880416064,
+        0.6294354156388716
+      ],
+      "energy": -1.120031426188631,
+      "gradient_theta": [
+        -0.0008707525518762335,
+        0.0004271604864106566
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.368774871883577e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.059427160509449094
+    },
+    {
+      "theta": [
+        0.07969484880416064,
+        0.6294354156388716
+      ],
+      "energy": -1.120031426188631,
+      "gradient_theta": [
+        -0.0008707525518762335,
+        0.0004271604864106566
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.368774871883577e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.059427160509449094
+    },
+    {
+      "theta": [
+        0.07251264845509216,
+        0.516346283114186
+      ],
+      "energy": -1.120038183224806,
+      "gradient_theta": [
+        0.00014368072107604616,
+        -0.00021276866721993827
+      ],
+      "orbital_iterations": 5,
+      "orbital_gradient_norm": 1.0175362097255202e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06038795935713799
+    },
+    {
+      "theta": [
+        0.07251264845509216,
+        0.516346283114186
+      ],
+      "energy": -1.120038183224806,
+      "gradient_theta": [
+        0.00014368072107604616,
+        -0.00021276866721993827
+      ],
+      "orbital_iterations": 5,
+      "orbital_gradient_norm": 1.0175362097255202e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06038795935713799
+    },
+    {
+      "theta": [
+        0.07968723772497315,
+        0.5637078108433927
+      ],
+      "energy": -1.1200440863239254,
+      "gradient_theta": [
+        -9.348773042472951e-05,
+        -3.327281170326388e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.1957467920563633e-15,
+      "normalization_error": 4.440892098500626e-16,
+      "minimum_overlap_eigenvalue": 0.060324537972919264
+    },
+    {
+      "theta": [
+        0.07968723772497315,
+        0.5637078108433927
+      ],
+      "energy": -1.1200440863239254,
+      "gradient_theta": [
+        -9.348773042472951e-05,
+        -3.327281170326388e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.1957467920563633e-15,
+      "normalization_error": 4.440892098500626e-16,
+      "minimum_overlap_eigenvalue": 0.060324537972919264
+    },
+    {
+      "theta": [
+        0.08535395933049274,
+        0.5837113637923749
+      ],
+      "energy": -1.12004450618945,
+      "gradient_theta": [
+        -1.8847528006409914e-05,
+        2.5429568254237363e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 2.175583928816829e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06040255423881232
+    },
+    {
+      "theta": [
+        0.08535395933049274,
+        0.5837113637923749
+      ],
+      "energy": -1.12004450618945,
+      "gradient_theta": [
+        -1.8847528006409914e-05,
+        2.5429568254237363e-05
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 2.175583928816829e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06040255423881232
+    },
+    {
+      "theta": [
+        0.08435295614332537,
+        0.5781381154742634
+      ],
+      "energy": -1.1200445636898233,
+      "gradient_theta": [
+        -2.6153365851436642e-06,
+        -7.472280170994079e-07
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 8.005932084973442e-16,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06041488170384031
+    },
+    {
+      "theta": [
+        0.08435295614332537,
+        0.5781381154742634
+      ],
+      "energy": -1.1200445636898233,
+      "gradient_theta": [
+        -2.6153365851436642e-06,
+        -7.472280170994079e-07
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 8.005932084973442e-16,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06041488170384031
+    },
+    {
+      "theta": [
+        0.08446674906717241,
+        0.5784677798067359
+      ],
+      "energy": -1.120044563972011,
+      "gradient_theta": [
+        -1.6317726841285487e-07,
+        -5.091617284843617e-09
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 2.1065000811460206e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06041723240234871
+    },
+    {
+      "theta": [
+        0.08446674906717241,
+        0.5784677798067359
+      ],
+      "energy": -1.120044563972011,
+      "gradient_theta": [
+        -1.6317726841285487e-07,
+        -5.091617284843617e-09
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 2.1065000811460206e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06041723240234871
+    },
+    {
+      "theta": [
+        0.08447177148705315,
+        0.578478466749716
+      ],
+      "energy": -1.1200445639724483,
+      "gradient_theta": [
+        -5.4331979386524116e-11,
+        6.703805954331028e-11
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.4895204919483639e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06041738249432276
+    },
+    {
+      "theta": [
+        0.08447177148705315,
+        0.578478466749716
+      ],
+      "energy": -1.1200445639724483,
+      "gradient_theta": [
+        -5.4331979386524116e-11,
+        6.703805954331028e-11
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.4895204919483639e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06041738249432276
+    },
+    {
+      "theta": [
+        0.08447177148705315,
+        0.578478466749716
+      ],
+      "energy": -1.1200445639724483,
+      "gradient_theta": [
+        -5.4331979386524116e-11,
+        6.703805954331028e-11
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.4895204919483639e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06041738249432276
+    },
+    {
+      "theta": [
+        0.0,
+        0.0
+      ],
+      "energy": -1.1199118212206445,
+      "gradient_theta": [
+        0.001149784102166826,
+        -0.000274983210094958
+      ],
+      "orbital_iterations": 3,
+      "orbital_gradient_norm": 8.08254562088053e-16,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.053548108685444275
+    },
+    {
+      "theta": [
+        0.08447177148705315,
+        0.578478466749716
+      ],
+      "energy": -1.1200445639724483,
+      "gradient_theta": [
+        -5.4331979386524116e-11,
+        6.703805954331028e-11
+      ],
+      "orbital_iterations": 4,
+      "orbital_gradient_norm": 1.4895204919483639e-15,
+      "normalization_error": 2.220446049250313e-16,
+      "minimum_overlap_eigenvalue": 0.06041738249432276
+    }
+  ],
+  "derivative_checks": [
+    {
+      "point": "initial",
+      "theta": [
+        0.0,
+        0.0
+      ],
+      "gradient_theta": [
+        0.001149784102166826,
+        -0.000274983210094958
+      ],
+      "finite_differences": [
+        {
+          "step": 0.005,
+          "gradient_theta": [
+            0.0011513925352701904,
+            -0.0002749859172368474
+          ],
+          "max_error": 1.6084331033643182e-06
+        },
+        {
+          "step": 0.001,
+          "gradient_theta": [
+            0.0011498484386862629,
+            -0.0002749833185600181
+          ],
+          "max_error": 6.433651943680598e-08
+        },
+        {
+          "step": 0.0002,
+          "gradient_theta": [
+            0.001149786674758957,
+            -0.0002749832128667862
+          ],
+          "max_error": 2.5725921308592664e-09
+        }
+      ],
+      "normalization_jacobian_max": 2.220446049250313e-16
+    },
+    {
+      "point": "optimized",
+      "theta": [
+        0.08447177148705315,
+        0.578478466749716
+      ],
+      "gradient_theta": [
+        -5.4331979386524116e-11,
+        6.703805954331028e-11
+      ],
+      "finite_differences": [
+        {
+          "step": 0.005,
+          "gradient_theta": [
+            7.007121105573333e-07,
+            4.877995785079747e-08
+          ],
+          "max_error": 7.007664425367198e-07
+        },
+        {
+          "step": 0.001,
+          "gradient_theta": [
+            2.7976287952924395e-08,
+            2.015498878904509e-09
+          ],
+          "max_error": 2.803061993231092e-08
+        },
+        {
+          "step": 0.0002,
+          "gradient_theta": [
+            1.0680345496894006e-09,
+            1.4099832412739488e-10
+          ],
+          "max_error": 1.1223665290759247e-09
+        }
+      ],
+      "normalization_jacobian_max": 2.220446049250313e-16
+    }
+  ],
+  "source_python_sha256": "ca37f375d0e4cc673d1ca2e5b50f189b9047ad8bce56e00f7f397156fac3e43f",
+  "script_sha256": "8b63bfab3d01ce16ca6ab8c88e58592254cd844ad362a69f950b8daaa07f3443",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "dtype": "float64",
+  "devices": [
+    "cpu:0"
+  ],
+  "elapsed_seconds": 34.21241974600707,
+  "scope": "Fixed geometry/topology/auxiliary metric. First exponent derivatives include normalized 1e and 3c DF integrals and relaxed HF. No exact 4c, auxiliary, geometry or higher exponent derivatives."
+}

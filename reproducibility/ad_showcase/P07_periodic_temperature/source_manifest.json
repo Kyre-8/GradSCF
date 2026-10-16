@@ -1,0 +1,43 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-crystal-ir-20261016",
+  "source_python_sha256": "11604abdb93693160e16e57ba0fc3a5971c23edffa3cf5f7faffde19c86622dd",
+  "production_source_archive_sha256": "529568fea03397660868d65e5856d5f5d4c08ab17d70bb692b29b3fff166aac0",
+  "production_source_archive": "artifacts/ad_showcase/P07_strain/strain-source.tar.gz",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "numpy": "2.4.4",
+  "scipy": "1.17.1",
+  "cpu": "model name\t: Intel(R) Xeon(R) Platinum 8457C",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONPATH": "src"
+  },
+  "command": "python examples/pbc/h2_temperature_response.py",
+  "source_sha256": {
+    "examples/pbc/h2_temperature_response.py": "4968f14897eaeb8f5da969f3cb3597aa118daa18f48a9a2a2abb832090e74901",
+    "examples/pbc/plot_h2_temperature_response.py": "f88eeef406ceebcdeafd6128b323aada1bb7bc5ff8a7dfe67f60892cc4d04c5d"
+  },
+  "files_sha256": {
+    "executed/h2_temperature_response.py": "4968f14897eaeb8f5da969f3cb3597aa118daa18f48a9a2a2abb832090e74901",
+    "executed/plot_h2_temperature_response.py": "f88eeef406ceebcdeafd6128b323aada1bb7bc5ff8a7dfe67f60892cc4d04c5d",
+    "gradscf.json": "65efbb75351f58de193e0944f8273883c08a84eda16335dd989ffc54cf7642aa",
+    "h2_temperature_response.pdf": "a9195dc9ec76d8b4c6ad6ee0dc5fc58c5d863465d077d4b16d54ccfcaaa6eaf2",
+    "h2_temperature_response.png": "b5aa6dcab8d829f405aeb7cd86c2d4af183893586138abcc9173c583a45d3af3",
+    "probe.json": "4a190f05f28df7fb1ddb5503523778a6f10f5919628a1ef477d7076132fa1920",
+    "validation/thermal-example/executed.py": "4968f14897eaeb8f5da969f3cb3597aa118daa18f48a9a2a2abb832090e74901",
+    "validation/thermal-example/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/thermal-example/resources.log": "cb4e835282e75c57f47c9f371f2a83a803c0f926490abff969ee49e6703e701d",
+    "validation/thermal-example/run.log": "53aa419751877455de51127d355ede4637505aa11440d7709b0819de98ccf3bd",
+    "validation/thermal-plot/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/thermal-plot/run.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "validation/thermal-probe/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/thermal-probe/resources.log": "1b8b78832b4ecbd9574357810de4f2003642641a7f96c20622245c6309a529b8",
+    "validation/thermal-probe/run.log": "1aa97d9f9e35ff0382b258dcae757c29bf7c974db318d76f97f0004f902a47c5"
+  }
+}

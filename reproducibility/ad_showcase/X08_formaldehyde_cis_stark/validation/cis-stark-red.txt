@@ -1,0 +1,25 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____ test_h2_total_excited_polarizability_matches_independent_finite_fields ____
+
+    def test_h2_total_excited_polarizability_matches_independent_finite_fields():
+        pytest.importorskip("pyscf")
+        from pyscf import gto as pgto, scf as pscf
+        from scipy.linalg import eigh
+    
+        coordinates = np.array([[0., -.4, -.4], [.4, .2, 1.]])
+        mol = gto.M(atom=list(zip(("H", "H"), coordinates)), basis="6-31g*", unit="Bohr", cart=True)
+        mf = scf.RHF(mol, integral_backend="native", conv_tol=1e-12,
+                     conv_tol_density=1e-11, conv_tol_grad=1e-11).run()
+        assert mf.converged
+        model = CISGeometry(mf, nroots=2, gradient_tolerance=1e-11,
+            response=EigenResponseConfig(linear_config=LinearSolverConfig(method="direct", max_dense=8, rtol=1e-11)))
+        field = np.array([.0002, -.0001, .0004])
+>       dipole, alpha, state = model.electric_response(coordinates, 0, field=field)
+                               ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'CISGeometry' object has no attribute 'electric_response'
+
+tests/test_cis_stark_response.py:23: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_cis_stark_response.py::test_h2_total_excited_polarizability_matches_independent_finite_fields
+1 failed in 12.51s

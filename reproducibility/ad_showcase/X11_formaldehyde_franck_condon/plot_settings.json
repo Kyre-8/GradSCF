@@ -1,0 +1,7 @@
+{
+  "probabilities": "Raw, not renormalized after state truncation or finite spectral window.",
+  "spectrum": "Gaussian illustration with sigma=.02 and .01 eV; no fitted lifetime or experimental broadening.",
+  "matrix_display": "Squared raw endpoint overlap and model canonical rotation are distinct matrices.",
+  "stick_selection": "Twenty largest raw factors; the smooth curve uses all retained weight except the reported <=1e-11 plotting screen.",
+  "scope": "Zero-temperature unit-Condon probability envelope on a common flat vibrational slice. No absolute dark-state absorption, HT, rotation-vibration coupling or full curvilinear FC claim."
+}

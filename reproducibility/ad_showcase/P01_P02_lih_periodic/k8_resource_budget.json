@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "-c",
+    "from examples.pbc.lih_forces_stress import SETTINGS,run_case; run_case('pbe_szv_k8_fft31',dict(SETTINGS,kmesh=[8]*3))"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 113101104,
+  "budget_kib": 125829120,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true
+}

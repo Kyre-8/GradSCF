@@ -132,6 +132,17 @@ class _EOM:
             raise ValueError("Invalid EOM root")
         return self.space.unpack(self.right_vectors[:, root])
 
+    def dyson(self, *, max_elements=20_000_000):
+        """One-spin IP/EA Dyson amplitudes and biorthogonal spectral weights."""
+        from .properties import dyson_orbitals
+
+        self.check_source()
+        if self.sector not in {"ip", "ea"}:
+            raise ValueError("Dyson orbitals require the IP or EA sector")
+        self.ground.solve_lambda()
+        return dyson_orbitals(self.ground.result, self.ground.lambda_result,
+                              self.result, max_elements=max_elements)
+
 
 class EOMEE(_EOM):
     """Restricted singlet EOM-EE-CCSD; not an all-spin EE dispatcher."""

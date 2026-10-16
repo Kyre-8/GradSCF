@@ -17,7 +17,8 @@ from ..types import (
 from .api import solve_hermitian
 
 
-def solve_stable_rpa(a, b, *, config=None, gap_tol=1e-8, stability_tol=1e-10):
+def solve_stable_rpa(a, b, *, config=None, gap_tol=1e-8, stability_tol=1e-10,
+                     response_config=None):
     """Solve [[A,B],[-B,-A]] for real symmetric A and B with A+/-B > 0.
 
     This dense reference path is bounded by config.max_dense. Cholesky of
@@ -27,12 +28,17 @@ def solve_stable_rpa(a, b, *, config=None, gap_tol=1e-8, stability_tol=1e-10):
     includes both the reduction and amplitude reconstruction. Instabilities
     are reported as invalid, with the two actual stability eigenvalue minima;
     no unstable roots are discarded or converted to real frequencies.
+    response_config optionally supplies shared LinearSolverConfig controls
+    for the n-dimensional reduced-state response, independently of the
+    forward eigensolver. None preserves the existing GMRES configuration.
     """
     cfg = (
         EigenSolverConfig(method="dense", gradient_mode="implicit_eigenvector")
         if config is None
         else config
     )
+    if response_config is not None and not isinstance(response_config, LinearSolverConfig):
+        raise TypeError("response_config must be a LinearSolverConfig")
     if cfg.value_min is not None:
         raise ValueError(
             "value_min is a Hermitian interval control, not an RPA frequency window"
@@ -96,7 +102,7 @@ def solve_stable_rpa(a, b, *, config=None, gap_tol=1e-8, stability_tol=1e-10):
             ),
             gap_atol=0.0,
             gap_rtol=32 * jnp.finfo(dtype).eps,
-            linear_config=LinearSolverConfig(
+            linear_config=response_config or LinearSolverConfig(
                 rtol=cfg.adjoint_tol, maxiter=cfg.adjoint_maxiter
             ),
         ),

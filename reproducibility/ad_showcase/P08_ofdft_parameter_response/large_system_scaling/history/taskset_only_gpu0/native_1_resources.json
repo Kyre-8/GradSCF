@@ -1,0 +1,62 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "-c",
+    "from examples.ofdft.large_system_response import calculate; calculate(1)"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 5230252,
+  "budget_kib": 33554432,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true,
+  "elapsed_seconds": 1034.1593535379998,
+  "inherited_cpu_affinity_at_start": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "wrapper_cpu_affinity_at_end": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "thread_environment": {
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "MKL_NUM_THREADS": "2",
+    "NUMEXPR_NUM_THREADS": "2"
+  },
+  "resource_driver_sha256": "60931efb4dff387d28698f2b69e32c98a52dd08627b7636356d0232ea50930ee",
+  "rss_monitor_sha256": "673d449cb2f334b1fd4e6b4c04302039d54e4ef4ca822f336e45cb0a8e4a44d5",
+  "sampled_peak_gpu0_mib": 5188,
+  "gpu_measurement": "Exclusive GPU0 total used memory, includes context; sampled at 1 s",
+  "cpu_pool_unchanged": true
+}

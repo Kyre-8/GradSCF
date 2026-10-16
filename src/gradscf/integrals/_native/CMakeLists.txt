@@ -31,7 +31,7 @@ add_library(gradscf_integrals SHARED
   vendor/libcint/src/autocode/int3c2e.c
   vendor/libcint/src/autocode/grad1.c vendor/libcint/src/autocode/grad2.c
   vendor/libcint/src/autocode/hess.c
-  vendor/pyscf/pyscf/lib/gto/fill_int2e.c csrc/ffi.cc csrc/geometry.cc csrc/geometry_hessian.cc csrc/coefficients.cc csrc/exponents.cc csrc/compact.cc
+  vendor/pyscf/pyscf/lib/gto/fill_int2e.c csrc/ffi.cc csrc/geometry.cc csrc/geometry_hessian.cc csrc/geometry_higher.cc csrc/coefficients.cc csrc/exponents.cc csrc/compact.cc
   csrc/packed_eri.cc csrc/density_fitting.cc csrc/direct_jk.cc csrc/packed_jk.cc
   vendor/pyscf_ecp/gto/nr_ecp.c vendor/pyscf_ecp/np_helper/np_helper.c csrc/ecp.cc)
 target_include_directories(gradscf_integrals PRIVATE

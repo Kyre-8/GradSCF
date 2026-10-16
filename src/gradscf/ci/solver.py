@@ -11,7 +11,7 @@ from .space import make_uci_space
 from ..fci.cistring import excite
 
 
-def _eigenpairs(apply, diagonal, config):
+def _eigenpairs(apply, diagonal, config, response=None):
     dim = diagonal.size
     operator = LinearOperator(
         (dim, dim),
@@ -27,16 +27,25 @@ def _eigenpairs(apply, diagonal, config):
         maxiter=config.max_cycle,
         max_subspace=config.max_space,
     )
-    response = EigenResponseConfig(
-        target=(
-            "eigenpairs"
-            if config.gradient_mode == "implicit_eigenvector"
-            else "eigenvalues"
-        ),
-        linear_config=LinearSolverConfig(
-            rtol=config.adjoint_tol, maxiter=config.adjoint_max_cycle
-        ),
-    )
+    if response is None:
+        response = EigenResponseConfig(
+            target=(
+                "eigenpairs"
+                if config.gradient_mode == "implicit_eigenvector"
+                else "eigenvalues"
+            ),
+            linear_config=LinearSolverConfig(
+                rtol=config.adjoint_tol, maxiter=config.adjoint_max_cycle
+            ),
+        )
+    else:
+        if not isinstance(response, EigenResponseConfig):
+            raise TypeError("response must be an EigenResponseConfig")
+        if (config.gradient_mode != "eigenvalue_only" or config.adjoint_tol != 1e-10
+                or config.adjoint_max_cycle != 100):
+            raise ValueError("Use response controls or legacy CI config AD controls, not both")
+        if response.target == "subspace":
+            raise ValueError("CI individual-root results do not support a subspace response")
     result = solve_hermitian(operator, config=shared, response=response)
     return result.values, result.vectors, result.residual_norms, result.converged
 
@@ -91,12 +100,16 @@ def solve_ucis(h1, eri, *, nocc, frozen=None, config=None, max_determinants=5000
                        config.gradient_mode == "implicit_eigenvector")
 
 
-def solve_cis(h1, eri, *, nocc, singlet=True, frozen=None, config=None):
+def solve_cis(h1, eri, *, nocc, singlet=True, frozen=None, config=None, response=None):
     """Spin-adapted HF singles with unit-normalized spatial amplitudes.
 
     A(ia,jb) = delta(ij) F(ab) - delta(ab) F(ij)
                + 2 (ia|jb) [singlet only] - (ij|ab).
     The occupied-virtual Fock block must vanish (stationary HF reference).
+    Optional ``response`` uses the shared EigenResponseConfig for individual
+    energies/eigenpairs, including bounded direct linear response. It cannot
+    be combined with nondefault legacy config AD controls. Subspace invariants
+    are not represented by this result type and are explicitly rejected.
     CIS reference: Foresman et al. (1992), doi:10.1021/j100180a030.
     See ci/REFERENCES.md for the separate numerical-response references.
     """
@@ -128,6 +141,7 @@ def solve_cis(h1, eri, *, nocc, singlet=True, frozen=None, config=None):
                 - jnp.einsum("iiaa->ia", exchange))
     if singlet:
         diagonal = diagonal + 2 * jnp.einsum("iaia->ia", coulomb)
-    energies, vectors, residuals, converged = _eigenpairs(apply, diagonal.ravel(), config)
+    energies, vectors, residuals, converged = _eigenpairs(apply, diagonal.ravel(), config, response)
     return CISResult(energies, vectors.T.reshape(config.nroots, no, nv), residuals, converged,
-                     config.gradient_mode == "implicit_eigenvector", singlet)
+                     (response.target == "eigenpairs" if response is not None
+                      else config.gradient_mode == "implicit_eigenvector"), singlet)

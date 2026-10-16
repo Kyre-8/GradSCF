@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "interrupted_fd_is_incomplete",
+    "altered_density_cache_is_rejected"
+  ],
+  "scope": "Synthetic I/O state-machine regression only; no physics or reference result is fabricated.",
+  "compare_script_sha256": "f3edcff1b5df08aac59516f2f6226541c6dd48c2e7657666c09bad1afa9ba3ad",
+  "test_script_sha256": "9769686269bf97f527111613eddca5b4dc1c30c8853309ac3c9605ee1f55219a"
+}

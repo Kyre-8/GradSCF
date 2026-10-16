@@ -1,0 +1,223 @@
+{
+  "complete": true,
+  "settings": {
+    "a_bohr": 7.6,
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pade",
+    "mesh": [
+      31,
+      31,
+      31
+    ],
+    "kmesh": [
+      1,
+      1,
+      1
+    ],
+    "precision": 1e-10,
+    "displacement_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.025,
+        -0.015,
+        0.01
+      ]
+    ]
+  },
+  "explicit_nelectron": 4,
+  "pseudopotential_valence_charges": [
+    3,
+    1
+  ],
+  "electron_number": 3.9999999999999973,
+  "nao": 3,
+  "occupied_orbitals": 2,
+  "sampled_indirect_gap_hartree": 0.7907258453261536,
+  "mo_fock_occupied_virtual_norm": 2.423542801130589e-16,
+  "minimum_overlap_eigenvalue": 0.24232684255726533,
+  "occupation_values": [
+    0.0,
+    2.0
+  ],
+  "scf_converged": true,
+  "scf_cycles": 11,
+  "energy_hartree": -8.306566126302469,
+  "forces_hartree_per_bohr": [
+    [
+      0.000886173954034198,
+      -0.000531427013384844,
+      0.0003542269942887486
+    ],
+    [
+      -0.0008859844247164512,
+      0.0005313325678750402,
+      -0.00035417017457663354
+    ]
+  ],
+  "stress_hartree_per_bohr3": [
+    [
+      0.0011236777710190852,
+      -3.107386767649803e-07,
+      2.0898282617254261e-07
+    ],
+    [
+      -3.107386767649803e-07,
+      0.0011241796197862723,
+      -1.2361016427293968e-07
+    ],
+    [
+      2.0898282617254261e-07,
+      -1.2361016427293968e-07,
+      0.0011243364338544028
+    ]
+  ],
+  "pressure_hartree_per_bohr3": -0.00112406460821992,
+  "raw_net_force_hartree_per_bohr": [
+    1.8952931774680014e-07,
+    -9.444550980381491e-08,
+    5.6819712115040166e-08
+  ],
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      3.8249999999999997,
+      3.7849999999999997,
+      3.8099999999999996
+    ]
+  ],
+  "lattice_bohr": [
+    [
+      0.0,
+      3.8,
+      3.8
+    ],
+    [
+      3.8,
+      0.0,
+      3.8
+    ],
+    [
+      3.8,
+      3.8,
+      0.0
+    ]
+  ],
+  "volume_bohr3": 109.74399999999999,
+  "kpoints_inverse_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "fractional_kpoints": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "basis_data": {
+    "Li": [
+      [
+        0,
+        [
+          7.2610457926,
+          -0.2798628497,
+          0.0501840556
+        ],
+        [
+          2.1056583087,
+          -0.447742079,
+          0.1084202571
+        ],
+        [
+          0.6439906571,
+          -0.3912929157,
+          0.1448363201
+        ],
+        [
+          0.0797152017,
+          -0.0282408543,
+          -0.4643021689
+        ],
+        [
+          0.029402959,
+          0.0106542324,
+          -0.6220213304
+        ]
+      ]
+    ],
+    "H": [
+      [
+        0,
+        [
+          8.3744350009,
+          -0.0283380461
+        ],
+        [
+          1.805868146,
+          -0.1333810052
+        ],
+        [
+          0.4852528328,
+          -0.3995676063
+        ],
+        [
+          0.1658236932,
+          -0.5531027541
+        ]
+      ]
+    ]
+  },
+  "pseudopotential_data": [
+    [
+      [
+        3
+      ],
+      0.4,
+      4,
+      [
+        -14.03486849,
+        9.55347627,
+        -1.76648817,
+        0.08436998
+      ],
+      0
+    ],
+    [
+      [
+        1
+      ],
+      0.2,
+      2,
+      [
+        -4.1802368,
+        0.72507482
+      ],
+      0
+    ]
+  ],
+  "stress_convention": "Tensile-positive symmetric strain at fixed fractional atoms/kpoints; pressure=-trace(stress)/3.",
+  "exchange_convention": "HF uses full-k Ewald exchange divergence correction; pure PBE has no exact exchange.",
+  "model": "GTH-Pade pseudopotentials used for both PBE and HF; T=0 fixed integer occupations, full k mesh.",
+  "forward_seconds": 29.753946042008465,
+  "force_stress_seconds_includes_reconvergence_and_ad": 73.86051627300913,
+  "elapsed_seconds": 103.6823428439966,
+  "peak_rss_kib": 4435504,
+  "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+  "script_sha256": "4431a8c0439a2b60b4d4befb9c8c1792fd65d2bd0b1107937aa5f75a03bc8d68",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "dtype": "float64"
+}

@@ -51,22 +51,49 @@ def eri_pair_matrix_to_df_factors_traceable(
     tol: float = 1e-10,
     max_rank: int | None = None,
 ) -> Array:
-    """Traceable spectral AO-pair factorization, without an auxiliary fitting basis."""
+    """Traceable AO-pair factors, without an auxiliary fitting basis.
+
+    With no rank cap, return the symmetric principal square root, with small
+    eigenvalues removed at ``tol``. Its first matrix-function derivative is
+    invariant within repeated auxiliary eigenvalue clusters. The active space
+    must stay separated from the cutoff; this first-order interface does not
+    promise higher derivatives at degeneracy.
+
+    An explicit positive ``max_rank`` retains the legacy rectangular spectral
+    factors. Their individual eigenvectors require isolated eigenvalues for AD.
+    Both gauges reconstruct the same retained pair matrix.
+    """
 
     pair = jnp.asarray(pair_matrix)
     sym_pair = 0.5 * (pair + pair.T)
-    eigvals, eigvecs = jnp.linalg.eigh(sym_pair)
     if max_rank is not None and int(max_rank) > 0:
+        eigvals, eigvecs = jnp.linalg.eigh(sym_pair)
         eigvals = eigvals[-int(max_rank) :]
         eigvecs = eigvecs[:, -int(max_rank) :]
-    threshold = jnp.asarray(tol, dtype=eigvals.dtype)
-    keep = eigvals > threshold
-    scales = jnp.where(
-        keep,
-        jnp.sqrt(jnp.maximum(eigvals, threshold)),
-        jnp.asarray(0.0, dtype=eigvals.dtype),
-    )
-    packed_factors = (eigvecs * scales[None, :]).T
+        threshold = jnp.asarray(tol, dtype=eigvals.dtype)
+        scales = jnp.where(eigvals > threshold, jnp.sqrt(jnp.maximum(eigvals, threshold)), 0.)
+        packed_factors = (eigvecs * scales[None, :]).T
+    else:
+        from gradscf.solvers.eigen.spectral import matrix_function
+
+        def root(values, threshold):
+            retained = values > threshold
+            return jnp.where(retained, jnp.sqrt(jnp.where(retained, values, 1.)), 0.)
+
+        def divided_difference(values, threshold):
+            retained = values > threshold
+            scales = root(values, threshold)
+            both = retained[:, None] & retained[None, :]
+            cross = retained[:, None] != retained[None, :]
+            # sqrt(x)-sqrt(y) over x-y = 1/(sqrt(x)+sqrt(y)).
+            # Across the cutoff, use the exact secant of the truncated function.
+            sums = scales[:, None]+scales[None, :]
+            gaps = values[:, None]-values[None, :]
+            mixed = (scales[:, None]-scales[None, :])/jnp.where(cross, gaps, 1.)
+            return jnp.where(both, 1/jnp.where(both, sums, 1.), jnp.where(cross, mixed, 0.))
+
+        packed_factors = matrix_function(sym_pair, jnp.asarray(tol, dtype=pair.dtype), root,
+                                         divided_difference=divided_difference)
     rows_np, cols_np = _packed_pair_indices(int(nao))
     rows = jnp.asarray(rows_np)
     cols = jnp.asarray(cols_np)

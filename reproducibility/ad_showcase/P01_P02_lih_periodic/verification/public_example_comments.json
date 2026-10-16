@@ -1,0 +1,76 @@
+[
+  {
+    "path": "examples/pbc/lih_forces_stress.py",
+    "before_sha256": "4431a8c0439a2b60b4d4befb9c8c1792fd65d2bd0b1107937aa5f75a03bc8d68",
+    "after_sha256": "42b4753c2ac8bc0a577520a9a4c201cd18905eaee05b1ef3fa7913c57f8adb2a",
+    "numerical_ast_unchanged": true,
+    "matching_executed_copies": [
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pbe-szv-k3-fft31/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pbe-szv-k5-fft31/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pbe-szv-gamma-fft31/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/molopt-sr-k2-fft41-ad/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pbe-szv-k4-fft31/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pbe-szv-k8-fft31-budgeted/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/memory-eager-repaired/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/basis-condition-candidates/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/molopt-sr-k2-fft31-ad/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pbe-szv-k6-fft31/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pbe-szv-k2-fft41-repaired/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/dzvp-forward-budget/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/dzvp-forward-diagnosis/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/cubic-lattice-native/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pbe-szv-k2-fft51-repaired/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/hf-szv-gamma-fft31/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pbe-szv-k8-fft31-monitor-fixed/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/molopt-sr-forward-budget/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pbe-szv-k2-fft31-primary/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/baseline_jobs/pbe-szv-k2-fft31/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/baseline_jobs/memory-eager-array/source/examples/pbc/lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/baseline_jobs/memory-whole-jit/source/examples/pbc/lih_forces_stress.py"
+    ]
+  },
+  {
+    "path": "examples/pbc/compare_lih_forces_stress.py",
+    "before_sha256": "41cc88549a36c541fb1a27b67532f76a7ab927e6e91cb410b3df286c71d543cb",
+    "after_sha256": "247fdf6ac73423fb98f468db75513cf87520b32b08a8e13f80f7a67368a165db",
+    "numerical_ast_unchanged": true,
+    "matching_executed_copies": [
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pyscf-fft41-51/source/examples/pbc/compare_lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pyscf-dzvp-forward-diagnosis/source/examples/pbc/compare_lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/cubic-lattice-pyscf/source/examples/pbc/compare_lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pyscf-molopt-sr31/source/examples/pbc/compare_lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pyscf-primary31-k3/source/examples/pbc/compare_lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pyscf-hf-gamma-fd/source/examples/pbc/compare_lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/pyscf-gamma-k4/source/examples/pbc/compare_lih_forces_stress.py",
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/baseline_jobs/pyscf-pbe-szv-k2-fft31/source/examples/pbc/compare_lih_forces_stress.py"
+    ]
+  },
+  {
+    "path": "examples/pbc/lih_lattice_optimization.py",
+    "before_sha256": "0f771978e46555fd633b48afc21cfef9a0ef0a20864be750c1e108aedf3b3855",
+    "after_sha256": "0e0de003b29ef8e0ce72658355fe25401d328d2ae78a3bcd0d51648dc5f8cfa1",
+    "numerical_ast_unchanged": true,
+    "matching_executed_copies": [
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/cubic-lattice-native/source/examples/pbc/lih_lattice_optimization.py"
+    ]
+  },
+  {
+    "path": "examples/pbc/compare_lih_lattice_pyscf.py",
+    "before_sha256": "4863eef653c72bd1b0e583b71ec468c87016ff346a64cf4784f2cf8207b00837",
+    "after_sha256": "b1bd519a7843ef85310f857db72c25cf6b83d3cb2fee25e712310825d60510fc",
+    "numerical_ast_unchanged": true,
+    "matching_executed_copies": [
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/repaired_jobs/cubic-lattice-pyscf/source/examples/pbc/compare_lih_lattice_pyscf.py"
+    ]
+  },
+  {
+    "path": "examples/pbc/plot_lih_forces_stress.py",
+    "before_sha256": "9934f0277b33f9895795fa51b391bd6a581d2d7b7faa16388fe74b67370c9cb6",
+    "after_sha256": "82e320668ec0599ab87b2708488037de219176e69b75b4d34f83f8773a74e46b",
+    "numerical_ast_unchanged": true,
+    "matching_executed_copies": [
+      "reproducibility/ad_showcase/P01_P02_lih_periodic/verification/final_plot_source/plot_lih_forces_stress.py"
+    ],
+    "recovered_exact_pre_comment_bytes_match_plot_validation_hash": true
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "recorded_utc": "2026-10-16T00:16:43.181626+00:00",
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-lih-gamma-linear-20261016",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "versions": {
+    "jax": "0.10.0",
+    "jaxlib": "0.10.0",
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "pyscf": "2.13.0"
+  },
+  "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+  "native_library_sha256": "e02844ce6c1b5eebc2dc00a6eec5f1803fd33ad4150aa82e9858d5c0890b9904",
+  "file_sha256": {
+    "examples/pbc/compare_lih_gamma_grids.py": "4042b31210d35939057a14404ea461e03e558a0a74102428e5febc2014360f3f",
+    "examples/pbc/compare_lih_gamma_solvers.py": "7174bd482734e0bf1d62445651e335b7dee9c5a2e0d86b7aaaf81360619afa59",
+    "examples/pbc/lih_forces_stress.py": "4431a8c0439a2b60b4d4befb9c8c1792fd65d2bd0b1107937aa5f75a03bc8d68",
+    "examples/pbc/lih_gamma_phonons.py": "52753c5e997b4b221e8004f48b9ed3218aaa744d4f11ffa13fa0f13a5741fa44",
+    "examples/pbc/plot_lih_gamma_phonons.py": "a4592f9c23911f6bf2965f4a55708998d1ee5b7cb3a26348516adb22a18ceebb"
+  },
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "PYTHONPATH": "src"
+  },
+  "scope": "Frozen production source; periodic Fourier/FFT builders supply this calculation. The native-library hash records the runtime environment, not a claim that molecular native-integral higher derivatives were used. Shared-node timings; thread settings do not cap all JAX workers."
+}

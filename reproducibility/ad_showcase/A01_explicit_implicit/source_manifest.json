@@ -1,0 +1,19 @@
+{
+  "source_origin": "/home/yjiao/gradscf_checks/ad-showcase-wb97-response-20261015/src",
+  "source_python_sha256": "ca37f375d0e4cc673d1ca2e5b50f189b9047ad8bce56e00f7f397156fac3e43f",
+  "files": {
+    "src/gradscf_tools/molecular_response.py": "9fd769a26c1f70e40b78d0752336299544df481f9acfbca7209a1e233ff76a02",
+    "src/gradscf/scf/orbital_optimization.py": "0325ee6dcaf5e6d19c3de95f344dd4a92d485412308442bfd3e0606bc98998d3",
+    "src/gradscf/scf/uks.py": "37ffbd81c9852b2364b786701aabfd8d10d42a2a2413e442aca4f8322e813263",
+    "src/gradscf/scf/inputs/grid.py": "fc8465c1731f833f10a0c90a463008557a0b6bb9019b4bd42c79ae1bcdaa4ae7",
+    "src/gradscf/integrals/grids/ao.py": "ad6a1b7ed5ec776b4323d541de97d9d2bd7ddb1acacf208751293f9e8d19bad6",
+    "src/gradscf/integrals/_native/lib/libgradscf_integrals.so": "e02844ce6c1b5eebc2dc00a6eec5f1803fd33ad4150aa82e9858d5c0890b9904"
+  },
+  "software": {
+    "jax": "0.10.0",
+    "numpy": "2.4.4",
+    "pyscf": "2.13.0",
+    "jax-xc": "0.0.9",
+    "scipy": "1.17.1"
+  }
+}

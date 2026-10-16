@@ -9,7 +9,7 @@ from .api import CC, CCS, CCD, CCSD, RCCSD, CC2, LCCD, LCCSD, UCCSD, UCCD, QCISD
 from .uccsd import run_ucc
 from ..scf.reference import UnrestrictedReference
 
-from .eom import EOMConfig, EOMResult, EOMEE, EOMIP, EOMEA, run_eom
+from .eom import EOMConfig, EOMResult, EOMEE, EOMIP, EOMEA, run_eom, DysonResult, dyson_orbitals
 
 __all__ = [
     "EOMConfig",
@@ -18,6 +18,8 @@ __all__ = [
     "EOMIP",
     "EOMEA",
     "run_eom",
+    "DysonResult",
+    "dyson_orbitals",
     "CCConfig",
     "CCReference",
     "CCResult",

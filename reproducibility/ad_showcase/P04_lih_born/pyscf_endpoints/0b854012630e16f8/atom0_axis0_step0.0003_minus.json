@@ -1,0 +1,82 @@
+{
+  "complete": true,
+  "signature": {
+    "input_sha256": "0b854012630e16f8cec1a88f80a85053c7213631da92670944fd6a8a961180a4",
+    "calculate_sha256": "b53903f07a9d591d65dd47185e3bb77a4f98f72c1facf943df4f78d621b713bf",
+    "coordinates_bohr": [
+      [
+        -0.0003,
+        0.0,
+        0.0
+      ],
+      [
+        3.8900161383501435,
+        3.8900161383501435,
+        3.8900161383501435
+      ]
+    ],
+    "anchor": [
+      [
+        3.1415926535897714,
+        -3.1415926535897856,
+        -3.141592653589785,
+        -3.141592653589785
+      ],
+      [
+        3.141592653589772,
+        -3.1415926535897856,
+        -3.141592653589785,
+        -3.141592653589785
+      ],
+      [
+        3.1415926535897722,
+        -3.1415926535897856,
+        -3.1415926535897856,
+        -3.141592653589786
+      ]
+    ],
+    "python": "3.11.15",
+    "numpy": "2.4.4",
+    "pyscf": "2.13.0"
+  },
+  "signature_sha256": "e8616529857e5d626dacce9984b2920f7c8816526891e67bac4a429a9147dd1e",
+  "record": {
+    "polarization_e_per_bohr2": [
+      -2.539796779110759e-06,
+      1.3183898417423734e-16,
+      1.3183898417423734e-16
+    ],
+    "phases": [
+      [
+        3.1413785276912307,
+        -3.1418239758653748,
+        -3.1418239758653743,
+        -3.1418866098391844
+      ],
+      [
+        3.1418067794883178,
+        -3.141298697340366,
+        -3.141361331314199,
+        -3.1413613313141746
+      ],
+      [
+        3.141806779488318,
+        -3.1412986973403654,
+        -3.1413613313142,
+        -3.1413613313141755
+      ]
+    ],
+    "energy_hartree": -8.007631878292726,
+    "sampled_gap_hartree": 0.1427264000977673,
+    "orbital_gradient_norm": 2.323451570477399e-12,
+    "minimum_link_singular_value": 0.7427080970814892,
+    "maximum_phase_change": 0.0002939562494201909
+  },
+  "record_sha256": "ab4eddc72f055f9866dee60646506d427bddfa964f68c38f5866171f9eac97ac",
+  "seconds": null,
+  "origin": {
+    "legacy_script_sha256": "b05716f2a88e91d1d48cf0c7d2aebdf3d42aa8c3ca93951ff96f73261d2a33c7",
+    "legacy_partial_sha256": "bed53bea5b9354a519190e2c2194c6b3fb461f244329b89e0d7096c8a5c4ddee",
+    "migration": "Observed legacy run used this unchanged native input. Scientific calculate function verified byte-for-byte unchanged. Legacy endpoint timings were not measured individually."
+  }
+}

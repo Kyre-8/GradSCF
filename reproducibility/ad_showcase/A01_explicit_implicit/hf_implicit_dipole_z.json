@@ -1,0 +1,197 @@
+{
+  "method": "HF",
+  "mode": "implicit",
+  "observable": "dipole_z",
+  "complete": true,
+  "fresh_process_pid": 2674115,
+  "source_python_sha256": "ca37f375d0e4cc673d1ca2e5b50f189b9047ad8bce56e00f7f397156fac3e43f",
+  "script_sha256": "0d13b7f9c681d9e5cb1e6ef847d75126cef0a6d3ffd7b76b43942f2422750002",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "numpy": "2.4.4",
+  "dtype": "float64",
+  "devices": [
+    "cpu:0"
+  ],
+  "persistent_compilation_cache_enabled": false,
+  "threads": {
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2"
+  },
+  "basis": "6-31g",
+  "cart": true,
+  "symbols": [
+    "H",
+    "H"
+  ],
+  "seed_coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      -0.7
+    ],
+    [
+      0.0,
+      0.0,
+      0.7
+    ]
+  ],
+  "coordinate_direction_bohr": [
+    [
+      0.0,
+      0.0,
+      -0.05
+    ],
+    [
+      0.0,
+      0.0,
+      0.05
+    ]
+  ],
+  "field_direction_au": [
+    0.0,
+    0.0,
+    0.005
+  ],
+  "point_theta": [
+    0.25,
+    0.4
+  ],
+  "grid_level": null,
+  "seed_scf_seconds": 6.846228071983205,
+  "seed_coefficients_sha256": "a50bb33fefcb3637264c3497c6943a3fafbcbbb556dc3961f5cc72f4d79fee34",
+  "seed_occupations": [
+    2.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "value": 0.013343485178739395,
+  "observable_normalization": "mu_z/(e bohr)",
+  "gradient_theta": [
+    0.0014242045346569254,
+    0.033357915608726044
+  ],
+  "finite_difference_checks": [
+    {
+      "step_theta": 0.02,
+      "gradient_theta": [
+        0.0014242045720428993,
+        0.03335791461226236
+      ],
+      "max_error": 9.964636824011386e-10
+    },
+    {
+      "step_theta": 0.007,
+      "gradient_theta": [
+        0.001424204539374023,
+        0.03335791548676822
+      ],
+      "max_error": 1.2195782578272585e-10
+    },
+    {
+      "step_theta": 0.002,
+      "gradient_theta": [
+        0.0014242045351846658,
+        0.033357915599105566
+      ],
+      "max_error": 9.620478025329504e-12
+    }
+  ],
+  "stationary": true,
+  "gradient_norm": 2.220446049250313e-16,
+  "orbital_iterations": 9,
+  "initial_energy_hartree": -1.1263876736612786,
+  "final_energy_hartree": -1.1264351106504806,
+  "relaxation_energy_hartree": 4.7436989202065405e-05,
+  "final_density": [
+    [
+      [
+        0.10570038931540056,
+        0.09124782637018049,
+        0.1053964652788459,
+        0.0877715761475373
+      ],
+      [
+        0.09124782637018049,
+        0.07877138269035194,
+        0.09098545829474688,
+        0.0757704450515269
+      ],
+      [
+        0.1053964652788459,
+        0.09098545829474688,
+        0.10509341512573286,
+        0.08751920345628897
+      ],
+      [
+        0.0877715761475373,
+        0.0757704450515269,
+        0.08751920345628897,
+        0.07288383353475962
+      ]
+    ],
+    [
+      [
+        0.10570038931540056,
+        0.09124782637018049,
+        0.1053964652788459,
+        0.0877715761475373
+      ],
+      [
+        0.09124782637018049,
+        0.07877138269035194,
+        0.09098545829474688,
+        0.0757704450515269
+      ],
+      [
+        0.1053964652788459,
+        0.09098545829474688,
+        0.10509341512573286,
+        0.08751920345628897
+      ],
+      [
+        0.0877715761475373,
+        0.0757704450515269,
+        0.08751920345628897,
+        0.07288383353475962
+      ]
+    ]
+  ],
+  "orbital_gradient_tolerance": 1e-10,
+  "orbital_max_iterations": 300,
+  "implicit_tolerance": 1e-10,
+  "implicit_max_iter": 100,
+  "implicit_restart": 40,
+  "forward_cold_seconds": 6.094726226001512,
+  "forward_warm_seconds": [
+    0.003724829002749175,
+    0.003439569001784548,
+    0.0031182410020846874,
+    0.0032568190072197467,
+    0.0035906709963455796
+  ],
+  "vjp_preparation_cold_seconds": 3.9935842849954497,
+  "vjp_preparation_warm_seconds": [
+    0.009120689006522298,
+    0.006838695000624284,
+    0.007031240005744621,
+    0.00651620898861438,
+    0.006866354000521824
+  ],
+  "pullback_cold_seconds": 2.3666546150052454,
+  "pullback_warm_seconds": [
+    0.004098204983165488,
+    0.0035217219847254455,
+    0.003212213021470234,
+    0.0030605189967900515,
+    0.003189569019014016
+  ],
+  "cumulative_peak_after_forward_mib": 1225.98828125,
+  "cumulative_peak_after_preparation_mib": 1293.046875,
+  "timed_fresh_process_peak_rss_mib": 1314.38671875,
+  "peak_after_validation_mib": 1390.26171875,
+  "timing_definition": "First transformed call includes tracing/compilation. VJP preparation includes a primal. Pullback timings directly execute the retained pullback, with no wall-time subtraction.",
+  "memory_definition": "Fresh-process high-water RSS includes imports, seed SCF and all timed phases. Phase readings are cumulative; no difference is interpreted as backward-only memory."
+}

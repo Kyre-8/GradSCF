@@ -59,10 +59,13 @@ def solve_fci(h1, eri, space, *, ecore=0., config=None, response=None,
         raise ValueError("ecore must be a real scalar")
     physical = _physical_integrals_valid(h,g) & jnp.isfinite(core)
     original = build_hamiltonian(h,g,space,max_workspace_elements=max_workspace_elements)
+    # closure_convert hoists inexact leaves, not a captured boolean tracer.
+    # Keep the same NaN guard explicit under nested JIT; its tangent is zero.
+    physical_gate = physical.astype(original.dtype)
     op = LinearOperator(original.shape, original.dtype,
-        lambda v: jnp.where(physical, original.matvec(v), jnp.nan),
+        lambda v: jnp.where(physical_gate != 0, original.matvec(v), jnp.nan),
         diagonal=jnp.where(physical, original.diagonal, jnp.nan),
-        matmat=lambda v: jnp.where(physical, original.apply(v), jnp.nan))
+        matmat=lambda v: jnp.where(physical_gate != 0, original.apply(v), jnp.nan))
     initial = None
     if ci0 is None and cfg.method == 'davidson':
         count = min(cfg.nroots+1,space.size)

@@ -1,0 +1,187 @@
+{
+  "complete": true,
+  "passed": true,
+  "input_sha256": {
+    "pbe_szv_k2_fft31_repaired": {
+      "native": "75285828303e1769263de976dbe080bc66cbfc8428b86961d64deb03125e85a5",
+      "independent": "dabbbc007df05ecf67bb194b78a6b915fdf6f3d480ba73ca6fc70256bcc2f6a4"
+    },
+    "pbe_szv_k2_fft41": {
+      "native": "83263c828f9fd27c262f9f31a01fd9ddaa8ba46e0e1a91b6e9b6d8ec32cf67c0",
+      "independent": "0633b7a4cd845e863d4f8c87e614d5df02cc7c6d140642bf349451ede531ca04"
+    },
+    "pbe_szv_k2_fft51": {
+      "native": "590b3d898ca9af3daadba3aa92471e81dbefb330a73cf9254ea26ab0754b9708",
+      "independent": "28a104791b97b406cdaade4bb007811a4d681706ad22d40f204080726df9fafc"
+    },
+    "pbe_szv_k1_fft31": {
+      "native": "b1914da5f0965ab369b346b061380abc0c8baffc835206d55595e15374139e92",
+      "independent": "84aa04dbf3321a5d7616c1ef7096fbfff09a438d45388d8173a7acc810dea10b"
+    },
+    "pbe_szv_k3_fft31": {
+      "native": "7fda676aab0a99e2144f8a17b05a0827ade827c39f723a9f505e87873494b484",
+      "independent": "14aba9d246e1259f06a7dedf6f93eca6de831ad38cc450bcc599223de30c6b15"
+    },
+    "pbe_szv_k4_fft31": {
+      "native": "ccf7d1dc5b30b368c97a39fc492108927f41144318ddd91e81a35dd800b35bd2",
+      "independent": "cb6c5235dae3cabd0fec4ec69a6e910aa0a2758774f09fd547900824e727262d"
+    },
+    "pbe_szv_k5_fft31": {
+      "native": "15f08d35b9daa9518ed9612d78d6a11112b2a735e1cb32b6333f711e9a3878e5",
+      "independent": null
+    },
+    "pbe_szv_k6_fft31": {
+      "native": "746d5ef7549980e431c8b25d315af7c46c1b6566a5cc71e3b8fc27baa9ef8197",
+      "independent": null
+    },
+    "pbe_szv_k8_fft31": {
+      "native": "2f5c3d403c5c17d6cf48899667358482f6b93aca8eb33183efddfc384b1a7649",
+      "independent": null
+    },
+    "pbe_molopt_sr_k2_fft41": {
+      "native": "5919992c6e9158d9806f91f62bed967d6635b12f068d696ed46966ce8066d48a",
+      "independent": "ea7007b8a08c71244a011d71fd501c1d13ec3d1d474e7c953426d71f2bd7eedb"
+    },
+    "hf_szv_k1_fft31": {
+      "native": "0d0fccdfefbf016f2707acea2ff551f799607a76b43c59480e56ff835a1dab77",
+      "independent": "505c1e6dbcba4e9fee6f9e80b329a5910985460f92f311b21237e5a8930e9b45"
+    },
+    "pbe_molopt_sr_k2_fft31": {
+      "native": "391ce93d618c2d1554b2ee2ca80ab3f3889ee1924789ef01d616eb4f54d3627e",
+      "independent": "cf1457c97cffdb0b8713755b7f47fecf2753c3980d0c573ec7e4c909684f235a"
+    }
+  },
+  "successive_increments": {
+    "FFT mesh (SZV, k2\u00b3)": [
+      {
+        "first": "pbe_szv_k2_fft31_repaired",
+        "second": "pbe_szv_k2_fft41",
+        "energy_hartree": 1.8540810309275457e-06,
+        "force_hartree_per_bohr": 7.204167545031472e-07,
+        "stress_hartree_per_bohr3": 6.393480058350105e-08
+      },
+      {
+        "first": "pbe_szv_k2_fft41",
+        "second": "pbe_szv_k2_fft51",
+        "energy_hartree": 6.2566416048071e-08,
+        "force_hartree_per_bohr": 4.060279966866705e-08,
+        "stress_hartree_per_bohr3": 3.032723823698062e-09
+      }
+    ],
+    "k mesh (SZV, FFT31\u00b3)": [
+      {
+        "first": "pbe_szv_k1_fft31",
+        "second": "pbe_szv_k2_fft31_repaired",
+        "energy_hartree": 0.29933019608120404,
+        "force_hartree_per_bohr": 0.00061883918413109,
+        "stress_hartree_per_bohr3": 0.0012275489932097943
+      },
+      {
+        "first": "pbe_szv_k2_fft31_repaired",
+        "second": "pbe_szv_k3_fft31",
+        "energy_hartree": 0.044916344317520895,
+        "force_hartree_per_bohr": 5.197010735443321e-06,
+        "stress_hartree_per_bohr3": 0.00010710016046444848
+      },
+      {
+        "first": "pbe_szv_k3_fft31",
+        "second": "pbe_szv_k4_fft31",
+        "energy_hartree": 0.0015348012032365688,
+        "force_hartree_per_bohr": 3.1040298820930756e-05,
+        "stress_hartree_per_bohr3": 4.079190485065037e-05
+      },
+      {
+        "first": "pbe_szv_k4_fft31",
+        "second": "pbe_szv_k5_fft31",
+        "energy_hartree": 0.000674605213635715,
+        "force_hartree_per_bohr": 1.2612135493781404e-05,
+        "stress_hartree_per_bohr3": 5.631594935258367e-06
+      },
+      {
+        "first": "pbe_szv_k5_fft31",
+        "second": "pbe_szv_k6_fft31",
+        "energy_hartree": 7.044536971356763e-05,
+        "force_hartree_per_bohr": 6.9195394497695555e-06,
+        "stress_hartree_per_bohr3": 6.7464877719917285e-06
+      },
+      {
+        "first": "pbe_szv_k6_fft31",
+        "second": "pbe_szv_k8_fft31",
+        "energy_hartree": 2.7507307210683507e-05,
+        "force_hartree_per_bohr": 1.8089652629049323e-06,
+        "stress_hartree_per_bohr3": 6.708693991116883e-07
+      }
+    ],
+    "Basis (FFT41\u00b3, k2\u00b3)": [
+      {
+        "first": "pbe_szv_k2_fft41",
+        "second": "pbe_molopt_sr_k2_fft41",
+        "energy_hartree": 0.03498744181075608,
+        "force_hartree_per_bohr": 0.00147709900880245,
+        "stress_hartree_per_bohr3": 7.439721058908263e-05
+      }
+    ],
+    "SR-DZVP FFT sensitivity (k2\u00b3)": [
+      {
+        "first": "pbe_molopt_sr_k2_fft31",
+        "second": "pbe_molopt_sr_k2_fft41",
+        "energy_hartree": 1.9081583104707533e-06,
+        "force_hartree_per_bohr": 8.85731907923756e-07,
+        "stress_hartree_per_bohr3": 5.912244988598588e-08
+      }
+    ]
+  },
+  "convergence": {
+    "fft": {
+      "first": "pbe_szv_k2_fft41",
+      "last": "pbe_szv_k2_fft51",
+      "increments": {
+        "energy_hartree": 6.2566416048071e-08,
+        "force_hartree_per_bohr": 4.060279966866705e-08,
+        "stress_hartree_per_bohr3": 3.032723823698062e-09
+      },
+      "gates": {
+        "energy_hartree": 1e-07,
+        "force_hartree_per_bohr": 1e-07,
+        "stress_hartree_per_bohr3": 1e-07
+      },
+      "passed": true
+    },
+    "k": {
+      "first": "pbe_szv_k6_fft31",
+      "last": "pbe_szv_k8_fft31",
+      "increments": {
+        "energy_hartree": 2.7507307210683507e-05,
+        "force_hartree_per_bohr": 1.8089652629049323e-06,
+        "stress_hartree_per_bohr3": 6.708693991116883e-07
+      },
+      "gates": {
+        "energy_hartree": 0.0001,
+        "force_hartree_per_bohr": 2e-06,
+        "stress_hartree_per_bohr3": 2e-06
+      },
+      "passed": true
+    }
+  },
+  "independent_checked_cases": [
+    "pbe_szv_k2_fft31_repaired",
+    "pbe_szv_k2_fft41",
+    "pbe_szv_k2_fft51",
+    "pbe_szv_k1_fft31",
+    "pbe_szv_k3_fft31",
+    "pbe_szv_k4_fft31",
+    "pbe_molopt_sr_k2_fft41",
+    "hf_szv_k1_fft31",
+    "pbe_molopt_sr_k2_fft31"
+  ],
+  "native_only_discretization_cases": [
+    "pbe_szv_k5_fft31",
+    "pbe_szv_k6_fft31",
+    "pbe_szv_k8_fft31"
+  ],
+  "eos_input_sha256": "9c08184522817eaa8610c346957e972184fda48aafa2ed28d13ea016f7e783bd",
+  "eos_independent_sha256": "2ab48b6fe6d754afbf5cda1e73a84952c39d98683ab0c69a083f26f2844d9098",
+  "eos_curve": "Cubic Hermite visual guide through native energies and AD slopes; not used for numerical gates.",
+  "script_sha256": "9934f0277b33f9895795fa51b391bd6a581d2d7b7faa16388fe74b67370c9cb6",
+  "interpretation": "Matched-code agreement and finite discretization/basis sensitivity are distinct. No complete-basis or experimental-material accuracy is inferred."
+}

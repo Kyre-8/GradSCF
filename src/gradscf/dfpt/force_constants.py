@@ -6,12 +6,14 @@ cell, supercell SCF, or four-index electron-repulsion tensor is constructed.
 import jax
 import jax.numpy as jnp
 import numpy as np
-from .displacement import _orbitals,displacement_source
+from types import SimpleNamespace
+from copy import deepcopy
+from .displacement import _orbitals,_displacement_source
 from .finite_q import finite_q_problem
 from ..pbc import _kpoint
 from ..pbc.kpoints import weights_for,reciprocal_vectors
 from ..pbc.momentum import momentum_transfer
-from ..pbc.response import _fields,_shifted_ao,q_kernel
+from ..pbc.response import _fields,_shifted_ao,q_kernel,_validate_q_domain
 from ..integrals.periodic.coulomb import coulomb_kernel,ewald_curvature
 from ..integrals.periodic.fft import _pair_potential
 from ..integrals.periodic.pseudo import local_potential,_projector_overlap
@@ -31,8 +33,8 @@ def _nonlocal_curvature(cell,data,density,ft,fu,fv,fuv,u,v,p,m):
             if not count:continue
             pos=cell.coords[atom]
             def overlap(coeff,r):
-                return jnp.stack([_projector_overlap(data.gvectors+k,c,r,l,radius,count,volume)
-                                  for k,c in zip(data.kpoints,coeff)])
+                return jax.vmap(lambda k,c:_projector_overlap(
+                    data.gvectors+k,c,r,l,radius,count,volume))(data.kpoints,coeff)
             o=overlap(ft,pos);au=overlap(fu,pos);av=overlap(fv,pos)
             bu=jax.jvp(lambda r:overlap(ft,r),(pos,),(u[atom],))[1]
             bv=jax.jvp(lambda r:overlap(ft,r),(pos,),(v[atom],))[1]
@@ -70,6 +72,7 @@ def geometry_curvature(source,q,u,v):
     u is the real amplitude of the -q row and v of the +q column. This is
     an internal numerical assembly, not an SCF/training facade.
     """
+    _validate_q_domain(source.inputs, source.exxdiv)
     cell=source.cell;data=source.inputs;density=source.result.density_spin
     q=np.asarray(q,dtype=float);kw=weights_for(data);volume=jnp.linalg.det(cell.lattice)
     fractional=np.asarray(source.kpts)@np.asarray(cell.lattice).T/(2*np.pi)
@@ -90,7 +93,7 @@ def geometry_curvature(source,q,u,v):
     kinetic=mixed_matrix(.5*jnp.sum((data.gvectors[None]+data.kpoints[:,None])**2,axis=-1)[:,:,None])
     trace=lambda matrix:jnp.einsum('k,skij,kji->',kw,density,matrix)
     kind=xc_type(source.xc);alpha=hybrid_coeff(source.xc)
-    field_kind='GGA' if kind=='GGA' else 'LDA'
+    field_kind='LDA' if kind=='HF' else kind
     fields=lambda left,right:_fields(density,left,right,kw,field_kind)
     second=fields(ao,d2)+fields(d2,ao)+fields(up,vp)+fields(vm,um)
     # Opposite-q density fields carry their own reciprocal folding phases.
@@ -145,35 +148,50 @@ def geometry_curvature(source,q,u,v):
 
 
 def primitive_force_response(source,q,config=None):
-    """Return primitive reference forces and a compiled relaxed Phi(q) action."""
+    """Return forces and a compiled Phi(q) action for an independent snapshot.
+
+    Arrays enter JIT at runtime; cell metadata is copied once so later changes
+    to the original SCF cannot mix old arrays with a new physical model.
+    """
     from .atomic import _ks_forces
     from ..integrals.periodic.fft import build_inputs
     from ..pbc.scf import validate_reference
     validate_reference(source,integer=False,equal_weights=True)
-    cell=source.cell;data=source.inputs;result=source.result
-    fractional=np.asarray(source.kpts)@np.asarray(cell.lattice).T/(2*np.pi)
+    cell=deepcopy(source.cell);data=source.inputs;result=source.result
+    kpts=np.array(source.kpts,copy=True);q=np.array(q,dtype=float,copy=True)
+    kweights=np.array(weights_for(data),copy=True);temperature=source.temperature
+    fractional=kpts@np.asarray(cell.lattice).T/(2*np.pi)
     transfer=momentum_transfer(fractional,q);p=transfer.partners
     options=dict(mesh=cell.mesh,xc=source.xc,exxdiv=source.exxdiv)
-    problem=finite_q_problem(data,result,transfer,temperature=source.temperature,**options)
-    interaction=q_kernel(data,result.density_spin,transfer,**options)
-    d=result.density_spin;f=result.fock_spin;inverse=jnp.linalg.inv(data.overlap)
-    w=d@f@inverse;w=.5*(w+w.conj().swapaxes(-1,-2));kw=weights_for(data)
     def inputs_at(r):
-        return build_inputs(cell,parameters=cell.parameters_at(r),kpts=source.kpts,kweights=source.kweights)
-    forces=_ks_forces(d,cell.coords,inputs_at,**options)
-    def respond(v):
-        sv=displacement_source(source,q,v).perturbation
+        return build_inputs(cell,parameters=cell.parameters_at(r),kpts=kpts,kweights=kweights)
+    forces=_ks_forces(result.density_spin,cell.coords,inputs_at,**options)
+    def respond(v,data,result):
+        # Grid and reference arrays are runtime arguments, not HLO literals.
+        # Reuse the same source/curvature formulas without repeating eager
+        # snapshot validation on traced data or mutating the original SCF.
+        snapshot=SimpleNamespace(cell=cell,inputs=data,result=result,kpts=kpts,
+                                 xc=options['xc'],exxdiv=options['exxdiv'])
+        problem=finite_q_problem(data,result,transfer,temperature=temperature,**options)
+        interaction=q_kernel(data,result.density_spin,transfer,**options)
+        d=result.density_spin;f=result.fock_spin;inverse=jnp.linalg.inv(data.overlap)
+        w=d@f@inverse;w=.5*(w+w.conj().swapaxes(-1,-2));kw=weights_for(data)
+        sv=_displacement_source(snapshot,q,v).perturbation
         response=problem.response(tangent=sv,config=config)
         d1=response.density;f1=sv.fock+interaction(d1);s1=sv.overlap
         w1=(d1@f+d[:,p]@f1-w[:,p]@s1)@inverse
         w1+=inverse[p]@(f[:,p]@d1+f1@d-s1@w)
         w1*=.5
         def bilinear(u):
-            su=displacement_source(source,q,u).perturbation
+            su=_displacement_source(snapshot,q,u).perturbation
             relaxed=jnp.einsum('k,skij,skij->',kw,su.fock.conj(),d1)
             relaxed-=jnp.einsum('k,kij,skij->',kw,su.overlap.conj(),w1)
-            value=jnp.sum(geometry_curvature(source,q,u,v))+relaxed
+            value=jnp.sum(geometry_curvature(snapshot,q,u,v))+relaxed
             return jnp.stack([value.real,value.imag])
-        parts=jax.jacrev(bilinear)(jnp.zeros_like(cell.coords))
-        return (parts[0]+1j*parts[1]).ravel(),response.residual_norm,response.converged
-    return forces,jax.jit(respond)
+        # B(u)=u.T @ Phi(q) @ v is real-linear in u and B(0)=0.
+        # Evaluate its rows directly, avoiding a large internal reverse graph.
+        basis=jnp.eye(cell.coords.size,dtype=cell.coords.dtype).reshape((-1,)+cell.coords.shape)
+        parts=jax.lax.map(bilinear,basis)
+        return parts[:,0]+1j*parts[:,1],response.residual_norm,response.converged
+    compiled=jax.jit(respond)
+    return forces,lambda v:compiled(v,data,result)

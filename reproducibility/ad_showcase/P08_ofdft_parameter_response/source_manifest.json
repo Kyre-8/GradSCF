@@ -1,0 +1,33 @@
+{
+  "source_python_sha256": "c792320a88f24c695049469ac317d26953efc0888cd3236c44cb0fb393220abc",
+  "source_origin": "/home/yjiao/gradscf_checks/ad-showcase-integration-20261015/src; frozen clone. P08 changed no src file.",
+  "files": {
+    "examples/ofdft/parameter_density_response.py": "bfa04a1a68892909693cf36acfebeeb90864b9db3a3ab192c2014daec78c8bb8",
+    "examples/ofdft/compare_parameter_density_response.py": "a72e717cd71ef698be00ce0d2fbaf9d0aa8e25e301677abab146ad7b9077b5f9",
+    "examples/ofdft/plot_parameter_density_response.py": "20b9d905eee568a8b690c7b1bbc2f94c276906b11ee62fca3e0836fba03dff4e",
+    "tests/ofdft/test_showcase_response.py": "7af09a3ccee7c1da17dc3296ef6d52e3cd0fbcbe50ff41fbf11fe9754397c2bd",
+    "src/gradscf/ofdft/problem.py": "e7f5e4e0fa42593a5309374b7540f6d80bea9c46765398defa5faefb77b7904d",
+    "src/gradscf/ofdft/energy.py": "69ce4e8bbb61219472f801bf07d69c4e20243185b01745e8cf425cfc818b3c9c",
+    "src/gradscf/ofdft/kinetic/__init__.py": "6dc4b06cf7ee2d41b0cba8554866bc602a841e435f39895d1a8326d868116e2f",
+    "src/gradscf/ofdft/representations/periodic.py": "b0325120cda0f099d897ba9de775fd803798ea3db52e8013132d48a10602bf60",
+    "src/gradscf/dfpt/core.py": "4765b5e80c2804f07e22ebcec7584bbed1d271fecdf4dd89949895b307e054bb",
+    "src/gradscf/dfpt/ofdft.py": "7b9d6ddba596727c073fc089639b0cfc6bc001cb67d5973d91004403ed016f33",
+    "tests/ofdft/test_response.py": "4f066f4e1fc0a9b5abf73ff163d8cc80942ec12f3b51db182cd6ec97a61eacc8",
+    "tests/ofdft/test_kinetic.py": "fcd3c9e1b73a361586e0eee2fb66c8ca0d67a33483bcfd691415b9fff403434a",
+    "tests/dfpt/test_ofdft.py": "6bbf21e415b8a9bbc317204e96cdf836732b8a83fd7342548425f1be1b0da2d8",
+    "tests/dfpt/test_pbe.py": "519f6c0b80a7ccbc59a6afd9010eed1e01bc0b6a3807b9d9732c437a49404edb"
+  },
+  "hostname": "c20",
+  "python": "3.11.15",
+  "numpy": "2.4.4",
+  "scipy": "1.17.1",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2"
+  },
+  "reference": "Independent analytic TF/vW formulas, NumPy Fourier matrices, SciPy constrained linear solve and Gauss-Legendre continuum quadrature; no DFTpy optimization run."
+}

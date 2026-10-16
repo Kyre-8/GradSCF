@@ -1,0 +1,18 @@
+{
+  "case": "OH_pbe",
+  "converged": false,
+  "grid_level": 5,
+  "grid_points": 66518,
+  "scf_attempts": [
+    {"solver": "DIIS", "converged": false, "maximum_cycles": 250, "energy_hartree": -75.63670551992018},
+    {"solver": "Newton", "converged": false, "maximum_cycles": 80, "energy_hartree": -75.63670551992018}
+  ],
+  "orbital_gradient_norm": 6.671844374870717e-10,
+  "largest_orbital_gradient": 5.230644180826741e-10,
+  "energy_tolerance": 1e-13,
+  "orbital_tolerance": 1e-11,
+  "status": "rejected; no level-5 force accepted",
+  "provenance": "Transcribed from remote oh-grid-reference-diagnostic.log; no force or convergence inferred",
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-stationary-20261015",
+  "hostname": "c20"
+}

@@ -1,6 +1,6 @@
 """Independent PySCF Boys comparison using saved GradSCF BODIPY orbitals.
 
-Run examples/bodipy_boys.py first. Neither SCF nor the AD localization is rerun.
+Run examples/localization/bodipy_boys.py first. Neither SCF nor the AD localization is rerun.
 """
 
 from pathlib import Path

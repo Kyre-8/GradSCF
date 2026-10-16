@@ -1,0 +1,51 @@
+{
+  "electron_temperature_K": 300.0,
+  "coordinate_unit": "Bohr",
+  "energy": "electronic free energy per primitive cell",
+  "method": "reconverged finite displacement; scaled polynomial least squares",
+  "derivatives4_Eh_Bohr_power": [
+    -22.473441428462507,
+    -5.722066695116239e-07,
+    0.942300915569165,
+    0.047107616956079984,
+    -185839.84116198824
+  ],
+  "derivatives6_Eh_Bohr_power": [
+    -22.473441428470316,
+    -5.723359075089563e-07,
+    0.9425119176687515,
+    0.049362600476720274,
+    -190678.46844567457,
+    -25055.372447557573,
+    67090210236.11996
+  ],
+  "rms_fit_residual_Eh": 6.453486030744971e-12,
+  "seconds_including_compilation": 25.548490419998416,
+  "scope": "one Gamma direction; no BZ-integrated anharmonic self-energy or linewidth",
+  "settings": {
+    "a_angstrom": 2.46,
+    "c_angstrom": 6.708,
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "xc": "pbe",
+    "fft_mesh": [
+      15,
+      15,
+      31
+    ],
+    "k_mesh": [
+      3,
+      3,
+      1
+    ],
+    "scf_controls": {
+      "max_cycle": 200,
+      "damping": 0.25,
+      "conv_tol": 1e-12,
+      "conv_tol_density": 1e-11,
+      "conv_tol_grad": 1e-10
+    },
+    "geometry": "fixed AB graphite, not relaxed",
+    "exxdiv": null
+  }
+}

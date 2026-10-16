@@ -19,6 +19,7 @@ artifacts/
 datasets/
 docs/
 outputs/
+/graphite_results/
 paper/
 tmp/
 .tmp_*

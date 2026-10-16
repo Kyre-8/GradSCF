@@ -1,0 +1,871 @@
+{
+  "complete": true,
+  "cases": [
+    {
+      "name": "h2_g0w0",
+      "atom": "H 0 0 0; H 0 0 .74",
+      "basis": "sto-3g",
+      "auxbasis": null,
+      "hf_hartree": -1.1167593075,
+      "nw": 200,
+      "qp_solver": "secant",
+      "scf_amplitudes": [],
+      "scf_seed": 20260923,
+      "scf_attempts": [],
+      "sigma_points": 40001,
+      "sigma_step": 5e-05,
+      "method": "g0w0",
+      "g_orbitals": [
+        0,
+        1
+      ],
+      "screening_occupied": [
+        0
+      ],
+      "screening_virtual": [
+        1
+      ],
+      "qp_targets": [
+        0,
+        1
+      ],
+      "molgw_input": "&molgw\n scf='HF'\n basis='STO-3G'\n gaussian_type='CART'\n tolscf=1.0e-12\n nscf=100\n frozencore='no'\n ncoreg=0\n ncorew=0\n nvirtualg=3\n nvirtualw=3\n selfenergy_state_min=1\n selfenergy_state_max=2\n nomega_sigma=40001\n step_sigma=5e-05\n length_unit='angstrom'\n natom=2\n postscf='G0W0'\n nstep_gw=1\n eta=0.00001\n print_w='yes'\n/\nH 0 0 0\nH 0 0 .74\n",
+      "qp_hartree": [
+        -0.596957672837265,
+        0.689547297881506
+      ],
+      "gradscf_qp_hartree": [
+        -0.596957673519583,
+        0.6895473056024529
+      ],
+      "gradscf_qp_residual_max": 3.17655624026969e-12,
+      "gradscf_qp_weight": [
+        0.9935591481920316,
+        0.9935591481920323
+      ],
+      "errors": {
+        "hf_hartree": 1.0357537050253995e-10,
+        "qp_hartree": 7.720946881839552e-09,
+        "qp_weight": 9.58079683366364e-08
+      },
+      "optical": [
+        {
+          "tda": true,
+          "singlet": true,
+          "energies_hartree": [
+            0.9852144920495327
+          ],
+          "oscillator_strengths": [
+            1.13750906
+          ],
+          "errors": {
+            "energy_hartree": 9.752083696135116e-09,
+            "oscillator_strength": 1.2216496925177012e-08,
+            "static_polarizability_au": 2.4780035801086342e-08,
+            "cross_section_au": 2.5142066917283046e-07
+          },
+          "static_polarizability_au": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.51572207
+            ]
+          ],
+          "omega_hartree": [
+            0.6177212578159449,
+            0.6633360252274259,
+            0.7089507926389069,
+            0.7553013182620044,
+            0.8009160856734854,
+            0.8472665745472592,
+            0.8928813419587402,
+            0.9392318675818377,
+            0.9848466349933187,
+            0.9855823564556117,
+            1.0304614024047998,
+            1.0768118912785734,
+            1.1224266954393782,
+            1.168777184313152,
+            1.214391951724633,
+            1.2607424405984067,
+            1.3063572447592116,
+            1.3527077336329851
+          ],
+          "cross_section_au": [
+            0.0022923232,
+            0.0032568962,
+            0.0047802356,
+            0.0074179119,
+            0.012313291,
+            0.023313195,
+            0.054666353,
+            0.22440147,
+            5.2064221,
+            5.2103116,
+            0.25391132,
+            0.067008361,
+            0.031259848,
+            0.018174828,
+            0.012083951,
+            0.0086476536,
+            0.0065673728,
+            0.0051674915
+          ]
+        },
+        {
+          "tda": false,
+          "singlet": true,
+          "energies_hartree": [
+            0.9535599438368169
+          ],
+          "oscillator_strengths": [
+            0.85148289
+          ],
+          "errors": {
+            "energy_hartree": 1.0079284074038242e-08,
+            "oscillator_strength": 9.24087684150976e-09,
+            "static_polarizability_au": 2.0011322376944918e-08,
+            "cross_section_au": 1.0560185881303141e-07
+          },
+          "static_polarizability_au": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              2.8093198
+            ]
+          ],
+          "omega_hartree": [
+            0.5860667132781615,
+            0.6316814806896425,
+            0.6772962481011233,
+            0.723646773724221,
+            0.7692615411357019,
+            0.8156120300094758,
+            0.8612267974209566,
+            0.9075773230440543,
+            0.9531920904555353,
+            0.953927811917828,
+            0.9988068578670162,
+            1.04515734674079,
+            1.0907721509015949,
+            1.1371226397753686,
+            1.1827374071868495,
+            1.2290878960606233,
+            1.274702700221428,
+            1.321053189095202
+          ],
+          "cross_section_au": [
+            0.0016741944,
+            0.0023909279,
+            0.0035243135,
+            0.0054890497,
+            0.0091393233,
+            0.017349537,
+            0.040772953,
+            0.16769588,
+            3.8972143,
+            3.9002225,
+            0.19033584,
+            0.0502943,
+            0.023488208,
+            0.013669536,
+            0.0090960942,
+            0.0065142959,
+            0.0049504001,
+            0.0038974278
+          ]
+        },
+        {
+          "tda": false,
+          "singlet": false,
+          "energies_hartree": [
+            0.6121423282715263
+          ],
+          "oscillator_strengths": [
+            0.0
+          ],
+          "errors": {
+            "energy_hartree": 6.474928704314209e-09,
+            "oscillator_strength": 0.0
+          }
+        }
+      ],
+      "qp_weight": [
+        0.993559244,
+        0.993559244
+      ],
+      "seconds": 33.78976571201929
+    },
+    {
+      "name": "h2_evgw0",
+      "atom": "H 0 0 0; H 0 0 .74",
+      "basis": "sto-3g",
+      "auxbasis": null,
+      "hf_hartree": -1.1167593075,
+      "nw": 200,
+      "qp_solver": "secant",
+      "scf_amplitudes": [],
+      "scf_seed": 20260923,
+      "scf_attempts": [],
+      "sigma_points": 40001,
+      "sigma_step": 5e-05,
+      "method": "evgw0",
+      "g_orbitals": [
+        0,
+        1
+      ],
+      "screening_occupied": [
+        0
+      ],
+      "screening_virtual": [
+        1
+      ],
+      "qp_targets": [
+        0,
+        1
+      ],
+      "molgw_input": "&molgw\n scf='HF'\n basis='STO-3G'\n gaussian_type='CART'\n tolscf=1.0e-12\n nscf=100\n frozencore='no'\n ncoreg=0\n ncorew=0\n nvirtualg=3\n nvirtualw=3\n selfenergy_state_min=1\n selfenergy_state_max=2\n nomega_sigma=40001\n step_sigma=5e-05\n length_unit='angstrom'\n natom=2\n postscf='GnW0'\n nstep_gw=40\n eta=0.00001\n print_w='yes'\n/\nH 0 0 0\nH 0 0 .74\n",
+      "qp_hartree": [
+        -0.596840634663009,
+        0.689430259707249
+      ],
+      "gradscf_qp_hartree": [
+        -0.5968406353556459,
+        0.6894302674383688
+      ],
+      "gradscf_qp_residual_max": 6.447280209709305e-12,
+      "gradscf_qp_weight": [
+        0.993640288950897,
+        0.993640288950897
+      ],
+      "errors": {
+        "hf_hartree": 1.0357537050253995e-10,
+        "qp_hartree": 7.73111974439189e-09
+      },
+      "optical": [
+        {
+          "tda": true,
+          "singlet": true,
+          "energies_hartree": [
+            0.984980417231647
+          ],
+          "oscillator_strengths": [
+            1.1372388
+          ],
+          "errors": {
+            "energy_hartree": 8.241948346032757e-09,
+            "oscillator_strength": 1.2342907806939252e-08,
+            "static_polarizability_au": 2.867736714762259e-08,
+            "cross_section_au": 9.77929471623895e-07
+          },
+          "static_polarizability_au": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.51655757
+            ]
+          ],
+          "omega_hartree": [
+            0.6174871646233971,
+            0.6631019687842019,
+            0.708716736195683,
+            0.7550672250694567,
+            0.8006819924809377,
+            0.8470325181040352,
+            0.8926472855155162,
+            0.93899777438929,
+            0.984612541800771,
+            0.9853482632630639,
+            1.0302273459615756,
+            1.0765778348353494,
+            1.1221926022468305,
+            1.1685430911206043,
+            1.2141578952814092,
+            1.2605083841551827,
+            1.3061231515666638,
+            1.3524736404404376
+          ],
+          "cross_section_au": [
+            0.0022913802,
+            0.0032556735,
+            0.004778585,
+            0.007415542,
+            0.012309623,
+            0.023306686,
+            0.054651955,
+            0.22434548,
+            5.2051846,
+            5.2090741,
+            0.25385358,
+            0.066993734,
+            0.03125327,
+            0.01817113,
+            0.012081565,
+            0.0086459929,
+            0.0065661422,
+            0.0051665448
+          ]
+        },
+        {
+          "tda": false,
+          "singlet": true,
+          "energies_hartree": [
+            0.9533180965369493
+          ],
+          "oscillator_strengths": [
+            0.85121263
+          ],
+          "errors": {
+            "energy_hartree": 8.671597440113032e-09,
+            "oscillator_strength": 9.367287501227395e-09,
+            "static_polarizability_au": 1.60049049569011e-08,
+            "cross_section_au": 7.924645004098174e-08
+          },
+          "static_polarizability_au": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              2.80985325
+            ]
+          ],
+          "omega_hartree": [
+            0.5858248659782939,
+            0.6314396333897748,
+            0.6770544008012558,
+            0.7234049264243534,
+            0.7690196938358344,
+            0.8153701827096081,
+            0.8609849501210891,
+            0.9073354757441867,
+            0.9529502431556677,
+            0.9536859646179605,
+            0.9985650105671485,
+            1.0449154994409224,
+            1.090530303601727,
+            1.136880792475501,
+            1.182495559886982,
+            1.2288460487607558,
+            1.2744608529215604,
+            1.3208113417953342
+          ],
+          "cross_section_au": [
+            0.0016733332,
+            0.0023897973,
+            0.0035227685,
+            0.0054868044,
+            0.0091358076,
+            0.017343228,
+            0.040758846,
+            0.16764044,
+            3.8959769,
+            3.8989849,
+            0.19027756,
+            0.050279402,
+            0.023481451,
+            0.013665708,
+            0.0090936061,
+            0.0065125518,
+            0.0049490995,
+            0.0038964213
+          ]
+        },
+        {
+          "tda": false,
+          "singlet": false,
+          "energies_hartree": [
+            0.611904177953632
+          ],
+          "oscillator_strengths": [
+            0.0
+          ],
+          "errors": {
+            "energy_hartree": 5.977944583790418e-09,
+            "oscillator_strength": 0.0
+          }
+        }
+      ],
+      "seconds": 5.925001463008812
+    },
+    {
+      "name": "h2_evgw",
+      "atom": "H 0 0 0; H 0 0 .74",
+      "basis": "sto-3g",
+      "auxbasis": null,
+      "hf_hartree": -1.1167593075,
+      "nw": 200,
+      "qp_solver": "secant",
+      "scf_amplitudes": [],
+      "scf_seed": 20260923,
+      "scf_attempts": [],
+      "sigma_points": 40001,
+      "sigma_step": 5e-05,
+      "method": "evgw",
+      "g_orbitals": [
+        0,
+        1
+      ],
+      "screening_occupied": [
+        0
+      ],
+      "screening_virtual": [
+        1
+      ],
+      "qp_targets": [
+        0,
+        1
+      ],
+      "molgw_input": "&molgw\n scf='HF'\n basis='STO-3G'\n gaussian_type='CART'\n tolscf=1.0e-12\n nscf=100\n frozencore='no'\n ncoreg=0\n ncorew=0\n nvirtualg=3\n nvirtualw=3\n selfenergy_state_min=1\n selfenergy_state_max=2\n nomega_sigma=40001\n step_sigma=5e-05\n length_unit='angstrom'\n natom=2\n postscf='evGW'\n nstep_gw=40\n eta=0.00001\n print_w='yes'\n/\nH 0 0 0\nH 0 0 .74\n",
+      "qp_hartree": [
+        -0.596701424025862,
+        0.689291049070103
+      ],
+      "gradscf_qp_hartree": [
+        -0.5967014247764112,
+        0.6892910568591339
+      ],
+      "gradscf_qp_residual_max": 6.530904636536938e-11,
+      "gradscf_qp_weight": [
+        0.9937684751539718,
+        0.9937684751539718
+      ],
+      "errors": {
+        "hf_hartree": 1.0357537050253995e-10,
+        "qp_hartree": 7.789030975757782e-09
+      },
+      "optical": [
+        {
+          "tda": true,
+          "singlet": true,
+          "energies_hartree": [
+            0.9847019970047426
+          ],
+          "oscillator_strengths": [
+            1.13691734
+          ],
+          "errors": {
+            "energy_hartree": 7.310383076664095e-09,
+            "oscillator_strength": 1.280990535867943e-08,
+            "static_polarizability_au": 2.3936227666609966e-08,
+            "cross_section_au": 5.752539644632293e-07
+          },
+          "static_polarizability_au": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.51755186
+            ]
+          ],
+          "omega_hartree": [
+            0.6172087517463577,
+            0.6628235191578388,
+            0.7084383233186434,
+            0.7547888121924172,
+            0.8004035796038982,
+            0.846754068477672,
+            0.8923688726384766,
+            0.9387193615122505,
+            0.9843341289237314,
+            0.9850698503860243,
+            1.0299488963352124,
+            1.07629942195831,
+            1.121914189369791,
+            1.1682646782435648,
+            1.2138794456550457,
+            1.2602299712781433,
+            1.3058447386896244,
+            1.3521952275633982
+          ],
+          "cross_section_au": [
+            0.0022902586,
+            0.0032542192,
+            0.0047766217,
+            0.0074127231,
+            0.012305259,
+            0.023298943,
+            0.054634829,
+            0.22427888,
+            5.2037126,
+            5.2076021,
+            0.2537849,
+            0.066976336,
+            0.031245445,
+            0.018166731,
+            0.012078728,
+            0.0086440175,
+            0.0065646785,
+            0.0051654188
+          ]
+        },
+        {
+          "tda": false,
+          "singlet": true,
+          "energies_hartree": [
+            0.9533417263521468
+          ],
+          "oscillator_strengths": [
+            0.852277469
+          ],
+          "errors": {
+            "energy_hartree": 1.0671465044964634e-08,
+            "oscillator_strength": 9.814477675007538e-09,
+            "static_polarizability_au": 1.6660055113248973e-08,
+            "cross_section_au": 9.73090735489901e-08
+          },
+          "static_polarizability_au": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              2.81322881
+            ]
+          ],
+          "omega_hartree": [
+            0.5858484957934914,
+            0.6314632632049724,
+            0.6770780306164532,
+            0.7234285562395509,
+            0.7690433236510319,
+            0.8153938125248057,
+            0.8610085799362865,
+            0.9073591055593843,
+            0.9529738729708652,
+            0.953709594433158,
+            0.9985886403823461,
+            1.0449391292561199,
+            1.0905539334169247,
+            1.1369044222906985,
+            1.1825191897021794,
+            1.2288696785759532,
+            1.2744844827367579,
+            1.3208349716105319
+          ],
+          "cross_section_au": [
+            0.0016754588,
+            0.0023928232,
+            0.0035272171,
+            0.0054937174,
+            0.0091472964,
+            0.017365002,
+            0.040809948,
+            0.16785037,
+            3.9008507,
+            3.9038624,
+            0.19051538,
+            0.050342196,
+            0.023510757,
+            0.013682753,
+            0.0091049428,
+            0.0065206672,
+            0.0049552642,
+            0.003901273
+          ]
+        },
+        {
+          "tda": false,
+          "singlet": false,
+          "energies_hartree": [
+            0.6113945346563681
+          ],
+          "oscillator_strengths": [
+            0.0
+          ],
+          "errors": {
+            "energy_hartree": 6.710189626168983e-09,
+            "oscillator_strength": 0.0
+          }
+        }
+      ],
+      "seconds": 1.7581154640065506
+    }
+  ],
+  "native_snapshot": "/home/yjiao/gradscf_checks/ad-showcase-integration-20261015",
+  "source_verification": {
+    "revision": "b831818d7a845c36f295d036dc8ceef59daf9991",
+    "files_checked": 3529,
+    "archive_bytes": 5601560,
+    "archive_sha256": "dcf0c147f3dda2b7fdbedcb126c8d5063e0d869e6a1bdbc05d4d4cd8cf72bd6d",
+    "verification": "Every archive file matches its Git blob SHA1 from the official fixed-commit recursive tree."
+  },
+  "libcint_verification": {
+    "revision": "c72d30662ba08048940c9000cc352a220c867712",
+    "source_files": 124,
+    "source_bytes": 3570990,
+    "source_git_blob_sha1": {
+      ".github/workflows/ci.yml": "71399d044cd853a56715cf6573d3a7ebfc2e420c",
+      ".gitignore": "427a587b1437ff77f2b239491753e9561cb779c6",
+      ".travis.yml": "5ac1b305297adcf663d5c77eade353f359059efb",
+      "AUTHORS": "646e0388ba2911412ee80d00f396b3c0d76b8ce0",
+      "CMakeLists.txt": "26a1520168faf6a660955fad495aacca21d96424",
+      "ChangeLog": "2ed95ee3d5303db051b8f057f496de4117ddb784",
+      "LICENSE": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+      "README.rst": "8df58cf3abca3d57a4bee5972260dbf25deed5e9",
+      "cmake/FindQUADMATH.cmake": "df886f4c572cb2d1dc685a55c875718012ef4f41",
+      "doc/compile.sh": "c40d6e0973ac0f5117e1206bb1f0c8eb43888142",
+      "doc/libcint.CPack.txt": "0150241b4f7525c88fabb9aa68c4e305d3a12346",
+      "doc/program_ref.pdf": "a1bc3a85daa18cb73760357e25a3d8d7d8d7f0b9",
+      "doc/program_ref.tex": "812250fcb0a2a1022516d64141f0996521793df9",
+      "doc/program_ref.txt": "3ec3a47ff6f11cb8566de9268569184ac25ccddd",
+      "examples/CMakeLists.txt": "bdc72602732161b0b3be0be6b85394a4f0aebd55",
+      "examples/c_call_cartesian.c": "8f5c3133e0a191c1dba22cb1a64cd584e833053e",
+      "examples/c_call_spheric.c": "d76a01a5a0311f7da8eaca2491063abc7f9abacc",
+      "examples/c_call_spinor.c": "3237d7728bd3c8cbf6b24ba41c4db0b34d5dd512",
+      "examples/fortran_call_cartesian.F90": "66568c21bf3e402b414bcea5cb14a5222b25c9e8",
+      "examples/fortran_call_spheric.F90": "cb260bfec546e829e08312e0daeae3c110fa7791",
+      "examples/fortran_call_spinor.F90": "113bc7a4fef92bdaba530dbe52da483cd967b02b",
+      "examples/julia_call.jl": "b0eaf6e208c5352f197733b9f4077dda39a1302a",
+      "examples/python_call.py": "912ad2bd3551cff25af44480a62ca4db24d4e441",
+      "examples/python_call_with_pyscf.py": "70c65006829b5a1bc4a9fbe2a78fc96204d190e8",
+      "examples/time_c2h6.c": "7b42af00103f799a94d25f4ecfec376e9ceddb29",
+      "examples/time_c60.c": "fc4864b0b58c44f33210119dcd5db42c3fa6b113",
+      "include/cint.h.in": "fd9cf74b0ad23dcb92f0b2c98a15e854597f4405",
+      "include/cint_funcs.h": "9d65fb212dc3668cbf8ec4587e83059191dbdcda",
+      "scripts/auto_intor.cl": "ad80afae2be70756bb8e47ef1056bdb6eafc6d5a",
+      "scripts/cart2sph.py": "8c7c84c6c30ad1e4330f69d6d23188acda691685",
+      "scripts/derivator.cl": "ad3916d1974cbb51ede711c226b04c55220263c1",
+      "scripts/erfc_tabulate.py": "c83fa4362a2a57e6baca888c192fde05e3f9b8fe",
+      "scripts/find_polyroots.py": "1d16cb52bc6659e8bd94441f571539d9038eb14f",
+      "scripts/gen-code.cl": "19157d46cf674171eb0e9b62da189e7ce71bb736",
+      "scripts/parser.cl": "a870f74c7beaae5e1a19e1f00f668699940cc6c3",
+      "scripts/rys_roots.py": "f0a0b4ce4ddb9e13a6c48ad1b12fc0d3831f0130",
+      "scripts/rys_tabulate.py": "d53ccc97b6a3873e0df44f95c7ffc5014934a749",
+      "scripts/rys_wheeler.py": "987316a52c4b7d0b62b7cb566fd7a7fb57a1d488",
+      "scripts/sr_rys_tabulate.py": "ebac576a3d62237ad268877be335f3df8a5483aa",
+      "scripts/sr_rys_tabulate1.py": "e9cead5b642bebb2c0b9ea4dcc8814ad8556736f",
+      "scripts/sr_rys_tabulate_error.py": "b9cd3e80c9fe6c56c86cae77337e27f03cfab53d",
+      "scripts/utility.cl": "c32c3ca6d6b40c0f00e0938b3be785993fb25544",
+      "src/autocode/breit1.c": "2ef743d4c9b02b3c486d1d51b46fabde6852b8a3",
+      "src/autocode/deriv3.c": "648109507c53fbb0019ca2d21f47e016fba1991d",
+      "src/autocode/deriv4.c": "4fe23bffe8e946eb873bd741d6737917e1cce632",
+      "src/autocode/dkb.c": "939ecef5f8de7cccaed474defae716674d454520",
+      "src/autocode/gaunt1.c": "fc8d38171bb16342079a7260430ed06e828336f8",
+      "src/autocode/grad1.c": "5143959515c65d96bd58a60ce62d3a1906adadbb",
+      "src/autocode/grad2.c": "0141f88937649ffd7f505d2dc3b72864f24068d7",
+      "src/autocode/hess.c": "c7d3f789a44563b68fdadf91510ddc6ea4b10a93",
+      "src/autocode/int1e_grids1.c": "d2b8aef6e1ed86152d9bf7fc385ac46c08919e70",
+      "src/autocode/int3c1e.c": "9065c86027fdd43ae649087f554d5991669dc421",
+      "src/autocode/int3c2e.c": "efab7af5b2f59b5ed20417109572a35226462981",
+      "src/autocode/intor1.c": "b1ed08b23a9d47936547a5808dc3f1dc9d2e02c6",
+      "src/autocode/intor2.c": "5e0547841fd1ae8fc7460563db91346eac17a7ce",
+      "src/autocode/intor3.c": "54f9292f99909865a7f4d25ad6c23f19362f445e",
+      "src/autocode/intor4.c": "c2e797c227dde291b9cd5fe8c833d74931154658",
+      "src/autocode/lresc.c": "012587a430cf0a3ffbce83206947f0deb63942d3",
+      "src/breit.c": "4931c6c6c389c2c68363e4f2942cfab2323ab371",
+      "src/c2f.c": "5b19da1be64d23ed10a8be666fc2f1872987a674",
+      "src/c2f.h": "d2703bff664515e4e9d555efd037a68e6f9d15ab",
+      "src/cart2sph.c": "752cdced97ca6cc498ae051fafafa4cc6ffd1258",
+      "src/cart2sph.h": "707a1a637768d1fd39acc8051e5f7e2872287fe5",
+      "src/cint1e.c": "9afbd01aaa110d9d6279c1d72eeedabed5b732bd",
+      "src/cint1e.h": "56b5badefae2015f86f9b2b3287342f904b9c22c",
+      "src/cint1e_a.c": "cb15032113db94906e2e7553a278438c7a255fe9",
+      "src/cint1e_grids.c": "15075b9e287b2b1762f49e343da19b0fc3995207",
+      "src/cint2c2e.c": "1ea1f5374574a5c32c1a1889f6f3b4a292432a48",
+      "src/cint2e.c": "33bb5ff52a0dcb1db9b42b1d13c43fbee1b185bd",
+      "src/cint2e.h": "17501d172876dd3641448c49179d97709528f05a",
+      "src/cint2e_f12.c": "1ded897367c9f0f79e81fef05f375295db67aae4",
+      "src/cint3c1e.c": "1a1f5a2d1fd3ce47fa6cb20d83484bf8c1e5a679",
+      "src/cint3c1e_a.c": "2a07db5551062e1964d98066b609d8513975f033",
+      "src/cint3c2e.c": "e2e59c6c0e21ddd2c8e1e2ba605589e6e0fa35bd",
+      "src/cint4c1e.c": "98d648df7d746e833488ceb5996ab098a2b7718a",
+      "src/cint_bas.c": "61d8b8fb385c56ee46d916be0b12046c71e01c32",
+      "src/cint_bas.h": "45c18c74ad48a84f362e696c73d0f50a795a3dea",
+      "src/cint_config.h.in": "02e84f704b05a8dcafb8705900d316c1a4726a52",
+      "src/eigh.c": "8cbfe6d9d922ef2db279bf3d46a5fe217f0ea539",
+      "src/fblas.c": "75cb4a30c4850e179b992e1b6711b5ad7d58c945",
+      "src/fblas.h": "24541914f23539f4831ee81c1a15ae9e9de0b708",
+      "src/find_roots.c": "9db13577b5d9898048659eff4c113ccd50574d9c",
+      "src/fmt.c": "820f053834ab9bf327c2aa640d240d34dba5e20a",
+      "src/g1e.c": "830e8d7fa77d9292078d24d5c4dce54763eda74f",
+      "src/g1e.h": "fcd3f179c8dc7a581c19839bc3fea9c02b1501b1",
+      "src/g1e_grids.c": "8721c78946af3386036fe25f31f8a2494c80ddcc",
+      "src/g1e_grids.h": "1ed4c4866994dabc5bf9de90fd845dfd2b521ec8",
+      "src/g2c2e.c": "1ba07f51fb749d2d2fde7cdb58283c881d04d225",
+      "src/g2e.c": "3ede5e209724012ab3fa30750c98b809ad01a100",
+      "src/g2e.h": "66982a5182bac549fb997015696583e991ad2a9b",
+      "src/g2e_f12.c": "8ef16ebf97d9abaf9575837138b7339e35a81a35",
+      "src/g3c1e.c": "6ab5eefb81d665173059c3c5429f104302199d6d",
+      "src/g3c1e.h": "8c58cfeeccfcf6e1891612307dd39154ca384968",
+      "src/g3c2e.c": "9421529ff1c4f9dae58f4a6d1b4d24a1d7aabc30",
+      "src/g4c1e.c": "a2971d151c89d1a3ea896e2132180ea69cf2ce64",
+      "src/gout2e_simd.c": "9e05689a85cb0f17d789f453d5c3fdd3ef596d68",
+      "src/misc.c": "3515589649bf7838c196786af7325c04a2da1cd5",
+      "src/misc.h": "bcd82a2e501b1d5a257f0f202ead93e27a0cb321",
+      "src/optimizer.c": "35f1eb95e1e00ed31eae98c1b158f82fcd349c58",
+      "src/optimizer.h": "495dae4de8a683b0814b1fae463b5b2e5f4756fb",
+      "src/polyfits.c": "e8d7584617fafb8049c76a6710f6664cb86b3534",
+      "src/roots_for_x0.dat": "98c10bedab2c76e79ec583bc19a04499c4eabc50",
+      "src/rys_roots.c": "4390b6e0135e7b47b4e44f062c635704e93116a6",
+      "src/rys_roots.h": "a3c1bdce8fde2b72fdb7174b1bcc69b660571e5d",
+      "src/rys_wheeler.c": "55bbc5b1e0b580431877344f114a221703483e21",
+      "src/sr_rys_polyfits.c": "243d7965a6f6029bec9d117febde51fdc8d4bc8c",
+      "src/stg_roots.c": "abb8427975eb6395869d5927caa73c4487a25ca2",
+      "testsuite/test_3c2e.py": "3a3c31de62ba94de36bde3e2c9c44a1a4208e678",
+      "testsuite/test_c2s.py": "5dbabd69751c4dcc5b7ab49be73cddd3f3fd3788",
+      "testsuite/test_cart2sph.py": "df61f2a930ceafe8789d3bd36930764dd4fcf447",
+      "testsuite/test_cint.py": "7f9815fad85daa3ca67efcf3fc77490d5c921ccc",
+      "testsuite/test_cint4c1e.py": "621130fa34e78b20f2f6ff1663b136829609b286",
+      "testsuite/test_erfc_error.py": "cf0134bcdab58a20b1e240a6e9d0e9e3f442f8d9",
+      "testsuite/test_f12_with_aft.py": "ac36d6bf08edf3802e596e4debb6e88e23239ca1",
+      "testsuite/test_int1e.py": "efe09bbe98cb917a1233a23992c8873e13def4ad",
+      "testsuite/test_int1e_grids.py": "55b590a7c80c258ba9add6c5bbdc9b9e4cba4231",
+      "testsuite/test_int2c2e.py": "82d97290bd5ea4a62671adbcdc67487e99abcae5",
+      "testsuite/test_int2e.py": "9fd07e6a3d040ca43ed83edd1ac37cbab0b9bb35",
+      "testsuite/test_int2e_f12_etc.py": "4fe1034ce6d036ad5ed3714dacf2fdb14d2130d0",
+      "testsuite/test_int3c1e.py": "cc3afeb774094727663b70d25260acfce216ba19",
+      "testsuite/test_int3c2e.py": "38feb6c5d37e77c83f25ff85001debb7737f312e",
+      "testsuite/test_range_separation.py": "49120eb9bb0431bfdcb7b2ff3e23896cf4fc576f",
+      "testsuite/test_rys_roots.py": "8068b3ed5444d4616eff2ba32b0b86f3004a1dca",
+      "testsuite/test_rys_wheeler.py": "f329903230d64c3627af367ebb8129abda10f988"
+    },
+    "omitted_files": {
+      "src/roots_xw.dat": {
+        "bytes": 99882018,
+        "git_blob_sha1": "ef83b962878ea22c67cba61e493ec0ffb08eadd2"
+      },
+      "src/sr_roots_part0_w.dat": {
+        "bytes": 990300,
+        "git_blob_sha1": "1667c2bc4effd6dcab0fd2802d20bc9fbabf2f08"
+      },
+      "src/sr_roots_part0_x.dat": {
+        "bytes": 990184,
+        "git_blob_sha1": "c499d6676cbe0b0264f2c642f11b897d0cd50314"
+      },
+      "src/sr_roots_part1_w.dat": {
+        "bytes": 6272274,
+        "git_blob_sha1": "f99cd01b558c5f33aea1bcd53e91d456e35bfe59"
+      },
+      "src/sr_roots_part1_x.dat": {
+        "bytes": 6272064,
+        "git_blob_sha1": "c14f0817d73975b9eb5a80038e280be51f4fd8e9"
+      },
+      "src/sr_roots_part2_w.dat": {
+        "bytes": 4125630,
+        "git_blob_sha1": "49f35f2ce0613bb12a45b95af7805c7eb693f613"
+      },
+      "src/sr_roots_part2_x.dat": {
+        "bytes": 4125484,
+        "git_blob_sha1": "ad6af5be23f19512f5dafc5a57958948d2453cf4"
+      },
+      "src/sr_roots_part3_w.dat": {
+        "bytes": 2970716,
+        "git_blob_sha1": "d5fc106322a1fe2bca8335aece31426ff4a96730"
+      },
+      "src/sr_roots_part3_x.dat": {
+        "bytes": 2970574,
+        "git_blob_sha1": "7be50d369c0f8cc75dfda1e548ae759a90c99b11"
+      }
+    },
+    "cmake_contract": {
+      "WITH_F12": false,
+      "WITH_POLYNOMIAL_FIT": false,
+      "WITH_CINT2_INTERFACE": true
+    },
+    "archive_bytes": 713781,
+    "archive_sha256": "9d03e83d368cf045b39da772a278a13fb265dd9fe1c64d0c91740054a12d4c3d",
+    "boundary": "Unmodified official source files; optional .dat tables omitted and their F12/polyfit build paths disabled."
+  },
+  "executable_sha256": "a3cb4799eaa416885b2969d5e2b219ec5f9e03a9ea2b063ab685731f663c8b58",
+  "comparator_sha256": "3ed10941cb3dfd3a6bb99a13b8447898f0dd53ec39ebbd8cd5cac6fe2460ba81",
+  "driver_sha256": "15db4ba000a946646b353b34ac4caea9ea29b4d71ba157d86c12869f9f2d3740",
+  "native_source_sha256": {
+    "gradscf/gw/__init__.py": "c269f1ad2741b077856e370cd9453a3e13051b1278409fcb6da24786f61328af",
+    "gradscf/gw/evgw.py": "ed1f7674cb797cf3230cf3405bf0ff8755997e91a68e989f7223a7a18bd4fb8c",
+    "gradscf/gw/freq.py": "d1562e54b5a163b3ec9f75104e4eb77d8e43db0a6a6170d3bde6e91b7771da10",
+    "gradscf/gw/g0w0.py": "ece14ac6207e5703029c93371b3dd77f7185d0d4fc746f402149a703118d6807",
+    "gradscf/gw/matsubara.py": "27f8d8169a8c1d1337810dfc3a7dc62753d0f9c65fa71bbdfae49f4b099b94b3",
+    "gradscf/gw/outer_response.py": "e174052aaa45da752298bb75845c13282e3a757237fe16454b7c924a3614045d",
+    "gradscf/gw/polarizability.py": "26cc189fc146894a0db3d86cc8c3f425fbdda21e647d34a4d7f5c4df15b13825",
+    "gradscf/gw/poles.py": "59518d578772a4bf22782671189f7b01f397ca23e35f1f5113a6faeadf2fac13",
+    "gradscf/gw/qp.py": "2774d73818251adbd1cd290cc1518dfe74c3b5a0a1c2cb3b2b97829c53ca8fed",
+    "gradscf/gw/qsgw.py": "32bf18c2e3cd0dff05fa050198e2fd66ebda290bf804fed2f98f1ad78fcf7063",
+    "gradscf/gw/rgw.py": "cb25469b1373baa4ab1b5abd1283e7656e7e820a86c7464f47649b9c1868983d",
+    "gradscf/gw/scgw.py": "4b4655c1366e5e5341cc89046831dd19aaac760bedd8cafcea6cfbe1f8e69a46",
+    "gradscf/gw/scgw_response.py": "88218732d73ef4fb023bcfc68067c5cf2d6bbc0ea0bee2d57198a51b12a59b55",
+    "gradscf/gw/screened.py": "d1c3fe12ac22dae1ca116a3137e6e46dfbfe138fbfff36a793d2502ab33e32a4",
+    "gradscf/gw/self_energy.py": "98564a4e79e6a15d94177925a2b769dd156c93aff95d5135c7ac5d3a66b0b871",
+    "gradscf/gw/types.py": "7dba574d617100847bdee1f784f7621a906b944af7f9cbb453550c8fe15236d6",
+    "gradscf/gw/ugw.py": "48b24952ca6487b94b75d181e05b72d0ddc34b4bfdcbfcba3ce692ebe1392855",
+    "gradscf/bse/__init__.py": "3034f4f7764683737ac3d6684fff821bdd9d4c6732a62cb65fb6f6507ed5badc",
+    "gradscf/bse/api.py": "5a07d482649a51b2fbea4bb523c70cf68672f1ea16334fcf11ef2bfd9fc09720",
+    "gradscf/bse/kernel.py": "06b2e62a946d17d6a7b6abe2cab79e37252c3e708c77c3e62cc2616144ca9cc4",
+    "gradscf/bse/properties.py": "1f550e9e16955ce195422deac887cea92e4c0e21b84fd3ac8178d2ca11d1d978",
+    "gradscf/bse/reference.py": "227cf2a4756b068ec6bfe7c5f4f727503167ac3fe2df5645bd3829e643acc16f",
+    "gradscf/bse/response.py": "1031d869e83bd090053d4addda2f969c3216ab0cb50ad2dbb23c28f3ca83155e",
+    "gradscf/bse/space.py": "7531c90cd6d27bbb60eb9713acd62e8a2f44a3708df006b9ea3381efb622c6b2",
+    "gradscf/bse/types.py": "519fb0179aacf075097535853e5731dfb9b57d5718b58a870edfb1f5f4e61d80"
+  },
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "limits": {
+    "hf_hartree": 1e-07,
+    "qp_hartree": 2e-06,
+    "qp_weight": 5e-05
+  },
+  "optical_limits": {
+    "energy_hartree": 3e-06,
+    "oscillator_strength": 2e-05,
+    "static_polarizability_au": 0.0003,
+    "cross_section_au": 0.0002
+  },
+  "nw": 200,
+  "elapsed_seconds": 41.47604102198966
+}

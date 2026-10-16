@@ -1,0 +1,7 @@
+{
+  "revision": "b831818d7a845c36f295d036dc8ceef59daf9991",
+  "files_checked": 3529,
+  "archive_bytes": 5601560,
+  "archive_sha256": "dcf0c147f3dda2b7fdbedcb126c8d5063e0d869e6a1bdbc05d4d4cd8cf72bd6d",
+  "verification": "Every archive file matches its Git blob SHA1 from the official fixed-commit recursive tree."
+}

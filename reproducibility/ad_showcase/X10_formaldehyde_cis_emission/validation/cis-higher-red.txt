@@ -1,0 +1,22 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_h2_relaxed_cis_geometry_hvp_matches_gradient_differences _________
+
+hydrogen = (array([[ 0. ,  0. , -0.7],
+       [ 0. ,  0. ,  0.7]]), RHF(mol=Mole(atom=[('H', array([ 0. ,  0. , -0.7])), ('H', ar...mpute_local_hfx_aux=False, hfx_omega_values=(0.0, 0.4), hfx_chunk_size=512), <function evaluate_cis at 0x7f8a185c0680>)
+
+    def test_h2_relaxed_cis_geometry_hvp_matches_gradient_differences(hydrogen):
+        coordinates, mf, oracle = hydrogen
+        model = CISGeometry(mf, nroots=2)
+        energy, gradient, state = model.total_gradient(coordinates, 0)
+        anchor = model.anchor(coordinates, state, 0)
+        direction = np.array([[.2, -.1, -.7], [-.2, .1, .7]])
+        direction /= np.linalg.norm(direction)
+>       product = model.total_hessian_vector(coordinates, 0, direction)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'CISGeometry' object has no attribute 'total_hessian_vector'
+
+tests/test_cis_geometry_higher_response.py:74: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_cis_geometry_higher_response.py::test_h2_relaxed_cis_geometry_hvp_matches_gradient_differences
+1 failed, 1 passed in 39.71s

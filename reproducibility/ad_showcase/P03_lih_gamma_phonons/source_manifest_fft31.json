@@ -1,0 +1,31 @@
+{
+  "recorded_utc": "2026-10-15T22:45:47.702560+00:00",
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-lih-gamma-20261016",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "versions": {
+    "jax": "0.10.0",
+    "jaxlib": "0.10.0",
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "pyscf": "2.13.0"
+  },
+  "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+  "native_library_sha256": "e02844ce6c1b5eebc2dc00a6eec5f1803fd33ad4150aa82e9858d5c0890b9904",
+  "file_sha256": {
+    "examples/pbc/lih_gamma_phonons.py": "88bbfe688c28a1017fbefec339d66c5afab31c2634be207061da7c3f1e3bcfbe",
+    "examples/pbc/compare_lih_gamma_phonons.py": "cafbb74086c289b36315cc24e4ba7f1e7a484e9d8447f96eaa2ed41f4fc46178",
+    "examples/pbc/lih_gamma_rotation.py": "4ea0d723ccd21f33ae05f605cf65b5d74c5c962af39402c35a7467263deee9bc",
+    "examples/pbc/lih_forces_stress.py": "4431a8c0439a2b60b4d4befb9c8c1792fd65d2bd0b1107937aa5f75a03bc8d68"
+  },
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "PYTHONPATH": "src"
+  },
+  "scope": "Original FFT31 Gamma model, including the first example version before explicit fine-grid arguments; no whole-worktree integration claim."
+}

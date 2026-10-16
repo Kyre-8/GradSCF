@@ -1,0 +1,22 @@
+{
+  "water_forward_convergence.py": {
+    "executed_ast_equal": true,
+    "public_sha256": "7ce6cbfdf56f3cc116e7d4fca212311950c280f475e7056606afb7a31ed61ae2",
+    "executed_sha256": "43df6627818f24b4f0871a765d2240357a7557372cdb7d2f6f18981533b810a7"
+  },
+  "water_bse_solver_comparison.py": {
+    "executed_ast_equal": true,
+    "public_sha256": "8ab52c5ab54a676a9494255b62dc2c040645cb2d8af423dc5d69f8b3d0ede38e",
+    "executed_sha256": "88fd27cffcd0fd1b71f3ec2ec5ad9347e7950219a9a17d7daeac203e98858b6d"
+  },
+  "compare_water_forward_convergence.py": {
+    "executed_ast_equal": true,
+    "public_sha256": "0d7e1d779c658ac491941baf20a8b40c9591d2f5c2f5b605eb92e3e85248fd8d",
+    "executed_sha256": "1e9c3842e4b18ef79ecc9d7b1098100a0224489de58774a01d92de318e5b6e71"
+  },
+  "plot_water_forward_convergence.py": {
+    "executed_ast_equal": true,
+    "public_sha256": "5b759d09b0537dc70c46c3be55a978770ff96b5967c4d4306f36ced8732fdb4d",
+    "executed_sha256": "404af6c966166ddf6eac1e2d67d3128bcd30b732297e02973bd29e1e6f582fed"
+  }
+}

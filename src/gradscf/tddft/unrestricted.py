@@ -433,6 +433,8 @@ def _build_unrestricted_response_operator_data(
     xc_params: Any | None = None,
     occupation_tolerance: float = 1e-8,
 ) -> _UnrestrictedResponseOperatorData:
+    from ..scf.rsh import reject_rsh_response
+    reject_rsh_response(molecule)
     resolved_xc = _resolve_xc_functional(molecule, xc_functional, xc_params)
     if isinstance(resolved_xc, str):
         resolved_xc = UnrestrictedSemilocalResponseFunctional(resolved_xc)

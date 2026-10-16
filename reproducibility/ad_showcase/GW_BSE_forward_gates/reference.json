@@ -1,0 +1,39 @@
+{
+  "basis": "6-31g*",
+  "cart": true,
+  "method": "RHF",
+  "nmo": 19,
+  "nocc": 5,
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.43,
+      1.11
+    ],
+    [
+      0.0,
+      -1.43,
+      1.11
+    ]
+  ],
+  "hf_energy_hartree": -76.01049281824507,
+  "factor_shape": [
+    190,
+    19,
+    19
+  ],
+  "factor_rank": 165,
+  "factor_cutoff": 1e-12,
+  "seconds": 12.718244855990633,
+  "accepted_native_record": "reproducibility/ad_showcase/X02_water_gw_bse_response/primary/nw200/native.json",
+  "accepted_sha256": "982a2c13790cb94a2ec36932314ae3882bd913b9281e1b9b222097a82727a226",
+  "jax": "0.10.0",
+  "backend": "cpu",
+  "dtype": "float64",
+  "script_sha256": "1e3016ff7a8a2f501e30582fcaf3555534845a9ab7f7d09dbf10f597593d0b8d"
+}

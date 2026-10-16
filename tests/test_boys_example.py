@@ -21,7 +21,7 @@ def example():
 
     with pytest.MonkeyPatch.context() as patch:
         patch.setattr(RKS, "kernel", counted_kernel)
-        result = runpy.run_path("examples/ethylene_boys.py")
+        result = runpy.run_path("examples/localization/ethylene_boys.py")
     assert len(calls) == 1
     return result
 
@@ -30,7 +30,7 @@ def test_example_is_gradscf_only_and_has_no_cli(example):
     from gradscf.scf.facade import RKS
 
     assert isinstance(example["mf"], RKS)
-    tree = ast.parse(Path("examples/ethylene_boys.py").read_text())
+    tree = ast.parse(Path("examples/localization/ethylene_boys.py").read_text())
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             assert all(not item.name.startswith(("pyscf", "argparse")) for item in node.names)

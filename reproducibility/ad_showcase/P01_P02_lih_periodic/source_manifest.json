@@ -1,0 +1,48 @@
+{
+  "recorded_utc": "2026-10-15T22:05:37.758401+00:00",
+  "remote_directory": "/home/yjiao/gradscf_checks/ad-showcase-p01-p02-memoryfix-20261016",
+  "hostname": "c20",
+  "cpu": "Intel(R) Xeon(R) Platinum 8457C",
+  "python": "3.11.15",
+  "versions": {
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "jax": "0.10.0",
+    "jaxlib": "0.10.0",
+    "pyscf": "2.13.0"
+  },
+  "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+  "source_hash_convention": "SHA256 of sorted relative src/*.py paths followed by their bytes.",
+  "native_library": {
+    "path": "src/gradscf/integrals/_native/lib/libgradscf_integrals.so",
+    "sha256": "e02844ce6c1b5eebc2dc00a6eec5f1803fd33ad4150aa82e9858d5c0890b9904"
+  },
+  "file_sha256": {
+    "src/gradscf/pbc/scf.py": "755a83038262d0c8c3b45ee32bbbeb4d640d094445c890c4c437bc21ea55d648",
+    "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+    "tests/pbc/test_implicit_forward_memory.py": "f5044abc50d6d9a1d384c288c32e1c52d4cc1a6e127848a1cd1cfdb13b22f6ca",
+    "tests/pbc/test_showcase_geometry.py": "ec382ec01dff832c6b3555c462764243e99108ae3afa184257125450f7111fc8",
+    "artifacts/ad_showcase/p01_p02/k8_rss_budget.py": "673d449cb2f334b1fd4e6b4c04302039d54e4ef4ca822f336e45cb0a8e4a44d5",
+    "examples/pbc/compare_lih_forces_stress.py": "41cc88549a36c541fb1a27b67532f76a7ab927e6e91cb410b3df286c71d543cb",
+    "examples/pbc/compare_lih_lattice_pyscf.py": "4863eef653c72bd1b0e583b71ec468c87016ff346a64cf4784f2cf8207b00837",
+    "examples/pbc/lih_forces_stress.py": "4431a8c0439a2b60b4d4befb9c8c1792fd65d2bd0b1107937aa5f75a03bc8d68",
+    "examples/pbc/lih_lattice_optimization.py": "0f771978e46555fd633b48afc21cfef9a0ef0a20864be750c1e108aedf3b3855",
+    "examples/pbc/plot_lih_forces_stress.py": "9934f0277b33f9895795fa51b391bd6a581d2d7b7faa16388fe74b67370c9cb6"
+  },
+  "numerical_environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "PYTHONPATH": "src"
+  },
+  "scope": "Frozen P01/P02 scientific snapshot, not the current whole-worktree integration. OpenMP/BLAS settings do not bound all JAX thread pools; no affinity change.",
+  "original_snapshot": {
+    "remote_directory": "/home/yjiao/gradscf_checks/ad-showcase-p01-p02-20261016",
+    "source_python_sha256": "c792320a88f24c695049469ac317d26953efc0888cd3236c44cb0fb393220abc",
+    "scope": "Initial PBE force/stress, independent multi-step FD and before-repair memory evidence; retained separately."
+  },
+  "plot_revision_utc": "2026-10-15T22:21:24.876460+00:00"
+}

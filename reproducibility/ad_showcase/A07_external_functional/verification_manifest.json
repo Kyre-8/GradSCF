@@ -1,0 +1,18 @@
+{
+  "source_unchanged": true,
+  "source_python_sha256": "ca37f375d0e4cc673d1ca2e5b50f189b9047ad8bce56e00f7f397156fac3e43f",
+  "hostname": "c20",
+  "status": "passed",
+  "executed_script_hashes": {
+    "examples/training/external_functional.py": "6287bbd73c3334e3969f1afbb82a793170cab811c3839fb1a2abae9d7a818454",
+    "examples/training/dfpt_response.py": "df9acf75f54916064f552b6fc7d116bd0819def0ffa501b784e8951792d72841",
+    "examples/training/density_matrix_mlp.py": "86e635f4106e516eefaf46fcaaa69ca70ff80e378ace88b39c04027a2d67d24b",
+    "tests/test_external_neural_xc.py": "9f824cd2e608d3b238cac35bf425c3b76eb41cc920ee3e514a87c6245c8de790"
+  },
+  "artifacts": {
+    "A07_dfpt_response.log": "08ef985659b8b52b509d46686ece3c1978106f0c2db20d9efbd2f792440be87a",
+    "A07_external_functional.log": "07bcb6cd7e8bd24d652cf1b31d2913a30988f31391886fc0565477f30e30d377",
+    "A07_focused.log": "3e77b5e29530b04f9a5c57c215887a8ff8c30e057d8b7b2a8d8b1c8dc2028c87",
+    "source_manifest.json": "91a0b5092e40e236b34ffaae239cf74964d21c3f3665f59bcb1f06645a309f38"
+  }
+}

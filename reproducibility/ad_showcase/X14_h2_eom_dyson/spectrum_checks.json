@@ -1,0 +1,36 @@
+{
+  "lorentzian_hwhm_ev": 0.15,
+  "energy_window_ev": [
+    -80.0,
+    80.0
+  ],
+  "total_weight": 4.0,
+  "finite_window_area": 3.9949666043920717,
+  "missing_tail_weight": 0.005033395607928259,
+  "area_integration_error": 1.6937118374471538e-11,
+  "area_derivative_per_bohr": 0.0002955819382962635,
+  "area_derivative_integration_error": 5.7485766906222036e-12,
+  "reconverged_spectral_checks": [
+    {
+      "step_bohr": 0.001,
+      "max_error_per_ev_bohr": 2.7716799435613098
+    },
+    {
+      "step_bohr": 0.0003,
+      "max_error_per_ev_bohr": 0.2511617879718244
+    },
+    {
+      "step_bohr": 0.0001,
+      "max_error_per_ev_bohr": 0.027923644106550682
+    },
+    {
+      "step_bohr": 3e-05,
+      "max_error_per_ev_bohr": 0.00251331451940473
+    },
+    {
+      "step_bohr": 1e-05,
+      "max_error_per_ev_bohr": 0.00027922420665049685
+    }
+  ],
+  "model": "One-particle trace; no continuum photoionization matrix elements"
+}

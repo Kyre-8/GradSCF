@@ -1,0 +1,12 @@
+{
+  "lineshape": "normalized Gaussian",
+  "sigma_ev": 0.1,
+  "fwhm_ev": 0.23548200450309495,
+  "energy_grid_points": 2400,
+  "energy_range_ev": [
+    3.0,
+    10.684474991891747
+  ],
+  "normalization": "No per-method normalization; six-state oscillator strengths retained.",
+  "scope": "Theoretical vertical spectra at one basis and grid; width is a plotting choice."
+}

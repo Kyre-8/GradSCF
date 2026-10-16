@@ -11,7 +11,7 @@ from ..types import (
     EigenResult,
 )
 from .primal import solve_ritz
-from .response import attach_spectral_response
+from .response import attach_spectral_response, spectral_values
 
 
 def solve_hermitian(
@@ -111,8 +111,11 @@ def solve_hermitian(
         distance = distance.at[jnp.arange(k), jnp.arange(k)].set(jnp.inf)
         valid &= jnp.all((distance > threshold) | ~roots.present[None, :])
 
-    def apply(z):
-        return require_converged_derivative(op.apply(z), valid)
+    # Validity is an explicit response input and is checked on every returned
+    # observable. Capturing its nondifferentiable tracer inside this operator
+    # bypasses closure_convert's differentiable-parameter hoisting and leaks
+    # it across a nested JIT/higher derivative.
+    apply = op.apply
 
     projection = trace = None
     if response.target == "subspace":
@@ -120,25 +123,26 @@ def solve_hermitian(
             if k == n:
                 projection = probes
             else:
-                y = attach_spectral_response(
-                    apply, x, config=response.linear_config, valid=valid
-                )
+                y = attach_spectral_response(apply, x, config=response.linear_config, valid=valid)
                 projection = y @ (y.T @ probes)
             projection = require_converged_derivative(projection, valid)
-        trace = require_converged_derivative(jnp.sum(x * apply(x)), valid)
+        trace = (jnp.sum(x*apply(x)) if k == n else
+                 jnp.sum(spectral_values(apply, x, config=response.linear_config, valid=valid)))
+        trace = require_converged_derivative(trace, valid)
         values = vectors = None
         converged = all_converged
         response_valid = valid
     else:
-        values = require_converged_derivative(jnp.sum(x * apply(x), axis=0), valid)
+        # One matrix root, with separate rank-one charts for isolated columns.
+        # An outer vmap of custom_root fails under nested JIT/third derivatives
+        # on JAX 0.10; a scan also drops higher terms. Columnwise checked linear
+        # solves stay inside the single implicit root instead.
+        values = spectral_values(
+            apply, x, config=response.linear_config, valid=valid, isolated=True)
+        values = require_converged_derivative(values, valid)
         if response.target == "eigenpairs":
-
-            def attach(i):
-                return attach_spectral_response(
-                    apply, x[:, i, None], config=response.linear_config, valid=valid
-                )[:, 0]
-
-            vectors = jax.lax.map(attach, jnp.arange(k)).T
+            vectors = attach_spectral_response(
+                apply, x, config=response.linear_config, valid=valid, isolated=True)
             vectors = require_converged_derivative(vectors, valid)
         else:
             vectors = x

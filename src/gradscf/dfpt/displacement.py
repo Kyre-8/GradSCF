@@ -12,7 +12,7 @@ from .finite_q import QSource
 from ..pbc import _kpoint
 from ..pbc.kpoints import weights_for,reciprocal_vectors
 from ..pbc.momentum import momentum_transfer
-from ..pbc.response import _fields,_project,_shifted_ao
+from ..pbc.response import _fields,_project,_shifted_ao,_validate_q_domain
 from ..integrals.periodic.ao import bloch_grid
 from ..integrals.periodic.coulomb import coulomb_kernel
 from ..integrals.periodic.pseudo import local_potential,_projector_overlap
@@ -39,11 +39,8 @@ def _nonlocal_source(cell,inputs,ft,dft,direction,partner):
         for l,(radius,count,coupling) in enumerate(pp[5:]):
             if not count:continue
             def overlaps(coeff,pos):
-                values=[]
-                for k,c in zip(inputs.kpoints,coeff):
-                    vectors=inputs.gvectors+k
-                    values.append(_projector_overlap(vectors,c,pos,l,radius,count,volume))
-                return jnp.stack(values)
+                return jax.vmap(lambda k,c:_projector_overlap(
+                    inputs.gvectors+k,c,pos,l,radius,count,volume))(inputs.kpoints,coeff)
             pos=cell.coords[atom]
             o,da=jax.jvp(lambda coeff:overlaps(coeff,pos),(ft,),(dft,))
             db=jax.jvp(lambda r:overlaps(ft,r),(pos,),(direction[atom],))[1]
@@ -88,6 +85,12 @@ def displacement_source(source,q,displacements):
     from ..pbc.scf import _SCF,validate_reference
     if not isinstance(source,_SCF):raise TypeError('A periodic HF/KS reference is required')
     validate_reference(source,integer=False,equal_weights=True)
+    return _displacement_source(source,q,displacements)
+
+
+def _displacement_source(source,q,displacements):
+    """Array assembly after the public entry point has validated the snapshot."""
+    _validate_q_domain(source.inputs, source.exxdiv)
     cell=source.cell;data=source.inputs;d=source.result.density_spin
     q=np.asarray(q,dtype=float)
     if q.shape!=(3,) or not np.isfinite(q).all():raise ValueError('q must be a finite three-vector')
@@ -99,7 +102,7 @@ def displacement_source(source,q,displacements):
         raise ValueError('displacements must be finite')
     direction=direction.astype(cell.coords.dtype)
     kind=xc_type(source.xc);alpha=hybrid_coeff(source.xc)
-    if kind not in ('HF','LDA','GGA'):raise NotImplementedError('Atomic q sources support HF/LDA/GGA/global hybrids')
+    if kind not in ('HF','LDA','GGA','MGGA'):raise NotImplementedError('Unsupported atomic q XC source')
     transfer=momentum_transfer(np.asarray(source.kpts)@np.asarray(cell.lattice).T/(2*np.pi),q)
     partner=transfer.partners;mesh=tuple(cell.mesh);volume=jnp.linalg.det(cell.lattice)
     def orbitals(r):
@@ -130,8 +133,9 @@ def displacement_source(source,q,displacements):
     hcore+=basis_projection(jnp.stack([v0,v0],axis=1),'LDA')[0]
     hcore+=_project(ao,plus,data.weights,jnp.stack([dv,dv],axis=1),'LDA')[0]
     hcore+=_nonlocal_source(cell,data,ft,dft,direction,partner)
-    fields=_fields(d,ao,dplus,weights_for(data),'GGA' if kind=='GGA' else 'LDA')
-    fields+=_fields(d[:,partner],dao,plus,weights_for(data),'GGA' if kind=='GGA' else 'LDA')
+    field_kind='LDA' if kind=='HF' else kind
+    fields=_fields(d,ao,dplus,weights_for(data),field_kind)
+    fields+=_fields(d[:,partner],dao,plus,weights_for(data),field_kind)
     rho0=_kpoint.grid_xc_variables(d,data,'LDA')
     v0=poisson(rho0.sum(axis=1),jnp.zeros(3)).real
     dv=poisson(fields[:,:2].sum(axis=1),wave)

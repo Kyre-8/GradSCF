@@ -1,0 +1,7 @@
+Mode 1 independent final derivative error 1.4186404974358968e-08
+Mode 2 independent final derivative error 1.0029781116749348e-08
+Mode 3 independent final derivative error 7.45706617566455e-08
+Mode 4 independent final derivative error 1.0225568554123043e-06
+Mode 5 independent final derivative error 3.4675605276035526e-07
+Mode 6 independent final derivative error 6.362715632146632e-10
+Independent X07 gates passed 72.21124866098398 s

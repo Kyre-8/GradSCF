@@ -1,0 +1,5 @@
+Independent field step 1.0e-04: max dipole difference 5.266e-08 au
+Independent field step 3.0e-05: max dipole difference 7.936e-09 au
+Independent field step 1.0e-05: max dipole difference 1.492e-08 au
+Independent X04 errors: {'ground_energy_hartree': 4.263256414560601e-14, 'excitation_hartree': 1.1940448629843559e-13, 'ground_density': 6.510347816401918e-13, 'unrelaxed_density': 4.06438771527462e-13, 'unrelaxed_dipole_au': 2.3803181647963356e-13, 'relaxed_dipole_finite_field_au': 1.49213973745636e-08, 'relaxed_density_directions': 7.211024541375899e-09, 'constant_overlap_shift': 3.728928277269006e-11}
+Independent X04 checks passed in 61.24 s

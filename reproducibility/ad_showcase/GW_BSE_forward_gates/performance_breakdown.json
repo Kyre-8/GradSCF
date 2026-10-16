@@ -1,0 +1,96 @@
+{
+  "stages": {
+    "screening_construction": {
+      "cold_seconds": 0.2690302800037898,
+      "warm_seconds": [
+        0.0007010239933151752,
+        0.000576955993892625,
+        0.0003512800030875951
+      ],
+      "warm_median_seconds": 0.000576955993892625
+    },
+    "screening_six_rhs": {
+      "cold_seconds": 1.419493326015072,
+      "warm_seconds": [
+        0.0018491529917810112,
+        0.0018021959986072034,
+        0.0017715920112095773
+      ],
+      "warm_median_seconds": 0.0018021959986072034
+    },
+    "kernel_diagonal_construction": {
+      "cold_seconds": 5.157573233009316,
+      "warm_seconds": [
+        0.030188883014488965,
+        0.028448142984416336,
+        0.02759163998416625
+      ],
+      "warm_median_seconds": 0.028448142984416336
+    },
+    "a_and_b_six_column_actions": {
+      "cold_seconds": 4.146142276003957,
+      "warm_seconds": [
+        0.08594586001709104,
+        0.08514043199829757,
+        0.07935767801245674
+      ],
+      "warm_median_seconds": 0.08514043199829757
+    },
+    "full_solve_energy_only": {
+      "cold_seconds": 44.598136913991766,
+      "warm_seconds": [
+        4.75840707399766,
+        4.761190234974492
+      ],
+      "warm_median_seconds": 4.759798654486076
+    },
+    "full_solve_vector_response": {
+      "cold_seconds": 119.71881869499339,
+      "warm_seconds": [
+        54.838022260024445
+      ],
+      "warm_median_seconds": 54.838022260024445
+    }
+  },
+  "max_space_requested": 80,
+  "transition_dimension": 70,
+  "inputs": "Same frozen reference.npz and nw200/qp.npz; no SCF/GW calls.",
+  "synchronization": "jax.block_until_ready on the complete returned pytree for every timed call.",
+  "linear_result_fields": [
+    "solution",
+    "residual_norm",
+    "converged",
+    "status"
+  ],
+  "rpa_result_fields": [
+    "values",
+    "x",
+    "y",
+    "residual_norms",
+    "converged",
+    "stable",
+    "response_valid",
+    "stability_margins",
+    "stability_certified",
+    "stability_residual_norms"
+  ],
+  "iteration_counts_available": false,
+  "iteration_note": "Current LinearResult/RPAResult do not expose iterations; the GMRES wrapper discards info. No counts inferred.",
+  "screening_reported_residual": 4.15028779232784e-14,
+  "forward_energy_difference_hartree": 0.0,
+  "forward_strength_difference": 0.0,
+  "full_solve_residual_hartree": [
+    8.194031946543785e-13,
+    8.106992032198914e-12,
+    1.605621227590426e-12,
+    3.2001675446983307e-12,
+    9.81002166360287e-13,
+    6.839904158740897e-13
+  ],
+  "previous_energy_output_sync_warm_seconds": [
+    54.564793700992595,
+    55.055409987980966,
+    58.52593599699321
+  ],
+  "passed": true
+}

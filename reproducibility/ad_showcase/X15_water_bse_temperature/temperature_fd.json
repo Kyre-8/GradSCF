@@ -1,0 +1,32 @@
+[
+  {
+    "step_kelvin": 10.0,
+    "max_error_mb_per_kelvin": 0.0016363618946361735,
+    "max_scaled_error": 1005.9594547638046
+  },
+  {
+    "step_kelvin": 3.0,
+    "max_error_mb_per_kelvin": 0.00014745852191042075,
+    "max_scaled_error": 90.76185727051693
+  },
+  {
+    "step_kelvin": 1.0,
+    "max_error_mb_per_kelvin": 1.6386094232684334e-05,
+    "max_scaled_error": 10.08685606096464
+  },
+  {
+    "step_kelvin": 0.3,
+    "max_error_mb_per_kelvin": 1.4747617332611096e-06,
+    "max_scaled_error": 0.9078391404902018
+  },
+  {
+    "step_kelvin": 0.1,
+    "max_error_mb_per_kelvin": 1.6384150755555105e-07,
+    "max_scaled_error": 0.10086965689822439
+  },
+  {
+    "step_kelvin": 0.03,
+    "max_error_mb_per_kelvin": 1.4750835886090385e-08,
+    "max_scaled_error": 0.009078180138677427
+  }
+]

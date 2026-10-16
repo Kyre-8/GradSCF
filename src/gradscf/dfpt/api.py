@@ -82,12 +82,14 @@ def DFPT(source, *, functional=None, params=None, converged=True, q=None, tolera
             if not isinstance(source,_SCF):
                 raise NotImplementedError('This adapter supports q=0 only; finite q currently requires periodic KS/HF')
             if functional is not None or params is not None:
-                raise NotImplementedError('An arbitrary external functional needs an explicit finite-q extension')
-            validate_reference(source,integer=False,equal_weights=True)
+                raise ValueError('Set the periodic Functional and params in SCF, then use DFPT(mf); '
+                                 'use finite_q_problem for array-valued parameter differentiation.')
+            validate_reference(source,integer=False,equal_weights=True,external=True)
             fractional=np.asarray(source.kpts)@np.asarray(source.cell.lattice).T/(2*np.pi)
             transfer=momentum_transfer(fractional,q)
             problem=finite_q_problem(source.inputs,source.result,transfer,mesh=source.cell.mesh,
-                xc=source.xc,exxdiv=source.exxdiv,temperature=source.temperature,tolerance=tolerance)
+                xc=source.xc,exxdiv=source.exxdiv,temperature=source.temperature,tolerance=tolerance,
+                functional=source.functional,params=source.params)
             return replace(problem,converged=problem.converged&converged)
     if functional is not None:
         if hasattr(source,'cell'):

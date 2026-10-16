@@ -1,0 +1,56 @@
+{
+  "complete": true,
+  "records": [
+    {
+      "label": "raw_jvp",
+      "converged": false,
+      "true_residual_norm": 0.002622660852948191,
+      "rhs_norm": 157.0136203115892,
+      "relative_residual": 1.6703397117674207e-05,
+      "physical_relative_residual": null,
+      "elapsed_seconds": 59.63357738100058
+    },
+    {
+      "label": "balanced_jvp",
+      "converged": true,
+      "true_residual_norm": 1.275950565884351e-11,
+      "rhs_norm": 1.9384397569332,
+      "relative_residual": 6.5823586279670034e-12,
+      "physical_relative_residual": 6.054731037582988e-12,
+      "elapsed_seconds": 36.00321033999899,
+      "relative_electron_response": 5.0057160063101105e-12,
+      "curvature_per_atom": -5.999427993723732,
+      "density_response_rms": 0.05062077252998298
+    },
+    {
+      "label": "raw_adjoint",
+      "converged": false,
+      "true_residual_norm": 4.374044734294433e-05,
+      "rhs_norm": 2.046809710084132,
+      "relative_residual": 2.1370060503155627e-05,
+      "physical_relative_residual": null,
+      "elapsed_seconds": 58.14116498800104
+    },
+    {
+      "label": "balanced_adjoint",
+      "converged": true,
+      "true_residual_norm": 1.040216639209082e-11,
+      "rhs_norm": 2.046809710084132,
+      "relative_residual": 5.082136527319508e-12,
+      "physical_relative_residual": 4.7300078199019654e-12,
+      "elapsed_seconds": 42.655416256000535
+    }
+  ],
+  "operator_diagnostics": {
+    "matvec_probe_finite": true,
+    "minimum_distance_to_kohn_anomaly": 0.019259279830976972,
+    "exact_kohn_anomaly_count": 0
+  },
+  "energy_hartree": -56.359582294096455,
+  "source_sha256": "8ce9ea188f5b0578ddbaa97afe51c3e16b4bf2b897969c1f9da1d237fff77b62",
+  "driver_sha256": "c308c6d2a2c28c44346909ffdef109382df104c9b4b5033702d02accf71c9ffb",
+  "elapsed_seconds": 368.0506474190006,
+  "transform": "S=diag(1,...,1,N), D=diag(1/N,...,1/N,1); B=D A S, state=(x,mu)",
+  "scope": "Equivalent-system diagnostic; not an actual benchmark adjoint residual measurement",
+  "balanced_adjoint_identity_error": 5.027089855502709e-13
+}

@@ -1,7 +1,10 @@
 """Factorized static BSE actions with bounded screening right-hand sides."""
 
+from dataclasses import replace
+
 import jax
 import jax.numpy as jnp
+import numpy as np
 from ..solvers import LinearOperator
 from ..solvers.diagnostics import require_converged_derivative
 from ..gw.screened import apply_static_screening, solve_static_screening
@@ -23,7 +26,7 @@ def build_tda_operator(
         raise ValueError("Screening and factors have different auxiliary dimensions")
     if not space.size or block_size < 1:
         raise ValueError("BSE requires nonempty transitions and a positive block_size")
-    oi, va = jnp.asarray(space.occupied), jnp.asarray(space.virtual)
+    oi, va = np.asarray(space.occupied), np.asarray(space.virtual)
     no, nv = len(space.occupied), len(space.virtual)
     loo = l[:, oi[:, None], oi[None, :]]
     lov = l[:, oi[:, None], va[None, :]]
@@ -38,17 +41,22 @@ def build_tda_operator(
             -jnp.einsum("Pi,Pa->ia", jnp.diagonal(loo, axis1=1, axis2=2), screened)
         )
 
+    # Spectral closure conversion lifts inexact leaves, not boolean tracers.
+    # Capture a floating gate; recover the original validity inside each action.
+    screening = replace(screening, valid=screening.valid.astype(jnp.result_type(l, 1.0)))
+
     @jax.checkpoint
     def direct_block(x, virtual_pairs):
+        state = replace(screening, valid=screening.valid != 0)
         # Contract before screening: RHS is (naux,nocc,block,nvec), not
         # (naux,nvir,nvir). Rematerialize these temporaries in reverse mode.
         if no * x.shape[-1] <= nv:
             rhs = jnp.einsum("Pab,jbk->Pjak", virtual_pairs, x)
-            screened = solve_static_screening(screening, rhs).solution
+            screened = solve_static_screening(state, rhs).solution
             return jnp.einsum("Pij,Pjak->iak", loo, screened)
         # Wide Davidson blocks use fewer RHS by screening a bare pair slab.
         # Auxiliary blocking also bounds the subsequent trial-vector workspace.
-        screened = apply_static_screening(screening, virtual_pairs)
+        screened = apply_static_screening(state, virtual_pairs)
         out = jnp.zeros((no, virtual_pairs.shape[1], x.shape[-1]), dtype=x.dtype)
         for start in range(0, l.shape[0], block_size):
             partial = jnp.einsum("Pab,jbk->Pjak", screened[start:start+block_size], x)
@@ -62,7 +70,7 @@ def build_tda_operator(
         for start in range(0, nv, block_size):
             pairs = l[:, va[start : start + block_size, None], va[None, :]]
             y = y.at[:, start : start + block_size, :].add(-direct_block(x, pairs))
-        return require_converged_derivative(y.reshape(space.size, -1), screening.valid)
+        return require_converged_derivative(y.reshape(space.size, -1), screening.valid != 0)
 
     return LinearOperator(
         (space.size, space.size),
@@ -88,26 +96,29 @@ def build_bse_operators(
         qp_energy, mo_factors, space, screening, singlet=singlet, block_size=block_size
     )
     l = jnp.asarray(mo_factors)
-    oi, va = jnp.asarray(space.occupied), jnp.asarray(space.virtual)
+    oi, va = np.asarray(space.occupied), np.asarray(space.virtual)
     no, nv = len(space.occupied), len(space.virtual)
     lov = l[:, oi[:, None], va[None, :]]
     kappa = 2.0 if singlet else 0.0
     diagonal = kappa * jnp.sum(lov**2, axis=0).reshape(-1)
     for start in range(0, space.size, block_size):
-        indices = jnp.arange(start, min(start + block_size, space.size))
+        indices = np.arange(start, min(start + block_size, space.size))
         pairs = l[:, oi[indices // nv], va[indices % nv]]
         screened = apply_static_screening(screening, pairs)
         diagonal = diagonal.at[start : start + block_size].add(
             -jnp.sum(pairs * screened, axis=0)
         )
 
+    screening = replace(screening, valid=screening.valid.astype(jnp.result_type(l, 1.0)))
+
     @jax.checkpoint
     def direct_block(x, occupied_virtual_pairs):
+        state = replace(screening, valid=screening.valid != 0)
         if no * x.shape[-1] <= nv:
             rhs = jnp.einsum("Pib,jbk->Pijk", occupied_virtual_pairs, x)
-            screened = solve_static_screening(screening, rhs).solution
+            screened = solve_static_screening(state, rhs).solution
             return jnp.einsum("Pja,Pijk->iak", lov, screened)
-        screened = apply_static_screening(screening, occupied_virtual_pairs)
+        screened = apply_static_screening(state, occupied_virtual_pairs)
         out = jnp.zeros((occupied_virtual_pairs.shape[1], nv, x.shape[-1]), dtype=x.dtype)
         for start in range(0, l.shape[0], block_size):
             partial = jnp.einsum("Pib,jbk->Pijk", screened[start:start+block_size], x)
@@ -122,7 +133,7 @@ def build_bse_operators(
             y = y.at[start : start + block_size].add(
                 -direct_block(x, lov[:, start : start + block_size])
             )
-        return require_converged_derivative(y.reshape(space.size, -1), screening.valid)
+        return require_converged_derivative(y.reshape(space.size, -1), screening.valid != 0)
 
     b = LinearOperator(
         a.shape,

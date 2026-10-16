@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import importlib
 from dataclasses import dataclass
+from functools import lru_cache, update_wrapper
+from types import FunctionType
 from typing import Any, Literal
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 
 class MissingJAXXCError(ImportError):
@@ -37,6 +40,8 @@ _STRICT_JAX_XC_FUNCTIONALS = {
     "gga_x_wpbeh",
     "gga_c_lyp",
     "gga_c_pbe",
+    "mgga_x_r2scan",
+    "mgga_c_r2scan",
 }
 
 _HybridTerm = tuple[float, str, dict[str, float]]
@@ -180,6 +185,18 @@ def _active_jax_xc_names() -> set[str]:
 
 def jax_xc_functional_info(name: str) -> JAXXCFunctionalInfo:
     canonical = str(name).strip().lower()
+    if canonical == "hyb_gga_xc_wb97x_d":
+        return JAXXCFunctionalInfo(
+            name=canonical,
+            status="wrapped",
+            family="GGA",
+            reason=(
+                "Local omegaB97X-D channel at fixed omega=0.2 bohr^-1; "
+                "B97 coefficient vectors are preserved by a parameter wrapper. "
+                "Energy, potential and kernel are checked against LibXC. "
+                "Exact exchange and CHG dispersion must be supplied separately."
+            ),
+        )
     if canonical in _STRICT_JAX_XC_FUNCTIONALS:
         return JAXXCFunctionalInfo(
             name=canonical,
@@ -258,6 +275,7 @@ def list_jax_xc_functionals(status: JAXXCStatus | None = None) -> tuple[JAXXCFun
         _STRICT_JAX_XC_FUNCTIONALS
         | set(SAFE_JAX_XC_WRAPPED_COMPOSITES)
         | _EXPERIMENTAL_JAX_XC_FUNCTIONALS
+        | {"hyb_gga_xc_wb97x_d"}
         | active_functionals
     )
     infos = tuple(jax_xc_functional_info(name) for name in names)
@@ -280,6 +298,42 @@ def _raise_if_not_allowed(
         )
 
 
+@lru_cache(maxsize=4)
+def _wb97xd_parameter_factory(factory):
+    """Restore B97 coefficient vectors lost by the legacy jax_xc converter.
+
+    In jax_xc 0.0.9, ``get_p`` repeats the first element of every C array.
+    Use the factory's actual scalar arguments and a factored local kernel to
+    avoid overflow in high derivatives of expanded B97 polynomials. As in the
+    PW compatibility layer, the cloned function has private globals; the
+    installed package is never modified.
+    """
+    if not isinstance(factory, FunctionType) or "get_p" not in factory.__globals__:
+        return factory
+    upstream_get_p = factory.__globals__["get_p"]
+
+    def get_p(name, polarized, *values):
+        p = upstream_get_p(name, polarized, *values)
+        if name != "hyb_gga_xc_wb97x_d":
+            return p
+        fields = ("c_x", "c_ss", "c_ab")
+        if len(values) != 18 or not hasattr(p, "params") or not all(
+            hasattr(p.params, field) for field in fields
+        ):
+            raise RuntimeError("Unsupported upstream omegaB97X-D parameter layout")
+        arrays = {field: np.asarray(values[5*i:5*i+5], dtype=np.float64)
+                  for i, field in enumerate(fields)}
+        return p._replace(params=p.params._replace(**arrays))
+
+    from .wb97_local import invoke
+
+    namespace = dict(factory.__globals__, get_p=get_p, invoke=invoke)
+    wrapped = FunctionType(factory.__code__, namespace, factory.__name__,
+                           factory.__defaults__, factory.__closure__)
+    wrapped.__kwdefaults__ = factory.__kwdefaults__
+    return update_wrapper(wrapped, factory)
+
+
 class _JAXXCModule:
     """Proxy an installed jax_xc module and expose GradSCF composites."""
 
@@ -293,6 +347,8 @@ class _JAXXCModule:
         if name == "lda_c_pw":
             from .jax_xc_compat import pw_parameter_factory
             return pw_parameter_factory(getattr(self._module, name))
+        if name == "hyb_gga_xc_wb97x_d":
+            return _wb97xd_parameter_factory(getattr(self._module, name))
         return getattr(self._module, name)
 
     def _hybrid_factory(self, name: str):
@@ -330,6 +386,9 @@ _SafeJAXXCModule = _JAXXCModule
 
 
 def _factory_kwargs(name: str, omega: Any | None) -> dict[str, Any]:
+    if name == "hyb_gga_xc_wb97x_d" and omega is not None:
+        if isinstance(omega, jax.core.Tracer) or float(omega) != 0.2:
+            raise ValueError("omegaB97X-D local channel is validated only at fixed omega=0.2 bohr^-1")
     if name == "gga_x_wpbeh" and omega is not None:
         return {"_omega": omega}
     return {}
@@ -380,6 +439,12 @@ def _evaluate_factory_from_unrestricted_features(
     *,
     family: str,
 ) -> jnp.ndarray:
+    if family == "MGGA":
+        raise NotImplementedError(
+            "Unrestricted MGGA requires explicit spin gradients and tau; use "
+            "eval_xc_energy_density_unrestricted_from_density_gradients. "
+            "The feature-bundle orbital bridge does not preserve sigma_ab."
+        )
     rho_a = jnp.maximum(jnp.asarray(features.rho_a), _DENSITY_FLOOR)
     rho_b = jnp.maximum(jnp.asarray(features.rho_b), _DENSITY_FLOOR)
     sigma_aa = jnp.maximum(jnp.asarray(features.sigma_aa), 0.0)
@@ -432,6 +497,8 @@ def eval_jax_xc_energy_density_from_unrestricted_density_gradients(
     grad_a: Any,
     grad_b: Any,
     *,
+    tau_a: Any | None = None,
+    tau_b: Any | None = None,
     omega: Any | None = None,
     allow_experimental_jax_xc: bool = False,
 ) -> jnp.ndarray:
@@ -439,8 +506,8 @@ def eval_jax_xc_energy_density_from_unrestricted_density_gradients(
 
     info = jax_xc_functional_info(name)
     _raise_if_not_allowed(info, allow_experimental_jax_xc=allow_experimental_jax_xc)
-    if info.family == "MGGA":
-        raise ValueError("Direct unrestricted density-gradient evaluation does not support MGGA.")
+    if info.family == "MGGA" and (tau_a is None or tau_b is None):
+        raise ValueError("MGGA requires explicit orbital-derived tau_a and tau_b.")
     module, _ = load_jax_xc()
     try:
         factory = getattr(module, info.name)
@@ -470,7 +537,15 @@ def eval_jax_xc_energy_density_from_unrestricted_density_gradients(
             dtype=rho_a_eff.dtype,
         )
 
-    epsilon_xc = functional(rho_fn, origin)
+    if info.family == "MGGA":
+        # Synthetic orbital gradients reproduce the supplied positive kinetic
+        # densities. rho_fn retains the full, nonparallel spin gradients.
+        def mo_fn(displacement):
+            slopes = jnp.sqrt(jnp.maximum(2*jnp.asarray([tau_a, tau_b]), 1e-30))
+            return slopes[:, None]*displacement[0]
+        epsilon_xc = functional(rho_fn, origin, mo_fn)
+    else:
+        epsilon_xc = functional(rho_fn, origin)
     return (rho_a_eff + rho_b_eff) * jnp.asarray(
         _coerce_functional_value(epsilon_xc),
         dtype=rho_a_eff.dtype,

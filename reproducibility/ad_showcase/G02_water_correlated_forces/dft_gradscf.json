@@ -1,0 +1,231 @@
+{
+  "symbols": [
+    "O",
+    "H",
+    "H"
+  ],
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.43,
+      1.11
+    ],
+    [
+      0.0,
+      -1.43,
+      1.11
+    ]
+  ],
+  "cart": true,
+  "direction": [
+    [
+      0.15758846320783174,
+      0.06198045963993444,
+      -0.016517628858549408
+    ],
+    [
+      -0.6605161885438985,
+      0.12290501824639227,
+      -0.6056407600883326
+    ],
+    [
+      0.25917820482896053,
+      0.1726007334061846,
+      0.23642991070022032
+    ]
+  ],
+  "records": [
+    {
+      "basis": "6-31g*",
+      "method": "pbe",
+      "energy_hartree": -76.32186174420559,
+      "gradient_hartree_per_bohr": [
+        [
+          7.599690385009116e-16,
+          -5.823575976104337e-16,
+          0.02346375106124441
+        ],
+        [
+          4.706637532656165e-17,
+          -0.012838278303735821,
+          -0.011731875530625966
+        ],
+        [
+          4.0057145607210127e-17,
+          0.012838278303735776,
+          -0.011731875530629111
+        ]
+      ],
+      "cold_seconds": 122.32588409198797,
+      "directional_checks": [
+        {
+          "step_bohr": 0.001,
+          "derivative": 0.004581945958648248,
+          "error": 3.166099465413963e-08
+        },
+        {
+          "step_bohr": 0.0003,
+          "derivative": 0.0045819754745934915,
+          "error": 2.1450494106650675e-09
+        },
+        {
+          "step_bohr": 0.0001,
+          "derivative": 0.0045819689376003225,
+          "error": 8.68204257965799e-09
+        }
+      ],
+      "grid_level": 3,
+      "grid_response": true,
+      "net_force": [
+        -8.470925594346834e-16,
+        6.279698983036042e-16,
+        1.0666814653781387e-14
+      ],
+      "torque": [
+        -4.550179677487165e-15,
+        -9.670710823648668e-17,
+        1.0023198498672679e-17
+      ]
+    },
+    {
+      "basis": "6-31g*",
+      "method": "pbe0",
+      "energy_hartree": -76.32558731174414,
+      "gradient_hartree_per_bohr": [
+        [
+          8.668887658466027e-16,
+          -2.500681552953919e-15,
+          0.008839470932443031
+        ],
+        [
+          1.534642887044747e-17,
+          -0.004847598708781352,
+          -0.004419735466225486
+        ],
+        [
+          2.6307084780755892e-17,
+          0.0048475987087876,
+          -0.004419735466226099
+        ]
+      ],
+      "cold_seconds": 102.52989099701517,
+      "directional_checks": [
+        {
+          "step_bohr": 0.001,
+          "derivative": 0.0017266800824700113,
+          "error": 3.19875593218083e-08
+        },
+        {
+          "step_bohr": 0.0003,
+          "derivative": 0.0017267100105300417,
+          "error": 2.0594992913760407e-09
+        },
+        {
+          "step_bohr": 0.0001,
+          "derivative": 0.0017267126395381638,
+          "error": 5.695088307194895e-10
+        }
+      ],
+      "grid_level": 3,
+      "grid_response": true,
+      "net_force": [
+        -9.08542279497806e-16,
+        -3.747002708109903e-15,
+        8.553921460041636e-15
+      ],
+      "torque": [
+        6.058521739848999e-15,
+        -4.623540015283574e-17,
+        -1.5673737951741046e-17
+      ]
+    },
+    {
+      "basis": "6-31g*",
+      "method": "b3lyp",
+      "energy_hartree": -76.40873955109315,
+      "gradient_hartree_per_bohr": [
+        [
+          -3.3690837741451217e-15,
+          3.0465748586410877e-15,
+          0.013510178242842908
+        ],
+        [
+          1.6604891515057063e-15,
+          -0.007870197874683045,
+          -0.006755089121438352
+        ],
+        [
+          1.6457747175540656e-15,
+          0.007870197874681193,
+          -0.006755089121443602
+        ]
+      ],
+      "cold_seconds": 151.70524113898864,
+      "directional_checks": [
+        {
+          "step_bohr": 0.001,
+          "derivative": 0.0026619786197557005,
+          "error": 3.257426369959737e-08
+        },
+        {
+          "step_bohr": 0.0003,
+          "derivative": 0.002662008734925318,
+          "error": 2.4590940820093388e-09
+        },
+        {
+          "step_bohr": 0.0001,
+          "derivative": 0.002662014537690993,
+          "error": 3.343671593075692e-09
+        }
+      ],
+      "grid_level": 3,
+      "grid_response": true,
+      "net_force": [
+        6.281990508534974e-17,
+        -1.1934897514720433e-15,
+        3.904602335902396e-14
+      ],
+      "torque": [
+        -9.565265246536114e-15,
+        -3.669952894656347e-15,
+        2.104164055084633e-17
+      ]
+    }
+  ],
+  "grid_level": 3,
+  "complete": true,
+  "requested_methods": [
+    "pbe",
+    "pbe0",
+    "b3lyp"
+  ],
+  "b3lyp_convention": "VWN-RPA (Gaussian B3LYP)",
+  "source_input": "reproducibility/ad_showcase/G02_water_correlated_forces/gradscf.json",
+  "dtype": "float64",
+  "integral_backend": "native",
+  "grid_ao_backend": "jax",
+  "scf_energy_tolerance": 1e-12,
+  "scf_density_tolerance": 1e-11,
+  "scf_orbital_tolerance": 1e-10,
+  "orbital_gradient_tolerance": 1e-09,
+  "implicit_tolerance": 1e-10,
+  "jax_version": "0.10.0",
+  "numpy_version": "2.4.4",
+  "python_version": "3.11.15",
+  "hostname": "c20",
+  "devices": [
+    "cpu:0"
+  ],
+  "runtime_source_hashes": {
+    "src/gradscf_tools/molecular_response.py": "e91d9b2b935ea84ba1b26667316e49453489825b54d78ded59fd0f631b1de9ce",
+    "src/gradscf/scf/orbital_optimization.py": "0325ee6dcaf5e6d19c3de95f344dd4a92d485412308442bfd3e0606bc98998d3",
+    "src/gradscf/scf/uks.py": "37ffbd81c9852b2364b786701aabfd8d10d42a2a2413e442aca4f8322e813263",
+    "src/gradscf/scf/rsh.py": "a1d4c968bd3e7f2ce07b659a0bae8d6dafcaa3b9f2fef29f15fbfbfc1a826461",
+    "src/gradscf/integrals/grids/ao.py": "ad6a1b7ed5ec776b4323d541de97d9d2bd7ddb1acacf208751293f9e8d19bad6"
+  }
+}

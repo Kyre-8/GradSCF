@@ -120,6 +120,40 @@ Facades reject stale inputs and properties after failed reruns. Explicit functio
 calls under JIT/AD assume fixed electron counts, orbital dimension and string
 ordering; nuclear derivatives also require the orbital/integral backend response.
 
+### Real wavefunction overlaps
+
+`fci.overlap(bra, ket, space, orbital_overlap=S_lr)` evaluates a many-electron
+overlap using the shared alpha/beta determinant strings and orbital-overlap
+minors. `S_lr[p,q] = <phi_left[p]|phi_right[q]>`; it need not be symmetric or
+invertible. Both coefficient tensors and `S_lr` participate in differentiation.
+The caller supplies one shared `FCISpace`, real coefficients, and frames that
+are orthonormal at their own geometries. The function does not normalize
+states or choose their phases.
+
+For moving molecules, form `S_lr = C_left.T @ S_AO_cross @ C_right` and retain
+all three dependencies in the physical wavefunction overlap. Differentiating
+only the CI coefficients omits the orbital/AO contribution to a lab-frame
+nonadiabatic coupling. Coefficient response still requires valid isolated
+eigenpairs; at an exact crossing use a complete isolated subspace instead.
+
+The initial cross-frame interface explicitly limits each spin to at most
+three occupied orbitals. Its polynomial determinant minors have tested first
+derivatives at singular matrices. Larger occupied minors raise
+`NotImplementedError`; no inverse-based singular derivative or silent zero is
+used. `orbital_overlap=None` means the same orbital frame and uses a direct
+coefficient inner product without this occupancy limit. A supplied numerical
+identity remains a differentiable orbital map and therefore retains the guard.
+The workspace limit is checked before constructing string-pair minors; it
+bounds dominant arrays, not total process RSS. Complex overlaps, different
+left/right spaces and production TDDFT/EOM derivative couplings are not covered.
+
+The [H3 example](../../../examples/fci/h3_nonadiabatic_coupling.py) and its
+[independent PySCF check](../../../examples/fci/compare_h3_nac_pyscf.py) exercise
+the complete wavefunction derivative and the exact-degeneracy boundary.
+Nested-JIT first-response regressions also keep FCI's physical-input validity
+guard explicit in the operator closure, preserving the forward NaN and final
+boolean/derivative rejection policy for invalid integrals.
+
 ## Resources and current scope
 
 Defaults: 1,000,000 determinants, 4,000,000 orbital-pair/string-map entries, and

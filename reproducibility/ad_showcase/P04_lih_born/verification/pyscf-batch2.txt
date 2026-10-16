@@ -1,0 +1,37 @@
+Checkpoint reused reference
+Checkpoint reused atom0_axis0_step0.0003_plus
+Checkpoint reused atom0_axis0_step0.0003_minus
+PySCF Born 0 0 0.0003 [0.9966941707344469, -4.629159220833293e-11, -4.629159220833293e-11] error 2.7577676688664398e-08
+Checkpoint reused atom0_axis0_step0.0001_plus
+Checkpoint reused atom0_axis0_step0.0001_minus
+PySCF Born 0 0 0.0001 [0.9966941710462343, -4.4930074790440776e-11, -4.4930074790440776e-11] error 2.7576315171246507e-08
+Checkpoint reused atom0_axis1_step0.0003_plus
+Checkpoint reused atom0_axis1_step0.0003_minus
+PySCF Born 0 1 0.0003 [-5.0376144462009364e-11, 0.9966941707330853, -5.1737661879901506e-11] error 2.7583131676674854e-08
+Checkpoint reused atom0_axis1_step0.0001_plus
+Checkpoint reused atom0_axis1_step0.0001_minus
+PySCF Born 0 1 0.0001 [-6.126828380514652e-11, 0.996694171029896, -5.309917929779364e-11] error 2.759266261517159e-08
+Checkpoint reused atom0_axis2_step0.0003_plus
+Checkpoint reused atom0_axis2_step0.0003_minus
+PySCF Born 0 2 0.0003 [-5.1737661879901506e-11, -5.1737661879901506e-11, 0.9966941707317237] error 2.758312157765391e-08
+Checkpoint reused atom0_axis2_step0.0001_plus
+Checkpoint reused atom0_axis2_step0.0001_minus
+PySCF Born 0 2 0.0001 [-4.901462704411721e-11, -5.309917929779364e-11, 0.996694171029896] error 2.75844830950718e-08
+Checkpoint reused atom1_axis0_step0.0003_plus
+Checkpoint reused atom1_axis0_step0.0003_minus
+PySCF Born 1 0 0.0003 [-0.9967546196407316, 6.94373883124994e-11, 6.535283605882295e-11] error 2.7502007476862684e-08
+Checkpoint reused atom1_axis0_step0.0001_plus
+Checkpoint reused atom1_axis0_step0.0001_minus
+PySCF Born 1 0 0.0001 [-0.9967546206428084, 9.394470183455798e-11, 9.802925408823442e-11] error 2.7530599067695996e-08
+Checkpoint reused atom1_axis1_step0.0003_plus
+Endpoint completed atom1_axis1_step0.0003_minus seconds 116.13938025801326
+PySCF Born 1 1 0.0003 [7.216042314828368e-11, -0.9967546196380087, 8.032952765563656e-11] error 2.751289978461164e-08
+Endpoint completed atom1_axis1_step0.0001_plus seconds 112.22231425700011
+Endpoint completed atom1_axis1_step0.0001_minus seconds 101.73992710499442
+PySCF Born 1 1 0.0001 [7.352194056617581e-11, -0.9967546206550622, 5.718373155147008e-11] error 2.7506091895531927e-08
+Endpoint completed atom1_axis2_step0.0003_plus seconds 99.47256824499345
+Endpoint completed atom1_axis2_step0.0003_minus seconds 124.81211857398739
+PySCF Born 1 2 0.0003 [7.079890573039154e-11, 7.89680102377444e-11, -0.9967546196380087] error 2.7511537339876235e-08
+Endpoint completed atom1_axis2_step0.0001_plus seconds 129.04617103101918
+Endpoint completed atom1_axis2_step0.0001_minus seconds 127.42235396098113
+PySCF Born 1 2 0.0001 [6.943738831249939e-11, 4.901462704411721e-11, -0.9967546206632312] error 2.750200671795099e-08

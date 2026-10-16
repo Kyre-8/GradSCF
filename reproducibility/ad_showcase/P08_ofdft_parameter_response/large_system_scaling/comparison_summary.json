@@ -1,0 +1,76 @@
+{
+  "same_discrete_model": {
+    "1": {
+      "energy_error_hartree_per_atom": 2.042810365310288e-14,
+      "density_relative_l2_error": 7.150751932174063e-08
+    },
+    "3": {
+      "energy_error_hartree_per_atom": 1.3158198810372225e-15,
+      "density_relative_l2_error": 6.239247164594021e-08
+    }
+  },
+  "finite_ks_comparison": [
+    {
+      "kmesh": [
+        4,
+        4,
+        4
+      ],
+      "basis_level": 3,
+      "sigma_hartree": 0.005,
+      "wgc_minus_ks_extrapolated_energy_hartree": -0.012733148430699615,
+      "wgc_ks_density_relative_l2": 0.014588123258007332,
+      "ks_density_relative_increment": null
+    },
+    {
+      "kmesh": [
+        6,
+        6,
+        6
+      ],
+      "basis_level": 3,
+      "sigma_hartree": 0.005,
+      "wgc_minus_ks_extrapolated_energy_hartree": 0.0026548537792843163,
+      "wgc_ks_density_relative_l2": 0.007424926478913798,
+      "ks_density_relative_increment": 0.015471993383575721
+    },
+    {
+      "kmesh": [
+        8,
+        8,
+        8
+      ],
+      "basis_level": 3,
+      "sigma_hartree": 0.005,
+      "wgc_minus_ks_extrapolated_energy_hartree": -0.0011365729054650942,
+      "wgc_ks_density_relative_l2": 0.00651014129967282,
+      "ks_density_relative_increment": 0.004464711223053287
+    },
+    {
+      "kmesh": [
+        10,
+        10,
+        10
+      ],
+      "basis_level": 3,
+      "sigma_hartree": 0.005,
+      "wgc_minus_ks_extrapolated_energy_hartree": -0.0005937024808235769,
+      "wgc_ks_density_relative_l2": 0.00706428104886191,
+      "ks_density_relative_increment": 0.005746485018955098
+    },
+    {
+      "kmesh": [
+        12,
+        12,
+        12
+      ],
+      "basis_level": 3,
+      "sigma_hartree": 0.005,
+      "wgc_minus_ks_extrapolated_energy_hartree": -0.00024067147310669057,
+      "wgc_ks_density_relative_l2": 0.006494461453526862,
+      "ks_density_relative_increment": 0.003988398735584031
+    }
+  ],
+  "physical_scope": "KS basis, k sampling and smearing are not jointly converged; no pure KEDF error claim",
+  "scaling_scope": "Measured finite size range; setup has explicit atom-pair and grid-atom arrays; no near-linear claim"
+}

@@ -1,0 +1,3 @@
+Independent gradient FD 3.0e-04 Bohr: AD Hessian error 1.044e-07 Eh/Bohr^2
+Independent gradient FD 1.0e-04 Bohr: AD Hessian error 1.166e-08 Eh/Bohr^2
+Independent full Hessian/frequency gates passed in 58.23 s

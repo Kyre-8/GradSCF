@@ -1,0 +1,34 @@
+Reference -8.007629338162591 gap 0.14272751247194976
+E1016 08:22:36.077409  511849 slow_operation_alarm.cc:73] Constant folding an instruction is taking > 1s:
+
+  %gather.1650 = c128[8,1,357911,3]{3,2,1,0} gather(%constant.4769, %constant.1290), offset_dims={1,2,3}, collapsed_slice_dims={}, start_index_map={0}, index_vector_dim=1, slice_sizes={1,357911,3}, metadata={op_name="jit(<lambda>)/jvp(jvp())/gather" stack_frame_id=2192}
+
+This isn't necessarily a bug; constant-folding is inherently a trade-off between compilation time and speed at runtime. XLA has some guards that attempt to keep constant folding from taking too long, but fundamentally you'll always be able to come up with an input program that takes a long time.
+
+If you'd like to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+E1016 08:22:36.119918  511846 slow_operation_alarm.cc:140] The operation took 1.042629605s
+Constant folding an instruction is taking > 1s:
+
+  %gather.1650 = c128[8,1,357911,3]{3,2,1,0} gather(%constant.4769, %constant.1290), offset_dims={1,2,3}, collapsed_slice_dims={}, start_index_map={0}, index_vector_dim=1, slice_sizes={1,357911,3}, metadata={op_name="jit(<lambda>)/jvp(jvp())/gather" stack_frame_id=2192}
+
+This isn't necessarily a bug; constant-folding is inherently a trade-off between compilation time and speed at runtime. XLA has some guards that attempt to keep constant folding from taking too long, but fundamentally you'll always be able to come up with an input program that takes a long time.
+
+If you'd like to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+Field response {'axis': 0, 'chi_column': [0.04487575830856882, 0.00023726265185060175, 0.00023726265185058771], 'residual': 1.2547346312200907e-13, 'converged': True, 'seconds': 145.22249960398767}
+Field response {'axis': 1, 'chi_column': [0.00023726265185059387, 0.044875758308568714, 0.00023726265185059964], 'residual': 1.5439336219535596e-13, 'converged': True, 'seconds': 6.1478570839972235}
+Field response {'axis': 2, 'chi_column': [0.00023726265185058923, 0.00023726265185061325, 0.044875758308568665], 'residual': 2.379693185332223e-13, 'converged': True, 'seconds': 6.480579950002721}
+Completed 206.19077254101285 s; peak RSS 18960976 KiB
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "-c",
+    "from lih_born_charges import SETTINGS; SETTINGS['mesh']=[71]*3; from lih_dielectric import run; run('fft71')"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 18960976,
+  "budget_kib": 67108864,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true
+}

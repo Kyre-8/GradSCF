@@ -1,0 +1,9 @@
+{
+  "source_job": "jobs/pbe-szv-k8-fft31-budgeted",
+  "outer_exit": 1,
+  "reason": "StopIteration after scientific result completion when child status no longer contained VmHWM",
+  "files": {
+    "pbe_szv_k8_fft31.json": "e30537949253c5e8b71fa470d8f098137e444ecc2ee64268ebce2d2d72b975fa",
+    "pbe_szv_k8_fft31_state.npz": "0d6dd96b8c059978644ea03be5fc7da5246ab7b5148954ba26614337377c2700"
+  }
+}

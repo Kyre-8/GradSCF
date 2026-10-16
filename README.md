@@ -249,7 +249,7 @@ documented operators; packed production, auxiliary integrals and direct J/K
 parameter derivatives have different coverage. The generic
 `mf.nuc_grad_method().kernel()` remains disabled. See
 [native contracts](src/gradscf/integrals/_native/README.md) and the
-[force-supervision example](examples/train_neural_scf_forces.py).
+[force-supervision example](examples/training/train_neural_scf_forces.py).
 
 ## Learning with GradSCF
 
@@ -371,13 +371,13 @@ Storage bounds and compile estimates are distinct from measured peak memory.
 | Correlated ground states | [MP2/MP3](examples/mp/molecular.py), [MP2–MP6 series](examples/mp/taylor_series.py), [water MP2–MP8 comparison](examples/mp/compare_water_pyscf.py), [CI](examples/ci/restricted_ci.py), [CC](examples/cc/restricted_ground.py), [open-shell properties](examples/cc/open_shell_properties.py) |
 | FCI/active spaces | [Ground state](examples/fci/ground_state.py), [core/active selection](examples/fci/active_space.py) |
 | EOM excitation/ionization/attachment | [EE/IP/EA](examples/cc/eom_ccsd.py), [response](examples/cc/eom_response.py) |
-| GW/BSE spectra | [scGW](examples/scgw_matsubara_h2.py), [implicit GW](examples/gw/implicit_response.py), [molecular BSE](examples/bse/molecular_spectrum.py), [unrestricted BSE](examples/bse/oh_unrestricted.py) |
+| GW/BSE spectra | [scGW](examples/gw/scgw_matsubara_h2.py), [implicit GW](examples/gw/implicit_response.py), [molecular BSE](examples/bse/molecular_spectrum.py), [unrestricted BSE](examples/bse/oh_unrestricted.py) |
 | Vibrational spectral effects | [Fixed-phonon scGW](examples/gw/fixed_phonon_scgw.py), [water BSE–vibration](examples/bse/water_ep_coupling.py) |
-| Orbital localization/animation | [Ethylene Boys](examples/ethylene_boys.py), [BODIPY](examples/bodipy_boys.md), [rotation animation](examples/animate_bodipy_boys_rotation.py) |
+| Orbital localization/animation | [Ethylene Boys](examples/localization/ethylene_boys.py), [BODIPY](examples/localization/bodipy_boys.md), [rotation animation](examples/localization/animate_bodipy_boys_rotation.py) |
 | Wavefunction/basis derivatives | [CIS probes](examples/ci/cis_h2o_gradients.py), [implicit HF → MP](examples/mp/implicit_gradient.py), [counterpoise](examples/basis/README.md) |
 | External-model training | [External functional](examples/training/external_functional.py), [density-matrix MLP](examples/training/density_matrix_mlp.py), [H2/FCI modes](examples/training/h2_fci_training.py) |
 | OFDFT | [Molecular](examples/ofdft/molecular.py), [periodic](examples/ofdft/periodic.py), [DFTpy comparison](examples/ofdft/compare_dftpy.py), [WGC scope/results](examples/ofdft/WGC_REPRODUCTION.md) |
-| Periodic methods/solvers | [Bands](examples/periodic_h2.py), [shared solvers](examples/shared_solvers.py), [degenerate subspace](examples/degenerate_subspace.py) |
+| Periodic methods/solvers | [Bands](examples/pbc/periodic_h2.py), [shared solvers](examples/solvers/shared_solvers.py), [degenerate subspace](examples/solvers/degenerate_subspace.py) |
 
 Comparison scripts and literature-derived illustrations are identified in
 their headers/guides. Follow instructions for optional dependencies, cached

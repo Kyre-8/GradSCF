@@ -1,0 +1,347 @@
+{
+  "complete": true,
+  "model": "Frozen RHF/3-21G vertices and three-state TDA-BSE; one-phonon Fan or Fan+DW",
+  "temperatures_kelvin": [
+    0.0,
+    300.0,
+    600.0,
+    1200.0
+  ],
+  "widths_ev": [
+    0.01,
+    0.003
+  ],
+  "bose_occupations": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.00017883113553952476,
+      1.1466200492497268e-08,
+      6.045779004577896e-09
+    ],
+    [
+      0.01355280272645309,
+      0.00010709181278179106,
+      7.776065362400205e-05
+    ],
+    [
+      0.1307555381390502,
+      0.01045616333819681,
+      0.008896303636637357
+    ]
+  ],
+  "zero_temperature_max_error_mb": 0.0,
+  "zero_coupling_max_error_mb": 1.1368683772161603e-13,
+  "temperature_derivative_at_kelvin": 600.0,
+  "derivative_units": "Mb/K",
+  "temperature_fd_checks": [
+    {
+      "step_kelvin": 10.0,
+      "max_error_mb_per_kelvin": 0.0016363618946361735,
+      "max_scaled_error": 1005.9594547638046
+    },
+    {
+      "step_kelvin": 3.0,
+      "max_error_mb_per_kelvin": 0.00014745852191042075,
+      "max_scaled_error": 90.76185727051693
+    },
+    {
+      "step_kelvin": 1.0,
+      "max_error_mb_per_kelvin": 1.6386094232684334e-05,
+      "max_scaled_error": 10.08685606096464
+    },
+    {
+      "step_kelvin": 0.3,
+      "max_error_mb_per_kelvin": 1.4747617332611096e-06,
+      "max_scaled_error": 0.9078391404902018
+    },
+    {
+      "step_kelvin": 0.1,
+      "max_error_mb_per_kelvin": 1.6384150755555105e-07,
+      "max_scaled_error": 0.10086965689822439
+    },
+    {
+      "step_kelvin": 0.03,
+      "max_error_mb_per_kelvin": 1.4750835886090385e-08,
+      "max_scaled_error": 0.009078180138677427
+    }
+  ],
+  "frequency_grid_checks": [
+    {
+      "temperature_kelvin": 0.0,
+      "model": "fan",
+      "eta_ev": 0.01,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.841846514422087,
+        10.84184707688615,
+        10.841847076886104
+      ],
+      "last_relative_change": 4.259908620448041e-15
+    },
+    {
+      "temperature_kelvin": 0.0,
+      "model": "fan",
+      "eta_ev": 0.003,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.816155459333395,
+        10.849811236714146,
+        10.84977214959793
+      ],
+      "last_relative_change": 3.602574844592052e-06
+    },
+    {
+      "temperature_kelvin": 0.0,
+      "model": "fan_dw",
+      "eta_ev": 0.01,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.843394518078693,
+        10.84339440419302,
+        10.843394404192836
+      ],
+      "last_relative_change": 1.703720296535482e-14
+    },
+    {
+      "temperature_kelvin": 0.0,
+      "model": "fan_dw",
+      "eta_ev": 0.003,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.856481757660188,
+        10.851870981832011,
+        10.851323779221978
+      ],
+      "last_relative_change": 5.042726778465548e-05
+    },
+    {
+      "temperature_kelvin": 300.0,
+      "model": "fan",
+      "eta_ev": 0.01,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.841846528235106,
+        10.84184706529669,
+        10.84184706529663
+      ],
+      "last_relative_change": 5.570649740386842e-15
+    },
+    {
+      "temperature_kelvin": 300.0,
+      "model": "fan",
+      "eta_ev": 0.003,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.817498277935234,
+        10.849869288517471,
+        10.849772154553401
+      ],
+      "last_relative_change": 8.952627086231498e-06
+    },
+    {
+      "temperature_kelvin": 300.0,
+      "model": "fan_dw",
+      "eta_ev": 0.01,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.843402567030523,
+        10.843402381830455,
+        10.843402381830277
+      ],
+      "last_relative_change": 1.6381913875821844e-14
+    },
+    {
+      "temperature_kelvin": 300.0,
+      "model": "fan_dw",
+      "eta_ev": 0.003,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.860799807271059,
+        10.851858864720448,
+        10.85133178303882
+      ],
+      "last_relative_change": 4.8572994740827255e-05
+    },
+    {
+      "temperature_kelvin": 600.0,
+      "model": "fan",
+      "eta_ev": 0.01,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.841846491621183,
+        10.841846177783632,
+        10.841846177783633
+      ],
+      "last_relative_change": 1.6384265283529284e-16
+    },
+    {
+      "temperature_kelvin": 600.0,
+      "model": "fan",
+      "eta_ev": 0.003,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.868602072068065,
+        10.84973277829307,
+        10.849771901565717
+      ],
+      "last_relative_change": 3.605907386936807e-06
+    },
+    {
+      "temperature_kelvin": 600.0,
+      "model": "fan_dw",
+      "eta_ev": 0.01,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.84399622675361,
+        10.84399547935024,
+        10.84399547935028
+      ],
+      "last_relative_change": 3.603823935672369e-15
+    },
+    {
+      "temperature_kelvin": 600.0,
+      "model": "fan_dw",
+      "eta_ev": 0.003,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.896975220969221,
+        10.851767041470847,
+        10.851926404955512
+      ],
+      "last_relative_change": 1.468527141797024e-05
+    },
+    {
+      "temperature_kelvin": 1200.0,
+      "model": "fan",
+      "eta_ev": 0.01,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.84183621742592,
+        10.84183654783714,
+        10.841836547837048
+      ],
+      "last_relative_change": 8.519825514916198e-15
+    },
+    {
+      "temperature_kelvin": 1200.0,
+      "model": "fan",
+      "eta_ev": 0.003,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.829253251832576,
+        10.850033722178441,
+        10.849768988432071
+      ],
+      "last_relative_change": 2.439994313723952e-05
+    },
+    {
+      "temperature_kelvin": 1200.0,
+      "model": "fan_dw",
+      "eta_ev": 0.01,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.848840715299913,
+        10.848840586918403,
+        10.848840586918275
+      ],
+      "last_relative_change": 1.1789065514617235e-14
+    },
+    {
+      "temperature_kelvin": 1200.0,
+      "model": "fan_dw",
+      "eta_ev": 0.003,
+      "samples": [
+        7001,
+        14001,
+        28001
+      ],
+      "integrated_cross_section_mb_ev": [
+        10.863332381192151,
+        10.857156765547813,
+        10.856785638232186
+      ],
+      "last_relative_change": 3.418390378094893e-05
+    }
+  ],
+  "elapsed_seconds": 21.228290649014525,
+  "timings_seconds": {
+    "cold_forward": 1.2424947510007769,
+    "warm_forward": 0.41836809998494573,
+    "cold_derivative": 1.4722787459904794,
+    "warm_derivative": 0.7721253320050891
+  },
+  "input_sha256": {
+    "reproducibility/gw_bse/water_bse_phonons/inputs.npz": "25ab27c7d3fd6bd799003b1e354ba2630b30d8745176a108d19eb767881ebb62",
+    "reproducibility/gw_bse/water_bse_phonons/results.json": "2c43426e80638866bfa1c76315ae2e5daf4d76f6fdd04b02adac7d5afebfeced"
+  },
+  "script_sha256": "b86c0e95c2c6e734b0a4d20d1af64f68590c9050a0857474816e254f07952089",
+  "hostname": "c20",
+  "jax": "0.10.0",
+  "backend": "cpu",
+  "dtype": "float64",
+  "scope": "Temperature changes only the fixed Bose bath. No electronic thermal SCF, mode relaxation, thermal multiphonon FC, full GW/BSE geometry response or experimental lifetime."
+}

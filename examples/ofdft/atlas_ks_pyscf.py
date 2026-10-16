@@ -19,6 +19,7 @@ Gaussian directions with overlap eigenvalues below 1e-7 are removed explicitly.
 """
 import json
 import platform
+from contextlib import nullcontext
 from pathlib import Path
 from time import perf_counter
 
@@ -30,6 +31,7 @@ from scipy.special import expit, xlogy
 import pyscf
 from pyscf import lib
 from pyscf.scf.addons import remove_linear_dep_
+from pyscf.scf import hf as molecular_hf
 from pyscf.gto import CHARGE_OF
 from pyscf.pbc import dft, gto, scf
 
@@ -121,13 +123,23 @@ def calculate(symbol, spacing=.25, kmesh=(2, 2, 2), basis_level=1, sigma=.01,
     # PySCF's default KRHF smearing rounds odd total electron counts upward.
     # The explicit N/2 occupation solve also makes Gamma-only Al valid.
     mf.get_occ = get_occ
-    remove_linear_dep_(mf, threshold=1e-7, lindep=1e-7)
     mf.conv_tol = 1e-9
     mf.conv_tol_grad = 1e-6
     mf.max_cycle = max_cycle
-    energies, coefficients = mf.eig(hcore, overlap)
-    dm0 = mf.make_rdm1(coefficients, mf.get_occ(energies))
-    mf.kernel(dm0=dm0)
+    modern_overlap = hasattr(mf, 'check_linear_dependency')
+    context = (lib.temporary_env(molecular_hf, remove_overlap_zero_eigenvalue=True,
+                               overlap_zero_eigenvalue_threshold=1e-7)
+               if modern_overlap else nullcontext())
+    with context:
+        if modern_overlap:
+            # New PySCF pads k-dependent retained ranks only on its x= path.
+            orthogonalizers = mf.check_linear_dependency(overlap)
+            energies, coefficients = mf.eig(hcore, overlap, x=orthogonalizers)
+        else:
+            remove_linear_dep_(mf, threshold=1e-7, lindep=1e-7)
+            energies, coefficients = mf.eig(hcore, overlap)
+        dm0 = mf.make_rdm1(coefficients, mf.get_occ(energies))
+        mf.kernel(dm0=dm0)
     if not mf.converged:
         raise RuntimeError('KS did not reach the requested SCF tolerances.')
     dm = np.asarray(mf.make_rdm1())

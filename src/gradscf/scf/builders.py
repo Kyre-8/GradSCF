@@ -21,6 +21,7 @@ from gradscf.scf.inputs.assembly import build_rks_integral_inputs, build_uks_int
 from .molecules import QuadratureGrid, RestrictedMolecule, UnrestrictedMolecule
 from .rks import RKSConfig, run_rks_from_integrals
 from .uks import UKSConfig, run_uks_from_integrals
+from .rsh import local_xc_spec, rsh_preset
 
 
 def _host_array(value: Any, dtype: Any | None = None) -> np.ndarray:
@@ -117,12 +118,14 @@ def _build_restricted_reference(
         raise ValueError('A cached SCF result requires the inputs from the same calculation.')
 
     xc_spec_resolved = str(xc_spec)
-    parse_xc(xc_spec_resolved)
+    parse_xc(local_xc_spec(xc_spec_resolved))
     cfg = RKSConfig(xc_spec=xc_spec_resolved) if rks_config is None else rks_config
     if cfg.xc_spec != xc_spec_resolved:
         cfg = replace(cfg, xc_spec=xc_spec_resolved)
 
-    exact_exchange_fraction = float(hybrid_coeff(xc_spec_resolved))
+    rsh = rsh_preset(xc_spec_resolved)
+    exact_exchange_fraction = (rsh.default_sr_hf_fraction if rsh is not None
+                               else float(hybrid_coeff(xc_spec_resolved)))
     if scf_inputs is None:
         scf_inputs = build_rks_integral_inputs(
             atom=atom,
@@ -291,6 +294,10 @@ def _build_restricted_reference(
         eri_pair_matrix=reference_eri_pair_matrix,
         scf_converged=bool(rks.converged),
         scf_cycles=int(rks.cycles),
+        eri_lr=getattr(scf_inputs, "eri_lr", None),
+        dispersion_energy=getattr(scf_inputs, "dispersion_energy", None),
+        range_separated_coefficients=getattr(rks, "range_separated_coefficients", None),
+        xc_density_floor=cfg.density_floor,
     )
 
 
@@ -435,7 +442,7 @@ def _build_unrestricted_reference(
     """Build an unrestricted strict-JAX UKS reference directly from molecule specs."""
 
     xc_spec_resolved = str(xc_spec)
-    parse_xc(xc_spec_resolved)
+    parse_xc(local_xc_spec(xc_spec_resolved))
     cfg = UKSConfig(xc_spec=xc_spec_resolved) if uks_config is None else uks_config
     if cfg.xc_spec != xc_spec_resolved:
         cfg = replace(cfg, xc_spec=xc_spec_resolved)
@@ -566,6 +573,9 @@ def _build_unrestricted_reference(
         df_factors=scf_inputs.df_factors,
         scf_converged=bool(uks.converged) if not uks_is_traceable else None,
         scf_cycles=int(uks.cycles) if not uks_is_traceable else None,
+        eri_lr=getattr(scf_inputs, "eri_lr", None),
+        dispersion_energy=getattr(scf_inputs, "dispersion_energy", None),
+        range_separated_coefficients=getattr(uks, "range_separated_coefficients", None),
     )
 
 

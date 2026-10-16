@@ -4,12 +4,17 @@ import jax.numpy as jnp
 import numpy as np
 from ._kpoint import energy_and_fock
 from .scf import validate_reference as _validate_reference
+from ..dft.libxc_jax.jax_libxc import hybrid_coeff
 from ..solvers.eigen.davidson import _davidson_lowest_symmetric
 from ..solvers.eigen.rpa import _davidson_lowest_tdhf, solve_dense_rpa
 
 
 def response_operators(mf,*,singlet=True):
     _validate_reference(mf)
+    # Removing the Ewald term shifts occupied energies only. Spherical
+    # truncation changes the entire kernel and cannot use that construction.
+    if mf.exxdiv == 'vcut_sph' and hybrid_coeff(mf.xc) != 0:
+        raise NotImplementedError('Periodic TD response does not support vcut_sph HF/hybrid references.')
     inputs=mf.inputs;result=mf.result
     coeff=result.mo_coeff_spin.astype(complex);density=result.density_spin.astype(complex)
     nk=coeff.shape[1];n=coeff.shape[-1]

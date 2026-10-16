@@ -10,7 +10,7 @@ import numpy as np
 import jax.numpy as jnp
 import pytest
 
-from gradscf.gw.pbc import KRGW
+from gradscf.gw.pbc import KRGW, KUGW
 from gradscf.pbc import gto, scf
 
 _MESH = (17, 17, 17)
@@ -34,6 +34,18 @@ def _h2_gamma_mf():
     mf = scf.RHF(cell).run()
     assert mf.converged
     return mf
+
+
+@pytest.mark.parametrize('unrestricted', [False, True])
+def test_gw_rejects_mismatched_reference_exchange(unrestricted):
+    cell = gto.M(atom=_ATOM, a=np.eye(3)*6., unit='Bohr',
+        basis='gth-szv', pseudo='gth-pade', mesh=(9,)*3)
+    mean_field = scf.UHF if unrestricted else scf.RHF
+    mf = mean_field(cell, exxdiv='vcut_sph').run()
+    assert mf.converged
+    driver = KUGW if unrestricted else KRGW
+    with pytest.raises(NotImplementedError, match='Ewald exchange'):
+        driver(mf, nw=2).run()
 
 
 def test_krgw_gamma_hf_start_smoke():

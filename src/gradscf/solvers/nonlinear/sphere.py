@@ -44,14 +44,23 @@ def _normalize(x):
 
 
 @partial(jax.jit, static_argnames=('energy', 'config'))
-def minimize_sphere(energy, initial, args, *, config=SphereConfig()):
+def minimize_sphere(energy, initial, args, *, config=SphereConfig(), energy_scale=1.):
     """Minimize energy(x,args) with x.T@x=1; scans also permit unrolled AD.
 
     A zero/nonfinite initial vector is invalid and yields nonfinite results.
     Convergence uses the tangential gradient, not an energy-change shortcut.
+    A dynamic positive scalar energy_scale normalizes the numerical objective;
+    tolerance and returned energy/residual retain the original energy units.
+    Invalid scales produce nonfinite energy/residual and converged=False under JIT.
     """
-    objective = jax.value_and_grad(lambda x: energy(_normalize(x), args))
     x = _normalize(jnp.asarray(initial))
+    scale = jnp.asarray(energy_scale, dtype=x.dtype)
+    if scale.ndim != 0:
+        raise ValueError('energy_scale must be a scalar.')
+    scale = jnp.where(jnp.isfinite(scale) & (scale > 0), scale, jnp.nan)
+    tolerance = config.tolerance/scale
+    scaled_energy = lambda y: energy(y, args)/scale
+    objective = jax.value_and_grad(lambda y: scaled_energy(_normalize(y)))
     value, gradient = objective(x)
     transform = optax.scale_by_lbfgs(memory_size=config.memory, scale_init_precond=False)
     state = _safe_lbfgs_state(transform, x, gradient)
@@ -70,11 +79,11 @@ def minimize_sphere(energy, initial, args, *, config=SphereConfig()):
             trial, _, _, accepted, _ = _backtrack(objective, x, value, grad, direction)
             trial = _normalize(trial)
             new_value, new_grad = objective(trial)
-            active = accepted & (jnp.linalg.norm(new_grad) > config.tolerance)
+            active = accepted & (jnp.linalg.norm(new_grad) > tolerance)
             return trial, new_value, new_grad, state, count+1, active
         return jax.lax.cond(carry[-1], update, lambda c: c, carry), None
 
-    active = jnp.isfinite(value) & (jnp.linalg.norm(gradient) > config.tolerance)
+    active = jnp.isfinite(value) & (jnp.linalg.norm(gradient) > tolerance)
     (x, value, gradient, _, count, _), _ = jax.lax.scan(jax.checkpoint(step),
         (x, value, gradient, state, jnp.array(0), active), None, length=config.maxiter)
     # A symmetric primal can already be stationary while its unrolled tangent
@@ -82,7 +91,7 @@ def minimize_sphere(energy, initial, args, *, config=SphereConfig()):
     # retain that response even when the primal step is zero (ATLAS Eq. 33 with
     # AD HVPs). These are local refinements, not a substitute for minimization.
     def refine(x):
-        raw_gradient = jax.grad(lambda y: energy(y,args))
+        raw_gradient = jax.grad(scaled_energy)
         g = raw_gradient(x)
         eta2 = jnp.vdot(x,g)
         project = lambda v: v-x*jnp.vdot(x,v)
@@ -99,9 +108,9 @@ def minimize_sphere(energy, initial, args, *, config=SphereConfig()):
         return _normalize(x+correction.solution)
     for _ in range(config.response_refinements):
         norm = jnp.linalg.norm(objective(x)[1])
-        active = (norm<=max(1e-3,config.tolerance)) & ((norm>config.tolerance) | config.refine_stationary)
+        active = (norm<=jnp.maximum(1e-3,tolerance)) & ((norm>tolerance) | config.refine_stationary)
         x = jax.lax.cond(active,
                          refine,lambda y:y,x)
     value, gradient = objective(x)
-    norm = jnp.linalg.norm(gradient)
+    value, norm = value*scale, jnp.linalg.norm(gradient)*scale
     return SphereResult(x, value, norm, count, jnp.isfinite(value) & (norm <= config.tolerance))

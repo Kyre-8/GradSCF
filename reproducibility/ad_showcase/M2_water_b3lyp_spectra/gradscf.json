@@ -1,0 +1,241 @@
+{
+  "method": "RKS",
+  "xc": "B3LYP",
+  "basis": "6-31g*",
+  "cart": true,
+  "symbols": [
+    "O",
+    "H",
+    "H"
+  ],
+  "coordinates_bohr": [
+    [
+      4.306296517448846e-14,
+      9.306046084854515e-15,
+      -0.014294724672886295
+    ],
+    [
+      -2.171946820880472e-14,
+      1.4391324888484824,
+      1.1171473623364268
+    ],
+    [
+      -2.1382014362410263e-14,
+      -1.4391324888484658,
+      1.11714736233643
+    ]
+  ],
+  "frequencies_cm1": [
+    1713.0594909089061,
+    3727.04749898641,
+    3849.025367189523
+  ],
+  "displacements": [
+    [
+      [
+        -9.07354625493143e-17,
+        -1.445060167887377e-17,
+        0.001589019065899773
+      ],
+      [
+        7.176415121020352e-16,
+        0.009650160488573064,
+        -0.012609442847285457
+      ],
+      [
+        7.223961234309799e-16,
+        -0.009650160488572833,
+        -0.0126094428472856
+      ]
+    ],
+    [
+      [
+        -6.53224864871973e-17,
+        9.542478004312636e-17,
+        0.0011460275156052386
+      ],
+      [
+        5.205613263599249e-16,
+        -0.013380384673606758,
+        -0.009094144160730462
+      ],
+      [
+        5.161539373886457e-16,
+        0.01338038467360524,
+        -0.009094144160729291
+      ]
+    ],
+    [
+      [
+        -3.5517882689529263e-19,
+        0.0015741889658273287,
+        -5.4405106640462414e-17
+      ],
+      [
+        5.64066432514861e-16,
+        -0.012491760622259145,
+        -0.009820988559697619
+      ],
+      [
+        -5.584294867859988e-16,
+        -0.01249176062226092,
+        0.009820988559698507
+      ]
+    ]
+  ],
+  "normal_coordinate_units": "Bohr * sqrt(electron mass)",
+  "dipole_derivatives": [
+    [
+      3.5093584702251635e-16,
+      1.7073846341017627e-16,
+      -0.006530380902995627
+    ],
+    [
+      8.029863863081415e-18,
+      -1.3920132691152873e-16,
+      -0.000975806956796962
+    ],
+    [
+      1.5004791292254951e-18,
+      -0.003302814674729194,
+      -7.218764459494667e-18
+    ]
+  ],
+  "alpha_derivatives": [
+    [
+      [
+        0.0014486870311738614,
+        -6.859726983598392e-18,
+        3.4147019449309164e-15
+      ],
+      [
+        -6.417432351950292e-18,
+        0.021863813522834168,
+        1.3849129796381007e-15
+      ],
+      [
+        3.418252719707737e-15,
+        1.1346709724250497e-15,
+        -0.06747314716218579
+      ]
+    ],
+    [
+      [
+        0.007969194555854625,
+        2.402725404109318e-17,
+        5.26506879148518e-15
+      ],
+      [
+        2.4230744961011708e-17,
+        -0.18629837925469994,
+        -8.170456807255988e-15
+      ],
+      [
+        5.2931430207742205e-15,
+        -8.179740322685297e-15,
+        -0.08754570222660571
+      ]
+    ],
+    [
+      [
+        -4.79364009675042e-16,
+        6.764480431470268e-15,
+        1.6179633308472625e-17
+      ],
+      [
+        6.892273267104005e-15,
+        1.1472344294767552e-14,
+        -0.11410585917829943
+      ],
+      [
+        1.6305386313404633e-17,
+        -0.11410585917830038,
+        4.8024489983939225e-15
+      ]
+    ]
+  ],
+  "ir_intensities_km_mol": [
+    75.78588709158741,
+    1.6921510646972757,
+    19.385621216778564
+  ],
+  "raman_activities_angstrom4_amu": [
+    7.971838060809285,
+    78.84768139132993,
+    39.084073207340985
+  ],
+  "depolarization_ratios": [
+    0.5471228727033484,
+    0.18197283546759188,
+    0.75
+  ],
+  "finite_difference_checks": [
+    {
+      "mode": 1,
+      "max_cartesian_step_bohr": 0.001,
+      "normal_coordinate_step": 0.07930564515110732,
+      "max_dipole_derivative_error": 7.105702831688987e-11,
+      "max_alpha_derivative_error": 1.543222498401331e-08
+    },
+    {
+      "mode": 1,
+      "max_cartesian_step_bohr": 0.0003,
+      "normal_coordinate_step": 0.023791693545332192,
+      "max_dipole_derivative_error": 6.342960011396226e-12,
+      "max_alpha_derivative_error": 1.3969007617298246e-09
+    },
+    {
+      "mode": 2,
+      "max_cartesian_step_bohr": 0.001,
+      "normal_coordinate_step": 0.07473626688569966,
+      "max_dipole_derivative_error": 9.947340223661477e-10,
+      "max_alpha_derivative_error": 3.2831924137721735e-08
+    },
+    {
+      "mode": 2,
+      "max_cartesian_step_bohr": 0.0003,
+      "normal_coordinate_step": 0.022420880065709897,
+      "max_dipole_derivative_error": 8.95871909642465e-11,
+      "max_alpha_derivative_error": 2.954929370635462e-09
+    },
+    {
+      "mode": 3,
+      "max_cartesian_step_bohr": 0.001,
+      "normal_coordinate_step": 0.0800527667987771,
+      "max_dipole_derivative_error": 4.4310982621857675e-09,
+      "max_alpha_derivative_error": 2.2666751614552894e-08
+    },
+    {
+      "mode": 3,
+      "max_cartesian_step_bohr": 0.0003,
+      "normal_coordinate_step": 0.024015830039633125,
+      "max_dipole_derivative_error": 3.985808467131535e-10,
+      "max_alpha_derivative_error": 2.206895000078646e-09
+    }
+  ],
+  "ir_conversion": 1777097.727665662,
+  "raman_conversion": 142.94357268633865,
+  "elapsed_seconds": 1921.6250192830048,
+  "approximation": "harmonic IR and static nonresonant Raman",
+  "grid_level": 3,
+  "grid_response": true,
+  "dipole_expression": "stationary identity; implicit relaxed density response retained",
+  "source_input": "reproducibility/ad_showcase/M2_water_b3lyp_spectra/hessian.json",
+  "dispersion": "none",
+  "raw_rotation_residual_hartree_per_bohr": 1.7346407261317057e-05,
+  "jax_version": "0.10.0",
+  "numpy_version": "2.4.4",
+  "python_version": "3.11.15",
+  "hostname": "c20",
+  "devices": [
+    "cpu:0"
+  ],
+  "dtype": "float64",
+  "runtime_source_hashes": {
+    "src/gradscf_tools/molecular_response.py": "9fd769a26c1f70e40b78d0752336299544df481f9acfbca7209a1e233ff76a02",
+    "src/gradscf/scf/orbital_optimization.py": "0325ee6dcaf5e6d19c3de95f344dd4a92d485412308442bfd3e0606bc98998d3",
+    "src/gradscf/scf/uks.py": "37ffbd81c9852b2364b786701aabfd8d10d42a2a2413e442aca4f8322e813263",
+    "src/gradscf/scf/rsh.py": "a1d4c968bd3e7f2ce07b659a0bae8d6dafcaa3b9f2fef29f15fbfbfc1a826461",
+    "src/gradscf/integrals/grids/ao.py": "ad6a1b7ed5ec776b4323d541de97d9d2bd7ddb1acacf208751293f9e8d19bad6"
+  }
+}

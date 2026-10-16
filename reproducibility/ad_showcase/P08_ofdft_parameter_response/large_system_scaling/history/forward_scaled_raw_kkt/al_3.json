@@ -1,0 +1,54 @@
+{
+  "complete": false,
+  "repeat": 3,
+  "atom_count": 27,
+  "mesh": [
+    51,
+    51,
+    51
+  ],
+  "model": "WGC99 second-order + Hartree + OEPP + PZ-LDA",
+  "forces_validated": false,
+  "source_sha256": "8ce9ea188f5b0578ddbaa97afe51c3e16b4bf2b897969c1f9da1d237fff77b62",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "backend": "gpu",
+  "device_kinds": [
+    "NVIDIA GeForce RTX 5090"
+  ],
+  "dtype": "float64",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "0",
+    "JAX_PLATFORMS": "cuda",
+    "JAX_ENABLE_X64": "1",
+    "XLA_PYTHON_CLIENT_PREALLOCATE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2"
+  },
+  "diagnostics": {
+    "euler_rms_hartree": 1.8711057532003196e-14,
+    "sphere_constraint": 0.0,
+    "response_chart_constraint": 1.75442650804963e-16,
+    "full_kkt_residual": 3.0311913252617494e-12,
+    "forward_iterations": 238
+  },
+  "density_min": 0.007217606109921898,
+  "density_max": 0.03020032425725686,
+  "native_euler_tolerance_hartree": 1e-09,
+  "adjoint_linear_residual": null,
+  "adjoint_diagnostic": "Unavailable from public result; implicit solver rejects unsuccessful solves with NaNs",
+  "stage": "forward passed; response pending",
+  "energy_hartree": -56.35958229409643,
+  "input_preparation_seconds": 5.33700280300036,
+  "forward_timing": {
+    "lower_compile_seconds": 130.8759959379995,
+    "first_execution_seconds": 12.120445446000303,
+    "warm_seconds": [
+      11.29420115799985,
+      11.496416173999933,
+      11.532088768999529
+    ],
+    "warm_median_seconds": 11.496416173999933
+  }
+}

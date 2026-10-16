@@ -1,0 +1,110 @@
+{
+  "method": "RKS",
+  "xc": "PBE",
+  "basis": "6-31g*",
+  "cart": true,
+  "symbols": [
+    "O",
+    "H",
+    "H"
+  ],
+  "coordinates_bohr": [
+    [
+      -9.417032519680655e-15,
+      4.9088306049216594e-15,
+      -0.027876254784767084
+    ],
+    [
+      -8.538965295255117e-16,
+      1.4423274370271266,
+      1.1239381273923832
+    ],
+    [
+      -8.739092068220459e-16,
+      -1.4423274370271417,
+      1.123938127392369
+    ]
+  ],
+  "dipole_e_bohr": [
+    6.274180043457834e-15,
+    -9.2007374474972e-15,
+    0.8137054379049599
+  ],
+  "polarizability_bohr3": [
+    [
+      2.8907016355278663,
+      2.2428955428731754e-17,
+      1.9671758788156764e-14
+    ],
+    [
+      2.3723362222367506e-17,
+      7.5656448177352535,
+      7.496537625590072e-15
+    ],
+    [
+      1.9669649910677415e-14,
+      2.7213841500202387e-15,
+      5.665455617352875
+    ]
+  ],
+  "alpha_dfpt_bohr3": [
+    [
+      2.89070163554154,
+      -4.7616751747526785e-15,
+      1.9661116281034833e-14
+    ],
+    [
+      1.515625333691098e-14,
+      7.565644817626422,
+      4.6629367034256575e-14
+    ],
+    [
+      -1.56415009536672e-14,
+      2.1760371282653068e-14,
+      5.665455617311425
+    ]
+  ],
+  "finite_field_checks": [
+    {
+      "field_step_au": 0.001,
+      "max_alpha_error": 3.467631778253377e-05
+    },
+    {
+      "field_step_au": 0.0003,
+      "max_alpha_error": 3.120873219408793e-06
+    },
+    {
+      "field_step_au": 0.0001,
+      "max_alpha_error": 3.467688456382234e-07
+    }
+  ],
+  "cold_dipole_and_alpha_seconds": 457.72705463698367,
+  "warm_alpha_seconds": 153.61866189798457,
+  "origin_bohr": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "electronic_response": "implicit",
+  "implicit_tolerance": 1e-10,
+  "orbital_gradient_tolerance": 1e-09,
+  "grid_level": 3,
+  "grid_response": true,
+  "source_input": "reproducibility/ad_showcase/G04_water_pbe_optimization/gradscf.json",
+  "raw_rotation_residual_hartree_per_bohr": null,
+  "jax_version": "0.10.0",
+  "numpy_version": "2.4.4",
+  "python_version": "3.11.15",
+  "hostname": "c20",
+  "devices": [
+    "cpu:0"
+  ],
+  "dtype": "float64",
+  "runtime_source_hashes": {
+    "src/gradscf_tools/molecular_response.py": "e91d9b2b935ea84ba1b26667316e49453489825b54d78ded59fd0f631b1de9ce",
+    "src/gradscf/scf/orbital_optimization.py": "0325ee6dcaf5e6d19c3de95f344dd4a92d485412308442bfd3e0606bc98998d3",
+    "src/gradscf/scf/uks.py": "37ffbd81c9852b2364b786701aabfd8d10d42a2a2413e442aca4f8322e813263",
+    "src/gradscf/scf/rsh.py": "a1d4c968bd3e7f2ce07b659a0bae8d6dafcaa3b9f2fef29f15fbfbfc1a826461",
+    "src/gradscf/integrals/grids/ao.py": "ad6a1b7ed5ec776b4323d541de97d9d2bd7ddb1acacf208751293f9e8d19bad6"
+  }
+}

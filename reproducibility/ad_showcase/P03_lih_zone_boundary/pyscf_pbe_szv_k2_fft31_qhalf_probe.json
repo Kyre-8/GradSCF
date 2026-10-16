@@ -1,0 +1,117 @@
+{
+  "complete": true,
+  "passed": true,
+  "folding_passed": true,
+  "native_sha256": "c84c2b452655a140081d9408ac1a1d6d7c874f8130a926f1521521dc380d8781",
+  "script_sha256": "f3edcff1b5df08aac59516f2f6226541c6dd48c2e7657666c09bad1afa9ba3ad",
+  "primitive_reference": {
+    "energy_hartree": -8.007631878665087,
+    "gradient_hartree_per_bohr": [
+      [
+        2.369823635593076e-15,
+        -1.6939517708918322e-14,
+        -1.3885244537928278e-14
+      ],
+      [
+        2.0543422111944352e-16,
+        7.577771718976891e-17,
+        1.645582701268737e-16
+      ]
+    ],
+    "converged": true,
+    "orbital_gradient_norm": 2.298123973260519e-12,
+    "sampled_indirect_gap_hartree": 0.14272639802081938,
+    "electron_number": 3.9999999999999987,
+    "elapsed_seconds": 203.94711898700916
+  },
+  "reference": {
+    "energy_hartree": -16.015263757330178,
+    "gradient_hartree_per_bohr": [
+      [
+        3.0873693597193246e-13,
+        3.1902335367386004e-13,
+        -2.9863940124131934e-13
+      ],
+      [
+        -1.5378983464512958e-13,
+        -1.5317106706480818e-13,
+        1.5352088621088614e-13
+      ],
+      [
+        -3.2906922273608506e-13,
+        -3.3281371720742867e-13,
+        3.401134242208796e-13
+      ],
+      [
+        1.5299903246526628e-13,
+        1.531289424144646e-13,
+        -1.5303282894082094e-13
+      ]
+    ],
+    "converged": true,
+    "electron_number": 7.999999999999998,
+    "orbital_gradient_norm": 1.754318497596802e-11,
+    "sampled_indirect_gap_hartree": 0.1427263980203783,
+    "minimum_overlap_eigenvalue": 0.01542980327115797,
+    "mesh": [
+      31,
+      31,
+      62
+    ],
+    "fractional_kpoints": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.5,
+        0.0
+      ],
+      [
+        0.5,
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.5,
+        0.0
+      ]
+    ],
+    "elapsed_seconds": 689.8691455450025
+  },
+  "reference_input_sha256": {
+    "reproducibility/ad_showcase/P03_lih_gamma_phonons/pbe_szv_k2_fft31.json": "6356e9e23e6df18c019fba1c8dcaa9aa240ee6a1fa5c714e3903086012f7e571",
+    "reproducibility/ad_showcase/P03_lih_gamma_phonons/pyscf_pbe_szv_k2_fft31.json": "b0fc121285eeeae58a464fced761917a3cb8baee3452bfec0d4515e029788b8f",
+    "reproducibility/ad_showcase/P03_lih_gamma_phonons/pyscf_pbe_szv_k2_fft31_state.npz": "9bca7e7f745240e77ba0138f4068cedfe17920453b73f49f7047e84c68ae2278"
+  },
+  "errors": {
+    "folding_energy_hartree_per_cell": 1.7763568394002505e-15,
+    "folding_relative_density": 1.8460569361347862e-11,
+    "native_energy_hartree": 5.379891732104625e-08
+  },
+  "gates": {
+    "folding_energy_hartree_per_cell": 1e-08,
+    "folding_relative_density": 1e-07,
+    "native_energy_hartree": 2e-06,
+    "hessian_hartree_per_bohr2": 5e-06,
+    "fd_step_change_hartree_per_bohr2": 5e-06
+  },
+  "steps_bohr": [
+    0.0003,
+    0.0001
+  ],
+  "columns": [],
+  "convention": "u_l=(-1)^l u; Phi(q)u=(g_prime_0-g_prime_1)/2; lattice-translation phase, no atomic-position phase.",
+  "elapsed_seconds_this_invocation": 689.876746895985,
+  "peak_rss_kib": 874420,
+  "note": "The doubled FFT z dimension is even; its Nyquist support differs from a finite primitive G-window. Failed folding gates are retained.",
+  "state_sha256": "0dad3b21a397a26cb4d518ea024bfaa9eb145aed7cb1e17405e1442bd12153b7",
+  "probe": true,
+  "hostname": "c20",
+  "python": "3.11.15",
+  "pyscf": "2.13.0",
+  "scope": "Independent folding/resource probe only."
+}

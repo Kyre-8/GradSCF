@@ -1,0 +1,120 @@
+{
+  "complete": true,
+  "oracle": "SciPy direct complex full-BSE resolvent; shared native A/B input",
+  "samples_per_damping": 1761,
+  "dampings_hartree": [
+    0.02,
+    0.01,
+    0.005
+  ],
+  "maximum_polarizability_errors_bohr3": [
+    1.1940091402112466e-12,
+    2.4137735207482312e-12,
+    4.980477020518154e-12
+  ],
+  "maximum_linear_residuals": [
+    1.0013727890288245e-15,
+    2.0175840826237853e-15,
+    2.908381734874007e-15
+  ],
+  "static_error_bohr3": 1.3589129821411916e-13,
+  "stability_margins_hartree": [
+    0.314410766973465,
+    0.34561137849491197
+  ],
+  "activity_grid_checks": [
+    {
+      "eta_hartree": 0.02,
+      "mode": 1,
+      "integrated_activities": [
+        437.55648276512824,
+        437.5563777806886,
+        437.5563712141509
+      ],
+      "last_relative_change": 1.5007295376033406e-08
+    },
+    {
+      "eta_hartree": 0.02,
+      "mode": 2,
+      "integrated_activities": [
+        1268.8171560650921,
+        1268.816692565285,
+        1268.816663589267
+      ],
+      "last_relative_change": 2.283704089088564e-08
+    },
+    {
+      "eta_hartree": 0.02,
+      "mode": 3,
+      "integrated_activities": [
+        214.95083175059693,
+        214.95082990049374,
+        214.95082978496038
+      ],
+      "last_relative_change": 5.374874238782006e-10
+    },
+    {
+      "eta_hartree": 0.01,
+      "mode": 1,
+      "integrated_activities": [
+        2391.961790244035,
+        2391.9612220697404,
+        2391.9611863343152
+      ],
+      "last_relative_change": 1.4939801438268104e-08
+    },
+    {
+      "eta_hartree": 0.01,
+      "mode": 2,
+      "integrated_activities": [
+        7587.826013330098,
+        7587.823223136232,
+        7587.823047694981
+      ],
+      "last_relative_change": 2.312142092314727e-08
+    },
+    {
+      "eta_hartree": 0.01,
+      "mode": 3,
+      "integrated_activities": [
+        458.03902021741015,
+        458.03901276087265,
+        458.0390122934423
+      ],
+      "last_relative_change": 1.0205033974050806e-09
+    },
+    {
+      "eta_hartree": 0.005,
+      "mode": 1,
+      "integrated_activities": [
+        17566.017539607066,
+        17565.880046983795,
+        17565.87998655378
+      ],
+      "last_relative_change": 3.4401928569184096e-09
+    },
+    {
+      "eta_hartree": 0.005,
+      "mode": 2,
+      "integrated_activities": [
+        56187.553191675725,
+        56187.19352951695,
+        56187.19322653928
+      ],
+      "last_relative_change": 5.392290545239444e-09
+    },
+    {
+      "eta_hartree": 0.005,
+      "mode": 3,
+      "integrated_activities": [
+        931.9299060145611,
+        931.9291178657297,
+        931.9291171575626
+      ],
+      "last_relative_change": 7.59893775783098e-10
+    }
+  ],
+  "input_sha256": "c27a08a1ced5c2470c992cbec29da8af196bf70efa35af2bc9ed9bde69cf420d",
+  "script_sha256": "c029c768c5674380c89ccfb630d97bdef4c91ffa3f472e70e2023d567e2de891",
+  "elapsed_seconds": 6.299086810002336
+}

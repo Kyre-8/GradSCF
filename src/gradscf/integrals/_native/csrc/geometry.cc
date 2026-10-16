@@ -10,7 +10,7 @@ static ffi::Error Geometry(ffi::BufferR2<ffi::S32> atoms,
                            ffi::ResultBuffer<ffi::F64> result,
                            int32_t op, int32_t cart) {
   try {
-    IntegralTables t(atoms,basis,environment,op,cart);
+    IntegralTables t(atoms,basis,environment,op,cart,true);
     if constexpr (transpose) {
       t.check_shape(vector,op);
       if (result->dimensions().size()!=1 || result->element_count()!=t.env.size())

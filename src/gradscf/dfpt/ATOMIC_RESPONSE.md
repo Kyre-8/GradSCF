@@ -257,9 +257,19 @@ matrix is assembled. The grid and AO workspaces are primitive-cell sized;
 exchange still sums over pairs of k points and the full AO basis. This is not
 an end-to-end timing or large-system scaling claim.
 
-Native finite-q OFDFT phonons, arbitrary external finite-q models, Born charges,
-macroscopic nonanalytic LO/TO corrections and general dispersion interpolation
-remain outside this increment.
+Native finite-q OFDFT phonons and arbitrary external finite-q models remain
+outside this increment. The separate `dfpt.electric.born_problem` observes
+zero-field `dP/dR` with the moving metric/AO Berry links and relaxed projector;
+`electric_problem` obtains `dP/dE` from a macroscopic electric enthalpy. See
+[Born evidence](../../../reproducibility/ad_showcase/P04_lih_born/README.md) and
+[field evidence](../../../reproducibility/ad_showcase/P04_lih_dielectric/README.md).
+The [Gamma nonanalytic correction](../pbc/INFRARED.md) consumes these tensors;
+finite-q polar IFC subtraction/restoration and converged polar interpolation
+are still separate unfinished work. Full-root Maxwell and one directional
+dielectric derivative pass [small-system tests](../../../reproducibility/ad_showcase/P04_electric_mixed/README.md),
+but do not establish general material mixed response or geometry Taylor-jet
+support. The zero-field atomic force formula above is not a finite-field
+force formula.
 
 The compiled finite-q independent response has a regression for complex MO
 frames against a full generalized-eigenproblem finite difference, at zero and

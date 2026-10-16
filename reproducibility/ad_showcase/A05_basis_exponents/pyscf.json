@@ -1,0 +1,76 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "point": "initial",
+      "energy": -1.119911821220645,
+      "native_energy_error": 4.440892098500626e-16,
+      "exact_four_center_energy": -1.119902077641568,
+      "df_minus_exact": -9.743579076904041e-06,
+      "finite_differences": [
+        {
+          "step": 0.005,
+          "gradient_theta": [
+            0.0011513925351813725,
+            -0.0002749859171924385
+          ],
+          "max_error": 1.6084330145464763e-06
+        },
+        {
+          "step": 0.001,
+          "gradient_theta": [
+            0.0011498484393523967,
+            -0.0002749833183379735
+          ],
+          "max_error": 6.433718557062075e-08
+        },
+        {
+          "step": 0.0002,
+          "gradient_theta": [
+            0.001149786678089626,
+            -0.0002749832150872322
+          ],
+          "max_error": 2.575922799933142e-09
+        }
+      ]
+    },
+    {
+      "point": "optimized",
+      "energy": -1.120044563972448,
+      "native_energy_error": 4.440892098500626e-16,
+      "exact_four_center_energy": -1.1200351950200345,
+      "df_minus_exact": -9.368952413435494e-06,
+      "finite_differences": [
+        {
+          "step": 0.005,
+          "gradient_theta": [
+            7.007121993751753e-07,
+            4.87798690329555e-08
+          ],
+          "max_error": 7.007665313545618e-07
+        },
+        {
+          "step": 0.001,
+          "gradient_theta": [
+            2.7975843863714545e-08,
+            2.0157209235094342e-09
+          ],
+          "max_error": 2.803017584310107e-08
+        },
+        {
+          "step": 0.0002,
+          "gradient_theta": [
+            1.0658141036401503e-09,
+            1.454392162258955e-10
+          ],
+          "max_error": 1.1201460830266744e-09
+        }
+      ]
+    }
+  ],
+  "pyscf": "2.13.0",
+  "elapsed_seconds": 1.4946268089988735,
+  "native_sha256": "8638edd4b6946a19165b6d0e84eb33d9a8934db3400488e74e20ebd5d36bf162",
+  "script_sha256": "611d73eb1c0f5e90f8d40163c007088b8f0d8d228951b9537889f477c5ac48ff",
+  "scope": "Same fixed auxiliary basis and normalized main basis; exact four-center energies reported separately, not used as DF gradient oracle."
+}

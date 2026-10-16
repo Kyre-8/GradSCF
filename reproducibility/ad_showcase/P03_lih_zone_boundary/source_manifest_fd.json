@@ -1,0 +1,34 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-lih-qhalf-20261016",
+  "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+  "parent_snapshot": "/home/yjiao/gradscf_checks/ad-showcase-lih-gamma-linear-20261016",
+  "recorded_utc": "2026-10-16T00:48:32.180698+00:00",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "versions": {
+    "jax": "0.10.0",
+    "jaxlib": "0.10.0",
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "pyscf": "2.13.0"
+  },
+  "example_sha256": {
+    "compare_lih_zone_boundary.py": "6281390c8922e56eb2d5c342011a5e4240950428223ba8691e499d87bc292261",
+    "lih_forces_stress.py": "4431a8c0439a2b60b4d4befb9c8c1792fd65d2bd0b1107937aa5f75a03bc8d68",
+    "lih_gamma_phonons.py": "52753c5e997b4b221e8004f48b9ed3218aaa744d4f11ffa13fa0f13a5741fa44",
+    "lih_zone_boundary.py": "9b231e2890a4b686140d513a9e7d6ba6b87bcddf638b40d94dc9032c4e5ce724"
+  },
+  "predeclared_gates": {
+    "linear_residual_norm": 1e-09,
+    "imaginary_hartree_per_bohr2": 1e-08,
+    "hermiticity_hartree_per_bohr2": 1e-08,
+    "folding_energy_hartree_per_cell": 1e-08,
+    "folding_relative_density": 1e-07,
+    "native_energy_hartree": 2e-06,
+    "hessian_hartree_per_bohr2": 5e-06,
+    "fd_step_change_hartree_per_bohr2": 5e-06
+  },
+  "compare_checkpoint_revision": "Before first execution: mark FD incomplete before endpoints; verify density cache hash.",
+  "parent_manifest_sha256": "7a9e00ada5818d978ff1f3554621f572aa67e4ad2cbfff2265031fb4e29d3a3b",
+  "stage": "Full native31 matrix and independently reconverged Hx column FD; same physical model and gates. Original folding report remains immutable."
+}

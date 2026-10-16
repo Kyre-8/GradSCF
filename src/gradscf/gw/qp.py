@@ -1,6 +1,6 @@
 """Quasiparticle equation solver with implicit differentiation.
 
-The quasiparticle energy e_p^QP is the graphical (Dyson) solution of
+The quasiparticle energy e_p^QP is a nonlinear (Dyson) solution of
 
     f(w) = w - e_p^mf - [ Re Sigma_p(w) + v^x_pp - v^mf_pp ] = 0
 
@@ -17,8 +17,9 @@ Two differentiation modes are provided:
       d e_p^QP / d theta = -(df_p/dtheta) / (df_p/dw)
 
   where df_p/dw = 1 - d(Re Sigma_p)/dw is the inverse quasiparticle
-  renormalization factor 1/Z.  Only one extra VJP of Sigma at the
-  converged roots is needed; the forward trajectory is not differentiated.
+  renormalization factor 1/Z. A custom JVP differentiates the residual at the
+  converged roots; its transpose supplies the VJP. The forward trajectory is
+  not differentiated.
 
 - ``explicit``: differentiates through the chosen forward iterations via a
   static-length ``lax.scan`` (useful for cross-checking the implicit rule
@@ -195,7 +196,7 @@ def _qp_forward(f, x0, *, tol, maxiter, method, scan=False):
     return out.roots, out.converged
 
 
-@partial(jax.custom_vjp, nondiff_argnums=(5, 6, 7, 8))
+@partial(jax.custom_jvp, nondiff_argnums=(5, 6, 7, 8))
 def _qp_solve_implicit(
     x0: Array, e_mf: Array, delta_v: Array, shared: dict, stacked: dict,
     conjugate: bool, tol: float, maxiter: int, method: str,
@@ -203,16 +204,9 @@ def _qp_solve_implicit(
     context = {**shared, "conjugate": conjugate}
     f = lambda w: qp_residual_batch(w, e_mf, delta_v, context, stacked)
     root, done = _qp_forward(f, x0, tol=tol, maxiter=maxiter, method=method)
-    # Encode auxiliary status as a real output inside custom_vjp. Boolean
+    # Encode auxiliary status as a real output inside the custom rule. Boolean
     # custom outputs can acquire active float0 tangents on some JAX versions.
     return root, done.astype(root.dtype)
-
-
-def _qp_solve_implicit_fwd(x0, e_mf, delta_v, shared, stacked, conjugate, tol, maxiter, method):
-    context = {**shared, "conjugate": conjugate}
-    f = lambda w: qp_residual_batch(w, e_mf, delta_v, context, stacked)
-    root, done = _qp_forward(f, x0, tol=tol, maxiter=maxiter, method=method)
-    return (root, done.astype(root.dtype)), (root, done, e_mf, delta_v, shared, stacked)
 
 
 def _raise_invalid_implicit_gradient(done, df_dw):
@@ -226,9 +220,12 @@ def _raise_invalid_implicit_gradient(done, df_dw):
         )
 
 
-def _qp_solve_implicit_bwd(conjugate, tol, maxiter, method, res, cotangents):
-    root, done, e_mf, delta_v, shared, stacked = res
-    g, _ = cotangents  # Auxiliary convergence status has no derivative.
+@_qp_solve_implicit.defjvp
+def _qp_solve_implicit_jvp(conjugate, tol, maxiter, method, primals, tangents):
+    x0, e_mf, delta_v, shared, stacked = primals
+    _, de_mf, ddelta_v, dshared, dstacked = tangents
+    root, status = _qp_solve_implicit(*primals, conjugate, tol, maxiter, method)
+    done = status > .5
     context = {**shared, "conjugate": conjugate}
     # df_p/dw at the converged roots (inverse Z factors), one per orbital.
     df_dw = _df_dw_batch(root, e_mf, delta_v, context, stacked)
@@ -241,19 +238,17 @@ def _qp_solve_implicit_bwd(conjugate, tol, maxiter, method, res, cotangents):
         )
     else:
         _raise_invalid_implicit_gradient(done, df_dw)
-    # Implicit function theorem per orbital; the VJP of the batched
-    # residual accumulates shared-parameter cotangents across orbitals.
-    _, pullback = jax.vjp(
+    # Hold the root fixed in this partial differential. Its live dependence
+    # remains available when the rule is itself differentiated. The seed is
+    # only a numerical choice; its tangent does not enter the physical root.
+    _, partial_response = jax.jvp(
         lambda em, dv, sh, st: qp_residual_batch(
             root, em, dv, {**sh, "conjugate": conjugate}, st
         ),
-        e_mf, delta_v, shared, stacked,
+        (e_mf, delta_v, shared, stacked),
+        (de_mf, ddelta_v, dshared, dstacked),
     )
-    cot_e_mf, cot_delta_v, cot_shared, cot_stacked = pullback(-g / df_dw)
-    return (None, cot_e_mf, cot_delta_v, cot_shared, cot_stacked)
-
-
-_qp_solve_implicit.defvjp(_qp_solve_implicit_fwd, _qp_solve_implicit_bwd)
+    return (root, status), (-partial_response/df_dw, jnp.zeros_like(status))
 
 
 def solve_qp_batch(
@@ -267,6 +262,7 @@ def solve_qp_batch(
     maxiter: int = _MAXITER,
     diff_mode: str = "implicit",
     method: str = "secant",
+    initial_guess: Array | None = None,
 ) -> tuple[Array, Array]:
     """Solve the quasiparticle equation for a batch of orbitals.
 
@@ -279,6 +275,10 @@ def solve_qp_batch(
     occupied:
         ``(norb,)`` boolean; selects the initial-guess offset sign
         (-1e-2 occupied, +1e-2 virtual, following PySCF ``gw_cd``).
+    initial_guess:
+        Optional real ``(norb,)`` QP seeds, overriding the mean-field offset.
+        Useful for following a previously identified isolated root. Implicit
+        response ignores the seed tangent; root selection itself is discrete.
     method:
         Static forward algorithm: "secant" (default), "newton" (AD JVP slopes),
         or "hybrid" (periodic/stalled AD refresh). All use the same implicit
@@ -288,7 +288,7 @@ def solve_qp_batch(
         Absolute step and residual tolerance (Ha), and iteration cap.
         These and ``shared['conjugate']`` are static configuration under JIT.
     diff_mode:
-        ``"implicit"`` (custom VJP via the implicit function theorem) or
+        ``"implicit"`` (JVP/VJP via the implicit function theorem) or
         ``"explicit"`` (AD through a static scan of the chosen method).
         The historical ``"unrolled"`` spelling remains accepted.
 
@@ -303,7 +303,13 @@ def solve_qp_batch(
     e_mf = jnp.asarray(e_mf, dtype=jnp.float64)
     delta_v = jnp.asarray(delta_v, dtype=jnp.float64)
     occupied = jnp.asarray(occupied, dtype=bool)
-    x0 = e_mf + jnp.where(occupied, -1e-2, 1e-2)
+    if initial_guess is None:
+        x0 = e_mf + jnp.where(occupied, -1e-2, 1e-2)
+    else:
+        x0 = jnp.asarray(initial_guess)
+        if x0.shape != e_mf.shape or jnp.iscomplexobj(x0):
+            raise ValueError("initial_guess must be a real vector matching the requested QP states")
+        x0 = x0.astype(e_mf.dtype)
     f = lambda w: qp_residual_batch(w, e_mf, delta_v, shared, stacked)
 
     if diff_mode == "implicit":

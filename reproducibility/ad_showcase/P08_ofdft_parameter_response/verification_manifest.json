@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "source_unchanged": true,
+  "new_tests": "5 passed in 71.05s",
+  "existing_tests": "17 passed in 283.58s",
+  "skipped_tests": 0,
+  "molecular_scope": "Analytic periodic model only; z uniform, no atomistic material benchmark.",
+  "maximum_number_jacobian": 3.228272630114687e-15,
+  "maximum_number_taylor_coefficient": 5.312590645178972e-17,
+  "curated_artifacts": {
+    "README.md": "a75ea99f42371955a88cfbd94afe3ec8b169b7d7f89aa1fd158d7a967bf8bfa0",
+    "density_parameter_response.pdf": "0d900f46529758041bb1f7eae025128aff19c9939a07187317c3f294bb8d4b7a",
+    "density_parameter_response.png": "dc121c929797156a4edeedf71ef9843b19854d2e9ada48d8412c75457b6813d7",
+    "density_response_maps.csv": "f1ddbc030a88996106c1ac09ac128723d4a6b7fb11df9330e4d0c383f6161154",
+    "gradscf.json": "cda13c9a3ae9702fbbcd7c6a7aa2b1614917eeb814fc7e353ca99f5f523e9886",
+    "independent.json": "4dd4fc5973ae5869ec726d3eaf818f05e941bad6eb4375a9f8f0c75e6a6c2353",
+    "independent_response.npz": "bd1242d1d64ffaac123e71eaa5344b81afbf0326ee47b8a5379db04adb3054fa",
+    "mesh_11.npz": "7896c41b565ec5f217d55b9b57a29436737d713cfef07a9a3913680a3e7278c6",
+    "mesh_5.npz": "c8edee9ce20093c6545a7b1d28fff0a28d236c1ca575f9a907041bf2411ca008",
+    "mesh_7.npz": "7acb66ae05e3e2b2df2a0a6938419afeefc620fdcc24f2cd3c72d930170260d1",
+    "mesh_9.npz": "7c74b46515c2ebb4be51afdf4568cdb3948f47cd66ca1204a6f72b291986f0be",
+    "p08-existing-regression.log": "18c0382040648b51a51d375f8894b3e8b2cb01675e509bacbe4d5b5661926373",
+    "p08-focused-green.log": "5c325b1d2dfd3807b1b5748a6949a6dd68d197fb1329fad209dac010ecff1af2",
+    "p08-independent-final.log": "db52c20e875078504d4441f44362a228d7148babb8e37451ac1fabe429adba29",
+    "p08-independent.log": "db52c20e875078504d4441f44362a228d7148babb8e37451ac1fabe429adba29",
+    "p08-native.log": "2b77c6c21bd8015fc732bf663871898da3dda7db3a92c7c7fc2052020fa36ce3",
+    "p08-plot-final.log": "a14a039f79d727d3da888a328497c870e5bfb266ef173be661b61b63d5d87d5f",
+    "p08-plot.log": "a14a039f79d727d3da888a328497c870e5bfb266ef173be661b61b63d5d87d5f",
+    "p08-red.log": "cb2cd5e57d58e634058cd22a6a006306d2b1ad506702ef7b571def4bc348f10a",
+    "plot_settings.json": "4d8936e96ee63b276e7a93dcadea695112363202a2e8d0e289e5947d4a5d824c",
+    "source_manifest.json": "142fb18a66f92ce0286d961093fa953005acd8736db7ad7484359c0d55f7326f"
+  }
+}

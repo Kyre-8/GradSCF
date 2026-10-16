@@ -35,7 +35,8 @@ struct IntegralTables {
   Intor cached_intor=nullptr;
   std::map<std::array<int,13>,int,ShellShapeLess> cache_sizes;
   IntegralTables(ffi::BufferR2<ffi::S32> atoms, ffi::BufferR2<ffi::S32> basis,
-                 ffi::BufferR1<ffi::F64> environment, int op, int cart) {
+                 ffi::BufferR1<ffi::F64> environment, int op, int cart,
+                 bool allow_long_range=false) {
     if (atoms.dimensions()[1] != ATM_SLOTS || basis.dimensions()[1] != BAS_SLOTS ||
         environment.element_count() < 20 || op < 0 || op > 4 || (cart != 0 && cart != 1))
       throw std::invalid_argument("Invalid libcint table dimensions or operator");
@@ -45,8 +46,11 @@ struct IntegralTables {
     env.assign(environment.typed_data(), environment.typed_data()+environment.element_count());
     for (double v : env)
       if (!std::isfinite(v)) throw std::invalid_argument("Native integral env must be finite");
-    if (env[PTR_RANGE_OMEGA] != 0.)
-      throw std::invalid_argument("Range-separated integrals are not supported");
+    if (env[PTR_RANGE_OMEGA] > std::sqrt(std::numeric_limits<double>::max()) / 2.)
+      throw std::invalid_argument("omega exceeds the safe float64 squared range");
+    if (env[PTR_RANGE_OMEGA] != 0. &&
+        (!allow_long_range || op != 4 || env[PTR_RANGE_OMEGA] < 0.))
+      throw std::invalid_argument("Range-separated integrals require the full ERI path and nonnegative omega");
     auto inside = [&](int ptr, int64_t count) {
       return ptr >= PTR_ENV_START && count > 0 && int64_t(ptr)+count <= int64_t(env.size());
     };

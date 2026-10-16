@@ -1,4 +1,4 @@
-"""Three-dimensional neutral periodic Gaussian cells, independent of PySCF."""
+"""Neutral Gaussian cells with explicit three-, two- or one-dimensional periodicity."""
 from dataclasses import dataclass
 import numpy as np
 import jax.numpy as jnp
@@ -24,13 +24,21 @@ class Cell:
     cart: bool = True
 
     def build(self):
-        if self.dimension!=3 or self.charge!=0 or not self.cart:
-            raise NotImplementedError('Initial PBC implementation requires neutral 3D Cartesian cells.')
+        if self.dimension not in (1,2,3) or self.charge!=0 or not self.cart:
+            raise NotImplementedError('Use neutral Cartesian cells with dimension=1, 2 or 3.')
+        self.dimension=int(self.dimension)
         if not 0<self.precision<1:
             raise ValueError('precision must be between zero and one.')
         raw=np.asarray(self.a,dtype=float)
         if raw.shape!=(3,3) or not np.isfinite(raw).all() or np.linalg.det(raw)<=0:
             raise ValueError('a must be a finite right-handed nonsingular 3x3 lattice.')
+        if self.dimension<3:
+            lengths=np.linalg.norm(raw,axis=1)
+            gram=raw@raw.T/(lengths[:,None]*lengths[None,:])
+            allowed=np.eye(3)
+            if self.dimension==2:allowed[:2,:2]=gram[:2,:2]
+            if np.max(abs(gram-allowed))>1e-10:
+                raise ValueError('Nonperiodic lattice vectors must be orthogonal to the other rows.')
         mesh=np.asarray(self.mesh)
         if mesh.shape!=(3,) or np.any(mesh<3) or np.any(mesh!=mesh.astype(int)) or np.any(mesh%2==0):
             raise ValueError('Use three odd FFT mesh sizes >=3 to retain +/-G symmetry.')
@@ -41,7 +49,7 @@ class Cell:
         self.coords=jnp.asarray(self.spec.coords_bohr)
         fractional=np.asarray(self.coords)@np.linalg.inv(np.asarray(self.lattice))
         delta=fractional[:,None]-fractional[None,:]
-        delta=delta-np.rint(delta)
+        delta[...,:self.dimension]-=np.rint(delta[...,:self.dimension])
         distances=np.linalg.norm(delta@np.asarray(self.lattice),axis=-1)
         if np.any(distances[np.triu_indices(len(fractional),1)]<1e-8):
             raise ValueError('Atoms coincide modulo a lattice translation.')
@@ -88,7 +96,11 @@ class Cell:
         return reciprocal_vectors(self.lattice)
 
     def make_kpts(self,mesh,*,shift=(0.,0.,0.)):
-        return uniform_kpoints(self.lattice,mesh,shift=shift)
+        points=uniform_kpoints(self.lattice,mesh,shift=shift)
+        if (np.any(np.asarray(mesh)[self.dimension:]!=1)
+                or np.any(np.asarray(shift)[self.dimension:]!=0)):
+            raise ValueError('Use one unshifted k point along each nonperiodic direction.')
+        return points
 
     def parameters_at(self,coordinates):
         """Move all atom-attached shells and nuclei; coordinates are in Bohr.

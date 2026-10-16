@@ -1,0 +1,23 @@
+	Command being timed: "timeout 3600 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python -u -c from run_budget import run; run('chi-finite', "from lih_born_charges import SETTINGS; SETTINGS['mesh']=[71]*3; from check_lih_finite_field import run; run('fft71_finite_field', reference='fft71')")"
+	User time (seconds): 2865.61
+	System time (seconds): 171.01
+	Percent of CPU this job got: 614%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 8:13.94
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 45789376
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 4066217
+	Voluntary context switches: 2029712
+	Involuntary context switches: 83171
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 640
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

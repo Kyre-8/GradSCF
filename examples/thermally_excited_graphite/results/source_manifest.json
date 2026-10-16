@@ -1,0 +1,8 @@
+{
+  "src/gradscf/pbc/phonon.py": "09994ce50edb468ba54730dee1f1f412b0b233f6312ee0e193c575aff2c640c3",
+  "src/gradscf/pbc/anharmonic.py": "3c297f77b73e2a26741ce0003590579e4bfe99f2c80095a164f4e0155b15f1a2",
+  "src/gradscf/pbc/vibrational.py": "0f774990a35d68334519711e5011910c0257823fdac613f75fe88c5edbd82659",
+  "tests/pbc/test_projected_phonons.py": "f92f6e993bd655c0623a4f7062882db7c22fe28b4333c9cc0c44d147da0d5666",
+  "tests/pbc/test_anharmonic.py": "9d00463b4b0797bb69781017986302923ecb6e3b60eafe635bff32b268ff4ca8",
+  "tests/pbc/test_vibrational.py": "2e63a546d72112b35f9f0aa49bd75c1f3f16dc7c29f670a34ec3669a32270d26"
+}

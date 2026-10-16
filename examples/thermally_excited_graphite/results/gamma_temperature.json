@@ -1,0 +1,152 @@
+[
+  {
+    "electron_temperature_K": 300.0,
+    "free_energy_Eh_cell": -22.473441428470178,
+    "optical_energies_meV": [
+      175.08639040125033,
+      175.45328125434452,
+      178.55994709497543,
+      178.92268846198047
+    ],
+    "all_inplane_energies_meV": [
+      -51.45444674903457,
+      -50.25409241616114,
+      27.713766674902523,
+      29.877355024385547,
+      175.08639040125033,
+      175.45328125434452,
+      178.55994709497543,
+      178.92268846198047
+    ],
+    "response_residual": 4.819005566609851e-12,
+    "relative_subspace_residual": 3.665698669206051e-13,
+    "seconds_including_compilation": 143.7370700110041,
+    "scope": "fixed geometry; electronic temperature only; projected harmonic modes",
+    "settings": {
+      "a_angstrom": 2.46,
+      "c_angstrom": 6.708,
+      "basis": "gth-szv",
+      "pseudo": "gth-pbe",
+      "xc": "pbe",
+      "fft_mesh": [
+        15,
+        15,
+        31
+      ],
+      "k_mesh": [
+        3,
+        3,
+        1
+      ],
+      "scf_controls": {
+        "max_cycle": 200,
+        "damping": 0.25,
+        "conv_tol": 1e-12,
+        "conv_tol_density": 1e-11,
+        "conv_tol_grad": 1e-10
+      },
+      "geometry": "fixed AB graphite, not relaxed",
+      "exxdiv": null
+    }
+  },
+  {
+    "electron_temperature_K": 800.0,
+    "free_energy_Eh_cell": -22.474414600525698,
+    "optical_energies_meV": [
+      176.22750910957132,
+      176.5909758355484,
+      178.76226936513845,
+      179.1255164018014
+    ],
+    "all_inplane_energies_meV": [
+      -49.4151349829688,
+      -48.16378420775492,
+      30.757854971510614,
+      32.72099952590218,
+      176.22750910957132,
+      176.5909758355484,
+      178.76226936513845,
+      179.1255164018014
+    ],
+    "response_residual": 7.223957199948504e-11,
+    "relative_subspace_residual": 9.227613132359341e-14,
+    "seconds_including_compilation": 86.04793261700252,
+    "scope": "fixed geometry; electronic temperature only; projected harmonic modes",
+    "settings": {
+      "a_angstrom": 2.46,
+      "c_angstrom": 6.708,
+      "basis": "gth-szv",
+      "pseudo": "gth-pbe",
+      "xc": "pbe",
+      "fft_mesh": [
+        15,
+        15,
+        31
+      ],
+      "k_mesh": [
+        3,
+        3,
+        1
+      ],
+      "scf_controls": {
+        "max_cycle": 200,
+        "damping": 0.25,
+        "conv_tol": 1e-12,
+        "conv_tol_density": 1e-11,
+        "conv_tol_grad": 1e-10
+      },
+      "geometry": "fixed AB graphite, not relaxed",
+      "exxdiv": null
+    }
+  },
+  {
+    "electron_temperature_K": 1377.0,
+    "free_energy_Eh_cell": -22.475574914324817,
+    "optical_energies_meV": [
+      178.06478916782243,
+      178.42422263915245,
+      180.41597195266027,
+      180.77618448370657
+    ],
+    "all_inplane_energies_meV": [
+      -48.94398371375853,
+      -47.68025898114932,
+      31.50050137987001,
+      33.42000895306942,
+      178.06478916782243,
+      178.42422263915245,
+      180.41597195266027,
+      180.77618448370657
+    ],
+    "response_residual": 1.458679161349039e-11,
+    "relative_subspace_residual": 1.0176745030958674e-13,
+    "seconds_including_compilation": 75.4701290219964,
+    "scope": "fixed geometry; electronic temperature only; projected harmonic modes",
+    "settings": {
+      "a_angstrom": 2.46,
+      "c_angstrom": 6.708,
+      "basis": "gth-szv",
+      "pseudo": "gth-pbe",
+      "xc": "pbe",
+      "fft_mesh": [
+        15,
+        15,
+        31
+      ],
+      "k_mesh": [
+        3,
+        3,
+        1
+      ],
+      "scf_controls": {
+        "max_cycle": 200,
+        "damping": 0.25,
+        "conv_tol": 1e-12,
+        "conv_tol_density": 1e-11,
+        "conv_tol_grad": 1e-10
+      },
+      "geometry": "fixed AB graphite, not relaxed",
+      "exxdiv": null
+    }
+  }
+]

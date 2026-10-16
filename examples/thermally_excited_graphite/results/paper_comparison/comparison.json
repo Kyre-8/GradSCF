@@ -1,0 +1,1140 @@
+{
+  "source_reference": {
+    "schema_version": 1,
+    "source": {
+      "arxiv_id": "2610.18561v1",
+      "title": "Time-Resolved Phonon Dispersions of Thermally Excited Graphite at the Nanoscale",
+      "url": "https://arxiv.org/html/2610.18561v1",
+      "verified_date": "2026-10-15",
+      "verification_scope": "Original HTML Methods, III.1, III.2 and IV; no figure digitization or raw experimental data"
+    },
+    "status_definitions": {
+      "VERIFIED_REPORTED": "Numerical value explicitly reported in original prose",
+      "VERIFIED_APPROXIMATE": "Original prose explicitly gives an approximate value",
+      "NOT_REPORTED_IN_PROSE": "No precise numerical endpoint available in inspected prose",
+      "SECONDARY_THEORY": "Theory quoted by this paper; not its measured peak",
+      "MODEL_ASSUMPTION": "Declared modeling choice, not experimental evidence"
+    },
+    "gamma_static_peak": [
+      {
+        "temperature_label": "room temperature",
+        "comparison_temperature_K": 300.0,
+        "temperature_assignment_status": "MODEL_ASSUMPTION",
+        "temperature_uncertainty_K": null,
+        "energy_meV": 193.7,
+        "energy_reported_uncertainty_meV": 0.2,
+        "status": "VERIFIED_REPORTED",
+        "locator": "III.1, paragraph beginning At the Gamma point; Fig. 3c,d"
+      },
+      {
+        "temperature_label": "laser heated",
+        "comparison_temperature_K": 1377.0,
+        "temperature_assignment_status": "VERIFIED_REPORTED",
+        "temperature_uncertainty_K": 11.0,
+        "energy_meV": 185.2,
+        "energy_reported_uncertainty_meV": 0.3,
+        "status": "VERIFIED_REPORTED",
+        "locator": "III.1, paragraph beginning At the Gamma point; Fig. 3c,d"
+      }
+    ],
+    "energy_uncertainty_definition": "Least-squares fit uncertainty (Methods); confidence coverage and endpoint covariance unspecified",
+    "instrument": {
+      "zlp_width_meV": 11.0,
+      "status": "VERIFIED_REPORTED",
+      "locator": "II Methods, microscope paragraph",
+      "model_profile": "Gaussian",
+      "model_fwhm_meV": 11.0,
+      "profile_assignment_status": "MODEL_ASSUMPTION"
+    },
+    "momentum_acceptance": {
+      "interval_angstrom_inverse": 0.26,
+      "detector_pixels": 4,
+      "status": "VERIFIED_REPORTED",
+      "locator": "II Methods, quantitative analysis paragraph; III.1, Fig. 3c discussion",
+      "modeled": false
+    },
+    "experimental_fit": {
+      "gamma": "Optical Voigt contribution with power-law background",
+      "locator": "II Methods, quantitative analysis paragraph",
+      "status": "VERIFIED_REPORTED"
+    },
+    "gamma_width": {
+      "static_room_temperature_meV": null,
+      "static_1377K_meV": null,
+      "endpoint_status": "NOT_REPORTED_IN_PROSE",
+      "time_resolved_increase_meV": 7.0,
+      "increase_status": "VERIFIED_APPROXIMATE",
+      "increase_uncertainty_meV": null,
+      "locator": "IV Discussion, paragraph beginning The initial energy separation; Fig. 4f",
+      "comparison_boundary": "Time-resolved dataset; not a measured static 300-to-1377 K width difference"
+    },
+    "cited_theory_dispersion": {
+      "status": "SECONDARY_THEORY",
+      "locator": "III.1, expected dispersions paragraph; Fig. 2c; reference 28",
+      "reference": "Senga et al., Nature 573, 247-250 (2019)",
+      "TO_LO_Gamma_meV_approx": [
+        197,
+        197
+      ],
+      "TO_LO_K_meV_approx": [
+        163,
+        153
+      ],
+      "TO_LO_M_meV_approx": [
+        177,
+        170
+      ],
+      "use_as_experimental_target": false
+    }
+  },
+  "cases": [
+    {
+      "case": "pilot",
+      "status": "unconverged basis/k/FFT; fixed geometry",
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          15,
+          15,
+          31
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "momentum_bohr_inverse": [
+        1.3515928766450476,
+        0.7803425111657989,
+        0.0
+      ],
+      "form_factors": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "momentum_acceptance_integrated": false,
+      "present_temperatures_K": [
+        300.0,
+        800.0,
+        1377.0
+      ],
+      "missing_endpoint_temperatures_K": [],
+      "thermal_comparison_available": true
+    },
+    {
+      "case": "szv_fft21_k3",
+      "status": "numerical refinement; convergence not presumed",
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          21,
+          21,
+          41
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "momentum_bohr_inverse": [
+        1.3515928766450476,
+        0.7803425111657989,
+        0.0
+      ],
+      "form_factors": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "momentum_acceptance_integrated": false,
+      "present_temperatures_K": [
+        300.0
+      ],
+      "missing_endpoint_temperatures_K": [
+        1377.0
+      ],
+      "thermal_comparison_available": false
+    },
+    {
+      "case": "szv_fft27_k3",
+      "status": "numerical refinement; convergence not presumed",
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          27,
+          27,
+          51
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "momentum_bohr_inverse": [
+        1.3515928766450476,
+        0.7803425111657989,
+        0.0
+      ],
+      "form_factors": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "momentum_acceptance_integrated": false,
+      "present_temperatures_K": [
+        300.0,
+        1377.0
+      ],
+      "missing_endpoint_temperatures_K": [],
+      "thermal_comparison_available": true
+    },
+    {
+      "case": "szv_fft33_k3",
+      "status": "numerical refinement; convergence not presumed",
+      "settings": {
+        "a_angstrom": 2.46,
+        "basis": "gth-szv",
+        "c_angstrom": 6.708,
+        "exxdiv": null,
+        "fft_mesh": [
+          33,
+          33,
+          63
+        ],
+        "geometry": "fixed AB graphite, not relaxed",
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "pseudo": "gth-pbe",
+        "scf_controls": {
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10,
+          "damping": 0.25,
+          "max_cycle": 200
+        },
+        "xc": "pbe"
+      },
+      "momentum_bohr_inverse": [
+        1.3515928766450476,
+        0.7803425111657989,
+        0.0
+      ],
+      "form_factors": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "momentum_acceptance_integrated": false,
+      "present_temperatures_K": [
+        300.0,
+        1377.0
+      ],
+      "missing_endpoint_temperatures_K": [],
+      "thermal_comparison_available": true
+    }
+  ],
+  "omitted_cases": [],
+  "records": [
+    {
+      "case": "pilot",
+      "numerical_status": "unconverged basis/k/FFT; fixed geometry",
+      "mechanism": "electronic_plus_bose",
+      "temperature_K": 1377.0,
+      "maximum_meV": 179.70093756047763,
+      "envelope_fwhm_meV": 11.330125498631645,
+      "voigt_center_meV": 179.68977154948962,
+      "voigt_fwhm_meV": 11.326091784864804,
+      "voigt_sigma_meV": 4.809748332474352,
+      "voigt_gamma_meV": 5e-324,
+      "voigt_normalized_rms": 0.0005069986586307377,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        178.06478916782243,
+        178.42422263915245,
+        180.41597195266027,
+        180.77618448370657
+      ],
+      "signed_inplane_energies_meV": [
+        -48.94398371375853,
+        -47.68025898114932,
+        31.50050137987001,
+        33.42000895306942,
+        178.06478916782243,
+        178.42422263915245,
+        180.41597195266027,
+        180.77618448370657
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.2625865289144415,
+        0.08744448469145025,
+        0.4877877527361102,
+        0.16218123365799805
+      ],
+      "experiment_energy_meV": 185.2,
+      "experiment_reported_error_meV": 0.3,
+      "fitted_center_bias_meV": -5.510228450510368,
+      "coarse_grid_center_difference_meV": -8.988877198135015e-09,
+      "coarse_grid_width_difference_meV": 1.1169731806148775e-11,
+      "source_file": "graphite_results/gamma_1377K.npz",
+      "source_sha256": "cfbc437588da90b12bc72f5b3337c3c1d7ba2f7f9227c02d8c3f0fb28f88b78c",
+      "mode_source_file": "graphite_results/gamma_1377K.npz",
+      "mode_source_sha256": "cfbc437588da90b12bc72f5b3337c3c1d7ba2f7f9227c02d8c3f0fb28f88b78c",
+      "voigt_shift_from_300K_meV": 2.013851462876744,
+      "maximum_shift_from_300K_meV": 1.9755362676411323,
+      "width_change_from_300K_meV": -0.3153594552572372,
+      "shift_mismatch_meV": 10.513851462876744
+    },
+    {
+      "case": "pilot",
+      "numerical_status": "unconverged basis/k/FFT; fixed geometry",
+      "mechanism": "bose_only",
+      "temperature_K": 1377.0,
+      "maximum_meV": 177.71896714864826,
+      "envelope_fwhm_meV": 11.648263308730748,
+      "voigt_center_meV": 177.66965204050658,
+      "voigt_fwhm_meV": 11.63802041136879,
+      "voigt_sigma_meV": 4.9422122237862265,
+      "voigt_gamma_meV": 4.88846492076311e-21,
+      "voigt_normalized_rms": 0.002085205484770104,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        175.08639040125033,
+        175.45328125434452,
+        178.55994709497543,
+        178.92268846198047
+      ],
+      "signed_inplane_energies_meV": [
+        -51.45444674903457,
+        -50.25409241616114,
+        27.713766674902523,
+        29.877355024385547,
+        175.08639040125033,
+        175.45328125434452,
+        178.55994709497543,
+        178.92268846198047
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.21928874777456112,
+        0.07301078064241866,
+        0.5310937351782469,
+        0.17660673640477326
+      ],
+      "experiment_energy_meV": 185.2,
+      "experiment_reported_error_meV": 0.3,
+      "fitted_center_bias_meV": -7.530347959493412,
+      "coarse_grid_center_difference_meV": -4.125240593566559e-08,
+      "coarse_grid_width_difference_meV": 1.2192913345643319e-11,
+      "source_file": "graphite_results/gamma_1377K.npz",
+      "source_sha256": "cfbc437588da90b12bc72f5b3337c3c1d7ba2f7f9227c02d8c3f0fb28f88b78c",
+      "mode_source_file": "graphite_results/gamma_300K.npz",
+      "mode_source_sha256": "b951f914d683ed0b7b55fedd11a1479c7c44de3d3459856947703b222ba7047a",
+      "voigt_shift_from_300K_meV": -0.006268046106299607,
+      "maximum_shift_from_300K_meV": -0.006434144188233404,
+      "width_change_from_300K_meV": 0.0027783548418653936,
+      "shift_mismatch_meV": 8.4937319538937
+    },
+    {
+      "case": "pilot",
+      "numerical_status": "unconverged basis/k/FFT; fixed geometry",
+      "mechanism": "electronic_plus_bose",
+      "temperature_K": 300.0,
+      "maximum_meV": 177.7254012928365,
+      "envelope_fwhm_meV": 11.645484953888882,
+      "voigt_center_meV": 177.67592008661288,
+      "voigt_fwhm_meV": 11.635527858760936,
+      "voigt_sigma_meV": 4.941153734152118,
+      "voigt_gamma_meV": 5.373595410891288e-21,
+      "voigt_normalized_rms": 0.002092937835977877,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        175.08639040125033,
+        175.45328125434452,
+        178.55994709497543,
+        178.92268846198047
+      ],
+      "signed_inplane_energies_meV": [
+        -51.45444674903457,
+        -50.25409241616114,
+        27.713766674902523,
+        29.877355024385547,
+        175.08639040125033,
+        175.45328125434452,
+        178.55994709497543,
+        178.92268846198047
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.21928874777456112,
+        0.07301078064241866,
+        0.5310937351782469,
+        0.17660673640477326
+      ],
+      "experiment_energy_meV": 193.7,
+      "experiment_reported_error_meV": 0.2,
+      "fitted_center_bias_meV": -16.024079913387112,
+      "coarse_grid_center_difference_meV": -9.126006261794828e-08,
+      "coarse_grid_width_difference_meV": 1.1425527191022411e-11,
+      "source_file": "graphite_results/gamma_300K.npz",
+      "source_sha256": "b951f914d683ed0b7b55fedd11a1479c7c44de3d3459856947703b222ba7047a",
+      "mode_source_file": "graphite_results/gamma_300K.npz",
+      "mode_source_sha256": "b951f914d683ed0b7b55fedd11a1479c7c44de3d3459856947703b222ba7047a",
+      "voigt_shift_from_300K_meV": 0.0,
+      "maximum_shift_from_300K_meV": 0.0,
+      "width_change_from_300K_meV": 0.0,
+      "shift_mismatch_meV": null
+    },
+    {
+      "case": "pilot",
+      "numerical_status": "unconverged basis/k/FFT; fixed geometry",
+      "mechanism": "bose_only",
+      "temperature_K": 300.0,
+      "maximum_meV": 177.7254012928365,
+      "envelope_fwhm_meV": 11.645484953888882,
+      "voigt_center_meV": 177.67592008661288,
+      "voigt_fwhm_meV": 11.635527858760936,
+      "voigt_sigma_meV": 4.941153734152118,
+      "voigt_gamma_meV": 5.373595410891288e-21,
+      "voigt_normalized_rms": 0.002092937835977877,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        175.08639040125033,
+        175.45328125434452,
+        178.55994709497543,
+        178.92268846198047
+      ],
+      "signed_inplane_energies_meV": [
+        -51.45444674903457,
+        -50.25409241616114,
+        27.713766674902523,
+        29.877355024385547,
+        175.08639040125033,
+        175.45328125434452,
+        178.55994709497543,
+        178.92268846198047
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.21928874777456112,
+        0.07301078064241866,
+        0.5310937351782469,
+        0.17660673640477326
+      ],
+      "experiment_energy_meV": 193.7,
+      "experiment_reported_error_meV": 0.2,
+      "fitted_center_bias_meV": -16.024079913387112,
+      "coarse_grid_center_difference_meV": -9.126006261794828e-08,
+      "coarse_grid_width_difference_meV": 1.1425527191022411e-11,
+      "source_file": "graphite_results/gamma_300K.npz",
+      "source_sha256": "b951f914d683ed0b7b55fedd11a1479c7c44de3d3459856947703b222ba7047a",
+      "mode_source_file": "graphite_results/gamma_300K.npz",
+      "mode_source_sha256": "b951f914d683ed0b7b55fedd11a1479c7c44de3d3459856947703b222ba7047a",
+      "voigt_shift_from_300K_meV": 0.0,
+      "maximum_shift_from_300K_meV": 0.0,
+      "width_change_from_300K_meV": 0.0,
+      "shift_mismatch_meV": null
+    },
+    {
+      "case": "pilot",
+      "numerical_status": "unconverged basis/k/FFT; fixed geometry",
+      "mechanism": "electronic_plus_bose",
+      "temperature_K": 800.0,
+      "maximum_meV": 178.0388031497296,
+      "envelope_fwhm_meV": 11.372835586199187,
+      "voigt_center_meV": 178.0232891276684,
+      "voigt_fwhm_meV": 11.368108502470436,
+      "voigt_sigma_meV": 4.827591189593859,
+      "voigt_gamma_meV": 5e-324,
+      "voigt_normalized_rms": 0.0006948385553118726,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        176.22750910957132,
+        176.5909758355484,
+        178.76226936513845,
+        179.1255164018014
+      ],
+      "signed_inplane_energies_meV": [
+        -49.4151349829688,
+        -48.16378420775492,
+        30.757854971510614,
+        32.72099952590218,
+        176.22750910957132,
+        176.5909758355484,
+        178.76226936513845,
+        179.1255164018014
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.24909586296098743,
+        0.08295261481842539,
+        0.5012853594019817,
+        0.16666616281860552
+      ],
+      "experiment_energy_meV": null,
+      "experiment_reported_error_meV": null,
+      "fitted_center_bias_meV": null,
+      "coarse_grid_center_difference_meV": -1.3893185268898378e-08,
+      "coarse_grid_width_difference_meV": 1.574562702444382e-11,
+      "source_file": "graphite_results/gamma_800K.npz",
+      "source_sha256": "3c25445025b2cc2b791533141e00e5d6ba477937f2387e24fbf78a3747378734",
+      "mode_source_file": "graphite_results/gamma_800K.npz",
+      "mode_source_sha256": "3c25445025b2cc2b791533141e00e5d6ba477937f2387e24fbf78a3747378734",
+      "voigt_shift_from_300K_meV": 0.347369041055515,
+      "maximum_shift_from_300K_meV": 0.3134018568931083,
+      "width_change_from_300K_meV": -0.27264936768969505,
+      "shift_mismatch_meV": null
+    },
+    {
+      "case": "pilot",
+      "numerical_status": "unconverged basis/k/FFT; fixed geometry",
+      "mechanism": "bose_only",
+      "temperature_K": 800.0,
+      "maximum_meV": 177.72228971734214,
+      "envelope_fwhm_meV": 11.646831590760428,
+      "voigt_center_meV": 177.672888182158,
+      "voigt_fwhm_meV": 11.636736223819726,
+      "voigt_sigma_meV": 4.941666879545688,
+      "voigt_gamma_meV": 4.63840965281867e-21,
+      "voigt_normalized_rms": 0.00208921929900861,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        175.08639040125033,
+        175.45328125434452,
+        178.55994709497543,
+        178.92268846198047
+      ],
+      "signed_inplane_energies_meV": [
+        -51.45444674903457,
+        -50.25409241616114,
+        27.713766674902523,
+        29.877355024385547,
+        175.08639040125033,
+        175.45328125434452,
+        178.55994709497543,
+        178.92268846198047
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.21928874777456112,
+        0.07301078064241866,
+        0.5310937351782469,
+        0.17660673640477326
+      ],
+      "experiment_energy_meV": null,
+      "experiment_reported_error_meV": null,
+      "fitted_center_bias_meV": null,
+      "coarse_grid_center_difference_meV": -6.157344500934414e-08,
+      "coarse_grid_width_difference_meV": 1.2249756764504127e-11,
+      "source_file": "graphite_results/gamma_800K.npz",
+      "source_sha256": "3c25445025b2cc2b791533141e00e5d6ba477937f2387e24fbf78a3747378734",
+      "mode_source_file": "graphite_results/gamma_300K.npz",
+      "mode_source_sha256": "b951f914d683ed0b7b55fedd11a1479c7c44de3d3459856947703b222ba7047a",
+      "voigt_shift_from_300K_meV": -0.003031904454871892,
+      "maximum_shift_from_300K_meV": -0.003111575494358476,
+      "width_change_from_300K_meV": 0.00134663687154557,
+      "shift_mismatch_meV": null
+    },
+    {
+      "case": "szv_fft21_k3",
+      "numerical_status": "numerical refinement; convergence not presumed",
+      "mechanism": "electronic_plus_bose",
+      "temperature_K": 300.0,
+      "maximum_meV": 179.39485836024758,
+      "envelope_fwhm_meV": 11.502558544574072,
+      "voigt_center_meV": 179.35531598234533,
+      "voigt_fwhm_meV": 11.498530108232966,
+      "voigt_sigma_meV": 4.8829761460952055,
+      "voigt_gamma_meV": 1.2513216950529677e-22,
+      "voigt_normalized_rms": 0.0017147921705007497,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        176.96235773032527,
+        176.96236326994557,
+        180.16470059339238,
+        180.16474309844483
+      ],
+      "signed_inplane_energies_meV": [
+        11.165353632310676,
+        11.166063743095016,
+        32.18840331000021,
+        32.188848464543284,
+        176.96235773032527,
+        176.96236326994557,
+        180.16470059339238,
+        180.16474309844483
+      ],
+      "negative_inplane_mode_count": 0,
+      "relative_zero_temperature_strengths": [
+        0.19752180722299922,
+        0.06583966926467054,
+        0.18416052249168186,
+        0.5524780010206484
+      ],
+      "experiment_energy_meV": 193.7,
+      "experiment_reported_error_meV": 0.2,
+      "fitted_center_bias_meV": -14.344684017654657,
+      "coarse_grid_center_difference_meV": -7.407081170640595e-08,
+      "coarse_grid_width_difference_meV": 2.751221472863108e-11,
+      "source_file": "graphite_results/gamma_precision/szv_fft21_k3/gamma_300K.npz",
+      "source_sha256": "58f8d176429cf377444112f2d8888147ec1d37184c9f017ecf37e947e8fbdda1",
+      "mode_source_file": "graphite_results/gamma_precision/szv_fft21_k3/gamma_300K.npz",
+      "mode_source_sha256": "58f8d176429cf377444112f2d8888147ec1d37184c9f017ecf37e947e8fbdda1",
+      "voigt_shift_from_300K_meV": 0.0,
+      "maximum_shift_from_300K_meV": 0.0,
+      "width_change_from_300K_meV": 0.0,
+      "shift_mismatch_meV": null
+    },
+    {
+      "case": "szv_fft21_k3",
+      "numerical_status": "numerical refinement; convergence not presumed",
+      "mechanism": "bose_only",
+      "temperature_K": 300.0,
+      "maximum_meV": 179.39485836024758,
+      "envelope_fwhm_meV": 11.502558544574072,
+      "voigt_center_meV": 179.35531598234533,
+      "voigt_fwhm_meV": 11.498530108232966,
+      "voigt_sigma_meV": 4.8829761460952055,
+      "voigt_gamma_meV": 1.2513216950529677e-22,
+      "voigt_normalized_rms": 0.0017147921705007497,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        176.96235773032527,
+        176.96236326994557,
+        180.16470059339238,
+        180.16474309844483
+      ],
+      "signed_inplane_energies_meV": [
+        11.165353632310676,
+        11.166063743095016,
+        32.18840331000021,
+        32.188848464543284,
+        176.96235773032527,
+        176.96236326994557,
+        180.16470059339238,
+        180.16474309844483
+      ],
+      "negative_inplane_mode_count": 0,
+      "relative_zero_temperature_strengths": [
+        0.19752180722299922,
+        0.06583966926467054,
+        0.18416052249168186,
+        0.5524780010206484
+      ],
+      "experiment_energy_meV": 193.7,
+      "experiment_reported_error_meV": 0.2,
+      "fitted_center_bias_meV": -14.344684017654657,
+      "coarse_grid_center_difference_meV": -7.407081170640595e-08,
+      "coarse_grid_width_difference_meV": 2.751221472863108e-11,
+      "source_file": "graphite_results/gamma_precision/szv_fft21_k3/gamma_300K.npz",
+      "source_sha256": "58f8d176429cf377444112f2d8888147ec1d37184c9f017ecf37e947e8fbdda1",
+      "mode_source_file": "graphite_results/gamma_precision/szv_fft21_k3/gamma_300K.npz",
+      "mode_source_sha256": "58f8d176429cf377444112f2d8888147ec1d37184c9f017ecf37e947e8fbdda1",
+      "voigt_shift_from_300K_meV": 0.0,
+      "maximum_shift_from_300K_meV": 0.0,
+      "width_change_from_300K_meV": 0.0,
+      "shift_mismatch_meV": null
+    },
+    {
+      "case": "szv_fft27_k3",
+      "numerical_status": "numerical refinement; convergence not presumed",
+      "mechanism": "electronic_plus_bose",
+      "temperature_K": 1377.0,
+      "maximum_meV": 179.77646938315462,
+      "envelope_fwhm_meV": 11.13557871394795,
+      "voigt_center_meV": 179.77124796850194,
+      "voigt_fwhm_meV": 11.135262166140063,
+      "voigt_sigma_meV": 4.728710454812532,
+      "voigt_gamma_meV": 7.414052842057058e-16,
+      "voigt_normalized_rms": 0.00024243909199682493,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        178.51855453551238,
+        178.51855459918104,
+        180.1970673256622,
+        180.1970673890691
+      ],
+      "signed_inplane_energies_meV": [
+        -7.636779453523517,
+        -7.636777937179649,
+        9.942989561909592,
+        9.942990769239021,
+        178.51855453551238,
+        178.51855459918104,
+        180.1970673256622,
+        180.1970673890691
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.06397789762813541,
+        0.1919328846934866,
+        0.18602614523641056,
+        0.5580630724419675
+      ],
+      "experiment_energy_meV": 185.2,
+      "experiment_reported_error_meV": 0.3,
+      "fitted_center_bias_meV": -5.42875203149805,
+      "coarse_grid_center_difference_meV": -6.705477062496357e-09,
+      "coarse_grid_width_difference_meV": 7.844391802791506e-12,
+      "source_file": "graphite_results/gamma_precision/szv_fft27_k3/gamma_1377K.npz",
+      "source_sha256": "40f3cba27a91afd352b1a143946e758f27c7be83adc6feb54a33fb39e41680ca",
+      "mode_source_file": "graphite_results/gamma_precision/szv_fft27_k3/gamma_1377K.npz",
+      "mode_source_sha256": "40f3cba27a91afd352b1a143946e758f27c7be83adc6feb54a33fb39e41680ca",
+      "voigt_shift_from_300K_meV": 2.231463444639246,
+      "maximum_shift_from_300K_meV": 2.2023649133225547,
+      "width_change_from_300K_meV": -0.30287276776599015,
+      "shift_mismatch_meV": 10.731463444639246
+    },
+    {
+      "case": "szv_fft27_k3",
+      "numerical_status": "numerical refinement; convergence not presumed",
+      "mechanism": "bose_only",
+      "temperature_K": 1377.0,
+      "maximum_meV": 177.56980721350374,
+      "envelope_fwhm_meV": 11.44035119584592,
+      "voigt_center_meV": 177.5355123477122,
+      "voigt_fwhm_meV": 11.438106067093324,
+      "voigt_sigma_meV": 4.857316418394506,
+      "voigt_gamma_meV": 3.292052439702653e-23,
+      "voigt_normalized_rms": 0.001505559288389809,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        175.21566501544112,
+        175.21566508068787,
+        178.27097443336467,
+        178.2709744972377
+      ],
+      "signed_inplane_energies_meV": [
+        -22.725175054010137,
+        -22.725174537651608,
+        8.974701421699743,
+        8.974702742047855,
+        175.21566501544112,
+        175.21566508068787,
+        178.27097443336467,
+        178.2709744972377
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.06229248124005312,
+        0.18689350535226315,
+        0.1877154430709843,
+        0.5630985703366995
+      ],
+      "experiment_energy_meV": 185.2,
+      "experiment_reported_error_meV": 0.3,
+      "fitted_center_bias_meV": -7.664487652287789,
+      "coarse_grid_center_difference_meV": 6.959442089282675e-08,
+      "coarse_grid_width_difference_meV": 2.1685764295398258e-11,
+      "source_file": "graphite_results/gamma_precision/szv_fft27_k3/gamma_1377K.npz",
+      "source_sha256": "40f3cba27a91afd352b1a143946e758f27c7be83adc6feb54a33fb39e41680ca",
+      "mode_source_file": "graphite_results/gamma_precision/szv_fft27_k3/gamma_300K.npz",
+      "mode_source_sha256": "40ccd815c3e550d6bd213c9a3ab09f00f4ef2ec33909158d797ea0399f7d7601",
+      "voigt_shift_from_300K_meV": -0.0042721761504935785,
+      "maximum_shift_from_300K_meV": -0.004297256328328558,
+      "width_change_from_300K_meV": 0.0018997141319800903,
+      "shift_mismatch_meV": 8.495727823849506
+    },
+    {
+      "case": "szv_fft27_k3",
+      "numerical_status": "numerical refinement; convergence not presumed",
+      "mechanism": "electronic_plus_bose",
+      "temperature_K": 300.0,
+      "maximum_meV": 177.57410446983206,
+      "envelope_fwhm_meV": 11.43845148171394,
+      "voigt_center_meV": 177.5397845238627,
+      "voigt_fwhm_meV": 11.436332769448732,
+      "voigt_sigma_meV": 4.856563368220529,
+      "voigt_gamma_meV": 2.2660071797916334e-17,
+      "voigt_normalized_rms": 0.0015073884560718933,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        175.21566501544112,
+        175.21566508068787,
+        178.27097443336467,
+        178.2709744972377
+      ],
+      "signed_inplane_energies_meV": [
+        -22.725175054010137,
+        -22.725174537651608,
+        8.974701421699743,
+        8.974702742047855,
+        175.21566501544112,
+        175.21566508068787,
+        178.27097443336467,
+        178.2709744972377
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.06229248124005312,
+        0.18689350535226315,
+        0.1877154430709843,
+        0.5630985703366995
+      ],
+      "experiment_energy_meV": 193.7,
+      "experiment_reported_error_meV": 0.2,
+      "fitted_center_bias_meV": -16.160215476137296,
+      "coarse_grid_center_difference_meV": -4.056792590745317e-08,
+      "coarse_grid_width_difference_meV": 1.261923898709938e-11,
+      "source_file": "graphite_results/gamma_precision/szv_fft27_k3/gamma_300K.npz",
+      "source_sha256": "40ccd815c3e550d6bd213c9a3ab09f00f4ef2ec33909158d797ea0399f7d7601",
+      "mode_source_file": "graphite_results/gamma_precision/szv_fft27_k3/gamma_300K.npz",
+      "mode_source_sha256": "40ccd815c3e550d6bd213c9a3ab09f00f4ef2ec33909158d797ea0399f7d7601",
+      "voigt_shift_from_300K_meV": 0.0,
+      "maximum_shift_from_300K_meV": 0.0,
+      "width_change_from_300K_meV": 0.0,
+      "shift_mismatch_meV": null
+    },
+    {
+      "case": "szv_fft27_k3",
+      "numerical_status": "numerical refinement; convergence not presumed",
+      "mechanism": "bose_only",
+      "temperature_K": 300.0,
+      "maximum_meV": 177.57410446983206,
+      "envelope_fwhm_meV": 11.43845148171394,
+      "voigt_center_meV": 177.5397845238627,
+      "voigt_fwhm_meV": 11.436332769448732,
+      "voigt_sigma_meV": 4.856563368220529,
+      "voigt_gamma_meV": 2.2660071797916334e-17,
+      "voigt_normalized_rms": 0.0015073884560718933,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        175.21566501544112,
+        175.21566508068787,
+        178.27097443336467,
+        178.2709744972377
+      ],
+      "signed_inplane_energies_meV": [
+        -22.725175054010137,
+        -22.725174537651608,
+        8.974701421699743,
+        8.974702742047855,
+        175.21566501544112,
+        175.21566508068787,
+        178.27097443336467,
+        178.2709744972377
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.06229248124005312,
+        0.18689350535226315,
+        0.1877154430709843,
+        0.5630985703366995
+      ],
+      "experiment_energy_meV": 193.7,
+      "experiment_reported_error_meV": 0.2,
+      "fitted_center_bias_meV": -16.160215476137296,
+      "coarse_grid_center_difference_meV": -4.056792590745317e-08,
+      "coarse_grid_width_difference_meV": 1.261923898709938e-11,
+      "source_file": "graphite_results/gamma_precision/szv_fft27_k3/gamma_300K.npz",
+      "source_sha256": "40ccd815c3e550d6bd213c9a3ab09f00f4ef2ec33909158d797ea0399f7d7601",
+      "mode_source_file": "graphite_results/gamma_precision/szv_fft27_k3/gamma_300K.npz",
+      "mode_source_sha256": "40ccd815c3e550d6bd213c9a3ab09f00f4ef2ec33909158d797ea0399f7d7601",
+      "voigt_shift_from_300K_meV": 0.0,
+      "maximum_shift_from_300K_meV": 0.0,
+      "width_change_from_300K_meV": 0.0,
+      "shift_mismatch_meV": null
+    },
+    {
+      "case": "szv_fft33_k3",
+      "numerical_status": "numerical refinement; convergence not presumed",
+      "mechanism": "electronic_plus_bose",
+      "temperature_K": 1377.0,
+      "maximum_meV": 179.69700052440834,
+      "envelope_fwhm_meV": 11.135533200536486,
+      "voigt_center_meV": 179.69177863058155,
+      "voigt_fwhm_meV": 11.135217563556859,
+      "voigt_sigma_meV": 4.728691513839401,
+      "voigt_gamma_meV": 9.860761315262648e-32,
+      "voigt_normalized_rms": 0.00024246380140916172,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        178.43892059728407,
+        178.43892059729185,
+        180.11740250623282,
+        180.11740250623524
+      ],
+      "signed_inplane_energies_meV": [
+        -9.319860339403437,
+        -9.319860339381034,
+        7.626642495815897,
+        7.62664249596332,
+        178.43892059728407,
+        178.43892059729185,
+        180.11740250623282,
+        180.11740250623524
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.05884975508286855,
+        0.19694917614329863,
+        0.5942257000810705,
+        0.14997536869276235
+      ],
+      "experiment_energy_meV": 185.2,
+      "experiment_reported_error_meV": 0.3,
+      "fitted_center_bias_meV": -5.508221369418436,
+      "coarse_grid_center_difference_meV": -6.474067504314007e-09,
+      "coarse_grid_width_difference_meV": 6.87805368215777e-12,
+      "source_file": "graphite_results/gamma_precision/szv_fft33_k3/gamma_1377K.npz",
+      "source_sha256": "be12ab9d46241ffa9abbdbb190517eb5dd63de9545e7fd00e2580df3088d7b33",
+      "mode_source_file": "graphite_results/gamma_precision/szv_fft33_k3/gamma_1377K.npz",
+      "mode_source_sha256": "be12ab9d46241ffa9abbdbb190517eb5dd63de9545e7fd00e2580df3088d7b33",
+      "voigt_shift_from_300K_meV": 2.232570718690141,
+      "maximum_shift_from_300K_meV": 2.2034339785978148,
+      "width_change_from_300K_meV": -0.3031899666431457,
+      "shift_mismatch_meV": 10.732570718690141
+    },
+    {
+      "case": "szv_fft33_k3",
+      "numerical_status": "numerical refinement; convergence not presumed",
+      "mechanism": "bose_only",
+      "temperature_K": 1377.0,
+      "maximum_meV": 177.48926297024985,
+      "envelope_fwhm_meV": 11.440626675213764,
+      "voigt_center_meV": 177.45492940514563,
+      "voigt_fwhm_meV": 11.438381051625129,
+      "voigt_sigma_meV": 4.857433193573309,
+      "voigt_gamma_meV": 2.5414783381915642e-17,
+      "voigt_normalized_rms": 0.0015071872943722838,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        175.13419102522624,
+        175.13419102523562,
+        178.19056261098714,
+        178.19056261099436
+      ],
+      "signed_inplane_energies_meV": [
+        -23.44163857877384,
+        -23.441638578747988,
+        6.663386791056942,
+        6.6633867911396845,
+        175.13419102522624,
+        175.13419102523562,
+        178.19056261098714,
+        178.19056261099436
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.005967041763627922,
+        0.24319663335730451,
+        0.7507190104986738,
+        0.00011731438039361127
+      ],
+      "experiment_energy_meV": 185.2,
+      "experiment_reported_error_meV": 0.3,
+      "fitted_center_bias_meV": -7.745070594854354,
+      "coarse_grid_center_difference_meV": 5.1822468094542273e-08,
+      "coarse_grid_width_difference_meV": 2.2708945834892802e-11,
+      "source_file": "graphite_results/gamma_precision/szv_fft33_k3/gamma_1377K.npz",
+      "source_sha256": "be12ab9d46241ffa9abbdbb190517eb5dd63de9545e7fd00e2580df3088d7b33",
+      "mode_source_file": "graphite_results/gamma_precision/szv_fft33_k3/gamma_300K.npz",
+      "mode_source_sha256": "09683ff814c934723d1b3b3667676a8479eae5a011f98dd9a43aad9265c74607",
+      "voigt_shift_from_300K_meV": -0.004278506745777122,
+      "maximum_shift_from_300K_meV": -0.004303575560669515,
+      "width_change_from_300K_meV": 0.0019035080341325283,
+      "shift_mismatch_meV": 8.495721493254223
+    },
+    {
+      "case": "szv_fft33_k3",
+      "numerical_status": "numerical refinement; convergence not presumed",
+      "mechanism": "electronic_plus_bose",
+      "temperature_K": 300.0,
+      "maximum_meV": 177.49356654581052,
+      "envelope_fwhm_meV": 11.438723167179631,
+      "voigt_center_meV": 177.4592079118914,
+      "voigt_fwhm_meV": 11.436604278549572,
+      "voigt_sigma_meV": 4.856678667519689,
+      "voigt_gamma_meV": 2.867151523976072e-17,
+      "voigt_normalized_rms": 0.0015090182822212878,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        175.13419102522624,
+        175.13419102523562,
+        178.19056261098714,
+        178.19056261099436
+      ],
+      "signed_inplane_energies_meV": [
+        -23.44163857877384,
+        -23.441638578747988,
+        6.663386791056942,
+        6.6633867911396845,
+        175.13419102522624,
+        175.13419102523562,
+        178.19056261098714,
+        178.19056261099436
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.005967041763627922,
+        0.24319663335730451,
+        0.7507190104986738,
+        0.00011731438039361127
+      ],
+      "experiment_energy_meV": 193.7,
+      "experiment_reported_error_meV": 0.2,
+      "fitted_center_bias_meV": -16.240792088108577,
+      "coarse_grid_center_difference_meV": -2.4553003186156275e-08,
+      "coarse_grid_width_difference_meV": 1.4352963262354024e-11,
+      "source_file": "graphite_results/gamma_precision/szv_fft33_k3/gamma_300K.npz",
+      "source_sha256": "09683ff814c934723d1b3b3667676a8479eae5a011f98dd9a43aad9265c74607",
+      "mode_source_file": "graphite_results/gamma_precision/szv_fft33_k3/gamma_300K.npz",
+      "mode_source_sha256": "09683ff814c934723d1b3b3667676a8479eae5a011f98dd9a43aad9265c74607",
+      "voigt_shift_from_300K_meV": 0.0,
+      "maximum_shift_from_300K_meV": 0.0,
+      "width_change_from_300K_meV": 0.0,
+      "shift_mismatch_meV": null
+    },
+    {
+      "case": "szv_fft33_k3",
+      "numerical_status": "numerical refinement; convergence not presumed",
+      "mechanism": "bose_only",
+      "temperature_K": 300.0,
+      "maximum_meV": 177.49356654581052,
+      "envelope_fwhm_meV": 11.438723167179631,
+      "voigt_center_meV": 177.4592079118914,
+      "voigt_fwhm_meV": 11.436604278549572,
+      "voigt_sigma_meV": 4.856678667519689,
+      "voigt_gamma_meV": 2.867151523976072e-17,
+      "voigt_normalized_rms": 0.0015090182822212878,
+      "voigt_center_error_meV": null,
+      "eigenvalues_meV": [
+        175.13419102522624,
+        175.13419102523562,
+        178.19056261098714,
+        178.19056261099436
+      ],
+      "signed_inplane_energies_meV": [
+        -23.44163857877384,
+        -23.441638578747988,
+        6.663386791056942,
+        6.6633867911396845,
+        175.13419102522624,
+        175.13419102523562,
+        178.19056261098714,
+        178.19056261099436
+      ],
+      "negative_inplane_mode_count": 2,
+      "relative_zero_temperature_strengths": [
+        0.005967041763627922,
+        0.24319663335730451,
+        0.7507190104986738,
+        0.00011731438039361127
+      ],
+      "experiment_energy_meV": 193.7,
+      "experiment_reported_error_meV": 0.2,
+      "fitted_center_bias_meV": -16.240792088108577,
+      "coarse_grid_center_difference_meV": -2.4553003186156275e-08,
+      "coarse_grid_width_difference_meV": 1.4352963262354024e-11,
+      "source_file": "graphite_results/gamma_precision/szv_fft33_k3/gamma_300K.npz",
+      "source_sha256": "09683ff814c934723d1b3b3667676a8479eae5a011f98dd9a43aad9265c74607",
+      "mode_source_file": "graphite_results/gamma_precision/szv_fft33_k3/gamma_300K.npz",
+      "mode_source_sha256": "09683ff814c934723d1b3b3667676a8479eae5a011f98dd9a43aad9265c74607",
+      "voigt_shift_from_300K_meV": 0.0,
+      "maximum_shift_from_300K_meV": 0.0,
+      "width_change_from_300K_meV": 0.0,
+      "shift_mismatch_meV": null
+    }
+  ],
+  "experimental_shift_meV": -8.5,
+  "experimental_formal_shift_error_meV": 0.36055512754639896,
+  "experimental_error_assumption": "Independent endpoint fit errors; covariance and confidence coverage unspecified. No propagation of temperature errors into energy errors.",
+  "fit": {
+    "energy_bounds_meV": [
+      150.08639040125033,
+      205.77618448370657
+    ],
+    "energy_spacing_meV": 0.010000000000005116,
+    "model": "single Voigt, free area/center/Gaussian sigma/Lorentzian gamma; zero background",
+    "loss": "uniform least squares on peak-normalized noiseless model loss spectrum"
+  },
+  "limitations": [
+    "Fixed representative lattice; no thermal expansion or geometry relaxation.",
+    "Only positive optical modes are synthesized; signed low in-plane modes are retained and no bulk stability is claimed.",
+    "No bulk cubic/quartic phonon self-energy or anharmonic lifetime.",
+    "No finite experimental momentum acceptance, screening, detector geometry or multiple scattering.",
+    "Unit form factors and Gaussian 11 meV instrumental FWHM are declared model assumptions.",
+    "Apparent widths contain instrument and unresolved mode mixing only; fitted Lorentzian is not a lifetime.",
+    "Experimental raw spectra/width endpoints are unavailable here; no synthetic experimental curves or error bars.",
+    "Model fit has zero background and uniform residual weights; it does not reproduce the full experimental fitting pipeline.",
+    "Model errors are unquantified; reported formal experimental errors exclude model and calibration systematics."
+  ],
+  "validation": {
+    "single_gaussian_center_meV": 179.99999999999923,
+    "single_gaussian_fwhm_meV": 11.0,
+    "single_gaussian_voigt_fit": {
+      "voigt_center_meV": 180.0,
+      "voigt_fwhm_meV": 10.99999999969858,
+      "voigt_sigma_meV": 4.6712699009380625,
+      "voigt_gamma_meV": 1.1450811039830702e-09,
+      "voigt_normalized_rms": 1.3768851002322386e-11,
+      "voigt_center_error_meV": null
+    },
+    "grid_refinement_check": "0.01 vs 0.02 meV, tolerance 1e-5 meV"
+  },
+  "runtime": {
+    "host": "c20",
+    "backend": "cpu",
+    "x64": true,
+    "jax_version": "0.10.0",
+    "numpy_version": "2.4.4",
+    "omp_threads": "2",
+    "openblas_threads": "2",
+    "elapsed_seconds": 13.328866696014302
+  },
+  "source_hashes": {
+    "/home/yjiao/gradscf_checks/graphite-paper-comparison-8509c60/examples/thermally_excited_graphite/experiment_reference.json": "ede35eb84021d0247dd0cbb5d83e46e3011e1dc04a5131f210326cb2abe5c34d",
+    "/home/yjiao/gradscf_checks/graphite-paper-comparison-8509c60/examples/thermally_excited_graphite/09_compare_paper.py": "5271995021e1cb012c2a85a29add5cbcdea65119d06c0a4e2135bbf883eaf634",
+    "/home/yjiao/gradscf_checks/graphite-paper-comparison-8509c60/src/gradscf/pbc/vibrational.py": "0f774990a35d68334519711e5011910c0257823fdac613f75fe88c5edbd82659"
+  }
+}

@@ -64,5 +64,5 @@ def compare(example):
 
 if __name__ == "__main__":
     root = Path(__file__).resolve().parents[2]
-    example = runpy.run_path(str(root / "examples" / "ethylene_boys.py"))
+    example = runpy.run_path(str(root / "examples" / "localization" / "ethylene_boys.py"))
     compare(example)

@@ -1,0 +1,8 @@
+{
+  "matrix_units": "Normalized observables versus dimensionless theta; H is d2(E/Eh)/dtheta2.",
+  "coordinate_scale_bohr": 0.05,
+  "field_scale_au": 0.002,
+  "log_display_floor": 1e-17,
+  "exact_errors_retained_in_json": true,
+  "scope": "A small dense validation example; no unscaled Cartesian-Hessian or vibrational-frequency interpretation."
+}

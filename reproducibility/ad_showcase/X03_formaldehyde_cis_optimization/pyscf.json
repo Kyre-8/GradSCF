@@ -1,0 +1,241 @@
+{
+  "passed": true,
+  "reference": "Independent PySCF/SciPy dense CIS and PySCF analytic gradients",
+  "ground_energy_hartree": -113.85388191569501,
+  "excitation_hartree": 0.14851935783359244,
+  "total_excited_energy_hartree": -113.70536255786142,
+  "gradient_hartree_per_bohr": [
+    [
+      -4.575041567811411e-09,
+      1.7647718481006436e-08,
+      -1.1293795232347748e-08
+    ],
+    [
+      1.6443841371893697e-08,
+      -3.4128084969164973e-08,
+      -4.601977288132275e-08
+    ],
+    [
+      -6.492754042741744e-10,
+      -3.1061160310486002e-09,
+      -1.4549121907236895e-09
+    ],
+    [
+      -1.121952564187012e-08,
+      1.958648065958357e-08,
+      5.8768471644654596e-08
+    ]
+  ],
+  "max_cartesian_gradient": 5.8768471644654596e-08,
+  "gap_hartree": 0.16753792105079646,
+  "max_eigen_residual": 1.5336098585547146e-14,
+  "scf_orbital_gradient_norm": 6.168920549815188e-13,
+  "scf_gradient_tolerance": 1e-12,
+  "z_residual_norm": 1.1546449402887544e-11,
+  "z_residual_tolerance": 1e-10,
+  "curvature_method": "Central differences of independent analytic CIS gradients in the same six-coordinate chart",
+  "curvature_step_bohr": 0.0003,
+  "chart_hessian_hartree_per_bohr2": [
+    [
+      0.7436979068309314,
+      0.011360925202078914,
+      -0.04096056633725217,
+      0.011471130729745484,
+      -0.006746178703072777,
+      -0.04096057763784226
+    ],
+    [
+      0.011360926865193004,
+      0.30090252198800016,
+      -0.13671352398973252,
+      -0.0005286534698889511,
+      -0.018084768388012172,
+      0.013732174002356603
+    ],
+    [
+      -0.04096056795817778,
+      -0.1367135489664199,
+      0.12271523455620327,
+      0.002617894931574346,
+      -0.014174256867116599,
+      0.008119460487288066
+    ],
+    [
+      0.011471130469768259,
+      -0.0005286536754652479,
+      0.0026178948161111513,
+      0.06393678632921063,
+      -0.11783371096418806,
+      -0.06837698053596686
+    ],
+    [
+      -0.00674618032288817,
+      -0.01808476839985455,
+      -0.014174256544781846,
+      -0.1178336938389979,
+      0.24265057394538364,
+      0.11846662349102034
+    ],
+    [
+      -0.04096057925506714,
+      0.013732174397966073,
+      0.008119460480996803,
+      -0.06837697881641644,
+      0.1184666384224098,
+      0.12271507539574068
+    ]
+  ],
+  "raw_curvature_asymmetry": 2.4976687384992147e-08,
+  "chart_curvature_eigenvalues_hartree_per_bohr2": [
+    0.0035789823529669912,
+    0.026953676852182536,
+    0.06842896014463827,
+    0.37284961408941797,
+    0.3737859762137839,
+    0.7510208893924804
+  ],
+  "errors": {
+    "ground_energy_hartree": 1.7053025658242404e-13,
+    "excitation_hartree": 1.1535217225855376e-13,
+    "total_energy_hartree": 5.684341886080802e-14,
+    "gradient_hartree_per_bohr": 3.8114650324772015e-13,
+    "chart_curvature_hartree_per_bohr2": 7.942315789419285e-10
+  },
+  "tolerances": {
+    "ground_energy_hartree": 1e-08,
+    "excitation_hartree": 1e-07,
+    "total_energy_hartree": 1e-07,
+    "gradient_hartree_per_bohr": 1e-06,
+    "chart_curvature_hartree_per_bohr2": 2e-05
+  },
+  "displaced_checks": [
+    {
+      "atom": 1,
+      "axis": 2,
+      "sign": 1,
+      "excitation_hartree": 0.1484886651945863,
+      "gap_hartree": 0.16748270895157158,
+      "max_eigen_residual": 1.2342612746535481e-14,
+      "scf_orbital_gradient_norm": 6.145530121664282e-13,
+      "z_residual_norm": 1.1558633957215039e-11
+    },
+    {
+      "atom": 1,
+      "axis": 2,
+      "sign": -1,
+      "excitation_hartree": 0.14855005573412514,
+      "gap_hartree": 0.16759313935684209,
+      "max_eigen_residual": 1.6110327963958764e-14,
+      "scf_orbital_gradient_norm": 6.141551646121905e-13,
+      "z_residual_norm": 1.1533324408749396e-11
+    },
+    {
+      "atom": 2,
+      "axis": 1,
+      "sign": 1,
+      "excitation_hartree": 0.14851815182462008,
+      "gap_hartree": 0.16753701000659532,
+      "max_eigen_residual": 1.4891511772319353e-14,
+      "scf_orbital_gradient_norm": 7.123986958196783e-13,
+      "z_residual_norm": 2.2410953761879787e-11
+    },
+    {
+      "atom": 2,
+      "axis": 1,
+      "sign": -1,
+      "excitation_hartree": 0.1485205630094456,
+      "gap_hartree": 0.1675388325801287,
+      "max_eigen_residual": 1.937653482765931e-14,
+      "scf_orbital_gradient_norm": 7.137677026039933e-13,
+      "z_residual_norm": 2.2419654654292177e-11
+    },
+    {
+      "atom": 2,
+      "axis": 2,
+      "sign": 1,
+      "excitation_hartree": 0.14851728699440597,
+      "gap_hartree": 0.16753566636096068,
+      "max_eigen_residual": 1.5589615168818045e-14,
+      "scf_orbital_gradient_norm": 6.752743365148032e-13,
+      "z_residual_norm": 2.2404518648294862e-11
+    },
+    {
+      "atom": 2,
+      "axis": 2,
+      "sign": -1,
+      "excitation_hartree": 0.14852142725277062,
+      "gap_hartree": 0.1675401752168515,
+      "max_eigen_residual": 1.4870427279696888e-14,
+      "scf_orbital_gradient_norm": 6.583547353745209e-13,
+      "z_residual_norm": 2.2399420274668592e-11
+    },
+    {
+      "atom": 3,
+      "axis": 0,
+      "sign": 1,
+      "excitation_hartree": 0.14851366346566125,
+      "gap_hartree": 0.16753642510358308,
+      "max_eigen_residual": 1.5462294211611384e-14,
+      "scf_orbital_gradient_norm": 7.045433577436519e-13,
+      "z_residual_norm": 2.2421215169551174e-11
+    },
+    {
+      "atom": 3,
+      "axis": 0,
+      "sign": -1,
+      "excitation_hartree": 0.1485250511679881,
+      "gap_hartree": 0.16753941772360414,
+      "max_eigen_residual": 1.3932365377889594e-14,
+      "scf_orbital_gradient_norm": 7.081124269240619e-13,
+      "z_residual_norm": 2.2414525936628765e-11
+    },
+    {
+      "atom": 3,
+      "axis": 1,
+      "sign": 1,
+      "excitation_hartree": 0.14851767684458683,
+      "gap_hartree": 0.16753815390964638,
+      "max_eigen_residual": 1.3921731488619428e-14,
+      "scf_orbital_gradient_norm": 7.142686641826682e-13,
+      "z_residual_norm": 2.242012056722411e-11
+    },
+    {
+      "atom": 3,
+      "axis": 1,
+      "sign": -1,
+      "excitation_hartree": 0.14852103715401477,
+      "gap_hartree": 0.1675376884790198,
+      "max_eigen_residual": 1.427172798081055e-14,
+      "scf_orbital_gradient_norm": 7.200108296352999e-13,
+      "z_residual_norm": 2.2418141859186313e-11
+    },
+    {
+      "atom": 3,
+      "axis": 2,
+      "sign": 1,
+      "excitation_hartree": 0.14851728698696737,
+      "gap_hartree": 0.16753566636471567,
+      "max_eigen_residual": 1.3234685107236092e-14,
+      "scf_orbital_gradient_norm": 6.654071277278435e-13,
+      "z_residual_norm": 2.240134689609148e-11
+    },
+    {
+      "atom": 3,
+      "axis": 2,
+      "sign": -1,
+      "excitation_hartree": 0.14852142726020956,
+      "gap_hartree": 0.16754017521308984,
+      "max_eigen_residual": 1.3930526818241151e-14,
+      "scf_orbital_gradient_norm": 6.203118686183605e-13,
+      "z_residual_norm": 2.2393938573362628e-11
+    }
+  ],
+  "cphf_tolerance": 1e-13,
+  "cphf_max_cycle": 100,
+  "krylov_linear_dependence_cutoff": 1e-26,
+  "elapsed_seconds": 17.127571769990027,
+  "pyscf": "2.13.0",
+  "hostname": "c20",
+  "native_sha256": "7ffbd34bbed2d013ee0fb4dd1e69deda90f66a4b7b3f6a04be82fc09a79d2c4d",
+  "script_sha256": "16a6041fb8a673c1b3f12b841c8b2b66dae4bae96da9677adefb9f95737f031e"
+}

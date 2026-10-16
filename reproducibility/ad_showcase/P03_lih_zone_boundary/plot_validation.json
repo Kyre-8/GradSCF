@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "input_sha256": {
+    "full": "a933b10f13dc61598369fb308364e0480c6de521e2e53c544ca1508d14f6d73a",
+    "probe": "c84c2b452655a140081d9408ac1a1d6d7c874f8130a926f1521521dc380d8781",
+    "reference": "021266c8de16f77f086bbdccdae6b3949776108a911da3e4eb8007c8838c9296",
+    "folding": "06eb127b59a9cad04532dd29b00afd4eb990ee31cb588d773ef56c22324f04f6"
+  },
+  "script_sha256": "e4e95b22efc5ceaf09d11cc0ff3ed8af7d3f68cc3ef458c039edf488d2cf1277",
+  "frequencies_signed_cm1": [
+    -438.54981953337136,
+    -438.48745590850314,
+    -103.76779972739702,
+    -103.73667716552873,
+    596.1232933942998,
+    1313.0853864973176
+  ],
+  "negative_native_modes": 4,
+  "independent_columns": [
+    "H x"
+  ],
+  "asr_projected": false,
+  "scope": "Raw finite-model q-half matrix and selected-column independent check; no complete dispersion or material stability claim."
+}

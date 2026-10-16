@@ -1,0 +1,71 @@
+{
+  "complete": true,
+  "validation_passed": true,
+  "endpoints": [
+    {
+      "q_sqrt_me_bohr": 0.09599693862133835,
+      "chi_column": [
+        0.006597308616573177,
+        0.42240391528532284,
+        0.006736216235741909
+      ],
+      "linear_residual": 1.946420802312332e-11,
+      "energy_hartree": -7.7882848557753155,
+      "gap_hartree": 0.07791017902079184,
+      "minimum_link": 0.5959521625931389,
+      "maximum_phase_change": 3.9968028886505635e-15
+    },
+    {
+      "q_sqrt_me_bohr": -0.09599693862133835,
+      "chi_column": [
+        0.006863269783038908,
+        0.42240348058138855,
+        0.006724362279495842
+      ],
+      "linear_residual": 1.1161738200371474e-11,
+      "energy_hartree": -7.7882847942963584,
+      "gap_hartree": 0.07790695485013391,
+      "minimum_link": 0.5959522035951987,
+      "maximum_phase_change": 4.884981308350689e-15
+    }
+  ],
+  "maximum_displacement_bohr": 0.0003,
+  "q_step_sqrt_me_bohr": 0.09599693862133835,
+  "comparison_source": "single-column probe",
+  "finite_difference": [
+    -0.0013852585836868188,
+    2.2641551935736364e-06,
+    6.174132433965292e-05
+  ],
+  "absolute_error": [
+    5.715056108478861e-10,
+    1.1911915219637301e-12,
+    1.5538344301014619e-10
+  ],
+  "gate": "abs(error) < 2e-8 + 5e-4*abs(AD dchi/dQ)",
+  "settings": {
+    "a_angstrom": 5.43,
+    "mesh": [
+      15,
+      15,
+      15
+    ],
+    "kmesh": [
+      3,
+      3,
+      3
+    ],
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "xc": "pbe",
+    "precision": 1e-10
+  },
+  "elapsed_seconds": 447.23205792800036,
+  "peak_rss_kib": 12499532,
+  "source_sha256": {
+    "src/gradscf/dfpt/electric.py": "c1f42df314bc6a646b975b0f44e6188097884b8095f86f30017f5fcd25cd2c1d",
+    "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+    "examples/pbc/silicon_raman.py": "4157e35f94bd6428396dd100b3ecd21afba0934621cdcb599e07e7005012220c",
+    "examples/pbc/check_silicon_raman.py": "762e5101e40b24b8e99e3cd7420952bb07870a1efae2baf5d5e23a5dfb33f3db"
+  }
+}

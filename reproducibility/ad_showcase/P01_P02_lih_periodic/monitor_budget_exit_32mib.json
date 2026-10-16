@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-c",
+    "import time; data=bytearray(64*1024**2); time.sleep(5)"
+  ],
+  "return_code": -15,
+  "peak_rss_kib": 74012,
+  "budget_kib": 32768,
+  "budget_exceeded": true,
+  "polling_seconds": 0.25,
+  "accepted": false
+}

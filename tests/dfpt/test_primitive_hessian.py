@@ -31,7 +31,7 @@ def test_ewald_q_curvature_matches_supercell(repetitions,q,outside):
     np.testing.assert_allclose(actual,expected,atol=2e-9,rtol=0)
 
 
-@pytest.mark.parametrize('xc',['hf','hf-noewald','pbe'])
+@pytest.mark.parametrize('xc',['hf','hf-noewald','pbe','r2scan'])
 def test_bare_geometry_curvature_matches_supercell(xc):
     from gradscf.dfpt.force_constants import geometry_curvature
     from gradscf.pbc.phonon import _replica

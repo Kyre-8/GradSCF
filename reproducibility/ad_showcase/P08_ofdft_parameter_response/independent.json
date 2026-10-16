@@ -1,0 +1,146 @@
+{
+  "passed": true,
+  "native_sha256": "cda13c9a3ae9702fbbcd7c6a7aa2b1614917eeb814fc7e353ca99f5f523e9886",
+  "method": "Analytic TF/vW density Hessian; independent NumPy Fourier matrices and SciPy fixed-N bordered solve",
+  "continuum_energy_hartree": 0.12441728129644034,
+  "continuum_quadrature_orders": [
+    48,
+    80
+  ],
+  "continuum_quadrature_difference": 9.159339953157541e-16,
+  "cases": [
+    {
+      "mesh": [
+        5,
+        5,
+        3
+      ],
+      "exact_discrete_energy_hartree": 0.12441733051059689,
+      "energy_error": 1.942890293094024e-16,
+      "continuum_energy_error": 4.9214156361276906e-08,
+      "maximum_potential_response_error": 7.318243233633837e-13,
+      "independent_kkt_residual": 5.783075831880366e-15,
+      "chemical_potential_response": 0.10242524295814019,
+      "potential_energy_curvature": -2.0927170426381965
+    },
+    {
+      "mesh": [
+        7,
+        7,
+        3
+      ],
+      "exact_discrete_energy_hartree": 0.12441728133833888,
+      "energy_error": 3.0531133177191805e-16,
+      "continuum_energy_error": 4.189884550420686e-11,
+      "maximum_potential_response_error": 6.791026074814965e-13,
+      "independent_kkt_residual": 1.461452959470738e-14,
+      "chemical_potential_response": 0.1024282124558226,
+      "potential_energy_curvature": -2.092638431422337
+    },
+    {
+      "mesh": [
+        9,
+        9,
+        3
+      ],
+      "exact_discrete_energy_hartree": 0.1244172812965254,
+      "energy_error": 7.632783294297951e-16,
+      "continuum_energy_error": 8.583411759133242e-14,
+      "maximum_potential_response_error": 2.9917734956086406e-13,
+      "independent_kkt_residual": 3.450348230788659e-14,
+      "chemical_potential_response": 0.10242826802741663,
+      "potential_energy_curvature": -2.092637050663879,
+      "maximum_parameter_jacobian_error": 5.722753000647618e-13,
+      "energy_gradient_error": 2.248201624865942e-15,
+      "taylor_energy_coefficients": [
+        0.028249796735819777,
+        -0.0008351413845837172
+      ],
+      "taylor_energy_coefficient_error": 1.0408340855860843e-16,
+      "constrained_energy_hessian": [
+        [
+          -2.092637050663882,
+          -0.12675915442496802,
+          -0.2528330258485307
+        ],
+        [
+          -0.1267591544249678,
+          -0.013219820971789545,
+          -0.026180003154954737
+        ],
+        [
+          -0.25283302584853057,
+          -0.026180003154954716,
+          -0.05318855157615977
+        ]
+      ]
+    },
+    {
+      "mesh": [
+        11,
+        11,
+        3
+      ],
+      "exact_discrete_energy_hartree": 0.12441728129644017,
+      "energy_error": 7.771561172376096e-16,
+      "continuum_energy_error": 6.106226635438361e-16,
+      "maximum_potential_response_error": 2.3800406090401793e-15,
+      "independent_kkt_residual": 6.77048868086251e-14,
+      "chemical_potential_response": 0.10242826845356187,
+      "potential_energy_curvature": -2.0926370397957967
+    }
+  ],
+  "relative_curvature_grid_increments": [
+    3.756559885315315e-05,
+    6.598174572861561e-07,
+    5.193486604376365e-09
+  ],
+  "density_map_grid_increments": [
+    {
+      "target_mesh": [
+        7,
+        7,
+        3
+      ],
+      "relative_l2_by_parameter": [
+        0.0018493173878350105,
+        0.002865336110187423,
+        0.0032005424140015616
+      ]
+    },
+    {
+      "target_mesh": [
+        9,
+        9,
+        3
+      ],
+      "relative_l2_by_parameter": [
+        8.465685427420816e-05,
+        6.143041119717868e-05,
+        4.7506034030669134e-05
+      ]
+    },
+    {
+      "target_mesh": [
+        11,
+        11,
+        3
+      ],
+      "relative_l2_by_parameter": [
+        1.2028581942638596e-06,
+        6.821890174198953e-07,
+        2.203867937951987e-06
+      ]
+    }
+  ],
+  "density_map_grid_definition": "Relative L2 change of complete Fourier interpolants; parameter order potential,tf,vw; not a continuum error bound",
+  "input_npz_sha256": {
+    "mesh_11.npz": "7896c41b565ec5f217d55b9b57a29436737d713cfef07a9a3913680a3e7278c6",
+    "mesh_5.npz": "c8edee9ce20093c6545a7b1d28fff0a28d236c1ca575f9a907041bf2411ca008",
+    "mesh_7.npz": "7acb66ae05e3e2b2df2a0a6938419afeefc620fdcc24f2cd3c72d930170260d1",
+    "mesh_9.npz": "7c74b46515c2ebb4be51afdf4568cdb3948f47cd66ca1204a6f72b291986f0be"
+  },
+  "elapsed_seconds": 0.22062748300959356,
+  "python": "3.11.15",
+  "hostname": "c20"
+}

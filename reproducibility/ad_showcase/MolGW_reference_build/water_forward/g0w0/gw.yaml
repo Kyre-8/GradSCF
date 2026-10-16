@@ -1,0 +1,422 @@
+---
+input parameters:
+    a1:                            [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00]
+    a2:                            [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00]
+    a3:                            [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00]
+    acfd_nlambda:                        21
+    alpha_hybrid:                    1.00000000E+00
+    alpha_mixing:                    7.00000000E-01
+    analytic_chi:                  False
+    approx_h_x2c:                  True 
+    assume_scf_converged:          False
+    auto_auxil_fsam:                 1.50000000E+00
+    auto_auxil_lmaxinc:                   1
+    auto_occupation:               False
+    auxil_basis:                   
+    basis:                         6-31Gs
+    basis_path:                    /home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/molgw-stock/basis/
+    beta_hybrid:                     0.00000000E+00
+    bogoliubov_scf:                False
+    bogoliubov_sigma:                1.00000000E+00
+    c_speedlight:                    1.37035999E+02
+    calc_charge_step:                1.00000000E+00
+    calc_dens_disc:                False
+    calc_q_matrix:                 False
+    calc_spectrum:                 False
+    cc4s_input:                    molgw
+    cc4s_output:                   molgw
+    charge:                          0.00000000E+00
+    check_cdsc_x2c:                True 
+    ci_greens_function:            HOLES
+    ci_nstate:                            1
+    ci_nstate_self:                       1
+    ci_spin_multiplicity:                 1
+    ci_type:                       ALL
+    comment:                       
+    complex_scf:                   False
+    cphf_cpks_0:                   False
+    cube_nx:                             30
+    cube_ny:                             30
+    cube_nz:                             30
+    cube_state_max:                       1
+    cube_state_min:                       1
+    density_matrix_damping:          0.00000000E+00
+    dft_core:                             0
+    diis_switch:                     5.00000000E-02
+    ecp_auxil_basis:               
+    ecp_basis:                     
+    ecp_elements:                  
+    ecp_quality:                   HIGH
+    ecp_small_basis:               
+    ecp_type:                      
+    electric_field_x:                0.00000000E+00
+    electric_field_y:                0.00000000E+00
+    electric_field_z:                0.00000000E+00
+    eri3_genuine:                  False
+    eri3_nbatch:                          1
+    eri3_npcol:                           1
+    eri3_nprow:                           1
+    eta:                             1.00000000E-05
+    even_tempered_alpha:             1.00000000E+00
+    even_tempered_beta:              5.00000000E-01
+    even_tempered_n_list:          1
+    excit_dir:                     [  1.00000000E+00,   0.00000000E+00,   0.00000000E+00]
+    excit_kappa:                     2.00000000E-05
+    excit_name:                    NO
+    excit_time0:                     3.00000000E+00
+    excit_width:                     2.00000000E-01
+    fft_coulomb_cutoff:              0.00000000E+00
+    fft_coulomb_exchange:          spherical
+    fft_coulomb_hartree:           bare
+    fft_ecut:                        1.20000000E+02
+    fft_ecut_postscf:                9.99990000E+04
+    fft_neighbors:                        1
+    fft_read_density:              False
+    fft_renormalize:               True 
+    force_energy_qp:               False
+    frozencore:                    NO
+    g3w2_skip_vv:                  False
+    g3w2_skip_vvv:                 False
+    g3w2_static_approximation:     False
+    gamma_hybrid:                    1.00000000E+06
+    gaussian_type:                 CART
+    grid_memory:                     4.00000000E+02
+    grid_quality:                  HIGH
+    gwgamma_tddft:                 False
+    harmonium:                     False
+    ignore_bigrestart:             False
+    incore:                        True 
+    init_hamiltonian:              GUESS
+    integral_quality:              HIGH
+    kappa_hybrid:                    0.00000000E+00
+    kerker_k0:                       0.00000000E+00
+    length_unit:                   BOHR
+    level_shifting_energy:           0.00000000E+00
+    magnetization:                   0.00000000E+00
+    memory_evaluation:             False
+    min_overlap:                     1.00000000E-05
+    mixing_scheme:                 PULAY
+    move_nuclei:                   no
+    mpi_poorman:                   False
+    mu_origin:                      -1.00000000E+02
+    n_iter:                               2
+    n_restart_tddft:                     50
+    natom:                                3
+    ncore_tddft:                          0
+    ncoreg:                               0
+    ncorew:                               0
+    nexcitation:                          0
+    nghost:                               0
+    noft_complex:                  False
+    noft_dft:                      False
+    noft_dft0:                     True 
+    noft_fcidump:                  False
+    noft_functional:               GNOF
+    noft_hessian:                  False
+    noft_ithresh_lambda:                  5
+    noft_lowmemeri:                True 
+    noft_lpower:                     5.30000000E-01
+    noft_ncoupled:                        2
+    noft_ndiis:                           5
+    noft_nophases:                 False
+    noft_notupdateocc:             False
+    noft_notupdateorb:             False
+    noft_notvxc:                   False
+    noft_npairs:                          1
+    noft_nr_occ:                   False
+    noft_nscf:                         1000
+    noft_printdmn:                 False
+    noft_printints:                False
+    noft_printswdmn:               False
+    noft_qc_orb:                   False
+    noft_readcoef:                 False
+    noft_readfdiag:                False
+    noft_readgammas:               False
+    noft_readocc:                  False
+    noft_restart:                  False
+    noft_rsinter:                  False
+    noft_tole:                       1.00000000E-09
+    nomega_chi_imag:                      0
+    nomega_chi_real:                      2
+    nomega_sigma:                    400001
+    nomega_sigma_calc:                    1
+    npulay_hist:                          6
+    nscf:                               100
+    nspin:                                1
+    nstep:                                1
+    nstep_dav:                           15
+    nstep_gw:                             1
+    nvel_projectile:                      1
+    nvirtualg:                           20
+    nvirtualw:                           20
+    parabolic_conf:                False
+    partition_scheme:              SSF
+    pbe_plus_alpha:                  0.00000000E+00
+    poscar_file:                   
+    postscf:                       G0W0
+    postscf_diago_flavor:          
+    print_all_mo_wfn_file:         False
+    print_bare_energy:             False
+    print_bigrestart:              True 
+    print_c_matrix_cmplx_hdf5:     False
+    print_cc4s_files:              False
+    print_charge_tddft:            False
+    print_cube:                    False
+    print_cube_diff_tddft:         False
+    print_cube_rho_tddft:          False
+    print_dens_traj:               False
+    print_dens_traj_points_set:    False
+    print_dens_traj_tddft:         False
+    print_density_matrix:          False
+    print_eri:                     False
+    print_hartree:                 False
+    print_hdf5:                    False
+    print_line_rho_diff_tddft:     False
+    print_line_rho_tddft:          False
+    print_molden:                  False
+    print_multipole:               False
+    print_p_matrix_mo_block_hdf5:  False
+    print_pdos:                    False
+    print_restart:                 True 
+    print_rho_grid:                False
+    print_sigma:                   False
+    print_spatial_extension:       False
+    print_tddft_matrices:          False
+    print_tddft_restart:           True 
+    print_transition_density:      False
+    print_transition_dipole:       False
+    print_w:                       True 
+    print_wfn:                     False
+    print_wfn_files:               False
+    print_yaml:                    True 
+    projectile_charge_scaling:       1.00000000E+00
+    pt3_a_diagrams:                YES
+    pt_density_matrix:             NO
+    r_disc:                          2.00000000E+02
+    rcut_mbpt:                       1.00000000E+00
+    rdm_filtering_mo:                     0
+    rdm_filtering_no:                     0
+    read_fchk:                     NO
+    read_molden:                   
+    read_restart:                  False
+    read_tddft_restart:            False
+    restart_input:                 RESTART
+    rwconfinement:                   0.00000000E+00
+    scalapack_block_min:             100000
+    scf:                           HF
+    scf_diago_flavor:              
+    scf_energy_shift:                0.00000000E+00
+    scissor:                         0.00000000E+00
+    selfenergy_state_max:                19
+    selfenergy_state_min:                 1
+    selfenergy_state_range:          100000
+    selfenergy_tdhf_alpha:           0.00000000E+00
+    selfenergy_tdhf_beta:            0.00000000E+00
+    selfenergy_tdhf_delta:           2.00000000E+00
+    selfenergy_tdhf_epsilon:         0.00000000E+00
+    selfenergy_tdhf_gamma:           1.00000000E+00
+    selfenergy_tdhf_zeta:            0.00000000E+00
+    small_basis:                   
+    step_sigma:                      5.00000000E-06
+    step_sigma_calc:                 3.00000000E-02
+    stopping:                      no
+    stopping_dq:                     2.00000000E-02
+    stopping_nq:                        500
+    tda:                           False
+    tddft_charge:                   -9.99000000E+02
+    tddft_energy_shift:              0.00000000E+00
+    tddft_force:                   False
+    tddft_grid_quality:            HIGH
+    tddft_history:                        2
+    tddft_magnetization:             0.00000000E+00
+    tddft_predictor_corrector:     PC2B
+    tddft_propagator:              CN
+    tddft_wfn_t0:                  SCF
+    temperature:                     0.00000000E+00
+    time_sim:                        1.00000000E+01
+    time_step:                       1.00000000E+00
+    toldav:                          1.00000000E-04
+    tolforce:                        1.00000000E-05
+    tolscf:                          1.00000000E-12
+    tolscf_tddft:                    1.00000000E-04
+    triplet:                       False
+    use_correlated_density_matrix: False
+    vel_projectile:                [  0.00000000E+00,   0.00000000E+00,   1.00000000E+00]
+    virtual_fno:                   False
+    w_screening:                   RPA
+    write_step:                      1.00000000E+00
+    x2c:                           False
+    xyz_file:                      
+    yaml_output:                   molgw.yaml
+
+physical system:
+    electrons:     1.00000000E+01
+    length unit: bohr
+    atom list:
+        - [  O,     0.00000000E+00,     0.00000000E+00,     0.00000000E+00]
+        - [  H,     0.00000000E+00,     1.43000000E+00,     1.11000000E+00]
+        - [  H,     0.00000000E+00,    -1.43000000E+00,     1.11000000E+00]
+    basis list:
+        - [  O, 6-31Gs, ]
+        - [  H, 6-31Gs, ]
+        - [  H, 6-31Gs, ]
+
+calculation parameters:
+    basis functions:                  19
+    independent basis functions:      19
+    auxiliary basis functions:         0
+
+scf is converged: True
+
+scf energy:
+    unit: Ha
+    total:                   -7.60104928E+01
+    total exx:               -7.60104928E+01
+    nucleus-nucleus:          9.18821539E+00
+    kinetic:                  7.58188605E+01
+    electron-nucleus:        -1.98861212E+02
+    hartree:                  4.67962197E+01
+    exchange:                -8.95257622E+00
+    hybrid exchange:         -8.95257622E+00
+
+gks energies:
+    unit: eV
+    spin channel 1:
+        1     :    -5.59482633E+02
+        2     :    -3.65055984E+01
+        3     :    -1.92179181E+01
+        4     :    -1.55432145E+01
+        5     :    -1.35490862E+01
+        6     :     5.72988133E+00
+        7     :     8.27105114E+00
+        8     :     2.77996005E+01
+        9     :     3.07955155E+01
+        10    :     3.17759793E+01
+        11    :     3.18771789E+01
+        12    :     3.75648347E+01
+        13    :     3.90369278E+01
+        14    :     5.49631533E+01
+        15    :     5.53499524E+01
+        16    :     5.62659758E+01
+        17    :     7.13291105E+01
+        18    :     8.01596408E+01
+        19    :     1.08026613E+02
+
+gw selfenergy:
+    correlation:
+        unit: eV
+        spin channel 1:
+            1     :     1.26955197E+01
+            2     :     3.94234851E+00
+            3     :     6.06481301E-01
+            4     :     1.08668761E+00
+            5     :     1.37060308E+00
+            6     :    -3.29012630E-01
+            7     :    -3.48325604E-01
+            8     :    -9.84148876E-01
+            9     :    -1.01835831E+00
+            10    :    -1.09359043E+00
+            11    :    -1.82446775E+00
+            12    :    -2.56760652E+00
+            13    :    -9.37409629E-01
+            14    :    -1.41760051E+00
+            15    :    -1.18870381E+00
+            16    :    -9.25268965E-01
+            17    :    -1.40234452E+00
+            18    :    -3.80228600E+00
+            19    :    -2.33560376E+00
+    exchange minus vxc:
+        unit: eV
+        spin channel 1:
+            1     :     3.86697040E-13
+            2     :    -6.04214124E-15
+            3     :     1.20842825E-14
+            4     :     9.06321186E-15
+            5     :    -4.53160593E-15
+            6     :    -6.04214124E-15
+            7     :    -1.96369590E-14
+            8     :     3.02107062E-14
+            9     :    -1.81264237E-14
+            10    :     1.20842825E-14
+            11    :     3.02107062E-14
+            12    :    -6.04214124E-15
+            13    :    -3.02107062E-14
+            14    :     1.20842825E-14
+            15    :     0.00000000E+00
+            16    :     0.00000000E+00
+            17    :    -1.20842825E-13
+            18    :    -1.08758542E-13
+            19    :    -3.14191345E-13
+    renormalization factor:
+        spin channel 1:
+            1     :     8.75489294E-01
+            2     :     5.38064952E-01
+            3     :     9.56294096E-01
+            4     :     9.50688214E-01
+            5     :     9.49761239E-01
+            6     :     9.87278103E-01
+            7     :     9.84265260E-01
+            8     :     9.69111119E-01
+            9     :     9.33201212E-01
+            10    :     7.58338433E-01
+            11    :     9.37748061E-01
+            12    :     8.43177452E-01
+            13    :     8.98872715E-01
+            14    :     5.31595184E-01
+            15    :     5.51201878E-01
+            16    :     9.10145901E-01
+            17    :     5.72490833E-01
+            18    :     2.60569354E-01
+            19    :     2.39747739E-01
+
+gw energies:
+    unit: eV
+    spin channel 1:
+        1     :    -5.46787113E+02
+        2     :    -3.25632499E+01
+        3     :    -1.86114368E+01
+        4     :    -1.44565269E+01
+        5     :    -1.21784831E+01
+        6     :     5.40086870E+00
+        7     :     7.92272554E+00
+        8     :     2.68154517E+01
+        9     :     2.97771572E+01
+        10    :     3.06823888E+01
+        11    :     3.00527112E+01
+        12    :     3.49972282E+01
+        13    :     3.80995182E+01
+        14    :     5.35455528E+01
+        15    :     5.41612486E+01
+        16    :     5.53407068E+01
+        17    :     6.99267660E+01
+        18    :     7.63573548E+01
+        19    :     1.05691010E+02
+
+mbpt energy:
+    unit: Ha
+    total:                   -7.62195346E+01
+    total exx:               -7.60104928E+01
+    nucleus-nucleus:          9.18821539E+00
+    kinetic:                  7.58188605E+01
+    electron-nucleus:        -1.98861212E+02
+    hartree:                  4.67962197E+01
+    exchange:                -8.95257622E+00
+    hybrid exchange:         -8.95257622E+00
+    rpa correlation:         -2.09041827E-01
+
+warnings:
+
+run:
+    MOLGW version:   3.4
+    mpi tasks:            1
+    omp threads:          1
+    timing:
+        unit: s
+        total:       1.14780300E+02
+        prescf:      0.00000000E+00
+        scf:         0.00000000E+00
+        postscf:     1.14719900E+02
+    memory:
+        unit: Gb
+        peak:        3.80501151E-04
+...

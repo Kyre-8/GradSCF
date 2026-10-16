@@ -1,0 +1,188 @@
+{
+  "passed": true,
+  "repeat": 3,
+  "atom_count": 27,
+  "mesh": [
+    51,
+    51,
+    51
+  ],
+  "energy_hartree": -56.35958229409639,
+  "energy_error_hartree_per_atom": 1.052655904829778e-15,
+  "density_relative_l2_error": 6.239247167548107e-08,
+  "potential_max_error_hartree": 6.4254157550180935e-15,
+  "nuclear_error_hartree_per_atom": 1.578983857244667e-15,
+  "diagnostics": {
+    "convergence_code": 0,
+    "euler_rms_hartree": 1.4395169912603555e-07,
+    "electron_number": 80.99999999999994,
+    "fixed_density_potential_fd_error_hartree_per_atom": 9.26362381865115e-13,
+    "attempts": [
+      {
+        "attempt": 0,
+        "convergence_code": 0,
+        "euler_rms_hartree": 1.4395169912603555e-07,
+        "energy_hartree": -56.35958229409639,
+        "density_min": 0.007217605713256436,
+        "density_max": 0.030200325231069938,
+        "objective_evaluations": 249,
+        "optimizer_iterations": null,
+        "iteration_note": "DFTpy prints iterations to the run log; no public counter is stored"
+      }
+    ]
+  },
+  "response_finite_differences": [
+    {
+      "step_hartree": 0.003,
+      "density_jvp_relative_l2_error": 5.2652678917576905e-05,
+      "observable_directional_derivative": -1.6515294383709131,
+      "vjp_direction_error": 7.654076421870215e-05,
+      "energy_curvature_per_atom": -5.999300875216161,
+      "hvp_direction_error_per_atom": 0.0001271185185655836,
+      "plus_diagnostics": {
+        "convergence_code": 0,
+        "euler_rms_hartree": 1.2112438704023427e-07,
+        "electron_number": 80.99999999999993,
+        "fixed_density_potential_fd_error_hartree_per_atom": 1.6892569236430458e-10,
+        "attempts": [
+          {
+            "attempt": 0,
+            "convergence_code": 0,
+            "euler_rms_hartree": 1.2112438704023427e-07,
+            "energy_hartree": -56.37032002062494,
+            "density_min": 0.007290487320467171,
+            "density_max": 0.030612763026387463,
+            "objective_evaluations": 162,
+            "optimizer_iterations": null,
+            "iteration_note": "DFTpy prints iterations to the run log; no public counter is stored"
+          }
+        ]
+      },
+      "minus_diagnostics": {
+        "convergence_code": 0,
+        "euler_rms_hartree": 1.301207808284415e-07,
+        "electron_number": 81.0,
+        "fixed_density_potential_fd_error_hartree_per_atom": 1.680833538197101e-10,
+        "attempts": [
+          {
+            "attempt": 0,
+            "convergence_code": 0,
+            "euler_rms_hartree": 1.301207808284415e-07,
+            "energy_hartree": -56.35030239768052,
+            "density_min": 0.007131337299856199,
+            "density_max": 0.0304365081657522,
+            "objective_evaluations": 174,
+            "optimizer_iterations": null,
+            "iteration_note": "DFTpy prints iterations to the run log; no public counter is stored"
+          }
+        ]
+      }
+    },
+    {
+      "step_hartree": 0.001,
+      "density_jvp_relative_l2_error": 2.612792234734615e-05,
+      "observable_directional_derivative": -1.651590658346961,
+      "vjp_direction_error": 1.5320788170791744e-05,
+      "energy_curvature_per_atom": -5.999413870254271,
+      "hvp_direction_error_per_atom": 1.412348045606551e-05,
+      "plus_diagnostics": {
+        "convergence_code": 0,
+        "euler_rms_hartree": 1.237300443981578e-07,
+        "electron_number": 80.99999999999994,
+        "fixed_density_potential_fd_error_hartree_per_atom": 1.6908350182938867e-10,
+        "attempts": [
+          {
+            "attempt": 0,
+            "convergence_code": 0,
+            "euler_rms_hartree": 1.237300443981578e-07,
+            "energy_hartree": -56.362999743996326,
+            "density_min": 0.007241852424015682,
+            "density_max": 0.030335664305927074,
+            "objective_evaluations": 139,
+            "optimizer_iterations": null,
+            "iteration_note": "DFTpy prints iterations to the run log; no public counter is stored"
+          }
+        ]
+      },
+      "minus_diagnostics": {
+        "convergence_code": 0,
+        "euler_rms_hartree": 1.2355939681505328e-07,
+        "electron_number": 80.99999999999986,
+        "fixed_density_potential_fd_error_hartree_per_atom": 1.692413508718676e-10,
+        "attempts": [
+          {
+            "attempt": 0,
+            "convergence_code": 0,
+            "euler_rms_hartree": 1.2355939681505328e-07,
+            "energy_hartree": -56.35632682837095,
+            "density_min": 0.0071887797702965125,
+            "density_max": 0.030272177197501506,
+            "objective_evaluations": 144,
+            "optimizer_iterations": null,
+            "iteration_note": "DFTpy prints iterations to the run log; no public counter is stored"
+          }
+        ]
+      }
+    },
+    {
+      "step_hartree": 0.0003,
+      "density_jvp_relative_l2_error": 0.0001254095362472336,
+      "observable_directional_derivative": -1.6516693994009293,
+      "vjp_direction_error": 6.342026579742033e-05,
+      "energy_curvature_per_atom": -5.999426699556592,
+      "hvp_direction_error_per_atom": 1.2941781346011407e-06,
+      "plus_diagnostics": {
+        "convergence_code": 0,
+        "euler_rms_hartree": 1.3713805678210706e-07,
+        "electron_number": 80.99999999999991,
+        "fixed_density_potential_fd_error_hartree_per_atom": 1.6907294892824312e-10,
+        "attempts": [
+          {
+            "attempt": 0,
+            "convergence_code": 0,
+            "euler_rms_hartree": 1.3713805678210706e-07,
+            "energy_hartree": -56.360590527136765,
+            "density_min": 0.007224875847682919,
+            "density_max": 0.03023884551002053,
+            "objective_evaluations": 123,
+            "optimizer_iterations": null,
+            "iteration_note": "DFTpy prints iterations to the run log; no public counter is stored"
+          }
+        ]
+      },
+      "minus_diagnostics": {
+        "convergence_code": 0,
+        "euler_rms_hartree": 1.2310461171430072e-07,
+        "electron_number": 80.99999999999991,
+        "fixed_density_potential_fd_error_hartree_per_atom": 1.679360704639312e-10,
+        "attempts": [
+          {
+            "attempt": 0,
+            "convergence_code": 0,
+            "euler_rms_hartree": 1.2310461171430072e-07,
+            "energy_hartree": -56.3585886396629,
+            "density_min": 0.007208951949106161,
+            "density_max": 0.030219567225743652,
+            "objective_evaluations": 129,
+            "optimizer_iterations": null,
+            "iteration_note": "DFTpy prints iterations to the run log; no public counter is stored"
+          }
+        ]
+      }
+    }
+  ],
+  "elapsed_seconds": 148.87524261699946,
+  "native_json_sha256": "ffe66fe3af4c7a6957a5750c52089b557234a805e3395204374f1e0245d72794",
+  "reference_commit": "fbc47b4e1df3def1a2206e58c5a1a1a4d51db1d0",
+  "reference_euler_tolerance_hartree": 5e-06,
+  "reference_energy_tolerance_hartree_per_atom": 1e-14,
+  "reference_driver_sha256": "0d1971372f961ea44aae68178688ae385c392292336910b37c44c883bff0534d",
+  "adapter_sha256": "a16ab34be96f5fa98929c7f0e506fc2e24394068864ceef9f4c6a53369e519cf",
+  "method": "DFTpy own optimizer and functionals + independent NumPy WGC adapter; central FD response",
+  "scope": "Same discrete OFDFT model agreement; not KEDF-versus-KS physical error",
+  "process_peak_rss_kib": 419056,
+  "hostname": "c20",
+  "python": "3.11.15",
+  "backend": "NumPy CPU",
+  "dtype": "float64"
+}

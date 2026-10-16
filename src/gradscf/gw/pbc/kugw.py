@@ -28,6 +28,7 @@ from ..polarizability import rho_response_iw
 from ..screened import screened_w_imag_axis
 from ..types import GWResult
 from .product_basis import gamma_product_factors
+from .krgw import _validate_gw_reference
 
 
 def g0w0_cd_gamma_unrestricted(
@@ -138,8 +139,7 @@ class KUGW:
 
     def kernel(self, orbs: Sequence[int] | None = None):
         mf = self._scf
-        from ...pbc.scf import validate_reference
-        validate_reference(mf)
+        _validate_gw_reference(mf)
         result = mf.result
         mo_energy = jnp.asarray(result.mo_energy_spin[:, 0])
         mo_coeff = jnp.asarray(result.mo_coeff_spin[:, 0])

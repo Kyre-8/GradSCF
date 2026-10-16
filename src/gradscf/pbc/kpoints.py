@@ -61,6 +61,9 @@ class TimeReversalPlan(NamedTuple):
     def reduce_weights(self, weights):
         return jnp.zeros(len(self.representatives),dtype=weights.dtype).at[self.full_to_ir].add(weights)
 
+    def weights_consistent(self, weights):
+        return jnp.all(jnp.abs(weights-weights[self.partners])<1e-12)
+
     def consistent(self, matrices, tolerance=1e-8):
         # Self-paired Gamma/TRIM points must also equal their own conjugate.
         restored=jnp.take(matrices,self.partners,axis=-3).conj()

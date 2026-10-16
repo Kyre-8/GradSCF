@@ -1,0 +1,59 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-correlated-mp2-20261016",
+  "hostname": "c20",
+  "python_version": "3.11.15",
+  "python_source_tree_sha256": "11be505861cf5849a2e8be84f4e871e214f8398ab908e9445da73a87d5fb9f2c",
+  "python_source_count": 483,
+  "source_hash_algorithm": "SHA256 of sorted newline-joined path + space + file SHA256",
+  "physics_source_sha256": {
+    "src/gradscf_tools/correlated_response.py": "2aef64387e3a788f7ddb9aadc78f76a3898f3ddb34872276189c547180eb86a1",
+    "src/gradscf_tools/molecular_response.py": "c815909cbc61b8fb2f12240636c22c35701b7b94391783250fc3cb921a5a3b1a",
+    "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+    "src/gradscf/cc/ground.py": "fbb5b2ef1bae99c939cc6d5f3132f99152979f4e925d3f9828e5778d097d18c7",
+    "src/gradscf/cc/rccsd.py": "206faab2c4b5415cef1e3c343ad768f1c70ae119acbfe1a23baf198654e7977e",
+    "src/gradscf/mp/mp2.py": "0fa9734825eee5c2df14913c2c0941b878957a210e75b4dcbc6cc355b6287232",
+    "src/gradscf/mp/integrals.py": "42475203e0ec828455ddd993c2eecdb28186bfdb1de6ba71d728854850dd6634",
+    "src/gradscf/solvers/eigen/api.py": "b481a4501129c18e022a079e3bdfa2dfbab7b3d662506ad9cdcb1db27f4f7aa1",
+    "src/gradscf/solvers/eigen/response.py": "8566c795e5a098ab72d7255a6b607fe0545e41d585e3c4646bd6aec389406e7b",
+    "src/gradscf/solvers/nonlinear/iterate.py": "985caa51531077be9ca98b558d1658971b5f3ca0c91c56f3fca9d76a82ac071b",
+    "src/gradscf/solvers/nonlinear/root.py": "6896011c23957975ad5420cbd14edd47a69d2b837189723841484f07f6108981"
+  },
+  "native_libraries": {
+    "src/gradscf/integrals/_native/lib/libgradscf_integrals.so": "e02844ce6c1b5eebc2dc00a6eec5f1803fd33ad4150aa82e9858d5c0890b9904"
+  },
+  "example_scripts": {
+    "examples/geometry/plot_water_pbe_modes.py": "a1e82b2b12e30e934bd23859eaf768a20e33daaafd28376bf37a3d7615d518bf",
+    "examples/geometry/plot_water_pbe_optimization.py": "cbeef97c2aa2f7ffb332dd8df8d6d7994a8b872a6fa08b99e18994b6d40f0711",
+    "examples/geometry/water_correlated_forces.py": "65ea3fae13bab96371c093fe0eada9698f6d5ae3c27b90746762b979871bd198",
+    "examples/vibrations/compare_water_correlated_pyscf.py": "ca26dab88ca011f17fccc0bd70095edf23456bcd7a981bea1be9c3cafbd292fb",
+    "examples/vibrations/plot_water_correlated_spectra.py": "1275b6a5f8fbd43c16a29852db18b275c70e8ac01261c9da2eb79dffffe73842",
+    "examples/vibrations/plot_water_spectra.py": "b984d9b41295ed5dfa9f81e92f9450afb8073b044a76af96211af096109a3e2c",
+    "examples/vibrations/water_correlated_spectra.py": "8425476514ab40e8b589fddb8311ae27f2e5255562eeac68e15837c9d9ce9401",
+    "examples/vibrations/water_ir_raman.py": "103643bb09624d94a4c30cd55a4b90af51835ae487aa40e5f1380f1609d997d2"
+  },
+  "artifacts": {
+    "broadened.csv": "e5ed1125466219751935cec48dbedae719a9739d90c0a1d3209a693ced4df5d6",
+    "geometry.json": "7e6c99e49d7d8e0778ef915cb56ae5457d0e4ca6aced7db7599fffb908d78fba",
+    "gradscf.json": "e284ed9f4c9f91338b0971fa977adb38908015fe24579b9a66b4dd6f35bc14ee",
+    "harmonic_checks.pdf": "92ef5aad0a4b149fb1daf9bbbfdc1aef7a7fd1a00caf276fba6a0ab9562b0dc3",
+    "harmonic_checks.png": "c29fa116111342366702549f5b689431ff322618a57f46231bbc522f1125c41f",
+    "hessian.json": "3cc6252534bda922c146481da47ddeb9ab9286321defe6d5eebf643e61f5115e",
+    "ir_raman.pdf": "bbc91a440f01bd02c1530d2c416cf94029b3b405a65bcdc47c2685a4be37b592",
+    "ir_raman.png": "277ad6901aeaa1d7117c339fd0d2aeddbb325eb4d5ad3b62161a5641c0ebd8fe",
+    "isotope_frequencies.csv": "a02130e5929a0a70f201c6c11ebfec7da796db6eabbb491932ef29a4cd46f4bc",
+    "optimization.pdf": "37886c6b742a28a597cfe3c76fdcb37423f4bef5a56f58cb4acc7027f0710670",
+    "optimization.png": "6c411355dba3b762b9e5d1744fc2fa9f3bfe1a4bc828f1c0bea2134b15ad089e",
+    "pyscf.json": "55bda83e64e5d68026c938cabcd685b12bb08fabfb4b8b54d7b8ec2674465f15",
+    "pyscf_geometry.json": "2b6e162d96a2628efedc15588cfa8bd9e4b3e76572bdc9c171461f3661425f6b",
+    "sticks.csv": "1915c03bb00e887ecd226be0a0abffd0a4868cdc23af6f2171b1978d0f50b093",
+    "water_modes.gif": "3125a30c99c6d08f68119424750a04068d9ff4bff9966589e6180dfd6ce07f1e"
+  },
+  "animation": {
+    "frames": 40,
+    "frame0_sha256": "abf2c57fcf3b411750869f4a5db02dc58dd75e93e6b9b7d5eca37697fd9356e0",
+    "frame10_sha256": "7a3ee58f271eba155687a69940353f23284f1d6157028a784082cb955ada12d8"
+  },
+  "method": "mp2",
+  "physics_sources_match_runtime": true,
+  "boundary": "MP2 source includes the validated Hermitian nested-JIT integration"
+}

@@ -16,7 +16,7 @@ construct occupied KS orbitals or require an HF/KS reference.
 For Cell-based periodic calculations, `calc.nuc_grad_method().kernel()` gives
 Cartesian energy gradients. The same driver exposes forces and tensile-positive
 stress through its `result`; see [periodic geometry conventions](../pbc/README.md#forces-and-stress)
-and `examples/periodic_forces.py`. Grid and Gaussian amplitudes use the same
+and `examples/pbc/periodic_forces.py`. Grid and Gaussian amplitudes use the same
 geometry derivative helper and their existing constrained implicit/explicit
 solver. This facade does not supply molecular OFDFT nuclear gradients.
 
@@ -142,6 +142,14 @@ formed. For Gaussian amplitudes, M is the overlap matrix. The KKT residual is
 \[
 F(x,\eta;\theta)=\left(\nabla_x E-2\eta x,\;x^T x-1\right),\quad \mu=\eta/N.
 \]
+
+Forward optimization uses `E/N` with tolerance divided by the same dynamic `N`;
+returned energy, `residual_norm` and the configured forward tolerance retain
+the original physical/raw units. Implicit response uses the equivalent state
+`(x,mu)` and residual `(grad(E)/N-2*mu*x, x.T*x-1)`. Electron number remains a
+differentiable input in this change of units. Linear-solve tolerances and any
+regularization act in this normalized response chart. The constraint component
+is dimensionless, so the full residual norm is not a strictly Hartree quantity.
 
 `SCFDifferentiationConfig` and `attach_scf_backward` are shared with DFT. Implicit
 response solves the constrained transposed Jacobian system with shared GMRES (a failed incremental true-residual check retries the upstream

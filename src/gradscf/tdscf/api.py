@@ -115,6 +115,34 @@ class _BaseTD:
 
     @property
     def molecule(self) -> Any:
+        from ..scf.rsh import rsh_preset
+
+        rsh_source = (rsh_preset(getattr(self.mf, "xc", "")) is not None
+                      or getattr(self.mf, "range_separated_coefficients", None) is not None
+                      or getattr(self.mf, "eri_lr", None) is not None)
+        if rsh_source:
+            from ..scf.facade import RKS
+            from ..scf.molecules import RestrictedMolecule
+            from ..tddft.response import _restricted_rsh_coefficients
+
+            if not isinstance(self.mf, (RKS, RestrictedMolecule)):
+                raise NotImplementedError("Range-separated TD response currently supports closed-shell RKS singlets only.")
+            if not getattr(self, "singlet", True):
+                raise NotImplementedError("Range-separated triplet TD response is not implemented; only singlets are supported.")
+            if self.xc_params is not None:
+                raise NotImplementedError("Range-separated TD response does not support XC parameter overrides.")
+            if self.xc_functional is not None:
+                override = self.xc_functional
+                if isinstance(override, SemilocalResponseFunctional):
+                    override = override.xc_spec
+                if not isinstance(override, str) or rsh_preset(override) is None:
+                    raise NotImplementedError("Range-separated TD response requires the complete wb97xd functional.")
+            # This private TD adapter deliberately leaves the general
+            # to_reference/as_reference GW/DFPT boundary closed. Reuse the
+            # facade's existing freshness and converged-state checks.
+            reference = self.mf._ensure_reference() if isinstance(self.mf, RKS) else self.mf
+            _restricted_rsh_coefficients(reference)
+            return reference
         return as_reference(self.mf)
 
     @property
@@ -127,6 +155,8 @@ class _BaseTD:
                 return SemilocalResponseFunctional(self.xc_functional)
             return self.xc_functional
         source_xc = getattr(self.mf, "xc", None)
+        if source_xc is None and getattr(self.mf, "range_separated_coefficients", None) is not None:
+            source_xc = "wb97xd"
         if source_xc is None:
             return None
         if isinstance(source_xc, str):

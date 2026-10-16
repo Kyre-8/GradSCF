@@ -105,11 +105,33 @@ The default `gradient_mode="eigenvalue_only"` stops the iterative Ritz vectors
 and differentiates their Rayleigh energies. At convergence and for an isolated
 root, dE = c.T (dH) c. Coefficient derivatives are disabled in this mode.
 `gradient_mode="implicit_eigenvector"` additionally solves the constrained
-eigenvector response using the existing TD-SCF adjoint implementation. This
+eigenvector response using the shared Hermitian response implementation. This
 mode is necessary for coefficient-dependent objectives, including CIS(D).
-These rules implement **first-order** derivatives of converged, nondegenerate
-roots. Higher derivatives and differentiable root tracking at degeneracies
-are not supported contracts.
+The general CI/CIS(D) method-level validation covers **first-order** derivatives
+of converged, nondegenerate roots. Isolated singlet CIS has separate small-system
+second-response checks described below. Differentiable root tracking through
+degeneracies is not a supported contract.
+
+`solve_cis(..., response=EigenResponseConfig(...))` accepts the existing shared
+energy/eigenpair response policy. For a bounded small problem it can explicitly
+select `LinearSolverConfig(method="direct", max_dense=..., rtol=...)`; the
+default remains the legacy GMRES response. Explicit policy and nondefault
+legacy `gradient_mode`, `adjoint_tol`, or `adjoint_max_cycle` controls cannot be
+combined. The `CISResult` represents individual roots, so `target="subspace"`
+is rejected rather than returning a partial subspace result. First energy
+derivatives use stationarity and require no response linear solve; second
+derivatives and first amplitude derivatives do require one, including its
+capacity and true-residual checks.
+
+The dedicated H2/Cartesian 6-31G* tests compare a fixed-MO CIS parameter Hessian
+with independent PySCF matrices and dense eigenvalue differentiation, and a
+relaxed native-integral geometry HVP with reconverged native/PySCF gradient
+differences. These checks do not extend the general CI, UCIS or CIS(D)
+higher-response contract. For a multiroot request, every response branch that
+AD evaluates must converge: an unused root's failed response can still produce
+NaNs in a composed derivative. The caller must use a suitable shared response
+solver, without weakening the convergence guard or silently replacing failed
+responses.
 
 Unconverged roots remain available for diagnostics; `residual_norms` and
 `converged` are per-root arrays. Their energy derivatives are NaN. Check all

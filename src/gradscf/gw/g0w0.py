@@ -11,7 +11,7 @@ Assembles the quasiparticle correction on top of a converged mean-field
 
        w - e_p - [ Re Sigma_p(w) + v^x_pp - v^mf_pp ] = 0
 
-   is solved graphically with the contour-deformation self-energy
+   is solved as a nonlinear root with the contour-deformation self-energy
    (:mod:`gradscf.gw.self_energy`), where ``v^x`` is the exact-exchange
    potential and ``v^mf`` the mean-field potential minus Coulomb
    (v_xc for DFT, -K for HF).
@@ -33,6 +33,7 @@ References
 from __future__ import annotations
 
 from collections.abc import Sequence
+from math import isfinite
 from numbers import Integral
 
 import jax.numpy as jnp
@@ -144,6 +145,8 @@ def _qp_loop(
     return_weight=False,
     wmn_static=None,
     resolvent_data=None,
+    qp_initial=None,
+    qp_tol=1e-6,
 ) -> tuple[Array, ...]:
     """Solve the QP equation for every orbital in ``orbs`` (one spin channel).
 
@@ -222,6 +225,8 @@ def _qp_loop(
             occupied=occupied,
             diff_mode=diff_mode,
             method=qp_solver,
+            tol=qp_tol,
+            initial_guess=None if qp_initial is None else jnp.asarray(qp_initial)[jnp.asarray(orbs)],
         )
 
     # Compute the same observables and status eagerly and under transforms.
@@ -230,7 +235,7 @@ def _qp_loop(
     sig_roots = sigma_cd_batch(roots, shared, stacked)
     residual = roots - e_base - jnp.real(sig_roots) - dv
     if linearized or evaluate_only:
-        done = jnp.isfinite(roots) & (jnp.abs(residual) < 1e-6)
+        done = jnp.isfinite(roots) & (jnp.abs(residual) < qp_tol)
         if linearized:
             done = done & jnp.isfinite(zfac)
     qp_energy = e_mf.copy()
@@ -275,6 +280,8 @@ def g0w0_cd_restricted(
     wmn_static_fixed: Array | None = None,
     resolvent_expansion: bool = False,
     resolvent_data_fixed: dict | None = None,
+    qp_initial: Array | None = None,
+    qp_tol: float = 1e-6,
 ) -> GWResult:
     """Spin-restricted G0W0 with contour deformation.
 
@@ -316,6 +323,15 @@ def g0w0_cd_restricted(
     qp_solver:
         Nonlinear forward root method: secant, newton or hybrid. Alternative
         methods require a nonlinear solve, not linearized/evaluate-only mode.
+    qp_initial:
+        Optional real ``(nmo,)`` initial QP energies for a nonlinear solve.
+        Selected entries seed the requested roots without altering G/W or the
+        mean-field base. Implicit derivatives follow the selected root and do
+        not differentiate this numerical seed. This is not a main-peak selector.
+    qp_tol:
+        Positive absolute root step/residual tolerance (Hartree). The default
+        preserves the historical forward precision. Small displacement or
+        spectral-residue derivatives can require a tighter converged root.
     linearized:
         Take one Newton update about the pole energies, with G/W fixed.
         The frequency derivative holds the active residue set fixed; this
@@ -334,6 +350,14 @@ def g0w0_cd_restricted(
     nocc = int(nocc)
     nmo = mo_energy.shape[0]
     orbs = _requested_orbitals(orbs,nmo)
+    if not isfinite(qp_tol) or qp_tol <= 0:
+        raise ValueError("qp_tol must be positive and finite")
+    if qp_initial is not None:
+        qp_initial = jnp.asarray(qp_initial)
+        if qp_initial.shape != mo_energy.shape or jnp.iscomplexobj(qp_initial):
+            raise ValueError("qp_initial must be a real (nmo,) spectrum")
+        if linearized or evaluate_only:
+            raise ValueError("qp_initial requires a nonlinear QP solve")
 
     b_mn = _mo_factors(df_factors, mo_coeff)
     if not 0 < nocc < nmo:
@@ -399,6 +423,8 @@ def g0w0_cd_restricted(
         return_weight=True,
         wmn_static=wmn_static,
         resolvent_data=resolvent_data,
+        qp_initial=qp_initial,
+        qp_tol=float(qp_tol),
     )
     return GWResult(
         mo_energy=qp_energy,

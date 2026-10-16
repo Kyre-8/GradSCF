@@ -1,0 +1,229 @@
+{
+  "case": "NO_mp2",
+  "independent_energy_hartree": -129.56336712546567,
+  "scf_orbital_residual": 4.8242703818348866e-12,
+  "native_density_error": 7.843004024010725e-12,
+  "native_bond_fd_checks": [
+    {
+      "step_bohr": 0.001,
+      "derivative": 0.11551684312394173,
+      "error": 8.173057005650408e-06
+    },
+    {
+      "step_bohr": 0.0003,
+      "derivative": 0.11550940612892192,
+      "error": 7.360619858481909e-07
+    },
+    {
+      "step_bohr": 0.0001,
+      "derivative": 0.11550875157695373,
+      "error": 8.151001765210886e-08
+    }
+  ],
+  "variants": [
+    {
+      "label": "default",
+      "requested_overrides": {},
+      "ucphf": [
+        {
+          "tol": 1e-09,
+          "max_cycle": 30,
+          "true_residual_l2": 0.00019076067895929964,
+          "true_residual_max": 6.199289972441159e-05,
+          "rhs_norm": 0.10483645021906847,
+          "solution_norm": 1.1988276812605012,
+          "dimension": 337
+        }
+      ],
+      "krylov": [
+        {
+          "tol": 1e-09,
+          "max_cycle": 30,
+          "lindep": 1e-13,
+          "operator_evaluations": 10
+        }
+      ],
+      "gradient_hartree_per_bohr": [
+        [
+          -1.6316409836718506e-16,
+          5.116663260809364e-16,
+          -0.11550302147360725
+        ],
+        [
+          1.631640983672387e-16,
+          -5.116663260809396e-16,
+          0.11550302147359659
+        ]
+      ],
+      "max_gradient_error": 5.64859342694346e-06,
+      "elapsed_seconds": 0.24820914698648266
+    },
+    {
+      "label": "max_cycle_only",
+      "requested_overrides": {
+        "max_cycle": 100
+      },
+      "ucphf": [
+        {
+          "tol": 1e-09,
+          "max_cycle": 100,
+          "true_residual_l2": 0.00019076067896219834,
+          "true_residual_max": 6.199289972477155e-05,
+          "rhs_norm": 0.10483645021906847,
+          "solution_norm": 1.1988276812604968,
+          "dimension": 337
+        }
+      ],
+      "krylov": [
+        {
+          "tol": 1e-09,
+          "max_cycle": 100,
+          "lindep": 1e-13,
+          "operator_evaluations": 10
+        }
+      ],
+      "gradient_hartree_per_bohr": [
+        [
+          -1.631640983671598e-16,
+          5.116663260809333e-16,
+          -0.11550302147360014
+        ],
+        [
+          1.6316409836721977e-16,
+          -5.116663260809396e-16,
+          0.11550302147359126
+        ]
+      ],
+      "max_gradient_error": 5.648593432272531e-06,
+      "elapsed_seconds": 0.242147960991133
+    },
+    {
+      "label": "tol_only",
+      "requested_overrides": {
+        "tol": 1e-13
+      },
+      "ucphf": [
+        {
+          "tol": 1e-13,
+          "max_cycle": 30,
+          "true_residual_l2": 0.00019076067893288498,
+          "true_residual_max": 6.19928997156816e-05,
+          "rhs_norm": 0.10483645021906846,
+          "solution_norm": 1.1988276812604939,
+          "dimension": 337
+        }
+      ],
+      "krylov": [
+        {
+          "tol": 1e-13,
+          "max_cycle": 30,
+          "lindep": 1e-13,
+          "operator_evaluations": 10
+        }
+      ],
+      "gradient_hartree_per_bohr": [
+        [
+          -1.631640983671188e-16,
+          5.116663260809554e-16,
+          -0.11550302147359659
+        ],
+        [
+          1.6316409836723239e-16,
+          -5.11666326080949e-16,
+          0.11550302147360192
+        ]
+      ],
+      "max_gradient_error": 5.64859342161439e-06,
+      "elapsed_seconds": 0.24271760100964457
+    },
+    {
+      "label": "tol_and_max_cycle",
+      "requested_overrides": {
+        "tol": 1e-13,
+        "max_cycle": 100
+      },
+      "ucphf": [
+        {
+          "tol": 1e-13,
+          "max_cycle": 100,
+          "true_residual_l2": 0.00019076067895002906,
+          "true_residual_max": 6.199289972102714e-05,
+          "rhs_norm": 0.10483645021906847,
+          "solution_norm": 1.1988276812604945,
+          "dimension": 337
+        }
+      ],
+      "krylov": [
+        {
+          "tol": 1e-13,
+          "max_cycle": 100,
+          "lindep": 1e-13,
+          "operator_evaluations": 10
+        }
+      ],
+      "gradient_hartree_per_bohr": [
+        [
+          -1.6316409836721345e-16,
+          5.11666326080927e-16,
+          -0.11550302147359837
+        ],
+        [
+          1.6316409836722608e-16,
+          -5.116663260809396e-16,
+          0.11550302147358948
+        ]
+      ],
+      "max_gradient_error": 5.6485934340488875e-06,
+      "elapsed_seconds": 0.2382077880029101
+    },
+    {
+      "label": "tol_max_cycle_lindep",
+      "requested_overrides": {
+        "tol": 1e-13,
+        "max_cycle": 100,
+        "lindep": 1e-26
+      },
+      "ucphf": [
+        {
+          "tol": 1e-13,
+          "max_cycle": 100,
+          "true_residual_l2": 1.5943330768984705e-09,
+          "true_residual_max": 4.856265632680046e-10,
+          "rhs_norm": 0.10483645021906847,
+          "solution_norm": 1.1988769748316381,
+          "dimension": 337
+        }
+      ],
+      "krylov": [
+        {
+          "tol": 1e-13,
+          "max_cycle": 100,
+          "lindep": 1e-26,
+          "operator_evaluations": 17
+        }
+      ],
+      "gradient_hartree_per_bohr": [
+        [
+          -1.633471890696564e-16,
+          5.115924517216775e-16,
+          -0.11550866999558629
+        ],
+        [
+          1.6334718906965324e-16,
+          -5.11592451721646e-16,
+          0.11550866999557385
+        ]
+      ],
+      "max_gradient_error": 7.144967950623027e-11,
+      "elapsed_seconds": 0.26033357600681484
+    }
+  ],
+  "native_sha256": "ddb28598a0b45d7fa65fa671f0b3a839bb4b718951b7126a832b54549ae0866a",
+  "script_sha256": "4e3d1576146cff6166a08224d161c897649e461ce1f43dac841197f926f90248",
+  "pyscf": "2.13.0",
+  "hostname": "c20",
+  "pyscf_source_sha256": {
+    "ucphf.py": "49df1f5388ca338df1e6bae1a27f7d677a88e20a79a2167d464172eb62e1a3df",
+    "linalg_helper.py": "9dcd5d4582c3695818e05fa72217c7764f87d5491ed29acb7b64d2725ee130e0"
+  }
+}

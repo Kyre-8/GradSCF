@@ -1,0 +1,5 @@
+{
+  "timing_valid": false,
+  "reason": "JAX GPU client initially rebound three TIDs outside CPU48-63; coordinator later narrowed them. GPU0 external gmx activity was observed. Numerical gates passed; do not fit these timings with GPU6 results.",
+  "source_sha256": "0ce87d1a6e6f86c4847f7139eae5996fa3557310da63612e84e91b1a55914a2c"
+}

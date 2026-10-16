@@ -1,0 +1,12 @@
+Field step 1.0e-04 au: max dipole error 5.288e-08 e Bohr
+Field step 3.0e-05 au: max dipole error 4.416e-09 e Bohr
+Field step 1.0e-05 au: max dipole error 4.263e-09 e Bohr
+AO direction 0: final density contraction error 1.574e-09
+AO direction 1: final density contraction error 3.217e-10
+AO direction 2: final density contraction error 2.746e-09
+AO direction 3: final density contraction error 3.509e-09
+AO direction 4: final density contraction error 1.138e-09
+AO direction 5: final density contraction error 2.122e-09
+Metric electron counts: {'ground': 16.000000000000007, 'relaxed': 16.000000000000004, 'unrelaxed': 16.00000000000001, 'attachment': 1.0000000000000007, 'detachment': 1.0000000000000007, 'relaxed_difference': -5.065392549852277e-16}
+Ground / relaxed excited / unrelaxed excited dipoles / au: [-5.14181555e-28  3.33066907e-16 -1.18181822e+00] [ 7.63985046e-17 -3.61411998e-15 -5.84103099e-01] [ 6.98319292e-17 -7.77156117e-16 -2.96776233e-01]
+Native X04 response-density and dipole gates passed in 239.45 s

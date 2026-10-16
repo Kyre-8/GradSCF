@@ -1,0 +1,43 @@
+{
+  "validation_passed": false,
+  "nw": 200,
+  "reference_directory": "reproducibility/ad_showcase/MolGW_reference_build/water_forward/g0w0",
+  "errors": {
+    "hf_hartree": 4.5062620301905554e-11,
+    "qp_hartree": 3.161859130074163e-08,
+    "qp_weight": 0.00016507258948428305
+  },
+  "limits": {
+    "hf_hartree": 1e-07,
+    "qp_hartree": 2e-06,
+    "qp_weight": 5e-05
+  },
+  "optical_limits": {
+    "energy_hartree": 3e-06,
+    "oscillator_strength": 2e-05,
+    "static_polarizability_au": 0.0003,
+    "cross_section_au": 0.0002
+  },
+  "optical": [
+    {
+      "tda": true,
+      "errors": {
+        "energy_hartree": 5.033891969929982e-08,
+        "oscillator_strength": 1.3200949089409164e-07,
+        "static_polarizability_au": 4.091449845589068e-09,
+        "cross_section_au": 4.3796210054125595e-06
+      }
+    },
+    {
+      "tda": false,
+      "errors": {
+        "energy_hartree": 3.464830111710171e-08,
+        "oscillator_strength": 7.306936422590837e-08,
+        "static_polarizability_au": 4.995412972164104e-09,
+        "cross_section_au": 1.495907244741801e-06
+      }
+    }
+  ],
+  "reference_hartree_to_ev": 27.21138505,
+  "scope": "Separate native and MolGW wavefunctions, full G/W/QP and optical spaces, matched Cartesian basis."
+}

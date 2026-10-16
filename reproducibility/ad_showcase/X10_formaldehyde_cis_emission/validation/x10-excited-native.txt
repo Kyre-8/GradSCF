@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/home/yjiao/gradscf_checks/ad-showcase-excited-hessian-20261015/examples/tdscf/formaldehyde_cis_hessian.py", line 49, in <module>
+    columns.append(model.total_hessian_vector(coordinates, root, direction).ravel())
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yjiao/gradscf_checks/ad-showcase-excited-hessian-20261015/src/gradscf_tools/excited.py", line 172, in total_hessian_vector
+    self._check(state)
+  File "/home/yjiao/gradscf_checks/ad-showcase-excited-hessian-20261015/src/gradscf_tools/excited.py", line 134, in _check
+    if not bool(state.scf_stationary) or not np.all(np.asarray(state.ci_converged)):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yjiao/opt/miniconda3/envs/jax_scf/lib/python3.11/site-packages/jax/_src/array.py", line 296, in __bool__
+    return bool(self._value)
+                ^^^^^^^^^^^
+  File "/home/yjiao/opt/miniconda3/envs/jax_scf/lib/python3.11/site-packages/jax/_src/profiler.py", line 384, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yjiao/opt/miniconda3/envs/jax_scf/lib/python3.11/site-packages/jax/_src/array.py", line 614, in _value
+    npy_value, did_copy = self._single_device_array_to_np_array_did_copy()
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jax.errors.JaxRuntimeError: INVALID_ARGUMENT: Buffer Definition Event: Derivative vector must be finite

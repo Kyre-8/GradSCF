@@ -1,0 +1,30 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/p03-lih-qmesh-20261016-agent",
+  "parent_snapshot": "/home/yjiao/gradscf_checks/ad-showcase-crystal-ir-20261016",
+  "source_python_sha256": "acc255538482dbbd7b243b5e3a577e2bd820086936fe29d67f6aaa28c66ef9b5",
+  "mechanical_reference_snapshot": "/home/yjiao/gradscf_checks/ad-showcase-lih-qhalf-rayleigh-20261016",
+  "files": {
+    "dfpt/force_constants.py": "54db8fc14634b5eeef20da2af88539bf2be0792e4780b5fb0c7386e703f10ee7",
+    "dfpt/displacement.py": "3df2d3b60d4a1c344cb28b78b07126f1d1240e160b8fa217708fbba287d486ce",
+    "dfpt/finite_q.py": "cbb28f0441f74af4edf7f7d1951adeca6ccd3da87033e598ac5b4bbbaa9c80d0",
+    "dfpt/atomic.py": "f854dacb99b1c6a219d7c63fa5173e852dde51383e71345bcb1a1f788cbd5a3d",
+    "pbc/response.py": "8d6b8978d683fe4582023a51d8ad2ab38d41e371f23ab65b90d9bcacbadfd2e7",
+    "pbc/ifc.py": "f9177f8621ff4908d46c9dfbd3ad939f073527353769efcdd027ea1be54be3d2",
+    "pbc/phonon.py": "09994ce50edb468ba54730dee1f1f412b0b233f6312ee0e193c575aff2c640c3",
+    "pbc/scf.py": "755a83038262d0c8c3b45ee32bbbeb4d640d094445c890c4c437bc21ea55d648",
+    "pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+    "pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+    "dfpt/electric.py": "61aeb686bb38c047c719240d1a39e79bbc41b08f0e3e11853fe295ae186fd5f2",
+    "pbc/polar_ifc.py": "3aa119b84c4f223a8409f2ed2dbf27609cfecb0a97a8abc7a0a3c09e2b76a889",
+    "integrals/periodic/fft.py": "70e593e5690a1ca50c69ccd068d14d5da68366f2d7e3a452d2662b5823b1993c"
+  },
+  "changed_python_paths_from_qhalf": [
+    "gradscf/pbc/vibrational.py"
+  ],
+  "added_python_paths_from_qhalf": [
+    "gradscf/dfpt/electric.py",
+    "gradscf/pbc/polar_ifc.py",
+    "gradscf/pbc/polarization.py"
+  ],
+  "scope": "Validated crystal-ir source plus root-validated polar_ifc.py; new workflows only."
+}

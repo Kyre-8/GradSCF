@@ -1,4 +1,17 @@
-# RHF counterpoise example
+# Basis examples
+
+- [bsse_counterpoise.py](bsse_counterpoise.py): RHF counterpoise correction.
+- [optimize_bsse_contractions.py](optimize_bsse_contractions.py): differentiable
+  contraction optimization for a fixed water dimer.
+- [optimize_exponents.py](optimize_exponents.py): bounded positive exponent
+  scales for H2 DF-HF at fixed geometry, topology and auxiliary basis.
+  [Independent PySCF check](compare_exponents_pyscf.py), [plot](plot_exponents.py),
+  and [A05 measured results](../../reproducibility/ad_showcase/A05_basis_exponents/README.md)
+  distinguish DF from exact four-center energies and verify normalization.
+- [nnao_basis.py](nnao_basis.py): MACE-conditioned H-X basis assembly and native
+  overlap integrals; requires the optional MACE stack and native library.
+
+## RHF counterpoise example
 
 bsse_counterpoise.py directly calls the public GradSCF API:
 

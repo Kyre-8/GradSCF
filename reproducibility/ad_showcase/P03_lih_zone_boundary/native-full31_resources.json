@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "-c",
+    "from examples.pbc.lih_zone_boundary import run; run(\"pbe_szv_k2_fft31_qhalf_full\",probe=False)"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 8656552,
+  "budget_kib": 33554432,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true
+}

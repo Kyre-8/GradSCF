@@ -1950,6 +1950,9 @@ def _resolve_training_molecule_and_info_with_mode(
     training_config: MolecularTrainingConfig | None,
 ) -> tuple[Any, Any]:
     scf = _make_differentiable_scf(training_config, functional=functional)
+    from gradscf.pbc.training import Reference
+    if isinstance(molecule,Reference):
+        return molecule.resolve(params,functional,scf.config)
     return scf.run(molecule, functional, params)
 
 
@@ -1970,6 +1973,7 @@ def _make_differentiable_scf(
             convergence_metric=cfg.scf_convergence_metric,
             occupation_tolerance=cfg.occupation_tolerance,
             conv_tol_density=cfg.scf_conv_tol_density,
+            conv_tol_grad=cfg.scf_conv_tol_grad,
             orthogonalization_eps=cfg.scf_orthogonalization_eps,
             eigenvalue_jitter=cfg.scf_eigenvalue_jitter,
             vxc_clip=cfg.scf_vxc_clip,
@@ -1986,6 +1990,9 @@ def _predict_ground_state_total_energy_from_molecule(
     functional: Any,
     molecule: Any,
 ) -> Array:
+    from gradscf.pbc.training import Reference
+    if isinstance(molecule,Reference):
+        return molecule.energy(params,functional)
     if getattr(molecule, "grid", None) is None:
         raise AttributeError("Molecule-like object must define grid.weights.")
     if getattr(molecule, "h1e", None) is None:
@@ -2035,6 +2042,9 @@ def _validate_training_datum(
     datum: MolecularTrainingDatum,
     config: MolecularTrainingConfig,
 ) -> None:
+    from gradscf.pbc.training import Reference
+    if isinstance(datum.molecule,Reference):
+        datum.molecule.validate_loss(config)
     requirements = (
         (
             _has_weight(config, "response_mse_weight", "response_mae_weight"),

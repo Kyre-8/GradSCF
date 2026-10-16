@@ -1,0 +1,49 @@
+{
+  "complete": true,
+  "validation_passed": true,
+  "check": {
+    "chi_column": [
+      0.042731381327832496,
+      0.3723823389605736,
+      0.04273138132783153
+    ],
+    "derivative": [
+      -0.002067423991089337,
+      2.4574858287913312e-06,
+      -0.00037583356646673913
+    ],
+    "field_residual": 1.3322676295501878e-15,
+    "mixed_residual": 7.752045533271357e-17,
+    "reference_residual": 5.086028984092054e-16
+  },
+  "maximum_gauge_error": 1.7889335846010823e-18,
+  "baseline_polarization_error": 1.3877787807814457e-17,
+  "density_error": 3.356589068483857e-16,
+  "same_reference_checkpoint_sha256": "2efb1d36eae4adc88df4b481f1092279fe11f19ea365ed15811f39ffc0a7730e",
+  "anchor": "Exactly the saved original phase anchor; no new principal branch selection.",
+  "settings": {
+    "a_angstrom": 5.43,
+    "mesh": [
+      15,
+      15,
+      15
+    ],
+    "kmesh": [
+      1,
+      1,
+      1
+    ],
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "xc": "pbe",
+    "precision": 1e-10
+  },
+  "elapsed_seconds": 362.09968469199976,
+  "peak_rss_kib": 10300224,
+  "source_sha256": {
+    "src/gradscf/dfpt/electric.py": "c1f42df314bc6a646b975b0f44e6188097884b8095f86f30017f5fcd25cd2c1d",
+    "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+    "examples/pbc/silicon_raman.py": "4157e35f94bd6428396dd100b3ecd21afba0934621cdcb599e07e7005012220c",
+    "examples/pbc/check_silicon_raman.py": "c1a46c1c644e8c62ba6cfac90b86a56833256339cf6d08e72c2d43bdd471bb66"
+  }
+}

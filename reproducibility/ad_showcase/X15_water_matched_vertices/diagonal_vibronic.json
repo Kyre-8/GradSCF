@@ -1,0 +1,505 @@
+{
+  "validation_passed": true,
+  "temperature_kelvin": 0,
+  "diagonal_only": true,
+  "models": [
+    "frozen",
+    "relaxed"
+  ],
+  "max_quanta": 32,
+  "huang_rhys": [
+    [
+      [
+        0.005148620617214675,
+        0.007686637898696675,
+        3.3495696980596175
+      ],
+      [
+        0.5773733581373618,
+        0.8885102426413792,
+        0.9690246491451895
+      ],
+      [
+        7.200575519995586e-26,
+        9.529166124055836e-26,
+        8.529706022020363e-26
+      ]
+    ],
+    [
+      [
+        0.013989852839818854,
+        0.07177944084646319,
+        3.6512502344132383
+      ],
+      [
+        0.9588553345540708,
+        1.4699060616092339,
+        0.6853948706046386
+      ],
+      [
+        1.3455545210573054e-25,
+        4.797685173306506e-24,
+        2.0699767947425275e-26
+      ]
+    ]
+  ],
+  "reorganization_hartree": [
+    [
+      0.010751034472394162,
+      0.016542619702755484,
+      0.0458483236049666
+    ],
+    [
+      0.01789972431265336,
+      0.02785881271728117,
+      0.04309872096668065
+    ]
+  ],
+  "zero_zero_hartree": [
+    [
+      0.32069362807065654,
+      0.3951128596516136,
+      0.3864631020726441
+    ],
+    [
+      0.31354493823039736,
+      0.3837966666370879,
+      0.38921270471093006
+    ]
+  ],
+  "helper_shift_K": [
+    [
+      [
+        -1.11233709283505,
+        1.3591243253914482,
+        -28.371708137671792
+      ],
+      [
+        7.89066838804793,
+        9.788511184165964,
+        10.222399139470234
+      ],
+      [
+        2.7469508293877903e-12,
+        3.1600556430140373e-12,
+        2.9897461303923008e-12
+      ]
+    ],
+    [
+      [
+        1.833570221630316,
+        4.15327807538523,
+        -29.62182234657601
+      ],
+      [
+        10.168618789977911,
+        12.590129942311576,
+        8.597176581263163
+      ],
+      [
+        3.755069078010812e-12,
+        2.2422454619647437e-11,
+        1.472821174095629e-12
+      ]
+    ]
+  ],
+  "equilibrium_Q": [
+    [
+      [
+        1.11233709283505,
+        -1.3591243253914482,
+        28.371708137671792
+      ],
+      [
+        -7.89066838804793,
+        -9.788511184165964,
+        -10.222399139470234
+      ],
+      [
+        -2.7469508293877903e-12,
+        -3.1600556430140373e-12,
+        -2.9897461303923008e-12
+      ]
+    ],
+    [
+      [
+        -1.833570221630316,
+        -4.15327807538523,
+        29.62182234657601
+      ],
+      [
+        -10.168618789977911,
+        -12.590129942311576,
+        -8.597176581263163
+      ],
+      [
+        -3.755069078010812e-12,
+        -2.2422454619647437e-11,
+        -1.472821174095629e-12
+      ]
+    ]
+  ],
+  "bare_oscillator_strengths": [
+    0.0168912280264681,
+    3.706204693414027e-28,
+    0.11055729216110051
+  ],
+  "cutoffs": [
+    {
+      "max_quanta": 8,
+      "lines_per_state": 165,
+      "models": [
+        {
+          "model": "frozen",
+          "states": [
+            {
+              "state": 0,
+              "retained_probability": 0.9999999873823296,
+              "raw_missing_probability": 1.2617670352987886e-08,
+              "poisson_tail": 1.261767060354048e-08,
+              "max_poisson_weight_error": 1.1102230246251565e-16,
+              "oscillator_strength": 0.01689122771271828,
+              "expected_partial_strength": 0.016891227712718275
+            },
+            {
+              "state": 1,
+              "retained_probability": 0.9999995396781094,
+              "raw_missing_probability": 4.6032189060518647e-07,
+              "poisson_tail": 4.60321890901378e-07,
+              "max_poisson_weight_error": 1.3877787807814457e-16,
+              "oscillator_strength": 3.7062023600408186e-28,
+              "expected_partial_strength": 3.7062023600408177e-28
+            },
+            {
+              "state": 2,
+              "retained_probability": 0.9675643958485994,
+              "raw_missing_probability": 0.032435604151400566,
+              "poisson_tail": 0.03243560415140219,
+              "max_poisson_weight_error": 1.3877787807814457e-16,
+              "oscillator_strength": 0.10650271153698344,
+              "expected_partial_strength": 0.10650271153698326
+            }
+          ]
+        },
+        {
+          "model": "relaxed",
+          "states": [
+            {
+              "state": 0,
+              "retained_probability": 0.9999991002197957,
+              "raw_missing_probability": 8.997802043442249e-07,
+              "poisson_tail": 8.997802046870295e-07,
+              "max_poisson_weight_error": 1.6653345369377348e-16,
+              "oscillator_strength": 0.016891205966488153,
+              "expected_partial_strength": 0.016891205966488146
+            },
+            {
+              "state": 1,
+              "retained_probability": 0.9999657911579172,
+              "raw_missing_probability": 3.420884208282793e-05,
+              "poisson_tail": 3.420884208314455e-05,
+              "max_poisson_weight_error": 1.249000902703301e-16,
+              "oscillator_strength": 3.7060354212163772e-28,
+              "expected_partial_strength": 3.7060354212163763e-28
+            },
+            {
+              "state": 2,
+              "retained_probability": 0.9668374400416386,
+              "raw_missing_probability": 0.03316255995836137,
+              "poisson_tail": 0.0331625599583626,
+              "max_poisson_weight_error": 1.5265566588595902e-16,
+              "oscillator_strength": 0.10644364409918025,
+              "expected_partial_strength": 0.10644364409918014
+            }
+          ]
+        }
+      ],
+      "relative_l1_change": null,
+      "maximum_poisson_tail": 0.0331625599583626
+    },
+    {
+      "max_quanta": 16,
+      "lines_per_state": 969,
+      "models": [
+        {
+          "model": "frozen",
+          "states": [
+            {
+              "state": 0,
+              "retained_probability": 1.0000000000000002,
+              "raw_missing_probability": -2.220446049250313e-16,
+              "poisson_tail": 1.6615622500260944e-19,
+              "max_poisson_weight_error": 1.1102230246251565e-16,
+              "oscillator_strength": 0.016891228026468103,
+              "expected_partial_strength": 0.016891228026468096
+            },
+            {
+              "state": 1,
+              "retained_probability": 1.0,
+              "raw_missing_probability": 0.0,
+              "poisson_tail": 1.8736744184728933e-16,
+              "max_poisson_weight_error": 1.3877787807814457e-16,
+              "oscillator_strength": 3.7062046934140264e-28,
+              "expected_partial_strength": 3.7062046934140255e-28
+            },
+            {
+              "state": 2,
+              "retained_probability": 0.9999969009497846,
+              "raw_missing_probability": 3.099050215449317e-06,
+              "poisson_tail": 3.099050217052712e-06,
+              "max_poisson_weight_error": 1.3877787807814457e-16,
+              "oscillator_strength": 0.11055684028598546,
+              "expected_partial_strength": 0.11055684028598528
+            }
+          ]
+        },
+        {
+          "model": "relaxed",
+          "states": [
+            {
+              "state": 0,
+              "retained_probability": 0.9999999999999997,
+              "raw_missing_probability": 3.3306690738754696e-16,
+              "poisson_tail": 7.034453293062727e-16,
+              "max_poisson_weight_error": 1.6653345369377348e-16,
+              "oscillator_strength": 0.016891228026468086,
+              "expected_partial_strength": 0.016891228026468075
+            },
+            {
+              "state": 1,
+              "retained_probability": 0.9999999999989676,
+              "raw_missing_probability": 1.032396390598933e-12,
+              "poisson_tail": 1.0327728669449601e-12,
+              "max_poisson_weight_error": 1.249000902703301e-16,
+              "oscillator_strength": 3.7062046934075876e-28,
+              "expected_partial_strength": 3.706204693407587e-28
+            },
+            {
+              "state": 2,
+              "retained_probability": 0.9999967285892623,
+              "raw_missing_probability": 3.2714107377485035e-06,
+              "poisson_tail": 3.271410739100336e-06,
+              "max_poisson_weight_error": 1.5265566588595902e-16,
+              "oscillator_strength": 0.11055682265851216,
+              "expected_partial_strength": 0.11055682265851202
+            }
+          ]
+        }
+      ],
+      "relative_l1_change": [
+        [
+          0.031810917494730376,
+          0.03181048177269819
+        ],
+        [
+          0.032274517564247304,
+          0.03227403153118878
+        ]
+      ],
+      "maximum_poisson_tail": 3.271410739100336e-06
+    },
+    {
+      "max_quanta": 24,
+      "lines_per_state": 2925,
+      "models": [
+        {
+          "model": "frozen",
+          "states": [
+            {
+              "state": 0,
+              "retained_probability": 1.0000000000000002,
+              "raw_missing_probability": -2.220446049250313e-16,
+              "poisson_tail": 5.000444519103308e-32,
+              "max_poisson_weight_error": 1.1102230246251565e-16,
+              "oscillator_strength": 0.0168912280264681,
+              "expected_partial_strength": 0.016891228026468096
+            },
+            {
+              "state": 1,
+              "retained_probability": 1.0000000000000004,
+              "raw_missing_probability": -4.440892098500626e-16,
+              "poisson_tail": 1.759705910158227e-27,
+              "max_poisson_weight_error": 1.3877787807814457e-16,
+              "oscillator_strength": 3.7062046934140278e-28,
+              "expected_partial_strength": 3.7062046934140273e-28
+            },
+            {
+              "state": 2,
+              "retained_probability": 0.9999999999921377,
+              "raw_missing_probability": 7.862266393487971e-12,
+              "poisson_tail": 7.863937850595849e-12,
+              "max_poisson_weight_error": 1.3877787807814457e-16,
+              "oscillator_strength": 0.11055729215978555,
+              "expected_partial_strength": 0.11055729215978534
+            }
+          ]
+        },
+        {
+          "model": "relaxed",
+          "states": [
+            {
+              "state": 0,
+              "retained_probability": 1.0000000000000004,
+              "raw_missing_probability": -4.440892098500626e-16,
+              "poisson_tail": 1.2719911663178482e-26,
+              "max_poisson_weight_error": 1.6653345369377348e-16,
+              "oscillator_strength": 0.016891228026468103,
+              "expected_partial_strength": 0.016891228026468096
+            },
+            {
+              "state": 1,
+              "retained_probability": 1.0000000000000002,
+              "raw_missing_probability": -2.220446049250313e-16,
+              "poisson_tail": 7.348302551576988e-22,
+              "max_poisson_weight_error": 1.249000902703301e-16,
+              "oscillator_strength": 3.7062046934140273e-28,
+              "expected_partial_strength": 3.7062046934140273e-28
+            },
+            {
+              "state": 2,
+              "retained_probability": 0.9999999999914222,
+              "raw_missing_probability": 8.577805132858884e-12,
+              "poisson_tail": 8.579126934028113e-12,
+              "max_poisson_weight_error": 1.5265566588595902e-16,
+              "oscillator_strength": 0.1105572921596973,
+              "expected_partial_strength": 0.11055729215969717
+            }
+          ]
+        }
+      ],
+      "relative_l1_change": [
+        [
+          3.5451002909276147e-06,
+          3.545320321499995e-06
+        ],
+        [
+          3.683493651563889e-06,
+          3.683671871584032e-06
+        ]
+      ],
+      "maximum_poisson_tail": 8.579126934028113e-12
+    },
+    {
+      "max_quanta": 32,
+      "lines_per_state": 6545,
+      "models": [
+        {
+          "model": "frozen",
+          "states": [
+            {
+              "state": 0,
+              "retained_probability": 1.0000000000000002,
+              "raw_missing_probability": -2.220446049250313e-16,
+              "poisson_tail": 1.1779751959602836e-45,
+              "max_poisson_weight_error": 1.1102230246251565e-16,
+              "oscillator_strength": 0.016891228026468096,
+              "expected_partial_strength": 0.016891228026468096
+            },
+            {
+              "state": 1,
+              "retained_probability": 1.0000000000000004,
+              "raw_missing_probability": -4.440892098500626e-16,
+              "poisson_tail": 1.2971972932724783e-39,
+              "max_poisson_weight_error": 1.3877787807814457e-16,
+              "oscillator_strength": 3.7062046934140273e-28,
+              "expected_partial_strength": 3.7062046934140273e-28
+            },
+            {
+              "state": 2,
+              "retained_probability": 1.0000000000000018,
+              "raw_missing_probability": -1.7763568394002505e-15,
+              "poisson_tail": 1.624832071743677e-18,
+              "max_poisson_weight_error": 1.3877787807814457e-16,
+              "oscillator_strength": 0.1105572921611007,
+              "expected_partial_strength": 0.1105572921611005
+            }
+          ]
+        },
+        {
+          "model": "relaxed",
+          "states": [
+            {
+              "state": 0,
+              "retained_probability": 1.0000000000000004,
+              "raw_missing_probability": -4.440892098500626e-16,
+              "poisson_tail": 1.806563741696573e-38,
+              "max_poisson_weight_error": 1.6653345369377348e-16,
+              "oscillator_strength": 0.016891228026468103,
+              "expected_partial_strength": 0.016891228026468096
+            },
+            {
+              "state": 1,
+              "retained_probability": 1.0000000000000002,
+              "raw_missing_probability": -2.220446049250313e-16,
+              "poisson_tail": 4.128144927944429e-32,
+              "max_poisson_weight_error": 1.249000902703301e-16,
+              "oscillator_strength": 3.706204693414028e-28,
+              "expected_partial_strength": 3.7062046934140273e-28
+            },
+            {
+              "state": 2,
+              "retained_probability": 1.0000000000000013,
+              "raw_missing_probability": -1.3322676295501878e-15,
+              "poisson_tail": 1.832354114721217e-18,
+              "max_poisson_weight_error": 1.5265566588595902e-16,
+              "oscillator_strength": 0.11055729216110065,
+              "expected_partial_strength": 0.1105572921611005
+            }
+          ]
+        }
+      ],
+      "relative_l1_change": [
+        [
+          1.031356161720291e-11,
+          1.0316321901087075e-11
+        ],
+        [
+          1.1006077268766285e-11,
+          1.1008492970585735e-11
+        ]
+      ],
+      "maximum_poisson_tail": 1.832354114721217e-18
+    }
+  ],
+  "area_checks": [
+    {
+      "model": "frozen",
+      "hwhm_ev": 0.05,
+      "finite_window_area": 0.1271186522921471,
+      "numerical_area_error": 9.591910599127118e-12,
+      "outside_window_strength": 0.0003298678954216927
+    },
+    {
+      "model": "frozen",
+      "hwhm_ev": 0.025,
+      "finite_window_area": 0.12728358552045124,
+      "numerical_area_error": 4.796163466380676e-12,
+      "outside_window_strength": 0.0001649346671175611
+    },
+    {
+      "model": "relaxed",
+      "hwhm_ev": 0.05,
+      "finite_window_area": 0.12711873093008108,
+      "numerical_area_error": 9.582168392086032e-12,
+      "outside_window_strength": 0.00032978925748769483
+    },
+    {
+      "model": "relaxed",
+      "hwhm_ev": 0.025,
+      "finite_window_area": 0.12728362484014477,
+      "numerical_area_error": 4.791556040828482e-12,
+      "outside_window_strength": 0.00016489534742400447
+    }
+  ],
+  "elapsed_seconds": 0.9292154749855399,
+  "hwhm_ev": [
+    0.05,
+    0.025
+  ],
+  "input_sha256": {
+    "vertices.npz": "671af58d875c15f08af94c026c82c8d4e054cb541b83fee2cad9590db8795e9c",
+    "finite_differences.json": "23d22cbff562b6396ff3e78e00a32b208456eb49eecbf41b4d58d61eb289c626"
+  },
+  "script_sha256": "79624c759cd24fc355eaa661394593609b0ecedc70ecba8e39d6c6f2941d8fd8",
+  "scope": "Matched local diagonal, equal-frequency, zero-temperature Condon surfaces; host FC enumeration; imposed line smoothing, no lifetime prediction."
+}

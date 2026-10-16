@@ -1,0 +1,17 @@
+{
+  "executed/audit_dynamic_jit_fft.py": "904a200fb0369fd968bc1403650eabfcbb1e08194bf9c3070432a59baac4b0c2",
+  "executed/audit_dynamic_jit_pre_fft.py": "a34624a5a6113aac7249a98f5586dad2c4354a24f34d538a731bd0c27de49b63",
+  "executed/berry_stencil_toy.py": "764e959db53ce3726a8210e0ed7dd37062b630ac109dfaeb3c0591d067cf3911",
+  "executed/check_silicon_raman_validated.py": "c1a46c1c644e8c62ba6cfac90b86a56833256339cf6d08e72c2d43bdd471bb66",
+  "executed/initial_electric.py": "5bc3a766419cb5630238e1b0f9a083219c6f03bb00d814c1cefba2e1e8b0f37f",
+  "executed/initial_silicon_raman.py": "f98449c02b026b0032b55749a96be56c3dcebffcf2477b10605c7510686633ab",
+  "executed/ks_batched.py": "79b68cf3de98343aa5b490422387f41107dbe2be77778c4619d1d6f09777b9df",
+  "executed/ks_batched_empty_guard.py": "1a18bea8c344422d7d8dcde7712e5af6e1fa1f2330ccd47184eeba25f3f8b1d1",
+  "executed/ks_pre_batch.py": "f5dc7b4ba7ba70a3a704359f98f9609ee51db18ddccbb5e6f1406d0f45104e93",
+  "executed/plot_silicon_raman_k_sampling.py": "c9d90c0ae20ea63ddd0b4ff3b71ae6e2436dda5ced17c1f666f6a46c068f7a07",
+  "executed/silicon_raman_dynamic.py": "c6728c307ffa457348ddead7fc77c36b9d683ce9c0a0f7a7651f2747bfec5e36",
+  "executed/silicon_raman_pre_dynamic.py": "4157e35f94bd6428396dd100b3ecd21afba0934621cdcb599e07e7005012220c",
+  "executed/silicon_raman_tensor_validated.py": "75a87433bff7879f9660a1163f108b888fbd13d4cbb356a9955e00fda1f2ecf6",
+  "executed/test_ks_batching.py": "eaf03bbb4819fd25e413fd9b89cf4531ab88927371516beb32e5aaea9c7ac66b",
+  "executed/test_ks_batching_empty_guard.py": "bde538cb4b7c464dae9946f23dfdb7a6b430ec1181d0632e553ca1d6113514d8"
+}

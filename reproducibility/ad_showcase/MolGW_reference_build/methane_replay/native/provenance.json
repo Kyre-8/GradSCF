@@ -1,0 +1,33 @@
+{
+  "complete": true,
+  "source_snapshot": "/home/yjiao/gradscf_checks/ad-showcase-integration-20261015",
+  "native_source_python_sha256": "c792320a88f24c695049469ac317d26953efc0888cd3236c44cb0fb393220abc",
+  "original_facade_succeeded": false,
+  "original_facade_exit": 139,
+  "implementation_branch": "Existing public finite-eta resolvent; same discrete CD equation. Original facade runtime failure remains separately archived.",
+  "environment": {
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "LD_LIBRARY_PATH": "/home/yjiao/opt/miniconda3/envs/jax_scf/lib/python3.11/site-packages/pyscf/lib"
+  },
+  "commands": [
+    "cd native-methane-formal; timeout 1800 python ../downloads/methane_resolvent_spectrum.py",
+    "cd native-methane-formal; timeout 900 python ../downloads/collect_methane_molgw_formal.py --runs ../methane --native-output outputs/methane_resolvent_spectrum --archive outputs/methane_resolvent_spectrum",
+    "cd native-methane-formal; timeout 120 python ../downloads/plot_methane_resolvent_spectrum.py"
+  ],
+  "python": "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+  "note": "Each command used the stated environment and frozen-source PYTHONPATH. Runtime thread settings are not an exclusive-core allocation. No affinity change was executed.",
+  "output_sha256": {
+    "comparison_private_metadata.json": "2f329638e124f02641c277d89d310e9a7cc3d54f67034c12e28364111eca5588",
+    "evgw0_reference.npz": "83da5e5af12759e5e9dc23747abb5b192835486883bcea9cd8bf2c35e61fa251",
+    "evgw_reference.npz": "7612c5de053dd3a767c5ff9c46d9d805be81e974e90139e04fbbbadddbba6ac4",
+    "g0w0_reference.npz": "53b8d73f77d97bc23d730dd17530eca6bdf7f7029eb46740eb5b9c5e662d2628",
+    "methane_reference_replay.pdf": "4d2963a4991a306115197907e653a2b3424ef94f00cb47564fee86220f58e9f5",
+    "methane_reference_replay.png": "895ad6de0acfd540ce9266d7e6e655234cdc289e6749e6aec46936a3d1c50524",
+    "molgw_comparison.json": "5229af413abce7b4a47bc8f9d21dabbd0a99eb7c4a1da001b5275ad0e6a2860e",
+    "spectrum.json": "6c7e9def7d5d705cb30cf66fef754eabe61543cc4708f40694bea4bfb8b82d4a",
+    "summary.csv": "875d67813d21db285e298555487333aeef284c9c70efe1d45319707cc3f9a0d3"
+  }
+}

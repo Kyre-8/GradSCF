@@ -1,0 +1,41 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-lih-born-20261016",
+  "source_origin": "Frozen ad-showcase-p01-p02-memoryfix-20261016/src; parent source Python SHA256 0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470. Added Berry polarization and zero-field Born adapter only.",
+  "hostname": "c20",
+  "cpu": "Intel(R) Xeon(R) Platinum 8457C",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "numpy": "2.4.4",
+  "pyscf": "2.13.0",
+  "files": {
+    "src/gradscf/pbc/polarization.py": "077565628d985b990abb270b5e80603003109a6c98be5f54178121bc5a7c4aa5",
+    "src/gradscf/dfpt/electric.py": "3fbd3a7a5986c82e4f2c64de8fe105fd5b01ab101bb4154d564cf8bcf7edca5c",
+    "src/gradscf/dfpt/periodic.py": "ab00412522f45c0c65ce2660291f56c4881239550063663ebc8d6d8accf29bcc",
+    "src/gradscf/dfpt/ks.py": "f5dc7b4ba7ba70a3a704359f98f9609ee51db18ddccbb5e6f1406d0f45104e93",
+    "src/gradscf/dfpt/core.py": "4765b5e80c2804f07e22ebcec7584bbed1d271fecdf4dd89949895b307e054bb",
+    "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+    "src/gradscf/integrals/periodic/ao.py": "eb2e34a5dbdeb9117bb0ebad3529a45e55638162acd8d05cf82c8cf101899417",
+    "src/gradscf/integrals/periodic/fft.py": "70e593e5690a1ca50c69ccd068d14d5da68366f2d7e3a452d2662b5823b1993c",
+    "src/gradscf/solvers/diagnostics.py": "4ada61fdd07fede58a2bad32530424e6635cb60c3b4f5da0d3a2a72553fe8a6a",
+    "examples/pbc/lih_born_charges.py": "57c0a7f2967814e2bfa24ba4d5f8daca228122f7bb0de5335715a9972283d59e",
+    "examples/pbc/compare_lih_born_pyscf.py": "b05716f2a88e91d1d48cf0c7d2aebdf3d42aa8c3ca93951ff96f73261d2a33c7",
+    "examples/pbc/plot_lih_born_charges.py": "831b476e1dbbdab2939afe4fb9b78d5366f13bc2e28e02bb8e983d467476cf49",
+    "tests/dfpt/test_born.py": "9a136522bf71bbce6108df10bf9782227a673862a7ce9d32ae35a14360e48b78",
+    "tests/pbc/test_polarization.py": "0be22b8b9da847e1675f6fcb17882c2cd07d2a1b22b09579b673d229ee17e41b",
+    "artifacts/born/lih_born_probe.py": "9e1ade6826476d0c422a84ef3ca19f440734827f6cf37278cf321ddaf7dbccf7"
+  },
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "PYTHONPATH": "src"
+  },
+  "command_native": "timeout 1800 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python examples/pbc/lih_born_charges.py",
+  "command_pyscf": "timeout 1800 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python examples/pbc/compare_lih_born_pyscf.py",
+  "command_h2": "timeout 900 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python -m pytest -q -s tests/dfpt/test_born.py",
+  "command_phase": "timeout 900 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python -m pytest -q -s tests/pbc/test_polarization.py",
+  "scope": "Fixed-cell zero-field dP/dR only; primary a=7.780032276700287 bohr matches P02/P03 finite model. The one-direction a=7.6 probe is separate."
+}

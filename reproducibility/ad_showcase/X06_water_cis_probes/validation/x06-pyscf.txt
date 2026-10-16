@@ -1,0 +1,10 @@
+geometry 0 independent final-step error 8.968285836186141e-10
+geometry 1 independent final-step error 2.481764242029394e-09
+geometry 2 independent final-step error 9.961204222586062e-10
+amplitude 0 independent final-step error 6.717797290667349e-10
+amplitude 1 independent final-step error 9.182852811484565e-10
+amplitude 2 independent final-step error 7.920892552970571e-10
+reference_rotation 0 independent final-step error 3.081921728996344e-10
+reference_rotation 1 independent final-step error 2.0678207063307141e-10
+reference_rotation 2 independent final-step error 1.185701883898993e-11
+Independent X06 gates passed 4.604267118993448 s

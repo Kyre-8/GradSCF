@@ -70,7 +70,7 @@ class Gradients:
             from .scf import validate_reference
             from ..integrals.periodic.fft import build_inputs
             if source.result is not None:
-                validate_reference(source,integer=False,equal_weights=False,external=True)
+                validate_reference(source,integer=False,equal_weights=False,external=True,low_dimensional=True)
             cell=source.cell
             params=source.params
             reference=None if source.result is None else source.result.density_spin
@@ -92,12 +92,20 @@ class Gradients:
                 return _checked_energy(out.total_energy,out.density,out.converged,reference)
         else:
             raise TypeError('Gradients requires a periodic SCF or Cell-based OFDFT calculation')
-        candidate=energy_and_derivatives(energy,params,cell.coords,cell.lattice)
-        if not all(np.isfinite(x).all() for x in candidate):
+        if getattr(cell,'dimension',3)<3:
+            # Forces hold the valid vacuum geometry fixed. General 3D shear
+            # changes that domain and must not be reported as low-D stress.
+            value,gradient=jax.value_and_grad(lambda r:energy(params,r,cell.lattice))(cell.coords)
+            candidate=CellDerivatives(value,-gradient,None)
+        else:
+            candidate=energy_and_derivatives(energy,params,cell.coords,cell.lattice)
+        if not all(np.isfinite(x).all() for x in candidate if x is not None):
             raise RuntimeError('Periodic geometry derivative failed: check SCF convergence, backward residuals and reference state')
         self.result=candidate
         return -self.result.forces
 
     def stress(self):
         if self.result is None:self.kernel()
+        if self.result.stress is None:
+            raise NotImplementedError('Reduced-dimensional stress requires a specified physical strain subspace.')
         return self.result.stress

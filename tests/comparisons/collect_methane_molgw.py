@@ -6,7 +6,8 @@ not build or execute MolGW and does not alter production numerical settings.
 """
 import argparse
 from pathlib import Path
-import json,re,time
+import json,re,time,platform,hashlib
+from datetime import datetime, timezone
 import jax,numpy as np,yaml
 jax.config.update('jax_enable_x64',True)
 from gradscf import bse
@@ -22,7 +23,11 @@ native=json.loads((archive/'spectrum.json').read_text())
 HA_MOLGW=27.21138505
 MB_PER_AU=.529177210903**2*100
 ordered=lambda x:np.array([x[k] for k in sorted(k for k in x if isinstance(k,int))])
-out={'date':'2026-10-01','molgw_revision':'b831818d7a845c36f295d036dc8ceef59daf9991','hardware':'Apple M4 Pro','dtype':'float64','backend':'CPU','molgw_ha_ev':HA_MOLGW,'gradscf_ha_ev':HARTREE_TO_EV,'methods':{},'driver_control':{}}
+out={'date':datetime.now(timezone.utc).isoformat(),'molgw_revision':'b831818d7a845c36f295d036dc8ceef59daf9991','hardware':platform.platform(),'hostname':platform.node(),'dtype':'float64','backend':'CPU','molgw_ha_ev':HA_MOLGW,'gradscf_ha_ev':HARTREE_TO_EV,'methods':{},'driver_control':{}}
+out['native_implementation_branch']=native.get('implementation_branch','legacy: not recorded')
+out['native_source_python_sha256']=native.get('source_python_sha256','legacy: not recorded')
+out['native_json_sha256']=hashlib.sha256((archive/'spectrum.json').read_bytes()).hexdigest()
+out['comparison_script_sha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 for m,orig in native['methods'].items():
  t=time.perf_counter()
  with np.load(args.native_output/f'{m}_reference.npz') as z:
