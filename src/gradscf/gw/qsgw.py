@@ -40,7 +40,7 @@ from jaxtyping import Array
 
 from ..scf.autodiff import SCFDifferentiationConfig
 from ..solvers.nonlinear import attach_root
-from .outer_response import linear_config, require_valid
+from .outer_response import linear_config, require_occupation_gap, require_valid
 from gradscf.integrals.molecular.jk import build_j_from_df
 from .freq import scaled_legendre_grid
 from .g0w0 import _exchange_mo, _mo_factors
@@ -136,6 +136,9 @@ def qsgw_cd_restricted(
     by more than ``1e-8 * (1 + max(abs(energy)))`` Ha in this response path.
     Degenerate spectra are rejected; no eigenvector-gap regularization is used.
     Failed response solves return NaNs under the shared linear-solver policy.
+    Both evaluation paths require occupied and virtual orbitals and a finite
+    positive occupation gap. The returned ``screening_energy`` records the
+    final independent-particle spectrum in the returned orbital frame.
     Convergence on a chosen discrete CD grid is separate from basis/grid accuracy.
     """
     inputs = (mo_energy, mo_coeff, df_factors, hcore_matrix)
@@ -150,6 +153,9 @@ def qsgw_cd_restricted(
     hcore = jnp.asarray(hcore_matrix, dtype=jnp.float64)
     df_factors = jnp.asarray(df_factors)
     nocc = int(nocc)
+    if not 0 < nocc < mo_energy.size:
+        raise ValueError('Restricted qsGW requires occupied and virtual orbitals.')
+    require_occupation_gap(mo_energy, nocc, "qsGW")
     if not 0.0 <= damping < 1.0:
         raise ValueError("damping must be in [0, 1).")
 
@@ -163,6 +169,7 @@ def qsgw_cd_restricted(
     energy = mo_energy
     last_delta = None
     for _ in range(int(max_iter)):
+        require_occupation_gap(energy, nocc, "qsGW")
         b_mn = _mo_factors(df_factors, coeff)
         b_ov = b_mn[:, :nocc, nocc:]
         occ_coeff = coeff[:, :nocc]
@@ -198,6 +205,8 @@ def qsgw_cd_restricted(
                 converged=True,
                 sigma_qp=None,
                 nw=int(nw),
+                screening_energy=energy,
+                method="qsgw",
             )
         energy, coeff = new_energy, new_coeff
     raise ArithmeticError(
@@ -219,8 +228,6 @@ def _implicit_qsgw(*, mo_energy, coeff, nocc, df_factors, hcore, nw, eta,
     """
     response_config = linear_config(config)
     nmo = mo_energy.size
-    if not 0 < nocc < nmo:
-        raise ValueError('Restricted qsGW requires occupied and virtual orbitals.')
     rows, cols = jnp.triu_indices(nmo)
     b_frame = _mo_factors(df_factors, coeff)
     h_frame = coeff.T @ hcore @ coeff
@@ -233,6 +240,7 @@ def _implicit_qsgw(*, mo_energy, coeff, nocc, df_factors, hcore, nw, eta,
     def mapping(state):
         fock = unpack(state)
         energy, rotation = jnp.linalg.eigh(fock)
+        require_occupation_gap(energy, nocc, "qsGW")
         b_mn = _mo_factors(b_frame, rotation)
         density = 2 * rotation[:, :nocc] @ rotation[:, :nocc].T
         static = _static_self_energy(
@@ -258,17 +266,23 @@ def _implicit_qsgw(*, mo_energy, coeff, nocc, df_factors, hcore, nw, eta,
         return jnp.where(done, state, mixed[rows, cols]), iteration + 1, fock_error, done
 
     initial = jnp.diag(mo_energy)[rows, cols]
-    seed, _, error, done = jax.lax.while_loop(
-        lambda loop: (loop[1] < max_iter) & ~loop[3], body,
-        (initial, jnp.array(0), jnp.array(jnp.inf), jnp.array(False)))
-    seed = jax.lax.stop_gradient(seed)
+    def numerical_forward(seed):
+        return jax.lax.while_loop(
+            lambda loop: (loop[1] < max_iter) & ~loop[3], body,
+            (seed, jnp.array(0), jnp.array(jnp.inf), jnp.array(False)))
+    # Keep the forward eigensolver trajectory out of the implicit response,
+    # following the shared nonlinear solver's captured-parameter isolation.
+    forward, parameters = jax.closure_convert(numerical_forward, initial)
+    state = forward(jax.lax.stop_gradient(initial),
+                    *jax.tree.map(jax.lax.stop_gradient, parameters))
+    seed, _, error, done = jax.tree.map(jax.lax.stop_gradient, state)
     energies = jnp.linalg.eigvalsh(unpack(seed))
     gap_ok = jnp.all(jnp.diff(energies) > 1e-8 * (1 + jnp.max(jnp.abs(energies))))
     require_valid(done & gap_ok, error, 'qsGW (isolated orbital spectrum required)')
     state = attach_root(residual, seed, config=response_config, converged=done & gap_ok)
     energy, rotation = jnp.linalg.eigh(unpack(state))
     return GWResult(mo_energy=energy, mo_coeff=coeff @ rotation, converged=done,
-                    sigma_qp=None, nw=nw)
+                    sigma_qp=None, nw=nw, screening_energy=energy, method="qsgw")
 
 
 __all__ = ["qsgw_cd_restricted"]

@@ -1,0 +1,70 @@
+{
+  "method": "periodic_evgw_full_cd_diagonal",
+  "converged": true,
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "fft_mesh": [
+    21,
+    21,
+    21
+  ],
+  "basis": "gth-szv",
+  "pseudo": "gth-pbe",
+  "xc": "pbe",
+  "soc": false,
+  "fc": false,
+  "exxdiv": null,
+  "nw": 64,
+  "screening_cutoff_rydberg": 16.0,
+  "eta_hartree": 0.001,
+  "scf_seconds": 1.469557853997685,
+  "model_seconds": 0.8347597210085951,
+  "gw_seconds": 22.64061973200296,
+  "tolerance_hartree": 1e-06,
+  "source_model": {
+    "fc": false,
+    "compression_tolerance": 1e-12,
+    "compression": [
+      {
+        "rank": 273,
+        "original_rank": 9261,
+        "relative_gram_residual": 5.620973530584062e-14
+      },
+      {
+        "rank": 280,
+        "original_rank": 9261,
+        "relative_gram_residual": 4.659608715138844e-13
+      }
+    ],
+    "mesh": [
+      21,
+      21,
+      21
+    ],
+    "screening_cutoff_rydberg": 16.0,
+    "screening_compression": [
+      {
+        "rank": 211,
+        "original_rank": 331,
+        "relative_gram_residual": 3.7315698275060925e-13,
+        "plane_waves": 331
+      },
+      {
+        "rank": 208,
+        "original_rank": 332,
+        "relative_gram_residual": 3.9787264518185677e-13,
+        "plane_waves": 332
+      }
+    ],
+    "scope": "3D source-k finite Hamiltonian; no Gamma-cell correction or material convergence",
+    "reference_hartree_residual": 6.734819993359232e-10,
+    "reference_fock_residual": 9.769992265215889e-15,
+    "reference_exchange_potential_difference": 0.7252930750907065
+  },
+  "scope": "Finite Gaussian/source-k model; no bulk-convergence claim",
+  "iterations": null,
+  "residual_hartree": 5.398805011033736e-07
+}

@@ -1,0 +1,31 @@
+{
+  "input_sc512": "jobs/gaas_four_methods_20261018/sc512_fft61_20261019/scgw.npz",
+  "input_sc512_sha256": "caa88f3c75c3fe01ea369b5aa82b66d673b515fbf80af60f8781184a446f0da9",
+  "source_hash_capture": "Current source after completion at archive time; this workflow edited no production source",
+  "current_source_sha256": {
+    "src/gradscf/gw/pbc/source.py": "f021849276aea5af49a27b9ff1bfc74c9950feda2da0028899d66eae370f3b3a",
+    "src/gradscf/gw/pbc/matsubara.py": "0b017682eba391909969ef0c025567b8878b00070fc776ded57c11e10f34f25b",
+    "src/gradscf/gw/pbc/scgw.py": "e3ab5d0c7ffda6ef1d479e17e597719b203591a58aa1666ebd02d9822001f58d",
+    "src/gradscf/gw/pbc/spectrum.py": "f91f90d749205321166a36259929cecf2ac96e0b6b36c82c6a8c566164c8f083",
+    "src/gradscf/gw/pbc/interpolation.py": "f1558be076b41ab61c00c1f689a188f2ccfbb5397fb457bd70bc6acfa5ac84bb",
+    "src/gradscf/pbc/bands.py": "6c302a0e8bdd34b048eca8857520e7c6d7ade0925d31cb8ad4e31fcb82a09193",
+    "src/gradscf/pbc/momentum.py": "0966b4d8ddb645cd31bdf5bb349007196d4037271198a42d844673575984eea8",
+    "src/gradscf/integrals/periodic/ao.py": "eb2e34a5dbdeb9117bb0ebad3529a45e55638162acd8d05cf82c8cf101899417",
+    "src/gradscf/integrals/periodic/fft.py": "049ab17a1bb1d7ed7f8074e42a1a6381a6c25b76b875e049559737910db07375",
+    "src/gradscf/solvers/poles.py": "82328417587ebb50cc144729ee40f64559f2318a488c34a3c9865f5dc38936a9",
+    "examples/pbc/band_structures/gaas_self_consistent_gw.py": "b17bb3c678ccc66dd3e4b9a8eb22f18f9671416ab43035f02b4bd01a341f3594",
+    "examples/pbc/band_structures/systems.py": "9d5fd37d3a8323378ff63da03c77604e32b171e95af1a6824c5376a68ef98870"
+  },
+  "artifact_sha256": {
+    "result.json": "a6db3ab12299912ccd43a1c1889ff76b36c7de8c582081d626a579e10ab63c5c",
+    "samples.npz": "25b2f400930b927f94a8bd8dc0f87ebf1938b87504b5b916ea349744bef63be9",
+    "run.json": "fd1b69a5e980fc21eb862e4fad12ac2ab9dfd4e6c8f04067a6a0ddebab5d70b3",
+    "run.stdout": "068406c33419da9b5500aae4b51bd811bde2b3542c0d18de15718c45b82961b6",
+    "summary.json": "92ccc31e0b972bc0f967a3fc5c4bbd10d73271e905a424b8d59ecfb6c8b45ec6",
+    "source_measure.npz": "48f8eeb52c0c5e633c6f1a7a2861880f291569bbc8ce1f1fbe4b66cde8ec6539",
+    "workflow.py": "c07c3c3a15954535fdf71b0c9d252ffb28f53749985b14032ce298e991fc5107"
+  },
+  "hostname": "c20",
+  "python": "3.11.15 (main, Mar 11 2026, 17:20:07) [GCC 14.3.0]",
+  "interpretation": "Continuity of one fine512 realization only; no 512-to-1024 or rank/window accuracy certificate"
+}

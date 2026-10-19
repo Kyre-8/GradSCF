@@ -1,0 +1,91 @@
+{
+  "band_zero_based": 7,
+  "band_one_based": 8,
+  "maximum_difference_point_energy_ev": 10.705697303927792,
+  "maximum_difference_point_minus_ks_ev": 2.7,
+  "native_minus_piecewise_bgw_sigma_c_ev": 1.0642273764908767,
+  "native_neighbors": [
+    {
+      "energy_ev": 10.505697303927791,
+      "energy_minus_ks_ev": 2.4999999999999996,
+      "real_sigma_c_ev": -0.9274931513366926,
+      "imaginary_sigma_c_ev": -0.18698707497772102
+    },
+    {
+      "energy_ev": 10.605697303927792,
+      "energy_minus_ks_ev": 2.600000000000001,
+      "real_sigma_c_ev": -1.3674193655061286,
+      "imaginary_sigma_c_ev": -0.4349520118642008
+    },
+    {
+      "energy_ev": 10.705697303927792,
+      "energy_minus_ks_ev": 2.7,
+      "real_sigma_c_ev": -2.1705679493795644,
+      "imaginary_sigma_c_ev": -1.6646480628401654
+    },
+    {
+      "energy_ev": 10.805697303927792,
+      "energy_minus_ks_ev": 2.8,
+      "real_sigma_c_ev": 1.4394139226800804,
+      "imaginary_sigma_c_ev": -3.445030544367593
+    },
+    {
+      "energy_ev": 10.905697303927793,
+      "energy_minus_ks_ev": 2.9000000000000012,
+      "real_sigma_c_ev": 1.3818147742430484,
+      "imaginary_sigma_c_ev": -0.7976571630564057
+    }
+  ],
+  "bgw_neighbors": [
+    {
+      "energy_ev": 10.505700457883126,
+      "energy_minus_ks_ev": 2.5000031539553347,
+      "real_sigma_c_ev": -0.962840041964666,
+      "imaginary_sigma_c_ev": -0.09436000411261047
+    },
+    {
+      "energy_ev": 10.605700462241554,
+      "energy_minus_ks_ev": 2.600003158313762,
+      "real_sigma_c_ev": -1.501660065448735,
+      "imaginary_sigma_c_ev": -0.23588001028065453
+    },
+    {
+      "energy_ev": 10.70570046659998,
+      "energy_minus_ks_ev": 2.7000031626721883,
+      "real_sigma_c_ev": -3.234850140988533,
+      "imaginary_sigma_c_ev": -1.4006500610462893
+    },
+    {
+      "energy_ev": 10.805700470958405,
+      "energy_minus_ks_ev": 2.8000031670306127,
+      "real_sigma_c_ev": 1.9097000832328554,
+      "imaginary_sigma_c_ev": -4.833290210655353
+    },
+    {
+      "energy_ev": 10.90570047531683,
+      "energy_minus_ks_ev": 2.9000031713890384,
+      "real_sigma_c_ev": 1.6804900732429078,
+      "imaginary_sigma_c_ev": -0.46766002038261356
+    }
+  ],
+  "native_nearest_sampled_extremum": {
+    "energy_ev": 10.705697303927792,
+    "energy_minus_ks_ev": 2.7,
+    "distance_from_max_difference_point_ev": 0.0,
+    "real_sigma_c_ev": -2.1705679493795644,
+    "scope": "Nearest sampled real-Sigma extremum; not an isolated mathematical pole"
+  },
+  "bgw_nearest_sampled_extremum": {
+    "energy_ev": 10.70570046659998,
+    "energy_minus_ks_ev": 2.7000031626721883,
+    "distance_from_max_difference_point_ev": 3.162672187810616e-06,
+    "real_sigma_c_ev": -3.234850140988533,
+    "scope": "Nearest sampled real-Sigma extremum; not an isolated mathematical pole"
+  },
+  "sigma_pole_isolated": false,
+  "sigma_pole_distance_ev": null,
+  "W_pole_isolated": false,
+  "W_pole_distance_ev": null,
+  "evidence_limit": "The maximum lies beside rapid sign-changing/turning sampled real Sigma. No dielectric eigenmode or complex pole was isolated; broadening and the tabulated grid prevent assigning an exact pole distance.",
+  "cause": "Not isolated. Different FFT product closures, finite q0 versus exact Gamma, quadrature/broadening and real/table grids remain possible contributors; no single cause is assigned."
+}

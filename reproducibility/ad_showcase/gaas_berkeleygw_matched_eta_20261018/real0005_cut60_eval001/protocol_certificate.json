@@ -1,0 +1,253 @@
+{
+  "rows": [
+    {
+      "band": 6,
+      "native_samples": 622,
+      "max_plotted_correlation_difference_ev": 0.2690538548162754,
+      "maximum_energy_minus_ks_ev": 0.6000000000000008,
+      "near_selected_roots": {
+        "0.1": {
+          "samples": 62,
+          "max_correlation_difference_ev": 0.01602746928104763
+        },
+        "0.25": {
+          "samples": 153,
+          "max_correlation_difference_ev": 0.1468131158115443
+        }
+      },
+      "on_shell_correlation_difference_ev": -0.006219192789251607,
+      "exchange_difference_ev": 0.009420170438375541,
+      "qp_bgw_minus_native_ev": -0.0009729397471958568,
+      "bgw_table_root_change_sparse_to_dense_ev": -0.01914771793862048,
+      "sparse_bgw_candidates": 2,
+      "dense_bgw_candidates": 2,
+      "native_candidates": 3,
+      "native_branch_valid": true,
+      "bgw_branch_valid": true,
+      "sparse_original_flag": "MULT:5",
+      "dense_original_flag": "MULT:9"
+    },
+    {
+      "band": 7,
+      "native_samples": 669,
+      "max_plotted_correlation_difference_ev": 0.11560062760565572,
+      "maximum_energy_minus_ks_ev": 0.54,
+      "near_selected_roots": {
+        "0.1": {
+          "samples": 63,
+          "max_correlation_difference_ev": 0.0010668673827404114
+        },
+        "0.25": {
+          "samples": 154,
+          "max_correlation_difference_ev": 0.0013811925276763224
+        }
+      },
+      "on_shell_correlation_difference_ev": -0.00503408676490849,
+      "exchange_difference_ev": 0.009098155039729335,
+      "qp_bgw_minus_native_ev": -0.006303534792598759,
+      "bgw_table_root_change_sparse_to_dense_ev": -0.00019095689401132267,
+      "sparse_bgw_candidates": 1,
+      "dense_bgw_candidates": 2,
+      "native_candidates": 2,
+      "native_branch_valid": true,
+      "bgw_branch_valid": true,
+      "sparse_original_flag": "MULT:2",
+      "dense_original_flag": "MULT:2"
+    },
+    {
+      "band": 8,
+      "native_samples": 631,
+      "max_plotted_correlation_difference_ev": 0.12140023615362064,
+      "maximum_energy_minus_ks_ev": 4.220000000000004,
+      "near_selected_roots": {
+        "0.1": {
+          "samples": 64,
+          "max_correlation_difference_ev": 0.0025997288947420135
+        },
+        "0.25": {
+          "samples": 155,
+          "max_correlation_difference_ev": 0.012167769788374944
+        }
+      },
+      "on_shell_correlation_difference_ev": -0.005614185602343569,
+      "exchange_difference_ev": 0.010078830422095758,
+      "qp_bgw_minus_native_ev": -0.005712615935936512,
+      "bgw_table_root_change_sparse_to_dense_ev": -0.001400538152992071,
+      "sparse_bgw_candidates": 2,
+      "dense_bgw_candidates": 1,
+      "native_candidates": 2,
+      "native_branch_valid": true,
+      "bgw_branch_valid": true,
+      "sparse_original_flag": "MULT:5",
+      "dense_original_flag": "MULT:6"
+    },
+    {
+      "band": 9,
+      "native_samples": 688,
+      "max_plotted_correlation_difference_ev": 0.04002660593644322,
+      "maximum_energy_minus_ks_ev": 0.4700000000000008,
+      "near_selected_roots": {
+        "0.1": {
+          "samples": 63,
+          "max_correlation_difference_ev": 0.006442595369472166
+        },
+        "0.25": {
+          "samples": 153,
+          "max_correlation_difference_ev": 0.006892656402669914
+        }
+      },
+      "on_shell_correlation_difference_ev": 0.013070499443724964,
+      "exchange_difference_ev": 0.00047210564926826215,
+      "qp_bgw_minus_native_ev": -0.005308860206539394,
+      "bgw_table_root_change_sparse_to_dense_ev": 3.928485761275661e-05,
+      "sparse_bgw_candidates": 1,
+      "dense_bgw_candidates": 1,
+      "native_candidates": 1,
+      "native_branch_valid": true,
+      "bgw_branch_valid": true,
+      "sparse_original_flag": "MULT:4",
+      "dense_original_flag": "MULT:5"
+    },
+    {
+      "band": 10,
+      "native_samples": 672,
+      "max_plotted_correlation_difference_ev": 0.16780060413707315,
+      "maximum_energy_minus_ks_ev": 4.390000000000004,
+      "near_selected_roots": {
+        "0.1": {
+          "samples": 62,
+          "max_correlation_difference_ev": 0.003025140227297222
+        },
+        "0.25": {
+          "samples": 153,
+          "max_correlation_difference_ev": 0.003025140227297222
+        }
+      },
+      "on_shell_correlation_difference_ev": 0.0160075661909135,
+      "exchange_difference_ev": 0.002367695787987634,
+      "qp_bgw_minus_native_ev": -0.0004136173527205334,
+      "bgw_table_root_change_sparse_to_dense_ev": 0.0003969662640044505,
+      "sparse_bgw_candidates": 2,
+      "dense_bgw_candidates": 2,
+      "native_candidates": 2,
+      "native_branch_valid": true,
+      "bgw_branch_valid": true,
+      "sparse_original_flag": "MULT:4",
+      "dense_original_flag": "MULT:4"
+    },
+    {
+      "band": 11,
+      "native_samples": 673,
+      "max_plotted_correlation_difference_ev": 0.09497554366051998,
+      "maximum_energy_minus_ks_ev": 4.330000000000004,
+      "near_selected_roots": {
+        "0.1": {
+          "samples": 62,
+          "max_correlation_difference_ev": 0.0020978357948402714
+        },
+        "0.25": {
+          "samples": 153,
+          "max_correlation_difference_ev": 0.002795375799314782
+        }
+      },
+      "on_shell_correlation_difference_ev": 0.015206021865641642,
+      "exchange_difference_ev": 0.00223022102559508,
+      "qp_bgw_minus_native_ev": -0.0002923503097476776,
+      "bgw_table_root_change_sparse_to_dense_ev": -0.0006299352705499181,
+      "sparse_bgw_candidates": 2,
+      "dense_bgw_candidates": 2,
+      "native_candidates": 2,
+      "native_branch_valid": true,
+      "bgw_branch_valid": true,
+      "sparse_original_flag": "MULT:6",
+      "dense_original_flag": "MULT:9"
+    }
+  ],
+  "bgw_table_interpolation_control": [
+    {
+      "band": 6,
+      "sparse_points": 401,
+      "dense_points": 4001,
+      "exact_common_points": 401,
+      "max_actual_common_point_complex_change_ev": 0.0,
+      "max_nearest_frequency_offset_ev": 0.0,
+      "max_dense_minus_sparse_linear_interpolant_ev": 61.67271768796009,
+      "scope": "BGW whole evaluated +/-20eV table; dense points versus the former .1eV linear table, not a native full-window comparison"
+    },
+    {
+      "band": 7,
+      "sparse_points": 401,
+      "dense_points": 4001,
+      "exact_common_points": 401,
+      "max_actual_common_point_complex_change_ev": 0.0,
+      "max_nearest_frequency_offset_ev": 0.0,
+      "max_dense_minus_sparse_linear_interpolant_ev": 13.04735256865914,
+      "scope": "BGW whole evaluated +/-20eV table; dense points versus the former .1eV linear table, not a native full-window comparison"
+    },
+    {
+      "band": 8,
+      "sparse_points": 401,
+      "dense_points": 4001,
+      "exact_common_points": 401,
+      "max_actual_common_point_complex_change_ev": 0.0,
+      "max_nearest_frequency_offset_ev": 0.0,
+      "max_dense_minus_sparse_linear_interpolant_ev": 44.293023930477965,
+      "scope": "BGW whole evaluated +/-20eV table; dense points versus the former .1eV linear table, not a native full-window comparison"
+    },
+    {
+      "band": 9,
+      "sparse_points": 401,
+      "dense_points": 4001,
+      "exact_common_points": 401,
+      "max_actual_common_point_complex_change_ev": 0.0,
+      "max_nearest_frequency_offset_ev": 0.0,
+      "max_dense_minus_sparse_linear_interpolant_ev": 49.17169614311149,
+      "scope": "BGW whole evaluated +/-20eV table; dense points versus the former .1eV linear table, not a native full-window comparison"
+    },
+    {
+      "band": 10,
+      "sparse_points": 401,
+      "dense_points": 4001,
+      "exact_common_points": 401,
+      "max_actual_common_point_complex_change_ev": 0.0,
+      "max_nearest_frequency_offset_ev": 0.0,
+      "max_dense_minus_sparse_linear_interpolant_ev": 15.38124567038013,
+      "scope": "BGW whole evaluated +/-20eV table; dense points versus the former .1eV linear table, not a native full-window comparison"
+    },
+    {
+      "band": 11,
+      "sparse_points": 401,
+      "dense_points": 4001,
+      "exact_common_points": 401,
+      "max_actual_common_point_complex_change_ev": 0.0,
+      "max_nearest_frequency_offset_ev": 0.0,
+      "max_dense_minus_sparse_linear_interpolant_ev": 68.17985297156903,
+      "scope": "BGW whole evaluated +/-20eV table; dense points versus the former .1eV linear table, not a native full-window comparison"
+    }
+  ],
+  "matched_eta_g_hartree": 0.0,
+  "matched_screening_eta_hartree": 0.001000000043584257,
+  "reference_error_hartree": 1.836530927334934e-11,
+  "immutable_input_sha256": {
+    "WFN": "88b928fb52ddf6cc98d8af6d672b292abe9040c0426ae7d809c85507a91cf92f",
+    "WFNq": "7899fef898cd56a178b7f51d8847e2892d4277b275868524d067528f6492cca0",
+    "eps0mat": "303d9d9ca67c60771f20b3ef6784dc19ef559a92af6929acdc5c44046fbdfd52",
+    "epsmat": "170f2bead8158d45162af82e54a0f56405f0e29bab73188934f58f22272caad0",
+    "vxc.dat": "7635c0026fc9ac60f6486c5c18684151bd99c04e3a175dffe4a7df24ab9e6f15",
+    "epsilon.inp": "8e6f3408a4aa5cd3d1439223d9d12f1755241d5e246e99d1ab3db3f085ad9a92"
+  },
+  "only_sigma_eval_step_changed": true,
+  "original_eps0_unchanged": true,
+  "bgw_spectrum_rows": 24006,
+  "max_plotted_correlation_difference_ev": 0.2690538548162754,
+  "max_near_root_01_correlation_difference_ev": 0.01602746928104763,
+  "max_near_root_025_correlation_difference_ev": 0.1468131158115443,
+  "max_on_shell_correlation_difference_ev": 0.0160075661909135,
+  "max_selected_qp_difference_ev": 0.006303534792598759,
+  "max_native_own_root_residual_ev": 3.681929981713447e-15,
+  "max_bgw_table_own_root_residual_ev": 3.021070754226418e-15,
+  "max_recomputed_native_curve_root_residual_ev": 3.681929981713447e-15,
+  "max_native_F_at_bgw_root_ev": 0.008825418572741066,
+  "max_bgw_F_at_native_root_ev": 0.008720354844272929,
+  "scope": "Actual native .01eV overview/.005eV near-root samples versus evaluated BGW .01eV Sigma table. Native was not sampled across the full +/-20eV BGW window; spatial fullOVVO/CV/FFT/q0 differences remain."
+}

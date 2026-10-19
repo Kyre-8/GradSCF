@@ -1,0 +1,72 @@
+{
+  "rows": [
+    {
+      "band": 6,
+      "actual_native_frequency_count": 108,
+      "exact_duplicate_frequency_count": 1,
+      "max_native_minus_piecewise_bgw_sigma_c_ev": -0.717982944381126,
+      "energy_ev": 11.273600585219961,
+      "energy_minus_ks_ev": 3.300000000000001
+    },
+    {
+      "band": 7,
+      "actual_native_frequency_count": 111,
+      "exact_duplicate_frequency_count": 1,
+      "max_native_minus_piecewise_bgw_sigma_c_ev": 1.0642273764908767,
+      "energy_ev": 10.705697303927792,
+      "energy_minus_ks_ev": 2.7
+    },
+    {
+      "band": 8,
+      "actual_native_frequency_count": 107,
+      "exact_duplicate_frequency_count": 1,
+      "max_native_minus_piecewise_bgw_sigma_c_ev": -0.4077130793488356,
+      "energy_ev": 8.457044881475356,
+      "energy_minus_ks_ev": 0.4
+    },
+    {
+      "band": 9,
+      "actual_native_frequency_count": 113,
+      "exact_duplicate_frequency_count": 1,
+      "max_native_minus_piecewise_bgw_sigma_c_ev": -0.7579975425433136,
+      "energy_ev": 10.824791451641937,
+      "energy_minus_ks_ev": 2.7
+    },
+    {
+      "band": 10,
+      "actual_native_frequency_count": 112,
+      "exact_duplicate_frequency_count": 1,
+      "max_native_minus_piecewise_bgw_sigma_c_ev": -0.6834696178814896,
+      "energy_ev": 16.190715523714417,
+      "energy_minus_ks_ev": 4.500000000000003
+    },
+    {
+      "band": 11,
+      "actual_native_frequency_count": 112,
+      "exact_duplicate_frequency_count": 1,
+      "max_native_minus_piecewise_bgw_sigma_c_ev": -0.531284799239374,
+      "energy_ev": 16.220135108313613,
+      "energy_minus_ks_ev": 4.500000000000003
+    }
+  ],
+  "all_curves_finite": true,
+  "no_table_extrapolation": true,
+  "selected_bands_zero_based": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "max_curve_difference_ev": 1.0642273764908767,
+  "curve_difference_scope": "Actual native samples versus piecewise-linear BGW spectrum table over the plotted window; includes pole regions and is not an on-shell bound",
+  "max_on_shell_sigma_c_difference_ev": 0.016097859516711378,
+  "max_exchange_difference_ev": 0.010078830422095758,
+  "max_selected_qp_difference_ev": 0.014071901143552506,
+  "max_native_own_root_residual_ev": 7.363859963426894e-15,
+  "max_bgw_table_own_root_residual_ev": 1.510535377113209e-15,
+  "max_recomputed_curve_root_residual_ev": 7.363859963426894e-15,
+  "max_native_residual_at_bgw_root_ev": 0.020869513070485807,
+  "max_bgw_table_residual_at_native_root_ev": 0.04280250170834463
+}

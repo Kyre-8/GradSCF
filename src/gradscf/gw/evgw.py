@@ -45,7 +45,22 @@ from .g0w0 import (
 from .types import GWResult
 from ..scf.autodiff import SCFDifferentiationConfig
 from ..solvers.nonlinear import NonlinearConfig, attach_root, solve_nonlinear
-from .outer_response import linear_config, require_valid, require_real
+from .outer_response import linear_config, require_occupation_gap, require_valid, require_real
+
+
+def _converged_result(result, computed, tol, converged):
+    """Keep fixed-G/W branch validity separate from the coupled outer root."""
+    branch = jnp.ones_like(computed)
+    if result.qp_branch_valid is not None:
+        branch = branch & result.qp_branch_valid
+    if result.qp_weight is not None:
+        branch = branch & jnp.isfinite(result.qp_weight) & (result.qp_weight > 0)
+    branch = ~computed | branch
+    require_valid(jnp.all(branch), jnp.max(jnp.abs(result.qp_residual)),
+                  "evGW quasiparticle slope")
+    return replace(result, converged=converged,
+                   converged_mask=(jnp.abs(result.qp_residual) < tol) & branch,
+                   qp_computed_mask=computed)
 
 
 def _evgw_loop(
@@ -77,6 +92,7 @@ def _evgw_loop(
     if not isinstance(diis_space, Integral) or isinstance(diis_space, bool) or diis_space < 0:
         raise ValueError("diis_space must be a nonnegative integer.")
     e_old = jnp.asarray(mo_energy_mf, dtype=jnp.float64)
+    occupations = kwargs.get("nocc")
     selected = kwargs.get("orbs")
     selected = (jnp.arange(e_old.shape[-1]) if selected is None
                 else jnp.asarray(tuple(selected), dtype=jnp.int32))
@@ -88,10 +104,14 @@ def _evgw_loop(
         require_valid(jnp.all(jnp.isfinite(guess)), jnp.max(jnp.abs(guess)), "evGW initial guess")
         # Numerical continuation cannot alter frozen levels or the MF base.
         e_old = jnp.where(computed, jax.lax.stop_gradient(guess), e_old)
+    if occupations is not None:
+        require_occupation_gap(e_old, occupations, "evGW")
     if differentiation is not None or diis_space:
         config = linear_config(differentiation or SCFDifferentiationConfig())
 
         def residual(energy):
+            if occupations is not None:
+                require_occupation_gap(energy, occupations, "evGW")
             result = driver(mo_energy_poles=energy, evaluate_only=True, **kwargs)
             # Unrequested levels follow the original MF spectrum. Their
             # equations must not be zero rows in the outer response Jacobian.
@@ -119,22 +139,30 @@ def _evgw_loop(
             energy, norm = solved.solution.reshape(shape), solved.residual_norm
             done = solved.converged & (norm < tol)
         else:
-            energy, _, norm, done = jax.lax.while_loop(
-                lambda state: (state[1] < max_iter) & ~state[3], body,
-                (e_old, jnp.array(0), jnp.array(jnp.inf), jnp.array(False)))
+            def numerical_forward(seed):
+                return jax.lax.while_loop(
+                    lambda state: (state[1] < max_iter) & ~state[3], body,
+                    (seed, jnp.array(0), jnp.array(jnp.inf), jnp.array(False)))
+            # As in the shared nonlinear solver, stop captured physical
+            # inputs before tracing the seed trajectory, including nested AD.
+            forward, parameters = jax.closure_convert(numerical_forward, e_old)
+            state = forward(jax.lax.stop_gradient(e_old),
+                            *jax.tree.map(jax.lax.stop_gradient, parameters))
+            energy, _, norm, done = jax.tree.map(jax.lax.stop_gradient, state)
+        norm, done = jax.tree.map(jax.lax.stop_gradient, (norm, done))
         require_valid(done, norm, "evGW")
         if not diis_space:
             energy = attach_root(residual, jax.lax.stop_gradient(energy), config=config, converged=done)
         result = driver(mo_energy_poles=energy, evaluate_only=True, **kwargs)
-        return replace(result, converged=done, converged_mask=jnp.abs(result.qp_residual) < tol,
-                       qp_computed_mask=computed)
+        return _converged_result(result, computed, tol, done)
     for _ in range(int(max_iter)):
+        if occupations is not None:
+            require_occupation_gap(e_old, occupations, "evGW")
         result = driver(mo_energy_poles=e_old, evaluate_only=True, **kwargs)
         residual = result.qp_residual
         delta = jnp.max(jnp.abs(residual))
         if float(delta) < tol:
-            return replace(result, converged=True, converged_mask=jnp.abs(residual) < tol,
-                           qp_computed_mask=computed)
+            return _converged_result(result, computed, tol, True)
         e_old = e_old - (1.0 - damping) * residual
     raise ArithmeticError(
         f"evGW did not converge in {max_iter} iterations (last max|Dyson residual| = "
@@ -189,6 +217,11 @@ def evgw_cd_restricted(
     its shape is the full mean-field spectrum. Unrequested levels stay at MF.
     Its tangent is ignored, while the original MF/G/W inputs retain response.
     Neither an initial guess nor DIIS selects a global largest-weight branch.
+    The fixed occupied/virtual labels require a finite positive occupation
+    gap at every G/W evaluation; an inverted or closed gap is rejected.
+    Final computed levels also require a finite positive fixed-G/W weight.
+    This local frequency-slope check does not replace the coupled outer
+    Jacobian or enumerate all quasiparticle branches.
     """
     require_real(mo_energy, mo_coeff, df_factors, fock_matrix, hcore_matrix, density_matrix)
     if type(update_w) is not bool:

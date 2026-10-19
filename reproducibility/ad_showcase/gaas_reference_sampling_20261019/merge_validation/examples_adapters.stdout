@@ -1,0 +1,14 @@
+.......................                                                  [100%]
+============================= slowest 10 durations =============================
+27.20s call     tests/gw/pbc/test_gaas_example.py::test_gaas_calculate_rejects_coarse_fft_before_building_gw
+1.58s call     tests/test_berkeleygw_export.py::test_export_scf_retains_same_source_orbitals_and_xc
+0.46s setup    tests/gw/pbc/test_gaas_spectra_example.py::test_valid_spectrum_survives_uncertified_scgw_roots_without_filling_them[dos]
+0.04s call     tests/gw/pbc/test_gaas_spectra_example.py::test_valid_spectrum_survives_uncertified_scgw_roots_without_filling_them[dos]
+0.01s call     tests/gw/pbc/test_gaas_spectra_example.py::test_valid_spectrum_survives_uncertified_scgw_roots_without_filling_them[gamma]
+0.01s call     tests/gw/pbc/test_gaas_spectra_example.py::test_static_source_qp_coverage_remains_strict[qsgw]
+0.01s call     tests/test_berkeleygw_export.py::test_wfn_binary_uses_rydberg_headers_and_normalized_fourier_coefficients
+0.01s call     tests/gw/pbc/test_gaas_spectra_example.py::test_static_source_qp_coverage_remains_strict[evgw]
+0.01s call     tests/gw/pbc/test_gaas_spectra_example.py::test_static_source_qp_coverage_remains_strict[g0w0]
+
+(1 durations < 0.005s hidden.  Use -vv to show these durations.)
+23 passed in 29.47s

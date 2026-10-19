@@ -1,0 +1,302 @@
+FF...                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_valid_spectrum_survives_uncertified_scgw_roots_without_filling_them[dos] _
+
+saved_example = namespace(example=<module 'examples.pbc.band_structures.gaas_gw_spectra' from '/home/yjiao/gradscf_checks/ad-showcase-...      [1.e-12, 1.e-12]]), 'candidate_count': array([[1, 1],
+       [1, 1],
+       [1, 2],
+       [1, 1]])}, plotted=[])
+ambiguous = 'dos'
+
+    @pytest.mark.parametrize('ambiguous', ['dos', 'gamma'])
+    def test_valid_spectrum_survives_uncertified_scgw_roots_without_filling_them(saved_example, ambiguous):
+        case = saved_example
+        # query order: two path points, one independent DOS point, explicit Gamma.
+        indices = [2] if ambiguous == 'dos' else [0, 3]
+        case.qp['branch_valid'][indices, 1] = False
+        case.qp['candidate_count'][indices, 1] = 2
+        raw_energy = case.qp['energy'].copy()
+>       case.example.analyze(case.directory, path_points=2, dos_kmesh=(1, 1, 1),
+            axis_ev=np.linspace(-50., 50., 101), frequency_cutoff=2.01)
+
+tests/gw/pbc/test_gaas_spectra_example.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/tmp/pytest-of-yjiao/pytest-24/test_valid_spectrum_survives_u0')
+
+    def analyze(directory, *, path_points=121, dos_kmesh=(4, 4, 4),
+                axis_ev=None, fit_tolerance=1e-4, spectral_eta_ev=.1,
+                particle_tolerance=1e-3, rank_tolerance=1e-12,
+                frequency_cutoff=None):
+        """Save comparison arrays and figures after the stated numerical checks.
+    
+        Plotting and uniform BZ samples interpolate source operators; they do not
+        increase screening/source resolution. axis_ev uses the common PBE-VBM
+        zero and defaults to [-50,200] eV. All 14 finite-basis bands are retained;
+        the drawing shows [-15,15] eV around the gap, without truncating DOS inputs.
+        Rank/range/eta stability requires separate runs with explicit controls;
+        training, holdout, first-moment and electron-count checks all apply.
+        These checks do not certify real-axis stability. scGW lines and reported
+        gaps use selected finite-eta ReSigma Dyson roots, not principal-peak or
+        spectral-onset assignments. Local inverse-slope Z is a root diagnostic,
+        not a physical spectral weight.
+        A frequency_cutoff (Ha) must come from a separate frequency-convergence
+        check. The full input is retained and excluded-frequency errors reported.
+        """
+        directory = Path(directory)
+        stored, reports = {}, {}
+        for method in METHODS:
+            reports[method] = json.loads((directory/f'{method}.json').read_text())
+            with np.load(directory/f'{method}.npz', allow_pickle=False) as saved:
+                stored[method] = {name: saved[name].copy() for name in saved.files}
+            if not reports[method]['converged']:
+                raise ValueError(f'{method} source calculation is not converged')
+        common = reports['g0w0']
+        controls = ('source_kmesh', 'fft_mesh', 'basis', 'pseudo', 'xc', 'soc',
+                    'fc', 'exxdiv', 'screening_cutoff_rydberg')
+        for method in METHODS:
+            if (any(reports[method][name] != common[name] for name in controls)
+                    or reports[method]['source_model']['compression_tolerance'] != common['source_model']['compression_tolerance']):
+                raise ValueError(f'{method} uses different physical source controls')
+        if (any(reports[method]['eta_hartree'] != common['eta_hartree'] for method in METHODS[:3])
+                or reports['scgw']['eta_hartree'] is not None):
+            raise ValueError('Match the CD broadenings; Matsubara scGW must have no imaginary-axis eta')
+        if common['basis'] != 'gth-szv' or common['pseudo'] != 'gth-pbe' or common['soc'] or common['fc']:
+            raise ValueError('This example requires the declared scalar GaAs/SZV fc=False model')
+        mf = reference(source_kmesh=tuple(common['source_kmesh']), mesh=tuple(common['fft_mesh']),
+                       exxdiv=common['exxdiv'])
+        model = build_periodic_model(mf, tolerance=common['source_model']['compression_tolerance'],
+            max_memory_bytes=MAX_MEMORY_BYTES,
+            fc=False, screening_cutoff_rydberg=common['screening_cutoff_rydberg'])
+        atoms, path_name, _ = structure('gaas')
+        overlap, nocc = np.asarray(mf.inputs.overlap), model.nocc
+        geometry = dict(lattice_bohr=model.lattice, coordinates_bohr=mf.cell.coords,
+                        atomic_numbers=atoms.get_atomic_numbers(), valence_charges=mf.cell.charges)
+        restored, verification = {}, {}
+        for method, data in stored.items():
+            for name, expected in geometry.items():
+                _close(data[name], expected, name)
+            _close(data['source_kpoints'], model.kpoints, 'source k points')
+            _close(data['overlap'], overlap, 'AO overlap')
+            _close(data['reference_energy'], model.energy, 'PBE source energies')
+            _close(data['reference_density'], mf.result.density_spin, 'PBE source density')
+            if int(data['nocc']) != nocc:
+                raise ValueError(f'{method} has a different occupied-band count')
+            verification[method] = dict(source_energy_max_error_hartree=float(np.max(
+                abs(data['reference_energy']-np.asarray(model.energy)))),
+                source_density_max_error=float(np.max(abs(data['reference_density']-np.asarray(mf.result.density_spin)))))
+            state = SimpleNamespace(converged=True, method=reports[method]['method'])
+            if method == 'scgw':
+                state.sigma_c_iw, state.sigma_moment, state.full_fock = align_source(model, overlap,
+                    data['reference_coeff'], data['reference_energy'],
+                    data['sigma_c_iw'], data['sigma_moment'], data['full_fock'])
+                state.grid = SimpleNamespace(fermion=data['fermion'],
+                    beta=reports[method]['beta_hartree_inverse'])
+                state.chemical_potential = float(data['chemical_potential'])
+            else:
+                if not data['converged_mask'].all() or not np.isfinite(data['qp_energy']).all():
+                    raise ArithmeticError(f'{method} has incomplete source QP coverage')
+                if 'qp_branch_valid' in data and not data['qp_branch_valid'].all():
+                    raise ArithmeticError(f'{method} has uncertified source branches')
+                if 'qp_weight' in data and (not np.isfinite(data['qp_weight']).all() or np.min(data['qp_weight']) <= 0):
+                    raise ArithmeticError(f'{method} has invalid source QP slopes')
+                state.mo_energy, state.mo_coeff = data['qp_energy'], data['qp_coeff']
+                state.converged_mask = data['converged_mask']
+                state.qp_computed_mask = data['qp_computed_mask']
+                if method == 'qsgw':
+                    align_source(model, overlap, data['reference_coeff'], data['reference_energy'])
+                else:
+                    diagonal = np.array([np.diag(row) for row in data['qp_energy']])
+                    aligned, = align_source(model, overlap, data['reference_coeff'], data['reference_energy'], diagonal)
+                    values = np.diagonal(aligned, axis1=-2, axis2=-1).real
+                    _close(aligned, np.array([np.diag(row) for row in values]), 'diagonal QP gauge')
+                    state.mo_energy = values
+            restored[method] = state
+        path = atoms.cell.bandpath(path_name, npoints=path_points, pbc=atoms.pbc)
+        distance, ticks, labels = path.get_linear_kpoint_axis()
+        # Keep the physical path continuous; interpolation wraps its own weights.
+        path_k = path.kpts@np.asarray(mf.cell.reciprocal_vectors())
+        dos_k = np.asarray(mf.cell.make_kpts(dos_kmesh))
+        points = np.concatenate((path_k, dos_k, np.zeros((1, 3))))
+        npath, ndos = len(path_k), len(dos_k)
+        bz = slice(npath, npath+ndos)
+        query_bands = tuple(np.asarray(value) for value in mf.get_bands(points, chunk_size=1))
+        pbe = query_bands[0]
+        zero = float(np.max(pbe[:npath+ndos, :nocc]))
+        axis_ev = np.linspace(-50., 200., 5001) if axis_ev is None else np.asarray(axis_ev, float)
+        if axis_ev.ndim != 1 or len(axis_ev) < 2 or np.any(np.diff(axis_ev) <= 0) or not np.isfinite(axis_ev).all():
+            raise ValueError('Use a finite increasing energy axis in eV')
+        fits, fit_reports = continue_self_energy(restored['scgw'], model=model,
+            tolerance=fit_tolerance, rank_tolerance=rank_tolerance,
+            frequency_cutoff=frequency_cutoff)
+        electrons = continued_particle_number(restored['scgw'], fits)
+        if not np.isfinite(particle_tolerance) or particle_tolerance <= 0:
+            raise ValueError('particle_tolerance must be positive in electrons/cell')
+        if abs(electrons-2*nocc) > particle_tolerance:
+            raise ArithmeticError(f'Continued scGW electron count {electrons:.9f} differs from {2*nocc}')
+        energy, arrays = {'pbe': pbe}, {}
+        for method in METHODS[:3]:
+            energy[method], _ = interpolate_quasiparticles(mf, model, restored[method], points,
+                                                           query_bands=query_bands)
+        spectral = interpolate_scgw(mf, model, restored['scgw'], fits, points,
+            zero+axis_ev/EV_PER_HARTREE, eta=spectral_eta_ev/EV_PER_HARTREE,
+            query_bands=query_bands, trace_only=True)
+        qp = continued_quasiparticles(spectral, mu=restored['scgw'].chemical_potential, nocc=nocc,
+                                      eta=common['eta_hartree'])
+        if not qp['converged_mask'].all() or not qp['branch_valid'].all() or not np.isfinite(qp['energy']).all():
+>           raise ArithmeticError('The continued scGW matrix Dyson roots are incomplete or ambiguous')
+E           ArithmeticError: The continued scGW matrix Dyson roots are incomplete or ambiguous
+
+examples/pbc/band_structures/gaas_gw_spectra.py:162: ArithmeticError
+_ test_valid_spectrum_survives_uncertified_scgw_roots_without_filling_them[gamma] _
+
+saved_example = namespace(example=<module 'examples.pbc.band_structures.gaas_gw_spectra' from '/home/yjiao/gradscf_checks/ad-showcase-...      [1.e-12, 1.e-12]]), 'candidate_count': array([[1, 2],
+       [1, 1],
+       [1, 1],
+       [1, 2]])}, plotted=[])
+ambiguous = 'gamma'
+
+    @pytest.mark.parametrize('ambiguous', ['dos', 'gamma'])
+    def test_valid_spectrum_survives_uncertified_scgw_roots_without_filling_them(saved_example, ambiguous):
+        case = saved_example
+        # query order: two path points, one independent DOS point, explicit Gamma.
+        indices = [2] if ambiguous == 'dos' else [0, 3]
+        case.qp['branch_valid'][indices, 1] = False
+        case.qp['candidate_count'][indices, 1] = 2
+        raw_energy = case.qp['energy'].copy()
+>       case.example.analyze(case.directory, path_points=2, dos_kmesh=(1, 1, 1),
+            axis_ev=np.linspace(-50., 50., 101), frequency_cutoff=2.01)
+
+tests/gw/pbc/test_gaas_spectra_example.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/tmp/pytest-of-yjiao/pytest-24/test_valid_spectrum_survives_u1')
+
+    def analyze(directory, *, path_points=121, dos_kmesh=(4, 4, 4),
+                axis_ev=None, fit_tolerance=1e-4, spectral_eta_ev=.1,
+                particle_tolerance=1e-3, rank_tolerance=1e-12,
+                frequency_cutoff=None):
+        """Save comparison arrays and figures after the stated numerical checks.
+    
+        Plotting and uniform BZ samples interpolate source operators; they do not
+        increase screening/source resolution. axis_ev uses the common PBE-VBM
+        zero and defaults to [-50,200] eV. All 14 finite-basis bands are retained;
+        the drawing shows [-15,15] eV around the gap, without truncating DOS inputs.
+        Rank/range/eta stability requires separate runs with explicit controls;
+        training, holdout, first-moment and electron-count checks all apply.
+        These checks do not certify real-axis stability. scGW lines and reported
+        gaps use selected finite-eta ReSigma Dyson roots, not principal-peak or
+        spectral-onset assignments. Local inverse-slope Z is a root diagnostic,
+        not a physical spectral weight.
+        A frequency_cutoff (Ha) must come from a separate frequency-convergence
+        check. The full input is retained and excluded-frequency errors reported.
+        """
+        directory = Path(directory)
+        stored, reports = {}, {}
+        for method in METHODS:
+            reports[method] = json.loads((directory/f'{method}.json').read_text())
+            with np.load(directory/f'{method}.npz', allow_pickle=False) as saved:
+                stored[method] = {name: saved[name].copy() for name in saved.files}
+            if not reports[method]['converged']:
+                raise ValueError(f'{method} source calculation is not converged')
+        common = reports['g0w0']
+        controls = ('source_kmesh', 'fft_mesh', 'basis', 'pseudo', 'xc', 'soc',
+                    'fc', 'exxdiv', 'screening_cutoff_rydberg')
+        for method in METHODS:
+            if (any(reports[method][name] != common[name] for name in controls)
+                    or reports[method]['source_model']['compression_tolerance'] != common['source_model']['compression_tolerance']):
+                raise ValueError(f'{method} uses different physical source controls')
+        if (any(reports[method]['eta_hartree'] != common['eta_hartree'] for method in METHODS[:3])
+                or reports['scgw']['eta_hartree'] is not None):
+            raise ValueError('Match the CD broadenings; Matsubara scGW must have no imaginary-axis eta')
+        if common['basis'] != 'gth-szv' or common['pseudo'] != 'gth-pbe' or common['soc'] or common['fc']:
+            raise ValueError('This example requires the declared scalar GaAs/SZV fc=False model')
+        mf = reference(source_kmesh=tuple(common['source_kmesh']), mesh=tuple(common['fft_mesh']),
+                       exxdiv=common['exxdiv'])
+        model = build_periodic_model(mf, tolerance=common['source_model']['compression_tolerance'],
+            max_memory_bytes=MAX_MEMORY_BYTES,
+            fc=False, screening_cutoff_rydberg=common['screening_cutoff_rydberg'])
+        atoms, path_name, _ = structure('gaas')
+        overlap, nocc = np.asarray(mf.inputs.overlap), model.nocc
+        geometry = dict(lattice_bohr=model.lattice, coordinates_bohr=mf.cell.coords,
+                        atomic_numbers=atoms.get_atomic_numbers(), valence_charges=mf.cell.charges)
+        restored, verification = {}, {}
+        for method, data in stored.items():
+            for name, expected in geometry.items():
+                _close(data[name], expected, name)
+            _close(data['source_kpoints'], model.kpoints, 'source k points')
+            _close(data['overlap'], overlap, 'AO overlap')
+            _close(data['reference_energy'], model.energy, 'PBE source energies')
+            _close(data['reference_density'], mf.result.density_spin, 'PBE source density')
+            if int(data['nocc']) != nocc:
+                raise ValueError(f'{method} has a different occupied-band count')
+            verification[method] = dict(source_energy_max_error_hartree=float(np.max(
+                abs(data['reference_energy']-np.asarray(model.energy)))),
+                source_density_max_error=float(np.max(abs(data['reference_density']-np.asarray(mf.result.density_spin)))))
+            state = SimpleNamespace(converged=True, method=reports[method]['method'])
+            if method == 'scgw':
+                state.sigma_c_iw, state.sigma_moment, state.full_fock = align_source(model, overlap,
+                    data['reference_coeff'], data['reference_energy'],
+                    data['sigma_c_iw'], data['sigma_moment'], data['full_fock'])
+                state.grid = SimpleNamespace(fermion=data['fermion'],
+                    beta=reports[method]['beta_hartree_inverse'])
+                state.chemical_potential = float(data['chemical_potential'])
+            else:
+                if not data['converged_mask'].all() or not np.isfinite(data['qp_energy']).all():
+                    raise ArithmeticError(f'{method} has incomplete source QP coverage')
+                if 'qp_branch_valid' in data and not data['qp_branch_valid'].all():
+                    raise ArithmeticError(f'{method} has uncertified source branches')
+                if 'qp_weight' in data and (not np.isfinite(data['qp_weight']).all() or np.min(data['qp_weight']) <= 0):
+                    raise ArithmeticError(f'{method} has invalid source QP slopes')
+                state.mo_energy, state.mo_coeff = data['qp_energy'], data['qp_coeff']
+                state.converged_mask = data['converged_mask']
+                state.qp_computed_mask = data['qp_computed_mask']
+                if method == 'qsgw':
+                    align_source(model, overlap, data['reference_coeff'], data['reference_energy'])
+                else:
+                    diagonal = np.array([np.diag(row) for row in data['qp_energy']])
+                    aligned, = align_source(model, overlap, data['reference_coeff'], data['reference_energy'], diagonal)
+                    values = np.diagonal(aligned, axis1=-2, axis2=-1).real
+                    _close(aligned, np.array([np.diag(row) for row in values]), 'diagonal QP gauge')
+                    state.mo_energy = values
+            restored[method] = state
+        path = atoms.cell.bandpath(path_name, npoints=path_points, pbc=atoms.pbc)
+        distance, ticks, labels = path.get_linear_kpoint_axis()
+        # Keep the physical path continuous; interpolation wraps its own weights.
+        path_k = path.kpts@np.asarray(mf.cell.reciprocal_vectors())
+        dos_k = np.asarray(mf.cell.make_kpts(dos_kmesh))
+        points = np.concatenate((path_k, dos_k, np.zeros((1, 3))))
+        npath, ndos = len(path_k), len(dos_k)
+        bz = slice(npath, npath+ndos)
+        query_bands = tuple(np.asarray(value) for value in mf.get_bands(points, chunk_size=1))
+        pbe = query_bands[0]
+        zero = float(np.max(pbe[:npath+ndos, :nocc]))
+        axis_ev = np.linspace(-50., 200., 5001) if axis_ev is None else np.asarray(axis_ev, float)
+        if axis_ev.ndim != 1 or len(axis_ev) < 2 or np.any(np.diff(axis_ev) <= 0) or not np.isfinite(axis_ev).all():
+            raise ValueError('Use a finite increasing energy axis in eV')
+        fits, fit_reports = continue_self_energy(restored['scgw'], model=model,
+            tolerance=fit_tolerance, rank_tolerance=rank_tolerance,
+            frequency_cutoff=frequency_cutoff)
+        electrons = continued_particle_number(restored['scgw'], fits)
+        if not np.isfinite(particle_tolerance) or particle_tolerance <= 0:
+            raise ValueError('particle_tolerance must be positive in electrons/cell')
+        if abs(electrons-2*nocc) > particle_tolerance:
+            raise ArithmeticError(f'Continued scGW electron count {electrons:.9f} differs from {2*nocc}')
+        energy, arrays = {'pbe': pbe}, {}
+        for method in METHODS[:3]:
+            energy[method], _ = interpolate_quasiparticles(mf, model, restored[method], points,
+                                                           query_bands=query_bands)
+        spectral = interpolate_scgw(mf, model, restored['scgw'], fits, points,
+            zero+axis_ev/EV_PER_HARTREE, eta=spectral_eta_ev/EV_PER_HARTREE,
+            query_bands=query_bands, trace_only=True)
+        qp = continued_quasiparticles(spectral, mu=restored['scgw'].chemical_potential, nocc=nocc,
+                                      eta=common['eta_hartree'])
+        if not qp['converged_mask'].all() or not qp['branch_valid'].all() or not np.isfinite(qp['energy']).all():
+>           raise ArithmeticError('The continued scGW matrix Dyson roots are incomplete or ambiguous')
+E           ArithmeticError: The continued scGW matrix Dyson roots are incomplete or ambiguous
+
+examples/pbc/band_structures/gaas_gw_spectra.py:162: ArithmeticError
+=========================== short test summary info ============================
+FAILED tests/gw/pbc/test_gaas_spectra_example.py::test_valid_spectrum_survives_uncertified_scgw_roots_without_filling_them[dos]
+FAILED tests/gw/pbc/test_gaas_spectra_example.py::test_valid_spectrum_survives_uncertified_scgw_roots_without_filling_them[gamma]
+2 failed, 3 passed in 1.66s

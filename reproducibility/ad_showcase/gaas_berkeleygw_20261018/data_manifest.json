@@ -1,0 +1,25 @@
+{
+  "files": {
+    "gaas_native_bgw_sigma.pdf": "43e3b39d993d754551986897969fa8de934460a81a7a1c82f0b2d33e4a27c07c",
+    "gaas_native_bgw_sigma.png": "a5fc8bc10ba1e2de9c9b3e8115b58b4e5a018682f3cb63583ec0d8435f76d426",
+    "comparison_before_control_metadata.json": "bc5fa4109e282a81ab550faca0a75ebe952d9273ad623ad244cffccc01c7cf81",
+    "render_resource.json": "f82ced6ea3871e9e8fb988fa57e25c16fab34702a11492f7d03183d78127298e",
+    "final_remote_curve_manifest.json": "0f5a4b4514f3016f940bd075ad720334af45fdc5e4072daed2935199737cb8bf",
+    "raw_evidence.tar.gz": "60909590f5b54756c41f79754f52063f76774dbf8445841b56433a1fa26ba089",
+    "native_bgw_final_summary.json": "0b75bcf3cecb6f57de84e4215a1f72c6c08636517fcdf2b7746a0c6da9ad19fb",
+    "curve_certificate.json": "a1f5ab33eb6bf305f303ea29fc25537a257055144e24949eceff0fe29d62854e",
+    "raw_archive_manifest.json": "f728bf99944001412f0ce361f15f78d839f2bb1c669bc281052e5f045a472b26",
+    "finite_eta_protocol.json": "4a858876a5037554ea67717f0cfbec175f65b77dc24b79ddd7de387ac8fe557d",
+    "correlation_curves.npz": "a89135053672fad541172e6020792a03f80de1342c275f2d44a4615f5da8599e",
+    "comparison.json": "8950a49f61157d01c564df20720f96c7baca35e1b3009db77bffaccec5bf1a6c",
+    "README.md": "bb1903eb07bd2f77cc1baf1d17937751a5b50fb468c6cf3d4be8cc45f3b99bf8",
+    "render_data_manifest.json": "2a21da36d8466ec60f17215526320ac4a697a54ad02974e19328065c4f94309b",
+    "raw_archive_download_verification.json": "cdaf1fbc3e5081b28e7135ff79e609302bc5a6f4447927a6eec7a6e80e88916e",
+    "sampling_resource.json": "fa728817689a2a52ac23b961bc948111833553d5ca3f2860e39860b0f2533cba",
+    "comparison_before_eta_protocol.json": "3a934dc6defd80791205f4cac597e85943f09b3e315d96daf395eae0afa67bf5",
+    "selected_gamma_comparison.csv": "28660911a9d22e6f8fc34ba7b56ee9d63e251c4500ce3b7fe661572a51b9b331",
+    "pole_neighborhood.json": "1611fa75ab001f104eab626b0ae824fac2f798f4d7f8d31abc9a8289373e684b"
+  },
+  "remote_curve_download_verified": true,
+  "raw_archive_files_verified": 92
+}

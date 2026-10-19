@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "jobs/gaas_four_methods_20261018/reference_causal_hermitian_ls/sc512_fft61_tr_diagnostic.py"
+  ],
+  "cwd": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016",
+  "return_code": 0,
+  "elapsed_seconds": 3.393159344996093,
+  "peak_rss_kib": 229344,
+  "allowed_cpu_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "rss_limit_kib": 8388608,
+  "wall_limit_seconds": 120.0,
+  "termination_reason": null,
+  "accepted": true
+}

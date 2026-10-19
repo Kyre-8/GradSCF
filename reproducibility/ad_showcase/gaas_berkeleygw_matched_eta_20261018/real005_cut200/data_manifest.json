@@ -1,0 +1,13 @@
+{
+  "files": {
+    "correlation_curves.npz": "c8b708cabc340b1a0ed107f1b5d64f090d8ea0316f2031a4655ccef3749fab19",
+    "comparison.json": "64882aa8845675f59b8f6960f376f20ca1271e9fbc2ccb8e76e4cc570ded0172",
+    "gaas_native_bgw_sigma.pdf": "cd90feb32609b7d88764fd4bd308330f2f60fdf8b0c9aa01aa0893487abdd229",
+    "gaas_native_bgw_sigma.png": "90d963e7555313934343984ca147eb7ef164f19d593d0e806ac59a7e9ef82508",
+    "selected_gamma_comparison.csv": "e9a012a63f5e1d23ef1c721937e7f34b8c8350d40c4d2614879ddd8a0f3822d0",
+    "protocol_certificate.json": "a2898995502a582bf8edd0448b53bbf73d92fb3e2eaa32c9810cc224b32efddb",
+    "resource.json": "c660311abf7c11944c4c5be82c407c6baf88a17e8bc67a22e96a556219487e9d",
+    "source_screening_eta_green.stdout": "1cce78aa78329cefeda1fa0f731b65c378768cde640bd7e9d8e53577624a5fce",
+    "source_screening_eta_green.json": "c5b21b50297fc7e5351f36ad7b9abf3f50b1090a35f56eb9a5117675789048f4"
+  }
+}

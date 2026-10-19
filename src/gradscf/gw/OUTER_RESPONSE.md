@@ -55,6 +55,15 @@ unchanged occupation/residue branches. The convergence test certifies the
 chosen finite contour grid, not basis/grid completeness. Periodic evGW outer
 response and unrestricted qsGW are not added by these molecular paths.
 
+Occupation labels stay fixed. Every updated spectrum must have a finite
+positive gap between the lowest virtual and highest occupied level; ordering
+and degeneracies inside a sector do not change that test. The evGW residual
+also requires a finite positive local fixed-G/W slope on computed levels.
+This slope is a validity check, not the full evGW response: the attached
+outer Jacobian includes the changes of G and W. The numerical forward
+closures and captured parameters are stopped before attaching that Jacobian,
+so reverse mode does not traverse their dynamic iteration loops.
+
 `tests/gw/test_gw_outer_response.py` compares CPU float64 compiled JVP/VJP
 against central differences of independently reconverged eager solutions.
 It covers initial-spectrum and individual DF-factor perturbations, separate

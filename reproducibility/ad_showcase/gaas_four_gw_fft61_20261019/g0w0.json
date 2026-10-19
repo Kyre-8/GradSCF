@@ -1,0 +1,73 @@
+{
+  "method": "periodic_g0w0_full_cd_diagonal",
+  "converged": true,
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "fft_mesh": [
+    61,
+    61,
+    61
+  ],
+  "basis": "gth-szv",
+  "pseudo": "gth-pbe",
+  "xc": "pbe",
+  "soc": false,
+  "fc": false,
+  "exxdiv": null,
+  "nw": 64,
+  "screening_cutoff_rydberg": 16.0,
+  "model_memory_limit_bytes": 17179869184,
+  "eta_hartree": 0.001,
+  "scf_seconds": 31.73067921801703,
+  "model_seconds": 23.00782083600643,
+  "gw_seconds": 12.083517795981606,
+  "reference_check_seconds": 8.613852347974898,
+  "reference_reciprocal_image_error_hartree": 6.012967901369848e-13,
+  "tolerance_hartree": 1e-06,
+  "source_model": {
+    "fc": false,
+    "compression_tolerance": 1e-12,
+    "compression": [
+      {
+        "rank": 203,
+        "original_rank": 226981,
+        "relative_gram_residual": 2.169783393873858e-13
+      },
+      {
+        "rank": 191,
+        "original_rank": 226981,
+        "relative_gram_residual": 3.4420033244008766e-13
+      }
+    ],
+    "mesh": [
+      61,
+      61,
+      61
+    ],
+    "screening_cutoff_rydberg": 16.0,
+    "screening_compression": [
+      {
+        "rank": 200,
+        "original_rank": 331,
+        "relative_gram_residual": 3.842211878949528e-13,
+        "plane_waves": 331
+      },
+      {
+        "rank": 190,
+        "original_rank": 332,
+        "relative_gram_residual": 4.0647809400493264e-13,
+        "plane_waves": 332
+      }
+    ],
+    "scope": "3D source-k finite Hamiltonian; no Gamma-cell correction or material convergence",
+    "reference_hartree_residual": 1.489426151857226e-10,
+    "reference_fock_residual": 6.217275180991155e-15,
+    "reference_exchange_potential_difference": 0.7359496969989212
+  },
+  "scope": "Finite Gaussian/source-k model; no bulk-convergence claim",
+  "iterations": 1,
+  "residual_hartree": 3.544387006115812e-14
+}

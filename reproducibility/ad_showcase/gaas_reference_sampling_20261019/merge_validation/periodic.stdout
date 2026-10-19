@@ -1,0 +1,13 @@
+.......................................................................  [100%]
+============================= slowest 10 durations =============================
+35.35s call     tests/gw/pbc/test_kpoint_invariants.py::test_q0_correction_does_not_depend_on_kpoint_order
+35.17s call     tests/gw/pbc/test_kpoint_invariants.py::test_kpoint_driver_is_invariant_to_independent_band_phases[True]
+28.15s call     tests/gw/pbc/test_kpoint_invariants.py::test_kpoint_driver_is_invariant_to_independent_band_phases[False]
+17.18s call     tests/gw/pbc/test_kpoint_invariants.py::test_small_h2_cell_gamma_matches_single_k_with_head_wing
+13.63s call     tests/gw/pbc/test_kpoint_invariants.py::test_gamma_matches_single_k_with_complex_orbitals
+12.14s call     tests/gw/pbc/test_self_consistency.py::test_native_source_hartree_matches_actual_scf_without_a_frozen_offset
+10.57s call     tests/gw/pbc/test_matsubara_retention.py::test_scgw_streamed_and_dense_diagnostics_have_the_same_fixed_point
+10.13s call     tests/gw/pbc/test_dynamic_tail.py::test_one_matrix_pole_density_and_time_match_exact_noncommuting_auxiliary_bath[3-20.0]
+10.06s call     tests/gw/pbc/test_self_consistency.py::test_zero_interaction_all_k_methods_recover_hamiltonian[g0w0]
+6.51s call     tests/gw/pbc/test_self_consistency.py::test_native_gamma_complex_density_exchange_matches_direct_fft_contraction
+71 passed in 245.21s (0:04:05)

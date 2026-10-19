@@ -1,0 +1,1125 @@
+{
+  "scope": "h-to-zero continuity and equivalent-coordinate QA of the saved SC1024 measure; not continuation accuracy or real-axis stability validation",
+  "comparison_sha256": "0f15a1ba843fdcbc005863d45944a9b1463f796f600237cf492088efeb3f79ff",
+  "source_sha256": "eb98b81662f79052e305e436593216c1575b8acd3c8e82e0c2c1da721a47128f",
+  "eta_ev": 0.1,
+  "energy_step_ev": 0.05,
+  "energy_window_ev": [
+    -15.0,
+    15.0
+  ],
+  "step_definition": "h0=(saved path_distance[i+1]-path_distance[i])/2; h=h0/2**j for j=0,1,2,3; evaluate s0-h and s0+h on the original unwrapped ASE path",
+  "s_units": "same reciprocal-path-distance units as saved ASE path_distance",
+  "difference_definition": "L2(Aplus-Aminus)/max(L2(Aplus),L2(Aminus)); raw per-k spectral traces are not renormalized",
+  "gauge_definition": "same physical k evaluated independently as unwrapped and canonical wrapped reciprocal coordinates",
+  "targets": [
+    {
+      "name": "strong_Gamma_X",
+      "saved_pair": [
+        6,
+        7
+      ],
+      "center_s": 0.23303947792221452,
+      "center_fractional_unwrapped": [
+        0.10483870967741936,
+        0.0,
+        0.10483870967741936
+      ],
+      "center_definition": "midpoint of original physical samples 6 and 7",
+      "terminal_extension": false,
+      "h0": 0.0179261136863242,
+      "steps": [
+        {
+          "h": 0.0179261136863242,
+          "query_indices": [
+            0,
+            1
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.6306994263170007,
+            "max_abs_states_per_ev": 8.249566943681364
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.6306994263170007,
+            "max_abs_states_per_ev": 8.249566943681364
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.7819864340899187,
+            "max_abs_states_per_ev": 10.008996156034128
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.7819864340899187,
+            "max_abs_states_per_ev": 10.008996156034128
+          },
+          "pbe_energy_left_right_max_ev": 0.3041845506979742,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.0,
+          "source_weights_left_right_max": 0.03225806451612903,
+          "source_weights_gauge_max": 0.0
+        },
+        {
+          "h": 0.0089630568431621,
+          "query_indices": [
+            2,
+            3
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.4135178833383635,
+            "max_abs_states_per_ev": 5.824066635180127
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.4135178833383635,
+            "max_abs_states_per_ev": 5.824066635180127
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.5096645188944755,
+            "max_abs_states_per_ev": 7.318395581651962
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.5096645188944755,
+            "max_abs_states_per_ev": 7.318395581651962
+          },
+          "pbe_energy_left_right_max_ev": 0.15219117283634673,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.0,
+          "source_weights_left_right_max": 0.01612903225806453,
+          "source_weights_gauge_max": 0.0
+        },
+        {
+          "h": 0.00448152842158105,
+          "query_indices": [
+            4,
+            5
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.2287453790278199,
+            "max_abs_states_per_ev": 3.33892947951563
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.2287453790278199,
+            "max_abs_states_per_ev": 3.33892947951563
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.2822971200446759,
+            "max_abs_states_per_ev": 4.059029993465057
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.2822971200446759,
+            "max_abs_states_per_ev": 4.059029993465057
+          },
+          "pbe_energy_left_right_max_ev": 0.0761079542455623,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.0,
+          "source_weights_left_right_max": 0.008064516129032362,
+          "source_weights_gauge_max": 0.0
+        },
+        {
+          "h": 0.002240764210790525,
+          "query_indices": [
+            6,
+            7
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.11782344210974875,
+            "max_abs_states_per_ev": 1.7359893329745075
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.11782344210974875,
+            "max_abs_states_per_ev": 1.7359893329745075
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.14551391275222422,
+            "max_abs_states_per_ev": 2.1651651601129736
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.14551391275222422,
+            "max_abs_states_per_ev": 2.1651651601129736
+          },
+          "pbe_energy_left_right_max_ev": 0.038055523277887554,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.0,
+          "source_weights_left_right_max": 0.0040322580645161255,
+          "source_weights_gauge_max": 0.0
+        }
+      ],
+      "sc_unwrapped_successive_ratios": [
+        0.6556496899848487,
+        0.5531692539658499,
+        0.515085561992573
+      ],
+      "sc_wrapped_successive_ratios": [
+        0.6556496899848487,
+        0.5531692539658499,
+        0.515085561992573
+      ]
+    },
+    {
+      "name": "X_wrap",
+      "saved_pair": [
+        30,
+        31
+      ],
+      "center_s": 1.1114190485520998,
+      "center_fractional_unwrapped": [
+        0.5,
+        0.0,
+        0.5
+      ],
+      "center_definition": "exact unwrapped crossing of a reciprocal component n+1/2",
+      "terminal_extension": false,
+      "h0": 0.01792611368632413,
+      "steps": [
+        {
+          "h": 0.01792611368632413,
+          "query_indices": [
+            8,
+            9
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.0655218048137025,
+            "max_abs_states_per_ev": 0.7533810741376143
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.04884160617763781,
+            "max_abs_states_per_ev": 0.5124055443730793
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.06589602758017153,
+            "max_abs_states_per_ev": 1.0579371584075234
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.049625696011944165,
+            "max_abs_states_per_ev": 1.0607984736708662
+          },
+          "pbe_energy_left_right_max_ev": 0.024075736060864626,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.03097066436840072,
+              "max_abs_states_per_ev": 0.4823833258805603
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.029466108594842406,
+              "max_abs_states_per_ev": 0.623322079052337
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.01589511757565934,
+          "source_weights_left_right_max": 0.01612903225806428,
+          "source_weights_gauge_max": 0.0
+        },
+        {
+          "h": 0.008963056843162065,
+          "query_indices": [
+            10,
+            11
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.03347964728345814,
+            "max_abs_states_per_ev": 0.3814627443136773
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.02537976045397334,
+            "max_abs_states_per_ev": 0.25919958739711557
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.02613893799429066,
+            "max_abs_states_per_ev": 0.49781900185075934
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.015015300964138313,
+            "max_abs_states_per_ev": 0.28967266877914977
+          },
+          "pbe_energy_left_right_max_ev": 0.011859287865738595,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.015379270359158688,
+              "max_abs_states_per_ev": 0.24152613486298957
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.014789168696713734,
+              "max_abs_states_per_ev": 0.31550376131198643
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.007958184348671123,
+          "source_weights_left_right_max": 0.00806451612903214,
+          "source_weights_gauge_max": 0.0
+        },
+        {
+          "h": 0.0044815284215810325,
+          "query_indices": [
+            12,
+            13
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.016950289500427825,
+            "max_abs_states_per_ev": 0.19148212954494337
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.013164865970264058,
+            "max_abs_states_per_ev": 0.12916478125661346
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.011842082409671929,
+            "max_abs_states_per_ev": 0.24447768949332271
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.00525275482027351,
+            "max_abs_states_per_ev": 0.08624824228604577
+          },
+          "pbe_energy_left_right_max_ev": 0.005884550152619539,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.007586167322695264,
+              "max_abs_states_per_ev": 0.11965933300875431
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.007402638721522337,
+              "max_abs_states_per_ev": 0.15822944720727694
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.003980430009507125,
+          "source_weights_left_right_max": 0.0040322580645161255,
+          "source_weights_gauge_max": 0.0
+        },
+        {
+          "h": 0.0022407642107905162,
+          "query_indices": [
+            14,
+            15
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.008531139385517163,
+            "max_abs_states_per_ev": 0.09586952347476974
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.006941817805247472,
+            "max_abs_states_per_ev": 0.06426625662977337
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.005727572846630465,
+            "max_abs_states_per_ev": 0.1209934795103198
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.0022064559987972753,
+            "max_abs_states_per_ev": 0.0418191495047715
+          },
+          "pbe_energy_left_right_max_ev": 0.002930961322089232,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.0038006651579803176,
+              "max_abs_states_per_ev": 0.058555998085592975
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.003702574355665722,
+              "max_abs_states_per_ev": 0.0791743300055483
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.0019903825371704264,
+          "source_weights_left_right_max": 0.002016129032258007,
+          "source_weights_gauge_max": 0.0
+        }
+      ],
+      "sc_unwrapped_successive_ratios": [
+        0.5109695524818111,
+        0.5062863821986184,
+        0.5033034618849335
+      ],
+      "sc_wrapped_successive_ratios": [
+        0.5196340259914198,
+        0.5187151389446242,
+        0.5272987830584221
+      ]
+    },
+    {
+      "name": "W_wrap",
+      "saved_pair": [
+        46,
+        47
+      ],
+      "center_s": 1.6671285728281497,
+      "center_fractional_unwrapped": [
+        0.5,
+        0.25,
+        0.75
+      ],
+      "center_definition": "exact unwrapped crossing of a reciprocal component n+1/2",
+      "terminal_extension": false,
+      "h0": 0.0178611805902521,
+      "steps": [
+        {
+          "h": 0.0178611805902521,
+          "query_indices": [
+            16,
+            17
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.08056047117910847,
+            "max_abs_states_per_ev": 0.8246218889710359
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.10496230847588284,
+            "max_abs_states_per_ev": 1.346623576196047
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.06320739655238924,
+            "max_abs_states_per_ev": 1.6540946514194204
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.05475324193069301,
+            "max_abs_states_per_ev": 1.605565634123007
+          },
+          "pbe_energy_left_right_max_ev": 0.03662436020163508,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.4447757062947161,
+              "max_abs_states_per_ev": 4.385400749131631
+            },
+            {
+              "normalized_l2": 0.457399269428702,
+              "max_abs_states_per_ev": 4.307365831091745
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.4686373343948707,
+              "max_abs_states_per_ev": 5.933512794212446
+            },
+            {
+              "normalized_l2": 0.47544067149496283,
+              "max_abs_states_per_ev": 5.84481649907589
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.4477533682390835,
+          "source_weights_left_right_max": 0.011363636363636131,
+          "source_weights_gauge_max": 1.1102230246251565e-16
+        },
+        {
+          "h": 0.00893059029512605,
+          "query_indices": [
+            18,
+            19
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.03954411594579258,
+            "max_abs_states_per_ev": 0.4275013146277207
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.05231071052813531,
+            "max_abs_states_per_ev": 0.6744311753114922
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.02164674525724568,
+            "max_abs_states_per_ev": 0.48905305214471184
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.016383393714023062,
+            "max_abs_states_per_ev": 0.4288834974735565
+          },
+          "pbe_energy_left_right_max_ev": 0.0166869935243571,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.44968761201035506,
+              "max_abs_states_per_ev": 4.362564792974636
+            },
+            {
+              "normalized_l2": 0.4560705587941103,
+              "max_abs_states_per_ev": 4.323504890060524
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.4705767976043586,
+              "max_abs_states_per_ev": 5.752999047106462
+            },
+            {
+              "normalized_l2": 0.47301021200691723,
+              "max_abs_states_per_ev": 5.892696499764984
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.44640293530695635,
+          "source_weights_left_right_max": 0.00568181818181801,
+          "source_weights_gauge_max": 1.1102230246251565e-16
+        },
+        {
+          "h": 0.004465295147563025,
+          "query_indices": [
+            20,
+            21
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.019549873751051428,
+            "max_abs_states_per_ev": 0.21722652864996528
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.026580993681950937,
+            "max_abs_states_per_ev": 0.3336826023672379
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.008813332772811495,
+            "max_abs_states_per_ev": 0.14387738363242164
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.006022449606165004,
+            "max_abs_states_per_ev": 0.10446824208474226
+          },
+          "pbe_energy_left_right_max_ev": 0.007269188532965005,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.4521338562628146,
+              "max_abs_states_per_ev": 4.3488695025776964
+            },
+            {
+              "normalized_l2": 0.4553368877343377,
+              "max_abs_states_per_ev": 4.32930025698483
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.471483366446314,
+              "max_abs_states_per_ev": 5.836638446433701
+            },
+            {
+              "normalized_l2": 0.4723924952843677,
+              "max_abs_states_per_ev": 5.910489381719243
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.44565146178927895,
+          "source_weights_left_right_max": 0.0028409090909090606,
+          "source_weights_gauge_max": 0.0
+        },
+        {
+          "h": 0.0022326475737815127,
+          "query_indices": [
+            22,
+            23
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.00971585487990114,
+            "max_abs_states_per_ev": 0.10923792910263908
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.014432103222298558,
+            "max_abs_states_per_ev": 0.16453662827454751
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.004069142958781626,
+            "max_abs_states_per_ev": 0.061072124466441835
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.0027236790671811588,
+            "max_abs_states_per_ev": 0.029149731525249578
+          },
+          "pbe_energy_left_right_max_ev": 0.0030374788976089482,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.4533537124221859,
+              "max_abs_states_per_ev": 4.341484412697444
+            },
+            {
+              "normalized_l2": 0.454952154329606,
+              "max_abs_states_per_ev": 4.331863501544662
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.4719214478357417,
+              "max_abs_states_per_ev": 5.882362429670353
+            },
+            {
+              "normalized_l2": 0.47229683637390896,
+              "max_abs_states_per_ev": 5.917898399139999
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.4452547474120984,
+          "source_weights_left_right_max": 0.0014204545454544748,
+          "source_weights_gauge_max": 0.0
+        }
+      ],
+      "sc_unwrapped_successive_ratios": [
+        0.49086252062596486,
+        0.4943813582240798,
+        0.49697788352104333
+      ],
+      "sc_wrapped_successive_ratios": [
+        0.4983761436626056,
+        0.5081367355477681,
+        0.5429482206339887
+      ]
+    },
+    {
+      "name": "KGamma_wrap",
+      "saved_pair": [
+        68,
+        69
+      ],
+      "center_s": 2.45302051879924,
+      "center_fractional_unwrapped": [
+        0.25000000000000006,
+        0.25000000000000006,
+        0.5000000000000001
+      ],
+      "center_definition": "exact unwrapped crossing of a reciprocal component n+1/2",
+      "terminal_extension": false,
+      "h0": 0.017335851749362252,
+      "steps": [
+        {
+          "h": 0.017335851749362252,
+          "query_indices": [
+            24,
+            25
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.2898445657257696,
+            "max_abs_states_per_ev": 3.1240556402532307
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.2920447009326924,
+            "max_abs_states_per_ev": 3.1418311862126553
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.6480059813115421,
+            "max_abs_states_per_ev": 5.338411118822032
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.668519345664338,
+            "max_abs_states_per_ev": 5.340683891402786
+          },
+          "pbe_energy_left_right_max_ev": 0.22300875099417533,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.04483083548304457,
+              "max_abs_states_per_ev": 0.5179904644642459
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.11500456709546535,
+              "max_abs_states_per_ev": 1.9700691369368077
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.0498974411198865,
+          "source_weights_left_right_max": 0.02205882352941163,
+          "source_weights_gauge_max": 1.1102230246251565e-16
+        },
+        {
+          "h": 0.008667925874681126,
+          "query_indices": [
+            26,
+            27
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.16326459883663516,
+            "max_abs_states_per_ev": 1.7699894150642912
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.1696064141121591,
+            "max_abs_states_per_ev": 1.790703327445885
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.3827648290255093,
+            "max_abs_states_per_ev": 3.7357824010355296
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.41751543675465014,
+            "max_abs_states_per_ev": 3.7438037125290453
+          },
+          "pbe_energy_left_right_max_ev": 0.11151800984668041,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.04683446526730172,
+              "max_abs_states_per_ev": 0.5574908199121342
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.12320737944830322,
+              "max_abs_states_per_ev": 2.1353292547112415
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.055910454642149436,
+          "source_weights_left_right_max": 0.011029411764706176,
+          "source_weights_gauge_max": 1.1102230246251565e-16
+        },
+        {
+          "h": 0.004333962937340563,
+          "query_indices": [
+            28,
+            29
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.08470785792941063,
+            "max_abs_states_per_ev": 0.9822094316575805
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.09793446907080511,
+            "max_abs_states_per_ev": 1.0144316801218305
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.2029127633007419,
+            "max_abs_states_per_ev": 2.1817139257404494
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.25629084084648335,
+            "max_abs_states_per_ev": 2.736349437831449
+          },
+          "pbe_energy_left_right_max_ev": 0.0557607087202463,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.04902926073552594,
+              "max_abs_states_per_ev": 0.5771965989590844
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.12949611373795125,
+              "max_abs_states_per_ev": 2.259577619871786
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.058928577512333276,
+          "source_weights_left_right_max": 0.0055147058823528106,
+          "source_weights_gauge_max": 1.1102230246251565e-16
+        },
+        {
+          "h": 0.0021669814686702815,
+          "query_indices": [
+            30,
+            31
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.042775483672462644,
+            "max_abs_states_per_ev": 0.5067305186472737
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.06614882357309865,
+            "max_abs_states_per_ev": 0.6181595231904651
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.10314810054197099,
+            "max_abs_states_per_ev": 1.1295881534079983
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 0.1804908947526817,
+            "max_abs_states_per_ev": 2.5682916383447325
+          },
+          "pbe_energy_left_right_max_ev": 0.02788056731930988,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.05036302905352951,
+              "max_abs_states_per_ev": 0.5870514393957307
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.13310664061759972,
+              "max_abs_states_per_ev": 2.3288363660108415
+            },
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.060440505205229575,
+          "source_weights_left_right_max": 0.0027573529411764053,
+          "source_weights_gauge_max": 1.1102230246251565e-16
+        }
+      ],
+      "sc_unwrapped_successive_ratios": [
+        0.5632832840174915,
+        0.5188378774884964,
+        0.5049765714546651
+      ],
+      "sc_wrapped_successive_ratios": [
+        0.5807549788456813,
+        0.5774219659289653,
+        0.6754396506226431
+      ]
+    },
+    {
+      "name": "L_wrap",
+      "saved_pair": [
+        119,
+        120
+      ],
+      "center_s": 4.201429595066379,
+      "center_fractional_unwrapped": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "center_definition": "exact unwrapped crossing of a reciprocal component n+1/2",
+      "terminal_extension": true,
+      "h0": 0.01659512293613874,
+      "steps": [
+        {
+          "h": 0.01659512293613874,
+          "query_indices": [
+            32,
+            33
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.10987676259579,
+            "max_abs_states_per_ev": 1.837920208938285
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.03773568019266993,
+            "max_abs_states_per_ev": 0.6279324766172492
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.12480513794375234,
+            "max_abs_states_per_ev": 2.7785567682346226
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 2.0939872392091469e-13,
+            "max_abs_states_per_ev": 3.82982534574694e-12
+          },
+          "pbe_energy_left_right_max_ev": 0.03617358044994928,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.10752319978320346,
+              "max_abs_states_per_ev": 1.8238498285607783
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.12480513794391301,
+              "max_abs_states_per_ev": 2.778556768238147
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.036173580449995545,
+          "source_weights_left_right_max": 1.1102230246251565e-16,
+          "source_weights_gauge_max": 0.0
+        },
+        {
+          "h": 0.00829756146806937,
+          "query_indices": [
+            34,
+            35
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.055405958736398565,
+            "max_abs_states_per_ev": 0.9302375649826766
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.02004165118266475,
+            "max_abs_states_per_ev": 0.3264084610846103
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.06304808268429633,
+            "max_abs_states_per_ev": 1.41311191275296
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 1.1615421760142655e-13,
+            "max_abs_states_per_ev": 1.964650664376677e-12
+          },
+          "pbe_energy_left_right_max_ev": 0.018087162521886573,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.05407956926384241,
+              "max_abs_states_per_ev": 0.9210941363677074
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.06304808268422168,
+              "max_abs_states_per_ev": 1.4131119127510843
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.018087162521875623,
+          "source_weights_left_right_max": 2.220446049250313e-16,
+          "source_weights_gauge_max": 2.220446049250313e-16
+        },
+        {
+          "h": 0.004148780734034685,
+          "query_indices": [
+            36,
+            37
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.027775157976600472,
+            "max_abs_states_per_ev": 0.4665357553655518
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.011021572877013316,
+            "max_abs_states_per_ev": 0.17346977515813222
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.031606705908278215,
+            "max_abs_states_per_ev": 0.7095496300741235
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 1.2576094346631423e-13,
+            "max_abs_states_per_ev": 3.5473846082823e-12
+          },
+          "pbe_energy_left_right_max_ev": 0.009043627809586834,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.027130467444650867,
+              "max_abs_states_per_ev": 0.4598023957424502
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.03160670590832609,
+              "max_abs_states_per_ev": 0.7095496300751787
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.009043627809692194,
+          "source_weights_left_right_max": 3.3306690738754696e-16,
+          "source_weights_gauge_max": 4.440892098500626e-16
+        },
+        {
+          "h": 0.0020743903670173425,
+          "query_indices": [
+            38,
+            39
+          ],
+          "sc_unwrapped": {
+            "normalized_l2": 0.013899904801500619,
+            "max_abs_states_per_ev": 0.23344723866612505
+          },
+          "sc_wrapped": {
+            "normalized_l2": 0.006516405976273448,
+            "max_abs_states_per_ev": 0.09654891540162058
+          },
+          "pbe_unwrapped": {
+            "normalized_l2": 0.01581386344898688,
+            "max_abs_states_per_ev": 0.3551494507853832
+          },
+          "pbe_wrapped": {
+            "normalized_l2": 1.894174374227072e-13,
+            "max_abs_states_per_ev": 3.561595462997502e-12
+          },
+          "pbe_energy_left_right_max_ev": 0.004521819723647445,
+          "sc_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.013702717092053781,
+              "max_abs_states_per_ev": 0.2278813187671629
+            }
+          ],
+          "pbe_gauge": [
+            {
+              "normalized_l2": 0.0,
+              "max_abs_states_per_ev": 0.0
+            },
+            {
+              "normalized_l2": 0.015813863449094707,
+              "max_abs_states_per_ev": 0.35514945078869076
+            }
+          ],
+          "pbe_energy_gauge_max_ev": 0.004521819723636304,
+          "source_weights_left_right_max": 3.3306690738754696e-16,
+          "source_weights_gauge_max": 0.0
+        }
+      ],
+      "sc_unwrapped_successive_ratios": [
+        0.5042554715615681,
+        0.5013027228487208,
+        0.5004437711285302
+      ],
+      "sc_wrapped_successive_ratios": [
+        0.5311061329843948,
+        0.5499333750777257,
+        0.5912410187718413
+      ]
+    }
+  ],
+  "reference_checks": {
+    "energy": 7.46325223843769e-12,
+    "density": 2.0571255740530194e-09,
+    "overlap": 1.3322676295501878e-15,
+    "lattice": 0.0,
+    "kpoints": 0.0
+  },
+  "saved_measure_frame_checks": [
+    {
+      "k": 0,
+      "training_relative_error": 4.012683184751768e-07,
+      "holdout_relative_error": 2.2182654338793403e-06,
+      "moment_relative_error": 1.4022509933398122e-14
+    },
+    {
+      "k": 1,
+      "training_relative_error": 2.72619810542587e-07,
+      "holdout_relative_error": 4.0254043470562825e-07,
+      "moment_relative_error": 1.5167519864644433e-14
+    }
+  ],
+  "saved_measure_frame_note": "No coefficients were stored with the final pole measure; reuse is checked directly against aligned source Sigma/M1 at the original train/holdout tolerances, without refitting",
+  "reference_and_setup_seconds": 20.741452871996444,
+  "query_count": 80,
+  "seconds": 53.09185716000502,
+  "query_bands_seconds": 26.655950875981944,
+  "completed": true,
+  "interpretation": "Four decreasing steps can support or contradict apparent continuity; they do not prove continuation accuracy or convergence in the number of source points"
+}

@@ -1,0 +1,360 @@
+{
+  "native_file": "/home/yjiao/gradscf_checks/gw-reference/native-one-map-20261019/one_map.npz",
+  "green_file": "/home/yjiao/gradscf_checks/gw-reference/green-native-gwmap-20261019-r1/matsubara_map.npz",
+  "native_sha256": "f2ad79c0dbcfc0300d09d4c62ca406294b5355f0df976321703f8771c7508638",
+  "green_sha256": "1d51a032c3bc4b088599e27437cb18e3ca78c2861282df87134527b8734517e0",
+  "script_sha256": "be26b503e86331e4d553aa913d0ca2f4809bbaf6cd934e86a8e6be92a1dcf9fb",
+  "beta_hartree_inverse": 400.0,
+  "scope": "One physical GW map at the same native finite Hamiltonian, initial Fock and mu; no self-consistent or band-query comparison",
+  "interpolation": false,
+  "native_source_report": {
+    "source_sha256": "f8a8d0b94c4c9ee912e6d28ae8f6a599ee3016dd55b3472c020eed1700e59594",
+    "script_sha256": "addb1b768716af9b90c34e6d5a2dd19f06e9a1a9063437e49ca9f7d286a0a1df",
+    "src_matsubara_sha256": "0b017682eba391909969ef0c025567b8878b00070fc776ded57c11e10f34f25b",
+    "src_source_sha256": "f021849276aea5af49a27b9ff1bfc74c9950feda2da0028899d66eae370f3b3a",
+    "jax_version": "0.10.0",
+    "numpy_version": "2.4.4",
+    "backend": "cpu",
+    "devices": [
+      "cpu:0"
+    ],
+    "beta_hartree_inverse": 400.0,
+    "mu_hartree": 0.29783017174122506,
+    "nw_positive": 1024,
+    "time_oversampling": 4,
+    "time_quadrature": "gauss",
+    "time_batch_size": 512,
+    "time_diagnostics": false,
+    "nk": 2,
+    "nmo": 14,
+    "nocc": 9,
+    "bare_factor_shapes": [
+      [
+        2,
+        203,
+        14,
+        14
+      ],
+      [
+        2,
+        191,
+        14,
+        14
+      ]
+    ],
+    "correlation_factor_shapes": [
+      [
+        2,
+        200,
+        14,
+        14
+      ],
+      [
+        2,
+        190,
+        14,
+        14
+      ]
+    ],
+    "scope": "One unmixed GW physical map at fixed Fref and common mu; no self-consistency or external agreement claim",
+    "grid_seconds": 51.953550958999585,
+    "nfermion": 2048,
+    "ntau": 8192,
+    "input_green_seconds": 1.1486334859991985,
+    "electron_number": 17.999999999823,
+    "particle_number_error": 1.7699974819151976e-10,
+    "gw_map_seconds": 129.65983366199998,
+    "sigma_iw_shape": [
+      2,
+      2048,
+      14,
+      14
+    ],
+    "sigma_moment_shape": [
+      2,
+      14,
+      14
+    ],
+    "density_hermiticity": 0.0,
+    "mapped_sigma1_hermiticity_hartree": 0.0,
+    "sigma_moment_hermiticity_hartree_squared": 0.0,
+    "sigma_matsubara_dagger_error_hartree": 6.938893903907228e-18,
+    "green_matsubara_dagger_error": 0.0,
+    "sigma_moment_minimum_eigenvalue_hartree_squared": 0.033544831089334474,
+    "finite": true,
+    "output_sha256": "f2ad79c0dbcfc0300d09d4c62ca406294b5355f0df976321703f8771c7508638",
+    "output_size_bytes": 12700741,
+    "elapsed_seconds": 183.52538282600017,
+    "complete": true
+  },
+  "green_input_export": {
+    "input_file": "/home/yjiao/gradscf_checks/gw-reference/green-native-input/input.h5",
+    "naux": 406,
+    "kmesh": [
+      2,
+      1,
+      1
+    ],
+    "source_frame": "fixed orthonormal reference MO",
+    "q0_treatment": "ignore_G0",
+    "factor_certificates": {
+      "df_hf": [
+        {
+          "original_rank": 203,
+          "converted_rank": 406,
+          "relative_gram_error": 2.318347513378538e-15,
+          "maximum_gram_error": 1.416469930218197e-15
+        },
+        {
+          "original_rank": 191,
+          "converted_rank": 382,
+          "relative_gram_error": 1.606866801933362e-14,
+          "maximum_gram_error": 1.4665494871762543e-14
+        }
+      ],
+      "df_corr": [
+        {
+          "original_rank": 200,
+          "converted_rank": 400,
+          "relative_gram_error": 2.0366666631098666e-15,
+          "maximum_gram_error": 2.402623197392833e-15
+        },
+        {
+          "original_rank": 190,
+          "converted_rank": 380,
+          "relative_gram_error": 1.3450527281211044e-15,
+          "maximum_gram_error": 1.8488017008833555e-15
+        }
+      ]
+    },
+    "external_reader_validated": false,
+    "native_hartree_max_error_hartree": 2.220446049250313e-16,
+    "native_exchange_max_error_hartree": 1.3620051108387428e-14,
+    "source_sha256": "f8a8d0b94c4c9ee912e6d28ae8f6a599ee3016dd55b3472c020eed1700e59594",
+    "elapsed_seconds": 1.5282169500001146,
+    "scope": "Native Hamiltonian-preserving file export; external GREEN reader/map validation still required"
+  },
+  "native_frequency_check": {
+    "nfrequencies": 2048,
+    "maximum_formula_error_hartree": 0.0,
+    "maximum_beta_inference_error": 5.684341886080802e-14
+  },
+  "green_frequency_check": {
+    "nfrequencies": 142,
+    "maximum_formula_error_hartree": 0.0,
+    "maximum_beta_inference_error": 5.684341886080802e-14
+  },
+  "native_mu_hartree": 0.29783017174122506,
+  "green_mu_hartree": 0.29783017174122506,
+  "mu_difference_hartree": 0.0,
+  "common_nodes": {
+    "count": 92,
+    "standard_fermion_n": [
+      -996,
+      -869,
+      -759,
+      -662,
+      -578,
+      -505,
+      -441,
+      -385,
+      -336,
+      -293,
+      -256,
+      -224,
+      -195,
+      -171,
+      -149,
+      -130,
+      -114,
+      -99,
+      -87,
+      -76,
+      -66,
+      -58,
+      -51,
+      -44,
+      -39,
+      -34,
+      -30,
+      -26,
+      -23,
+      -20,
+      -18,
+      -16,
+      -14,
+      -13,
+      -12,
+      -11,
+      -10,
+      -9,
+      -8,
+      -7,
+      -6,
+      -5,
+      -4,
+      -3,
+      -2,
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      15,
+      17,
+      19,
+      22,
+      25,
+      29,
+      33,
+      38,
+      43,
+      50,
+      57,
+      65,
+      75,
+      86,
+      98,
+      113,
+      129,
+      148,
+      170,
+      194,
+      223,
+      255,
+      292,
+      335,
+      384,
+      440,
+      504,
+      577,
+      661,
+      758,
+      868,
+      995
+    ],
+    "maximum_frequency_difference_hartree": 0.0,
+    "positive_count": 46,
+    "negative_count": 46
+  },
+  "sigma_correlation_hartree": {
+    "shape": [
+      2,
+      92,
+      14,
+      14
+    ],
+    "maximum_absolute_error": 7.176726418471463e-12,
+    "frobenius_error": 2.291818182540975e-11,
+    "reference_frobenius_norm": 1.487362000233974,
+    "relative_frobenius_error": 1.5408610561386224e-11,
+    "diagonal_maximum_error": 7.176726418471463e-12,
+    "off_diagonal_maximum_error": 3.56476386032258e-12
+  },
+  "frequency_bands": {
+    "low_abs_omega_le_0.1_Ha": {
+      "nfrequencies": 12,
+      "shape": [
+        2,
+        12,
+        14,
+        14
+      ],
+      "maximum_absolute_error": 7.176726418471463e-12,
+      "frobenius_error": 2.2151432919630423e-11,
+      "reference_frobenius_norm": 0.6656687587099797,
+      "relative_frobenius_error": 3.327696039477409e-11
+    },
+    "middle_0.1_to_1_Ha": {
+      "nfrequencies": 38,
+      "shape": [
+        2,
+        38,
+        14,
+        14
+      ],
+      "maximum_absolute_error": 7.914432514515469e-13,
+      "frobenius_error": 5.83997112877825e-12,
+      "reference_frobenius_norm": 1.1913692440934416,
+      "relative_frobenius_error": 4.901898515285332e-12
+    },
+    "high_abs_omega_gt_1_Ha": {
+      "nfrequencies": 42,
+      "shape": [
+        2,
+        42,
+        14,
+        14
+      ],
+      "maximum_absolute_error": 9.690291630203211e-14,
+      "frobenius_error": 6.721718565153141e-13,
+      "reference_frobenius_norm": 0.5914136857105542,
+      "relative_frobenius_error": 1.1365510686614107e-12
+    }
+  },
+  "sigma_negative_frequency_dagger_error_hartree": {
+    "native_all_2048": 6.938893903907228e-18,
+    "green_all_142": 6.436156000158265e-16,
+    "native_common_92": 6.938893903907228e-18,
+    "green_common_92": 1.6654248846680025e-16
+  },
+  "sigma_static_hartree": {
+    "shape": [
+      2,
+      14,
+      14
+    ],
+    "maximum_absolute_error": 8.453050443493529e-12,
+    "frobenius_error": 2.7955817317983406e-11,
+    "reference_frobenius_norm": 21.05483199566001,
+    "relative_frobenius_error": 1.3277625451367118e-12
+  },
+  "density_one_spin": {
+    "shape": [
+      2,
+      14,
+      14
+    ],
+    "maximum_absolute_error": 6.446431479433672e-11,
+    "frobenius_error": 7.674650148815232e-11,
+    "reference_frobenius_norm": 4.208710803202657,
+    "relative_frobenius_error": 1.823515681565751e-11
+  },
+  "sigma_moment_endpoint_hartree_squared": {
+    "shape": [
+      2,
+      14,
+      14
+    ],
+    "maximum_absolute_error": 2.0788154950275302e-11,
+    "frobenius_error": 7.345860168522997e-11,
+    "reference_frobenius_norm": 0.34428862650922526,
+    "relative_frobenius_error": 2.1336342832475658e-10
+  },
+  "hermiticity_errors": {
+    "green_sigma_static_hartree": 1.1909377645114584e-11,
+    "green_density_one_spin": 7.506990121230355e-11,
+    "green_moment_hartree_squared": 1.5653277862447975e-12,
+    "native_sigma_static_hartree": 0.0,
+    "native_density_one_spin": 0.0,
+    "native_moment_hartree_squared": 0.0
+  },
+  "particle_numbers": {
+    "native": 17.999999999823004,
+    "green": 17.999999999957886
+  },
+  "large_difference_reporting_threshold_hartree": 1e-06,
+  "large_difference_flag": false,
+  "elapsed_seconds": 0.17240258600031666,
+  "comparison_complete": true
+}

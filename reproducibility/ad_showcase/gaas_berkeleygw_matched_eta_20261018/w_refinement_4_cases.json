@@ -1,0 +1,331 @@
+{
+  "cases": {
+    "bgw_screen8_ep01_nw256_real005_schur": {
+      "rows": [
+        {
+          "band": 6,
+          "maximum_curve_difference_ev": 0.5968253818470254,
+          "maximum_difference_energy_minus_ks_ev": 4.346173987641834,
+          "on_shell_native_minus_bgw_ev": -0.006219186822069473,
+          "flag": "MULT:5"
+        },
+        {
+          "band": 7,
+          "maximum_curve_difference_ev": 2.4619566121723784,
+          "maximum_difference_energy_minus_ks_ev": 2.8,
+          "on_shell_native_minus_bgw_ev": -0.0050340164236707865,
+          "flag": "MULT:2"
+        },
+        {
+          "band": 8,
+          "maximum_curve_difference_ev": -0.9166093457287259,
+          "maximum_difference_energy_minus_ks_ev": 3.2,
+          "on_shell_native_minus_bgw_ev": -0.0056137274384493886,
+          "flag": "MULT:3"
+        },
+        {
+          "band": 9,
+          "maximum_curve_difference_ev": 0.03369851083546355,
+          "maximum_difference_energy_minus_ks_ev": 0.4,
+          "on_shell_native_minus_bgw_ev": 0.013070387091138898,
+          "flag": "MULT:4"
+        },
+        {
+          "band": 10,
+          "maximum_curve_difference_ev": 0.47089009752999583,
+          "maximum_difference_energy_minus_ks_ev": 4.400000000000001,
+          "on_shell_native_minus_bgw_ev": 0.01609759066657859,
+          "flag": "MULT:4"
+        },
+        {
+          "band": 11,
+          "maximum_curve_difference_ev": 0.37675224736591617,
+          "maximum_difference_energy_minus_ks_ev": 4.199999999999999,
+          "on_shell_native_minus_bgw_ev": 0.015226161965840621,
+          "flag": "MULT:4"
+        }
+      ],
+      "max_curve_difference_ev": 2.4619566121723784,
+      "max_on_shell_difference_ev": 0.01609759066657859
+    },
+    "bgw_screen8_ep01_nw256_real005_cut60_schur": {
+      "rows": [
+        {
+          "band": 6,
+          "maximum_curve_difference_ev": 0.5968253818470254,
+          "maximum_difference_energy_minus_ks_ev": 4.346173987641834,
+          "on_shell_native_minus_bgw_ev": -0.006219186822069473,
+          "flag": "MULT:5"
+        },
+        {
+          "band": 7,
+          "maximum_curve_difference_ev": 2.4619566121723784,
+          "maximum_difference_energy_minus_ks_ev": 2.8,
+          "on_shell_native_minus_bgw_ev": -0.0050340164236707865,
+          "flag": "MULT:2"
+        },
+        {
+          "band": 8,
+          "maximum_curve_difference_ev": -0.9166093457287259,
+          "maximum_difference_energy_minus_ks_ev": 3.2,
+          "on_shell_native_minus_bgw_ev": -0.0056137274384493886,
+          "flag": "MULT:3"
+        },
+        {
+          "band": 9,
+          "maximum_curve_difference_ev": 0.03369851083546355,
+          "maximum_difference_energy_minus_ks_ev": 0.4,
+          "on_shell_native_minus_bgw_ev": 0.013070387091138898,
+          "flag": "MULT:4"
+        },
+        {
+          "band": 10,
+          "maximum_curve_difference_ev": 0.47089009752999583,
+          "maximum_difference_energy_minus_ks_ev": 4.400000000000001,
+          "on_shell_native_minus_bgw_ev": 0.01609759066657859,
+          "flag": "MULT:4"
+        },
+        {
+          "band": 11,
+          "maximum_curve_difference_ev": 0.37675224736591617,
+          "maximum_difference_energy_minus_ks_ev": 4.199999999999999,
+          "on_shell_native_minus_bgw_ev": 0.015226161965840621,
+          "flag": "MULT:4"
+        }
+      ],
+      "max_curve_difference_ev": 2.4619566121723784,
+      "max_on_shell_difference_ev": 0.01609759066657859
+    },
+    "bgw_screen8_ep01_nw256_real001_cut60_schur": {
+      "rows": [
+        {
+          "band": 6,
+          "maximum_curve_difference_ev": 0.5977108997543419,
+          "maximum_difference_energy_minus_ks_ev": 4.346173987641834,
+          "on_shell_native_minus_bgw_ev": -0.006219186822069473,
+          "flag": "MULT:5"
+        },
+        {
+          "band": 7,
+          "maximum_curve_difference_ev": -0.019023532208908567,
+          "maximum_difference_energy_minus_ks_ev": 0.4999999999999996,
+          "on_shell_native_minus_bgw_ev": -0.0050340164236707865,
+          "flag": "MULT:2"
+        },
+        {
+          "band": 8,
+          "maximum_curve_difference_ev": -0.07678235961705565,
+          "maximum_difference_energy_minus_ks_ev": 4.368020267762618,
+          "on_shell_native_minus_bgw_ev": -0.005613808984123989,
+          "flag": "MULT:5"
+        },
+        {
+          "band": 9,
+          "maximum_curve_difference_ev": 0.03369851083546355,
+          "maximum_difference_energy_minus_ks_ev": 0.4,
+          "on_shell_native_minus_bgw_ev": 0.013070387091138898,
+          "flag": "MULT:4"
+        },
+        {
+          "band": 10,
+          "maximum_curve_difference_ev": 0.11612722247112459,
+          "maximum_difference_energy_minus_ks_ev": 4.400000000000001,
+          "on_shell_native_minus_bgw_ev": 0.016007595149891238,
+          "flag": "MULT:4"
+        },
+        {
+          "band": 11,
+          "maximum_curve_difference_ev": 0.03753805941916354,
+          "maximum_difference_energy_minus_ks_ev": 0.19999999999999923,
+          "on_shell_native_minus_bgw_ev": 0.015206157827218507,
+          "flag": "MULT:6"
+        }
+      ],
+      "max_curve_difference_ev": 0.5977108997543419,
+      "max_on_shell_difference_ev": 0.016007595149891238
+    },
+    "bgw_screen8_ep01_nw256_real0005_cut60_schur": {
+      "rows": [
+        {
+          "band": 6,
+          "maximum_curve_difference_ev": 0.5983168900898533,
+          "maximum_difference_energy_minus_ks_ev": 4.346173987641834,
+          "on_shell_native_minus_bgw_ev": -0.006219186822069473,
+          "flag": "MULT:5"
+        },
+        {
+          "band": 7,
+          "maximum_curve_difference_ev": -0.0171935910114562,
+          "maximum_difference_energy_minus_ks_ev": 0.4999999999999996,
+          "on_shell_native_minus_bgw_ev": -0.0050340164236707865,
+          "flag": "MULT:2"
+        },
+        {
+          "band": 8,
+          "maximum_curve_difference_ev": -0.07685248265861576,
+          "maximum_difference_energy_minus_ks_ev": 4.368020267762618,
+          "on_shell_native_minus_bgw_ev": -0.005613810796250075,
+          "flag": "MULT:5"
+        },
+        {
+          "band": 9,
+          "maximum_curve_difference_ev": 0.03369851083546355,
+          "maximum_difference_energy_minus_ks_ev": 0.4,
+          "on_shell_native_minus_bgw_ev": 0.013070387091138898,
+          "flag": "MULT:4"
+        },
+        {
+          "band": 10,
+          "maximum_curve_difference_ev": 0.09714818208640653,
+          "maximum_difference_energy_minus_ks_ev": 4.400000000000001,
+          "on_shell_native_minus_bgw_ev": 0.016007595149891238,
+          "flag": "MULT:4"
+        },
+        {
+          "band": 11,
+          "maximum_curve_difference_ev": 0.037498048863217885,
+          "maximum_difference_energy_minus_ks_ev": 0.19999999999999923,
+          "on_shell_native_minus_bgw_ev": 0.015206156907718427,
+          "flag": "MULT:6"
+        }
+      ],
+      "max_curve_difference_ev": 0.5983168900898533,
+      "max_on_shell_difference_ev": 0.016007595149891238
+    }
+  },
+  "consecutive_changes": [
+    {
+      "before": "bgw_screen8_ep01_nw256_real005_schur",
+      "after": "bgw_screen8_ep01_nw256_real005_cut60_schur",
+      "rows": [
+        {
+          "band": 6,
+          "max_complex_sigma_change_ev": 0.0,
+          "max_real_sigma_change_ev": 0.0,
+          "max_change_energy_ev": -12.026400524161708
+        },
+        {
+          "band": 7,
+          "max_complex_sigma_change_ev": 0.0,
+          "max_real_sigma_change_ev": 0.0,
+          "max_change_energy_ev": -11.994300522762654
+        },
+        {
+          "band": 8,
+          "max_complex_sigma_change_ev": 0.0,
+          "max_real_sigma_change_ev": 0.0,
+          "max_change_energy_ev": -11.942960520525036
+        },
+        {
+          "band": 9,
+          "max_complex_sigma_change_ev": 0.0,
+          "max_real_sigma_change_ev": 0.0,
+          "max_change_energy_ev": -11.875210517572203
+        },
+        {
+          "band": 10,
+          "max_complex_sigma_change_ev": 0.0,
+          "max_real_sigma_change_ev": 0.0,
+          "max_change_energy_ev": -8.309280362153794
+        },
+        {
+          "band": 11,
+          "max_complex_sigma_change_ev": 0.0,
+          "max_real_sigma_change_ev": 0.0,
+          "max_change_energy_ev": -8.279870360871982
+        }
+      ],
+      "maximum_complex_sigma_change_ev": 0.0,
+      "maximum_real_sigma_change_ev": 0.0
+    },
+    {
+      "before": "bgw_screen8_ep01_nw256_real005_cut60_schur",
+      "after": "bgw_screen8_ep01_nw256_real001_cut60_schur",
+      "rows": [
+        {
+          "band": 6,
+          "max_complex_sigma_change_ev": 25.265574801228126,
+          "max_real_sigma_change_ev": 24.644571074115273,
+          "max_change_energy_ev": -9.326400406484213
+        },
+        {
+          "band": 7,
+          "max_complex_sigma_change_ev": 2.7033548268657865,
+          "max_real_sigma_change_ev": 2.4475701066755193,
+          "max_change_energy_ev": 26.50570115523124
+        },
+        {
+          "band": 8,
+          "max_complex_sigma_change_ev": 8.014667737358815,
+          "max_real_sigma_change_ev": 7.960990346973832,
+          "max_change_energy_ev": -9.342960407205968
+        },
+        {
+          "band": 9,
+          "max_complex_sigma_change_ev": 3.2688383808200183,
+          "max_real_sigma_change_ev": 2.5329901103984866,
+          "max_change_energy_ev": -11.075210482704797
+        },
+        {
+          "band": 10,
+          "max_complex_sigma_change_ev": 5.051660325286811,
+          "max_real_sigma_change_ev": 2.478770108035348,
+          "max_change_energy_ev": 31.390721368141207
+        },
+        {
+          "band": 11,
+          "max_complex_sigma_change_ev": 16.332312377805348,
+          "max_real_sigma_change_ev": 13.567680591337243,
+          "max_change_energy_ev": 29.920131304046635
+        }
+      ],
+      "maximum_complex_sigma_change_ev": 25.265574801228126,
+      "maximum_real_sigma_change_ev": 24.644571074115273
+    },
+    {
+      "before": "bgw_screen8_ep01_nw256_real001_cut60_schur",
+      "after": "bgw_screen8_ep01_nw256_real0005_cut60_schur",
+      "rows": [
+        {
+          "band": 6,
+          "max_complex_sigma_change_ev": 1.356001386275174,
+          "max_real_sigma_change_ev": 0.7351400320405307,
+          "max_change_energy_ev": -8.22640035854153
+        },
+        {
+          "band": 7,
+          "max_complex_sigma_change_ev": 0.2651971339032896,
+          "max_real_sigma_change_ev": 0.24856001083330254,
+          "max_change_energy_ev": 26.90570117266494
+        },
+        {
+          "band": 8,
+          "max_complex_sigma_change_ev": 1.215431616863644,
+          "max_real_sigma_change_ev": 1.1955900521089025,
+          "max_change_energy_ev": -8.242960359263288
+        },
+        {
+          "band": 9,
+          "max_complex_sigma_change_ev": 0.20327441452835596,
+          "max_real_sigma_change_ev": 0.1397600060913354,
+          "max_change_energy_ev": 25.82479112555428
+        },
+        {
+          "band": 10,
+          "max_complex_sigma_change_ev": 0.3203205000369853,
+          "max_real_sigma_change_ev": 0.1494300065127954,
+          "max_change_energy_ev": 31.390721368141207
+        },
+        {
+          "band": 11,
+          "max_complex_sigma_change_ev": 0.3141750548723661,
+          "max_real_sigma_change_ev": 0.3138900136806663,
+          "max_change_energy_ev": 29.920131304046635
+        }
+      ],
+      "maximum_complex_sigma_change_ev": 1.356001386275174,
+      "maximum_real_sigma_change_ev": 1.1955900521089025
+    }
+  ],
+  "scope": "Fixed actual native explicit-frequency samples; BGW piecewise evaluated table in the same plotted window, and actual full +/-20eV self-energy table changes"
+}

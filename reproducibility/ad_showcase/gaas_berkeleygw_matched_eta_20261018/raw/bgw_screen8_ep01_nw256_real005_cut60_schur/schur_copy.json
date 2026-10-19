@@ -1,0 +1,20 @@
+{
+  "source": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real005_cut60/eps0mat",
+  "destination": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real005_cut60_schur/eps0mat",
+  "matrix_size": 113,
+  "frequencies": 1457,
+  "head_index": 0,
+  "min_abs_inverse_head": 7.564619745262242e-06,
+  "certified_frequency_indices": [
+    0,
+    1456
+  ],
+  "max_identity_relative_error": 8.784519861652995e-16,
+  "max_absolute_body_change": 3.135017755132947,
+  "source_sha256": "cd41014d9acbaf7ec5ad0f7e699e2166083689daed2ffc55c7994206914bd3ed",
+  "destination_sha256": "6185faa71edbb0423703692d4027eafc40283d0ae18af876f46cab48072d47a0",
+  "original_modified": false,
+  "predicted_working_bytes": 44620045,
+  "transformation": "S_body -> S_body - S_body,head S_head,body / S_head,head; head=1,wings=0",
+  "scope": "Exact block inverse conversion of the original finite-small-q dielectric; not q0 extrapolation or fitting"
+}

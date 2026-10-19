@@ -1,0 +1,29 @@
+{
+  "scope": "Standard-library metadata only; scientific modules/backends were not imported",
+  "hostname": "c20",
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8457C",
+  "architecture": "x86_64",
+  "logical_cpu_count": 192,
+  "os": {
+    "system": "Linux",
+    "release": "4.18.0-348.el8.x86_64",
+    "version": "#1 SMP Tue Oct 19 15:14:17 UTC 2021",
+    "platform": "Linux-4.18.0-348.el8.x86_64-x86_64-with-glibc2.28"
+  },
+  "python": {
+    "executable": "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "version": "3.11.15 (main, Mar 11 2026, 17:20:07) [GCC 14.3.0]",
+    "implementation": "CPython"
+  },
+  "package_versions": {
+    "jax": "0.10.0",
+    "jaxlib": "0.10.0",
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "ase": "3.29.0",
+    "pyscf": "2.13.0"
+  },
+  "metadata_probe_cpu_ids": [
+    0
+  ]
+}

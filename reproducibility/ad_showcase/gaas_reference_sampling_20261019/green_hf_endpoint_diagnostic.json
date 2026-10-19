@@ -1,0 +1,17 @@
+{
+  "chemical_potential_hartree": 0.29783017174122506,
+  "raw_spin_sum_density_max_error_from_exact_baseline": 1.2892862958867344e-10,
+  "hermitian_spin_sum_density_max_error_from_exact_baseline": 1.0481937540163244e-10,
+  "hermitian_sigma_native_max_error_hartree": 1.3619294141949628e-14,
+  "raw_sigma_native_max_error_hartree": 5.954690018992496e-12,
+  "sigma_antihermitian_part_hartree": 5.954688822557292e-12,
+  "g0_ir_reconstruction_max_error_all_nodes": 3.34125119239601e-13,
+  "g0_ir_reconstruction_max_error_common_nodes": 3.34125119239601e-13,
+  "ir_fermion_sample_count": 142,
+  "native_nw1024_common_sample_count": 92,
+  "ir_fermion_n_range": [
+    -181242,
+    181241
+  ],
+  "scope": "Diagnostic projections only; original GREEN checkpoint and strict HF gate remain unchanged"
+}

@@ -1,0 +1,162 @@
+{
+  "case": "gan_szv_qp_dense61_20261017",
+  "operation": "Read-only band-index neighbor correction-step diagnostic; no overlap-tracked branch continuation",
+  "source_manifest_matches_current": true,
+  "native_fingerprints_match_current": true,
+  "source_count": 22,
+  "native_fingerprint_count": 65,
+  "bands_sha256": "ac9c345fc4156bb00ffd3732ae8d6369d589ae03cf3cbfd9ab9b86789922ea59",
+  "conversion_ev_per_hartree": 27.211386245988,
+  "per_band": [
+    {
+      "band_index": 15,
+      "accepted_neighbor_pair_count": 60,
+      "max_abs_correction_step_ev": 0.5273856566264671,
+      "maximum_from_point": 26,
+      "maximum_to_point": 27
+    },
+    {
+      "band_index": 16,
+      "accepted_neighbor_pair_count": 60,
+      "max_abs_correction_step_ev": 0.2546612981507521,
+      "maximum_from_point": 30,
+      "maximum_to_point": 31
+    },
+    {
+      "band_index": 17,
+      "accepted_neighbor_pair_count": 60,
+      "max_abs_correction_step_ev": 0.21357171831254643,
+      "maximum_from_point": 39,
+      "maximum_to_point": 40
+    },
+    {
+      "band_index": 18,
+      "accepted_neighbor_pair_count": 60,
+      "max_abs_correction_step_ev": 0.7695104485738881,
+      "maximum_from_point": 54,
+      "maximum_to_point": 55
+    },
+    {
+      "band_index": 19,
+      "accepted_neighbor_pair_count": 60,
+      "max_abs_correction_step_ev": 1.0192892217028489,
+      "maximum_from_point": 29,
+      "maximum_to_point": 30
+    },
+    {
+      "band_index": 20,
+      "accepted_neighbor_pair_count": 60,
+      "max_abs_correction_step_ev": 0.3964053344060196,
+      "maximum_from_point": 5,
+      "maximum_to_point": 6
+    }
+  ],
+  "accepted_neighbor_pair_count": 360,
+  "largest_steps": [
+    {
+      "band_index": 19,
+      "from_point": 29,
+      "to_point": 30,
+      "signed_correction_step_ev": 1.0192892217028489,
+      "abs_correction_step_ev": 1.0192892217028489,
+      "from_correction_ev": 4.353799140343105,
+      "to_correction_ev": 5.373088362045953,
+      "ks_step_ev": -0.03671658022088961,
+      "qp_step_ev": 0.9825726414819593,
+      "from_fractional": [
+        0.0,
+        0.0,
+        0.4
+      ],
+      "to_fractional": [
+        0.0,
+        0.0,
+        -0.5
+      ]
+    },
+    {
+      "band_index": 19,
+      "from_point": 28,
+      "to_point": 29,
+      "signed_correction_step_ev": -0.9439580212455456,
+      "abs_correction_step_ev": 0.9439580212455456,
+      "from_correction_ev": 5.297757161588651,
+      "to_correction_ev": 4.353799140343105,
+      "ks_step_ev": 0.011305258479269527,
+      "qp_step_ev": -0.9326527627662761,
+      "from_fractional": [
+        0.0,
+        0.0,
+        0.30000000000000004
+      ],
+      "to_fractional": [
+        0.0,
+        0.0,
+        0.4
+      ]
+    },
+    {
+      "band_index": 18,
+      "from_point": 54,
+      "to_point": 55,
+      "signed_correction_step_ev": 0.7695104485738881,
+      "abs_correction_step_ev": 0.7695104485738881,
+      "from_correction_ev": 4.789804049597795,
+      "to_correction_ev": 5.559314498171683,
+      "ks_step_ev": -0.2844516258426695,
+      "qp_step_ev": 0.4850588227312186,
+      "from_fractional": [
+        0.14285714285714285,
+        0.14285714285714285,
+        -0.5
+      ],
+      "to_fractional": [
+        0.11904761904761907,
+        0.11904761904761907,
+        -0.5
+      ]
+    },
+    {
+      "band_index": 18,
+      "from_point": 15,
+      "to_point": 16,
+      "signed_correction_step_ev": -0.7688424528355281,
+      "abs_correction_step_ev": 0.7688424528355281,
+      "from_correction_ev": 6.205667604697567,
+      "to_correction_ev": 5.436825151862038,
+      "ks_step_ev": -0.40488883281066734,
+      "qp_step_ev": -1.1737312856461954,
+      "from_fractional": [
+        0.303030303030303,
+        0.303030303030303,
+        0.0
+      ],
+      "to_fractional": [
+        0.2727272727272727,
+        0.2727272727272727,
+        0.0
+      ]
+    },
+    {
+      "band_index": 18,
+      "from_point": 36,
+      "to_point": 37,
+      "signed_correction_step_ev": -0.69245801192338,
+      "abs_correction_step_ev": 0.69245801192338,
+      "from_correction_ev": 5.440583307067423,
+      "to_correction_ev": 4.748125295144043,
+      "ks_step_ev": -0.12144599911363037,
+      "qp_step_ev": -0.8139040110370104,
+      "from_fractional": [
+        0.30000000000000004,
+        0.0,
+        -0.5
+      ],
+      "to_fractional": [
+        0.35000000000000003,
+        0.0,
+        -0.5
+      ]
+    }
+  ]
+}

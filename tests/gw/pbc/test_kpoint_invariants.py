@@ -24,7 +24,7 @@ from gradscf.integrals.periodic.coulomb import coulomb_kernel
 from gradscf.integrals.periodic.fft import get_kpoint_jk
 
 
-def _toy(nk=3):
+def _toy(nk=3, *, paired=False):
     mesh = (9, 1, 1)
     length = 8.0
     volume = length**3
@@ -54,8 +54,14 @@ def _toy(nk=3):
     )
     coeff = []
     for k in range(nk):
-        t = 0.2 + 0.1 * k
-        coeff.append([[np.cos(t), 1j * np.sin(t)], [1j * np.sin(t), np.cos(t)]])
+        if paired:
+            # Constant real orbitals give equal OV/VO spectral covariances;
+            # independent complex column phases may still be applied below.
+            t = .2
+            coeff.append([[np.cos(t), -np.sin(t)], [np.sin(t), np.cos(t)]])
+        else:
+            t = 0.2 + 0.1 * k
+            coeff.append([[np.cos(t), 1j * np.sin(t)], [1j * np.sin(t), np.cos(t)]])
     coeff = jnp.asarray(coeff)
     energy = jnp.tile(jnp.array([-0.7, 0.6]), (nk, 1))
     density = jnp.einsum("kpi,kqi->kpq", coeff[:, :, :1], coeff[:, :, :1].conj())
@@ -124,9 +130,10 @@ def test_three_k_screening_uses_inverse_momentum_partner():
     for q in range(nk):
         pi = np.zeros((naux, naux), dtype=complex)
         for ki in range(nk):
-            gap = energy[ki, 0] - energy[table[ki, q], 1]
-            v = b[q, ki, :, 0, 1]
-            pi += 4 / nk * gap / (omega**2 + gap**2) * np.outer(v, v.conj())
+            for m, n, sign in ((0, 1, 1), (1, 0, -1)):
+                gap = energy[ki, m] - energy[table[ki, q], n]
+                v = b[q, ki, :, m, n]
+                pi += 2*sign/(nk*(1j*omega+gap))*np.outer(v, v.conj())
         screened = np.linalg.solve(np.eye(naux) - pi, pi)
         for kn in range(nk):
             km = np.flatnonzero(table[:, q] == kn)[0]
@@ -156,7 +163,7 @@ def test_product_factors_match_direct_canonical_fourier_sum():
 
 @pytest.mark.parametrize("fc", [False, True])
 def test_kpoint_driver_is_invariant_to_independent_band_phases(fc):
-    kw = _toy()
+    kw = _toy(paired=True)
     original = g0w0_cd_kpoints(**kw, fc=fc)
     phase = jnp.exp(1j * jnp.array([[0.3, 1.1], [-0.7, 0.4], [0.6, -1.0]]))
     coeff = kw["mo_coeff_k"] * phase[:, None, :]
@@ -181,7 +188,8 @@ def test_head_wing_is_invariant_to_auxiliary_unitary():
 
 
 def test_gamma_matches_single_k_with_complex_orbitals():
-    kw = _toy(nk=1)
+    kw = _toy(nk=1, paired=True)
+    kw["mo_coeff_k"] = kw["mo_coeff_k"] * jnp.exp(1j*jnp.array([.3, -.7]))[None, None, :]
     result = g0w0_cd_kpoints(**kw, fc=False)
     gamma = g0w0_cd_gamma(
         inputs=kw["inputs"], mo_energy=kw["mo_energy_k"][0], mo_coeff=kw["mo_coeff_k"][0],
@@ -193,7 +201,7 @@ def test_gamma_matches_single_k_with_complex_orbitals():
 
 
 def test_gamma_unrestricted_preserves_independent_spin_phases():
-    kw = _toy(nk=1)
+    kw = _toy(nk=1, paired=True)
     ref = g0w0_cd_kpoints(**kw, fc=False)
     ca = kw["mo_coeff_k"][0] * jnp.exp(1j * jnp.array([0.2, -0.7]))
     cb = kw["mo_coeff_k"][0] * jnp.exp(1j * jnp.array([-0.5, 1.2]))
@@ -206,7 +214,7 @@ def test_gamma_unrestricted_preserves_independent_spin_phases():
 
 
 def test_q0_correction_does_not_depend_on_kpoint_order():
-    kw = _toy()
+    kw = _toy(paired=True)
     ref = g0w0_cd_kpoints(**kw, fc=True)
     order = np.array([1, 0, 2])  # Gamma is no longer the first transfer.
     permuted = dict(kw)

@@ -11,6 +11,12 @@ from ..integrals.periodic.library import (
 
 @dataclass
 class Cell:
+    """Explicit Gaussian/FFT cell.
+
+    ``mesh`` controls AO Fourier and grid quadrature resolution independently
+    of ``precision``, which currently controls Ewald lattice sums. Tight
+    Gaussian primitives require a separate FFT convergence check.
+    """
     atom: object
     a: object
     basis: object = 'gth-szv'

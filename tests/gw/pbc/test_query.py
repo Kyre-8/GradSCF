@@ -97,7 +97,7 @@ def test_query_rejects_jit_and_ad_including_closed_constants():
             operation()
 
 
-@pytest.mark.parametrize('field,value,message', [('fc', True, 'fc=False'),
+@pytest.mark.parametrize('field,value,message', [
     ('boundary', object(), '3D'), ('unrestricted', True, 'restricted'),
     ('exxdiv', 'vcut_sph', 'exxdiv'), ('xc', 'pbe0', 'LDA/GGA')])
 def test_unsupported_domain_rejected_before_build(field, value, message):
@@ -186,7 +186,7 @@ def test_real_offmesh_and_onmesh_full_numpy_reference(hydrogen):
     fractions = np.array([[0., 0., 0.], [.13, 0., 0.], [.31, 0., 0.]])
     reciprocal = 2*np.pi*np.linalg.inv(np.asarray(hydrogen.cell.lattice)).T
     points = fractions@reciprocal
-    options = dict(nw=16, eta=1e-3,
+    options = dict(nw=16, eta=1e-3, self_energy='diagonal',
         root_config=ScalarRootConfig(ftol=1e-9, xtol=1e-9, maxiter=80))
     result = query.g0w0_bands(hydrogen, points, [0, 1], **options)
     reference = evaluate_query(hydrogen, points, [0, 1], np.asarray(result.mo_energy), nw=16, eta=1e-3)

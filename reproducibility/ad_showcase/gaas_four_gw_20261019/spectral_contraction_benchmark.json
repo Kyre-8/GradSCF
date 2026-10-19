@@ -1,0 +1,235 @@
+{
+  "source": "jobs/gaas_four_methods_20261018/sc1024_spectral_endpoint/baseline.npz",
+  "source_sha256": "f538bbe0fc277b9810930b69ca6d11b193b60730b0732bb3cb85737545c766e4",
+  "numpy_version": "2.4.4",
+  "affinity": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "environment": {
+    "OMP_NUM_THREADS": "16",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1"
+  },
+  "dtype": "complex128",
+  "eta_hartree": 0.003674932217565499,
+  "chemical_potential_hartree": 0.4899145003244022,
+  "note": "All three contractions use exactly the same kernel/residues in each case; 10001 points preserve the saved endpoint range, not an asserted final plotting range",
+  "cases": [
+    {
+      "axis": "saved_endpoint_axis",
+      "k_index": 0,
+      "kernel_shape": [
+        201,
+        378
+      ],
+      "residues_shape": [
+        378,
+        14,
+        14
+      ],
+      "axis_min_hartree": -0.255148894501775,
+      "axis_max_hartree": 0.8473307707678748,
+      "default_first_seconds": 0.030833740980597213,
+      "methods": {
+        "default": {
+          "seconds": [
+            0.030698529008077458,
+            0.030881737999152392,
+            0.03076785200391896
+          ],
+          "median_seconds": 0.03076785200391896,
+          "maximum_absolute_difference_hartree": 0.0,
+          "relative_difference": 0.0
+        },
+        "optimized": {
+          "seconds": [
+            0.0022327690094243735,
+            0.0019245159928686917,
+            0.0019004920031875372
+          ],
+          "median_seconds": 0.0019245159928686917,
+          "maximum_absolute_difference_hartree": 1.2225062931717345e-15,
+          "relative_difference": 5.965619457818193e-16,
+          "speedup_over_default_median": 15.98731947041722
+        },
+        "matmul": {
+          "seconds": [
+            0.0018639659974724054,
+            0.001819428987801075,
+            0.0018097330175805837
+          ],
+          "median_seconds": 0.001819428987801075,
+          "maximum_absolute_difference_hartree": 1.2225062931717345e-15,
+          "relative_difference": 5.965478615813152e-16,
+          "speedup_over_default_median": 16.91071880804997
+        }
+      }
+    },
+    {
+      "axis": "saved_endpoint_axis",
+      "k_index": 1,
+      "kernel_shape": [
+        201,
+        378
+      ],
+      "residues_shape": [
+        378,
+        14,
+        14
+      ],
+      "axis_min_hartree": -0.255148894501775,
+      "axis_max_hartree": 0.8473307707678748,
+      "default_first_seconds": 0.030748775985557586,
+      "methods": {
+        "default": {
+          "seconds": [
+            0.030808733019512147,
+            0.030630180990556255,
+            0.030765278002945706
+          ],
+          "median_seconds": 0.030765278002945706,
+          "maximum_absolute_difference_hartree": 0.0,
+          "relative_difference": 0.0
+        },
+        "optimized": {
+          "seconds": [
+            0.002029752009548247,
+            0.0019030859984923154,
+            0.0018830159970093518
+          ],
+          "median_seconds": 0.0019030859984923154,
+          "maximum_absolute_difference_hartree": 1.5543122344752192e-15,
+          "relative_difference": 5.535458638804641e-16,
+          "speedup_over_default_median": 16.165994614704186
+        },
+        "matmul": {
+          "seconds": [
+            0.001863594021415338,
+            0.0018181729828938842,
+            0.001811845024349168
+          ],
+          "median_seconds": 0.0018181729828938842,
+          "maximum_absolute_difference_hartree": 1.5543122344752192e-15,
+          "relative_difference": 5.534108000389431e-16,
+          "speedup_over_default_median": 16.92098512759679
+        }
+      }
+    },
+    {
+      "axis": "same_endpoint_range_10001",
+      "k_index": 0,
+      "kernel_shape": [
+        10001,
+        378
+      ],
+      "residues_shape": [
+        378,
+        14,
+        14
+      ],
+      "axis_min_hartree": -0.255148894501775,
+      "axis_max_hartree": 0.8473307707678748,
+      "default_first_seconds": 1.5299382130033337,
+      "methods": {
+        "default": {
+          "seconds": [
+            1.531856265006354,
+            1.5312116100103594,
+            1.5314302500046324
+          ],
+          "median_seconds": 1.5314302500046324,
+          "maximum_absolute_difference_hartree": 0.0,
+          "relative_difference": 0.0
+        },
+        "optimized": {
+          "seconds": [
+            0.09203994798008353,
+            0.09008505800738931,
+            0.08924337499774992
+          ],
+          "median_seconds": 0.09008505800738931,
+          "maximum_absolute_difference_hartree": 2.8913797230035545e-15,
+          "relative_difference": 5.835494396773512e-16,
+          "speedup_over_default_median": 16.999825319300072
+        },
+        "matmul": {
+          "seconds": [
+            0.09097508402192034,
+            0.08997516499948688,
+            0.08857944098417647
+          ],
+          "median_seconds": 0.08997516499948688,
+          "maximum_absolute_difference_hartree": 2.8913797230035545e-15,
+          "relative_difference": 5.835491363283615e-16,
+          "speedup_over_default_median": 17.020588403626334
+        }
+      }
+    },
+    {
+      "axis": "same_endpoint_range_10001",
+      "k_index": 1,
+      "kernel_shape": [
+        10001,
+        378
+      ],
+      "residues_shape": [
+        378,
+        14,
+        14
+      ],
+      "axis_min_hartree": -0.255148894501775,
+      "axis_max_hartree": 0.8473307707678748,
+      "default_first_seconds": 1.530634621012723,
+      "methods": {
+        "default": {
+          "seconds": [
+            1.5302725530054886,
+            1.5281256700109225,
+            1.528480044013122
+          ],
+          "median_seconds": 1.528480044013122,
+          "maximum_absolute_difference_hartree": 0.0,
+          "relative_difference": 0.0
+        },
+        "optimized": {
+          "seconds": [
+            0.09078534401487559,
+            0.09010758899967186,
+            0.08917585201561451
+          ],
+          "median_seconds": 0.09010758899967186,
+          "maximum_absolute_difference_hartree": 3.5596458096434965e-15,
+          "relative_difference": 5.631568806633361e-16,
+          "speedup_over_default_median": 16.962833663418607
+        },
+        "matmul": {
+          "seconds": [
+            0.09109546299441718,
+            0.09015706198988482,
+            0.08858978198259138
+          ],
+          "median_seconds": 0.09015706198988482,
+          "maximum_absolute_difference_hartree": 3.5596458096434965e-15,
+          "relative_difference": 5.631541619538851e-16,
+          "speedup_over_default_median": 16.953525439688907
+        }
+      }
+    }
+  ],
+  "all_equivalent": true
+}

@@ -199,15 +199,19 @@ the final iteration alone. Observables are recomputed from the attached root.
 The matrix-free linear solves reuse the shared SCF checked GMRES machinery.
 The charge row is treated through a scalar Schur complement of the fixed-mu
 matrix block. This handles mu response explicitly and checks both cancellation
-and the magnitude of the resulting charge susceptibility. It never substitutes
-a fixed mu. `charge_response_tol` is an absolute floor in electrons/Ha
+and the resulting charge susceptibility. A stable grand-canonical
+finite-temperature branch has `dN/dmu >= 0`; a negative susceptibility must
+not pass merely because its magnitude is large. The tangent and adjoint
+guards require the Schur complement to give a positive susceptibility above
+`charge_response_tol`. They never substitute a fixed mu.
+`charge_response_tol` is an absolute floor in electrons/Ha
 (default `1e-10`), in addition to the relative linear-solve checks.
 
 Failure policy:
 
 - An unconverged primal, failed number bracket/bisection, or nonfinite forward
   update raises an error, also under JIT (wrapped by the JAX runtime).
-- An unsuccessful tangent/adjoint solve, unresolved charge Schur complement,
+- An unsuccessful tangent/adjoint solve, negative or unresolved charge Schur complement,
   or unsolvable fixed-mu block produces NaN response, following the SCF policy.
   In particular, low-temperature insulating charge response can be numerically
   indistinguishable from zero. A converged forward state does not imply a
@@ -257,8 +261,19 @@ diagonal/off-diagonal directions, density and mu response, a dense residual
 Jacobian comparison, energy-origin covariance at beta=5 and 20, trajectory
 independence, and explicit primal/adjoint/charge failure cases.
 
-Derivatives are tested away from reference/RPA spectral degeneracies; robust
-derivatives at those degeneracies remain future work. Higher derivatives and
+Thermal static-reference density and Green's functions use smooth matrix
+functions with first Frechet response, rather than derivatives of individual
+eigenvectors. At zero interaction, the correlation map vanishes exactly; its
+first response therefore supports repeated static levels. The Hartree and
+exchange map remains outside that branch and retains the physical quadratic
+dependence on the DF vertices. Tests compare a three-level canonical density
+response with its analytic formula and the finite-coupling quadratic energy
+with the Hartree/exchange expression.
+
+This zero-interaction branch does not supply fourth-order interaction
+derivatives of the correlation diagrams. Interacting reference/RPA spectral
+degeneracies remain unsupported; this is not a general degenerate scGW
+response implementation. Higher derivatives and
 complete nuclear-coordinate forces (including integral/basis derivatives) are
 not validated. beta differentiation and unrolled outer AD are not implemented.
 Complex/unrestricted/periodic scGW, analytic continuation, GPU operation and

@@ -1,0 +1,19 @@
+{
+  "scope": "Existing-array TR diagnostic inputs and runtime, no new SCF/fit",
+  "input_sc512_sha256": "caa88f3c75c3fe01ea369b5aa82b66d673b515fbf80af60f8781184a446f0da9",
+  "current_source_capture_note": "Production TR implementation changed after this diagnostic. Do not label a later source hash as the diagnostic run-start snapshot.",
+  "baseline_source_provenance": "../sc512_fft61_hzero_20261019/provenance.json",
+  "artifact_sha256": {
+    "red_precondition.stdout": "bf1cdec946d15b9ce02c833099539651ef44bb56f36af59dd08a4293fe2ed5ea",
+    "red.json": "9b60e8bc29674b5cb88d9a1443f83634bde912e3d3013e415fca3acbb365174f",
+    "result.json": "1c364969f39c1374c79ca51ae7753298c0aae472cc05d88b5c7fdaad1c5c1f18",
+    "source_measure.npz": "48f8eeb52c0c5e633c6f1a7a2861880f291569bbc8ce1f1fbe4b66cde8ec6539",
+    "run.stdout": "9906f97b7d0608237c7a5fe90e00696d1834daf4ea048095281b2210c8f5c205",
+    "samples.npz": "25b2f400930b927f94a8bd8dc0f87ebf1938b87504b5b916ea349744bef63be9",
+    "workflow.py": "b9e82ebd5ba690017be97c8fb8975d23924bfb30318553bdb0dbf779a5e81ea3",
+    "red_precondition.json": "3245ef154309a5588496aac946ec077debcf047ea37909691ac026db30b6e58a",
+    "red.stdout": "d28654ee54ff7e6e7cf9c90c54e7a9960bb95d5ea0de5e8e79c53145c10f50c0",
+    "run.json": "543d9a98338aca1a3d9aa845ffd009bb6ef34b8bbca5a057f866262145a8a68a",
+    "source_scgw.npz": "caa88f3c75c3fe01ea369b5aa82b66d673b515fbf80af60f8781184a446f0da9"
+  }
+}

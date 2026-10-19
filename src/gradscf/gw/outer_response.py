@@ -20,6 +20,33 @@ def linear_config(config):
 
 
 def require_valid(valid, residual, method):
+    # These are failure certificates, not physical observables. A live
+    # callback payload can retain the eager-seed loop in reverse-mode AD
+    # despite attaching the final root through its implicit rule.
+    valid = jax.lax.stop_gradient(jnp.asarray(valid))
+    residual = jax.lax.stop_gradient(jnp.asarray(residual))
     def fail(value):
         raise ArithmeticError(f'{method} outer solve failed convergence/response validity (residual {float(value):.3e}).')
     jax.lax.cond(valid, lambda: None, lambda: jax.debug.callback(fail, residual))
+
+
+def require_occupation_gap(energy, nocc, method):
+    """Validate fixed occupied/virtual labels without ordering each sector.
+
+    A zero-temperature molecular G/W spectrum needs a positive gap between
+    every occupied and virtual level. Degeneracy within either sector is
+    permitted. Empty/full individual spin sectors have no gap condition.
+    """
+    energy = jnp.asarray(energy)
+    if isinstance(nocc, tuple):
+        if energy.ndim != 2 or len(nocc) != energy.shape[0]:
+            raise ValueError('Spin occupations must match the stacked spectra.')
+        for spin, occupied in enumerate(nocc):
+            require_occupation_gap(energy[spin], occupied, method)
+        return
+    if not 0 <= nocc <= energy.shape[-1]:
+        raise ValueError('Occupation count must lie between zero and nmo.')
+    gap = (jnp.min(energy[..., nocc:], axis=-1)
+           - jnp.max(energy[..., :nocc], axis=-1)) if 0 < nocc < energy.shape[-1] else jnp.inf
+    valid = jnp.all(jnp.isfinite(energy)) & jnp.all(gap > 0)
+    require_valid(valid, jnp.min(gap), f'{method} occupation gap')

@@ -1,0 +1,95 @@
+FF..F.                                                                   [100%]
+=================================== FAILURES ===================================
+_ test_resolved_avoided_crossing_and_true_crossing_are_distinguished[2e-09-False] _
+
+delta = 2e-09, complex_frame = False
+
+    @pytest.mark.parametrize('complex_frame', [False, True])
+    @pytest.mark.parametrize('delta', [2e-9, 0.])
+    def test_resolved_avoided_crossing_and_true_crossing_are_distinguished(delta, complex_frame):
+        # H(w)=w0 I + a*(w-w0)*sigma_z + delta*sigma_x.  For delta>0
+        # the two exact roots are w0 +/- delta/sqrt(1-a^2), with Z=1/(1-a^2).
+        # Their spectral gap is much less than xtol but is numerically resolved.
+        a, w0 = .4, .2
+        frame = (jnp.array([[1., 1j], [1j, 1.]])/jnp.sqrt(2.)
+                 if complex_frame else jnp.eye(2, dtype=jnp.complex128))
+        def correlation(omega):
+            x = omega-w0
+            matrix = jnp.array([[a*x, delta], [delta, -a*x]], dtype=jnp.complex128)
+            return frame.conj().T@matrix@frame
+        energy = jnp.full((2,), w0)
+        zero = jnp.zeros((2, 2), dtype=jnp.complex128)
+        config = ScalarRootConfig(method='hybrid', ftol=1e-13, xtol=1e-8, maxiter=100)
+        result = _solve_subspace_qp(energy, zero, zero, correlation,
+                                    config=config, occupied=False)
+        assert np.max(abs(np.asarray(result['residual']))) < config.ftol
+        if delta:
+            exact = w0+np.array([-1., 1.])*delta/np.sqrt(1-a*a)
+            np.testing.assert_allclose(result['roots'], exact, atol=2e-13, rtol=0)
+>           assert np.asarray(result['converged']).all()
+E           assert np.False_
+E            +  where np.False_ = <built-in method all of numpy.ndarray object at 0x7f07f446b2d0>()
+E            +    where <built-in method all of numpy.ndarray object at 0x7f07f446b2d0> = array([False, False]).all
+E            +      where array([False, False]) = <built-in function asarray>(Array([False, False], dtype=bool))
+E            +        where <built-in function asarray> = np.asarray
+
+tests/gw/pbc/test_qp_cluster_precision.py:32: AssertionError
+_ test_resolved_avoided_crossing_and_true_crossing_are_distinguished[2e-09-True] _
+
+delta = 2e-09, complex_frame = True
+
+    @pytest.mark.parametrize('complex_frame', [False, True])
+    @pytest.mark.parametrize('delta', [2e-9, 0.])
+    def test_resolved_avoided_crossing_and_true_crossing_are_distinguished(delta, complex_frame):
+        # H(w)=w0 I + a*(w-w0)*sigma_z + delta*sigma_x.  For delta>0
+        # the two exact roots are w0 +/- delta/sqrt(1-a^2), with Z=1/(1-a^2).
+        # Their spectral gap is much less than xtol but is numerically resolved.
+        a, w0 = .4, .2
+        frame = (jnp.array([[1., 1j], [1j, 1.]])/jnp.sqrt(2.)
+                 if complex_frame else jnp.eye(2, dtype=jnp.complex128))
+        def correlation(omega):
+            x = omega-w0
+            matrix = jnp.array([[a*x, delta], [delta, -a*x]], dtype=jnp.complex128)
+            return frame.conj().T@matrix@frame
+        energy = jnp.full((2,), w0)
+        zero = jnp.zeros((2, 2), dtype=jnp.complex128)
+        config = ScalarRootConfig(method='hybrid', ftol=1e-13, xtol=1e-8, maxiter=100)
+        result = _solve_subspace_qp(energy, zero, zero, correlation,
+                                    config=config, occupied=False)
+        assert np.max(abs(np.asarray(result['residual']))) < config.ftol
+        if delta:
+            exact = w0+np.array([-1., 1.])*delta/np.sqrt(1-a*a)
+            np.testing.assert_allclose(result['roots'], exact, atol=2e-13, rtol=0)
+>           assert np.asarray(result['converged']).all()
+E           assert np.False_
+E            +  where np.False_ = <built-in method all of numpy.ndarray object at 0x7f07e47c7990>()
+E            +    where <built-in method all of numpy.ndarray object at 0x7f07e47c7990> = array([False, False]).all
+E            +      where array([False, False]) = <built-in function asarray>(Array([False, False], dtype=bool))
+E            +        where <built-in function asarray> = np.asarray
+
+tests/gw/pbc/test_qp_cluster_precision.py:32: AssertionError
+____ test_remote_third_state_derivative_cannot_relax_a_crossing_certificate ____
+
+    def test_remote_third_state_derivative_cannot_relax_a_crossing_certificate():
+        # The third eigenvalue lies in [2,4] Ha, uniformly away from the crossing.
+        # Its H'(0)=1e12 must not set the two-state derivative certification scale.
+        energy = jnp.array([0., 0., 3.])
+        zero = jnp.zeros((3, 3), dtype=jnp.complex128)
+        def correlation(omega):
+            return jnp.diag(jnp.array([.4*omega, -.4*omega, jnp.tanh(1e12*omega)]))
+        config = ScalarRootConfig(method='hybrid', ftol=1e-13, xtol=1e-8, maxiter=100)
+        result = _solve_subspace_qp(energy, zero, zero, correlation,
+                                    config=config, occupied=False)
+        assert np.max(abs(np.asarray(result['residual']))) < config.ftol
+        np.testing.assert_allclose(result['roots'], [0., 0., 4.], atol=2e-13, rtol=0)
+>       assert not np.asarray(result['converged'])[:2].any()
+E       assert not np.True_
+E        +  where np.True_ = <built-in method any of numpy.ndarray object at 0x7f07d4350930>()
+E        +    where <built-in method any of numpy.ndarray object at 0x7f07d4350930> = array([ True,  True]).any
+
+tests/gw/pbc/test_qp_cluster_precision.py:55: AssertionError
+=========================== short test summary info ============================
+FAILED tests/gw/pbc/test_qp_cluster_precision.py::test_resolved_avoided_crossing_and_true_crossing_are_distinguished[2e-09-False]
+FAILED tests/gw/pbc/test_qp_cluster_precision.py::test_resolved_avoided_crossing_and_true_crossing_are_distinguished[2e-09-True]
+FAILED tests/gw/pbc/test_qp_cluster_precision.py::test_remote_third_state_derivative_cannot_relax_a_crossing_certificate
+3 failed, 3 passed in 9.31s

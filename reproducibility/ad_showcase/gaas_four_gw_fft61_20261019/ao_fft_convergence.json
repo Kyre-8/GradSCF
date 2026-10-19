@@ -1,0 +1,266 @@
+{
+  "scope": "Pure one-electron source mesh refinement; no SCF/GW or source edits",
+  "source_hzero_result_sha256": "ccdcca50d7c5b905872e712a1c218302910a4d4b0a46cfaff2fc1178da2da092",
+  "chosen_query_index": 17,
+  "chosen_saved_pbe_gauge_error_ev": 0.4477533682390835,
+  "fractional_k_pair": [
+    [
+      0.4943181818181819,
+      0.2556818181818181,
+      0.75
+    ],
+    [
+      0.4943181818181819,
+      0.2556818181818181,
+      -0.25
+    ]
+  ],
+  "reciprocal_integer_shift": [
+    0,
+    0,
+    1
+  ],
+  "meshes": [
+    21,
+    41,
+    61
+  ],
+  "basis": "gth-szv",
+  "pseudo": "gth-pbe",
+  "cart": true,
+  "precision": 1e-10,
+  "frontier_indices": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "fixed_projection": "Saved mesh21 PBE coefficients at the first query; no new bands/SCF",
+  "operator_builder": "SRC build_band_inputs; copied nuclear-energy/Madelung fields omitted as unused",
+  "cases": [
+    {
+      "mesh": 21,
+      "native_seconds": 7.205900680011837,
+      "equivalence": {
+        "overlap": {
+          "ao_max_absolute": 0.0005401483120781592,
+          "fixed_pbe_all14_max_absolute": 0.0006465855201067885,
+          "fixed_pbe_frontier_max_absolute": 3.4572302926477854e-05
+        },
+        "kinetic_hartree": {
+          "ao_max_absolute": 0.019751401169880722,
+          "fixed_pbe_all14_max_absolute": 0.021692192216515967,
+          "fixed_pbe_frontier_max_absolute": 0.0012004165250205404
+        },
+        "hcore_hartree": {
+          "ao_max_absolute": 0.021694909227546688,
+          "fixed_pbe_all14_max_absolute": 0.02660458365107469,
+          "fixed_pbe_frontier_max_absolute": 0.0014453826847313498
+        }
+      },
+      "exact_overlap_errors": [
+        {
+          "ao_max_absolute": 0.00748733545892355,
+          "fixed_pbe_all14_max_absolute": 0.006973758480040337,
+          "fixed_pbe_frontier_max_absolute": 0.0005132093287759313
+        },
+        {
+          "ao_max_absolute": 0.006994540360271362,
+          "fixed_pbe_all14_max_absolute": 0.006827693348679763,
+          "fixed_pbe_frontier_max_absolute": 0.0004786370258494761
+        }
+      ],
+      "exact_kinetic_errors_hartree": [
+        {
+          "ao_max_absolute": 0.4009276661121124,
+          "fixed_pbe_all14_max_absolute": 0.3642132349848665,
+          "fixed_pbe_frontier_max_absolute": 0.026367358522702108
+        },
+        {
+          "ao_max_absolute": 0.3836158845171518,
+          "fixed_pbe_all14_max_absolute": 0.358968986416813,
+          "fixed_pbe_frontier_max_absolute": 0.02516694199768157
+        }
+      ],
+      "generalized_hcore_eigenvalue_equivalence_ev": {
+        "all14_max": 0.4895309238657166,
+        "indices6_to11_max": 0.02166157421258048,
+        "note": "Pure hcore eigenvalues, not PBE/GW frontier levels"
+      },
+      "generalized_kinetic_eigenvalue_exact_error_ev": {
+        "all14_max": 8.166066279451169,
+        "indices6_to11_max": 8.166066279451169
+      },
+      "shifted_G_box_boundary_identity": {
+        "entering_count": 441,
+        "leaving_count": 441,
+        "overlap_boundary_mismatch_max": 3.642377198465052e-16,
+        "kinetic_boundary_mismatch_max_hartree": 4.218847493575595e-15,
+        "entering_overlap_max": 0.0017131371749579737,
+        "leaving_overlap_max": 0.0011789656674444369,
+        "entering_kinetic_max_hartree": 0.07634143916286677,
+        "leaving_kinetic_max_hartree": 0.05747718842103284
+      },
+      "seconds": 9.30026543198619
+    },
+    {
+      "mesh": 41,
+      "native_seconds": 8.121881494007539,
+      "equivalence": {
+        "overlap": {
+          "ao_max_absolute": 4.217295845876379e-09,
+          "fixed_pbe_all14_max_absolute": 4.653165115684846e-09,
+          "fixed_pbe_frontier_max_absolute": 2.21205636946783e-10
+        },
+        "kinetic_hartree": {
+          "ao_max_absolute": 6.123019904435978e-07,
+          "fixed_pbe_all14_max_absolute": 6.691919479389214e-07,
+          "fixed_pbe_frontier_max_absolute": 3.1891939374584964e-08
+        },
+        "hcore_hartree": {
+          "ao_max_absolute": 1.1771167383045622e-06,
+          "fixed_pbe_all14_max_absolute": 1.310794774382314e-06,
+          "fixed_pbe_frontier_max_absolute": 6.119063716554112e-08
+        }
+      },
+      "exact_overlap_errors": [
+        {
+          "ao_max_absolute": 1.5046049295364128e-08,
+          "fixed_pbe_all14_max_absolute": 1.2633959839349273e-08,
+          "fixed_pbe_frontier_max_absolute": 8.853802580485912e-10
+        },
+        {
+          "ao_max_absolute": 1.0850309095644661e-08,
+          "fixed_pbe_all14_max_absolute": 9.440524860533311e-09,
+          "fixed_pbe_frontier_max_absolute": 6.641746438350973e-10
+        }
+      ],
+      "exact_kinetic_errors_hartree": [
+        {
+          "ao_max_absolute": 2.340250476962069e-06,
+          "fixed_pbe_all14_max_absolute": 1.94639661764884e-06,
+          "fixed_pbe_frontier_max_absolute": 1.3721549080921582e-07
+        },
+        {
+          "ao_max_absolute": 1.7311263942332289e-06,
+          "fixed_pbe_all14_max_absolute": 1.498515257514413e-06,
+          "fixed_pbe_frontier_max_absolute": 1.0532355143448224e-07
+        }
+      ],
+      "generalized_hcore_eigenvalue_equivalence_ev": {
+        "all14_max": 2.223673972981613e-05,
+        "indices6_to11_max": 1.7896034082119682e-06,
+        "note": "Pure hcore eigenvalues, not PBE/GW frontier levels"
+      },
+      "generalized_kinetic_eigenvalue_exact_error_ev": {
+        "all14_max": 3.761179821492352e-05,
+        "indices6_to11_max": 3.3359528647843515e-05
+      },
+      "shifted_G_box_boundary_identity": {
+        "entering_count": 1681,
+        "leaving_count": 1681,
+        "overlap_boundary_mismatch_max": 1.4089962778220636e-15,
+        "kinetic_boundary_mismatch_max_hartree": 2.0726839540897157e-15,
+        "entering_overlap_max": 7.08730949288965e-09,
+        "leaving_overlap_max": 2.87022405508447e-09,
+        "entering_kinetic_max_hartree": 1.062969450029878e-06,
+        "leaving_kinetic_max_hartree": 4.507104350636724e-07
+      },
+      "seconds": 10.254866216011578
+    },
+    {
+      "mesh": 61,
+      "native_seconds": 9.250170743995113,
+      "equivalence": {
+        "overlap": {
+          "ao_max_absolute": 4.440892098500626e-16,
+          "fixed_pbe_all14_max_absolute": 5.680843926641606e-16,
+          "fixed_pbe_frontier_max_absolute": 5.680843926641606e-16
+        },
+        "kinetic_hartree": {
+          "ao_max_absolute": 3.552713678800501e-15,
+          "fixed_pbe_all14_max_absolute": 1.1514320681450349e-15,
+          "fixed_pbe_frontier_max_absolute": 2.060682668249903e-16
+        },
+        "hcore_hartree": {
+          "ao_max_absolute": 7.105474694130067e-15,
+          "fixed_pbe_all14_max_absolute": 5.6079046463318254e-15,
+          "fixed_pbe_frontier_max_absolute": 5.139632724334679e-16
+        }
+      },
+      "exact_overlap_errors": [
+        {
+          "ao_max_absolute": 1.7763568422002318e-15,
+          "fixed_pbe_all14_max_absolute": 1.5992879381505087e-15,
+          "fixed_pbe_frontier_max_absolute": 1.5992879381505087e-15
+        },
+        {
+          "ao_max_absolute": 2.220446049267707e-15,
+          "fixed_pbe_all14_max_absolute": 2.2603837710713555e-15,
+          "fixed_pbe_frontier_max_absolute": 2.2603837710713555e-15
+        }
+      ],
+      "exact_kinetic_errors_hartree": [
+        {
+          "ao_max_absolute": 1.5987211555487347e-14,
+          "fixed_pbe_all14_max_absolute": 6.720459523327592e-15,
+          "fixed_pbe_frontier_max_absolute": 1.730495587278802e-15
+        },
+        {
+          "ao_max_absolute": 1.5987211554662466e-14,
+          "fixed_pbe_all14_max_absolute": 6.267377973119658e-15,
+          "fixed_pbe_frontier_max_absolute": 1.6378503741675237e-15
+        }
+      ],
+      "generalized_hcore_eigenvalue_equivalence_ev": {
+        "all14_max": 2.9002279240573614e-13,
+        "indices6_to11_max": 2.4546199878089647e-14,
+        "note": "Pure hcore eigenvalues, not PBE/GW frontier levels"
+      },
+      "generalized_kinetic_eigenvalue_exact_error_ev": {
+        "all14_max": 3.866970565409815e-13,
+        "indices6_to11_max": 3.866970565409815e-13
+      },
+      "shifted_G_box_boundary_identity": {
+        "entering_count": 3721,
+        "leaving_count": 3721,
+        "overlap_boundary_mismatch_max": 4.4459389158079e-16,
+        "kinetic_boundary_mismatch_max_hartree": 3.3908393253807893e-15,
+        "entering_overlap_max": 6.641372672112208e-19,
+        "leaving_overlap_max": 1.5945553869438266e-19,
+        "entering_kinetic_max_hartree": 2.1522947194807277e-16,
+        "leaving_kinetic_max_hartree": 5.335511950898367e-17
+      },
+      "seconds": 11.282690066989744
+    }
+  ],
+  "cartesian_k_pair_inverse_bohr": [
+    [
+      0.30075219832303646,
+      0.581454250091204,
+      -2.7755575615628914e-17
+    ],
+    [
+      -0.2873854339531239,
+      -0.006683382184956316,
+      0.5881376322761603
+    ]
+  ],
+  "pyscf_exact_equivalence": {
+    "overlap": {
+      "ao_max_absolute": 2.482534153247273e-16,
+      "fixed_pbe_all14_max_absolute": 3.35822165710087e-16,
+      "fixed_pbe_frontier_max_absolute": 3.3337265388909294e-16
+    },
+    "kinetic_hartree": {
+      "ao_max_absolute": 4.9569742297200255e-17,
+      "fixed_pbe_all14_max_absolute": 7.056452708224403e-17,
+      "fixed_pbe_frontier_max_absolute": 7.056452708224403e-17
+    }
+  },
+  "elapsed_seconds": 32.34712210998987,
+  "cpu_seconds": 41.030178145,
+  "completed": true
+}

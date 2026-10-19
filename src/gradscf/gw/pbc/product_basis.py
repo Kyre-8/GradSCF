@@ -38,6 +38,7 @@ from __future__ import annotations
 
 from numbers import Integral
 import numpy as np
+import jax
 import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
@@ -92,6 +93,50 @@ def gamma_product_factors(inputs, mo_coeff: Array, *, mesh: tuple[int, int, int]
 __all__ = ["gamma_product_factors", "kpoint_product_factors",
            "kpoint_product_factor_builder", "kpoint_transition_block",
            "mixed_product_factors", "lehmann_weights"]
+
+
+def _require_paired_lehmann(factors, differences, signs, *, label):
+    """Certify the covariance pairing required by a folded even-W contour.
+
+    Match the OV and VO spectral covariances at each opposite transition
+    gap, allowing phases and rotations within equal-gap spaces. Thin QR
+    avoids forming a G-space covariance and avoids Gram-norm cancellation.
+    Validation is nondifferentiable; AD is valid only along parameter paths
+    that preserve this pairing, not arbitrary complex orbital perturbations.
+    """
+    def validate(values, gaps, channels):
+        values, gaps, channels = map(np.asarray, (values, gaps, channels))
+        def unpaired():
+            raise NotImplementedError(
+                f'{label} requires paired OV/VO Lehmann covariances; '
+                'use the full-response query path for its supported references.')
+        if not all(np.isfinite(x).all() for x in (values, gaps, channels)):
+            unpaired()
+        used = np.zeros(len(gaps), dtype=bool)
+        for index in np.flatnonzero(channels > 0):
+            if used[index]:
+                continue
+            tolerance = 1e-10*(1+abs(gaps[index]))
+            forward = np.flatnonzero((channels > 0) & (abs(gaps-gaps[index]) <= tolerance))
+            reverse = np.flatnonzero((channels < 0) & (abs(gaps+gaps[index]) <= tolerance))
+            if not len(reverse):
+                unpaired()
+            joined = values[:, np.r_[forward, reverse]]
+            triangular = np.linalg.qr(joined, mode='r')
+            left, right = triangular[:, :len(forward)], triangular[:, len(forward):]
+            first, second = left@left.conj().T, right@right.conj().T
+            scale = np.linalg.norm(first)+np.linalg.norm(second)
+            if np.linalg.norm(first-second) > 1e-10*scale+1e-24:
+                unpaired()
+            used[forward], used[reverse] = True, True
+        if not used.all():
+            unpaired()
+
+    values = jax.tree.map(jax.lax.stop_gradient, (factors, differences, signs))
+    if any(isinstance(x, jax.core.Tracer) for x in jax.tree.leaves(values)):
+        jax.debug.callback(validate, *values)
+    else:
+        validate(*values)
 
 
 def _fourier_pair_factors(left, right, coords, gvectors, q, wrap, volume, mesh, *, kernel=None):
@@ -230,7 +275,8 @@ def mixed_product_factors(inputs, left_values, right_values, *, q_cart,
         jnp.asarray(wrap)[None], float(inputs.weights[0])*ngrid, mesh, kernel=kernel)[0]
 
 
-def kpoint_transition_block(build, mo_energy_k, nocc, momentum_table, q, *, full=False):
+def kpoint_transition_block(build, mo_energy_k, nocc, momentum_table, q, *, full=False,
+                            partner_energy=None):
     """One restricted transition space for shared periodic GW/BSE screening.
 
     The default returns the unchanged OV factors B(ngrid,nk*nocc*nvir),
@@ -243,11 +289,19 @@ def kpoint_transition_block(build, mo_energy_k, nocc, momentum_table, q, *, full
     an all-q cache or a QP/optical-window restriction. Callers must budget
     the complete OV factor/Gram storage, in addition to the builder's block
     array bound.
+
+    partner_energy supplies the spectrum of a separately evaluated shifted
+    frame with the same k-index labels. The builder must use that frame for
+    its right orbital, and momentum_table identifies its corresponding row.
+    Omitting it retains the mesh-closed source/source construction.
     """
     energy = jnp.asarray(mo_energy_k)
     if energy.ndim != 2 or not isinstance(nocc, Integral) or not 0 < nocc < energy.shape[1]:
         raise ValueError("Use a k-resolved spectrum with nonempty occupied and virtual spaces")
     nk, nmo = energy.shape
+    partner = energy if partner_energy is None else jnp.asarray(partner_energy)
+    if partner.shape != energy.shape:
+        raise ValueError('Shifted partner energies must have the same (nk,nmo) shape as the source')
     table = np.asarray(momentum_table)
     if table.shape != (nk, nk) or not isinstance(q, Integral) or not 0 <= q < nk:
         raise ValueError("Transition momentum table/q does not match the spectrum")
@@ -257,7 +311,7 @@ def kpoint_transition_block(build, mo_energy_k, nocc, momentum_table, q, *, full
     columns = [build(q, pairs=pairs, k_indices=[ki])[0] for ki in range(nk)]
     factors = jnp.concatenate(columns, axis=1)
     differences = jnp.concatenate([energy[ki, pairs[:, 0]]
-        -energy[int(table[ki, q]), pairs[:, 1]] for ki in range(nk)])
+        -partner[int(table[ki, q]), pairs[:, 1]] for ki in range(nk)])
     result = dict(factors=factors, gram=factors.conj().T@factors, differences=differences)
     if full:
         signs = jnp.ones(nocc*(nmo-nocc))

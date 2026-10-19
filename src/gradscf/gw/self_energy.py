@@ -111,6 +111,7 @@ def sigma_imag_part(
     *,
     wmn_static: Array | None = None,
     occupation_sign: Array | None = None,
+    del_w_static: Array | None = None,
 ) -> Array:
     """Imaginary-axis integral part of Sigma_p(omega).
 
@@ -136,7 +137,13 @@ def sigma_imag_part(
     Complex scalar.
     """
     if wmn_static is not None and del_w is not None:
-        raise NotImplementedError("Static pole subtraction requires matching q0 static corrections")
+        if del_w_static is None or p_index is None:
+            raise NotImplementedError("Static pole subtraction requires matching q0 static corrections")
+        # The head/wing belongs only to the own-G-pole column. Treat body
+        # and correction as one kernel, including the same static endpoint.
+        wmn_p = jnp.asarray(wmn_p).at[:, p_index].add(del_w)
+        wmn_static = jnp.asarray(wmn_static).at[p_index].add(del_w_static)
+        del_w = None
     sigma = _imag_axis_integral(omega, wmn_p, mo_energy, ef, freqs, wts, eta,
                                 wmn_static, occupation_sign)
     if del_w is not None:
@@ -161,6 +168,7 @@ def sigma_residue_part(
     p_index: int | Array | None = None,
     resolvent_data: dict | None = None,
     g_indices: Array | None = None,
+    del_w_static: Array | None = None,
 ) -> Array:
     """Residue part of Sigma_p(omega) from poles inside the contour.
 
@@ -224,6 +232,13 @@ def sigma_residue_part(
         return jnp.sum(weights * row)
 
     pole_freqs = jnp.abs(mo_energy - omega_r)  # (nmo,)
+    weights = (_static_residue_weights(omega_r, mo_energy, ef, occupation_sign)
+               if wmn_static is not None else mask.astype(jnp.complex128))
+    active = weights != 0
+    # An inactive G pole can coincide with a bare response pole. Inverting
+    # its infinite Pi and subsequently multiplying by zero gives NaN. Keep
+    # the batched solve, probing inactive lanes at the regular zero frequency.
+    probe_freqs = jnp.where(active, pole_freqs, 0.)
 
     naux = b_pm.shape[0]
     dtype = jnp.complex128
@@ -232,21 +247,19 @@ def sigma_residue_part(
         w, channels, eta, naux, dtype, conjugate, response_scale
     )
     if est_bytes > _BATCH_MEM_LIMIT:
-        screened = jax.lax.map(solve_one, pole_freqs)
+        screened_probe = jax.lax.map(solve_one, probe_freqs)
     else:
-        screened = jax.vmap(solve_one)(pole_freqs)  # (nmo, naux, naux)
+        screened_probe = jax.vmap(solve_one)(probe_freqs)  # (nmo, naux, naux)
+    screened = jnp.where(active[:, None, None], screened_probe, 0.)
     first = b_pm.conj() if conjugate else b_pm
     contrib = jnp.einsum("Pm,mPQ,Qm->m", first, screened, b_mp, precision=Precision.HIGHEST)
     if wmn_static is not None:
-        if q0 is not None:
+        if q0 is not None and del_w_static is None:
             raise NotImplementedError("Static pole subtraction needs matching q0 corrections")
         # At eta=0 the subtracted residue vanishes at the contour boundary.
         # Signed weights include half the residue there and also handle an
         # empty/full spin channel without inventing a spin Fermi level.
-        weights = _static_residue_weights(omega_r, mo_energy, ef, occupation_sign)
         contrib = contrib - jnp.asarray(wmn_static)
-    else:
-        weights = mask.astype(contrib.dtype)
     sigma_r = jnp.sum(weights * contrib)
 
     if q0 is not None:
@@ -265,14 +278,17 @@ def sigma_residue_part(
                 "q0 residue correction requires qij entries aligned with the response channels."
             )
         eye = jnp.eye(naux, dtype=screened.dtype)
-        eps_body_inv = screened[p_index] + eye
+        # Reuse the finite probe inverse even when this correction is
+        # inactive; replacing it by I could make an artificial zero Schur
+        # complement under an outer vmap of the orbital callback.
+        eps_body_inv = screened_probe[p_index] + eye
         q2 = jnp.sum(q_abs**2)
         q_norm = jnp.sqrt(q2)
         head_scale = (2.0 / jnp.pi) * (6.0 * jnp.pi**2 / volume / nkpts) ** (1.0 / 3.0)
         wings_const = jnp.sqrt(volume / 4.0 / jnp.pi**3) * (6.0 * jnp.pi**2 / volume / nkpts) ** (
             2.0 / 3.0
         )
-        omega_c = jnp.asarray(pole_freqs[p_index], dtype=jnp.complex128)
+        omega_c = jnp.asarray(probe_freqs[p_index], dtype=jnp.complex128)
         pi_00 = 0j
         pi_p0 = jnp.zeros(naux, dtype=jnp.complex128)
         for (e_spin, b_ov_spin, spin_factor), qij_c in zip(channels, qij_list):
@@ -297,7 +313,12 @@ def sigma_residue_part(
         del00 = head_scale * (eps_inv_00 - 1.0)
         b_pp = b_pm[:, p_index]
         wing = wings_const * 2.0 * jnp.dot(b_pp.conj(), eps_inv_p0).real
-        sigma_r = sigma_r + mask.astype(contrib.dtype)[p_index] * (del00 + wing)
+        correction = del00 + wing
+        correction = jnp.where(active[p_index], correction, 0.)
+        if wmn_static is not None:
+            sigma_r = sigma_r + weights[p_index]*(correction-del_w_static)
+        else:
+            sigma_r = sigma_r + mask.astype(contrib.dtype)[p_index]*correction
 
     return sigma_r if wmn_static is not None else fm * sigma_r
 
@@ -313,6 +334,8 @@ def sigma_cd(omega: float | Array, ctx: dict) -> Array:
       analytic static subtraction and the half-residue limit at a G pole
     - optional ``occupation_sign``: (nmo,), -1 occupied/+1 virtual; molecular
       drivers provide it explicitly, including empty/full spin channels
+    - optional ``del_w_static``: scalar own-orbital q0 head/wing at zero
+      frequency, matching ``del_w`` and ``q0`` when static subtraction is used
     - ``b_pm``, ``b_mp``: (naux, nmo) factor slices for orbital p
     - ``channels``: tuple of (mo_energy_spin, b_ov_spin, spin_factor)
       response channels (retarded-response spin factors: 2.0 restricted,
@@ -324,13 +347,14 @@ def sigma_cd(omega: float | Array, ctx: dict) -> Array:
     analytically. Finite eta is retained only in real-frequency W. This is
     an exact contour identity at eta=0; finite-eta boundary continuity and
     arbitrary higher derivatives are not implied. q0 head/wing contexts
-    require matching static corrections and are not routed through this path.
+    require the matching del_w_static correction in the same orbital frame.
     Contexts without wmn_static keep the legacy quadrature convention.
 
     Returns the complex scalar Sigma_p(omega).
     """
     static = ctx.get("wmn_static")
-    if static is not None and (ctx.get("q0") is not None or ctx.get("del_w") is not None):
+    corrected = ctx.get("q0") is not None or ctx.get("del_w") is not None
+    if static is not None and corrected and ctx.get("del_w_static") is None:
         raise NotImplementedError("Static pole subtraction requires matching q0 static corrections")
     # Subtract Wc(0) before quadrature. Integrate its G-pole contribution
     # analytically together with the residue, including omega == epsilon_m.
@@ -346,6 +370,7 @@ def sigma_cd(omega: float | Array, ctx: dict) -> Array:
         p_index=ctx.get("p_index"),
         wmn_static=static,
         occupation_sign=ctx.get("occupation_sign"),
+        del_w_static=ctx.get("del_w_static"),
     )
     sigma_r = sigma_residue_part(
         omega,
@@ -362,6 +387,7 @@ def sigma_cd(omega: float | Array, ctx: dict) -> Array:
         p_index=ctx.get("p_index"),
         resolvent_data=ctx.get("resolvent_data"),
         g_indices=ctx.get("g_indices"),
+        del_w_static=ctx.get("del_w_static"),
     )
     return sigma_i + sigma_r
 
@@ -429,19 +455,21 @@ def sigma_residue_matrix(
     fm = jax.lax.stop_gradient(fm)
 
     pole_freqs = jnp.abs(mo_energy - omega_r)  # (nq,)
+    weights = (fm*mask.astype(jnp.complex128) if wmn_static is None else
+               _static_residue_weights(omega_r, mo_energy, ef, occupation_sign))
+    active = weights != 0
+    probe_freqs = jnp.where(active, pole_freqs, 0.)
     naux = b_mn.shape[0]
     est_bytes = pole_freqs.shape[0] * naux * naux * 16 * 2
     solve_one = lambda w: _response_solve_one(w, channels, eta, naux, jnp.complex128, conjugate)
     if est_bytes > _BATCH_MEM_LIMIT:
-        screened = jax.lax.map(solve_one, pole_freqs)
+        screened = jax.lax.map(solve_one, probe_freqs)
     else:
-        screened = jax.vmap(solve_one)(pole_freqs)  # (nq, naux, naux)
+        screened = jax.vmap(solve_one)(probe_freqs)  # (nq, naux, naux)
 
     first = b_mn.conj() if conjugate else b_mn
     # contrib[m,n] = sum_{q in poles} conj(B_P[m,q]) screened[q]_PQ B_Q[q,n]
-    weights = (fm * mask.astype(screened.dtype) if wmn_static is None else
-               _static_residue_weights(omega_r, mo_energy, ef, occupation_sign))
-    screened_masked = screened * weights[:, None, None]
+    screened_masked = jnp.where(active[:, None, None], screened*weights[:, None, None], 0.)
     contrib = jnp.einsum("Pmq,qPQ,Qqn->mn", first, screened_masked, b_mn, precision=Precision.HIGHEST)
     if wmn_static is not None:
         contrib -= jnp.tensordot(weights, wmn_static, axes=1)

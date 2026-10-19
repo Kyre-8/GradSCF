@@ -17,10 +17,12 @@ historical solver forwarding modules have been removed.
 | Bounded complex dense RPA and metric energy derivatives | `eigen/rpa.py` | Small non-Gamma periodic response |
 | Regularized full-spectrum and inverse-square-root derivatives | `eigen/spectral.py` | SCF orbital diagonalization and overlap response |
 | Checked GMRES/direct solves and transpose response | `linear/` | Eigenvector response, SCF/GW implicit derivatives |
+| Checked repeated shifted solves | `linear/shifted.py` | Molecular RPA resolvents and full signed periodic GW screening |
 | Complex-to-real linear adapter | `linear/complex.py` | Exciton–vibration retarded response |
 | Scalar-bordered Schur solve | `linear/schur.py` | scGW charge-constrained response |
 | Fixed-point/root implicit differentiation | `nonlinear/` | SCF and scGW |
 | DIIS and callback-based orbital minimization | `nonlinear/` | SCF families |
+| Moment-anchored causal matrix realization | `poles.py` | Periodic scGW spectral continuation |
 
 `tddft/eigensolvers.py`, `tddft/eigenvector_differentiation.py`, `scf/implicit.py`,
 `scf/diis.py`, `scf/_orbital_solver.py`, and `ci/response.py` have been removed.
@@ -94,6 +96,45 @@ GMRES keeps this representation matrix-free; the direct `max_dense` bound
 applies to `2*n`. The true residual norm, NaN/status failure policy, JVP/VJP
 and higher response are retained. This does not change the real input contract
 of `solve_linear`. No separate complex numerical algorithm is implemented.
+
+`solvers.linear.factor_shifted(M, symmetric=True)` prepares a local numerical
+cache for repeated `(M-shift*I) x = b` solves. The default requires algebraic
+transpose symmetry, including complex symmetric matrices; it does not assert
+Hermiticity. Use `symmetric=False` for a general real or complex matrix. The
+general real path promotes its spectral cache and output to complex dtype.
+Rebuild the cache whenever the physical matrix changes.
+
+`solve_shifted(cache, b, shift, rtol=1e-11, atol=1e-13)` accepts vector or block
+RHS and returns the solution array. Eigenvectors are stopped primal data;
+JVP/VJP differentiate the original matrix equation, including repeated
+eigenvalues. Its explicit transpose solve uses the algebraic transpose, never
+the adjoint. A defective or poorly conditioned eigenbasis falls back to the
+original dense equation. Both primal and transpose solutions must pass the
+shared true-residual check against `cache.matrix`; failed checks return NaNs.
+The fallback and residual certificate do not regularize a singular shift.
+Molecular real/complex symmetric RPA matrices retain the default contract;
+periodic full signed screening explicitly requests the general path. Choosing
+the matrix and shift, including the finite-frequency broadening convention,
+remains the caller's physical responsibility.
+
+`solvers.poles.interpolate_causal(z, values, moment=M1, tolerance=...,`
+`rank_tolerance=1e-12)` constructs a PSD matrix pole measure from upper-half-plane
+samples. It first checks the original moment-anchored Gram without causal
+projection, then whitens the moment support and scales frequency columns.
+A Hermitian least-squares completion minimizes `||H X-T||_F`; its unconstrained
+block is set to zero. Numerical ranks, discarded modes, compatibility residuals
+and original-sample errors remain in `PoleFit.diagnostics`. Rank truncation
+makes this a controlled approximation; the original sample and constraint
+errors must pass the requested tolerance, with relative first-moment error
+at most `1e-9`. A failed certificate raises rather than returning a usable fit.
+The zero moment and zero dynamic function produce an empty, usable bath.
+
+`evaluate_poles` evaluates this measure, and `auxiliary_spectrum` gives the
+complete Dyson poles and physical spectral weights, including satellites.
+The completion is a deterministic choice among finite-data continuations;
+it does not establish a unique real-axis spectrum. Clients retain independent
+holdout, particle-number and forward-frequency convergence checks. This eager
+reduction has no differentiation contract or iterative fitting backend.
 
 The new `solve_hermitian` and `solve_linear` APIs accept real floating-point
 data. Dense symmetric inputs are checked rather than silently repaired;
