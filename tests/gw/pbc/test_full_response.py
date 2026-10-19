@@ -148,6 +148,23 @@ def test_imaginary_branches_are_adjoint_but_not_assumed_even(model):
     assert not np.allclose(*responses, atol=1e-10, rtol=1e-10)
 
 
+def test_kpoint_driver_response_matches_full_complex_lehmann_sum(model):
+    """A general-q driver cannot replace distinct VO vertices by folded OV."""
+    from gradscf.gw.pbc.ksigma import _response_iw_kpoint
+
+    inputs, c, energy, table, mesh, nocc = model
+    build = products.kpoint_product_factor_builder(inputs, c, mesh=mesh,
+                                                   momentum_table=table)
+    nmo = energy.shape[1]
+    pairs = np.array([(m, n) for m in range(nmo) for n in range(nmo)])
+    factors = [build(q, pairs=pairs).reshape(len(c), len(inputs.coords), nmo, nmo)
+               for q in range(len(c))]
+    actual = _response_iw_kpoint(.37, 1, factors, jnp.asarray(energy),
+                                nocc, table, len(c))
+    expected = numpy_response(model, numpy_factors(model, 1), 1, .37, None)
+    np.testing.assert_allclose(actual, expected, atol=2e-13, rtol=2e-12)
+
+
 def test_complex_orbital_phases_preserve_full_response(model):
     inputs, c, energy, table, mesh, nocc = model
     phases = np.exp(1j*np.random.default_rng(19).normal(size=energy.shape))

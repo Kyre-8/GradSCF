@@ -213,7 +213,9 @@ def scgw_matsubara_restricted(
     to enable JIT, JVP and VJP with respect to real symmetric physical inputs.
     beta/nw/nocc and solver controls remain static. A failed response solve
     returns NaNs. charge_response_tol is the minimum resolved self-consistent
-    charge susceptibility (electrons/Ha); mu is differentiated, never frozen.
+    positive charge susceptibility (electrons/Ha) for a stable finite-T branch;
+    negative or unresolved charge response returns NaNs. mu is differentiated,
+    never frozen.
 
     phonons optionally supplies ep_coupling.PhononModel in the fixed initial
     orthonormal MO frame (not AO). Mode energies, linear and quadratic vertices

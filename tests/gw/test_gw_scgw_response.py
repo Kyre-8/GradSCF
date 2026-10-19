@@ -53,6 +53,54 @@ def test_noninteracting_canonical_internal_energy_gradient():
     np.testing.assert_allclose(derivative, expected_derivative, rtol=1e-7, atol=1e-9)
 
 
+def test_noninteracting_degenerate_density_has_finite_canonical_response():
+    # Three coincident levels with N=2: each per-spin occupation is 1/3.
+    # The full density is smooth under a traceless splitting even though
+    # individual reference eigenvectors have no unique derivative.
+    beta = 4.0
+    direction = jnp.array([[0.2, 0.1, 0.0], [0.1, -0.2, 0.0], [0.0, 0.0, 0.0]])
+    kwargs = dict(mo_energy=jnp.zeros(3), mo_coeff=jnp.eye(3), nocc=1,
+                  df_factors=jnp.zeros((1, 3, 3)), beta=beta, nw=4,
+                  max_iter=5, tol=1e-10, particle_tol=1e-12)
+
+    def density(scale):
+        return scgw_matsubara_restricted(
+            **kwargs, hcore_matrix=scale * direction, differentiation=_AD
+        ).density_mo
+
+    value, tangent = jax.jit(lambda scale: jax.jvp(
+        density, (scale,), (jnp.ones_like(scale),)
+    ))(jnp.array(0.0))
+    np.testing.assert_allclose(value, 2 * np.eye(3) / 3, rtol=0, atol=1e-11)
+    expected = -2 * beta * (1 / 3) * (2 / 3) * direction
+    np.testing.assert_allclose(tangent, expected, rtol=0, atol=1e-9)
+    reverse = jax.jit(jax.grad(lambda scale: jnp.sum(density(scale) * direction)))(0.0)
+    np.testing.assert_allclose(reverse, jnp.sum(expected * direction), rtol=0, atol=1e-9)
+
+
+def test_noninteracting_limit_keeps_quadratic_hartree_exchange_energy():
+    beta = 4.0
+    vertex = jnp.array([[[0.1, 0.04, 0.0], [0.04, -0.08, 0.02], [0.0, 0.02, 0.05]]])
+    kwargs = dict(mo_energy=jnp.zeros(3), mo_coeff=jnp.eye(3), nocc=1,
+                  hcore_matrix=jnp.zeros((3, 3)), beta=beta, nw=4,
+                  max_iter=100, tol=1e-12, particle_tol=1e-12)
+
+    def energy(scale, response):
+        return scgw_matsubara_restricted(
+            **kwargs, df_factors=scale * vertex, differentiation=response
+        ).total_energy
+
+    np.testing.assert_allclose(jax.jit(jax.grad(lambda scale: energy(scale, _AD)))(0.0),
+                               0.0, rtol=0, atol=1e-12)
+    # D=2I/3 at B=0. E_H+E_x is quadratic in B; correlation starts at B^4.
+    # Check finite nonzero couplings, rather than claim higher AD at B=0.
+    expected = (2 * jnp.sum(jnp.trace(vertex, axis1=-2, axis2=-1)**2)
+                - jnp.sum(vertex**2)) / 9
+    for step in (1e-3, 2e-3):
+        finite_coefficient = (energy(step, None) + energy(-step, None)) / (2 * step**2)
+        np.testing.assert_allclose(finite_coefficient, expected, rtol=1e-5, atol=1e-9)
+
+
 @pytest.mark.parametrize("beta,nw", [(5.0, 6), (20.0, 12)])
 def test_uniform_energy_shift_includes_chemical_potential_response(beta, nw):
     kw = {**_inputs(), "beta": beta, "nw": nw, "max_iter": 200}
@@ -114,6 +162,44 @@ def test_unresolved_cold_charge_response_is_rejected():
         **{**kw, "hcore_matrix": kw["hcore_matrix"] + shift * jnp.eye(2)}, differentiation=_AD
     ).chemical_potential))(0.0)
     assert not jnp.isfinite(derivative)
+
+
+@pytest.mark.parametrize("adjoint", [False, True])
+def test_negative_self_consistent_charge_susceptibility_is_rejected(adjoint):
+    from gradscf.gw.scgw_response import _charge_linear_solve
+
+    # The charge Schur complement is -0.46. Finite-T stable branches have
+    # dN/dmu >= 0; its magnitude alone cannot certify a physical response.
+    matrix = jnp.array([[1.0, 0.2], [0.3, -0.4]])
+    solve = lambda rhs: _charge_linear_solve(
+        lambda vector: matrix @ vector, rhs, _AD, 5.0, 1e-10, True
+    )
+    rhs = jnp.array([1.0, 0.1])
+    if adjoint:
+        _, pullback = jax.vjp(solve, rhs)
+        result = pullback(jnp.ones_like(rhs))[0]
+    else:
+        result = solve(rhs)
+    assert np.all(np.isnan(result))
+
+
+@pytest.mark.parametrize("adjoint", [False, True])
+def test_positive_charge_susceptibility_preserves_checked_response(adjoint):
+    from gradscf.gw.scgw_response import _charge_linear_solve
+
+    matrix = jnp.array([[1.0, 0.2], [0.3, 0.4]])
+    solve = lambda rhs: _charge_linear_solve(
+        lambda vector: matrix @ vector, rhs, _AD, 5.0, 1e-10, True
+    )
+    rhs = jnp.array([1.0, 0.1])
+    if adjoint:
+        _, pullback = jax.vjp(solve, rhs)
+        result = pullback(jnp.ones_like(rhs))[0]
+        expected = np.linalg.solve(np.asarray(matrix).T, np.ones(2))
+    else:
+        result = solve(rhs)
+        expected = np.linalg.solve(np.asarray(matrix), np.asarray(rhs))
+    np.testing.assert_allclose(result, expected, rtol=0, atol=1e-10)
 
 
 def test_matrix_free_tangent_matches_dense_residual_jacobian():

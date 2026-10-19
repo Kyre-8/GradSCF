@@ -137,11 +137,11 @@ def _solve_state(hcore, b, energy_guess, grid, *, nocc, max_iter, tol, mixing, p
 
 
 def _charge_linear_solve(matvec, rhs, config, beta, charge_response_tol, converged):
-    """Supply the physical charge-resolution policy to the shared bordered solve."""
+    """Require a resolved positive dN/dmu for a stable finite-T branch."""
     linear_config = LinearSolverConfig(rtol=config.tolerance, maxiter=config.max_iter,
                                         restart=20 if config.restart is None else config.restart)
     return solve_scalar_border(matvec, rhs, config=linear_config, converged=converged,
-        schur_valid=lambda schur: jnp.abs(beta * schur) > charge_response_tol)
+        schur_valid=lambda schur: beta * schur > charge_response_tol)
 
 
 def _raise_nonconverged(residual):

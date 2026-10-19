@@ -23,6 +23,20 @@ def test_noninteracting_density_is_exact_on_a_coarse_grid():
     np.testing.assert_allclose(inverse @ green, jnp.broadcast_to(jnp.eye(2), green.shape), rtol=0, atol=1e-13)
 
 
+def test_degenerate_static_reference_density_has_smooth_matrix_response():
+    from gradscf.gw.matsubara import matsubara_grid, dyson_green_and_density
+
+    grid = matsubara_grid(nw=4, beta=4.0)
+    sigma = jnp.zeros((8, 3, 3), dtype=jnp.complex128)
+    direction = jnp.array([[0.2, 0.1, 0.0], [0.1, -0.2, 0.0], [0.0, 0.0, 0.0]])
+    mu = -jnp.log(2.0) / grid.beta
+    density = lambda scale: dyson_green_and_density(scale * direction, sigma, mu, grid)[1]
+    value, tangent = jax.jvp(density, (jnp.array(0.0),), (jnp.array(1.0),))
+    np.testing.assert_allclose(value, np.eye(3) / 3, rtol=0, atol=1e-13)
+    expected = -grid.beta * (1 / 3) * (2 / 3) * direction
+    np.testing.assert_allclose(tangent, expected, rtol=0, atol=1e-12)
+
+
 def test_single_level_thermal_zero_mode_and_self_energy_tail():
     from gradscf.gw.matsubara import matsubara_grid, dyson_green_and_density, gw_matsubara_step
 

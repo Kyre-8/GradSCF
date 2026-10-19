@@ -52,8 +52,14 @@ W energies, original-MO correlation windows and the producing method.
 `qp_weight = 1/(1-d Re Sigma/d omega)` is evaluated at returned energies with
 G/W fixed. Unrequested levels and singular slopes have NaN weights. A finite
 weight does not certify root convergence or guarantee a physical main peak;
-negative weights are not clipped. This is not a multi-root search or an
-automatic largest-weight satellite-selection algorithm.
+negative weights are not clipped. Nonlinear diagonal drivers test six seeds
+with the shared scalar solver, deduplicate converged positive-slope candidates,
+and choose the candidate closest to the on-shell energy. An explicit
+continuation target takes precedence. `qp_candidate_count` counts only the
+distinct accepted roots found by those seeds; it is not a complete frequency
+scan. Tied candidates are uncertified. `qp_branch_valid`, `qp_on_shell` and
+`qp_linearized` expose this choice; no largest-weight or physical-main-peak
+identification is implied.
 
 The native BSE adapter inherits the actual W spectrum and windows. G0W0/evGW0
 therefore give W0; converged evGW supplies its updated W. Missing legacy
@@ -63,8 +69,77 @@ are invalidated by source/settings changes; failed GW reruns clear their result.
 The QP implicit VJP and fixed-input G0W0/BSE derivatives retain their existing
 contracts. See [BSE properties](../bse/README.md), [scGW](SCGW.md), and
 [executed MolGW comparisons](../bse/VALIDATION.md). COHSEX, spin-flip BSE,
-periodic BSE, analytic continuation of scGW, and distributed execution remain
+periodic BSE and distributed execution remain
 outside this increment.
+
+## Periodic self-consistent finite models
+
+`gw.pbc.build_periodic_model(mf)` constructs one fixed orthonormal source-k
+Hamiltonian for `g0w0_model`, `evgw_cd_kpoints`, `qsgw_cd_kpoints` and
+`scgw_matsubara_kpoints`. Complete complex OV/VO response, source weights and
+Hartree/exchange conventions are shared. The new source drivers are eager
+forward only and currently require `fc=False`; this is not an outer AD or
+bulk-material convergence claim. A bare Ewald correction without a matched
+screened Gamma-cell treatment must be assessed separately.
+
+In the Matsubara driver, positive-frequency count and time integration are
+independent controls. ``time_oversampling`` sets ``Nt=2*nw*factor``;
+``time_quadrature='uniform'`` retains midpoint integration, while ``'gauss'``
+uses positive Gauss-Legendre weights for the forward time integrals. Inverse
+Matsubara sums keep their original 1/beta normalization. Matrix-pole Green
+reference subtraction and the first two bosonic moments reduce finite-window
+errors; they do not remove the need for frequency/time convergence checks.
+
+Periodic scGW returns full frequency-dependent matrices and no QP energies.
+`pbc.spectrum` provides an explicit causal Hermitian matrix realization with
+PSD residues, fixed self-energy moment and held-out Matsubara frequencies,
+followed by a separate continued Dyson solve. Its real-axis result remains
+conditional on numerical-rank and frequency-grid stability. Static QP operator
+interpolation and independently sampled Brillouin-zone DOS are labelled as
+interpolations, rather than direct GW at every drawing point.
+Static interpolation requires complete computed and converged QP masks; a
+crossing between fixed occupied/empty diagonal-QP branches is rejected rather
+than hidden by energy sorting. The GaAs comparison also checks the continued
+electron count from all auxiliary-Hamiltonian poles with the original beta
+and chemical potential. A finite-window DOS integral counts spectral states
+and is recorded separately from the occupied electron count.
+
+`continue_self_energy` uses the shared `solvers.poles.interpolate_causal`
+Hermitian least-squares realization. It determines poles without a prescribed
+grid or nonlinear optimizer and checks errors against the original matrices.
+Different source-k pole sets use their exact union with zero residues at
+unused poles. Numerical rank truncation and the unconstrained completion are
+reported; the latter is fixed to zero and does not imply a unique spectrum.
+The eager construction has no implicit differentiation rule.
+An optional `frequency_cutoff` in Ha selects a range established by a separate
+Matsubara convergence study. The input remains complete, excluded-frequency
+errors are reported, and this option does not certify forward convergence.
+
+For a nonmagnetic spinless source, pass `model=model` to
+`continue_self_energy`. The existing k-point utility pairs k and -k, and
+the source MO coefficients determine the antiunitary sewing matrices through
+`C_k U_k = C_-k.conj()`. The original full-frequency state must satisfy
+`Sigma_k(z) = U_k Sigma_-k(z).T U_k.conj().T`, together with the corresponding
+Fock and first-moment relations. The check uses the same complex frequency;
+complex-conjugating Sigma would also conjugate its frequency argument.
+After this validation, paired residues on the common real pole set are
+replaced by their convex time-reversal average. This preserves PSD and M1,
+retains physical complex residues at non-TRIM k points, and recomputes all
+train/holdout/moment certificates. It rejects a genuinely symmetry-breaking
+source rather than imposing this assumption on it. The electron count must
+still be checked separately. Without `model`, the generic unconstrained
+matrix realization remains available. Neither choice proves real-axis
+stability or identifies principal peaks.
+
+The GaAs example records uncertified selected roots as NaN together with
+their original candidates and masks. A retarded spectral map or DOS can
+remain defined when a unique quasiparticle assignment fails. Each gap is
+reported only when its own query sample has complete certified roots;
+otherwise its JSON value and change are null.
+
+The executed same-orbital BerkeleyGW comparison, including its finite-body
+head adapter, frequency convergence, multiple roots and remaining full-curve
+differences, is documented in [the periodic review](pbc/BERKELEYGW_REVIEW.md).
 
 ## Algorithm references
 
@@ -86,7 +161,7 @@ Forward method selection does not change the implicit backward. See
 [algorithms, safeguards and measured costs](QP_SOLVERS.md).
 
 
-## Molecular contour-boundary treatment
+## Contour-boundary treatment
 
 Molecular diagonal G0W0/evGW/evGW0 self-energies now subtract Wc(0) from the
 imaginary-axis quadrature and residue, then add the analytic static term.
@@ -99,9 +174,28 @@ and independent single-pole/parameter-response checks are described in the
 The imaginary Green denominator uses eta->0; `eta` still broadens real-frequency
 W. At finite eta this differs from the previous Green-broadened quadrature,
 and is not a proof of exact boundary continuity or arbitrary higher AD.
-Periodic q0 head/wing paths retain their previous convention. Molecular matrix
+Periodic Gamma drivers use the same subtraction with a matching zero-frequency
+body cache and, when requested, a matching q0 head/wing cache. Molecular matrix
 qsGW uses the corresponding static subtraction, with an independent analytic
 two-orbital pole test; this does not establish full qsGW parity with MolGW.
+
+The paired periodic k-mesh drivers use the same zero-frequency body and
+head/wing caches as Gamma. General complex OV/VO covariances need the full
+two-sided imaginary-axis response; the legacy even-W drivers reject an
+unpaired finite model explicitly. `pbc.g0w0_bands` retains both Lehmann
+branches and uses the complete requested matrix window at every query point.
+Its 3D `fc=True` path replaces the correlation Gamma node with nonzero
+Gauss-cell samples and shifted source/internal orbitals. The quadrature order
+must be converged; low-dimensional or gapless screened cell integration is
+not supplied by this path.
+
+Exact HF references are supported by the full query at their source k points
+with `fc=False`. Their reference potential is reconstructed as `F-h-J`,
+including its actual SCF exchange boundary. Off-mesh HF and HF Gamma-cell
+queries require further band/exchange support. Pure LDA/GGA queries retain
+their arbitrary-k and gapped 3D cell paths. Numerical evidence and the
+remaining differentiation boundaries are recorded in
+[the 2026-10-18 repair validation](../../../reproducibility/ad_showcase/gw_repairs_20261018/README.md).
 
 
 For one contracted intermediate state, let delta = omega - epsilon_m,

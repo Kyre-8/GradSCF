@@ -93,5 +93,15 @@ class GWResult:
     screening_virtual: tuple[int, ...] | None = None
     method: str | None = None
 
+    # Fixed-G/W baselines and tested positive-slope root selection. Count zero
+    # means no candidate enumeration (e.g. an outer evGW residual evaluation).
+    qp_on_shell: jnp.ndarray | None = None
+    qp_linearized: jnp.ndarray | None = None
+    qp_candidate_count: jnp.ndarray | None = None
+    qp_branch_valid: jnp.ndarray | None = None
+    # Energy-dependent projected Dyson vectors in the KS frame. These columns
+    # need not be mutually orthogonal and never replace the KS/BSE MO frame.
+    qp_vectors: jnp.ndarray | None = None
+
 
 __all__ = ["GWResult"]

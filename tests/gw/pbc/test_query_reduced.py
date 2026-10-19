@@ -108,6 +108,7 @@ def test_query_restores_negative_head_and_keeps_positive_head_once(head, monkeyp
         return values
     monkeypatch.setattr(query, 'mixed_product_factors', mixed)
     result = query.g0w0_bands(mf, np.zeros((1, 3)), [0, 1], nw=8,
+        self_energy='diagonal',
         root_config=ScalarRootConfig(ftol=1e-10, xtol=1e-10))
     expected = np.array([[-.5, .5]])-head/2*np.array([[.36, .64]])
     assert bool(result.converged)

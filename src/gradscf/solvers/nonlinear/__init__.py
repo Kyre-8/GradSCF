@@ -11,3 +11,6 @@ __all__ += ['SphereConfig', 'SphereResult', 'minimize_sphere']
 
 from .scalar import ScalarRootConfig, ScalarRootResult, solve_scalar_roots, bisect
 __all__ += ['ScalarRootConfig', 'ScalarRootResult', 'solve_scalar_roots', 'bisect']
+
+from .eager import EagerIterationResult, iterate_eager
+__all__ += ['EagerIterationResult', 'iterate_eager']

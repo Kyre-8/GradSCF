@@ -142,9 +142,19 @@ domega = -partial_theta(f) dtheta / partial_omega(f).
 
 The numerical seed has zero implicit tangent. The returned root remains live
 when this rule is differentiated again, retaining mixed and higher response.
-No root-iteration trajectory is differentiated in implicit mode. Failed roots
-and nonfinite or singular frequency slopes retain the original rejection
-policy, including under JIT. The shared scalar forward solver is unchanged.
+No root-iteration trajectory is differentiated in implicit mode. Failed or
+uncertified branches and nonfinite, singular or negative frequency slopes are
+rejected, including under JIT. The numerical scalar solver remains shared.
+
+The GW wrapper now tests the supplied seed, reference energy, on-shell energy,
+AD-linearized energy, and reference plus/minus the scalar step cap. Converged
+positive-slope candidates are deduplicated at the root tolerance and ranked
+by distance to the on-shell energy, or to an explicitly supplied continuation
+target. A distinct tie invalidates the branch. Diagnostics report the tested
+candidate count, on-shell and linearized energies, and selected slope. This
+bounded search can miss roots; it is not a complete interval scan or an
+automatic largest-Z rule. The generic selection helper provides forward
+selection; `solve_qp_batch` supplies the implicit differentiation contract.
 
 Restricted `g0w0_cd_restricted` additionally accepts `qp_initial`, a real
 full-MO spectrum, and `qp_tol`, the positive absolute root step/residual
@@ -212,3 +222,52 @@ outer-response group passed 35 tests in 413.23 s, including R/U DIIS response,
 selected/frozen orbitals, numerical-seed tangents and previous outer-method
 regressions. UGW tests cover its existing energies and screening outputs;
 the unrestricted driver does not currently expose `qp_weight`.
+
+## Frequency clusters in the periodic matrix equation
+
+The periodic matrix selector solves `f_b(w)=w-lambda_b(H(w))=0`, with
+`H(w)=H_static+(Sigma_c(w)+Sigma_c(w)^dagger)/2`. Its local inverse slope is
+`Z_b=1/(1-lambda_b'(w))`. A root stopping tolerance in Ha controls this
+scalar solve; it does not define whether two eigenvalues of the computed
+Hermitian matrix are numerically distinguishable.
+
+At a candidate frequency, the selector measures
+
+```math
+\eta_H=\|HV-V\Lambda\|_F
+  +32n\epsilon\max(1,\|H\|_F).
+```
+
+The floating-point term is a conservative matrix-precision scale; it is not
+a fit-error estimate or a material convergence claim. This follows the
+usual separation of eigenvalue error and eigenvector gap sensitivity in
+the [LAPACK symmetric/Hermitian eigenproblem discussion](https://www.netlib.org/lapack/lug/node89.html).
+The measured Ritz residual uses lambda, not the nonlinear target w.
+
+With `D=V^dagger H'(w)V`, the local crossing guard additionally uses
+
+```math
+u_b=2|Z_b|(|f_b|+\eta_H),\qquad
+v_{bj}=\sqrt{(D_{bb}-D_{jj})^2+4|D_{bj}|^2},
+```
+
+and includes j in the candidate cluster when
+`|lambda_j-lambda_b| <= 2*eta_H+v_bj*u_b`. The self-pair speed is zero.
+The factor two protects the Newton estimate against finite-residual
+quadratic crossing examples. This remains a local first-order guard,
+not a rigorous interval bound for an arbitrary nonlinear function. A
+global statement would also require derivative/curvature bounds over
+the relevant interval. Invalid or nonpositive Z never passes the selector;
+a finite negative Z remains available as a diagnostic value.
+
+For a numerically unresolved cluster P, scalar frequency response requires
+`P H' P` to be proportional to P. The non-scalar part is checked against
+`slope_floor*max(1,||P H' P||_F)`: an unrelated state's large derivative
+cannot relax the cluster's test. A genuine crossing with a splitting
+frequency derivative remains uncertified. A resolved avoided crossing
+instead uses each simple eigenvalue's finite positive slope.
+
+This changes neither scalar root residual/step tolerances, seeds, positive-
+slope requirements nor the nearest-target rule. It also does not change
+the reference-KS rule requiring complete requested degenerate subspaces.
+The frequency certificate is not a generic orbital/geometry implicit VJP.
