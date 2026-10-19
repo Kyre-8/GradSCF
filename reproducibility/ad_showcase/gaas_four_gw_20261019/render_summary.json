@@ -1,0 +1,30 @@
+{
+  "cwd": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016",
+  "return_code": 0,
+  "elapsed_seconds": 3.0818583100044634,
+  "peak_rss_kib": 332504,
+  "allowed_cpu_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "rss_limit_kib": 16777216,
+  "wall_limit_seconds": 600,
+  "termination_reason": null,
+  "accepted": true,
+  "operation": "Render saved comparison arrays using gradscf_tools.gaas_gw_plot.plot_comparison; full command retained in remote jobs",
+  "original_resource_sha256": "0e8bb7bab0aab929d025993c67d73192fe6fb81d8f816255313e20b8744cfd5a"
+}

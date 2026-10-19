@@ -1,0 +1,33 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/scgw_fft61_controls_20261019/compare.py"
+  ],
+  "cwd": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016",
+  "return_code": 0,
+  "elapsed_seconds": 1.8439620620047208,
+  "peak_rss_kib": 214068,
+  "allowed_cpu_ids": [
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+  ],
+  "rss_limit_kib": 16777216,
+  "wall_limit_seconds": 120,
+  "termination_reason": null,
+  "accepted": true
+}

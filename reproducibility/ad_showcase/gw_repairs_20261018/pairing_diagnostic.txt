@@ -1,0 +1,8 @@
+kpts [[ 0.   0.   0. ]
+ [-0.5  0.   0. ]]
+energy [[-0.62210634  0.69328845]
+ [-0.59179796  0.72265173]]
+{"q": 0, "gap": -1.3153947844089893, "forward": [0], "reverse": [1], "relative_covariance_error": 6.118354239455594e-16, "covariance_scale": 0.24343860097539255}
+{"q": 0, "gap": -1.3144496889548694, "forward": [2], "reverse": [3], "relative_covariance_error": 0.011194376440830227, "covariance_scale": 0.2630291284585494}
+{"q": 1, "gap": -1.3447580655577331, "forward": [0], "reverse": [3], "relative_covariance_error": 0.016983203364796123, "covariance_scale": 0.2415560888197888}
+{"q": 1, "gap": -1.2850864078061255, "forward": [2], "reverse": [1], "relative_covariance_error": 0.006775102520919847, "covariance_scale": 0.2531440713610217}

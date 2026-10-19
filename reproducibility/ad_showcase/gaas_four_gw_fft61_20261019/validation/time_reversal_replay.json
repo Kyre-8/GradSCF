@@ -1,0 +1,1496 @@
+{
+  "scope": "One fine512 realization with validated source time reversal; no new SCF/GW/query bands",
+  "source": "jobs/gaas_four_methods_20261018/sc512_fft61_20261019/scgw.npz",
+  "source_sha256": "caa88f3c75c3fe01ea369b5aa82b66d673b515fbf80af60f8781184a446f0da9",
+  "baseline": "jobs/gaas_four_methods_20261018/sc512_fft61_hzero_20261019",
+  "continuation_controls": {
+    "tolerance": 0.0001,
+    "rank_tolerance": 1e-12,
+    "frequency_cutoff_hartree": 2.01,
+    "moment_tolerance": 1e-09,
+    "particle_tolerance": 0.001
+  },
+  "eta_ev": 0.1,
+  "energy_window_ev": [
+    -15.0,
+    15.0
+  ],
+  "energy_step_ev": 0.05,
+  "step_definition": "Same ASE121 targets as the earlier QA: h0=(s[i+1]-s[i])/2; h=h0/2**j,j=0,1,2,3; evaluate original unwrapped path at s0-h,s0+h",
+  "difference_definition": "L2(Aplus-Aminus)/max(L2(Aplus),L2(Aminus)); spectral values are not renormalized",
+  "energy_zero_hartree": 0.2915260236580225,
+  "current_source_sha256": {
+    "src/gradscf/gw/pbc/spectrum.py": "89262a39dc4d584cbc156e773c6a4cd244609dc61582de5223427ab7dbcc3111",
+    "src/gradscf/gw/pbc/interpolation.py": "f1558be076b41ab61c00c1f689a188f2ccfbb5397fb457bd70bc6acfa5ac84bb",
+    "src/gradscf/solvers/poles.py": "82328417587ebb50cc144729ee40f64559f2318a488c34a3c9865f5dc38936a9"
+  },
+  "input_sha256": {
+    "samples.npz": "25b2f400930b927f94a8bd8dc0f87ebf1938b87504b5b916ea349744bef63be9",
+    "source_measure.npz": "48f8eeb52c0c5e633c6f1a7a2861880f291569bbc8ce1f1fbe4b66cde8ec6539"
+  },
+  "realization_reports": [
+    {
+      "k_index": 0,
+      "training_relative_error": 2.0974550177034848e-07,
+      "holdout_relative_error": 3.0556104128204954e-07,
+      "moment_relative_error": 1.475574785607761e-14,
+      "source_pole_count": 187,
+      "pole_count": 367,
+      "realization": {
+        "method": "moment-anchored Hermitian realization",
+        "rank_tolerance": 1e-12,
+        "moment_rank": 14,
+        "original_gram_min_eigenvalue": -9.006655588969957e-16,
+        "original_gram_negative_roundoff_limit": 2.2857135192556463e-11,
+        "column_scaling": "[1,abs(z_1),...,abs(z_m)] after moment-support whitening",
+        "completion": "zero on orthogonal complement of range(X)",
+        "roundoff_relative_tolerance": 5.1727511163335294e-11,
+        "retained_rank": 187,
+        "gram_rank_threshold": 2.9773475859485654e-11,
+        "gram_negative_roundoff_limit": 3.8502695122320954e-10,
+        "moment_support_relative_error": 2.1070122416526375e-15,
+        "discarded_gram_relative_norm": 5.257616741653798e-13,
+        "x_rank": 187,
+        "x_rank_threshold": 5.393424073126709e-12,
+        "x_condition": 7051404.334341454,
+        "free_complement_dimension": 0,
+        "null_constraint_relative_error": 7.399587668249227e-08,
+        "hermitian_constraint_relative_error": 6.807629129735197e-14,
+        "raw_hamiltonian_antihermitian_relative_error": 0.8201901407220223,
+        "raw_hx_relative_error": 7.39958766827618e-08,
+        "hermitian_completion": "minimum Frobenius norm of H X - T",
+        "hamiltonian_antihermitian_relative_error": 5.235132411276838e-16,
+        "hx_relative_error": 3.373799750089465e-07,
+        "unscaled_hx_relative_error": 1.1946625712776638e-05,
+        "interpolation_relative_error": 2.0974550177034848e-07,
+        "moment_relative_error": 1.475574785607761e-14,
+        "pole_count": 187,
+        "time_reversal": {
+          "partner": 0,
+          "subspace_relative_error": 8.182957286284357e-16,
+          "sewing_unitary_error": 2.220446049250313e-15,
+          "sewing_involution_error": 2.220446049250313e-15,
+          "fock_maximum_absolute_error": 3.175351961058611e-14,
+          "fock_relative_error": 1.3117721696658011e-14,
+          "moment_maximum_absolute_error": 1.0702198020507495e-15,
+          "moment_relative_error": 1.1314547691608648e-14,
+          "self_energy_maximum_absolute_error": 1.7984501924122217e-15,
+          "self_energy_relative_error": 2.4679315938384977e-14,
+          "construction": "Convex average R_k and U_k R_-k^T U_k^dagger on the common real pole set",
+          "original_training_relative_error": 2.240248993178776e-07,
+          "original_holdout_relative_error": 3.191808425829918e-07,
+          "residue_relative_error": 1.4427486015795682e-15,
+          "minimum_residue_eigenvalue": -1.5282340264940978e-17
+        },
+        "unconstrained_realization_scope": "HX/Gram diagnostics precede the time-reversal residue average"
+      },
+      "fit_frequency_count": 128,
+      "total_positive_frequency_count": 512,
+      "frequency_cutoff_hartree": 2.01,
+      "fitted_frequency_min_hartree": 0.007853981633974483,
+      "fitted_frequency_max_hartree": 2.0027653166634933,
+      "excluded_frequency_relative_error": 0.0017605107293839955
+    },
+    {
+      "k_index": 1,
+      "training_relative_error": 1.7373106120371337e-07,
+      "holdout_relative_error": 1.7633904853441166e-07,
+      "moment_relative_error": 1.5229328822460122e-14,
+      "source_pole_count": 180,
+      "pole_count": 367,
+      "realization": {
+        "method": "moment-anchored Hermitian realization",
+        "rank_tolerance": 1e-12,
+        "moment_rank": 14,
+        "original_gram_min_eigenvalue": -1.7445101027515244e-15,
+        "original_gram_negative_roundoff_limit": 2.3785578199325282e-11,
+        "column_scaling": "[1,abs(z_1),...,abs(z_m)] after moment-support whitening",
+        "completion": "zero on orthogonal complement of range(X)",
+        "roundoff_relative_tolerance": 5.1727511163335294e-11,
+        "retained_rank": 180,
+        "gram_rank_threshold": 3.076100660054663e-11,
+        "gram_negative_roundoff_limit": 3.977975780813016e-10,
+        "moment_support_relative_error": 1.8324079824279416e-15,
+        "discarded_gram_relative_norm": 5.463792501896694e-13,
+        "x_rank": 180,
+        "x_rank_threshold": 5.482123639427944e-12,
+        "x_condition": 5439077.88598487,
+        "free_complement_dimension": 0,
+        "null_constraint_relative_error": 8.03443261711442e-08,
+        "hermitian_constraint_relative_error": 7.156093382509386e-14,
+        "raw_hamiltonian_antihermitian_relative_error": 0.7909339448196903,
+        "raw_hx_relative_error": 8.034432617109946e-08,
+        "hermitian_completion": "minimum Frobenius norm of H X - T",
+        "hamiltonian_antihermitian_relative_error": 5.067310759793195e-16,
+        "hx_relative_error": 3.4100586790809486e-07,
+        "unscaled_hx_relative_error": 1.4756025458601062e-05,
+        "interpolation_relative_error": 1.7373106120371337e-07,
+        "moment_relative_error": 1.5229328822460122e-14,
+        "pole_count": 180,
+        "time_reversal": {
+          "partner": 1,
+          "subspace_relative_error": 1.0380355205346446e-15,
+          "sewing_unitary_error": 1.7763568394002505e-15,
+          "sewing_involution_error": 2.778363764402109e-15,
+          "fock_maximum_absolute_error": 2.6852994898629923e-14,
+          "fock_relative_error": 1.3032219894847378e-14,
+          "moment_maximum_absolute_error": 8.974254449843457e-16,
+          "moment_relative_error": 1.0753331251584501e-14,
+          "self_energy_maximum_absolute_error": 1.840758071988149e-15,
+          "self_energy_relative_error": 2.6753041276317336e-14,
+          "construction": "Convex average R_k and U_k R_-k^T U_k^dagger on the common real pole set",
+          "original_training_relative_error": 1.9875989587654975e-07,
+          "original_holdout_relative_error": 1.9805196636849987e-07,
+          "residue_relative_error": 1.8861491873260296e-15,
+          "minimum_residue_eigenvalue": -7.057629068332154e-18
+        },
+        "unconstrained_realization_scope": "HX/Gram diagnostics precede the time-reversal residue average"
+      },
+      "fit_frequency_count": 128,
+      "total_positive_frequency_count": 512,
+      "frequency_cutoff_hartree": 2.01,
+      "fitted_frequency_min_hartree": 0.007853981633974483,
+      "fitted_frequency_max_hartree": 2.0027653166634933,
+      "excluded_frequency_relative_error": 0.0016801359710110235
+    }
+  ],
+  "continued_electrons": 17.99999492427898,
+  "particle_number_error": -5.075721020375568e-06,
+  "maximum_moment_relative_error": 1.5229328822460122e-14,
+  "seconds": 41.912477380014025,
+  "auxiliary_vs_direct_trace_max_abs_states_per_ev": 7.679190616727283e-12,
+  "baseline_spectral_difference": {
+    "relative_frobenius": 0.027523045010102904,
+    "max_abs": 0.9978024735672568
+  },
+  "targets": [
+    {
+      "name": "strong_Gamma_X",
+      "saved_pair": [
+        6,
+        7
+      ],
+      "center_s": 0.23303947792221452,
+      "center_fractional_unwrapped": [
+        0.10483870967741936,
+        0.0,
+        0.10483870967741936
+      ],
+      "center_definition": "midpoint of original physical samples 6 and 7",
+      "terminal_extension": false,
+      "h0": 0.0179261136863242,
+      "steps": [
+        {
+          "h": 0.0179261136863242,
+          "query_indices": [
+            0,
+            1
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.46797394904094053,
+            "max_abs": 402.8826075182811
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.46797394904094053,
+            "max_abs": 402.8826075182811
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.4577215945968784,
+            "max_abs": 6.793129505191637
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.4577215945968784,
+            "max_abs": 6.793129505191637
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.9323667317621772,
+            "max_abs": 10.827531404910648
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.9323667317621772,
+            "max_abs": 10.827531404910648
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ]
+        },
+        {
+          "h": 0.0089630568431621,
+          "query_indices": [
+            2,
+            3
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.28957582201815146,
+            "max_abs": 234.61924502684136
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.28957582201815146,
+            "max_abs": 234.61924502684136
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.28318060981738713,
+            "max_abs": 4.658482894282913
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.28318060981738713,
+            "max_abs": 4.658482894282913
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.6135878005754385,
+            "max_abs": 7.943133588506997
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.6135878005754385,
+            "max_abs": 7.943133588506997
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ]
+        },
+        {
+          "h": 0.00448152842158105,
+          "query_indices": [
+            4,
+            5
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.15708888399814586,
+            "max_abs": 135.49273309109986
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.15708888399814586,
+            "max_abs": 135.49273309109986
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.15361400367931655,
+            "max_abs": 2.7438718072839947
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.15361400367931655,
+            "max_abs": 2.7438718072839947
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.3423735514793073,
+            "max_abs": 4.7117439587049335
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.3423735514793073,
+            "max_abs": 4.7117439587049335
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ]
+        },
+        {
+          "h": 0.002240764210790525,
+          "query_indices": [
+            6,
+            7
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.08053472854335776,
+            "max_abs": 70.6419336439338
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.08053472854335776,
+            "max_abs": 70.6419336439338
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.07875419468376783,
+            "max_abs": 1.4319699155980317
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.07875419468376783,
+            "max_abs": 1.4319699155980317
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.1768482508159465,
+            "max_abs": 2.4723974783988734
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.1768482508159465,
+            "max_abs": 2.4723974783988734
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "X_wrap",
+      "saved_pair": [
+        30,
+        31
+      ],
+      "center_s": 1.1114190485520998,
+      "center_fractional_unwrapped": [
+        0.5,
+        0.0,
+        0.5
+      ],
+      "center_definition": "exact unwrapped crossing of a reciprocal component n+1/2",
+      "terminal_extension": false,
+      "h0": 0.01792611368632413,
+      "steps": [
+        {
+          "h": 0.01792611368632413,
+          "query_indices": [
+            8,
+            9
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.05020480739669831,
+            "max_abs": 53.515065612183406
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.050204807396754765,
+            "max_abs": 53.515065612203976
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 6.868351564187395e-13,
+              "max_abs": 8.702194843037172e-10
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.04890479416097947,
+            "max_abs": 0.9183452503209839
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.04890479416101157,
+            "max_abs": 0.9183452503209297
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 5.366017222223758e-13,
+              "max_abs": 1.1864287330354273e-11
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.03937747799843187,
+            "max_abs": 0.5920844817578477
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.03937747799845543,
+            "max_abs": 0.5920844817578343
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 8.679951587860423e-14,
+              "max_abs": 1.6822099269120372e-12
+            }
+          ]
+        },
+        {
+          "h": 0.008963056843162065,
+          "query_indices": [
+            10,
+            11
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.026053200620245836,
+            "max_abs": 28.104334814969494
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.026053200620225984,
+            "max_abs": 28.104334814936827
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 2.512195370259328e-13,
+              "max_abs": 3.213753371456728e-10
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.02535641553416937,
+            "max_abs": 0.4749953218686449
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.02535641553418005,
+            "max_abs": 0.47499532186850146
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 1.6413159865959301e-13,
+              "max_abs": 4.888534022029489e-12
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.010019718331256224,
+            "max_abs": 0.15036317874905247
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.010019718331235036,
+            "max_abs": 0.15036317874859328
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 6.916742913059114e-14,
+              "max_abs": 1.092459456231154e-12
+            }
+          ]
+        },
+        {
+          "h": 0.0044815284215810325,
+          "query_indices": [
+            12,
+            13
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.013282488778027159,
+            "max_abs": 14.265354426678284
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.013282488778047198,
+            "max_abs": 14.265354426703848
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 2.1204938393563413e-13,
+              "max_abs": 2.09798981040277e-10
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.012928205533415787,
+            "max_abs": 0.23788287299650257
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.012928205533401104,
+            "max_abs": 0.23788287299641375
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 2.9462340437448293e-13,
+              "max_abs": 5.5280224842135794e-12
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.0025158769940392756,
+            "max_abs": 0.0377137442047184
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.002515876994109088,
+            "max_abs": 0.03771374420581086
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 9.649844890207754e-14,
+              "max_abs": 1.9326762412674725e-12
+            }
+          ]
+        },
+        {
+          "h": 0.0022407642107905162,
+          "query_indices": [
+            14,
+            15
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.006706560478010405,
+            "max_abs": 7.169032810893013
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.00670656047804054,
+            "max_abs": 7.169032810924809
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 2.641217780396243e-13,
+              "max_abs": 3.245046156899556e-10
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.006528970976604509,
+            "max_abs": 0.1184987543355831
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.006528970976619012,
+            "max_abs": 0.11849875433569679
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 1.9321510921821054e-13,
+              "max_abs": 4.462208380573429e-12
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.0006296533033182257,
+            "max_abs": 0.00943575247043249
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.0006296533032866393,
+            "max_abs": 0.00943575246934003
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 7.280975332597743e-14,
+              "max_abs": 1.092459456231154e-12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "W_wrap",
+      "saved_pair": [
+        46,
+        47
+      ],
+      "center_s": 1.6671285728281497,
+      "center_fractional_unwrapped": [
+        0.5,
+        0.25,
+        0.75
+      ],
+      "center_definition": "exact unwrapped crossing of a reciprocal component n+1/2",
+      "terminal_extension": false,
+      "h0": 0.0178611805902521,
+      "steps": [
+        {
+          "h": 0.0178611805902521,
+          "query_indices": [
+            16,
+            17
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.0915088011271784,
+            "max_abs": 98.50487578741694
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.09150880112725104,
+            "max_abs": 98.50487578756945
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 2.711024215030118e-12,
+              "max_abs": 3.0451374550096234e-09
+            },
+            {
+              "relative_frobenius": 2.2821185186329848e-12,
+              "max_abs": 2.365566548160445e-09
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.08894796492772197,
+            "max_abs": 1.5732506868862415
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.08894796492770984,
+            "max_abs": 1.5732506868867215
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 2.5789958944057677e-12,
+              "max_abs": 5.341860287444433e-11
+            },
+            {
+              "relative_frobenius": 2.279800712912329e-12,
+              "max_abs": 4.263966957296361e-11
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.06087522447159356,
+            "max_abs": 1.4007310368782004
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.06087522447155318,
+            "max_abs": 1.4007310368786747
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 2.5592347308145375e-13,
+              "max_abs": 3.3013591860253655e-12
+            },
+            {
+              "relative_frobenius": 3.592458732216412e-13,
+              "max_abs": 4.626521388217952e-12
+            }
+          ]
+        },
+        {
+          "h": 0.00893059029512605,
+          "query_indices": [
+            18,
+            19
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.04495729222418094,
+            "max_abs": 51.54343571460873
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.044957292224157244,
+            "max_abs": 51.54343571456387
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 3.0539157935992505e-12,
+              "max_abs": 3.404922138552555e-09
+            },
+            {
+              "relative_frobenius": 2.9564548497881315e-12,
+              "max_abs": 2.966286355736328e-09
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.04370812194508769,
+            "max_abs": 0.8059312833994587
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.04370812194504686,
+            "max_abs": 0.8059312833986088
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 2.9053837680723196e-12,
+              "max_abs": 5.912426104259794e-11
+            },
+            {
+              "relative_frobenius": 2.8399656344859857e-12,
+              "max_abs": 5.701750183106924e-11
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.018716797193557722,
+            "max_abs": 0.42813947924651075
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.018716797193514274,
+            "max_abs": 0.42813947924740603
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 2.6468400625279863e-13,
+              "max_abs": 2.878586258248106e-12
+            },
+            {
+              "relative_frobenius": 3.5807606998992064e-13,
+              "max_abs": 4.89563944938709e-12
+            }
+          ]
+        },
+        {
+          "h": 0.004465295147563025,
+          "query_indices": [
+            20,
+            21
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.02214612567971319,
+            "max_abs": 25.962149227328723
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.022146125679748465,
+            "max_abs": 25.962149227426025
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 2.9878442852308077e-12,
+              "max_abs": 3.3185917122708355e-09
+            },
+            {
+              "relative_frobenius": 2.8323731539238017e-12,
+              "max_abs": 3.178770194077655e-09
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.02153030614000999,
+            "max_abs": 0.40055918785085476
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.02153030614001168,
+            "max_abs": 0.40055918785129707
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 2.912920096031162e-12,
+              "max_abs": 5.967848437649081e-11
+            },
+            {
+              "relative_frobenius": 2.7961118628316014e-12,
+              "max_abs": 5.876898967471789e-11
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.006848966658238295,
+            "max_abs": 0.1335267537815934
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.00684896665819106,
+            "max_abs": 0.1335267537818936
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 2.84652617492264e-13,
+              "max_abs": 4.594546965108748e-12
+            },
+            {
+              "relative_frobenius": 2.90231964195457e-13,
+              "max_abs": 4.079403481682675e-12
+            }
+          ]
+        },
+        {
+          "h": 0.0022326475737815127,
+          "query_indices": [
+            22,
+            23
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.010975824861587224,
+            "max_abs": 12.96934932655269
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.010975824861613092,
+            "max_abs": 12.96934932659623
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 2.507114297844176e-12,
+              "max_abs": 2.5841884633339375e-09
+            },
+            {
+              "relative_frobenius": 2.693502349034112e-12,
+              "max_abs": 2.923385580223779e-09
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.010671852531443956,
+            "max_abs": 0.19828860543094695
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.010671852531421297,
+            "max_abs": 0.1982886054304407
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 2.522948067420207e-12,
+              "max_abs": 4.922640073345974e-11
+            },
+            {
+              "relative_frobenius": 2.6515323944260853e-12,
+              "max_abs": 5.3887561080046e-11
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.002992471208065099,
+            "max_abs": 0.0458043906308081
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.0029924712080392113,
+            "max_abs": 0.04580439063093422
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 3.2494341233832383e-13,
+              "max_abs": 4.658495811327157e-12
+            },
+            {
+              "relative_frobenius": 2.906444593905756e-13,
+              "max_abs": 4.219735671995295e-12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "KGamma_wrap",
+      "saved_pair": [
+        68,
+        69
+      ],
+      "center_s": 2.45302051879924,
+      "center_fractional_unwrapped": [
+        0.25000000000000006,
+        0.25000000000000006,
+        0.5000000000000001
+      ],
+      "center_definition": "exact unwrapped crossing of a reciprocal component n+1/2",
+      "terminal_extension": false,
+      "h0": 0.017335851749362252,
+      "steps": [
+        {
+          "h": 0.017335851749362252,
+          "query_indices": [
+            24,
+            25
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.20526126095573294,
+            "max_abs": 176.0930143747522
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.20526126095576755,
+            "max_abs": 176.09301437476216
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 5.589104452109283e-13,
+              "max_abs": 5.689084769685383e-10
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.19908572557464693,
+            "max_abs": 2.7908256267160043
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.1990857255746314,
+            "max_abs": 2.7908256267160256
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 3.3245748914037745e-13,
+              "max_abs": 6.291855925155687e-12
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.7833530715221622,
+            "max_abs": 5.1979907938918135
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.7833530715221504,
+            "max_abs": 5.197990793891974
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 2.7299413585095834e-13,
+              "max_abs": 3.226752198770555e-12
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ]
+        },
+        {
+          "h": 0.008667925874681126,
+          "query_indices": [
+            26,
+            27
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.11480684225760225,
+            "max_abs": 116.82738153586858
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.11480684225758954,
+            "max_abs": 116.82738153585119
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 1.3155648392252598e-13,
+              "max_abs": 1.0514140450998684e-10
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.1113559037059784,
+            "max_abs": 1.847609001636767
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.11135590370594664,
+            "max_abs": 1.847609001636168
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 2.2628430854051288e-13,
+              "max_abs": 5.725198093387007e-12
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.4655254488581298,
+            "max_abs": 3.6258417751631162
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.4655254488581165,
+            "max_abs": 3.6258417751635927
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 3.362729645328351e-13,
+              "max_abs": 3.863576125695545e-12
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ]
+        },
+        {
+          "h": 0.004333962937340563,
+          "query_indices": [
+            28,
+            29
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.05943958573942408,
+            "max_abs": 63.51592622523928
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.059439585739359264,
+            "max_abs": 63.51592622516965
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 2.678565167777867e-13,
+              "max_abs": 3.165665398175528e-10
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.05764730837961654,
+            "max_abs": 0.9908885043265268
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.05764730837954394,
+            "max_abs": 0.9908885043250746
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 1.437168820309244e-13,
+              "max_abs": 2.041922186890588e-12
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.24705189141511463,
+            "max_abs": 2.1724326416408717
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.2470518914151029,
+            "max_abs": 2.172432641641336
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 3.6591099448696377e-13,
+              "max_abs": 4.431122135883925e-12
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ]
+        },
+        {
+          "h": 0.0021669814686702815,
+          "query_indices": [
+            30,
+            31
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 0.029999924097478592,
+            "max_abs": 32.462471787492525
+          },
+          "green_wrapped": {
+            "relative_frobenius": 0.029999924097353314,
+            "max_abs": 32.46247178732461
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 2.675125375547866e-13,
+              "max_abs": 2.341120829232334e-10
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 0.029095488054579875,
+            "max_abs": 0.5037682801641852
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 0.02909548805446953,
+            "max_abs": 0.5037682801619074
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 1.8668481225800324e-13,
+              "max_abs": 2.277733557320971e-12
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 0.12558741223779485,
+            "max_abs": 1.1397934897322557
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 0.12558741223778733,
+            "max_abs": 1.139793489733667
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 4.478253489861119e-13,
+              "max_abs": 4.8476778147232835e-12
+            },
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "L_wrap",
+      "saved_pair": [
+        119,
+        120
+      ],
+      "center_s": 4.201429595066379,
+      "center_fractional_unwrapped": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "center_definition": "exact unwrapped crossing of a reciprocal component n+1/2",
+      "terminal_extension": true,
+      "h0": 0.01659512293613874,
+      "steps": [
+        {
+          "h": 0.01659512293613874,
+          "query_indices": [
+            32,
+            33
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 8.966930393000066e-13,
+            "max_abs": 1.172490537535897e-09
+          },
+          "green_wrapped": {
+            "relative_frobenius": 4.140466504221253e-13,
+            "max_abs": 3.592655925520589e-10
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 9.690943621075401e-13,
+              "max_abs": 1.1339406447959134e-09
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 6.215462053195499e-13,
+            "max_abs": 1.332978172285948e-11
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 1.8941164784478037e-13,
+            "max_abs": 3.7836400679225335e-12
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 7.040143731146843e-13,
+              "max_abs": 1.553424056055519e-11
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 1.8952607085273296e-13,
+            "max_abs": 2.254196829198918e-12
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 2.1317664210796168e-13,
+            "max_abs": 3.417710559006082e-12
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 1.5853210576324262e-13,
+              "max_abs": 2.348343741687131e-12
+            }
+          ],
+          "query_same_z_sigma_TR": {
+            "relative_frobenius": 3.617878515062528e-15,
+            "max_abs": 8.93988089742832e-15
+          }
+        },
+        {
+          "h": 0.00829756146806937,
+          "query_indices": [
+            34,
+            35
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 2.691673176328144e-13,
+            "max_abs": 2.353460272573534e-10
+          },
+          "green_wrapped": {
+            "relative_frobenius": 3.777827114427129e-13,
+            "max_abs": 3.1499275178291627e-10
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 2.0662890920867016e-13,
+              "max_abs": 1.9040626332087914e-10
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 1.0368906931623685e-13,
+            "max_abs": 1.8669510382096632e-12
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 1.744126577292334e-13,
+            "max_abs": 3.9612757518625585e-12
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 2.035426341831178e-13,
+              "max_abs": 5.258016244624741e-12
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 2.6450105834514367e-13,
+            "max_abs": 4.2570391656227e-12
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 1.3435615120239065e-13,
+            "max_abs": 1.5054624213917123e-12
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 2.3006506030536087e-13,
+              "max_abs": 3.376854351699876e-12
+            }
+          ],
+          "query_same_z_sigma_TR": {
+            "relative_frobenius": 3.351686489899157e-15,
+            "max_abs": 1.1682163181672947e-14
+          }
+        },
+        {
+          "h": 0.004148780734034685,
+          "query_indices": [
+            36,
+            37
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 4.704475462840434e-13,
+            "max_abs": 3.292456312614748e-10
+          },
+          "green_wrapped": {
+            "relative_frobenius": 3.941168802231904e-13,
+            "max_abs": 3.538448217455952e-10
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 2.5420264279534944e-13,
+              "max_abs": 1.9166288018736235e-10
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 2.2267308404295786e-13,
+            "max_abs": 3.931077685592754e-12
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 1.0806331760737406e-13,
+            "max_abs": 2.7462476737127872e-12
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 2.3157938393710875e-13,
+              "max_abs": 3.8760106235713465e-12
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 8.277202793208555e-14,
+            "max_abs": 1.8314239014216582e-12
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 9.154284069941631e-14,
+            "max_abs": 2.1298518504409003e-12
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 8.51367263574483e-14,
+              "max_abs": 1.3020695632803836e-12
+            }
+          ],
+          "query_same_z_sigma_TR": {
+            "relative_frobenius": 5.824935827814771e-15,
+            "max_abs": 3.0057327753883307e-14
+          }
+        },
+        {
+          "h": 0.0020743903670173425,
+          "query_indices": [
+            38,
+            39
+          ],
+          "green_unwrapped": {
+            "relative_frobenius": 1.7637886489787318e-13,
+            "max_abs": 1.5529888353974293e-10
+          },
+          "green_wrapped": {
+            "relative_frobenius": 5.10224992141031e-13,
+            "max_abs": 5.819943753947658e-10
+          },
+          "green_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 5.691495468933643e-13,
+              "max_abs": 5.970761896243607e-10
+            }
+          ],
+          "sc_unwrapped": {
+            "relative_frobenius": 1.0065143512095108e-13,
+            "max_abs": 2.1174173525650986e-12
+          },
+          "sc_wrapped": {
+            "relative_frobenius": 2.965246978857166e-13,
+            "max_abs": 6.009415187691047e-12
+          },
+          "sc_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 2.8886576391253044e-13,
+              "max_abs": 5.774936084890214e-12
+            }
+          ],
+          "pbe_unwrapped": {
+            "relative_frobenius": 1.0845179494035571e-13,
+            "max_abs": 1.4139800441625994e-12
+          },
+          "pbe_wrapped": {
+            "relative_frobenius": 9.7761129773827e-14,
+            "max_abs": 1.5418777365994174e-12
+          },
+          "pbe_gauge": [
+            {
+              "relative_frobenius": 0.0,
+              "max_abs": 0.0
+            },
+            {
+              "relative_frobenius": 1.255513590497811e-13,
+              "max_abs": 2.296829393344524e-12
+            }
+          ],
+          "query_same_z_sigma_TR": {
+            "relative_frobenius": 7.12025811714731e-15,
+            "max_abs": 4.193190522831185e-14
+          }
+        }
+      ]
+    }
+  ],
+  "completed": true,
+  "interpretation": "TR and k-continuity of one fine512 measure; not real-axis accuracy or rank/window/512-to-1024 stability"
+}

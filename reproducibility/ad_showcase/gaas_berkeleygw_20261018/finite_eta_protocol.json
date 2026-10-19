@@ -1,0 +1,31 @@
+{
+  "inspection_date": "2026-10-18",
+  "matching_finite_eta": false,
+  "native_eta_hartree": 0.001,
+  "bgw_epsilon_broadening_ev": 0.027211386245988,
+  "bgw_broadening_hartree_definition": "0.027211386245988 / 27.21138506",
+  "bgw_positive_frequency_lehmann_shifts": "resonant +i*deltaW; antiresonant +i*deltaW",
+  "bgw_residue": "Linear interpolation of epsR at abs(E-epsilon_m) with no additional imaginary G-pole displacement",
+  "bgw_imaginary_integral": "Real wxi=E-epsilon_m; kernel wxi/(wxi^2+nu^2), piecewise quadratic analytic integration; no etaG",
+  "native_residue_lehmann_denominator": "omega + transition_difference + i*eta*(sign(omega)+transition_sign)",
+  "native_positive_frequency_shifts": "+2i*eta for OV, 0 for VO",
+  "native_negative_frequency_shifts": "0 for OV, -2i*eta for VO",
+  "bgw_complex_R_A_definition": "W_A(q,E)=W_R(q,E)^dagger; epsinv_A=(epsinv_R*v)^dagger*v^-1, not elementwise conjugation",
+  "bgw_negative_frequency_CD": "Within BGW folded response, epsR(q,-E)=epsA(q,E); real negative wx reads epsR(abs(wx)), equivalent to its advanced branch at wx",
+  "complex_frame_limit": "This BGW folded CV identity does not by itself establish equality with arbitrary native full OV/VO complex finite-q vertices; same-frame adjoint and transition pairing need separate verification",
+  "source_locations": {
+    "Epsilon/mtxel.f90": "get_eden, line 934: eden=epsilon_v-epsilon_c",
+    "Epsilon/chi_summation.f90": "1646-1650: eden +/- (dFreqGrid+dFreqBrd)/RYD",
+    "Epsilon/inread.f90": "582: real-grid broadening; 603: imaginary-node shift; actual input does not enable add_w0_freq",
+    "Epsilon/epsinv.f90": "524-538: Coulomb-metric R/A adjoint",
+    "Sigma/mtxel_cor.f90": "853-888: stated general complex R/A identities; 3101-3103 real wxi; 3128-3168 real residue interpolation; 3255-3277 real analytic CD kernel",
+    "Sigma/inread.f90": "997: need_advanced excludes CD method 2",
+    "src/gradscf/gw/pbc/product_basis.py": "lehmann_weights: explicit signed G-pole and response shifts"
+  },
+  "installed_and_guard_copy_sha256_equal": {
+    "Epsilon/chi_summation.f90": "5aef551781a8d0f4787b0389bbc8a58205e015f65fe943c10d9c6f95a7bb90ef",
+    "Sigma/mtxel_cor.f90": "8914dc00ac8d80d99e78f9b76a6d398491240bf147fa8714a65fed4ce5daf1dd"
+  },
+  "quantitative_cause_isolated": false,
+  "conclusion": "Known finite-broadening definition difference can affect sampled resonance amplitudes. Its share of the observed 1.064227-eV full-window deviation has not yet been numerically isolated; do not claim matched finite-frequency self-energies."
+}

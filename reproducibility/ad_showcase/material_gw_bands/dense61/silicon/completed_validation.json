@@ -1,0 +1,123 @@
+{
+  "system": "silicon",
+  "computed": 366,
+  "accepted": 359,
+  "failed": [
+    {
+      "point": 11,
+      "band": 6,
+      "residual_hartree": -0.14354440030083854,
+      "candidate_hartree": 0.663675991401111
+    },
+    {
+      "point": 12,
+      "band": 6,
+      "residual_hartree": -0.07703245289738116,
+      "candidate_hartree": 0.6823111010778647
+    },
+    {
+      "point": 19,
+      "band": 6,
+      "residual_hartree": -0.13397237290496755,
+      "candidate_hartree": 0.6774580393518214
+    },
+    {
+      "point": 20,
+      "band": 1,
+      "residual_hartree": 0.11160452176885073,
+      "candidate_hartree": -0.06948200866840197
+    },
+    {
+      "point": 28,
+      "band": 5,
+      "residual_hartree": -0.10708338405789035,
+      "candidate_hartree": 0.6707101454072624
+    },
+    {
+      "point": 58,
+      "band": 1,
+      "residual_hartree": 0.07816598081593995,
+      "candidate_hartree": -0.059223919361804114
+    },
+    {
+      "point": 59,
+      "band": 1,
+      "residual_hartree": 0.06628550634934567,
+      "candidate_hartree": -0.06831427840330777
+    }
+  ],
+  "max_accepted_residual_hartree": 2.0951240742306254e-11,
+  "neighbor_correction_step": {
+    "hartree_to_ev": 27.211386245988,
+    "eligible_adjacent_pairs": 348,
+    "max_abs_correction_step_ev": 2.73811638018811,
+    "from_point": 22,
+    "to_point": 23,
+    "band": 1,
+    "signed_correction_step_ev": -2.73811638018811,
+    "from_correction_ev": -1.6772793729894173,
+    "to_correction_ev": -4.415395753177528
+  },
+  "source_count": 22,
+  "native_count": 65,
+  "executed": {
+    "src/gradscf/gw/pbc/query.py": "fd8062efcaeeb6a98215d64e7a105c2353619f345a0a5199cb0317b631e71763",
+    "examples/pbc/band_structures/gw_bands.py": "ebbbb63da512bd0690664f5c00456b5b0ca7b9fe49384f5ba6384e8d8835286e",
+    "src/gradscf_tools/periodic_gw_plot.py": "1a67fecd9266d8276ae592c5f81b3eac22046bcf9cb802dbde26904fa7d9ed2d"
+  },
+  "resource": {
+    "command": [
+      "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+      "-u",
+      "-c",
+      "from examples.pbc.band_structures.gw_bands import run; run('silicon', case='silicon_szv_qp_dense61_20261017', path_points=61, checkpoint='reproducibility/ad_showcase/material_gw_bands/silicon_szv_reference_20261017/scf_reference.npz')"
+    ],
+    "return_code": 0,
+    "peak_rss_kib": 4722452,
+    "budget_kib": 16777216,
+    "budget_exceeded": false,
+    "polling_seconds": 0.25,
+    "accepted": true,
+    "elapsed_seconds": 2096.540794597997,
+    "allowed_cpu_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "cpu_model": "Intel(R) Xeon(R) Platinum 8457C"
+  },
+  "gw_seconds": 2065.254037212995,
+  "native_elapsed_seconds": 2092.8446870650005,
+  "file_sha256": {
+    "data/native.json": "29ceec5bd5866e32484fc64aafa595b29f09e5ca0f4bb5cd72e46cab1b641aba",
+    "data/bands.npz": "04342827089df6bf9925b7ed02da1b5fdd4cd7419981390f566883b172b960cd",
+    "data/scf_reference.npz": "526e5043efa2fda02839fa89bc4e0ecf1e47b589b439a320d1444daecdaed15c",
+    "data/bands.png": "4419a39e4771e1b51610a9db45e38971ed833ce94f9dea5303480f12fdaa55b6",
+    "data/bands.pdf": "720cb68fe0044cad3c288286b395b3335ac199eefb420a4e4fd673d82112132f",
+    "job/budget.json": "c8ee658d727da1ce5abbdf761877097b712ad8afe9c3b6482ad3d76e32cf5016",
+    "job/source_verification.json": "8f06f845be0de41b1e673ca3f81ae3a449f0b9d54a3d3cfedaceed51aa990716",
+    "job/native_verification.json": "8c2162912a71a665eb85e91d2151ef64dfc1772338e13c5e533e1a61b76b9395",
+    "job/exit_code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  }
+}

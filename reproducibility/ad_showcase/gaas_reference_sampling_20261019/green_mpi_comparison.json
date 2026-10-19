@@ -1,0 +1,26 @@
+{
+  "single_checkpoint_sha256": "79675cf64e4cfbfcead630a2605d9b164a5035b26ff3b52b87276a424a9b64d5",
+  "mpi16_checkpoint_sha256": "1a10e78e2194f6814eac1a0cec9022b79fb967a142c3c46e93d1ae0ba5e64f50",
+  "comparison": "Same input, precision, IR grid and original binary; only MPI rank count differs",
+  "mu": {
+    "max_abs_error": 0.0,
+    "frobenius_relative_error": 0.0,
+    "exact_equal": true
+  },
+  "Sigma1": {
+    "max_abs_error": 1.7763568396666464e-15,
+    "frobenius_relative_error": 1.6295120802041254e-16,
+    "exact_equal": false
+  },
+  "Selfenergy/data": {
+    "max_abs_error": 0.0,
+    "frobenius_relative_error": 0.0,
+    "exact_equal": true
+  },
+  "G_tau/data": {
+    "max_abs_error": 0.0,
+    "frobenius_relative_error": 0.0,
+    "exact_equal": true
+  },
+  "accepted": true
+}

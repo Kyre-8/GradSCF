@@ -216,6 +216,41 @@ three have no saved independent reference and one fails; these states remain
 visible in the figures. Three incomplete records have no arrays to plot.
 The gallery reused the saved numerical inputs and ran no new SCF/GW.
 
+2026-10-19: additional validation found that the
+[archived FFT21 GaAs demonstration](../reproducibility/ad_showcase/gaas_four_gw_20261019/README.md)
+is underresolved for the tight Ga 3d Gaussian primitives. Its reciprocal-image
+error is distinct from scGW continuation sensitivity. The
+[FFT61 correction](../reproducibility/ad_showcase/gaas_four_gw_fft61_20261019/README.md)
+records the causal grid diagnosis, independent PySCF PBE agreement and new
+common-model G0W0/evGW/qsGW/scGW runs. The public workflow now checks
+reciprocal-image bands before GW and retains a continuous physical path.
+Both fine-grid scGW frequency calculations converged. A separate symmetry
+test identified time-reversal breaking in the unconstrained continuation;
+the model-aware measure now restores the validated source symmetry and
+passes the saved-query replay. Quasiparticle-root coverage is recorded
+separately from the retarded spectral map and DOS, with unavailable gaps
+left explicit. Numerical-rank/window sensitivity remains measurable.
+The subsequent frequency-cluster precision correction removes a false Gamma
+rejection without changing scalar root tolerances: the full path/DOS query
+now has 2604/2604 certified selected QPs. All eight source input files, retarded
+A/DOS and previously certified roots remain byte-identical. The final source
+passed 26 core tests and 52 caller regressions (three shared tests), including
+genuine-crossing rejection and preservation of negative-Z diagnostics.
+Spectral maps and selected-root diagnostics remain distinct; this is not
+a bulk-gap, periodic-AD or continuation-stability completion claim. Separate
+eight-source-point CD checks and the controlled BerkeleyGW reference remain
+linked from the archived result, with their original finite-model settings.
+
+2026-10-19 integration checkpoint: further periodic GW/BSE work is deferred.
+The [external-reference sampling record](../reproducibility/ad_showcase/gaas_reference_sampling_20261019/README.md)
+retains accepted BerkeleyGW G0W0 and ecalj mode-A qsGW sampling checks,
+the unconverged external evGW state, and an exact-Hamiltonian GREEN/native
+single-map comparison (92 common Matsubara nodes, maximum full-matrix Sigma
+difference 7.18e-12 Ha). Full external GREEN scGW was not submitted. These
+checks do not establish bulk/source-mesh convergence or resolve the native
+off-node L-star anisotropy. Large checkpoints remain separate as described
+in [result packaging](../reproducibility/ad_showcase/PACKAGING.md).
+
 Al343, Mg, additional basis/k/grid/vacuum scans and the remaining phonon/Raman
 convergence studies are optional benchmarks. They are not required to establish
 the demonstrated finite-model capability. A02's historical result bundle was

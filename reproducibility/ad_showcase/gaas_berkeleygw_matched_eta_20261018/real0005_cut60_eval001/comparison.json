@@ -1,0 +1,677 @@
+{
+  "complete": true,
+  "stage": "complete",
+  "rows": [
+    {
+      "nw": 128,
+      "band": 6,
+      "energy_reference_hartree": 0.2930244168062395,
+      "native_exchange_hartree": -0.32284330906352604,
+      "bgw_exchange_hartree": -0.3231894939419155,
+      "native_vref_hartree": -0.468805811601659,
+      "bgw_vxc_hartree": -0.46880583203421106,
+      "bgw_vxc_physical_hartree": -0.4688058116016581,
+      "bgw_vxc_input_unit_delta_ev": -5.559980895202376e-07,
+      "native_correlation_on_shell_hartree": 0.017107204674638023,
+      "bgw_correlation_on_shell_hartree": 0.01733575579412274,
+      "delta_exchange_ev": 0.009420170438375541,
+      "delta_vref_ev": 5.559980655301059e-07,
+      "delta_correlation_on_shell_ev": -0.006219192789251607,
+      "bgw_reported_qp_flag": "MULT:9",
+      "native_root": {
+        "energy_hartree": 0.45715328357061913,
+        "residual_hartree": -1.3530843112619095e-16,
+        "weight": 0.3282109015870186,
+        "candidate_count": 3,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.4560941240190105
+      },
+      "bgw_table_root": {
+        "energy_hartree": 0.45711752869439193,
+        "residual_hartree": -5.551115123125783e-17,
+        "weight": 0.3160556257901349,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.45597664913851327
+      },
+      "bgw_table_root_physical_vxc": {
+        "energy_hartree": 0.4571175222365686,
+        "residual_hartree": -5.551115123125783e-17,
+        "weight": 0.3160556257901349,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.4559766287059603
+      },
+      "bgw_table_residual_at_native_root_hartree": 0.00011312842838284709,
+      "native_residual_at_bgw_root_hartree": -0.00010962303622423855
+    },
+    {
+      "nw": 128,
+      "band": 7,
+      "energy_reference_hartree": 0.294203949462815,
+      "native_exchange_hartree": -0.27820635644471703,
+      "bgw_exchange_hartree": -0.2785407074754761,
+      "native_vref_hartree": -0.4618082779839919,
+      "bgw_vxc_hartree": -0.4618082981115626,
+      "bgw_vxc_physical_hartree": -0.46180827798399193,
+      "bgw_vxc_input_unit_delta_ev": -5.476990982823007e-07,
+      "native_correlation_on_shell_hartree": -0.002432182154990293,
+      "bgw_correlation_on_shell_hartree": -0.00224718287860647,
+      "delta_exchange_ev": 0.009098155039729335,
+      "delta_vref_ev": 5.476991010888002e-07,
+      "delta_correlation_on_shell_ev": -0.00503408676490849,
+      "bgw_reported_qp_flag": "MULT:2",
+      "native_root": {
+        "energy_hartree": 0.47525099552456657,
+        "residual_hartree": 9.71445146547012e-17,
+        "weight": 0.7802687757553245,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.4753736888470995
+      },
+      "bgw_table_root": {
+        "energy_hartree": 0.4750193448936279,
+        "residual_hartree": 0.0,
+        "weight": 0.7800312012480556,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.475224300111646
+      },
+      "bgw_table_root_physical_vxc": {
+        "energy_hartree": 0.47501932919349477,
+        "residual_hartree": 0.0,
+        "weight": 0.7800312012480556,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.47522427998407535
+      },
+      "bgw_table_residual_at_native_root_hartree": 0.0002969761088633671,
+      "native_residual_at_bgw_root_hartree": -0.00029711776546010454
+    },
+    {
+      "nw": 128,
+      "band": 8,
+      "energy_reference_hartree": 0.2960909381330499,
+      "native_exchange_hartree": -0.3156691344845929,
+      "bgw_exchange_hartree": -0.3160395246709283,
+      "native_vref_hartree": -0.46999208010690474,
+      "bgw_vxc_hartree": -0.46999210059115964,
+      "bgw_vxc_physical_hartree": -0.4699920801069041,
+      "bgw_vxc_input_unit_delta_ev": -5.574049897895012e-07,
+      "native_correlation_on_shell_hartree": 0.012660644476299443,
+      "bgw_correlation_on_shell_hartree": 0.01286696199175389,
+      "delta_exchange_ev": 0.010078830422095758,
+      "delta_vref_ev": 5.574049721382076e-07,
+      "delta_correlation_on_shell_ev": -0.005614185602343569,
+      "bgw_reported_qp_flag": "MULT:6",
+      "native_root": {
+        "energy_hartree": 0.46334778494729056,
+        "residual_hartree": 9.71445146547012e-17,
+        "weight": 0.6392594576246123,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.4630745282316612
+      },
+      "bgw_table_root": {
+        "energy_hartree": 0.46313785018379505,
+        "residual_hartree": 5.551115123125783e-17,
+        "weight": 0.6613756613756608,
+        "candidate_count": 1,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.4629105936312931
+      },
+      "bgw_table_root_physical_vxc": {
+        "energy_hartree": 0.46313783663600694,
+        "residual_hartree": 0.0,
+        "weight": 0.6613756613756608,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.46291057314703754
+      },
+      "bgw_table_residual_at_native_root_hartree": 0.00032046712965821955,
+      "native_residual_at_bgw_root_hartree": -0.0003243281504646707
+    },
+    {
+      "nw": 128,
+      "band": 9,
+      "energy_reference_hartree": 0.29858057866639715,
+      "native_exchange_hartree": -0.23682734187038504,
+      "bgw_exchange_hartree": -0.23684469143299094,
+      "native_vref_hartree": -0.4548649639317135,
+      "bgw_vxc_hartree": -0.4548649837566666,
+      "bgw_vxc_physical_hartree": -0.45486496393171516,
+      "bgw_vxc_input_unit_delta_ev": -5.394644108008982e-07,
+      "native_correlation_on_shell_hartree": 0.005190458162296063,
+      "bgw_correlation_on_shell_hartree": 0.004710126167241895,
+      "delta_exchange_ev": 0.00047210564926826215,
+      "delta_vref_ev": 5.394644567543873e-07,
+      "delta_correlation_on_shell_ev": 0.013070499443724964,
+      "bgw_reported_qp_flag": "MULT:5",
+      "native_root": {
+        "energy_hartree": 0.48664727965706633,
+        "residual_hartree": -4.163336342344337e-17,
+        "weight": 0.8020814571315649,
+        "candidate_count": 1,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.5218086588900217
+      },
+      "bgw_table_root": {
+        "energy_hartree": 0.4864521826429507,
+        "residual_hartree": 0.0,
+        "weight": 0.8006405124099241,
+        "candidate_count": 1,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.5213110742747066
+      },
+      "bgw_table_root_physical_vxc": {
+        "energy_hartree": 0.4864521667702914,
+        "residual_hartree": 0.0,
+        "weight": 0.8006405124099241,
+        "candidate_count": 1,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.5213110544497551
+      },
+      "bgw_table_residual_at_native_root_hartree": 0.00024367617063042468,
+      "native_residual_at_bgw_root_hartree": -0.00024319889210355078
+    },
+    {
+      "nw": 128,
+      "band": 10,
+      "energy_reference_hartree": 0.42962587124491214,
+      "native_exchange_hartree": -0.1974448493330463,
+      "bgw_exchange_hartree": -0.197531860548373,
+      "native_vref_hartree": -0.39427611049749656,
+      "bgw_vxc_hartree": -0.39427612768172704,
+      "bgw_vxc_physical_hartree": -0.3942761104974957,
+      "bgw_vxc_input_unit_delta_ev": -4.676067547693821e-07,
+      "native_correlation_on_shell_hartree": -0.006008562676844645,
+      "bgw_correlation_on_shell_hartree": -0.0065968298840426475,
+      "delta_exchange_ev": 0.002367695787987634,
+      "delta_vref_ev": 4.6760673301367354e-07,
+      "delta_correlation_on_shell_ev": 0.0160075661909135,
+      "bgw_reported_qp_flag": "MULT:4",
+      "native_root": {
+        "energy_hartree": 0.6123415430484141,
+        "residual_hartree": -3.469446951953614e-18,
+        "weight": 0.5086133924045501,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.6204485697325177
+      },
+      "bgw_table_root": {
+        "energy_hartree": 0.6123263428910616,
+        "residual_hartree": 1.1102230246251565e-16,
+        "weight": 0.5068423720222495,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.619773143813768
+      },
+      "bgw_table_root_physical_vxc": {
+        "energy_hartree": 0.612326334181365,
+        "residual_hartree": 0.0,
+        "weight": 0.5068423720222495,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.6197731266295368
+      },
+      "bgw_table_residual_at_native_root_hartree": 2.9989910456773572e-05,
+      "native_residual_at_bgw_root_hartree": -2.988040859969697e-05
+    },
+    {
+      "nw": 128,
+      "band": 11,
+      "energy_reference_hartree": 0.43070702103762204,
+      "native_exchange_hartree": -0.19959624201766402,
+      "bgw_exchange_hartree": -0.19967820112865653,
+      "native_vref_hartree": -0.40195382728924683,
+      "bgw_vxc_hartree": -0.40195384480810403,
+      "bgw_vxc_physical_hartree": -0.4019538272892451,
+      "bgw_vxc_input_unit_delta_ev": -4.767124351224177e-07,
+      "native_correlation_on_shell_hartree": -0.008924394078568149,
+      "bgw_correlation_on_shell_hartree": -0.009483205075118668,
+      "delta_exchange_ev": 0.00223022102559508,
+      "delta_vref_ev": 4.767123898099143e-07,
+      "delta_correlation_on_shell_ev": 0.015206021865641642,
+      "bgw_reported_qp_flag": "MULT:9",
+      "native_root": {
+        "energy_hartree": 0.6138776964584731,
+        "residual_hartree": 7.979727989493313e-17,
+        "weight": 0.6124700892306923,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.6241402122306368
+      },
+      "bgw_table_root": {
+        "energy_hartree": 0.613866952782752,
+        "residual_hartree": -1.1102230246251565e-16,
+        "weight": 0.6116207951070138,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.6234994750582828
+      },
+      "bgw_table_root_physical_vxc": {
+        "energy_hartree": 0.6138669420678537,
+        "residual_hartree": 1.1102230246251565e-16,
+        "weight": 0.6116207951070138,
+        "candidate_count": 2,
+        "branch_valid": true,
+        "converged": true,
+        "on_shell_hartree": 0.6234994575394239
+      },
+      "bgw_table_residual_at_native_root_hartree": 1.756590980384054e-05,
+      "native_residual_at_bgw_root_hartree": -1.7543724072900668e-05
+    }
+  ],
+  "bgw_directory": "jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real0005_cut60_schur_eval001",
+  "screening_cutoff_rydberg": 8.0,
+  "bgw_hartree_to_ev": 27.21138506,
+  "reporting_hartree_to_ev": 27.211386245988,
+  "native_nw_values": [
+    128
+  ],
+  "eta_hartree": 0.0,
+  "screening_eta_hartree": 0.001000000043584257,
+  "exxdiv": null,
+  "response_broadening_protocol": "independent signed retarded/advanced response shift",
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "original_fft_mesh": [
+    21,
+    21,
+    21
+  ],
+  "dtype": "float64/complex128",
+  "backend": "cpu",
+  "hostname": "c20",
+  "cpu_affinity": [
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95
+  ],
+  "thread_environment": {
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "threadpools": "threadpoolctl unavailable; environment only",
+  "source_sha256": {
+    "src/gradscf/gw/pbc/source.py": "f021849276aea5af49a27b9ff1bfc74c9950feda2da0028899d66eae370f3b3a",
+    "src/gradscf/gw/qp.py": "65ec34064a7272cdc72c700ff4ab656e5f1c4fc898f01cb5d0ebdd318fda12b7",
+    "src/gradscf/gw/freq.py": "d1562e54b5a163b3ec9f75104e4eb77d8e43db0a6a6170d3bde6e91b7771da10",
+    "src/gradscf/gw/pbc/query.py": "32da4ca526e8ff3bbd78d877f1c51515c0fad8adf5b8695df899b554d9857d6c",
+    "src/gradscf_tools/berkeleygw.py": "5470b3f4e3c34d93595e103c15780e3c94cd397871966662b3ddd39cc9eaed0c",
+    "examples/pbc/band_structures/gaas_self_consistent_gw.py": "6c4d480cd4e899d8d030508f602f1ec7724e290eb6689331ef0b124a37879e0a",
+    "examples/pbc/band_structures/berkeleygw_gaas.py": "de6113ae4afe57848047149c63c568fc1ce29773522548ab62bf34d58d9cc861"
+  },
+  "bgw_sha256": {
+    "spectrum.dat": "c6397e438bc2b558bd1bbdeae0a06b19b318a4fad5f055e676f140d51f1b21b8",
+    "eqp0.dat": "91a23404d915702e8e5acd744e9b121601e1a6c5e3aad64f7babb4c34f28efcb",
+    "eqp1.dat": "3c9d63466a2cbef92ae454850a7f478d4a082affdc2a2bdff00c86b18edc81e6",
+    "x.dat": "7327a8253102a1c1e1bc8c8a6b4560edc5e8643e011b8736539ee0b220a91969",
+    "vxc.dat": "7635c0026fc9ac60f6486c5c18684151bd99c04e3a175dffe4a7df24ab9e6f15"
+  },
+  "branch_rule": "SRC shared positive-slope nearest on-shell among tested seeds; counts are not global enumeration",
+  "bgw_root_scope": "Residual of piecewise-linear evaluated table only; no extrapolation",
+  "bgw_inverse_dielectric_transform": {
+    "source": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real0005_cut60/eps0mat",
+    "destination": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real0005_cut60_schur/eps0mat",
+    "matrix_size": 113,
+    "frequencies": 12256,
+    "head_index": 0,
+    "min_abs_inverse_head": 7.564619745262251e-06,
+    "certified_frequency_indices": [
+      0,
+      12255
+    ],
+    "max_identity_relative_error": 8.784519861652995e-16,
+    "max_absolute_body_change": 3.2182762255397876,
+    "source_sha256": "37eaefcded7e1d74774253ca5e2cf8c9c9ce75c0eef1494a1f5985747444e2f8",
+    "destination_sha256": "303d9d9ca67c60771f20b3ef6784dc19ef559a92af6929acdc5c44046fbdfd52",
+    "original_modified": false,
+    "predicted_working_bytes": 122977589,
+    "transformation": "S_body -> S_body - S_body,head S_head,body / S_head,head; head=1,wings=0",
+    "scope": "Exact block inverse conversion of the original finite-small-q dielectric; not q0 extrapolation or fitting"
+  },
+  "protocol_differences": [
+    "native full-FFT bare exchange versus BGW bare sphere",
+    "native Gamma body response versus BGW finite-small-q body response; head Schur feedback removed",
+    "native scaled Legendre x0=0.5 Ha versus BGW piecewise quadratic CD grid",
+    "native full OV/VO signed R/A response versus BGW folded CV response; spatial frame/closure differences remain"
+  ],
+  "scf_seconds": 14.640351323992945,
+  "model_seconds": 2.7968491739884485,
+  "model_metadata": {
+    "fc": false,
+    "compression_tolerance": 1e-12,
+    "compression": [
+      {
+        "rank": 273,
+        "original_rank": 9261,
+        "relative_gram_residual": 5.620973530584062e-14
+      },
+      {
+        "rank": 280,
+        "original_rank": 9261,
+        "relative_gram_residual": 4.659608715138844e-13
+      }
+    ],
+    "mesh": [
+      21,
+      21,
+      21
+    ],
+    "screening_cutoff_rydberg": 8.0,
+    "screening_compression": [
+      {
+        "rank": 112,
+        "original_rank": 113,
+        "relative_gram_residual": 1.5459899772070655e-15,
+        "plane_waves": 113
+      },
+      {
+        "rank": 120,
+        "original_rank": 120,
+        "relative_gram_residual": 2.768094298507443e-15,
+        "plane_waves": 120
+      }
+    ],
+    "scope": "3D source-k finite Hamiltonian; no Gamma-cell correction or material convergence",
+    "reference_hartree_residual": 6.734819993359232e-10,
+    "reference_fock_residual": 9.769992265215889e-15,
+    "reference_exchange_potential_difference": 0.7252930750907065
+  },
+  "reference_energy_max_error_hartree": 1.836530927334934e-11,
+  "native_reference_energy_hartree": [
+    -0.289072071638756,
+    -0.2889014962798161,
+    -0.1884415429961307,
+    -0.09414667691508435,
+    -0.042300669525044306,
+    -0.04130195368093162,
+    0.2930244168062395,
+    0.294203949462815,
+    0.2960909381330499,
+    0.29858057866639715,
+    0.42962587124491214,
+    0.43070702103762204,
+    0.4317312281961483,
+    4.962138642993553
+  ],
+  "bgw_reference_energy_hartree": {
+    "6": 0.2930244168173922,
+    "7": 0.2942039494626151,
+    "8": 0.29609093812147175,
+    "9": 0.29858057868370774,
+    "10": 0.42962587123817647,
+    "11": 0.43070702105598735
+  },
+  "scf_energy_hartree": -78.28410986996047,
+  "model_madelung_hartree": 0.0,
+  "actual_exxdiv": null,
+  "current_nw": 128,
+  "current_band": 11,
+  "nw_seconds": {
+    "128": 26.573479368002154
+  },
+  "elapsed_seconds": 49.55002950699418,
+  "bgw_preparation": {
+    "nmo": 14,
+    "nocc": 9,
+    "kgrid": [
+      2,
+      1,
+      1
+    ],
+    "orbital_fft_mesh": [
+      21,
+      21,
+      21
+    ],
+    "density_fft_mesh": [
+      105,
+      105,
+      105
+    ],
+    "max_orthonormality_error": 1.3877787807814457e-14,
+    "ecutwfc_rydberg": 399.0,
+    "actual_max_gk_squared_rydberg": 398.0511850801937,
+    "wavefunction_g_counts": [
+      40857,
+      41026
+    ],
+    "zero_padding_only": true,
+    "ecutrho_rydberg": 10288.624331110392,
+    "wavefunction": "jobs/gaas_four_methods_20261018/bgw_pilot3/WFN",
+    "scope": "Exact head-Schur removal on a new eps0mat copy; original files and nonzero-q screening unchanged; finite q0 retained",
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "native_exxdiv": "ewald",
+    "native_madelung_hartree": 0.2963734352433938,
+    "source_kpoints_fractional": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        -0.5,
+        1.0094867743364432e-17,
+        1.0094867743364432e-17
+      ]
+    ],
+    "query_kpoints_fractional": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        -0.5,
+        1.0094867743364432e-17,
+        1.0094867743364432e-17
+      ]
+    ],
+    "shifted_query": false,
+    "max_vxc_imaginary_hartree": 2.0178018869491943e-17,
+    "shifted_export": {
+      "nmo": 14,
+      "nocc": 9,
+      "kgrid": [
+        2,
+        1,
+        1
+      ],
+      "orbital_fft_mesh": [
+        21,
+        21,
+        21
+      ],
+      "density_fft_mesh": [
+        105,
+        105,
+        105
+      ],
+      "max_orthonormality_error": 7.549516567451064e-15,
+      "ecutwfc_rydberg": 399.0,
+      "actual_max_gk_squared_rydberg": 398.07228637625576,
+      "wavefunction_g_counts": [
+        40857,
+        41026
+      ],
+      "zero_padding_only": true,
+      "ecutrho_rydberg": 10288.624331110392,
+      "wavefunction": "jobs/gaas_four_methods_20261018/bgw_pilot3/WFNq",
+      "scope": "Fixed scalar Gaussian Bloch orbitals; exact zero padding to kinetic spheres; BGW cutoffs require separate validation",
+      "xc": "pbe",
+      "basis": "gth-szv",
+      "pseudo": "gth-pbe",
+      "native_exxdiv": "ewald",
+      "native_madelung_hartree": 0.2963734352433938,
+      "source_kpoints_fractional": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.5,
+          1.0094867743364432e-17,
+          1.0094867743364432e-17
+        ]
+      ],
+      "query_kpoints_fractional": [
+        [
+          -8.139520154785942e-21,
+          -8.139520154785942e-21,
+          0.001
+        ],
+        [
+          -0.5,
+          1.0863565843547164e-17,
+          0.0010000000000000178
+        ]
+      ],
+      "shifted_query": true,
+      "max_vxc_imaginary_hartree": 2.1423157301955764e-17
+    },
+    "screening_bands": 14,
+    "full_finite_model": true,
+    "requires_bgw_complete_finite_space_patch": true,
+    "q0_fractional": [
+      0.0,
+      0.0,
+      0.001
+    ],
+    "cutoff_rydberg": 8,
+    "head": "body",
+    "bare_exchange_boundary": "BGW zero Gamma head; native occupied Ewald constant reported separately",
+    "screening_boundary": "BGW small-q epsilon inverted with head/wings; Sigma-only head removal does not undo body Schur feedback",
+    "source_kmesh": [
+      2,
+      1,
+      1
+    ],
+    "scf_energy_hartree": -78.28410986996047,
+    "screened_coulomb_cutoff_rydberg": 8,
+    "bare_coulomb_cutoff_rydberg": 399,
+    "output_bands_one_based": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "max_frequency_eval_ev": 20.0,
+    "delta_frequency_eval_ev": 0.01,
+    "screening_real_frequency_cutoff_ev": 60.0,
+    "source_orbitals_reused_from": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_pilot3",
+    "screening_reused_from": null,
+    "nw": 256,
+    "bgw_plasma_frequency_ev": 2.721138506,
+    "bgw_plasma_frequency_hartree": 0.1,
+    "output_kpoints_fractional": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "frequency_family": "fixed Ep=0.1Ha; compare nw128 and nw256; earlier Ep=1Ha is a separate protocol",
+    "derived_from": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real0005_cut60_schur",
+    "changed_control": "epsilon delta_frequency 0.25 -> 0.05 eV only",
+    "screening_real_frequency_delta_ev": 0.005,
+    "real_grid_note": "BGW CD method2 forces high cutoff equal to low cutoff; both remain 200 eV to retain the 14th orbital",
+    "active_residue_frequency_bound": {
+      "evaluated_energy_min_ev": -12.026400524161708,
+      "evaluated_energy_max_ev": 31.720131382498298,
+      "occupied_internal_min_ev": -7.866051794290102,
+      "occupied_internal_max_ev": 8.057044881475356,
+      "empty_internal_min_ev": 8.124791451641936,
+      "empty_internal_max_ev": 140.51175392678695,
+      "maximum_active_real_W_frequency_ev": 23.595339930856362,
+      "conservative_upper_bound_ev": 23.605339930856363,
+      "proposed_real_cutoff_ev": 60.0,
+      "supported": true,
+      "all_14_internal_bands_retained": true,
+      "ef_hartree": 0.2973357583997235,
+      "evaluated_table_points": 2406,
+      "bgw_particle_threshold": "unoccupied m with E-epsilon_m >= 0, including the zero-frequency endpoint",
+      "bgw_hole_threshold": "occupied m with E-epsilon_m < 0, excluding the zero-frequency endpoint",
+      "native_strict_threshold": "E>Ef: Ef<epsilon_m<E; E<=Ef: E<epsilon_m<Ef; exact endpoint treatment does not increase this absolute-frequency bound",
+      "rounding_margin_ev": 0.01,
+      "scope": "BGW sigma_cd occupied-negative / empty-positive residue condition on every actual evaluated output energy and both source k points; imaginary W retains every internal state and unchanged nu grid. No claim for output band14 or expanded evaluation windows."
+    },
+    "changed_controls": "Only Sigma evaluation spacing .1 -> .01 eV; source WFN, projected eps0mat, nonzero-q epsmat, imaginary grid and all internal14 states unchanged",
+    "epsilon_executable_rerun": false,
+    "inverse_dielectric_transform": {
+      "source": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real0005_cut60/eps0mat",
+      "destination": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real0005_cut60_schur/eps0mat",
+      "matrix_size": 113,
+      "frequencies": 12256,
+      "head_index": 0,
+      "min_abs_inverse_head": 7.564619745262251e-06,
+      "certified_frequency_indices": [
+        0,
+        12255
+      ],
+      "max_identity_relative_error": 8.784519861652995e-16,
+      "max_absolute_body_change": 3.2182762255397876,
+      "source_sha256": "37eaefcded7e1d74774253ca5e2cf8c9c9ce75c0eef1494a1f5985747444e2f8",
+      "destination_sha256": "303d9d9ca67c60771f20b3ef6784dc19ef559a92af6929acdc5c44046fbdfd52",
+      "original_modified": false,
+      "predicted_working_bytes": 122977589,
+      "transformation": "S_body -> S_body - S_body,head S_head,body / S_head,head; head=1,wings=0",
+      "scope": "Exact block inverse conversion of the original finite-small-q dielectric; not q0 extrapolation or fitting"
+    },
+    "readonly_screening_reused_from": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real0005_cut60_schur"
+  },
+  "curve_sampling": {
+    "step_ev": 0.01,
+    "root_step_ev": 0.005,
+    "elapsed_seconds": 53.089047641988145,
+    "native_curve_source": "SRC correlation_diagonal",
+    "max_sampled_root_residual_hartree": 1.3530843112619095e-16,
+    "bgw_curve_source": "Actual spectrum.dat; linear connection is a display/table interpolation",
+    "band_labels": "zero based, with one-based labels shown explicitly in the figure",
+    "source_sha256": {
+      "src/gradscf/gw/pbc/source.py": "f021849276aea5af49a27b9ff1bfc74c9950feda2da0028899d66eae370f3b3a",
+      "src/gradscf_tools/berkeleygw.py": "5470b3f4e3c34d93595e103c15780e3c94cd397871966662b3ddd39cc9eaed0c",
+      "examples/pbc/band_structures/berkeleygw_gaas.py": "de6113ae4afe57848047149c63c568fc1ce29773522548ab62bf34d58d9cc861"
+    }
+  }
+}

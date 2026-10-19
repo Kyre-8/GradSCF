@@ -1,0 +1,13 @@
+{
+  "files": {
+    "correlation_curves.npz": "a89135053672fad541172e6020792a03f80de1342c275f2d44a4615f5da8599e",
+    "comparison.json": "f25f4ee4d85abdbd5a77be65f5b14e28bce8bc47ea1e7ad5d4669f239b91e464",
+    "gaas_native_bgw_sigma.pdf": "e1e51ab62772c8b2de81431bbda7da8b10cbd26810293588a5e775a0d5d80a12",
+    "gaas_native_bgw_sigma.png": "0f818f5b6307bf1cc75ecf51698b9b0a66241ac42019912433603cdfa98e5052",
+    "selected_gamma_comparison.csv": "28660911a9d22e6f8fc34ba7b56ee9d63e251c4500ce3b7fe661572a51b9b331",
+    "comparison_before_control_metadata.json": "bc5fa4109e282a81ab550faca0a75ebe952d9273ad623ad244cffccc01c7cf81",
+    "curve_certificate.json": "a1f5ab33eb6bf305f303ea29fc25537a257055144e24949eceff0fe29d62854e",
+    "sampling_resource.json": "fa728817689a2a52ac23b961bc948111833553d5ca3f2860e39860b0f2533cba",
+    "render_resource.json": "1852ea0cacf34d0f499862626a74c93cc2ebde9e7e18a187e08adf29690003f5"
+  }
+}

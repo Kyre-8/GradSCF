@@ -1,0 +1,33 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-c",
+    "from examples.pbc.band_structures.berkeleygw_gaas import sample_comparison_curves, plot_comparison_curves; sample_comparison_curves(\"jobs/gaas_four_methods_20261018/native_bgw_screen8_real005_schur_native128\", \"jobs/gaas_four_methods_20261018/native_bgw_selected_curves\"); print(plot_comparison_curves(\"jobs/gaas_four_methods_20261018/native_bgw_selected_curves\"))"
+  ],
+  "cwd": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016",
+  "return_code": 0,
+  "elapsed_seconds": 44.013291765004396,
+  "peak_rss_kib": 2046212,
+  "allowed_cpu_ids": [
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+  ],
+  "rss_limit_kib": 16777216,
+  "wall_limit_seconds": 600,
+  "termination_reason": null,
+  "accepted": true
+}

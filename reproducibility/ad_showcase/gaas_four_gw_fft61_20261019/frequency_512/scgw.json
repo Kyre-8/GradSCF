@@ -1,0 +1,98 @@
+{
+  "method": "periodic_scgw_matsubara",
+  "converged": true,
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "fft_mesh": [
+    61,
+    61,
+    61
+  ],
+  "basis": "gth-szv",
+  "pseudo": "gth-pbe",
+  "xc": "pbe",
+  "soc": false,
+  "fc": false,
+  "exxdiv": null,
+  "nw": 512,
+  "screening_cutoff_rydberg": 16.0,
+  "model_memory_limit_bytes": 17179869184,
+  "eta_hartree": null,
+  "scf_seconds": 28.744645149010466,
+  "model_seconds": 23.568443871015916,
+  "gw_seconds": 708.7990742860129,
+  "reference_check_seconds": 9.138069998996798,
+  "reference_reciprocal_image_error_hartree": 5.986322548778844e-13,
+  "tolerance_hartree": 1e-06,
+  "source_model": {
+    "fc": false,
+    "compression_tolerance": 1e-12,
+    "compression": [
+      {
+        "rank": 203,
+        "original_rank": 226981,
+        "relative_gram_residual": 2.1692780650164465e-13
+      },
+      {
+        "rank": 191,
+        "original_rank": 226981,
+        "relative_gram_residual": 3.441818537637054e-13
+      }
+    ],
+    "mesh": [
+      61,
+      61,
+      61
+    ],
+    "screening_cutoff_rydberg": 16.0,
+    "screening_compression": [
+      {
+        "rank": 200,
+        "original_rank": 331,
+        "relative_gram_residual": 3.842373531042101e-13,
+        "plane_waves": 331
+      },
+      {
+        "rank": 190,
+        "original_rank": 332,
+        "relative_gram_residual": 4.064824701934824e-13,
+        "plane_waves": 332
+      }
+    ],
+    "scope": "3D source-k finite Hamiltonian; no Gamma-cell correction or material convergence",
+    "reference_hartree_residual": 2.2852268743965352e-11,
+    "reference_fock_residual": 3.552713728706386e-15,
+    "reference_exchange_potential_difference": 0.7359496969968167
+  },
+  "scope": "Finite Gaussian/source-k model; no bulk-convergence claim",
+  "beta_hartree_inverse": 400.0,
+  "iterations": 16,
+  "time_oversampling": 4,
+  "time_quadrature": "gauss",
+  "ntau": 4096,
+  "residual_hartree": 4.137753938054218e-07,
+  "particle_number_error": 0.0,
+  "charge_response_electrons_per_hartree": 2.608362508371952,
+  "implementation_sha256": {
+    "matsubara": "0b017682eba391909969ef0c025567b8878b00070fc776ded57c11e10f34f25b",
+    "scgw": "e3ab5d0c7ffda6ef1d479e17e597719b203591a58aa1666ebd02d9822001f58d",
+    "source": "f021849276aea5af49a27b9ff1bfc74c9950feda2da0028899d66eae370f3b3a"
+  },
+  "model_max_memory_bytes": 17179869184,
+  "time_batch_size": 256,
+  "initial_guess": "independent default PBE cold start",
+  "mixing": 0.5,
+  "diis_space": 6,
+  "diis_start": 3,
+  "green_tail_reference": "causal_matrix_pole_subtraction_only",
+  "boson_tail_order": 2,
+  "fresh_g0_gate": {
+    "npz": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/gaas_four_gw_fft61_20261019_r1/g0w0.npz",
+    "npz_sha256": "bb59c475b4ba61b9171a6d08ee7b2d25c901b5c1c632ae690e25fca82ca0b669",
+    "json_sha256": "46ac1f724658eaf5211aec666ba186fa499ca064f817836a692b475ad334452e",
+    "all_28_masks_passed": true
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "remote_sha_all_match": true,
+  "files": 11,
+  "junit_summary": [
+    {
+      "tests": "52",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "127.976"
+    }
+  ],
+  "failures": []
+}

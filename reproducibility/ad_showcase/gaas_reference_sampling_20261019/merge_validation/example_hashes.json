@@ -1,0 +1,6 @@
+{
+  "examples/pbc/band_structures/gaas_self_consistent_gw.py": "b17bb3c678ccc66dd3e4b9a8eb22f18f9671416ab43035f02b4bd01a341f3594",
+  "examples/pbc/band_structures/gaas_gw_spectra.py": "2f7cda11cc4c4f324ac74f59338e171e3d27036e8945c62c57fcdc7c7df05078",
+  "examples/pbc/band_structures/berkeleygw_gaas.py": "b00355fd98bcb8389ef176d6e176d0ed5ad9878c2a5a7b77510434770b91d13f",
+  "examples/pbc/band_structures/gw_bands.py": "ebbbb63da512bd0690664f5c00456b5b0ca7b9fe49384f5ba6384e8d8835286e"
+}

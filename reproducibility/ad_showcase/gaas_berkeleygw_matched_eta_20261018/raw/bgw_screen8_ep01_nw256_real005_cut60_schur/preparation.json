@@ -1,0 +1,212 @@
+{
+  "nmo": 14,
+  "nocc": 9,
+  "kgrid": [
+    2,
+    1,
+    1
+  ],
+  "orbital_fft_mesh": [
+    21,
+    21,
+    21
+  ],
+  "density_fft_mesh": [
+    105,
+    105,
+    105
+  ],
+  "max_orthonormality_error": 1.3877787807814457e-14,
+  "ecutwfc_rydberg": 399.0,
+  "actual_max_gk_squared_rydberg": 398.0511850801937,
+  "wavefunction_g_counts": [
+    40857,
+    41026
+  ],
+  "zero_padding_only": true,
+  "ecutrho_rydberg": 10288.624331110392,
+  "wavefunction": "jobs/gaas_four_methods_20261018/bgw_pilot3/WFN",
+  "scope": "Exact head-Schur removal on a new eps0mat copy; original files and nonzero-q screening unchanged; finite q0 retained",
+  "xc": "pbe",
+  "basis": "gth-szv",
+  "pseudo": "gth-pbe",
+  "native_exxdiv": "ewald",
+  "native_madelung_hartree": 0.2963734352433938,
+  "source_kpoints_fractional": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      -0.5,
+      1.0094867743364432e-17,
+      1.0094867743364432e-17
+    ]
+  ],
+  "query_kpoints_fractional": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      -0.5,
+      1.0094867743364432e-17,
+      1.0094867743364432e-17
+    ]
+  ],
+  "shifted_query": false,
+  "max_vxc_imaginary_hartree": 2.0178018869491943e-17,
+  "shifted_export": {
+    "nmo": 14,
+    "nocc": 9,
+    "kgrid": [
+      2,
+      1,
+      1
+    ],
+    "orbital_fft_mesh": [
+      21,
+      21,
+      21
+    ],
+    "density_fft_mesh": [
+      105,
+      105,
+      105
+    ],
+    "max_orthonormality_error": 7.549516567451064e-15,
+    "ecutwfc_rydberg": 399.0,
+    "actual_max_gk_squared_rydberg": 398.07228637625576,
+    "wavefunction_g_counts": [
+      40857,
+      41026
+    ],
+    "zero_padding_only": true,
+    "ecutrho_rydberg": 10288.624331110392,
+    "wavefunction": "jobs/gaas_four_methods_20261018/bgw_pilot3/WFNq",
+    "scope": "Fixed scalar Gaussian Bloch orbitals; exact zero padding to kinetic spheres; BGW cutoffs require separate validation",
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "native_exxdiv": "ewald",
+    "native_madelung_hartree": 0.2963734352433938,
+    "source_kpoints_fractional": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        -0.5,
+        1.0094867743364432e-17,
+        1.0094867743364432e-17
+      ]
+    ],
+    "query_kpoints_fractional": [
+      [
+        -8.139520154785942e-21,
+        -8.139520154785942e-21,
+        0.001
+      ],
+      [
+        -0.5,
+        1.0863565843547164e-17,
+        0.0010000000000000178
+      ]
+    ],
+    "shifted_query": true,
+    "max_vxc_imaginary_hartree": 2.1423157301955764e-17
+  },
+  "screening_bands": 14,
+  "full_finite_model": true,
+  "requires_bgw_complete_finite_space_patch": true,
+  "q0_fractional": [
+    0.0,
+    0.0,
+    0.001
+  ],
+  "cutoff_rydberg": 8,
+  "head": "body",
+  "bare_exchange_boundary": "BGW zero Gamma head; native occupied Ewald constant reported separately",
+  "screening_boundary": "BGW small-q epsilon inverted with head/wings; Sigma-only head removal does not undo body Schur feedback",
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "scf_energy_hartree": -78.28410986996047,
+  "screened_coulomb_cutoff_rydberg": 8,
+  "bare_coulomb_cutoff_rydberg": 399,
+  "output_bands_one_based": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "max_frequency_eval_ev": 20.0,
+  "delta_frequency_eval_ev": 0.1,
+  "screening_real_frequency_cutoff_ev": 60.0,
+  "source_orbitals_reused_from": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_pilot3",
+  "screening_reused_from": null,
+  "nw": 256,
+  "bgw_plasma_frequency_ev": 2.721138506,
+  "bgw_plasma_frequency_hartree": 0.1,
+  "output_kpoints_fractional": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "frequency_family": "fixed Ep=0.1Ha; compare nw128 and nw256; earlier Ep=1Ha is a separate protocol",
+  "derived_from": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real005_cut60",
+  "changed_control": "epsilon delta_frequency 0.25 -> 0.05 eV only",
+  "screening_real_frequency_delta_ev": 0.05,
+  "real_grid_note": "BGW CD method2 forces high cutoff equal to low cutoff; both remain 200 eV to retain the 14th orbital",
+  "active_residue_frequency_bound": {
+    "evaluated_energy_min_ev": -12.026400524161708,
+    "evaluated_energy_max_ev": 31.720131382498298,
+    "occupied_internal_min_ev": -7.866051794290102,
+    "occupied_internal_max_ev": 8.057044881475356,
+    "empty_internal_min_ev": 8.124791451641936,
+    "empty_internal_max_ev": 140.51175392678695,
+    "maximum_active_real_W_frequency_ev": 23.595339930856362,
+    "conservative_upper_bound_ev": 23.605339930856363,
+    "proposed_real_cutoff_ev": 60.0,
+    "supported": true,
+    "all_14_internal_bands_retained": true,
+    "ef_hartree": 0.2973357583997235,
+    "evaluated_table_points": 2406,
+    "bgw_particle_threshold": "unoccupied m with E-epsilon_m >= 0, including the zero-frequency endpoint",
+    "bgw_hole_threshold": "occupied m with E-epsilon_m < 0, excluding the zero-frequency endpoint",
+    "native_strict_threshold": "E>Ef: Ef<epsilon_m<E; E<=Ef: E<epsilon_m<Ef; exact endpoint treatment does not increase this absolute-frequency bound",
+    "rounding_margin_ev": 0.01,
+    "scope": "BGW sigma_cd occupied-negative / empty-positive residue condition on every actual evaluated output energy and both source k points; imaginary W retains every internal state and unchanged nu grid. No claim for output band14 or expanded evaluation windows."
+  },
+  "changed_controls": "real range 200->60eV, then independent spacing .05->.01; complete fourteen-state response retained",
+  "epsilon_executable_rerun": false,
+  "inverse_dielectric_transform": {
+    "source": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real005_cut60/eps0mat",
+    "destination": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/bgw_screen8_ep01_nw256_real005_cut60_schur/eps0mat",
+    "matrix_size": 113,
+    "frequencies": 1457,
+    "head_index": 0,
+    "min_abs_inverse_head": 7.564619745262242e-06,
+    "certified_frequency_indices": [
+      0,
+      1456
+    ],
+    "max_identity_relative_error": 8.784519861652995e-16,
+    "max_absolute_body_change": 3.135017755132947,
+    "source_sha256": "cd41014d9acbaf7ec5ad0f7e699e2166083689daed2ffc55c7994206914bd3ed",
+    "destination_sha256": "6185faa71edbb0423703692d4027eafc40283d0ae18af876f46cab48072d47a0",
+    "original_modified": false,
+    "predicted_working_bytes": 44620045,
+    "transformation": "S_body -> S_body - S_body,head S_head,body / S_head,head; head=1,wings=0",
+    "scope": "Exact block inverse conversion of the original finite-small-q dielectric; not q0 extrapolation or fitting"
+  }
+}

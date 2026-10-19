@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "jobs/gaas_four_methods_20261018/reference_causal_hermitian_ls/benchmark_spectral_einsum.py"
+  ],
+  "cwd": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016",
+  "return_code": 0,
+  "elapsed_seconds": 14.539333305991022,
+  "peak_rss_kib": 323760,
+  "allowed_cpu_ids": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "rss_limit_kib": 4194304,
+  "wall_limit_seconds": 120.0,
+  "termination_reason": null,
+  "accepted": true
+}

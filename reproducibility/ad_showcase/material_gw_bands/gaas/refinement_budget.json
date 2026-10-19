@@ -1,0 +1,34 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "jobs/material_gw_bands/refine_bulk/refine.py",
+    "gaas"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 3992232,
+  "budget_kib": 16777216,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true,
+  "elapsed_seconds": 73.31800161399951,
+  "allowed_cpu_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8457C"
+}

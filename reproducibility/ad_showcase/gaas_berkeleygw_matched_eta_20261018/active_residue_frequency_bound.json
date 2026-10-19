@@ -1,0 +1,20 @@
+{
+  "evaluated_energy_min_ev": -12.026400524161708,
+  "evaluated_energy_max_ev": 31.720131382498298,
+  "occupied_internal_min_ev": -7.866051794290102,
+  "occupied_internal_max_ev": 8.057044881475356,
+  "empty_internal_min_ev": 8.124791451641936,
+  "empty_internal_max_ev": 140.51175392678695,
+  "maximum_active_real_W_frequency_ev": 23.595339930856362,
+  "conservative_upper_bound_ev": 23.605339930856363,
+  "proposed_real_cutoff_ev": 60.0,
+  "supported": true,
+  "all_14_internal_bands_retained": true,
+  "ef_hartree": 0.2973357583997235,
+  "evaluated_table_points": 2406,
+  "bgw_particle_threshold": "unoccupied m with E-epsilon_m >= 0, including the zero-frequency endpoint",
+  "bgw_hole_threshold": "occupied m with E-epsilon_m < 0, excluding the zero-frequency endpoint",
+  "native_strict_threshold": "E>Ef: Ef<epsilon_m<E; E<=Ef: E<epsilon_m<Ef; exact endpoint treatment does not increase this absolute-frequency bound",
+  "rounding_margin_ev": 0.01,
+  "scope": "BGW sigma_cd occupied-negative / empty-positive residue condition on every actual evaluated output energy and both source k points; imaginary W retains every internal state and unchanged nu grid. No claim for output band14 or expanded evaluation windows."
+}

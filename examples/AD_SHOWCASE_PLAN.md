@@ -567,6 +567,25 @@ Ga semicore states. Scalar calculations do not include spin-orbit splitting.
    or conductivity with explicit normalization, not a vacuum-dependent bulk
    dielectric curve labeled as an intrinsic material spectrum.
 
+2026-10-17 GW band update: [the public native example](pbc/band_structures/gw_bands.py)
+now evaluates complete compact G0W0@PBE paths for all four materials, with
+the [selected arrays and figures](../reproducibility/ad_showcase/material_gw_bands/README.md)
+kept separate from the earlier DZVP DFT gallery. Accepted/requested QP counts
+are Si 113/114, GaAs 114/114, GaN 132/132 and graphene 89/91. Failed candidates
+remain masked. The query treats complete degenerate KS subspaces, explicit
+neutral T=0 band touching and analytic static-pole subtraction, reusing
+shared matrix, linear and scalar solvers. Focused remote gates record 67
+query passes and 17 separate momentum passes. These coarse body-only paths
+do not complete material convergence, metallic/intraband or long-wavelength
+screening, periodic GW AD, or material BSE validation.
+
+The subsequent [61-point direct paths](../reproducibility/ad_showcase/material_gw_bands/dense61/README.md)
+finish all four systems with the user-approved maximum of 96 logical CPUs.
+Accepted/requested counts are 359/366, 363/366, 366/366 and 413/427 for
+Si/GaAs/GaN/graphene. Denser query sampling leaves source/FFT settings fixed
+and preserves failed masks. Accepted-root correction jumps remain visible;
+continuous physical QP-branch validation is still open.
+
 The cutoff implementation should be checked against Ismail-Beigi,
 [Phys. Rev. B 73, 233103 (2006)](https://doi.org/10.1103/PhysRevB.73.233103),
 and independent slab/wire calculations. The [BerkeleyGW cutoff interface](https://manual.berkeleygw.org/4.0/epsilon-keywords/)
