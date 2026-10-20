@@ -47,3 +47,21 @@ def test_transferred_direct_response_matches_cpu_value_and_density_ad(references
     assert next(iter(actual[0].devices())).platform == "gpu"
     for observed, wanted in zip(actual, expected):
         np.testing.assert_allclose(observed, wanted, atol=2e-10, rtol=2e-11)
+
+
+def test_cpu_prepared_cache_uses_direct_callback_when_moved_to_cuda(references):
+    reference, _, cpu, gpu = references
+    provider = reference.direct_basis
+    with jax.default_device(cpu):
+        action = provider.prepare_jk(cache_bytes=provider.eri_cache_nbytes)
+        density = jax.device_put(np.random.default_rng(919).normal(size=(3, provider.nao, provider.nao)), cpu)
+        expected = jax.jit(action)(density)
+        expected_grad = jax.jit(jax.grad(lambda d: sum(jnp.sum(x*x) for x in action(d))))(density)
+    with jax.default_device(gpu):
+        moved = jax.device_put(density, gpu)
+        actual = jax.jit(action)(moved)
+        actual_grad = jax.jit(jax.grad(lambda d: sum(jnp.sum(x*x) for x in action(d))))(moved)
+    assert next(iter(actual[0].devices())).platform == "gpu"
+    for observed, wanted in zip(actual, expected):
+        np.testing.assert_allclose(observed, wanted, atol=2e-11)
+    np.testing.assert_allclose(actual_grad, expected_grad, atol=3e-10)

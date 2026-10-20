@@ -145,6 +145,9 @@ class UnrestrictedMolecule:
     range_separated_coefficients: tuple[float, float, float] | None = None
     fock_matrix: jnp.ndarray | None = None
     xc_spec: str | None = None
+    # The same spatial AO provider serves both spin densities. Its topology
+    # is static; numerical basis parameters remain dynamic PyTree leaves.
+    direct_basis: Any | None = None
 
     @property
     def eri_pair_matrix(self):

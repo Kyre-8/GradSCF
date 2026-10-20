@@ -15,6 +15,18 @@ from .backends.native import packing as native_packing
 from .basis.types import check_parameter_shapes
 
 
+def _validate_omega(omega):
+    """Static nonnegative erf-Coulomb range parameter, in inverse Bohr."""
+    if isinstance(omega, jax.core.Tracer):
+        raise NotImplementedError("omega must be static; omega differentiation is not supported.")
+    if isinstance(omega, (bool, np.bool_)) or not isinstance(omega, Real):
+        raise TypeError("omega must be a static real scalar.")
+    omega = float(omega)
+    if not np.isfinite(omega) or omega < 0 or omega > np.sqrt(np.finfo(np.float64).max) / 2:
+        raise ValueError("omega must be finite, nonnegative and at most sqrt(float64.max)/2.")
+    return omega
+
+
 def _reference_basis(topology, parameters, *, precompute_eri_groups=True):
     if not topology.cart:
         raise NotImplementedError("The JAX reference backend supports Cartesian basis functions only.")
@@ -56,17 +68,28 @@ class IntegralPlan:
             self, parameters, active_shells=active_shells,
             separate_exponents=separate_exponents)
 
-    def get_jk(self, parameters, density, *, screening_threshold=0.):
-        """Native shell-direct J/K, with JVP/VJP in density at fixed basis.
+    def get_jk(self, parameters, density, *, screening_threshold=0., workers=1,
+               with_j=True, with_k=True, omega=0.):
+        """Native shell-direct J/K with density and coordinate response.
 
-        The Schwarz cutoff depends only on the basis, so the density map
-        stays linear. Basis/geometry AD is explicitly unsupported here.
+        Coordinate AD requires zero screening cutoff. Numerical exponents
+        and coefficients remain separate unsupported differentiation inputs.
+        A static positive omega selects erf(omega*r12)/r12 in inverse Bohr;
+        omega=0 retains ordinary Coulomb, including its exact density response.
         """
+        omega = _validate_omega(omega)
         if self.backend!='native':raise NotImplementedError('get_jk requires the native backend.')
         from .backends.native.jk import direct_jk
-        atm,bas,env=self.pack(parameters)
+        fixed=replace(parameters,centers=jnp.zeros_like(parameters.centers),
+                      nuclear_coords=jnp.zeros_like(parameters.nuclear_coords))
+        atm,bas,env=self.pack(fixed)
+        if omega:
+            env=env.at[8].set(omega)  # libcint PTR_RANGE_OMEGA
+        coordinates=jnp.concatenate((parameters.nuclear_coords,parameters.centers))
         if density.shape[-2:]!=(self.topology.nao,)*2:raise ValueError('Density AO dimensions do not match the plan.')
-        return direct_jk(atm,bas,env,density,cart=self.topology.cart,cutoff=screening_threshold)
+        return direct_jk(atm,bas,env,density,cart=self.topology.cart,
+                         cutoff=screening_threshold,workers=workers,
+                         with_j=with_j,with_k=with_k,coordinates=coordinates)
 
     def evaluate(self, operator, parameters, *, origin=None, ecps=None, aosym='s1', omega=0.0):
         """Bind current values and evaluate an operator.
@@ -79,13 +102,7 @@ class IntegralPlan:
         Long-range s4/s8 values and geometry AD currently gather from the full
         ERI, so their temporary storage remains O(nao**4).
         """
-        if isinstance(omega, jax.core.Tracer):
-            raise NotImplementedError("omega must be static; omega differentiation is not supported.")
-        if isinstance(omega, (bool, np.bool_)) or not isinstance(omega, Real):
-            raise TypeError("omega must be a static real scalar.")
-        omega = float(omega)
-        if not np.isfinite(omega) or omega < 0 or omega > np.sqrt(np.finfo(np.float64).max) / 2:
-            raise ValueError("omega must be finite, nonnegative and at most sqrt(float64.max)/2.")
+        omega = _validate_omega(omega)
         if omega and operator != "eri":
             raise ValueError("Nonzero omega applies only to the eri operator.")
         if omega and self.backend != "native":

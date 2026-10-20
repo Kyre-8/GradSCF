@@ -114,7 +114,7 @@ def test_direct_complex_density_hessian_and_basis_ad_guard():
     tangent=jnp.ones_like(d)
     np.testing.assert_allclose(jax.jvp(jax.grad(loss),(d,),(tangent,))[1],
                                jax.jvp(jax.grad(ref),(d,),(tangent,))[1],atol=1e-10)
-    with pytest.raises(NotImplementedError,match='density AD'):
+    with pytest.raises((NotImplementedError, RuntimeError),match='(?i)(density AD|basis|exponent|coefficient)'):
         jax.jvp(lambda p:plan.get_jk(p,d),(p,),(jax.tree.map(jnp.ones_like,p),))
 
 

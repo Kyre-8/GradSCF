@@ -80,7 +80,7 @@ class RKSIntegralInputs:
 
 @dataclass(frozen=True)
 class UKSIntegralInputs:
-    """AO integrals/grid for UKS; eri may be full or native s4 packed."""
+    """AO/grid data for UKS, with full/packed ERIs or an AO J/K provider."""
 
     basis: CartesianBasis
     overlap: Array
@@ -96,6 +96,7 @@ class UKSIntegralInputs:
     ao_laplacian: Array | None
     dipole_integrals: Array
     df_factors: Array | None = None
+    direct_basis: Any | None = None
     init_density_alpha: Array | None = None
     init_density_beta: Array | None = None
     init_mo_coeff_alpha: Array | None = None
@@ -137,4 +138,6 @@ class UKSIntegralInputs:
         }
         if self.eri_lr is not None or self.dispersion_energy is not None:
             kwargs.update(eri_lr=self.eri_lr, dispersion_energy=self.dispersion_energy)
+        if self.direct_basis is not None:
+            kwargs["direct_basis"] = self.direct_basis
         return kwargs

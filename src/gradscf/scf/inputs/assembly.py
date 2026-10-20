@@ -57,8 +57,8 @@ def _build_common(*, atom, basis, cfg, xc_spec, unit, charge, spin, cart,
     recipe.require_complete_support(provided=("dispersion",) if original_chg else ())
     if recipe.needs_laplacian:
         raise NotImplementedError("This molecular XC assembly requires an implemented density-Laplacian operator.")
-    if rsh is not None and (mode != "native" or cfg.jk_backend != "full"):
-        raise NotImplementedError("Range-separated XC requires native full ERI assembly.")
+    if rsh is not None and (mode != "native" or cfg.jk_backend not in {"full", "direct"}):
+        raise NotImplementedError("Range-separated XC requires native full ERIs or direct J/K.")
     if grid_ao_backend != "jax":
         raise ValueError("Only grid_ao_backend='jax' is supported")
     if geometry_grad_policy not in {"analytic", "error", "zero"}:
@@ -89,11 +89,12 @@ def _build_common(*, atom, basis, cfg, xc_spec, unit, charge, spin, cart,
         h = plan.evaluate("kinetic", params)+plan.evaluate("nuclear", params)
         full_eri=pair=factors=None
         auxiliary=getattr(cfg,'auxbasis',None)
-        if rsh is not None:
+        if cfg.jk_backend=='direct':
+            if context.geometry_is_traced and cfg.direct_scf_tol != 0.:
+                raise ValueError('Direct-SCF geometry AD requires direct_scf_tol=0.')
+        elif rsh is not None:
             full_eri = plan.evaluate("eri", params)
             eri_lr = plan.evaluate("eri", params, omega=rsh.default_omega)
-        elif cfg.jk_backend=='direct':
-            if context.geometry_is_traced:raise NotImplementedError('Native direct-SCF geometry AD is not implemented.')
         elif cfg.jk_backend=='df' and auxiliary is not None:
             if context.geometry_is_traced:raise NotImplementedError('Native auxiliary-integral geometry AD is not implemented.')
             from gradscf.integrals.molecular.density_fitting import make_auxiliary_plan, unpack_factors
@@ -172,7 +173,6 @@ def build_uks_integral_inputs(*, atom, basis, config=None, xc_spec=None,
     from gradscf.scf.uks import UKSConfig
     from gradscf.scf.init_guess import unrestricted_initial_guess
     cfg, name = _resolve_config(config, xc_spec, UKSConfig)
-    if cfg.jk_backend=='direct':raise NotImplementedError('UKS assembly supports full/df; native direct J/K is available through IntegralPlan.get_jk.')
     values = _build_common(atom=atom,basis=basis,cfg=cfg,xc_spec=name,unit=unit,charge=charge,spin=spin,
         cart=cart,grids_level=grids_level,max_l=max_l,grid_ao_backend=grid_ao_backend,
         integral_backend=integral_backend,geometry_grad_policy=libcint_geometry_grad_policy,
@@ -183,13 +183,21 @@ def build_uks_integral_inputs(*, atom, basis, config=None, xc_spec=None,
     initial=unrestricted_initial_guess(init_guess=init_guess,dtype=h.dtype)
     total=int(np.asarray(spec.charges).sum())-int(spec.charge)
     nalpha,nbeta=_unrestricted_spin_electron_counts(total,int(spec.spin))
-    if cfg.jk_backend == "df":
+    direct=None
+    if cfg.jk_backend == "direct":
+        if mode != "native":
+            raise NotImplementedError("Unrestricted direct SCF requires native AO J/K.")
+        from gradscf.integrals.backends.native.jk import NativeDirectBasis
+        top,parameters=prepare_basis(spec,basis,cart=True)
+        direct=NativeDirectBasis(make_plan(top),parameters)
+        eri=jnp.zeros((0,0,0,0),dtype=h.dtype)
+    elif cfg.jk_backend == "df":
         eri=jnp.zeros((0,0,0,0),dtype=h.dtype)
     elif mode=='native' and eri_lr is None:
         eri=pair
     elif eri is None:
         eri=eri_tensor(ctx.basis)
-    return UKSIntegralInputs(basis=ctx.basis,overlap=s,hcore=h,eri=eri,df_factors=factors,
+    return UKSIntegralInputs(basis=ctx.basis,overlap=s,hcore=h,eri=eri,df_factors=factors,direct_basis=direct,
         nalpha=nalpha,nbeta=nbeta,nuclear_repulsion=spec.nuclear_repulsion,
         coords=ctx.coords,grid_weights=ctx.grid_weights,ao=ao,ao_deriv1=dao,ao_laplacian=lap,
         dipole_integrals=dipole,init_density_alpha=initial.density_alpha,init_density_beta=initial.density_beta,

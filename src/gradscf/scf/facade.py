@@ -121,6 +121,7 @@ class _BaseKS:
         from .differentiable import DifferentiableSCF, DifferentiableSCFConfig
         from .energy import XCContribution, unrestricted_energy
         from .uks import _spin_jk_matrices
+        from ..integrals.backends.native.jk import _selected_jk
 
         if self.params is None:
             raise ValueError("External XC requires explicit params; use {} for a parameter-free Functional.")
@@ -132,11 +133,6 @@ class _BaseKS:
         if isinstance(self, RKS):
             initializer._sync_from_scf_result(initializer._build_scf_result(spec))
         initial = initializer._build_reference(spec)
-        if isinstance(self, RKS) and initial.direct_basis is not None:
-            # The existing external-XC SCF solver consumes integral arrays.
-            # Preserve that contract; direct TD references retain the action.
-            initial = replace(initial, direct_basis=None,
-                              eri_pair_matrix=initializer._scf_inputs.response_eri_pair_matrix())
         if isinstance(self, RKS):
             self._scf_inputs = initializer._scf_inputs
         if initial.ao_laplacian is None:
@@ -155,12 +151,17 @@ class _BaseKS:
             eigenvalue_jitter=0., vxc_clip=float("inf")))
         state, info = solver.run(initial, self.xc, self.params)
         density_spin = jnp.asarray(state.rdm1)
-        eri = getattr(state, "eri_pair_matrix", None)
-        if eri is None or not int(jnp.asarray(eri).size):
-            eri = state.rep_tensor
-        _, coulomb, ka, kb = _spin_jk_matrices(
-            eri, density_spin[0], density_spin[1],
-            df_factors=getattr(state, "df_factors", None), with_k=False)
+        direct_basis = getattr(state, "direct_basis", None)
+        if callable(getattr(direct_basis, "get_jk", None)):
+            coulomb, _ = _selected_jk(direct_basis, density_spin.sum(axis=0), with_k=False)
+            ka = kb = jnp.zeros_like(coulomb)
+        else:
+            eri = getattr(state, "eri_pair_matrix", None)
+            if eri is None or not int(jnp.asarray(eri).size):
+                eri = state.rep_tensor
+            _, coulomb, ka, kb = _spin_jk_matrices(
+                eri, density_spin[0], density_spin[1],
+                df_factors=getattr(state, "df_factors", None), with_k=False)
         xc_energy = self.xc.energy_from_molecule(self.params, state)
         potential_spin = self.xc.potential(self.params, state, density_spin)
         total = unrestricted_energy(density_spin, state.h1e, coulomb, jnp.stack([ka, kb]),
@@ -341,6 +342,7 @@ class RKS(_BaseKS):
     df_max_rank: int | None = None
     auxbasis: str | None = None
     direct_scf_tol: float = 0.0
+    direct_scf_workers: int = 1
     compute_local_hfx_features: bool = False
     compute_local_hfx_aux: bool = False
     hfx_omega_values: tuple[float, ...] = (0.0, 0.4)
@@ -360,6 +362,7 @@ class RKS(_BaseKS):
             df_max_rank=self.df_max_rank,
             auxbasis=self.auxbasis,
             direct_scf_tol=self.direct_scf_tol,
+            direct_scf_workers=self.direct_scf_workers,
         )
 
     def _build_reference(self, spec: MoleculeSpec) -> Any:
@@ -466,8 +469,10 @@ class RHF(RKS):
 @dataclass
 class UKS(_BaseKS):
     conv_tol_grad: float = 1e-7
-    jk_backend: Literal['full','df'] = 'full'
+    jk_backend: Literal['full','df','direct'] = 'full'
     auxbasis: str | None = None
+    direct_scf_tol: float = 0.0
+    direct_scf_workers: int = 1
 
     def _response_signature(self):
         # UKS builds the response container during SCF, without the optional
@@ -495,6 +500,8 @@ class UKS(_BaseKS):
             level_shift=self.level_shift,
             jk_backend=self.jk_backend,
             auxbasis=self.auxbasis,
+            direct_scf_tol=self.direct_scf_tol,
+            direct_scf_workers=self.direct_scf_workers,
         )
 
     def _build_reference(self, spec: MoleculeSpec) -> Any:
@@ -543,7 +550,8 @@ class UKS(_BaseKS):
         return self
 
     def direct_scf(self) -> "UKS":
-        raise NotImplementedError("UKS direct SCF is not exposed by the current core solver.")
+        self.jk_backend = "direct"
+        return self
 
 
 @dataclass(frozen=True)

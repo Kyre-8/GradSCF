@@ -1,4 +1,5 @@
-"""Zero materialized basis tangents are valid; actual basis AD is rejected."""
+"""Zero materialized tangents remain valid; exponent/coefficient AD is rejected."""
+from dataclasses import replace
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -49,27 +50,29 @@ def test_materialized_zero_basis_tangent_with_jit_vmap_and_density_hvp(system):
 
 def test_jit_nonzero_basis_tangent_is_explicitly_rejected(system):
     plan, parameters, _, density = system
-    direction = jax.tree.map(jnp.ones_like, parameters)
+    direction = replace(jax.tree.map(jnp.zeros_like, parameters),
+                        exponents=jax.tree.map(jnp.ones_like, parameters.exponents))
     operation = jax.jit(lambda p, dp: jax.jvp(
         lambda p: plan.get_jk(p, density), (p,), (dp,))[1])
-    with pytest.raises((NotImplementedError, RuntimeError), match="density AD|basis/geometry"):
+    with pytest.raises((NotImplementedError, RuntimeError), match="(?i)(basis|exponent|coefficient)"):
         jax.block_until_ready(operation(parameters, direction))
 
 
 def test_active_basis_vjp_is_explicitly_rejected(system):
     plan, parameters, _, density = system
-    loss = lambda p: sum(jnp.sum(x*x) for x in plan.get_jk(p, density))
-    with pytest.raises((NotImplementedError, RuntimeError), match="basis/geometry|density AD"):
-        jax.block_until_ready(jax.jit(jax.grad(loss))(parameters))
+    loss = lambda coefficients: sum(jnp.sum(x*x) for x in plan.get_jk(
+        replace(parameters, coefficients=coefficients), density))
+    with pytest.raises((NotImplementedError, RuntimeError), match="(?i)(basis|exponent|coefficient)"):
+        jax.block_until_ready(jax.jit(jax.grad(loss))(parameters.coefficients))
 
 
 def test_second_order_basis_variation_is_not_hidden_by_zero_first_tangent(system):
     plan, parameters, _, density = system
-    direction = jax.tree.map(jnp.ones_like, parameters)
 
     def value(t):
-        changed = jax.tree.map(lambda p, v: p + t*t*v, parameters, direction)
+        changed = replace(parameters, exponents=tuple(
+            value+t*t*jnp.ones_like(value) for value in parameters.exponents))
         return sum(jnp.sum(x*x) for x in plan.get_jk(changed, density))
 
-    with pytest.raises((NotImplementedError, RuntimeError), match="density AD|basis/geometry"):
+    with pytest.raises((NotImplementedError, RuntimeError), match="(?i)(basis|exponent|coefficient)"):
         jax.block_until_ready(jax.jit(jax.jacfwd(jax.jacfwd(value)))(0.))

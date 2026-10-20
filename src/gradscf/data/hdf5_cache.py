@@ -187,6 +187,22 @@ def _read_array(group: Any, name: str, *, array_backend: str = "jax") -> Any | N
     raise ValueError(f"Unsupported array_backend {array_backend!r}.")
 
 
+def _clear_unused_integral_arrays(group: Any, molecule: Any) -> None:
+    for field in (
+        "eri_pair_matrix", "df_factors", "response_df_factors_j", "response_df_factors_k",
+        "eri_ovov", "eri_ovvo", "eri_oovv",
+    ):
+        if getattr(molecule, field, None) is None and field in group:
+            del group[field]
+
+
+def _replace_direct_basis(group: Any, provider: Any) -> None:
+    if "direct_basis" in group:
+        del group["direct_basis"]
+    if provider is not None:
+        _write_direct_basis(group.create_group("direct_basis"), provider)
+
+
 def write_restricted_molecule(group: Any, molecule: RestrictedMolecule) -> None:
     """Write a restricted molecule's large numerical inputs to an HDF5 group."""
 
@@ -211,26 +227,21 @@ def write_restricted_molecule(group: Any, molecule: RestrictedMolecule) -> None:
     _write_array(grid_group, "weights", molecule.grid.weights)
     _write_array(grid_group, "coords", molecule.grid.coords)
     # A rewritten reference must not reload integral arrays from its old mode.
-    for field in (
-        "eri_pair_matrix", "df_factors", "response_df_factors_j", "response_df_factors_k",
-        "eri_ovov", "eri_ovvo", "eri_oovv",
-    ):
-        if getattr(molecule, field) is None and field in group:
-            del group[field]
+    _clear_unused_integral_arrays(group, molecule)
     for field in _ARRAY_FIELDS:
         if field == "hfx_nu":
             continue
         _write_array(group, field, getattr(molecule, field))
     _write_hfx_nu(group, molecule)
-    if "direct_basis" in group:
-        del group["direct_basis"]
-    if provider is not None:
-        _write_direct_basis(group.create_group("direct_basis"), provider)
+    _replace_direct_basis(group, provider)
 
 
 def write_unrestricted_molecule(group: Any, molecule: UnrestrictedMolecule) -> None:
     """Write an unrestricted molecule's large numerical inputs to an HDF5 group."""
 
+    provider = molecule.direct_basis
+    if provider is not None:
+        _validate_direct_basis(provider)
     group.attrs["nuclear_repulsion"] = float(molecule.nuclear_repulsion)
     group.attrs["exact_exchange_fraction"] = float(molecule.exact_exchange_fraction)
     if molecule.mf_energy is not None:
@@ -245,12 +256,14 @@ def write_unrestricted_molecule(group: Any, molecule: UnrestrictedMolecule) -> N
     grid_group = group.require_group("grid")
     _write_array(grid_group, "weights", molecule.grid.weights)
     _write_array(grid_group, "coords", molecule.grid.coords)
+    _clear_unused_integral_arrays(group, molecule)
     for field in _ARRAY_FIELDS:
         if field == "hfx_nu":
             continue
         if hasattr(molecule, field):
             _write_array(group, field, getattr(molecule, field))
     _write_hfx_nu(group, molecule)
+    _replace_direct_basis(group, provider)
 
 
 def read_restricted_molecule(
@@ -376,6 +389,10 @@ def read_unrestricted_molecule(
         exact_exchange_fraction=float(group.attrs.get("exact_exchange_fraction", 0.0)),
         nocc_alpha=(int(group.attrs["nocc_alpha"]) if "nocc_alpha" in group.attrs else None),
         nocc_beta=(int(group.attrs["nocc_beta"]) if "nocc_beta" in group.attrs else None),
+        direct_basis=(
+            _read_direct_basis(group["direct_basis"], array_backend=array_backend)
+            if "direct_basis" in group else None
+        ),
         runtime_scf_backend=(
             str(group.attrs["runtime_scf_backend"])
             if "runtime_scf_backend" in group.attrs

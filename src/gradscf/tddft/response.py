@@ -48,6 +48,7 @@ class _RestrictedResponseOperatorData:
     nonlocal_xc_b_action_fn: Callable[[Array], Array] | None = None
     fock_occupied: Array | None = None
     fock_virtual: Array | None = None
+    memory_plan: Any | None = None
 
 
 def _assert_finite(values: Array, *, label: str) -> None:
@@ -278,20 +279,27 @@ def _restricted_response_factors(
     *,
     feature_kind: str,
     dtype: Any,
+    grid_start: Any = 0,
+    grid_size: int | None = None,
 ) -> _RestrictedResponseFactors:
-    ao = jnp.asarray(molecule.ao, dtype=dtype)
-    rho_o = jnp.einsum("gp,pi->gi", ao, orbo, precision=Precision.HIGHEST)
-    rho_v = jnp.einsum("gp,pa->ga", ao, orbv, precision=Precision.HIGHEST)
-    channels: list[tuple[tuple[float, Array, Array], ...]] = [((1.0, rho_o, rho_v),)]
+    def on_grid(value, axis=0):
+        array = jnp.asarray(value)
+        if grid_size is not None:
+            array = jax.lax.dynamic_slice_in_dim(array, grid_start, grid_size, axis=axis)
+        return jnp.asarray(array, dtype=dtype)
+
     if feature_kind == "LDA":
-        return _RestrictedResponseFactors(feature_kind, tuple(channels))
+        ao = on_grid(molecule.ao)
+        rho_o = jnp.einsum("gp,pi->gi", ao, orbo, precision=Precision.HIGHEST)
+        rho_v = jnp.einsum("gp,pa->ga", ao, orbv, precision=Precision.HIGHEST)
+        return _RestrictedResponseFactors(feature_kind, (((1.0, rho_o, rho_v),),))
 
     ao_deriv1 = getattr(molecule, "ao_deriv1", None)
     if ao_deriv1 is None:
         raise AttributeError(
             "Molecule-like object must define ao_deriv1 for GGA/meta-GGA transition features."
         )
-    ao_deriv1 = jnp.asarray(ao_deriv1, dtype=dtype)
+    ao_deriv1 = on_grid(ao_deriv1, axis=1)
     if ao_deriv1.shape[0] < 4:
         raise ValueError("ao_deriv1 must contain AO values plus first derivatives.")
     rho_o_full = jnp.einsum(
@@ -306,6 +314,10 @@ def _restricted_response_factors(
         orbv,
         precision=Precision.HIGHEST,
     )
+    # Match the dense feature definition even when AO and derivative[0] are
+    # independent dynamic leaves. The Laplacian channel uses AO values below.
+    rho_o, rho_v = rho_o_full[0], rho_v_full[0]
+    channels: list[tuple[tuple[float, Array, Array], ...]] = [((1.0, rho_o, rho_v),)]
     channels.extend(
         (
             (1.0, rho_o_full[axis], rho_v),
@@ -329,12 +341,15 @@ def _restricted_response_factors(
         raise AttributeError(
             "Molecule-like object must define ao_laplacian for MGGA_LAPL transition features."
         )
-    ao_laplacian = jnp.asarray(ao_laplacian, dtype=dtype)
+    ao_laplacian = on_grid(ao_laplacian)
     lapl_o = jnp.einsum("gp,pi->gi", ao_laplacian, orbo, precision=Precision.HIGHEST)
     lapl_v = jnp.einsum("gp,pa->ga", ao_laplacian, orbv, precision=Precision.HIGHEST)
-    lapl_terms = [(1.0, lapl_o, rho_v)]
+    ao = on_grid(molecule.ao)
+    ao_o = jnp.einsum("gp,pi->gi", ao, orbo, precision=Precision.HIGHEST)
+    ao_v = jnp.einsum("gp,pa->ga", ao, orbv, precision=Precision.HIGHEST)
+    lapl_terms = [(1.0, lapl_o, ao_v)]
     lapl_terms.extend((2.0, rho_o_full[axis], rho_v_full[axis]) for axis in range(1, 4))
-    lapl_terms.append((1.0, rho_o, lapl_v))
+    lapl_terms.append((1.0, ao_o, lapl_v))
     channels.append(tuple(lapl_terms))
     return _RestrictedResponseFactors(feature_kind, tuple(channels))
 
@@ -347,11 +362,13 @@ def _project_restricted_transition_to_grid(
     for channel in factors.channels:
         total = None
         for coefficient, left, right in channel:
+            contracted = jnp.einsum(
+                "nia,ga->ngi", values, right, precision=Precision.HIGHEST,
+            )
             term = coefficient * jnp.einsum(
-                "gi,nia,ga->ng",
+                "gi,ngi->ng",
                 left,
-                values,
-                right,
+                contracted,
                 precision=Precision.HIGHEST,
             )
             total = term if total is None else total + term
@@ -372,10 +389,12 @@ def _project_grid_response_to_restricted_transition(
     for channel_idx, channel in enumerate(factors.channels):
         channel_weight = weighted[:, channel_idx, :]
         for coefficient, left, right in channel:
+            scaled = jnp.einsum(
+                "gi,ng->ngi", left, channel_weight, precision=Precision.HIGHEST,
+            )
             out = out + coefficient * jnp.einsum(
-                "gi,ng,ga->nia",
-                left,
-                channel_weight,
+                "ngi,ga->nia",
+                scaled,
                 right,
                 precision=Precision.HIGHEST,
             )
@@ -389,48 +408,73 @@ def _restricted_grid_xc_response(
     *,
     feature_kind: str,
     dtype: Any,
-) -> tuple[Callable[[Array], Array], Array]:
+    block_size: int = 256,
+    compute_diagonal: bool = True,
+) -> tuple[Callable[[Array], Array], Array | None]:
     weighted_hessian = jnp.asarray(weighted_hessian, dtype=dtype)
     nocc = int(orbo.shape[1])
     nvir = int(orbv.shape[1])
-    features = _restricted_response_features(
-        molecule,
-        orbo,
-        orbv,
-        feature_kind=feature_kind,
-        dtype=dtype,
-    )
+    if (isinstance(block_size, bool) or not isinstance(block_size, (int, np.integer))
+            or block_size < 1):
+        raise ValueError("block_size must be a positive integer.")
+    ngrids = int(weighted_hessian.shape[-1])
+    width = min(int(block_size), max(1, ngrids))
+    full_blocks, tail = divmod(ngrids, width)
+
+    def block_factors(start, size):
+        return _restricted_response_factors(
+            molecule, orbo, orbv, feature_kind=feature_kind, dtype=dtype,
+            grid_start=start, grid_size=size,
+        )
+
+    def contribution(start, size, values):
+        factors = block_factors(start, size)
+        hessian = jax.lax.dynamic_slice_in_dim(weighted_hessian, start, size, axis=2)
+        projected = _project_restricted_transition_to_grid(factors, values)
+        weighted = jnp.einsum("xyg,nyg->nxg", hessian, projected, precision=Precision.HIGHEST)
+        return 2.0 * _project_grid_response_to_restricted_transition(factors, weighted)
+
+    # Rebuild block-local factors in the transpose. The OV reduction remains
+    # outside checkpoint, so no grid-block stack of OV contributions is kept.
+    rematerialized = jax.checkpoint(contribution, static_argnums=(1,))
 
     def action(x: Array) -> Array:
         original_shape = jnp.asarray(x).shape
         values = jnp.asarray(x, dtype=dtype).reshape(-1, nocc, nvir)
-        projected = jnp.einsum(
-            "xgia,nia->nxg",
-            features,
-            values,
-            precision=Precision.HIGHEST,
+        out = jax.lax.fori_loop(
+            0, full_blocks,
+            lambda index, total: total + rematerialized(index * width, width, values),
+            jnp.zeros_like(values),
         )
-        weighted = jnp.einsum(
-            "xyg,nyg->nxg",
-            weighted_hessian,
-            projected,
-            precision=Precision.HIGHEST,
-        )
-        out = 2.0 * jnp.einsum(
-            "xgia,nxg->nia",
-            features,
-            weighted,
-            precision=Precision.HIGHEST,
-        )
+        if tail:
+            out = out + rematerialized(full_blocks * width, tail, values)
         return out.reshape(original_shape)
 
-    diagonal = 2.0 * jnp.einsum(
-        "xyg,xgia,ygia->ia",
-        weighted_hessian,
-        features,
-        features,
-        precision=Precision.HIGHEST,
-    )
+    def diagonal_contribution(start, size):
+        factors = block_factors(start, size)
+        hessian = jax.lax.dynamic_slice_in_dim(weighted_hessian, start, size, axis=2)
+        out = jnp.zeros((nocc, nvir), dtype=dtype)
+        for x, left_channel in enumerate(factors.channels):
+            for y, right_channel in enumerate(factors.channels):
+                weight = hessian[x, y, :, None]
+                for c1, left1, right1 in left_channel:
+                    for c2, left2, right2 in right_channel:
+                        out = out + (2.0 * c1 * c2) * jnp.matmul(
+                            (left1 * left2).T, weight * (right1 * right2),
+                            precision=Precision.HIGHEST,
+                        )
+        return out
+
+    diagonal = None
+    if compute_diagonal:
+        rematerialized_diagonal = jax.checkpoint(diagonal_contribution, static_argnums=(1,))
+        diagonal = jax.lax.fori_loop(
+            0, full_blocks,
+            lambda index, total: total + rematerialized_diagonal(index * width, width),
+            jnp.zeros((nocc, nvir), dtype=dtype),
+        )
+        if tail:
+            diagonal = diagonal + rematerialized_diagonal(full_blocks * width, tail)
     return action, diagonal
 
 
@@ -716,28 +760,47 @@ def _restricted_ao_response_action(
     dtype: Any,
     two_electron_mode: str = "auto",
     include_coulomb: bool = True,
+    eri_cache_bytes: int = 0,
+    direct_tol: float = 0.0,
+    direct_workers: int = 8,
 ) -> Callable[[Array], Array]:
     alpha = jnp.asarray(hybrid_fraction, dtype=dtype)
     rsh = _restricted_rsh_coefficients(molecule)
     eri_lr = None
+    mode = str(two_electron_mode).lower()
+    direct_basis = getattr(molecule, "direct_basis", None)
+    use_direct = mode in {"auto", "direct"} and direct_basis is not None
     if rsh is not None:
         _validate_restricted_rsh_mode(molecule, two_electron_mode)
         _, long_range, short_range = rsh
         alpha = jnp.asarray(short_range, dtype=dtype)
-        eri_lr = jnp.asarray(molecule.eri_lr, dtype=dtype)
+        if not use_direct:
+            eri_lr = jnp.asarray(molecule.eri_lr, dtype=dtype)
         include_exchange = True
     df_factors = getattr(molecule, "df_factors", None)
-    mode = str(two_electron_mode).lower()
     if mode == "df" and (df_factors is None or int(jnp.asarray(df_factors).size) == 0):
         raise ValueError(
             'response_two_electron_mode="df" requires molecule.df_factors. '
             'Build the reference with response_df_mode="df" or jk_backend="df".'
         )
-    direct_basis = getattr(molecule, "direct_basis", None)
-    if mode in {"auto", "direct"} and direct_basis is not None:
+    if use_direct:
         if rsh is not None:
-            raise NotImplementedError("Range-separated direct J/K response is not implemented.")
-        jk_fn = direct_basis.get_jk
+            from ..scf.rsh import _direct_rsh_jk
+            # The shared SCF/response action already includes both exchange
+            # coefficients. It streams LR exchange without a Coulomb cache.
+            jk_fn = lambda density: _direct_rsh_jk(
+                direct_basis, density, rsh, with_j=include_coulomb,
+                screening_threshold=direct_tol, workers=direct_workers)
+            alpha = jnp.asarray(1., dtype=dtype)
+        else:
+            from ..integrals.backends.native.jk import NativeDirectBasis, _selected_jk
+            jk_fn = (direct_basis.prepare_jk(cache_bytes=eri_cache_bytes,
+                                            screening_threshold=direct_tol, workers=direct_workers,
+                                            with_j=include_coulomb, with_k=include_exchange)
+                     if type(direct_basis) is NativeDirectBasis else
+                     lambda density: _selected_jk(
+                         direct_basis, density, with_j=include_coulomb, with_k=include_exchange,
+                         screening_threshold=direct_tol, workers=direct_workers))
         j_fn = lambda density: jk_fn(density)[0]
     elif mode in {"auto", "df"} and df_factors is not None and int(jnp.asarray(df_factors).size) > 0:
         source = jnp.asarray(df_factors, dtype=dtype)
@@ -784,10 +847,10 @@ def _restricted_rsh_coefficients(molecule):
 
 def _validate_restricted_rsh_mode(molecule, two_electron_mode):
     if str(two_electron_mode).lower() not in {"auto", "direct"}:
-        raise NotImplementedError("Range-separated restricted response requires full AO ERIs; DF/RIS is unsupported.")
+        raise NotImplementedError("Range-separated response requires native direct J/K or full AO ERIs; DF/RIS is unsupported.")
     factors = getattr(molecule, "df_factors", None)
     if factors is not None and int(jnp.asarray(factors).size):
-        raise NotImplementedError("Range-separated restricted response requires full AO ERIs, not DF factors.")
+        raise NotImplementedError("Range-separated response does not support DF factors.")
 
 
 def _unused_ao_response_action(_density: Array) -> Array:
@@ -928,6 +991,17 @@ def _build_restricted_response_operator_data(
 
     from ._semilocal_response import SemilocalResponseFunctional
     standard_hf = isinstance(resolved_xc, SemilocalResponseFunctional) and resolved_xc.xc_spec == "hf"
+    response_dtype = jnp.result_type(delta_eps, weights)
+    memory_plan = plan_response_memory(
+        orbo.shape[0], delta_eps.size, 1, response_dtype, response_options.max_memory,
+        rpa=need_b_terms,
+        direct_basis=(getattr(molecule, "direct_basis", None)
+                      if response_options.two_electron_mode in {"auto", "direct"} else None),
+        integral_cache="none" if rsh is not None else response_options.integral_cache,
+        direct_workers=response_options.direct_workers, direct_tol=response_options.direct_tol,
+        grid_block_size=(response_options.grid_block_size
+                         if resolved_xc is not None and not standard_hf else 0),
+    )
     if standard_hf:
         # HF has no quadrature contribution. Even a zero local kernel would
         # otherwise construct a useless grid-by-occupied-by-virtual tensor.
@@ -987,6 +1061,8 @@ def _build_restricted_response_operator_data(
                 strict_tensor * weights[None, None, :],
                 feature_kind=str(feature_kind),
                 dtype=jnp.asarray(weights).dtype,
+                block_size=memory_plan.grid_block_size,
+                compute_diagonal=False,
             )
         else:
             feature_kind = normalize_response_feature_kind(
@@ -1013,6 +1089,8 @@ def _build_restricted_response_operator_data(
                 orbv=orbv,
                 weighted_hessian=(weights * local_fxc)[None, None, :],
                 dtype=jnp.asarray(weights).dtype,
+                block_size=memory_plan.grid_block_size,
+                compute_diagonal=False,
             )
 
         (
@@ -1031,7 +1109,6 @@ def _build_restricted_response_operator_data(
             if need_b_terms:
                 nonlocal_xc_b_action_fn = pair_nonlocal_b_action
 
-    response_dtype = jnp.result_type(delta_eps, weights)
     include_exchange = _needs_exchange_terms(hybrid_fraction)
     ao_mo_response_action_fn = None if rsh is not None or not singlet else _restricted_lowrank_response_action_for_options(
         molecule,
@@ -1051,6 +1128,9 @@ def _build_restricted_response_operator_data(
             dtype=response_dtype,
             two_electron_mode=response_options.two_electron_mode,
             include_coulomb=singlet,
+            eri_cache_bytes=memory_plan.eri_cache_bytes,
+            direct_tol=response_options.direct_tol,
+            direct_workers=response_options.direct_workers,
         )
     else:
         ao_response_action_fn = _unused_ao_response_action
@@ -1067,6 +1147,7 @@ def _build_restricted_response_operator_data(
         nonlocal_xc_b_action_fn=nonlocal_xc_b_action_fn,
         fock_occupied=fock_occupied,
         fock_virtual=fock_virtual,
+        memory_plan=memory_plan,
     )
 
 
@@ -1105,13 +1186,15 @@ def _restricted_ao_mo_action(
     )
 
 
-def _restricted_a_action(data: _RestrictedResponseOperatorData, x: Array) -> Array:
+def _restricted_fock_action(data: _RestrictedResponseOperatorData, x: Array) -> Array:
     if data.fock_occupied is None:
-        out = x * data.delta_eps[None, :, :]
-    else:
-        out = (jnp.einsum("nia,ab->nib", x, data.fock_virtual, precision=Precision.HIGHEST)
-               - jnp.einsum("ij,nja->nia", data.fock_occupied, x, precision=Precision.HIGHEST))
-    out = out + _restricted_ao_mo_action(
+        return x * data.delta_eps[None, :, :]
+    return (jnp.einsum("nia,ab->nib", x, data.fock_virtual, precision=Precision.HIGHEST)
+            - jnp.einsum("ij,nja->nia", data.fock_occupied, x, precision=Precision.HIGHEST))
+
+
+def _restricted_a_action(data: _RestrictedResponseOperatorData, x: Array) -> Array:
+    out = _restricted_fock_action(data, x) + _restricted_ao_mo_action(
         data,
         x,
         bottom_density=False,
@@ -1145,6 +1228,23 @@ def _restricted_tdhf_action(
     x: Array,
     y: Array,
 ) -> tuple[Array, Array]:
+    if (data.ao_mo_response_action_fn is None
+            and data.xc_response_action_fn is None
+            and data.nonlocal_xc_a_action_fn is None
+            and data.nonlocal_xc_b_action_fn is None):
+        # For ordinary real AO J/K, R(D.T)=R(D).T. Combining X and Y
+        # densities shares one integral traversal between the two TDHF rows.
+        density = (
+            _restricted_transition_density(data.orbo, data.orbv, x, bottom=False)
+            + _restricted_transition_density(data.orbo, data.orbv, y, bottom=True)
+        )
+        response = data.ao_response_action_fn(density)
+        return (
+            _restricted_fock_action(data, x) + _restricted_project_response(
+                response, data.orbo, data.orbv, bottom=False),
+            _restricted_fock_action(data, y) + _restricted_project_response(
+                response, data.orbo, data.orbv, bottom=True),
+        )
     return (
         _restricted_a_action(data, x) + _restricted_b_action(data, y),
         _restricted_b_action(data, x) + _restricted_a_action(data, y),
@@ -1186,14 +1286,14 @@ def build_restricted_tda_operator(
     dim = int(nocc * nvir)
 
     diagonal = _restricted_tda_diagonal(data).reshape(-1)
-    options = normalize_response_kernel_options(response_kernel_options)
-    plan = plan_response_memory(data.orbo.shape[0], dim, 1, data.orbo.dtype, options.max_memory)
+    plan = data.memory_plan
 
     def vind(x: Array) -> Array:
         x = jnp.asarray(x).reshape(-1, nocc, nvir)
         return _map_response_vectors(lambda block: _restricted_a_action(data, block),
                                      x, plan.batch_size).reshape(-1, dim)
 
+    vind.memory_plan = plan
     return vind, diagonal, delta_eps
 
 
@@ -1215,9 +1315,7 @@ def build_restricted_tdhf_operator(
     delta_eps = data.delta_eps
     nocc, nvir = delta_eps.shape
     dim = int(nocc * nvir)
-    options = normalize_response_kernel_options(response_kernel_options)
-    plan = plan_response_memory(data.orbo.shape[0], dim, 1, data.orbo.dtype,
-                                options.max_memory, rpa=True)
+    plan = data.memory_plan
 
     def block_action(z: Array) -> Array:
         z = jnp.asarray(z).reshape(-1, 2 * dim)
@@ -1233,6 +1331,7 @@ def build_restricted_tdhf_operator(
         rows = jnp.asarray(z).reshape(-1, 2 * dim)
         return _map_response_vectors(block_action, rows, plan.batch_size)
 
+    vind.memory_plan = plan
     return vind
 
 

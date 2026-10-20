@@ -1,0 +1,123 @@
+{
+  "purpose": "rigid computational benchmark; no aggregate-physics or optimized-geometry claim",
+  "source_geometry_sha256": "039b06decb1c4d8c2ec3ebd4f34d9c78c13be478009f232fda252a5b5eb46f51",
+  "generator_sha256": "4d3d04016df4bf4a61e40008766415e72d9fd87d7f1e1db566a658f38c047b31",
+  "dimer_sha256": "ae82a3c617ee443790da4cc6d4bd0d6563f1fa0b00bf9955673613e8dbddf1b4",
+  "search": {
+    "stages": [
+      {
+        "name": "compact_stack",
+        "normal_min": 3.5,
+        "normal_max": 6.0,
+        "slip_radius": 3.5
+      },
+      {
+        "name": "expanded_stack",
+        "normal_min": 3.5,
+        "normal_max": 8.0,
+        "slip_radius": 6.0
+      }
+    ],
+    "normal_step_angstrom": 0.25,
+    "slip_step_angstrom": 0.5,
+    "angle_degrees": [
+      0.0,
+      180.0,
+      30.0,
+      330.0,
+      60.0,
+      300.0,
+      90.0,
+      270.0,
+      120.0,
+      240.0,
+      150.0,
+      210.0,
+      15.0,
+      345.0,
+      45.0,
+      315.0,
+      75.0,
+      285.0,
+      105.0,
+      255.0,
+      135.0,
+      225.0,
+      165.0,
+      195.0
+    ],
+    "placement_order": "squared normal excess above 3.5 Angstrom plus squared lateral slip",
+    "selected_stage": "compact_stack",
+    "evaluated_candidates": 10868
+  },
+  "normal_separation_angstrom": 5.5,
+  "slip_angstrom": [
+    1.0,
+    -0.5
+  ],
+  "rotation_degrees": 255.0,
+  "stacking_normal": [
+    -0.047681732800434716,
+    0.17406606525737434,
+    0.9835789024185927
+  ],
+  "slip_axes": [
+    [
+      0.7455777441218133,
+      0.6614874431485512,
+      -0.0809208874581872
+    ],
+    [
+      -0.6647106737727146,
+      0.7294760910973082,
+      -0.16132065177780547
+    ]
+  ],
+  "rotation_matrix": [
+    [
+      -0.25595706002975055,
+      0.9396163534624449,
+      -0.22717194308907174
+    ],
+    [
+      -0.9605121746159031,
+      -0.2206780930556697,
+      0.16946250812478256
+    ],
+    [
+      0.10909787273616067,
+      0.2615765424330915,
+      0.9589970628803791
+    ]
+  ],
+  "minimum_interfragment_distance_angstrom": 2.561338716521243,
+  "maximum_internal_distance_change_angstrom": 7.105427357601002e-15,
+  "closest_atom_indices": [
+    81,
+    166
+  ],
+  "atoms": 192,
+  "electrons": 776,
+  "charge": 0,
+  "spin": 0,
+  "basis": "Cartesian def2-SVP",
+  "expected_nao": 2120,
+  "expected_occupied": 388,
+  "expected_virtual": 1732,
+  "expected_transition_dimension": 672016,
+  "execution": {
+    "host": "c20",
+    "machine": "x86_64",
+    "python": "3.11.15",
+    "executable": "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "numpy": "2.4.4",
+    "cpu_affinity": [
+      56,
+      57,
+      58,
+      59
+    ],
+    "cuda_visible_devices": "",
+    "elapsed_seconds": 2.9073376469896175
+  }
+}

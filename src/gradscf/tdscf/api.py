@@ -136,7 +136,7 @@ class _BaseTD:
                 raise NotImplementedError("Range-separated TD response does not support XC parameter overrides.")
             if self.xc_functional is not None:
                 override = self.xc_functional
-                if isinstance(override, SemilocalResponseFunctional):
+                if isinstance(override, (SemilocalResponseFunctional, UnrestrictedSemilocalResponseFunctional)):
                     override = override.xc_spec
                 if hasattr(override, "spec"):
                     override = override.spec
@@ -193,12 +193,15 @@ class _BaseTD:
             "excitation_threshold": self.excitation_threshold,
         }
 
-    def _restricted_solver_kwargs(self, molecule: Any) -> dict[str, Any]:
-        kwargs = self._common_solver_kwargs(molecule)
+    def _response_options(self):
         options = self.response_kernel_options
         if self.max_memory is not None:
             from ..tddft.response_options import normalize_response_kernel_options
             options = replace(normalize_response_kernel_options(options), max_memory=self.max_memory)
+        return options
+
+    def _restricted_solver_kwargs(self, molecule: Any) -> dict[str, Any]:
+        kwargs = self._common_solver_kwargs(molecule)
         kwargs.update(
             {
                 "matrix_eps": self.matrix_eps,
@@ -211,14 +214,12 @@ class _BaseTD:
                 "tda_gradient_mode": self.tda_gradient_mode,
                 "eigenvector_adjoint_tol": self.eigenvector_adjoint_tol,
                 "eigenvector_adjoint_max_iter": self.eigenvector_adjoint_max_iter,
-                "response_kernel_options": options,
+                "response_kernel_options": self._response_options(),
             }
         )
         return kwargs
 
     def _unrestricted_solver_kwargs(self, molecule: Any) -> dict[str, Any]:
-        if self.max_memory is not None:
-            raise NotImplementedError("The max_memory response budget currently supports restricted references.")
         kwargs = self._common_solver_kwargs(molecule)
         source_xc = self.xc_functional
         if source_xc is None:
@@ -239,6 +240,7 @@ class _BaseTD:
                 "tda_gradient_mode": self.tda_gradient_mode,
                 "eigenvector_adjoint_tol": self.eigenvector_adjoint_tol,
                 "eigenvector_adjoint_max_iter": self.eigenvector_adjoint_max_iter,
+                "response_kernel_options": self._response_options(),
             }
         )
         return kwargs

@@ -1,6 +1,6 @@
 // Analytic coordinate products from libcint derivative kernels. No Python,
 // PySCF bridge, numerical differences, or full coordinate Jacobian.
-#include "tables.h"
+#include "eri_geometry_entries.h"
 
 template<bool transpose>
 static ffi::Error Geometry(ffi::BufferR2<ffi::S32> atoms,
@@ -38,27 +38,9 @@ static ffi::Error Geometry(ffi::BufferR2<ffi::S32> atoms,
     };
     const int n=t.n;
     auto index2=[&](int c,int i,int j) { return (size_t(c)*n+i)*n+j; };
-    auto index4=[&](int i,int j,int k,int l) { return ((size_t(i)*n+j)*n+k)*n+l; };
     std::vector<double> block,cache;
     if (op==4) {
-      Intor ip=cart ? int2e_ip1_cart : int2e_ip1_sph;
-      for (int i=0; i<t.nbas; ++i) for (int j=0; j<t.nbas; ++j)
-        for (int k=0; k<t.nbas; ++k) for (int l=0; l<t.nbas; ++l) {
-          int shells[]={i,j,k,l};
-          int di=t.ao[i+1]-t.ao[i], dj=t.ao[j+1]-t.ao[j];
-          int dk=t.ao[k+1]-t.ao[k], dl=t.ao[l+1]-t.ao[l];
-          size_t size=size_t(di)*dj*dk*dl;
-          t.shell(ip,shells,3*size,block,cache);
-          for (int x=0; x<3; ++x) for (int s=0; s<dl; ++s)
-            for (int r=0; r<dk; ++r) for (int q=0; q<dj; ++q) for (int p=0; p<di; ++p) {
-              // d/d(center) = -d/d(electron coordinate); first AO contiguous.
-              double v=-block[x*size+((size_t(s)*dk+r)*dj+q)*di+p];
-              int a=t.ao[i]+p,b=t.ao[j]+q,c=t.ao[k]+r,d=t.ao[l]+s;
-              int ptr=t.coord_ptr(i)+x;
-              add(index4(a,b,c,d),ptr,v); add(index4(b,a,c,d),ptr,v);
-              add(index4(c,d,a,b),ptr,v); add(index4(c,d,b,a),ptr,v);
-            }
-        }
+      for_each_eri_geometry_entry(t,cart,add);
     } else {
       Intor ips_cart[]={int1e_ipovlp_cart,int1e_ipkin_cart,int1e_ipnuc_cart,int1e_irp_cart};
       Intor ips_sph[]={int1e_ipovlp_sph,int1e_ipkin_sph,int1e_ipnuc_sph,int1e_irp_sph};

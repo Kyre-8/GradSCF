@@ -7,9 +7,12 @@ import numpy as np
 import pytest
 
 from gradscf import integrals
-from gradscf.data.hdf5_cache import read_restricted_molecule, write_restricted_molecule
+from gradscf.data.hdf5_cache import (
+    read_restricted_molecule, write_restricted_molecule,
+    read_unrestricted_molecule, write_unrestricted_molecule,
+)
 from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
-from gradscf.scf.molecules import QuadratureGrid, RestrictedMolecule
+from gradscf.scf.molecules import QuadratureGrid, RestrictedMolecule, UnrestrictedMolecule
 
 
 @pytest.fixture(scope="module")
@@ -54,6 +57,45 @@ def _assert_provider(actual, expected, array_backend):
                                     jax.tree.leaves(expected.parameters), strict=True):
             assert isinstance(value, array_type)
             np.testing.assert_array_equal(value, reference)
+
+
+@pytest.mark.parametrize("array_backend", ["host", "jax"])
+@pytest.mark.parametrize("kind", ["native", "projected"])
+def test_unrestricted_direct_cache_preserves_provider_and_discards_stale_integrals(
+        tmp_path, native_provider, monkeypatch, array_backend, kind):
+    from dataclasses import fields
+    h5py = pytest.importorskip("h5py")
+    provider = _provider(native_provider, kind)
+    restricted = _reference(provider)
+    values = {field.name: getattr(restricted, field.name)
+              for field in fields(UnrestrictedMolecule) if hasattr(restricted, field.name)}
+    n = provider.nao
+    values.update(mo_coeff=np.stack([np.eye(n)] * 2),
+                  mo_occ=np.stack([np.r_[1., np.zeros(n-1)], np.zeros(n)]),
+                  mo_energy=np.stack([np.linspace(-.5, .5, n)] * 2),
+                  nocc_alpha=1, nocc_beta=0, direct_basis=provider)
+    molecule = UnrestrictedMolecule(**values)
+    density = jnp.eye(n)
+    expected = provider.get_jk(density)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Unrestricted direct cache must not evaluate ERIs")
+
+    monkeypatch.setattr(type(native_provider.plan), "evaluate", forbidden)
+    path = tmp_path / "unrestricted_direct.h5"
+    with h5py.File(path, "w") as handle:
+        group = handle.create_group("reference")
+        for field in ("eri_pair_matrix", "df_factors", "eri_ovov"):
+            group.create_dataset(field, data=np.ones((2, 2)))
+        write_unrestricted_molecule(group, molecule)
+        assert "direct_basis" in group
+        assert all(field not in group for field in ("eri_pair_matrix", "df_factors", "eri_ovov"))
+        restored = read_unrestricted_molecule(group, array_backend=array_backend)
+    _assert_provider(restored.direct_basis, provider, array_backend)
+    assert restored.rep_tensor.size == 0 and restored.eri_pair_matrix is None
+    assert (restored.nocc_alpha, restored.nocc_beta) == (1, 0)
+    for actual, reference in zip(restored.direct_basis.get_jk(density), expected):
+        np.testing.assert_allclose(actual, reference, atol=2e-11, rtol=2e-11)
 
 
 @pytest.mark.parametrize("array_backend", ["host", "jax"])

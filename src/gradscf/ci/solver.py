@@ -201,7 +201,8 @@ def solve_cis_response(molecule, *, singlet=True, frozen=None, config=None,
     plan = plan_response_memory(coeff.shape[0], no*nv, config.nroots,
                                 coeff.dtype, max_memory,
                                 max_subspace=(no*nv if config.solver == "dense"
-                                              else config.max_space))
+                                              else config.max_space),
+                                direct_basis=getattr(active_reference, "direct_basis", None))
     config = replace(config, max_space=plan.max_subspace)
     vind, diagonal, _ = build_restricted_tda_operator(
         active_reference, SemilocalResponseFunctional("hf"), singlet=singlet,

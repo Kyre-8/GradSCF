@@ -3,18 +3,13 @@
 #pragma once
 #include "tables.h"
 
-template<bool transpose, class Evaluate>
-void contract_geometry_hessian(IntegralTables& t, int op, int cart,
-                                const double* u, const double* input,
-                                double* output, Evaluate&& evaluate) {
+template<class Evaluate, class Accumulate>
+void for_each_geometry_hessian_entry(IntegralTables& t, int op, int cart,
+                                     Evaluate&& evaluate, Accumulate&& add) {
   // Shadow shells may have been appended, but never enter the physical loop.
   const int nshell=int(t.ao.size())-1;
   // Each call contributes one ordered Hessian entry. Cross-slot entries
   // explicitly contribute both coordinate orders, even for a shared atom.
-  auto add=[&](size_t index,int a,int b,double value) {
-    if constexpr (transpose) output[a]+=value*u[b]*input[index];
-    else output[index]+=value*u[a]*input[b];
-  };
   auto cross=[&](size_t index,int a,int b,double value) {
     add(index,a,b,value); add(index,b,a,value);
   };
@@ -120,4 +115,15 @@ void contract_geometry_hessian(IntegralTables& t, int op, int cart,
       }
     }
   }
+}
+
+template<bool transpose, class Evaluate>
+void contract_geometry_hessian(IntegralTables& t, int op, int cart,
+                                const double* u, const double* input,
+                                double* output, Evaluate&& evaluate) {
+  auto add=[&](size_t index,int a,int b,double value) {
+    if constexpr (transpose) output[a]+=value*u[b]*input[index];
+    else output[index]+=value*u[a]*input[b];
+  };
+  for_each_geometry_hessian_entry(t,op,cart,evaluate,add);
 }

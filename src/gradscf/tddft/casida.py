@@ -149,9 +149,20 @@ class RestrictedCasidaTDDFT:
         dim = int(gaps.size)
         roots = dim if nstates is None else min(int(nstates), dim)
         options = normalize_response_kernel_options(self.response_kernel_options)
+        from ._semilocal_response import SemilocalResponseFunctional
+        resolved = _resolve_xc_functional(self.molecule, self.xc_functional, self.xc_params)
+        with_grid = resolved is not None and not (
+            isinstance(resolved, SemilocalResponseFunctional) and resolved.xc_spec == "hf")
         return plan_response_memory(self.molecule.mo_coeff.shape[-2], dim, roots,
                                     gaps.dtype, options.max_memory,
-                                    max_subspace=self.davidson_max_subspace, rpa=rpa)
+                                    max_subspace=self.davidson_max_subspace, rpa=rpa,
+                                    direct_basis=(getattr(self.molecule, "direct_basis", None)
+                                                  if options.two_electron_mode in {"auto", "direct"} else None),
+                                    integral_cache=("none" if getattr(resolved, "range_separated_coefficients", None) is not None
+                                                    else options.integral_cache),
+                                    direct_workers=options.direct_workers,
+                                    direct_tol=options.direct_tol,
+                                    grid_block_size=options.grid_block_size if with_grid else 0)
 
     def _posthoc_correction(
         self,

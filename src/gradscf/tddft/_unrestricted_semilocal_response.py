@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from numbers import Integral
+from types import SimpleNamespace
 from typing import Any
 
+import jax
 import jax.numpy as jnp
 from jaxtyping import Array
 
@@ -103,6 +106,8 @@ def build_spin_transition_factors(
     *,
     feature_kind: str,
     dtype: Any,
+    grid_start: Any = 0,
+    grid_size: int | None = None,
 ):
     return _restricted_response_factors(
         molecule,
@@ -110,6 +115,8 @@ def build_spin_transition_factors(
         orbv,
         feature_kind=str(feature_kind).upper(),
         dtype=dtype,
+        grid_start=grid_start,
+        grid_size=grid_size,
     )
 
 
@@ -119,6 +126,65 @@ def project_spin_transition_to_grid(factors: Any, values: Array) -> Array:
 
 def project_grid_response_to_spin_transition(factors: Any, values: Array) -> Array:
     return _project_grid_response_to_restricted_transition(factors, values)
+
+
+def _build_blocked_spin_response_action(
+    molecule: Any,
+    orbo_a: Array,
+    orbv_a: Array,
+    orbo_b: Array,
+    orbv_b: Array,
+    block_hvp: Callable[..., tuple[Array, Array]],
+    *,
+    feature_kind: str,
+    dtype: Any,
+    block_size: int,
+) -> Callable[[Array, Array], tuple[Array, Array]]:
+    """Reduce local spin-field responses without retaining grid-by-OV arrays."""
+    if isinstance(block_size, bool) or not isinstance(block_size, Integral) or block_size < 1:
+        raise ValueError("block_size must be a positive integer.")
+    weights = jnp.asarray(molecule.grid.weights, dtype=dtype)
+    ngrids = int(weights.shape[0])
+    width = min(int(block_size), max(1, ngrids))
+    full_blocks, tail = divmod(ngrids, width)
+
+    def contribution(start, size, alpha, beta):
+        factors_a = build_spin_transition_factors(
+            molecule, orbo_a, orbv_a, feature_kind=feature_kind, dtype=dtype,
+            grid_start=start, grid_size=size,
+        )
+        factors_b = build_spin_transition_factors(
+            molecule, orbo_b, orbv_b, feature_kind=feature_kind, dtype=dtype,
+            grid_start=start, grid_size=size,
+        )
+        tangent_a = project_spin_transition_to_grid(factors_a, alpha)
+        tangent_b = project_spin_transition_to_grid(factors_b, beta)
+        response_a, response_b = block_hvp(start, size, tangent_a, tangent_b)
+        block_weights = jax.lax.dynamic_slice_in_dim(weights, start, size)
+        return (
+            project_grid_response_to_spin_transition(
+                factors_a, jnp.asarray(response_a, dtype=dtype)*block_weights[None, None, :]),
+            project_grid_response_to_spin_transition(
+                factors_b, jnp.asarray(response_b, dtype=dtype)*block_weights[None, None, :]),
+        )
+
+    rematerialized = jax.checkpoint(contribution, static_argnums=(1,))
+
+    def action(alpha: Array, beta: Array) -> tuple[Array, Array]:
+        alpha, beta = jnp.asarray(alpha, dtype=dtype), jnp.asarray(beta, dtype=dtype)
+
+        def add_block(index, total):
+            da, db = rematerialized(index*width, width, alpha, beta)
+            return total[0] + da, total[1] + db
+
+        out_a, out_b = jax.lax.fori_loop(
+            0, full_blocks, add_block, (jnp.zeros_like(alpha), jnp.zeros_like(beta)))
+        if tail:
+            da, db = rematerialized(full_blocks*width, tail, alpha, beta)
+            out_a, out_b = out_a + da, out_b + db
+        return out_a, out_b
+
+    return action
 
 
 def build_unrestricted_semilocal_response_action(
@@ -131,11 +197,36 @@ def build_unrestricted_semilocal_response_action(
     *,
     feature_kind: str,
     dtype: Any,
+    block_size: int | None = None,
 ) -> Callable[[Array, Array], tuple[Array, Array]]:
     kind = str(feature_kind).upper()
     if kind not in {"LDA", "GGA", "MGGA"}:
         raise NotImplementedError(
             "Unrestricted semilocal response projection supports LDA/GGA/tau-dependent MGGA."
+        )
+    if (block_size is not None
+            and type(getattr(response_hvp, "__self__", None)) is UnrestrictedSemilocalResponseFunctional):
+        def block_hvp(start, size, tangent_a, tangent_b):
+            def on_grid(value, axis=0):
+                return (None if value is None else jax.lax.dynamic_slice_in_dim(
+                    jnp.asarray(value), start, size, axis=axis))
+
+            # Only the known local functional sees this view. Opaque callbacks
+            # retain the original molecule and both complete spin-grid fields.
+            view = SimpleNamespace(
+                ao=on_grid(molecule.ao),
+                ao_deriv1=on_grid(getattr(molecule, "ao_deriv1", None), axis=1),
+                rdm1=molecule.rdm1,
+                grid=SimpleNamespace(weights=on_grid(molecule.grid.weights),
+                                     coords=on_grid(getattr(molecule.grid, "coords", None))),
+                xc_density_floor=getattr(molecule, "xc_density_floor", 1e-12),
+                dispersion_energy=getattr(molecule, "dispersion_energy", None),
+            )
+            return response_hvp(view, tangent_a, tangent_b)
+
+        return _build_blocked_spin_response_action(
+            molecule, orbo_a, orbv_a, orbo_b, orbv_b, block_hvp,
+            feature_kind=kind, dtype=dtype, block_size=block_size,
         )
     factors_a = build_spin_transition_factors(
         molecule,

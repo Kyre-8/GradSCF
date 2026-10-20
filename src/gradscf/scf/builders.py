@@ -483,6 +483,7 @@ def _build_unrestricted_reference(
     s = scf_inputs.overlap
     h1e = scf_inputs.hcore
     eri = scf_inputs.eri
+    direct_basis = getattr(scf_inputs, "direct_basis", None)
     coords = scf_inputs.coords
     weights = scf_inputs.grid_weights
     ao = scf_inputs.ao
@@ -529,6 +530,10 @@ def _build_unrestricted_reference(
         else:
             hfx_local, hfx_fxx = hfx_result
     if compute_local_pt2_features:
+        if direct_basis is not None:
+            # This explicit feature request requires orbital integrals. The
+            # default direct reference retains only its spatial AO action.
+            eri = direct_basis.response_eri_pair_matrix()
         pt2_local, pt2_fock_response = _local_pt2_feature_from_unrestricted_orbitals(
             ao,
             jnp.stack([uks.mo_coeff_alpha, uks.mo_coeff_beta], axis=0),
@@ -586,6 +591,7 @@ def _build_unrestricted_reference(
         dispersion_energy=getattr(scf_inputs, "dispersion_energy", None),
         range_separated_coefficients=getattr(uks, "range_separated_coefficients", None),
         xc_spec=xc_spec_resolved,
+        direct_basis=direct_basis,
     )
 
 

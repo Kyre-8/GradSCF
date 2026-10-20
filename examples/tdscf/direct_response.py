@@ -1,4 +1,4 @@
-"""Non-DF benzene TDA: bound response work without storing AO/MO ERIs.
+"""Non-DF benzene TDA: exact integral reuse within a response budget.
 
 Use the same orbital space and five roots for a storage comparison. The
 explicit 40-column Davidson space also permits running this example against
@@ -40,6 +40,8 @@ reference_seconds = perf_counter() - started
 eri_bytes = sum(0 if getattr(reference, name) is None else getattr(reference, name).nbytes
                 for name in ("rep_tensor", "eri_pair_matrix", "df_factors"))
 action, _, gaps = build_restricted_tda_operator(reference, SemilocalResponseFunctional("hf"))
+plan = getattr(action, "memory_plan", None)
+response_cache_bytes = 0 if plan is None else plan.eri_cache_bytes
 vectors = jnp.asarray(np.random.default_rng(910).normal(size=(5, gaps.size)))
 started = perf_counter()
 compiled = jax.jit(action).lower(vectors).compile()
@@ -71,7 +73,9 @@ print("DIRECT_RESPONSE_RESULT " + json.dumps(dict(
     nao=mf.mo_coeff.shape[0], transitions=int(gaps.size), nroots=5,
     max_subspace=40, dtype="float64", backend=jax.default_backend(),
     hf_energy_hartree=float(mf.e_tot), excitation_energy_hartree=np.asarray(td.e).tolist(),
-    eri_cache_bytes=int(eri_bytes), scf_seconds=scf_seconds,
+    eri_cache_bytes=int(eri_bytes), response_eri_cache_bytes=int(response_cache_bytes),
+    response_batch_size=None if plan is None else plan.batch_size,
+    scf_seconds=scf_seconds,
     reference_seconds=reference_seconds, operator_compile_seconds=compile_seconds,
     warm_action_median_seconds=float(np.median(seconds)), full_tda_seconds=solve_seconds,
     compiled_memory_bytes=memory_bytes), sort_keys=True))

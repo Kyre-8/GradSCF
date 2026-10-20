@@ -87,6 +87,31 @@ def test_memory_plan_rejects_budget_below_minimum_without_changing_roots():
         plan_response_memory(1000, 10000, 20, np.float64, .01)
 
 
+@pytest.mark.parametrize("include_coulomb", [False, True])
+def test_projected_response_forwards_direct_controls(monkeypatch, include_coulomb):
+    from gradscf.integrals.backends.native.jk import ProjectedNativeDirectBasis
+    from gradscf.tddft.response import _restricted_ao_response_action
+
+    calls = []
+
+    def get_jk(provider, density, **controls):
+        calls.append(controls)
+        return (2*density if controls.get("with_j", True) else jnp.zeros_like(density),
+                3*density if controls.get("with_k", True) else jnp.zeros_like(density))
+
+    monkeypatch.setattr(ProjectedNativeDirectBasis, "get_jk", get_jk)
+    state = SimpleNamespace(direct_basis=ProjectedNativeDirectBasis(None, jnp.eye(2)))
+    density = jnp.asarray([[[.2, -.3], [.4, .1]]])
+    action = _restricted_ao_response_action(
+        state, .4, include_exchange=True, include_coulomb=include_coulomb,
+        dtype=density.dtype, direct_tol=1e-10, direct_workers=3)
+    actual = action(density)
+    assert calls == [dict(with_j=include_coulomb, with_k=True,
+                          screening_threshold=1e-10, workers=3)]
+    np.testing.assert_allclose(actual, ((2. if include_coulomb else 0.)-.6)*density,
+                               atol=1e-14, rtol=0)
+
+
 def test_large_transition_space_has_no_quartic_or_full_response_workspace():
     from gradscf.tddft.response_options import plan_response_memory
 

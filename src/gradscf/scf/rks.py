@@ -79,6 +79,7 @@ class RKSConfig:
     df_max_rank: int | None = None
     auxbasis: str | None = None
     direct_scf_tol: float = 0.0
+    direct_scf_workers: int = 1
     convergence_metric: Literal["energy_and_residual", "energy"] = "energy_and_residual"
 
 
@@ -279,12 +280,16 @@ def _make_jk_builder(
     from .rsh import rsh_preset
     rsh = rsh_preset(cfg.xc_spec)
     if rsh is not None:
-        if cfg.jk_backend != "full":
-            raise NotImplementedError("Range-separated wb97xd requires full ERI.")
-        if eri_lr is None or eri is None or jnp.ndim(eri) != 4:
-            raise ValueError("Range-separated wb97xd requires full eri and eri_lr.")
-        exchange_eri = (rsh.default_sr_hf_fraction * jnp.asarray(eri)
-                        + (rsh.default_lr_hf_fraction-rsh.default_sr_hf_fraction) * jnp.asarray(eri_lr))
+        if cfg.jk_backend == "direct":
+            from .rsh import _require_direct_rsh_provider
+            _require_direct_rsh_provider(direct_basis)
+        elif cfg.jk_backend == "full":
+            if eri_lr is None or eri is None or jnp.ndim(eri) != 4:
+                raise ValueError("Range-separated XC requires full eri and eri_lr.")
+            exchange_eri = (rsh.default_sr_hf_fraction * jnp.asarray(eri)
+                            + (rsh.default_lr_hf_fraction-rsh.default_sr_hf_fraction) * jnp.asarray(eri_lr))
+        else:
+            raise NotImplementedError("Range-separated XC requires full ERIs or canonical native direct J/K.")
     def _direct_builder() -> JKBuilder:
         if direct_basis is None:
             raise ValueError("jk_backend='direct' requires direct_basis.")
@@ -295,7 +300,13 @@ def _make_jk_builder(
             def _native_direct(density,mo_coeff=None,mo_occ=None,density_last=None,j_last=None,k_last=None):
                 del mo_coeff,mo_occ
                 delta=density if density_last is None else density-density_last
-                j,k=direct_basis.get_jk(delta,screening_threshold=threshold)
+                if rsh is not None:
+                    from .rsh import _direct_rsh_jk
+                    j,k=_direct_rsh_jk(direct_basis,delta,rsh.to_range_separated_hybrid_coefficients(),
+                        screening_threshold=threshold,workers=cfg.direct_scf_workers,with_k=with_k)
+                else:
+                    j,k=direct_basis.get_jk(delta,screening_threshold=threshold,
+                                          workers=cfg.direct_scf_workers,with_k=with_k)
                 if density_last is not None:j,k=j+j_last,k+k_last
                 return j,k if with_k else jnp.zeros_like(density)
             return _native_direct
@@ -1059,7 +1070,8 @@ def _run_rks_from_integrals_shared(
     traceable: bool,
 ) -> RKSResult:
     cfg = RKSConfig() if config is None else config
-    rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy, jk_backend=cfg.jk_backend)
+    rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy,
+                              jk_backend=cfg.jk_backend, direct_basis=direct_basis)
     parse_xc(local_xc_spec(cfg.xc_spec))
     xc_kind = xc_type(local_xc_spec(cfg.xc_spec))
 

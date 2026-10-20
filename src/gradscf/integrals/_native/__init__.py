@@ -32,6 +32,8 @@ def register_integrals():
                "gradscf_coefficient_hessian_vjp_cpu_v1": "GradSCFCoefficientHessianVJP",
                "gradscf_compact_cpu_v1": "GradSCFCompact",
                "gradscf_direct_jk_cpu_v1": "GradSCFDirectJK",
+               "gradscf_direct_jk_geometry_jvp_cpu_v1": "GradSCFDirectJKGeometryJVP",
+               "gradscf_direct_jk_geometry_vjp_cpu_v1": "GradSCFDirectJKGeometryVJP",
                "gradscf_packed_jk_cpu_v1": "GradSCFPackedJK"}
     targets.update({"gradscf_exponent_jvp_cpu_v1": "GradSCFExponentJVP",
                     "gradscf_exponent_vjp_cpu_v1": "GradSCFExponentVJP"})

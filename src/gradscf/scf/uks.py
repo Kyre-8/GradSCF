@@ -65,10 +65,12 @@ class UKSConfig:
     orthogonalization_eps: float = 1e-10
     density_floor: float = 1e-12
     potential_clip: float | None = None
-    jk_backend: Literal["full", "df"] = "full"
+    jk_backend: Literal["full", "df", "direct"] = "full"
     df_tol: float = 1e-10
     df_max_rank: int | None = None
     auxbasis: str | None = None
+    direct_scf_tol: float = 0.0
+    direct_scf_workers: int = 1
 
 
 @dataclass(frozen=True)
@@ -105,10 +107,11 @@ def _validate_spin_occ(mo_occ: Array, *, nao: int, nelec: int, label: str) -> Ar
     occ = jnp.asarray(mo_occ)
     if occ.ndim != 1 or int(occ.shape[0]) != nao:
         raise ValueError(f"{label} occupations must be a 1D vector with length nao.")
-    if float(jnp.min(occ)) < -1e-8 or float(jnp.max(occ)) > 1.0 + 1e-8:
-        raise ValueError(f"{label} occupations must lie in [0, 1].")
-    if abs(float(jnp.sum(occ)) - float(nelec)) > 1e-6:
-        raise ValueError(f"{label} occupations must sum to the requested electron count.")
+    if not _contains_jax_tracer(occ):
+        if float(jnp.min(occ)) < -1e-8 or float(jnp.max(occ)) > 1.0 + 1e-8:
+            raise ValueError(f"{label} occupations must lie in [0, 1].")
+        if abs(float(jnp.sum(occ)) - float(nelec)) > 1e-6:
+            raise ValueError(f"{label} occupations must sum to the requested electron count.")
     return occ
 
 
@@ -206,6 +209,9 @@ def _spin_jk_matrices(
     mo_occ_a: Array | None = None,
     mo_occ_b: Array | None = None,
     with_k: bool = True,
+    direct_basis: Any | None = None,
+    direct_scf_tol: float = 0.0,
+    direct_scf_workers: int = 1,
 ) -> tuple[Array, Array, Array, Array]:
     density_tot = density_a + density_b
     if df_factors is not None:
@@ -232,6 +238,17 @@ def _spin_jk_matrices(
         k_a = _k_from_density_or_orbitals(density_a, mo_coeff_a, mo_occ_a)
         k_b = _k_from_density_or_orbitals(density_b, mo_coeff_b, mo_occ_b)
         return density_tot, j_tot, k_a, k_b
+    if direct_basis is not None:
+        from ..integrals.backends.native.jk import _selected_jk
+
+        density = jnp.stack((density_a, density_b)) if with_k else density_tot
+        coulomb, exchange = _selected_jk(
+            direct_basis, density, with_k=with_k,
+            screening_threshold=direct_scf_tol, workers=direct_scf_workers)
+        if with_k:
+            return density_tot, coulomb.sum(axis=0), exchange[0], exchange[1]
+        zero = jnp.zeros_like(coulomb)
+        return density_tot, coulomb, zero, zero
     j_tot, _ = _build_jk(eri, density_tot)
     if not bool(with_k):
         zero_k = jnp.zeros_like(j_tot)
@@ -311,26 +328,43 @@ def _raw_fock_and_energy_for_state(
     eri_lr: Array | None = None,
     dispersion_energy: Array | None = None,
     compute_potential: bool = True,
+    direct_basis: Any | None = None,
 ) -> tuple[Array, Array, Array | None, Array | None]:
     if not compute_potential and bound_xc is not None:
         raise NotImplementedError("Energy-only evaluation is limited to the classic orbital objective.")
-    rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy, jk_backend=cfg.jk_backend)
+    rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy,
+                              jk_backend=cfg.jk_backend, direct_basis=direct_basis)
     if rsh is not None and bound_xc is not None:
-        raise NotImplementedError("Range-separated wb97xd does not support bound_xc overrides.")
-    density_tot, j_tot, k_a, k_b = _spin_jk_matrices(
-        eri,
-        density_a,
-        density_b,
-        df_factors=df_factors,
-        mo_coeff_a=mo_coeff_a,
-        mo_coeff_b=mo_coeff_b,
-        mo_occ_a=mo_occ_a,
-        mo_occ_b=mo_occ_b,
-    )
-    if rsh is not None:
-        sr, delta = rsh.default_sr_hf_fraction, rsh.default_lr_hf_fraction-rsh.default_sr_hf_fraction
-        k_a = sr*k_a + delta*_build_jk(eri_lr, density_a)[1]
-        k_b = sr*k_b + delta*_build_jk(eri_lr, density_b)[1]
+        raise NotImplementedError("Range-separated XC does not support bound_xc overrides.")
+    if rsh is not None and cfg.jk_backend == "direct":
+        from .rsh import _direct_rsh_jk
+        density_tot = density_a + density_b
+        coefficients = rsh.to_range_separated_hybrid_coefficients()
+        controls = dict(screening_threshold=cfg.direct_scf_tol, workers=cfg.direct_scf_workers)
+        j_tot, _ = _direct_rsh_jk(direct_basis, density_tot, coefficients, with_k=False, **controls)
+        _, exchange = _direct_rsh_jk(direct_basis, jnp.stack((density_a, density_b)),
+                                     coefficients, with_j=False, **controls)
+        k_a, k_b = exchange[0], exchange[1]
+    else:
+        density_tot, j_tot, k_a, k_b = _spin_jk_matrices(
+            eri,
+            density_a,
+            density_b,
+            df_factors=df_factors,
+            mo_coeff_a=mo_coeff_a,
+            mo_coeff_b=mo_coeff_b,
+            mo_occ_a=mo_occ_a,
+            mo_occ_b=mo_occ_b,
+            with_k=(bound_xc is not None or rsh is not None
+                    or abs(float(hybrid_coeff(cfg.xc_spec))) > 1e-14),
+            direct_basis=direct_basis,
+            direct_scf_tol=cfg.direct_scf_tol,
+            direct_scf_workers=cfg.direct_scf_workers,
+        )
+        if rsh is not None:
+            sr, delta = rsh.default_sr_hf_fraction, rsh.default_lr_hf_fraction-rsh.default_sr_hf_fraction
+            k_a = sr*k_a + delta*_build_jk(eri_lr, density_a)[1]
+            k_b = sr*k_b + delta*_build_jk(eri_lr, density_b)[1]
     extra_fock_a = extra_fock_b = jnp.zeros_like(h)
     vxc_tau_a = vxc_tau_b = None
     include_hf_energy = bound_xc is None
@@ -720,11 +754,13 @@ def run_uks_from_integrals(
     molecule_template: Any | None = None,
     eri_lr: Array | None = None,
     dispersion_energy: Array | None = None,
+    direct_basis: Any | None = None,
 ) -> UKSResult:
     """Run unrestricted Kohn-Sham SCF from AO integrals and numerical grid data."""
 
     cfg = UKSConfig() if config is None else config
-    rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy, jk_backend=cfg.jk_backend)
+    rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy,
+                              jk_backend=cfg.jk_backend, direct_basis=direct_basis)
     xc_kind = None
     if bound_xc is None:
         parse_xc(local_xc_spec(cfg.xc_spec))
@@ -739,6 +775,8 @@ def run_uks_from_integrals(
     enuc = jnp.asarray(nuclear_repulsion)
     if cfg.jk_backend == "df" and df_factors_arr is None:
         raise ValueError("UKS jk_backend='df' requires df_factors.")
+    if cfg.jk_backend == "direct" and direct_basis is None:
+        raise ValueError("UKS jk_backend='direct' requires an AO J/K provider.")
     traceable_inputs = _contains_jax_tracer((s, h, eri, eri_lr, dispersion_energy, df_factors_arr, ao, ao_deriv1, weights, enuc))
     nao = int(s.shape[0])
     if nalpha < 0 or nalpha > nao or nbeta < 0 or nbeta > nao or (nalpha + nbeta) <= 0:
@@ -818,6 +856,7 @@ def run_uks_from_integrals(
             molecule_template=molecule_template,
             eri_lr=eri_lr,
             dispersion_energy=dispersion_energy,
+            direct_basis=direct_basis if cfg.jk_backend == "direct" else None,
         )
 
     def fock_builder(density_spin: Array, mo_coeff_spin: Array, mo_energy_spin: Array) -> tuple[Array, Array, Array]:
