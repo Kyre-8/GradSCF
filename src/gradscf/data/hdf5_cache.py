@@ -40,6 +40,77 @@ _ARRAY_FIELDS = (
 )
 
 
+_BASIS_TOPOLOGY_FIELDS = (
+    "angular_momenta", "primitive_counts", "contraction_counts", "nuclear_charges",
+)
+
+
+def _validate_direct_basis(provider: Any) -> None:
+    from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
+
+    if type(provider) is NativeDirectBasis:
+        return
+    if type(provider) is ProjectedNativeDirectBasis:
+        _validate_direct_basis(provider.primitive_basis)
+        return
+    raise TypeError(f"Unsupported direct basis provider type: {type(provider).__name__}.")
+
+
+def _write_direct_basis(group: Any, provider: Any) -> None:
+    from gradscf.integrals.backends.native.jk import ProjectedNativeDirectBasis
+
+    if type(provider) is ProjectedNativeDirectBasis:
+        group.attrs["kind"] = "projected_native"
+        _write_array(group, "transform", provider.transform)
+        _write_direct_basis(group.create_group("primitive_basis"), provider.primitive_basis)
+        return
+    group.attrs["kind"] = "native"
+    group.attrs["backend"] = provider.plan.backend
+    topology_group = group.create_group("topology")
+    topology_group.attrs["cart"] = bool(provider.plan.topology.cart)
+    for field in _BASIS_TOPOLOGY_FIELDS:
+        _write_array(topology_group, field, np.asarray(getattr(provider.plan.topology, field), dtype=np.int64))
+    parameters_group = group.create_group("parameters")
+    for field in ("exponents", "coefficients"):
+        shells_group = parameters_group.create_group(field)
+        for index, value in enumerate(getattr(provider.parameters, field)):
+            _write_array(shells_group, str(index), value)
+    for field in ("centers", "nuclear_coords"):
+        _write_array(parameters_group, field, getattr(provider.parameters, field))
+
+
+def _read_direct_basis(group: Any, *, array_backend: str) -> Any:
+    from gradscf.integrals import make_plan
+    from gradscf.integrals.basis import BasisTopology, BasisParameters
+    from gradscf.integrals.basis.types import check_parameter_shapes
+    from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
+
+    kind = str(group.attrs.get("kind", ""))
+    if kind == "projected_native":
+        return ProjectedNativeDirectBasis(
+            _read_direct_basis(group["primitive_basis"], array_backend=array_backend),
+            _read_array(group, "transform", array_backend=array_backend),
+        )
+    if kind != "native":
+        raise ValueError(f"Unsupported direct basis provider kind: {kind!r}.")
+    topology_group = group["topology"]
+    topology = BasisTopology(
+        **{field: tuple(int(value) for value in topology_group[field][()])
+           for field in _BASIS_TOPOLOGY_FIELDS},
+        cart=bool(topology_group.attrs["cart"]),
+    )
+    parameters_group = group["parameters"]
+    parameters = BasisParameters(
+        **{field: tuple(_read_array(parameters_group[field], str(index), array_backend=array_backend)
+                        for index in range(len(topology.angular_momenta)))
+           for field in ("exponents", "coefficients")},
+        centers=_read_array(parameters_group, "centers", array_backend=array_backend),
+        nuclear_coords=_read_array(parameters_group, "nuclear_coords", array_backend=array_backend),
+    )
+    check_parameter_shapes(topology, parameters)
+    return NativeDirectBasis(make_plan(topology, backend=str(group.attrs["backend"])), parameters)
+
+
 def _write_array(group: Any, name: str, value: Any) -> None:
     if value is None:
         return
@@ -119,6 +190,10 @@ def _read_array(group: Any, name: str, *, array_backend: str = "jax") -> Any | N
 def write_restricted_molecule(group: Any, molecule: RestrictedMolecule) -> None:
     """Write a restricted molecule's large numerical inputs to an HDF5 group."""
 
+    # Reject unknown providers before mutating an existing cache group.
+    provider = molecule.direct_basis
+    if provider is not None:
+        _validate_direct_basis(provider)
     group.attrs["nuclear_repulsion"] = float(molecule.nuclear_repulsion)
     group.attrs["exact_exchange_fraction"] = float(molecule.exact_exchange_fraction)
     if molecule.mf_energy is not None:
@@ -135,11 +210,22 @@ def write_restricted_molecule(group: Any, molecule: RestrictedMolecule) -> None:
     grid_group = group.require_group("grid")
     _write_array(grid_group, "weights", molecule.grid.weights)
     _write_array(grid_group, "coords", molecule.grid.coords)
+    # A rewritten reference must not reload integral arrays from its old mode.
+    for field in (
+        "eri_pair_matrix", "df_factors", "response_df_factors_j", "response_df_factors_k",
+        "eri_ovov", "eri_ovvo", "eri_oovv",
+    ):
+        if getattr(molecule, field) is None and field in group:
+            del group[field]
     for field in _ARRAY_FIELDS:
         if field == "hfx_nu":
             continue
         _write_array(group, field, getattr(molecule, field))
     _write_hfx_nu(group, molecule)
+    if "direct_basis" in group:
+        del group["direct_basis"]
+    if provider is not None:
+        _write_direct_basis(group.create_group("direct_basis"), provider)
 
 
 def write_unrestricted_molecule(group: Any, molecule: UnrestrictedMolecule) -> None:
@@ -232,6 +318,10 @@ def read_restricted_molecule(
             else None
         ),
         hfx_nu_api=hfx_nu_api,
+        direct_basis=(
+            _read_direct_basis(group["direct_basis"], array_backend=array_backend)
+            if "direct_basis" in group else None
+        ),
         **kwargs,
     )
 

@@ -10,12 +10,27 @@ from jax.interpreters import ad, batching, mlir
 from ..._native import register_integrals
 
 
+@jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class NativeDirectBasis:
-    """Bound native J/K provider for the existing restricted direct-SCF hook."""
+    """Native AO action with static topology and dynamic basis parameters.
+
+    J/K density derivatives are supported at a fixed basis. Basis/geometry
+    derivatives remain explicitly rejected by the underlying native operator.
+    """
 
     plan: object
     parameters: object
+
+    def tree_flatten(self):
+        return (self.parameters,), (self.plan.topology, self.plan.backend)
+
+    @classmethod
+    def tree_unflatten(cls, metadata, children):
+        from ...plan import make_plan
+
+        topology, backend = metadata
+        return cls(make_plan(topology, backend=backend), children[0])
 
     @property
     def nao(self):
@@ -30,6 +45,7 @@ class NativeDirectBasis:
         return self.plan.evaluate("eri", self.parameters, aosym="s4")
 
 
+@jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class ProjectedNativeDirectBasis:
     """Exact contracted J/K from a fixed primitive shell-direct operator.
@@ -41,6 +57,13 @@ class ProjectedNativeDirectBasis:
 
     primitive_basis: NativeDirectBasis
     transform: object
+
+    def tree_flatten(self):
+        return (self.primitive_basis, self.transform), None
+
+    @classmethod
+    def tree_unflatten(cls, metadata, children):
+        return cls(*children)
 
     @property
     def nao(self):
@@ -62,6 +85,48 @@ class ProjectedNativeDirectBasis:
             "pi,...pq,qj->...ij", transform, matrix, transform
         )
         return project(primitive_j), project(primitive_k)
+
+
+@lru_cache(maxsize=1)
+def _zero_basis_tangent():
+    """Accept materialized zero tangents, never an active basis derivative.
+
+    custom_root can instantiate symbolic zeros in closed-over constants.
+    This partial linear operation is defined only on the zero tangent; its
+    transpose explicitly rejects differentiation with respect to the basis.
+    """
+    primitive = core.Primitive("gradscf_direct_jk_zero_basis_tangent")
+
+    def check(tangent):
+        if np.any(np.asarray(tangent) != 0):
+            raise NotImplementedError(
+                "Direct J/K supports density AD only; basis/geometry derivatives are not implemented."
+            )
+        return np.asarray(0., dtype=tangent.dtype)
+
+    primitive.def_impl(check)
+    primitive.def_abstract_eval(lambda tangent: jax.core.ShapedArray((), tangent.dtype))
+    mlir.register_lowering(primitive, mlir.lower_fun(
+        lambda tangent: jax.pure_callback(check, jax.ShapeDtypeStruct((), tangent.dtype),
+                                          tangent, vmap_method="sequential"),
+        multiple_results=False))
+
+    def jvp(primals, tangents):
+        value = primitive.bind(primals[0])
+        tangent = (ad.Zero(jax.core.ShapedArray((), value.dtype))
+                   if isinstance(tangents[0], ad.Zero) else primitive.bind(tangents[0]))
+        return value, tangent
+
+    def transpose(cotangent, tangent):
+        if not isinstance(cotangent, ad.Zero) and ad.is_undefined_primal(tangent):
+            raise NotImplementedError("Direct J/K basis/geometry VJP is not implemented.")
+        return (ad.Zero(tangent.aval) if ad.is_undefined_primal(tangent) else None,)
+
+    ad.primitive_jvps[primitive] = jvp
+    ad.primitive_transposes[primitive] = transpose
+    batching.primitive_batchers[primitive] = lambda args, axes: (
+        jax.lax.map(primitive.bind, batching.bdim_at_front(args[0], axes[0], args[0].shape[axes[0]])), 0)
+    return primitive
 
 
 @lru_cache(maxsize=32)
@@ -94,19 +159,33 @@ def _direct_operator(atoms_key, basis_key, cart, cutoff):
         primitive, mlir.lower_fun(apply, multiple_results=False), platform="cpu"
     )
 
+    # Keep the shell engine on CPU when response arrays live on CUDA. Only
+    # bounded density/J/K batches cross devices, never an AO ERI tensor.
+    host_apply = jax.jit(apply)
+
+    def host_callback(env, density):
+        cpu = jax.local_devices(backend="cpu")[0]
+        return np.asarray(host_apply(jax.device_put(env, cpu), jax.device_put(density, cpu)))
+
+    def cuda_apply(env, density):
+        shape = jax.ShapeDtypeStruct((2, *density.shape), jnp.float64)
+        return jax.pure_callback(host_callback, shape, env, density, vmap_method="sequential")
+
+    mlir.register_lowering(primitive, mlir.lower_fun(cuda_apply, multiple_results=False), platform="cuda")
+
     def jvp(primals, tangents):
         env, d = primals
         de, dd = tangents
-        if not isinstance(de, ad.Zero):
-            raise NotImplementedError(
-                "Direct J/K supports density AD only; use the RI contraction path for coefficients."
-            )
+        basis_zero = None if isinstance(de, ad.Zero) else _zero_basis_tangent().bind(de)
         value = primitive.bind(env, d)
-        return value, (
+        tangent = (
             ad.Zero(jax.core.ShapedArray(value.shape, value.dtype))
             if isinstance(dd, ad.Zero)
             else primitive.bind(env, dd)
         )
+        if basis_zero is not None:
+            tangent = (jnp.zeros_like(value) if isinstance(tangent, ad.Zero) else tangent) + basis_zero
+        return value, tangent
 
     def transpose(cot, env, d):
         if ad.is_undefined_primal(env):

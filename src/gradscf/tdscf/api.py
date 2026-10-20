@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Literal
+from dataclasses import replace
 
 from ..scf.reference import as_reference
 from ..tools import spectra
@@ -81,6 +82,7 @@ class _BaseTD:
         eigenvector_adjoint_tol: float = 1e-6,
         eigenvector_adjoint_max_iter: int = 64,
         response_kernel_options: Any | None = None,
+        max_memory: float | None = None,
         **kwargs: Any,
     ) -> None:
         if mf_or_molecule is None and "mf_or_reference" in kwargs:
@@ -105,6 +107,7 @@ class _BaseTD:
         self.eigenvector_adjoint_tol = eigenvector_adjoint_tol
         self.eigenvector_adjoint_max_iter = eigenvector_adjoint_max_iter
         self.response_kernel_options = response_kernel_options
+        self.max_memory = max_memory
 
         self.result: Any | None = None
         self.e: Any | None = None
@@ -192,6 +195,10 @@ class _BaseTD:
 
     def _restricted_solver_kwargs(self, molecule: Any) -> dict[str, Any]:
         kwargs = self._common_solver_kwargs(molecule)
+        options = self.response_kernel_options
+        if self.max_memory is not None:
+            from ..tddft.response_options import normalize_response_kernel_options
+            options = replace(normalize_response_kernel_options(options), max_memory=self.max_memory)
         kwargs.update(
             {
                 "matrix_eps": self.matrix_eps,
@@ -204,12 +211,14 @@ class _BaseTD:
                 "tda_gradient_mode": self.tda_gradient_mode,
                 "eigenvector_adjoint_tol": self.eigenvector_adjoint_tol,
                 "eigenvector_adjoint_max_iter": self.eigenvector_adjoint_max_iter,
-                "response_kernel_options": self.response_kernel_options,
+                "response_kernel_options": options,
             }
         )
         return kwargs
 
     def _unrestricted_solver_kwargs(self, molecule: Any) -> dict[str, Any]:
+        if self.max_memory is not None:
+            raise NotImplementedError("The max_memory response budget currently supports restricted references.")
         kwargs = self._common_solver_kwargs(molecule)
         source_xc = self.xc_functional
         if source_xc is None:

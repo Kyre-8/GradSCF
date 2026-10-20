@@ -132,6 +132,11 @@ class _BaseKS:
         if isinstance(self, RKS):
             initializer._sync_from_scf_result(initializer._build_scf_result(spec))
         initial = initializer._build_reference(spec)
+        if isinstance(self, RKS) and initial.direct_basis is not None:
+            # The existing external-XC SCF solver consumes integral arrays.
+            # Preserve that contract; direct TD references retain the action.
+            initial = replace(initial, direct_basis=None,
+                              eri_pair_matrix=initializer._scf_inputs.response_eri_pair_matrix())
         if isinstance(self, RKS):
             self._scf_inputs = initializer._scf_inputs
         if initial.ao_laplacian is None:

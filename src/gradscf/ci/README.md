@@ -95,6 +95,14 @@ of supplied integrals and the reference is the caller's responsibility.
 
 For explicit inputs to a facade use
 `CIReference(h1_mo, eri_mo, nocc, nuclear_repulsion=..., mo_energy=...)`.
+SCF-backed restricted non-DF `CIS` instead shares the AO single-excitation
+action with TD response, avoiding a complete MO-ERI transformation. Native
+direct references retain their J/K provider without constructing an AO-pair
+matrix. `CIS(..., max_memory=1024.)` budgets this path in decimal MB; frozen
+spaces, singlet/triplet selection and unit-norm CIS amplitudes are preserved.
+DF, explicit-integral inputs, UCIS and CIS(D) retain their existing routes.
+See [direct response and validation](../tddft/DIRECT_RESPONSE.md) for its
+fixed-basis AD contract, cache format, device behavior and measured limits.
 For AO inputs, `integrals.molecular.ao2mo.transform_integrals` supports full ERIs, an s4
 AO-pair matrix, or density-fitting factors with shape `(naux, nao, nao)`.
 The SCF facade adapter is eager and accepts converged GradSCF `scf.RHF` (or `RKS(xc="hf")`),

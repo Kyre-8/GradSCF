@@ -23,6 +23,7 @@ from .lowrank_response import build_restricted_lowrank_mo_response_action
 from .response_options import (
     ResponseKernelOptions,
     normalize_response_kernel_options,
+    plan_response_memory,
 )
 
 
@@ -714,6 +715,7 @@ def _restricted_ao_response_action(
     include_exchange: bool,
     dtype: Any,
     two_electron_mode: str = "auto",
+    include_coulomb: bool = True,
 ) -> Callable[[Array], Array]:
     alpha = jnp.asarray(hybrid_fraction, dtype=dtype)
     rsh = _restricted_rsh_coefficients(molecule)
@@ -731,7 +733,13 @@ def _restricted_ao_response_action(
             'response_two_electron_mode="df" requires molecule.df_factors. '
             'Build the reference with response_df_mode="df" or jk_backend="df".'
         )
-    if mode in {"auto", "df"} and df_factors is not None and int(jnp.asarray(df_factors).size) > 0:
+    direct_basis = getattr(molecule, "direct_basis", None)
+    if mode in {"auto", "direct"} and direct_basis is not None:
+        if rsh is not None:
+            raise NotImplementedError("Range-separated direct J/K response is not implemented.")
+        jk_fn = direct_basis.get_jk
+        j_fn = lambda density: jk_fn(density)[0]
+    elif mode in {"auto", "df"} and df_factors is not None and int(jnp.asarray(df_factors).size) > 0:
         source = jnp.asarray(df_factors, dtype=dtype)
         jk_fn = lambda density: _jk_from_df_factors(source, density)
         j_fn = lambda density: _j_from_df_factors(source, density)
@@ -763,7 +771,7 @@ def _restricted_ao_response_action(
         if eri_lr is not None:
             _, k_lr = _jk_from_full_eri(eri_lr, density_ao)
             exchange = exchange+(long_range-short_range)*k_lr
-        return (j_mat - 0.5 * exchange).reshape(original_shape)
+        return ((j_mat if include_coulomb else jnp.zeros_like(j_mat)) - 0.5 * exchange).reshape(original_shape)
 
     return action
 
@@ -880,9 +888,12 @@ def _build_restricted_response_operator_data(
     occupation_tolerance: float = 1e-8,
     need_b_terms: bool = True,
     response_kernel_options: ResponseKernelOptions | dict[str, Any] | None = None,
+    singlet: bool = True,
 ) -> _RestrictedResponseOperatorData:
     response_options = normalize_response_kernel_options(response_kernel_options)
     resolved_xc = _resolve_xc_functional(molecule, xc_functional, xc_params)
+    if not singlet and getattr(resolved_xc, "xc_spec", None) != "hf":
+        raise NotImplementedError("The triplet AO response option currently requires HF.")
     rsh = _restricted_rsh_coefficients(molecule)
     functional_rsh = getattr(resolved_xc, "range_separated_coefficients", None)
     if rsh is not None or functional_rsh is not None:
@@ -915,7 +926,13 @@ def _build_restricted_response_operator_data(
     nonlocal_xc_a_action_fn = None
     nonlocal_xc_b_action_fn = None
 
-    if resolved_xc is not None:
+    from ._semilocal_response import SemilocalResponseFunctional
+    standard_hf = isinstance(resolved_xc, SemilocalResponseFunctional) and resolved_xc.xc_spec == "hf"
+    if standard_hf:
+        # HF has no quadrature contribution. Even a zero local kernel would
+        # otherwise construct a useless grid-by-occupied-by-virtual tensor.
+        hybrid_fraction = resolved_xc.exact_exchange_fraction
+    elif resolved_xc is not None:
         total_density = _density_on_grid(molecule)
         hybrid_fraction = _strict_hybrid_fraction(
             resolved_xc,
@@ -1016,7 +1033,7 @@ def _build_restricted_response_operator_data(
 
     response_dtype = jnp.result_type(delta_eps, weights)
     include_exchange = _needs_exchange_terms(hybrid_fraction)
-    ao_mo_response_action_fn = None if rsh is not None else _restricted_lowrank_response_action_for_options(
+    ao_mo_response_action_fn = None if rsh is not None or not singlet else _restricted_lowrank_response_action_for_options(
         molecule,
         orbo,
         orbv,
@@ -1033,6 +1050,7 @@ def _build_restricted_response_operator_data(
             include_exchange=include_exchange,
             dtype=response_dtype,
             two_electron_mode=response_options.two_electron_mode,
+            include_coulomb=singlet,
         )
     else:
         ao_response_action_fn = _unused_ao_response_action
@@ -1133,6 +1151,18 @@ def _restricted_tdhf_action(
     )
 
 
+def _map_response_vectors(action, values, batch_size):
+    """Apply sequential vector microbatches; retain only the final OV rows."""
+    count = values.shape[0]
+    if count <= batch_size:
+        return action(values)
+    padded = ((count + batch_size - 1) // batch_size) * batch_size
+    values = jnp.pad(values, ((0, padded - count),) + ((0, 0),) * (values.ndim - 1))
+    blocks = values.reshape(-1, batch_size, *values.shape[1:])
+    result = jax.lax.map(jax.checkpoint(action), blocks)
+    return result.reshape(padded, *result.shape[2:])[:count]
+
+
 def build_restricted_tda_operator(
     molecule: Any,
     xc_functional: Any | None = None,
@@ -1140,6 +1170,7 @@ def build_restricted_tda_operator(
     xc_params: Any | None = None,
     occupation_tolerance: float = 1e-8,
     response_kernel_options: ResponseKernelOptions | dict[str, Any] | None = None,
+    singlet: bool = True,
 ):
     data = _build_restricted_response_operator_data(
         molecule,
@@ -1148,16 +1179,20 @@ def build_restricted_tda_operator(
         occupation_tolerance=occupation_tolerance,
         need_b_terms=False,
         response_kernel_options=response_kernel_options,
+        singlet=singlet,
     )
     delta_eps = data.delta_eps
     nocc, nvir = delta_eps.shape
     dim = int(nocc * nvir)
 
     diagonal = _restricted_tda_diagonal(data).reshape(-1)
+    options = normalize_response_kernel_options(response_kernel_options)
+    plan = plan_response_memory(data.orbo.shape[0], dim, 1, data.orbo.dtype, options.max_memory)
 
     def vind(x: Array) -> Array:
         x = jnp.asarray(x).reshape(-1, nocc, nvir)
-        return _restricted_a_action(data, x).reshape(-1, dim)
+        return _map_response_vectors(lambda block: _restricted_a_action(data, block),
+                                     x, plan.batch_size).reshape(-1, dim)
 
     return vind, diagonal, delta_eps
 
@@ -1180,8 +1215,11 @@ def build_restricted_tdhf_operator(
     delta_eps = data.delta_eps
     nocc, nvir = delta_eps.shape
     dim = int(nocc * nvir)
+    options = normalize_response_kernel_options(response_kernel_options)
+    plan = plan_response_memory(data.orbo.shape[0], dim, 1, data.orbo.dtype,
+                                options.max_memory, rpa=True)
 
-    def vind(z: Array) -> Array:
+    def block_action(z: Array) -> Array:
         z = jnp.asarray(z).reshape(-1, 2 * dim)
         x = z[:, :dim].reshape(-1, nocc, nvir)
         y = z[:, dim:].reshape(-1, nocc, nvir)
@@ -1190,6 +1228,10 @@ def build_restricted_tdhf_operator(
             [upper.reshape(-1, dim), -lower.reshape(-1, dim)],
             axis=-1,
         )
+
+    def vind(z: Array) -> Array:
+        rows = jnp.asarray(z).reshape(-1, 2 * dim)
+        return _map_response_vectors(block_action, rows, plan.batch_size)
 
     return vind
 

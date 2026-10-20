@@ -83,6 +83,9 @@ class RestrictedMolecule:
     # A dynamic pytree leaf: occupied/virtual projections retain input AD.
     # None preserves the canonical mo_energy-difference contract.
     fock_matrix: jnp.ndarray | None = None
+    # Optional native AO J/K action. Its plan is static and its basis
+    # parameters are dynamic pytree leaves; no ERI array is required.
+    direct_basis: Any | None = None
 
     def density(self) -> jnp.ndarray:
         return jnp.einsum("spq,rp,rq->rs", self.rdm1, self.ao, self.ao)

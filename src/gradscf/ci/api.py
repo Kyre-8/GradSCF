@@ -1,10 +1,12 @@
 """PySCF-style facades backed by GradSCF's JAX CI kernels."""
+from dataclasses import replace
+
 import numpy as np
 
 from .integrals import reference_from_source
 from .space import make_ci_space, make_uci_space, _selected_ranks
 from .spin import spin_square
-from .solver import solve_ci, solve_cis, solve_ucis
+from .solver import solve_ci, solve_cis, solve_cis_response, solve_ucis
 from gradscf.integrals.molecular.ao2mo import spin_orbital_integrals
 from .solver import restricted_fock
 from .corrections import cis_d_correction
@@ -204,14 +206,22 @@ class UCIS(UCI):
 
 
 class CIS(CI):
-    """Spin-adapted HF singles. e is an array of excitation energies in Hartree."""
-    def __init__(self, mf, *, singlet=None, **kwargs):
+    """Spin-adapted HF singles; e is an excitation-energy array in Hartree.
+
+    Non-DF SCF sources use the shared AO response action instead of a full MO
+    ERI transformation. ``max_memory`` (decimal MB) budgets this AO path;
+    explicit CIReference and DF inputs retain the MO-integral implementation.
+    """
+    _use_ao_response = True
+
+    def __init__(self, mf, *, singlet=None, max_memory=2000.0, **kwargs):
         if kwargs.get("excitation_ranks") is not None:
             raise ValueError("CIS has a fixed singles space; excitation_ranks is not supported")
         if is_unrestricted_source(mf) and singlet is not None:
             raise ValueError("Unrestricted CIS has no singlet/triplet selection; use UCIS")
         super().__init__(mf, max_excitation=1, **kwargs)
         self.singlet = None if is_unrestricted_source(mf) else (True if singlet is None else singlet)
+        self.max_memory = max_memory
         self.e = self.amplitudes = None
 
     def kernel(self):
@@ -219,6 +229,37 @@ class CIS(CI):
             raise ValueError("CIS has a fixed singles space; excitation_ranks is not supported")
         if is_unrestricted_source(self.mf):
             return UCIS.kernel(self)
+        from ..scf.facade import RKS
+        from ..scf.reference import as_reference
+
+        if (self._use_ao_response and isinstance(self.mf, RKS)
+                and self.mf.jk_backend != "df"):
+            if str(self.mf.xc).strip().lower() != "hf":
+                raise NotImplementedError("CIS requires a closed-shell HF reference")
+            if (not self.mf.converged or self.mf.scf_result is None
+                    or self.mf._scf_inputs is None):
+                raise RuntimeError("Run and converge the HF SCF before CIS")
+            # The AO adapter retains the source's convergence/freshness checks.
+            # Use its actual Fock matrix, including noncanonical block response.
+            self.reference = ref = replace(
+                as_reference(self.mf), fock_matrix=self.mf.scf_result.fock_matrix)
+            coeff = np.asarray(self.mf.mo_coeff)
+            nocc = self.mf._scf_inputs.nelectron // 2
+            if coeff.ndim != 2 or np.iscomplexobj(coeff) or self.mf._scf_inputs.nelectron % 2:
+                raise NotImplementedError("Only real closed-shell HF references are supported")
+            expected = np.zeros(coeff.shape[1])
+            expected[:nocc] = 2
+            if not np.allclose(np.asarray(self.mf.mo_occ), expected, atol=1e-10, rtol=0):
+                raise ValueError("CIS requires integer occupations, occupied orbitals first")
+            fock = coeff.T @ np.asarray(ref.fock_matrix) @ coeff
+            if np.max(np.abs(fock[:nocc, nocc:]), initial=0.) > 1e-7:
+                raise ValueError("CIS requires a stationary HF reference (occupied-virtual Fock block must vanish)")
+            self.result = solve_cis_response(
+                ref, singlet=self.singlet, frozen=self.frozen,
+                config=self._config(), max_memory=self.max_memory)
+            self.e, self.amplitudes = self.result.excitation_energies, self.result.amplitudes
+            self.converged = np.asarray(self.result.converged)
+            return self.e, self.amplitudes
         self.reference = ref = reference_from_source(self.mf)
         fock = np.asarray(restricted_fock(ref.h1, ref.eri, ref.nocc))
         if np.max(np.abs(fock[:ref.nocc, ref.nocc:]), initial=0.) > 1e-7:
@@ -232,6 +273,9 @@ class CIS(CI):
 
 class CIS_D(CIS):
     """Canonical RHF singlet CIS(D), with complete first-order CIS-vector response."""
+    # The doubles correction requires the canonical MO ERIs after the CIS solve.
+    _use_ao_response = False
+
     def __init__(self, mf, *, singlet=True, denominator_tol=1e-10, **kwargs):
         if is_unrestricted_source(mf):
             raise NotImplementedError("CIS(D) currently requires a closed-shell RHF reference")

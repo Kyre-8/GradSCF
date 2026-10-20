@@ -35,7 +35,7 @@ def _davidson_search_nroots(nroots: int, dim: int) -> int:
 
 def _davidson_max_subspace(nroots: int, dim: int, max_subspace: int | None) -> int:
     if max_subspace is None:
-        return int(dim)
+        return min(int(dim), max(40, 4 * (int(nroots) + 1)))
     return min(int(dim), max(int(max_subspace), int(nroots) + 2))
 
 
@@ -169,7 +169,7 @@ def _davidson_lowest_symmetric(
     if initial_vectors is None:
         guess_dim = min(dim, max_subspace, guess_count)
         guess_idx = jnp.argsort(diag)[:guess_dim]
-        guess_basis = jnp.eye(dim, dtype=dtype)[:, guess_idx]
+        guess_basis = jax.nn.one_hot(guess_idx, dim, dtype=dtype).T
     else:
         guess_basis = jnp.asarray(initial_vectors, dtype=dtype)
         if (guess_basis.ndim != 2 or guess_basis.shape[0] != dim

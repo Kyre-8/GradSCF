@@ -197,6 +197,7 @@ def _build_restricted_reference(
     pt2_local = None
     pt2_fock_response = None
     reference_eri_pair_matrix = None
+    reference_direct_basis = None
     if compute_local_hfx_features:
         hfx_result = _local_hfx_features_from_basis_dm(
             basis_cart,
@@ -221,6 +222,11 @@ def _build_restricted_reference(
     if cfg.jk_backend == "df":
         if df_factors is None:
             raise RuntimeError("DF backend requested but df_factors were not constructed.")
+        rep_tensor = _empty_rep_tensor_like(s)
+    elif cfg.jk_backend == "direct" and not compute_local_pt2_features and callable(
+        getattr(scf_inputs.direct_basis, "get_jk", None)
+    ):
+        reference_direct_basis = scf_inputs.direct_basis
         rep_tensor = _empty_rep_tensor_like(s)
     else:
         if eri is None and eri_pair_matrix is None:
@@ -292,6 +298,7 @@ def _build_restricted_reference(
         pt2_fock_response=pt2_fock_response,
         df_factors=reference_arrays["df_factors"],
         eri_pair_matrix=reference_eri_pair_matrix,
+        direct_basis=reference_direct_basis,
         scf_converged=bool(rks.converged),
         scf_cycles=int(rks.cycles),
         eri_lr=getattr(scf_inputs, "eri_lr", None),

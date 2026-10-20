@@ -27,7 +27,7 @@ from .response import (
     gen_tda_vind,
     gen_tdhf_vind,
 )
-from .response_options import ResponseKernelOptions
+from .response_options import ResponseKernelOptions, normalize_response_kernel_options, plan_response_memory
 from .tda import solve_tda_from_operator
 from .types import TDDFTResult, TDAResult
 
@@ -144,6 +144,15 @@ class RestrictedCasidaTDDFT:
     eigenvector_adjoint_max_iter: int = 64
     response_kernel_options: ResponseKernelOptions | dict[str, Any] | None = None
 
+    def _memory_plan(self, nstates, *, rpa=False):
+        gaps = _restricted_delta_eps(self.molecule, self.occupation_tolerance)
+        dim = int(gaps.size)
+        roots = dim if nstates is None else min(int(nstates), dim)
+        options = normalize_response_kernel_options(self.response_kernel_options)
+        return plan_response_memory(self.molecule.mo_coeff.shape[-2], dim, roots,
+                                    gaps.dtype, options.max_memory,
+                                    max_subspace=self.davidson_max_subspace, rpa=rpa)
+
     def _posthoc_correction(
         self,
         result: TDAResult | TDDFTResult,
@@ -204,6 +213,7 @@ class RestrictedCasidaTDDFT:
         )
 
     def tda(self, nstates: int | None = None) -> TDAResult:
+        memory = self._memory_plan(nstates)
         mode = str(self.eigensolver).lower()
         if mode not in {"auto", "davidson"}:
             raise ValueError(
@@ -225,7 +235,7 @@ class RestrictedCasidaTDDFT:
             excitation_threshold=self.excitation_threshold,
             davidson_tol=self.davidson_tol,
             davidson_max_iter=self.davidson_max_iter,
-            davidson_max_subspace=self.davidson_max_subspace,
+            davidson_max_subspace=memory.max_subspace,
             davidson_initial_guess_count=self.davidson_initial_guess_count,
             davidson_max_trial_vectors=self.davidson_max_trial_vectors,
             tda_gradient_mode=self.tda_gradient_mode,
@@ -253,6 +263,7 @@ class RestrictedCasidaTDDFT:
         )
 
     def kernel(self, nstates: int | None = None) -> TDDFTResult:
+        memory = self._memory_plan(nstates, rpa=True)
         mode = str(self.eigensolver).lower()
         if mode not in {"auto", "davidson"}:
             raise ValueError(
@@ -274,7 +285,7 @@ class RestrictedCasidaTDDFT:
             matrix_eps=self.matrix_eps,
             davidson_tol=self.davidson_tol,
             davidson_max_iter=self.davidson_max_iter,
-            davidson_max_subspace=self.davidson_max_subspace,
+            davidson_max_subspace=memory.max_subspace,
             davidson_initial_guess_count=self.davidson_initial_guess_count,
         )
         return self._apply_posthoc_correction(result, use_tda=False)

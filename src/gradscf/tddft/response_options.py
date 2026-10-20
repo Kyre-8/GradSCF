@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
-from typing import Any, Literal
+from math import isfinite
+from numbers import Integral, Real
+from typing import Any, Literal, NamedTuple
+
+import numpy as np
 
 
 TwoElectronMode = Literal["auto", "direct", "df", "ris"]
@@ -17,6 +21,7 @@ class ResponseKernelOptions:
     ris_j_fit: RISFit = "sp"
     ris_k_fit: RISFit = "s"
     ris_aux_chunk_size: int = 256
+    max_memory: float = 2000.0
 
 
 _OPTION_FIELDS = {field.name for field in fields(ResponseKernelOptions)}
@@ -58,6 +63,9 @@ def normalize_response_kernel_options(
         raise ValueError("ris_theta must be positive.")
     if int(normalized.ris_aux_chunk_size) <= 0:
         raise ValueError("ris_aux_chunk_size must be positive.")
+    if (isinstance(normalized.max_memory, bool) or not isinstance(normalized.max_memory, Real)
+            or not isfinite(normalized.max_memory) or normalized.max_memory <= 0):
+        raise ValueError("max_memory must be a finite positive number of MB.")
 
     return ResponseKernelOptions(
         two_electron_mode=mode,  # type: ignore[arg-type]
@@ -65,4 +73,54 @@ def normalize_response_kernel_options(
         ris_j_fit=j_fit,  # type: ignore[arg-type]
         ris_k_fit=k_fit,  # type: ignore[arg-type]
         ris_aux_chunk_size=int(normalized.ris_aux_chunk_size),
+        max_memory=float(normalized.max_memory),
     )
+
+
+class _ResponseMemoryPlan(NamedTuple):
+    max_subspace: int
+    batch_size: int
+
+
+def plan_response_memory(nao, dim, nroots, dtype, max_memory,
+                         max_subspace=None, rpa=False):
+    """Bound primary solver/AO work arrays; max_memory is decimal MB.
+
+    The estimate reserves common AO state, output vectors, QR/Ritz work and
+    one microbatch of densities and J/K outputs. It is not an RSS bound on
+    XLA compilation, external functional internals or allocator caches.
+    """
+    if (isinstance(max_memory, bool) or not isinstance(max_memory, Real)
+            or not isfinite(max_memory) or max_memory <= 0):
+        raise ValueError("max_memory must be a finite positive number of MB.")
+    if min(nao, dim, nroots) < 1 or nroots > dim:
+        raise ValueError("Invalid response dimensions or requested root count.")
+    if max_subspace is not None and (isinstance(max_subspace, bool)
+            or not isinstance(max_subspace, Integral)):
+        raise ValueError("max_subspace must be an integer.")
+    # Public eigensolvers promote float32 to float64 when x64 is enabled.
+    # Eight bytes is conservative for the supported real response paths.
+    itemsize = max(8, np.dtype(dtype).itemsize)
+    budget = int(max_memory * 1_000_000)
+    fixed = itemsize * (8 * nao**2 + 4 * dim * nroots)
+    # The density transpose of native J/K concatenates the J/K cotangents.
+    per_vector = itemsize * (12 * nao**2 + (8 if rpa else 4) * dim)
+    minimum = min(dim, nroots + (2 if rpa else 3))
+    default = max(8 * nroots, 128) if rpa else max(40, 4 * (nroots + 2))
+    width = min(dim, default if max_subspace is None else int(max_subspace))
+    if width < minimum:
+        raise ValueError("max_subspace must retain requested and boundary roots plus expansion slots.")
+    def basis_bytes(columns):
+        return itemsize * ((10 if rpa else 6) * dim * columns + 8 * columns**2)
+    # Reserve the same action share for builder and solver, independently of
+    # the requested roots. The remaining budget belongs to the Ritz basis.
+    action_budget = max(per_vector, budget // 4)
+    required = fixed + action_budget + basis_bytes(minimum)
+    if required > budget:
+        raise ValueError(f"Response memory budget is {budget} bytes; at least {required} bytes are required.")
+    available = budget - fixed - action_budget
+    if max_subspace is not None and basis_bytes(width) > available:
+        raise ValueError("Requested max_subspace exceeds the response memory budget.")
+    while basis_bytes(width) > available:
+        width -= 1
+    return _ResponseMemoryPlan(width, min(32, max(1, action_budget // per_vector)))

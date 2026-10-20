@@ -165,3 +165,53 @@ def solve_cis(h1, eri, *, nocc, singlet=True, frozen=None, config=None, response
     return CISResult(energies, vectors.T.reshape(config.nroots, no, nv), residuals, converged,
                      (response.target == "eigenpairs" if response is not None
                       else config.gradient_mode == "implicit_eigenvector"), singlet)
+
+
+def solve_cis_response(molecule, *, singlet=True, frozen=None, config=None,
+                       response=None, max_memory=2000.0):
+    """AO-action counterpart of ``solve_cis`` for a restricted HF reference.
+
+    The reference carries AO J/K data (or a direct provider) and the full AO
+    Fock matrix. Only the active orbital columns are selected; the reference
+    density and its occupied/virtual Fock blocks remain unchanged. As in
+    ``solve_cis``, the caller supplies a stationary real HF reference and the
+    spatial amplitudes have unit norm. ``max_memory`` is in decimal MB.
+    """
+    from ..tddft._semilocal_response import SemilocalResponseFunctional
+    from ..tddft._utils import _restricted_channel
+    from ..tddft.response import build_restricted_tda_operator
+    from ..tddft.response_options import ResponseKernelOptions, plan_response_memory
+
+    config = CIConfig() if config is None else config
+    coeff, occupations, orbital_energies = _restricted_channel(molecule)
+    nmo = coeff.shape[1]
+    nocc = molecule.nocc
+    if not isinstance(nocc, int) or nocc < 1 or nocc >= nmo:
+        raise ValueError("CIS requires occupied and virtual orbitals")
+    frozen = frozen_indices(nmo, nocc, frozen)
+    occupied = [i for i in range(nocc) if i not in frozen]
+    virtual = [i for i in range(nocc, nmo) if i not in frozen]
+    no, nv = len(occupied), len(virtual)
+    if no * nv == 0:
+        raise ValueError("CIS has no active single excitations")
+    active = jnp.asarray(occupied + virtual, dtype=jnp.int32)
+    active_reference = replace(molecule, mo_coeff=coeff[:, active],
+                               mo_occ=occupations[active],
+                               mo_energy=orbital_energies[active], nocc=no)
+    plan = plan_response_memory(coeff.shape[0], no*nv, config.nroots,
+                                coeff.dtype, max_memory,
+                                max_subspace=(no*nv if config.solver == "dense"
+                                              else config.max_space))
+    config = replace(config, max_space=plan.max_subspace)
+    vind, diagonal, _ = build_restricted_tda_operator(
+        active_reference, SemilocalResponseFunctional("hf"), singlet=singlet,
+        response_kernel_options=ResponseKernelOptions(
+            two_electron_mode="direct", max_memory=max_memory))
+    # The TD action consumes row vectors, while the common CI solver uses
+    # columns. Do not inherit restricted TDA's sqrt(1/2) amplitude convention.
+    energies, vectors, residuals, converged = _eigenpairs(
+        lambda columns: vind(columns.T).T, diagonal, config, response)
+    return CISResult(energies, vectors.T.reshape(config.nroots, no, nv),
+                     residuals, converged,
+                     (response.target == "eigenpairs" if response is not None
+                      else config.gradient_mode == "implicit_eigenvector"), singlet)

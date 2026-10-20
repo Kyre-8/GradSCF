@@ -4,7 +4,7 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 from .dense import dense_vectors
-from .davidson import _davidson_lowest_symmetric
+from .davidson import _davidson_lowest_symmetric, _davidson_max_subspace
 
 
 class RitzResult(NamedTuple):
@@ -53,11 +53,11 @@ def solve_ritz(operator, config, *, initial_vectors=None, structure_valid=True):
     else:
         if operator.diagonal is None:
             raise ValueError("Davidson requires an operator diagonal approximation")
-        width = n if config.max_subspace is None else min(n, config.max_subspace)
-        if width < min(n, count + 2):
+        if config.max_subspace is not None and config.max_subspace < min(n, count + 2):
             raise ValueError(
                 "max_subspace must include nroots plus one boundary root and two expansion slots (or the full dimension)"
             )
+        width = _davidson_max_subspace(count, n, config.max_subspace)
         if initial_vectors is None:
             guess_count = min(
                 width,
