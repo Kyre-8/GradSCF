@@ -68,6 +68,8 @@ class TensorSpace:
             if max_rank is not None and sum(block.excitation) > max_rank:
                 result.append(None)
                 continue
+            if any(item is None for item in maps):
+                raise ValueError("This packed-only space does not expand high-rank tensors")
             packed = vector[block.offset:block.offset+block.size].reshape(block.shape)
             positions, phase, axis = [], 1, 0
             for count, (index, sign) in zip(block.counts, maps):
@@ -112,6 +114,26 @@ class TensorSpace:
             result.append(gap.reshape(-1))
         return jnp.concatenate(result)
 
+    def determinant_map(self, determinants):
+        """Physical determinant indices/signs for the packed wedge chart."""
+        from ..fci.cistring import excite
+        n = self.nmo
+        na, nb = self.nocc
+        reference = ((1 << na)-1) | (((1 << nb)-1) << n)
+        lookup = {d: i for i, d in enumerate(determinants)}
+        va, vb, oa, ob = self.orbitals
+        indices, signs = [], []
+        for block in self.blocks:
+            rank = sum(block.excitation)
+            phase = (-1)**(rank*(rank-1)//2)
+            for selected in product(*block.indices):
+                particles = tuple(va[i] for i in selected[0])+tuple(n+vb[i] for i in selected[1])
+                holes = tuple(oa[i] for i in selected[2])+tuple(n+ob[i] for i in selected[3])
+                determinant, sign = excite(reference, holes, particles)
+                indices.append(lookup[determinant])
+                signs.append(phase*sign)
+        return np.asarray(indices, dtype=np.int32), np.asarray(signs, dtype=np.int8)
+
 
 def _antisymmetry_map(n, rank):
     if rank == 0:
@@ -126,7 +148,8 @@ def _antisymmetry_map(n, rank):
 
 
 def make_tensor_space(nmo, nocc, *, max_excitation, frozen=None,
-                      max_determinants=5000, max_tensor_elements=2_000_000):
+                      max_determinants=5000, max_tensor_elements=2_000_000,
+                      packed_only=False):
     unrestricted = isinstance(nocc, tuple)
     ns = nocc if unrestricted else (nocc, nocc)
     if unrestricted:
@@ -152,8 +175,10 @@ def make_tensor_space(nmo, nocc, *, max_excitation, frozen=None,
         dense += prod(full)
     if size > max_determinants:
         raise ValueError(f"Tensor space requires {size} independent coefficients; max_determinants={max_determinants}")
-    if dense > max_tensor_elements:
-        raise ValueError(f"Dense tensor expansion requires {dense} elements; max_tensor_elements={max_tensor_elements}")
+    expanded = (sum(prod(full) for a, b, _, _, full in descriptors if a+b <= 2)
+                if packed_only else dense)
+    if expanded > max_tensor_elements:
+        raise ValueError(f"Dense tensor expansion requires {expanded} elements; max_tensor_elements={max_tensor_elements}")
     blocks, maps, offset, cache = [], [], 0, {}
     for a, b, counts, shape, full in descriptors:
         indices = tuple(np.asarray(list(combinations(range(n), r)), dtype=np.int32).reshape((comb(n, r), r))
@@ -162,6 +187,9 @@ def make_tensor_space(nmo, nocc, *, max_excitation, frozen=None,
         blocks.append(Block((a, b), counts, shape, full, indices, offset, block_size))
         group_maps = []
         for n, r in zip(dims, counts):
+            if packed_only and a+b > 2:
+                group_maps.append(None)
+                continue
             if (n, r) not in cache:
                 cache[(n, r)] = _antisymmetry_map(n, r)
             group_maps.append(cache[(n, r)])

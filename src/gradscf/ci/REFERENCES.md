@@ -89,3 +89,30 @@ correction needs its own definition, source, denominators and validation.
 The [PySCF CI API](https://pyscf.org/user/ci.html) and
 [Psi4 DETCI manual](https://psicode.org/psi4manual/master/detci.html) remain useful
 software documentation, but do not replace the method bibliography.
+
+## Direct-action implementation and source comparison
+
+The direct-action update was compared with the official source on 2026-10-20:
+
+- [PySCF `cisd.contract`](https://pyscf.org/_modules/pyscf/ci/cisd.html) applies
+  the CISD Hamiltonian to singles/doubles tensors rather than storing every
+  determinant-pair connection.
+- [PySCF `direct_spin1.contract_2e`](https://pyscf.org/_modules/pyscf/fci/direct_spin1.html)
+  and [string links](https://pyscf.org/_modules/pyscf/fci/cistring.html) use
+  alpha/beta occupation strings and factorized one-body links.
+- [OpenMolcas RASSCF](https://molcas.gitlab.io/OpenMolcas/sphinx/users.guide/programs/rasscf.html)
+  describes split-GUGA with determinant-based inner sigma-vector operations.
+
+`direct.py` is a GradSCF JAX implementation in compact particle/hole string
+coordinates. The source comparisons motivate direct sigma contractions; they
+do not imply that GradSCF reproduces PySCF's spin-adapted CISD storage or
+OpenMolcas's GUGA representation. The existing Slater--Condon implementation
+remains a separate small-space oracle. Partial input/output rank limits apply
+to the complete one-/two-body operator, giving `P_out H P_in`; a truncated
+product of two projected single-excitation operators would be incorrect.
+
+CI and recursive MP share these actions. CI retains variational eigenvalue
+equations, while MP retains its own Fock partition and Taylor recurrence. MO
+degeneracy inside a complete occupied/virtual block is distinct from a truly
+degenerate CI root; the latter retains the documented isolated-root response
+boundary.

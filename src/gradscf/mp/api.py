@@ -62,7 +62,8 @@ class MP:
             result = run_mp(ref.h1, ref.eri, nocc=ref.nocc,
                 frozen=self.frozen, nuclear_repulsion=ref.nuclear_repulsion, config=cfg)
         else:
-            result = evaluate_mp2(from_scf(self.mf, frozen=self.frozen), cfg)
+            result = evaluate_mp2(from_scf(self.mf, frozen=self.frozen,
+                                           frozen_gap_tol=cfg.denominator_tol), cfg)
         self.result = result
         self.e_corr, self.e_tot, self.e2, self.e3 = (result.correlation_energy,
             result.total_energy, result.e2, result.e3)
@@ -72,7 +73,7 @@ class MP:
         self.wavefunction_coefficients = result.wavefunction_coefficients
         self.converged = bool(result.valid)
         if not self.converged:
-            raise RuntimeError("MP requires finite canonical HF data and resolved physical denominators")
+            raise RuntimeError("MP requires stationary HF data in the selected orbital basis and resolved physical denominators")
         return self.e_corr, self.t2
 
     def run(self):

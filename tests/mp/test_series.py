@@ -84,18 +84,18 @@ def test_linear_hamiltonian_nodes_are_shared_outside_taylor(system, monkeypatch)
     from gradscf.mp import MPConfig, run_mp
     from gradscf.ci import hamiltonian
     _, h, g, no = system
-    build = hamiltonian.build_hamiltonian
+    build = hamiltonian.build_direct_hamiltonian
     calls = []
-    def counted(*args):
-        op = build(*args)
+    def counted(*args, **kwargs):
+        op = build(*args, **kwargs)
         class Action:
             diagonal = op.diagonal
-            def __call__(self, c):
+            def apply(self, c):
                 assert type(c).__name__ != "JetTracer", "Share linear actions before Taylor propagation"
                 calls.append(c)
-                return op(c)
+                return op.apply(c)
         return Action()
-    monkeypatch.setattr(hamiltonian, "build_hamiltonian", counted)
+    monkeypatch.setattr(hamiltonian, "build_direct_hamiltonian", counted)
     result = run_mp(h, g, nocc=no, config=MPConfig(order=6, algorithm="series"))
     assert result.valid
     # W Phi0 and W Psi1..3, plus two distinct E2 spin-channel nodes.

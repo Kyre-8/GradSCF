@@ -1,4 +1,129 @@
-# Canonical molecular MP validation
+# Molecular MP validation
+
+## Invariant Fock resolvent and nuclear response, 2026-10-20
+
+This increment adds `orbital_basis="noncanonical"` for real stationary RHF/UHF
+frames. The occupied and virtual Fock blocks remain inside the residual and
+its implicit derivative; no derivative of an individual degenerate canonical
+orbital is taken. The default canonical API and its streaming MP2 path remain
+available. The series engine reuses the compact CI action, shares each
+`W Psi_j`, and prunes only identically absent excitation ranks. It does not
+discard small amplitudes or regularize physical zero denominators.
+
+All new numerical checks ran remotely on `jy_gpu_1`, Intel Xeon Platinum
+8457C, CPU float64, Python 3.11.15, JAX/JAXlib 0.10.0 and PySCF 2.13.0.
+CUDA devices were hidden, including GPU6. Independent jobs used disjoint
+16-CPU affinity sets with eight BLAS threads; no local numerical tests ran.
+Resource limits, commands, JUnit results and source snapshots are retained
+under the worktree's ignored `artifacts/ci_mp_validation/` directory.
+
+Focused MP2 checks passed 25 synthetic/legacy cases, one complete N2 geometry
+case, and a later five-case frozen-boundary selection. They cover R/U internal
+occupied/virtual rotations, exact internal degeneracy, JVP/VJP and HVP against
+independent finite differences, canonical agreement, empty channels, and
+invalid physical denominators. The frozen-boundary increment rejects a
+partially frozen degenerate eigenspace and uses the configured denominator
+tolerance. The complete N2 MP2 run preceded that narrow guard increment; it is
+not evidence for general moving frozen-core projector response.
+
+The higher-order independent oracle uses PySCF Hamiltonian actions followed by
+ordinary NumPy Rayleigh--Schrodinger recursion. It shares neither the Taylor
+lifting nor the production CI action. At exact internal degeneracy, both
+`series` and `tensor` passed checks of each E2--E6 JVP and of the **sum of
+corrections' HVP**: two cases, 783.72 s pytest time, 812.90 s wall time,
+8.21 GiB peak process RSS. This includes compilation, not warmed execution.
+These checks do not establish each coefficient's HVP or a nuclear Hessian.
+Earlier MP4 coefficient/JVP/HVP and capacity/dispatch selections also passed;
+the final MP6 pair checks the rank-pruned implementation.
+
+A separate 400-determinant, six-electron/six-spatial-orbital check explicitly
+applies `P_4 H P_6` to the rank-six determinant and obtains a nonzero rank-four
+result. Its action, transpose, physical-integral directional VJP and state VJP
+match the old Slater--Condon oracle (one case, 299.82 s pytest, 316.14 s wall,
+5.84 GiB peak RSS). Two additional cases verify that nonzero coordinate
+diagonal gaps do not conceal an actually singular occupied/virtual spectrum
+(69.70 s pytest). Both representations reject that noninvertible recurrence,
+including JVP/VJP; this is not a claim that every zero-coupling degenerate
+model lacks a smooth energy extension.
+
+The complete nuclear-response case uses all-electron N2/STO-3G at R=2.08 bohr,
+Cartesian AOs, native GradSCF integrals and independently converged HF in both
+programs. The symmetry-preserving AO density seed is `1.4 I_10`; the hcore
+seed instead selects a different, high-energy RHF branch. The occupied pi
+orbitals are degenerate to roundoff. GradSCF differentiates native integrals,
+implicit HF, the transported occupied/virtual frame, MO integrals and the MP
+residual. The independent MP4 reference reconverges PySCF at R and R +/- h,
+with h=3e-4 and 1e-4 bohr.
+
+| Quantity | GradSCF | Independent reference |
+| --- | ---: | ---: |
+| MP4 total / Ha | -107.650984563774 | -107.65098456377372 |
+| MP4 dE/dR / (Ha/bohr) | -0.2816141277 | -0.28161424223 (h=3e-4) |
+| MP4 dE/dR / (Ha/bohr) | -0.2816141277 | -0.28161414086 (h=1e-4) |
+| MP6 total / Ha | -107.653992031040 | -107.653992031040 (rounded) |
+| MP6 dE/dR / (Ha/bohr) | -0.2877278495 | -0.287727961516 (h=3e-4) |
+| MP6 dE/dR / (Ha/bohr) | -0.2877278495 | -0.287727862442 (h=1e-4) |
+
+The MP4 case passed, including all four displaced energies, internal finite
+differences, transverse zero forces and translation invariance. Pytest took
+635.50 s, wall time 649.46 s and peak RSS 8.17 GiB. Gradient lowering,
+compilation and first execution took 86.112, 318.947 and 0.422 s, respectively.
+An additional forward compilation accounts for most of the remaining time;
+the current test reuses the compiled value-and-gradient function for the
+displaced energies. The earlier unpruned graph was stopped within its resource
+budget before producing a numerical result; it is not a passed comparison.
+
+The corresponding default-JIT N2 MP6 geometry attempt completed lowering in
+228.244 s but did not complete XLA backend compilation. It was stopped after
+1140.53 s within the 1200 s budget, with return code -15 and peak RSS 16.23 GiB.
+The compiler reported repeated `algebraic_simplifier` passes; neither the
+energy, gradient nor finite differences were executed. The successful small
+MP6 coefficient-response checks above must not be read as this larger nuclear
+test having passed. Compilation scale remains a practical limitation.
+
+An isolated compiler diagnostic disabled only XLA's `algsimp` pass for that
+same lowered MP6 gradient. It also exhausted its budget before execution:
+1140.58 s wall, 23.92 GiB peak RSS, no energy/gradient/FD result. Its unchanged
+source produced approximately 1.275 million unoptimized HLO instructions,
+122.22 MiB of HLO text. This does not isolate a single pass as the cause of
+slow compilation, and no compiler-disable setting is installed by GradSCF.
+
+The final algebraic reduction directly constructs normal-ordered W and removes
+the lambda-independent HF offset from the Taylor quotient. Its ten focused
+R/U, frozen-space, rank-projection, transpose and physical-direction response
+cases passed in 167.96 s pytest time (179.88 s wall, 4.09 GiB peak RSS).
+They also check a nonzero occupied--virtual Fock perturbation and the absence
+of same-block Fock kernels in the W construction. Two additional forward cases
+passed in 105.32 s: legacy canonical H2 low-order agreement and each E2--E6
+against independent RS for the rotated noncanonical model.
+
+On that frozen reduced source, the physical-CI default builder, the selected
+doubles coupling, exact-degenerate MP4/series JVP plus total HVP, and
+MP6/tensor JVP plus total HVP passed together: four cases, 543.71 s pytest,
+564.57 s wall, 7.94 GiB peak RSS. No source changed during this run.
+
+The complete N2 MP6 nuclear test then passed with **default JIT**, no plugin
+or compiler-options override: one case, 1008.48 s pytest, 1033.34 s wall,
+14.81 GiB peak process RSS. Lowering/compilation/first execution took
+201.800/792.461/1.539 s. Internal FD errors were 1.121e-7 and 1.254e-8
+Ha/bohr for h=3e-4 and 1e-4 bohr; independent RS FD errors were 1.120e-7
+and 1.289e-8 Ha/bohr. Displaced-energy errors were at most 1.705e-13 Ha.
+Translations and transverse gradients passed their original tolerances.
+The compiler still warned about repeated simplifier passes; compilation scale
+is reduced enough for this bounded case, not eliminated as a general concern.
+The 1.539 s measurement is the first execution of an already compiled gradient,
+not a repeated warm benchmark. The earlier MP4 nuclear run preceded this final
+W/Rayleigh reduction; the MP6 and four-case response runs use the reduced source.
+
+Fifteen selected legacy MP cases also passed (336.89 s pytest time), covering
+R/U tensor MP4/MP6, low-order amplitudes and spin components, MP5 wavefunctions,
+capacity/invalid guards and the existing implicit HF-to-MP4 basis-parameter
+chain. This is a selected regression, not a rerun of the full suite or MP12.
+General ROHF, complex orbitals, moving frozen-core geometry, a closed physical
+occupied--virtual gap and large-system high-order scaling remain outside this
+validation. An isolated HF branch and nonsingular excitation resolvents are
+still required. CCSD(T)'s separate first-order streamed-response checks are
+recorded in [the CC validation](../cc/VALIDATION.md).
 
 ## Shared Taylor graph optimization, 2026-10-10
 

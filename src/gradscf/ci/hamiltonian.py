@@ -16,6 +16,7 @@ import numpy as np
 from .space import UCISpace
 from ..fci.cistring import excite
 from gradscf.integrals.molecular.ao2mo import validate_integrals, spin_orbital_integrals
+from .direct import build_direct_hamiltonian, build_one_body, build_fluctuation
 
 
 @lru_cache(maxsize=8)

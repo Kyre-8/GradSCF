@@ -26,7 +26,7 @@ class CI:
     def __init__(self, mf, *, max_excitation=2, frozen=None, nroots=1,
                  solver="davidson", conv_tol=1e-9, max_cycle=100, max_space=None,
                  gradient_mode="eigenvalue_only", adjoint_tol=1e-10,
-                 adjoint_max_cycle=100, max_determinants=5000, excitation_ranks=None):
+                 adjoint_max_cycle=100, max_determinants=1_000_000, excitation_ranks=None):
         self.mf = mf
         self.max_excitation = max_excitation
         self.excitation_ranks = _selected_ranks(max_excitation, excitation_ranks)

@@ -118,7 +118,8 @@ class CC:
         return self.l1, self.l2
 
     def triples(self, *, variant=None, orbital_basis="canonical",
-                max_triples_elements=2_000_000):
+                max_triples_elements=2_000_000, algorithm="auto",
+                max_workspace_elements=2_000_000):
         """Return CCSD(T) or QCISD(T) for this model, with state diagnostics.
 
         An explicit variant can select restricted CCSD+T(CCSD). Cross-model
@@ -141,6 +142,8 @@ class CC:
             variant=variant,
             orbital_basis=orbital_basis,
             max_triples_elements=max_triples_elements,
+            algorithm=algorithm,
+            max_workspace_elements=max_workspace_elements,
         )
         if not bool(result.valid):
             raise ValueError(
@@ -149,9 +152,11 @@ class CC:
             )
         return result
 
-    def ccsd_t(self, *, orbital_basis="canonical", max_triples_elements=2_000_000):
+    def ccsd_t(self, *, orbital_basis="canonical", max_triples_elements=2_000_000,
+               algorithm="auto", max_workspace_elements=2_000_000):
         return self.triples(variant="ccsd(t)", orbital_basis=orbital_basis,
-                            max_triples_elements=max_triples_elements).energy
+                            max_triples_elements=max_triples_elements, algorithm=algorithm,
+                            max_workspace_elements=max_workspace_elements).energy
 
     def qcisd_t(self):
         """Canonical restricted QCISD(T), requiring converged QCISD amplitudes."""

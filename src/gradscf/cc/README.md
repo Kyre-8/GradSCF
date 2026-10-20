@@ -165,6 +165,12 @@ that remains defined at within-block orbital degeneracies. It is algebraically
 equivalent to explicit semicanonicalization, without differentiating individual
 orbital eigenvectors. The opt-in reference implementation stores six-index
 moments with `max_triples_elements=2_000_000` per tensor; it is not streamed.
+The additional `algorithm="streamed"` option uses bounded moment panels with
+full Fock-block JVP/VJP through second order, controlled by `max_workspace_elements`.
+`CorrelatedEnergy(mf, "ccsd(t)")` reuses the molecular HF response and this
+correction for complete nuclear gradients and Hessian-vector products. The
+streamed option explicitly rejects third-order AD; its remaining spin-block memory costs
+are documented with the formulation.
 Its Cartesian-spectrum singularity guard is conservative. See
 [the formulation and limits](SEMICANONICAL.md).
 See [the forward comparison and roadmap](FORWARD_PARITY.md).
@@ -182,10 +188,11 @@ default canonical path explicitly.
 
 This is an in-core reference implementation for small systems. Full MO integrals,
 CC intermediates and DIIS histories can be large. GPU performance, large-basis
-scaling, orbital optimization and complete nuclear coordinate gradients are not
-validated here. The tested contract is first-order parameter response of a
-converged nonsingular branch; root crossings and strong-correlation failures
-are not regularized into a different method.
+scaling and orbital optimization are not validated here. Native N2/STO-3G
+CCSD(T) has separate complete-gradient and two-direction nuclear HVP checks;
+these do not establish general large-system or unrestricted nuclear Hessians.
+Response requires a converged nonsingular branch; root crossings and
+strong-correlation failures are not regularized into a different method.
 
 Tests use H2 (0.74 Angstrom), asymmetric H4 (z = 0, 0.8, 1.9, 3.1 Angstrom),
 and H2O (H at y = +/-0.757, z = 0.587 Angstrom), with RHF/STO-3G, CPU and

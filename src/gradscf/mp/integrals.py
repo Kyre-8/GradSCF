@@ -2,6 +2,7 @@
 from typing import NamedTuple
 
 import numpy as np
+import jax
 import jax.numpy as jnp
 
 from gradscf.integrals.molecular.ao2mo import validate_integrals, validate_unrestricted_integrals, frozen_indices, unrestricted_frozen_indices, transform_eri_block
@@ -15,6 +16,8 @@ class MPIntegrals(NamedTuple):
     reference_energy: object
     canonical_error: object
     finite: object
+    focks: tuple
+    reference_error: object
 
 
 def _active_orbitals(nmo, nocc, frozen):
@@ -30,6 +33,45 @@ def active_indices(nmo, nocc, frozen):
 def canonical_error(focks):
     return jnp.max(jnp.stack([jnp.max(jnp.abs(f - jnp.diag(jnp.diag(f))), initial=0.)
                               for f in focks]))
+
+
+def reference_error(focks, nocc, *, frozen=None, orbital_basis="canonical", frozen_gap_tol=1e-10):
+    """Check the HF partition and fixed frozen subspaces, without choosing a gauge.
+
+    Noncanonical occupied/virtual rotations must preserve the frozen/active
+    boundary. Within each of these subspaces, Fock off-diagonal entries are
+    unrestricted. Mixing an active subspace with its frozen complement is
+    rejected rather than changing the MP zeroth-order Hamiltonian. Frozen
+    boundaries must also preserve complete degenerate Fock eigenspaces; this
+    mode does not attach response to independently supplied frozen projectors.
+    """
+    if orbital_basis == "canonical":
+        return canonical_error(focks)
+    ns = nocc if isinstance(nocc, tuple) else (nocc,)
+    nmo = focks[0].shape[0]
+    frozen_sets = (unrestricted_frozen_indices(nmo, ns, frozen)
+                   if isinstance(nocc, tuple) else (frozen_indices(nmo, nocc, frozen),))
+    errors = []
+    for f, no, selected in zip(focks, ns, frozen_sets):
+        errors.extend((jnp.max(jnp.abs(f[:no, no:]), initial=0.),
+                       jnp.max(jnp.abs(f[no:, :no]), initial=0.)))
+        for start, end in ((0, no), (no, nmo)):
+            active = jnp.asarray([i for i in range(start, end) if i not in selected], dtype=jnp.int32)
+            inactive = jnp.asarray([i for i in range(start, end) if i in selected], dtype=jnp.int32)
+            errors.extend((jnp.max(jnp.abs(f[jnp.ix_(active, inactive)]), initial=0.),
+                           jnp.max(jnp.abs(f[jnp.ix_(inactive, active)]), initial=0.)))
+            if active.size and inactive.size:
+                a, b = f[jnp.ix_(active, active)], f[jnp.ix_(inactive, inactive)]
+                ea = jnp.linalg.eigvalsh(jax.lax.stop_gradient(.5*(a+a.T)))
+                eb = jnp.linalg.eigvalsh(jax.lax.stop_gradient(.5*(b+b.T)))
+                gap = jnp.min(jnp.abs(ea[:, None]-eb[None, :]))
+                errors.append(jnp.where(gap > frozen_gap_tol, 0., jnp.inf))
+    return jnp.max(jnp.stack(errors))
+
+
+def _active_focks(focks, selections):
+    return tuple(f[jnp.ix_(jnp.concatenate((o, v)), jnp.concatenate((o, v)))]
+                 for f, (o, v) in zip(focks, selections))
 
 
 def _reference_data(h1, eri, nocc):
@@ -58,7 +100,7 @@ def _reference_data(h1, eri, nocc):
         return (h,), (g,), (f,), energy
 
 
-def prepare_integrals(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0.):
+def prepare_integrals(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., frozen_gap_tol=1e-10):
     hs, gs, focks, energy = _reference_data(h1, eri, nocc)
     energy = energy + nuclear_repulsion
     if isinstance(nocc, tuple):
@@ -79,10 +121,13 @@ def prepare_integrals(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0.):
     finite = (jnp.isfinite(energy) & jnp.all(jnp.stack([jnp.all(jnp.isfinite(x))
                for x in (*focks, *gs)])))
     return MPIntegrals(energies, tuple(len(o) for o, _ in selections), blocks,
-                       None, energy, canonical_error(focks), finite)
+                       None, energy, canonical_error(focks), finite,
+                       _active_focks(focks, selections),
+                       reference_error(focks, nocc, frozen=frozen, orbital_basis="noncanonical",
+                                       frozen_gap_tol=frozen_gap_tol))
 
 
-def from_scf(source, *, frozen=None):
+def from_scf(source, *, frozen=None, frozen_gap_tol=1e-10):
     """Reuse converged HF AO data; DF retains only Q/occupied/virtual factors.
 
     This is an eager adapter. It does not rerun SCF or transform complete MO ERIs.
@@ -150,4 +195,7 @@ def from_scf(source, *, frozen=None):
     finite = jnp.isfinite(source.e_tot) & jnp.all(jnp.stack([
         jnp.all(jnp.isfinite(x)) for x in (*focks, *finite_data)]))
     return MPIntegrals(energies, tuple(len(o) for o, _ in selections), blocks,
-                       ov_factors, jnp.asarray(source.e_tot), canonical_error(focks), finite)
+                       ov_factors, jnp.asarray(source.e_tot), canonical_error(focks), finite,
+                       _active_focks(focks, selections), reference_error(
+                           focks, ns if unrestricted else ns[0], frozen=frozen,
+                           orbital_basis="noncanonical", frozen_gap_tol=frozen_gap_tol))

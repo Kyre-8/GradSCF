@@ -9,7 +9,7 @@
 # Adapted from PySCF 2.9.0 cc/ccsd_t_slow.py; see NOTICE.md and LICENSE.pyscf.
 # Original author: Qiming Sun <osirpt.sun@gmail.com>
 # QCISD(T) weight/contractions: PySCF qcisd_t_slow, Qiming Sun and Timothy Berkelbach.
-"""CC/QCI noniterative triples; canonical streaming and opt-in CC tensor solve."""
+"""CC/QCI triples: canonical streaming, general tensor and panel response."""
 from math import isfinite
 from itertools import permutations
 import numpy as np
@@ -47,6 +47,8 @@ def evaluate_triples(
     canonical_tol=1e-7,
     orbital_basis="canonical",
     max_triples_elements=2_000_000,
+    algorithm="auto",
+    max_workspace_elements=2_000_000,
 ):
     """CCSD(T), restricted Urban +T(CCSD), or canonical restricted QCISD(T).
 
@@ -60,13 +62,23 @@ def evaluate_triples(
     orbital_basis='semicanonical' selects the general-reference formula,
     including F_vo*T2, through the common tensor-sum inverse. That bounded
     reference path stores (nocc_spin*nvir_spin)**3 elements per triples tensor;
-    it is not the canonical streaming algorithm. See SEMICANONICAL.md.
+    it is not the canonical streaming algorithm. algorithm='streamed' instead
+    opts into bounded panels with full Fock-block JVP/VJP and second response;
+    third-order AD is explicitly rejected. max_workspace_elements limits one
+    spin-orbital panel, not total memory. See SEMICANONICAL.md.
     """
     if orbital_basis not in {"canonical", "semicanonical"}:
         raise ValueError("orbital_basis must be 'canonical' or 'semicanonical'")
+    if algorithm not in {"auto", "streamed"}:
+        raise ValueError("algorithm must be 'auto' or 'streamed'")
+    if not isinstance(max_workspace_elements, int) or max_workspace_elements < 1:
+        raise ValueError("max_workspace_elements must be a positive integer")
+    if algorithm == "streamed" and variant != "ccsd(t)":
+        raise NotImplementedError("Streamed full-Fock response currently implements only CCSD(T)")
     if orbital_basis == "semicanonical" and variant != "ccsd(t)":
         raise NotImplementedError("Semicanonical triples currently implement only CCSD(T)")
-    if orbital_basis == "semicanonical" and not isinstance(nocc, (tuple, list)):
+    if (orbital_basis == "semicanonical" and algorithm == "auto"
+            and not isinstance(nocc, (tuple, list))):
         # The general-reference formula is shared in the spin-orbital kernel.
         # Restricted and unrestricted amplitudes use different storage, not
         # different occupied/virtual rotation conventions.
@@ -79,7 +91,8 @@ def evaluate_triples(
         return evaluate_ucc_triples(h1, eri, result, nocc=nocc, frozen=frozen,
             denominator_tol=denominator_tol, max_virtual_triples=max_virtual_triples,
             variant=variant, residual_tol=residual_tol, canonical_tol=canonical_tol,
-            orbital_basis=orbital_basis, max_triples_elements=max_triples_elements)
+            orbital_basis=orbital_basis, max_triples_elements=max_triples_elements,
+            algorithm=algorithm, max_workspace_elements=max_workspace_elements)
     variants = ("ccsd+t(ccsd)", "ccsd(t)", "qcisd(t)")
     if variant not in variants:
         raise ValueError(f"Unknown triples variant {variant!r}; choose {variants}")
@@ -105,9 +118,10 @@ def evaluate_triples(
         result.converged
         & (result.method_id == METHODS.index(model))
         & (cc_norm <= residual_tol)
-        & (canonical_error <= canonical_tol)
         & (symmetry_error <= residual_tol)
     )
+    if orbital_basis == "canonical":
+        state_valid &= canonical_error <= canonical_tol
     dtype = jnp.result_type(ints.fock.dtype, result.t1.dtype, result.t2.dtype)
 
     def assemble(connected, singles, minimum):
@@ -118,10 +132,14 @@ def evaluate_triples(
         )
         applied_singles = singles if variant != "ccsd+t(ccsd)" else jnp.zeros_like(singles)
         correction = connected + applied_singles
+        def checked(value):
+            if algorithm == "streamed":
+                return value * jnp.where(valid, jnp.ones_like(value), jnp.full_like(value, jnp.nan))
+            return jnp.where(valid, value, jnp.nan)
         return TriplesResult(
-            jnp.where(valid, correction, jnp.nan),
-            jnp.where(valid, connected, jnp.nan),
-            jnp.where(valid, applied_singles, jnp.nan),
+            checked(correction),
+            checked(connected),
+            checked(applied_singles),
             minimum,
             cc_norm,
             canonical_error,
@@ -132,6 +150,15 @@ def evaluate_triples(
     if no < 2 or nv < 2:
         zero = jnp.asarray(0.0, dtype=dtype)
         return assemble(zero, zero, jnp.asarray(jnp.inf, dtype=dtype))
+    if algorithm == "streamed":
+        from ._streamed_triples import _restricted_inputs, _streamed_general_correction
+        if (2 * nv) * (2 * no)**3 > max_workspace_elements:
+            raise ValueError("Restricted spin triples panel exceeds max_workspace_elements")
+        spin_ints, spin_t1, spin_t2 = _restricted_inputs(ints, result.t1, result.t2)
+        connected, singles, minimum, solved = _streamed_general_correction(
+            spin_ints, spin_t1, spin_t2, denominator_tol=denominator_tol)
+        state_valid &= solved
+        return assemble(connected, singles, minimum)
     if nv * (nv + 1) * (nv + 2) // 6 > max_virtual_triples:
         raise ValueError("Virtual triples exceed max_virtual_triples")
     combinations = np.asarray(
@@ -211,6 +238,8 @@ def triples_correction(
     canonical_tol=1e-7,
     orbital_basis="canonical",
     max_triples_elements=2_000_000,
+    algorithm="auto",
+    max_workspace_elements=2_000_000,
 ):
     """Scalar correction; use evaluate_triples for decomposition and diagnostics."""
     return evaluate_triples(
@@ -226,4 +255,6 @@ def triples_correction(
         canonical_tol=canonical_tol,
         orbital_basis=orbital_basis,
         max_triples_elements=max_triples_elements,
+        algorithm=algorithm,
+        max_workspace_elements=max_workspace_elements,
     ).energy

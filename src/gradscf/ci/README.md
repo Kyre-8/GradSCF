@@ -140,6 +140,14 @@ inputs; complete nuclear gradients also require SCF orbital response and the
 chosen integral backend's derivative support. No automatic backend fallback is
 introduced here.
 
+Degenerate molecular orbitals inside an isolated occupied or virtual subspace
+do not by themselves invalidate a CISD energy gradient. The nuclear-response
+path uses a smooth transported HF frame and differentiates the CI Hamiltonian;
+it does not differentiate individual canonical orbitals. This differs from a
+true degeneracy of the selected many-electron CI root, which retains the
+individual-root restrictions above. Native N2 checks and their basis/size
+limits are recorded in [VALIDATION.md](VALIDATION.md).
+
 ## CIS(D) theory and validation
 
 The singlet correction implements the unscaled CIS(D) method of
@@ -170,16 +178,24 @@ the Fock matrix is diagonal and consistent with the supplied orbital energies.
 
 ## Scope and computational limits
 
-- The Hamiltonian is applied through stored Slater–Condon connections; Davidson
-  does not construct a dense determinant Hamiltonian. Static connections are
-  cached on the host, while integral contractions and vector actions use JAX.
-- This generic implementation targets small reference calculations. Full MO
-  ERIs still require O(nmo^4) storage (dense spin embedding for UCI), and the connection table can be large.
-  It is not an optimized production CISD/FCI engine.
-- The default space limit is 5000 determinants (configurable); connection
-  construction stops at 1,000,000 stored diagonal/undirected connections.
-  Dense verification is limited to 2048 determinants. Reducing the orbital
-  space or excitation rank is preferable to simply increasing these limits.
+- Variational solves use compact alpha/beta excitation-rank blocks. Increasing
+  particle/hole strings, one-group removal/creation maps and tiled integral
+  contractions replace stored determinant-pair Hamiltonian connections. The
+  complete one-/two-body operator is projected into the retained space; an
+  intermediate single-excitation projection is not introduced.
+- Full MO ERIs still require O(nmo^4) storage. Restricted and unrestricted
+  Hamiltonian actions retain spatial/spin integral blocks without constructing
+  a full spin-orbital ERI. The coefficient vector and Davidson subspace remain
+  combinatorial; this does not turn high-rank CI into a polynomial method.
+- The default vector capacity is 1,000,000 determinants (configurable). Creator
+  and spectator string contractions are tiled, and vector columns are processed
+  in batches. The default Davidson basis capacity is
+  `min(ndet, max(40, 4*(nroots+1)))`. Initial guesses retain exact reference/low
+  diagonal unit vectors and add separate full-support random columns. The old
+  Slater–Condon connection implementation remains a small
+  independent oracle, with its 1,000,000-connection bound; dense verification
+  remains limited to 2048 determinants. Density matrices still use their
+  separate connection implementation and capacity guard.
 - GHF, complex orbitals, periodic CI, and automatic
   spin selection for general CI roots are not implemented.
 - Named `CISD(T)` / `CISDT(Q)` corrections are not exported. They need a specific

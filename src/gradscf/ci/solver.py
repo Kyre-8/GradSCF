@@ -1,18 +1,21 @@
 """CI Hamiltonian orchestration using the common eigensolver and AD rules."""
+import jax
 import jax.numpy as jnp
 import numpy as np
 from dataclasses import replace
 
 from ..solvers import LinearOperator, EigenSolverConfig, EigenResponseConfig, LinearSolverConfig, solve_hermitian
-from .hamiltonian import build_hamiltonian, validate_integrals
+from .hamiltonian import build_direct_hamiltonian, validate_integrals
 from .space import frozen_indices
 from .types import CIConfig, CIResult, CISResult, UCISResult
 from .space import make_uci_space
 from ..fci.cistring import excite
 
 
-def _eigenpairs(apply, diagonal, config, response=None):
+def _eigenpairs(apply, diagonal, config, response=None, reference_index=None):
     dim = diagonal.size
+    if config.nroots > dim:
+        raise ValueError("nroots exceeds operator dimension")
     operator = LinearOperator(
         (dim, dim),
         diagonal.dtype,
@@ -20,13 +23,30 @@ def _eigenpairs(apply, diagonal, config, response=None):
         diagonal=diagonal,
         matmat=apply,
     )
+    capacity = min(dim, (max(40, 4*(config.nroots+1)) if config.max_space is None
+                         else config.max_space))
     shared = EigenSolverConfig(
         method=config.solver,
         nroots=config.nroots,
         atol=config.conv_tol,
         maxiter=config.max_cycle,
-        max_subspace=config.max_space,
+        max_subspace=capacity,
     )
+    initial = None
+    if config.solver == "davidson":
+        count = min(config.nroots+1, dim)
+        if reference_index is None:
+            indices = jnp.argsort(diagonal)[:count]
+        else:
+            order = jnp.argsort(jnp.where(jnp.arange(dim) == reference_index, jnp.inf, diagonal))
+            indices = jnp.concatenate((jnp.asarray([reference_index]), order[:count-1]))
+        units = jax.nn.one_hot(indices, dim, dtype=diagonal.dtype).T
+        width = min(capacity, 2*count)
+        extra = jax.random.normal(jax.random.PRNGKey(0), (dim, max(0, width-count)),
+                                  dtype=diagonal.dtype) / jnp.sqrt(float(dim))
+        # Keep reference/low-diagonal vectors exact. Separate full-support
+        # columns allow searches outside their invariant spin/symmetry sectors.
+        initial = jnp.concatenate((units, extra), axis=1)
     if response is None:
         response = EigenResponseConfig(
             target=(
@@ -46,7 +66,7 @@ def _eigenpairs(apply, diagonal, config, response=None):
             raise ValueError("Use response controls or legacy CI config AD controls, not both")
         if response.target == "subspace":
             raise ValueError("CI individual-root results do not support a subspace response")
-    result = solve_hermitian(operator, config=shared, response=response)
+    result = solve_hermitian(operator, config=shared, response=response, initial_vectors=initial)
     return result.values, result.vectors, result.residual_norms, result.converged
 
 
@@ -57,8 +77,8 @@ def solve_ci(h1, eri, space, *, nuclear_repulsion=0.0, config=None):
     determinants. Derivatives assume converged, isolated roots and fixed topology.
     """
     config = CIConfig() if config is None else config
-    op = build_hamiltonian(h1, eri, space)
-    energies, vectors, residuals, converged = _eigenpairs(op, op.diagonal, config)
+    op = build_direct_hamiltonian(h1, eri, space)
+    energies, vectors, residuals, converged = _eigenpairs(op.apply, op.diagonal, config, reference_index=0)
     reference = op.diagonal[0]
     return CIResult(energies + nuclear_repulsion, energies - reference,
                     reference + nuclear_repulsion, vectors, residuals, converged)
@@ -69,7 +89,7 @@ def restricted_fock(h1, eri, nocc):
         "piiq->pq", eri[:, :nocc, :nocc, :])
 
 
-def solve_ucis(h1, eri, *, nocc, frozen=None, config=None, max_determinants=5000):
+def solve_ucis(h1, eri, *, nocc, frozen=None, config=None, max_determinants=1_000_000):
     """Spin-conserving UHF singles, relative to the reference determinant.
 
     Requires a stationary UHF reference for equivalence to UHF/TDA. No singlet/
@@ -82,10 +102,10 @@ def solve_ucis(h1, eri, *, nocc, frozen=None, config=None, max_determinants=5000
                           max_determinants=max_determinants)
     if full.size == 1:
         raise ValueError("UCIS has no active single excitations")
-    full_op = build_hamiltonian(h1, eri, full)
+    full_op = build_direct_hamiltonian(h1, eri, full)
     space = replace(full, determinants=full.determinants[1:], ranks=full.ranks[1:])
-    op = build_hamiltonian(h1, eri, space)
-    energies, vectors, norms, converged = _eigenpairs(op, op.diagonal, config)
+    op = build_direct_hamiltonian(h1, eri, space)
+    energies, vectors, norms, converged = _eigenpairs(op.apply, op.diagonal, config)
     amplitudes = []
     lookup = {d: k for k, d in enumerate(space.determinants)}
     for spin, (no, fr) in enumerate(zip(nocc, full.frozen)):

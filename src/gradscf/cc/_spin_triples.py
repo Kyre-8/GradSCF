@@ -13,6 +13,7 @@
 Spin-orbital formula: J. Chem. Phys. 98, 8718 (1993), doi:10.1063/1.464480.
 Canonical virtual triples are streamed. The opt-in semicanonical reference
 path instead materializes bounded six-index moments and uses a tensor solve.
+algorithm='streamed' selects four-index panels with response through second order.
 See NOTICE.md for software attribution; no PySCF runtime is used.
 """
 from itertools import combinations
@@ -27,6 +28,7 @@ from ._spin_equations import residual
 from .ground import METHODS
 from .types import TriplesResult
 from ..solvers import solve_tensor_sum
+from ._streamed_triples import _streamed_general_correction
 
 
 def _general_correction(ints, t1, t2, *, denominator_tol):
@@ -58,7 +60,8 @@ def _general_correction(ints, t1, t2, *, denominator_tol):
 def evaluate_ucc_triples(h1, eri, result, *, nocc, frozen=None,
                          denominator_tol=1e-10, max_virtual_triples=20000,
                          variant="ccsd(t)", residual_tol=1e-8, canonical_tol=1e-7,
-                         orbital_basis="canonical", max_triples_elements=2_000_000):
+                         orbital_basis="canonical", max_triples_elements=2_000_000,
+                         algorithm="auto", max_workspace_elements=2_000_000):
     if variant != "ccsd(t)":
         raise NotImplementedError("Unrestricted triples currently implement only CCSD(T)")
     if any(not isfinite(x) or x <= 0 for x in (denominator_tol, residual_tol, canonical_tol)):
@@ -69,6 +72,10 @@ def evaluate_ucc_triples(h1, eri, result, *, nocc, frozen=None,
         raise ValueError("orbital_basis must be 'canonical' or 'semicanonical'")
     if not isinstance(max_triples_elements, int) or max_triples_elements < 1:
         raise ValueError("max_triples_elements must be a positive integer")
+    if algorithm not in {"auto", "streamed"}:
+        raise ValueError("algorithm must be 'auto' or 'streamed'")
+    if not isinstance(max_workspace_elements, int) or max_workspace_elements < 1:
+        raise ValueError("max_workspace_elements must be a positive integer")
     ints, occupied, virtual = prepare_ucc_integrals(h1, eri, nocc=nocc, frozen=frozen)
     space = SpinAmplitudeSpace(occupied, virtual)
     t1, t2 = space.from_blocks(result.t1, result.t2, ints.fock.dtype)
@@ -87,14 +94,24 @@ def evaluate_ucc_triples(h1, eri, result, *, nocc, frozen=None,
 
     def assemble(connected, singles, minimum):
         valid = state_valid & (minimum > denominator_tol) & jnp.isfinite(connected+singles)
-        return TriplesResult(jnp.where(valid, connected+singles, jnp.nan),
-            jnp.where(valid, connected, jnp.nan), jnp.where(valid, singles, jnp.nan),
+        def checked(value):
+            if algorithm == "streamed":
+                return value * jnp.where(valid, jnp.ones_like(value), jnp.full_like(value, jnp.nan))
+            return jnp.where(valid, value, jnp.nan)
+        return TriplesResult(checked(connected+singles), checked(connected), checked(singles),
             minimum, norm, canonical_error, valid, jnp.asarray(1, dtype=jnp.int32))
 
     no, nv = t1.shape
     zero = jnp.asarray(0., dtype=t1.dtype)
     if no < 3 or nv < 3:
         return assemble(zero, zero, jnp.asarray(jnp.inf, dtype=t1.dtype))
+    if algorithm == "streamed":
+        if nv * no**3 > max_workspace_elements:
+            raise ValueError("Streamed triples panel exceeds max_workspace_elements")
+        connected, disconnected, minimum, solved = _streamed_general_correction(
+            ints, t1, t2, denominator_tol=denominator_tol)
+        state_valid &= solved
+        return assemble(connected, disconnected, minimum)
     if orbital_basis == "semicanonical":
         if (no*nv)**3 > max_triples_elements:
             raise ValueError("Semicanonical triples exceed max_triples_elements; reduce the active space")

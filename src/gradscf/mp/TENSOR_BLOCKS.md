@@ -130,6 +130,15 @@ allocation. It is **not** a bound on total peak memory: integral kernels, cached
 permutations, compiler temporaries and differentiated graphs also consume memory.
 The space remains combinatorial. Full spatial MO ERIs are still prepared.
 
+With `orbital_basis="noncanonical"`, the same packed wedge coordinates are
+mapped by a signed permutation to the shared direct CI action. High-rank
+antisymmetric coefficient tensors and expansion maps are not constructed.
+`max_tensor_elements` then bounds only the low-rank S/D expansions retained
+for amplitude outputs; `max_determinants` still bounds independent coefficients.
+The reported `dense_elements` remains the theoretical full expansion size,
+not an allocation or a measured peak. The physical MP partition retains the
+complete occupied/virtual Fock blocks, as described in [SERIES.md](SERIES.md).
+
 This first version does not factor disconnected states, stream density-fitted
 integrals, optimize a general contraction tree, or guarantee a speedup. Expansion
 and antisymmetrization can dominate when multiple same-spin holes and particles

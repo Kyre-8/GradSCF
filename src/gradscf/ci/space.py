@@ -52,7 +52,7 @@ def _selected_ranks(max_excitation, excitation_ranks):
     return tuple(sorted(map(int, ranks)))
 
 
-def make_uci_space(nmo, nocc, *, max_excitation=2, frozen=None, max_determinants=5000,
+def make_uci_space(nmo, nocc, *, max_excitation=2, frozen=None, max_determinants=1_000_000,
                    excitation_ranks=None):
     """Rank-truncated alpha/beta space; frozen electrons remain explicit."""
     if not isinstance(nmo, Integral) or nmo < 1:
@@ -88,7 +88,7 @@ def make_uci_space(nmo, nocc, *, max_excitation=2, frozen=None, max_determinants
                     tuple(d for _, d in entries), tuple(r for r, _ in entries))
 
 
-def make_ci_space(nmo, nocc, *, max_excitation=2, frozen=None, max_determinants=5000,
+def make_ci_space(nmo, nocc, *, max_excitation=2, frozen=None, max_determinants=1_000_000,
                   excitation_ranks=None):
     """Generate only retained excitations, without enumerating the FCI space.
 

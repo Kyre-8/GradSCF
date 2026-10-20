@@ -1,5 +1,107 @@
 # Ground-state CC validation
 
+## Streamed second-order response — 2026-10-20
+
+This increment supersedes the second-AD rejection recorded in the earlier
+streamed-response stages below. The explicit `algorithm="streamed"` path now
+supports first and second JVPs/VJPs, HVPs, reverse-over-reverse directional
+curvatures and `jax.hessian`. Third-order AD still raises explicitly.
+The existing `algorithm="auto"` paths are unchanged. The derivation and
+memory/time tradeoff are in [SEMICANONICAL.md](SEMICANONICAL.md).
+
+All numerical checks ran on `jy_gpu_1` (host `c20`, Intel Xeon Platinum 8457C),
+Python 3.11.15, JAX/jaxlib 0.10.0, PySCF 2.13.0 and CPU float64. Every job hid
+all GPUs, used a disjoint 16-CPU affinity set within CPUs 0--63, and limited
+OMP/OpenBLAS/MKL to eight threads. No local numerical or GPU test was run.
+
+| Final-source selection | Result | Pytest time | CPU affinity |
+| --- | --- | ---: | --- |
+| 21 response cases plus 12 invalid-derivative cases | 33 passed | 96.60 s | 48--63 |
+| Three molecular integration cases plus two UCC curvature cases | 5 passed | 113.30 s | 32--47 |
+| Newly appended direct `jit(jax.hessian)` API case | 1 passed | 5.12 s | 0--15 |
+
+All three invocations exited zero, with no failures, errors or skips. The
+single Hessian-API case was appended after the 33-case run; the preceding
+21 response cases were byte-identical. These are separate invocations, not
+one full CC-suite run. The exact final commands, from their source stages, were:
+
+```bash
+export CUDA_VISIBLE_DEVICES="" JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 PYTHONPATH=src
+export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8
+taskset -c 48-63 timeout 600 python -m pytest -q \
+  tests/cc/test_streamed_triples_response.py \
+  tests/cc/test_streamed_triples_invalid.py
+taskset -c 32-47 timeout 600 python -m pytest -q -s \
+  tests/cc/test_streamed_triples_geometry.py \
+  tests/cc/test_semicanonical.py::test_semicanonical_cc_response_at_exact_orbital_degeneracy
+taskset -c 0-15 timeout 600 python -m pytest -q -s \
+  tests/cc/test_streamed_triples_response.py::test_streamed_jit_hessian_api_matches_two_direction_six_index_oracle
+```
+
+### Independent algebra and workspace checks
+
+The 4-occupied/4-virtual spin-orbital model has twofold occupied and virtual
+Fock eigenvalues. Joint physical directions vary the full symmetric Fock
+matrix, consistently antisymmetrized ERI slices, T1 and T2. Connected,
+disconnected and total HVPs and curvatures agree with the retained six-index
+tensor-resolvent oracle. Independent occupied/virtual rotations also produce
+noncanonical Fock blocks while preserving the repeated spectra; the maximum
+rotated HVP discrepancy is 4.34e-18 and the energy spread is 6.07e-18 Hartree.
+The direct two-parameter `jax.hessian` result is nonzero and symmetric, with
+maximum oracle error 1.74e-18 and symmetry error 2.17e-19. This is a complete
+2-by-2 parameter Hessian, not a full molecular Cartesian Hessian.
+
+Recursive Jaxpr checks cover forward, VJP, HVP and scalar grad-grad graphs.
+They reject six-axis arrays and arrays larger than 256 elements for this
+fixture, including flattened panel histories. These are structural checks;
+they are not universal process-memory or large-system scaling bounds.
+
+Independent review also reproduced a pre-existing failure-path defect:
+singular denominators or invalid CC states could yield finite or zero
+derivatives. Twelve regressions now require invalid active first/second
+derivatives to be NaN. The private kernel reuses the shared convergence
+derivative guard, while the public streamed energy mask propagates failure
+through AD. Valid-state algebra and default algorithms are unchanged.
+
+### Complete native nuclear HVP
+
+The final integration group uses the N2/STO-3G real-RHF setup and converged
+HF/CC thresholds documented below, including exact pi-orbital degeneracy.
+The differentiated map includes native integral second response, implicit
+HF, metric-preserving MO transport, MO transformations, implicit CCSD and
+streamed `(T)`. Two dynamic directions are checked: a bond stretch and a
+normalized mixed Cartesian displacement. At each displaced geometry, the
+external PySCF reference independently reconverges RHF and CCSD, solves the
+CCSD(T)-corrected Lambda equations, and evaluates its analytic gradient.
+
+| Direction | Max HVP error at h=3e-4 bohr | Max HVP error at h=1e-4 bohr |
+| --- | ---: | ---: |
+| Bond stretch | 3.277e-7 | 3.653e-8 |
+| Mixed Cartesian | 3.864e-7 | 4.634e-8 |
+
+HVP errors are Hartree/bohr squared. The mixed Hessian symmetry discrepancy
+is 3.064e-14 in the same units. The final first-order rerun has energy error
+1.549e-12 Hartree and maximum analytic-gradient error 6.197e-12 Hartree/bohr.
+The UCC cases separately include implicit amplitude response and a nonzero
+triples correction at exact internal orbital degeneracy; both `auto` and
+`streamed` curvatures agree with gradient differences at two steps.
+
+The five-case runner took 116.26 s and reached 2,475,820 KiB maximum RSS
+(2.36 GiB); this includes compilation and reference calculations, not just a
+production HVP. Source/library manifests were unchanged during every run.
+The final molecular stage checked 1,568 files and verified native-source and
+reused-library hashes. The common streamed-kernel SHA256 was
+`61be0d11ce5786777a0a6c982352ecf80e322c2e35f2ef621ddf72ee2965cc03`.
+JUnit, resource records and source manifests are retained under the remote
+root `/home/yjiao/gradscf_checks/ci-mp-response-20261020/`, in
+`cc_second_guard/artifacts/regression`,
+`cc_second_geometry/artifacts/final_integration` and
+`cc_second_order/artifacts/hessian_api`.
+
+The full repository/CC suites, GPU response, unrestricted nuclear Hessians,
+a full N2 Cartesian Hessian and third-order response were not validated by
+this increment. Third-order streamed response remains unsupported.
+
 ## Restricted QCISD/(T) — 2026-09-22
 
 Branch: `feat/ci-cc-forward-parity`, increment based on `07a54e5`. Environment:
@@ -340,3 +442,117 @@ orbital/electron counts allow at most two spin-conserving excitations; this
 equality must not be generalized to arbitrary three-electron systems. The
 derivative perturbs only h-alpha by `x*diag(0.2,-0.1,0.07)` at fixed MO orbitals,
 with finite-difference step 1e-4. It is not a nuclear force.
+
+## Streamed full-Fock triples response — 2026-10-20
+
+The opt-in `algorithm="streamed"` path was tested remotely on `jy_gpu_1`,
+CPU backend/float64, affinity restricted to logical CPUs 48–63, with all GPUs
+hidden. OMP, OpenBLAS and MKL thread limits were each 8. No local numerical
+tests or GPU tests were run for this change.
+
+The initial focused oracle/degeneracy group passed 5 tests in 12.59 s. The
+new response module plus the existing semicanonical module then passed
+17 tests in 136.52 s. After strengthening the workspace assertion and adding
+an explicit streamed UCC parameter, the two affected cases passed in 20.00 s.
+These are test-suite elapsed times, not production timing/scaling benchmarks.
+
+```bash
+env CUDA_VISIBLE_DEVICES="" JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 \
+  OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 PYTHONPATH=src \
+  taskset -c 48-63 timeout 600 python -m pytest -q \
+  tests/cc/test_streamed_triples_response.py tests/cc/test_semicanonical.py
+```
+
+The new synthetic 4-occupied/4-virtual spin-orbital case compares the connected
+term, disconnected term and their sum, plus all input VJPs, with the retained
+six-index tensor-solve oracle. It includes a nonzero `F_vo*T2` contribution.
+Exactly repeated occupied and virtual eigenvalues are perturbed off-diagonally;
+both JVPs and VJPs agree with the oracle and central differences (step 1e-4).
+Forward/reverse Jaxprs are checked for both array rank and element count so
+that flattening a retained triples-panel history cannot evade the memory test.
+This structural check is not a measured peak-process-memory benchmark.
+
+A restricted four-spatial-orbital interacting model compares complete CCSD
+amplitude-response derivatives with the tensor oracle and finite differences.
+The fixed-amplitude derivative is explicitly different. That test rejects any
+call to the full spin-integral builder from the restricted streamed path.
+The existing three-electron UCC exact-degeneracy model also passes with the
+streamed option. Workspace/tensor-capacity separation, physical denominator
+singularity rejection and explicit second-order-AD rejection are covered.
+
+JUnit evidence is in the remote validation stage
+`/home/yjiao/gradscf_checks/ci-mp-response-20261020/cc/`:
+`streamed_triples_junit.xml` and `streamed_triples_delta_junit.xml`.
+The old default algorithm remains unchanged. These checks establish bounded
+moment representation and first-order parameter response; large-molecule
+performance, fully spin-adapted storage and complete nuclear forces are not
+established by this test group.
+
+### Complete native molecular geometry chain
+
+The same validation date added `CorrelatedEnergy(mf, "ccsd(t)")` by extending
+the existing molecular adapter. The unsupported-method regression failed
+before the implementation; the constructor/configuration check and complete
+N2 geometry calculation then passed. The final two-test run took 24.86 s
+(CPU48–63, float64, OMP/OpenBLAS/MKL limits 8, all GPUs hidden). Its source and
+test hashes were unchanged across the run. No local numerical test was used.
+
+The molecule is N2 at `(0,0,-1.04)` and `(0,0,1.04)` bohr, all electrons,
+Cartesian STO-3G, real RHF. The symmetry-preserving AO density seed is `1.4 I`;
+HF convergence tolerances are 1e-13 Hartree, density 1e-11 and orbital gradient
+1e-10. The occupied/virtual pi pairs are exactly degenerate to 1e-9 Hartree.
+The adapter differentiates native AO integrals, implicit HF, the transported
+MO frame, MO integral transformations, implicit CCSD and the streamed `(T)`
+correction inside a single total-energy map.
+
+| Quantity | Measured value |
+| --- | ---: |
+| Total CCSD(T) energy | -107.652291980331 Hartree |
+| Bond derivative dE/dR | -0.2832401921 Hartree/bohr |
+| Energy absolute error versus PySCF | 1.862e-12 Hartree |
+| Maximum component error versus analytic PySCF CCSD(T) gradient | 6.602e-12 Hartree/bohr |
+| Maximum bond-gradient error versus independently reconverged PySCF FD | 1.134e-7 Hartree/bohr |
+| Maximum bond-gradient error versus GradSCF FD | 1.133e-7 Hartree/bohr |
+
+The independent analytic reference explicitly solves
+`pyscf.cc.ccsd_t_lambda.kernel(tol=1e-11)` and supplies those amplitudes to
+`pyscf.grad.ccsd_t.Gradients`; ordinary CCSD Lambda amplitudes are not used.
+Each external displaced sample independently reconverges RHF, CCSD and `(T)`.
+Central bond-length steps are 3e-4 and 1e-4 bohr. Transverse force components
+and the translational gradient sum pass at 2e-8 Hartree/bohr.
+
+```bash
+env CUDA_VISIBLE_DEVICES="" JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 \
+  OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 PYTHONPATH=src \
+  taskset -c 48-63 timeout 1200 python -m pytest -q \
+  tests/cc/test_streamed_triples_geometry.py
+```
+
+Final evidence is in
+`/home/yjiao/gradscf_checks/ci-mp-response-20261020/ccgeom/`:
+`ccgeom_final_junit.xml`, `ccgeom_final_resources.txt`, and matching
+`source_final_before.json`/`source_final_after.json`. This establishes the
+complete first-order geometry chain for this restricted example; it does not
+establish second-order `(T)` response, a general large-molecule benchmark or
+an unrestricted nuclear-gradient comparison.
+
+### Mixed input precision
+
+Independent review found that float32 integrals with float64 restart
+amplitudes produced inconsistent loop-carry dtypes in the new streamed kernel.
+Two focused regressions reproduced this failure before the repair. The kernel
+now promotes its working inputs to their common dtype before entering the
+custom AD rule; the casts' transposes retain each original input's cotangent
+dtype. No global precision setting or default algorithm was changed.
+
+The two new cases, the three existing float64 connected/disconnected/total
+value-and-VJP oracles, and explicit second-AD rejection passed together:
+six cases, 6.62 s pytest, 7.15 s wall time. A subsequent restricted spin-bridge
+check and the two mixed cases passed in 5.67 s pytest. The bridge already
+preserved the common amplitude dtype and required no implementation change.
+These overlapping groups are not nine unique cases. Both groups used remote
+CPU32--47, float64 enabled, eight BLAS threads and all CUDA devices hidden.
+Evidence is under `artifacts/ci_mp_validation/cc_dtype/` in the worktree.
+The complete nuclear-gradient group above preceded this common-dtype repair;
+its float64 algebra is unchanged, but it was not rerun for the mixed-input
+increment.
