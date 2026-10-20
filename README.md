@@ -172,7 +172,7 @@ def energy(params, x):
     correction = .01 * rho * jnp.tanh(params["w"] * jnp.log1p(rho))
     return jnp.sum(x["weights"] * (exchange + correction))
 
-functional = dft.Functional(input_fn=inputs, energy_fn=energy)
+functional = dft.custom_xc(input_fn=inputs, energy_fn=energy)
 mf = scf.RHF(gto.M(atom="H 0 0 0; H 0 0 .74", basis="sto-3g"),
              grids_level=0, conv_tol=1e-12).run()
 target = float(fci.FCI(mf, solver="dense").run().e_tot)
@@ -253,8 +253,12 @@ parameter derivatives have different coverage. The generic
 
 ## Learning with GradSCF
 
-**External XC.** `dft.Functional(input_fn, energy_fn, init_fn=...)` connects
-external features and JAX/Flax/Haiku networks. `DensityInputs` exposes the
+**External XC.** `dft.custom_xc(input_fn=..., energy_fn=..., init_fn=...)`
+connects external formulas and JAX/Flax/Haiku networks through the existing
+`dft.Functional`. `dft.custom_xc(spec)` instead constructs a complete
+traditional recipe, including exact exchange and additional physical terms.
+See the [XC library](src/gradscf/dft/xc/README.md) for names and method scope.
+`DensityInputs` exposes the
 current density matrix, grid density and supported derivatives, kinetic-energy
 density, and fixed geometry/AO data. Features are rebuilt from each trial SCF
 density. The callback returns a real scalar XC energy in Hartree, including

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field, fields, is_dataclass
+from dataclasses import dataclass, field, fields, is_dataclass, replace
 from typing import Any, Literal
 
 import numpy as np
@@ -19,8 +19,8 @@ from .builders import (
 )
 from .core import _contains_jax_tracer, _build_density_from_occ
 from gradscf.scf.inputs.assembly import build_rks_integral_inputs
-from .rks import RKSConfig, run_rks_from_integrals
-from .uks import UKSConfig
+from .rks import RKSConfig, RKSResult, run_rks_from_integrals
+from .uks import UKSConfig, UKSResult
 
 
 _SCF_RESULT_FIELDS = (
@@ -53,7 +53,9 @@ def _cache_signature(value):
 @dataclass
 class _BaseKS:
     mol: Any
-    xc: str = "pbe"
+    xc: Any = "pbe"
+    # External Functional parameters stay explicit and participate in freshness.
+    params: Any | None = field(default=None, kw_only=True)
     conv_tol: float = 1e-10
     conv_tol_density: float = 1e-8
     conv_tol_grad: float = 1e-7
@@ -94,9 +96,97 @@ class _BaseKS:
                      for value in (self.mo_coeff, self.mo_occ, self.mo_energy))
 
     def _scf_signature(self):
-        return _cache_signature((self._spec(), self.mol.basis, self._config(), self.grids_level,
+        return _cache_signature((self._spec(), self.mol.basis, self._config(), self.xc, self.params, self.grids_level,
             self.max_l, self.integral_backend, self.geometry_grad_policy, self.grid_ao_backend,
             self.init_guess, self.chkfile, self.sap_basis, self.init_guess_chkfile_project))
+
+    def _is_external_xc(self):
+        from ..dft.functional import Functional
+        return isinstance(self.xc, Functional)
+
+    def _standard_xc_spec(self):
+        if self._is_external_xc():
+            return "hf"  # Only the initialization uses this standard solver.
+        spec = getattr(self.xc, "spec", self.xc)
+        if not isinstance(spec, str):
+            raise TypeError("xc must be a standard specification, TraditionalXCFunctional, or Functional.")
+        return spec
+
+    def _run_external_xc(self):
+        """Eager facade over the existing full-energy differentiable SCF solver.
+
+        Training and parameter AD keep using Functional and DifferentiableSCF;
+        this facade supplies molecular inputs, status, and the same TD binding.
+        """
+        from .differentiable import DifferentiableSCF, DifferentiableSCFConfig
+        from .energy import XCContribution, unrestricted_energy
+        from .uks import _spin_jk_matrices
+
+        if self.params is None:
+            raise ValueError("External XC requires explicit params; use {} for a parameter-free Functional.")
+        initial_options = dict(xc="hf", params=None, max_cycle=1)
+        if isinstance(self, RKS):
+            initial_options.update(compute_local_hfx_features=False, compute_local_hfx_aux=False)
+        initializer = _fresh_scf_like(self, type(self), **initial_options)
+        spec = self._spec()
+        if isinstance(self, RKS):
+            initializer._sync_from_scf_result(initializer._build_scf_result(spec))
+        initial = initializer._build_reference(spec)
+        if isinstance(self, RKS):
+            self._scf_inputs = initializer._scf_inputs
+        if initial.ao_laplacian is None:
+            from ..integrals import basis_from_molecule_spec, evaluate_cartesian_ao_with_derivatives
+            basis = basis_from_molecule_spec(spec, basis=self.mol.basis,
+                max_l=self.max_l, precompute_eri_groups=False)
+            derivatives = evaluate_cartesian_ao_with_derivatives(basis, initial.grid.coords, deriv=2)[1]
+            initial = replace(initial, ao_laplacian=derivatives[4])
+        if isinstance(self, RKS):
+            self._scf_inputs = replace(self._scf_inputs, ao_laplacian=initial.ao_laplacian)
+        initial = self._put_on_requested_device(initial)
+        solver = DifferentiableSCF(DifferentiableSCFConfig(
+            mode="self_consistent", gradient_mode="implicit", max_cycle=self.max_cycle,
+            damping=self.damp, level_shift=self.level_shift, conv_tol_energy=self.conv_tol,
+            conv_tol_density=self.conv_tol_density, conv_tol_grad=self.conv_tol_grad,
+            eigenvalue_jitter=0., vxc_clip=float("inf")))
+        state, info = solver.run(initial, self.xc, self.params)
+        density_spin = jnp.asarray(state.rdm1)
+        eri = getattr(state, "eri_pair_matrix", None)
+        if eri is None or not int(jnp.asarray(eri).size):
+            eri = state.rep_tensor
+        _, coulomb, ka, kb = _spin_jk_matrices(
+            eri, density_spin[0], density_spin[1],
+            df_factors=getattr(state, "df_factors", None), with_k=False)
+        xc_energy = self.xc.energy_from_molecule(self.params, state)
+        potential_spin = self.xc.potential(self.params, state, density_spin)
+        total = unrestricted_energy(density_spin, state.h1e, coulomb, jnp.stack([ka, kb]),
+            XCContribution(xc_energy, potential_spin, 0.), nuclear_repulsion=state.nuclear_repulsion)
+        restricted = isinstance(self, RKS)
+        potential = potential_spin.mean(axis=0) if restricted else potential_spin
+        fock = state.h1e+coulomb+potential
+        converged = bool(info.converged) and bool(jnp.isfinite(total))
+        cycles = int(info.cycles)
+        state = replace(state, fock_matrix=fock, mf_energy=total, exact_exchange_fraction=0.,
+                        scf_converged=converged, scf_cycles=cycles, xc_spec=None)
+        common = dict(converged=converged, total_energy=total,
+            electronic_energy=total-state.nuclear_repulsion, nuclear_repulsion=state.nuclear_repulsion,
+            xc_energy=xc_energy, exact_exchange_fraction=0., overlap_matrix=state.overlap_matrix,
+            hcore_matrix=state.h1e, cycles=cycles)
+        if restricted:
+            result = RKSResult(**common, mo_coeff=state.mo_coeff[0], mo_occ=2*state.mo_occ[0],
+                mo_energy=state.mo_energy[0], density_matrix=density_spin.sum(axis=0), fock_matrix=fock)
+            self._sync_from_scf_result(result)
+            self.reference = state
+        else:
+            result = UKSResult(**common, mo_coeff_alpha=state.mo_coeff[0], mo_coeff_beta=state.mo_coeff[1],
+                mo_occ_alpha=state.mo_occ[0], mo_occ_beta=state.mo_occ[1],
+                mo_energy_alpha=state.mo_energy[0], mo_energy_beta=state.mo_energy[1],
+                density_matrix_alpha=density_spin[0], density_matrix_beta=density_spin[1],
+                fock_matrix_alpha=fock[0], fock_matrix_beta=fock[1])
+            self._sync_from_reference(state)
+            self.scf_result = result
+        self._cached_scf_key = self._scf_signature()
+        self._cached_response_key = self._response_signature()
+        return self.e_tot
 
     def run(self) -> "_BaseKS":
         self.kernel()
@@ -253,7 +343,7 @@ class RKS(_BaseKS):
 
     def _config(self) -> RKSConfig:
         return RKSConfig(
-            xc_spec=self.xc,
+            xc_spec=self._standard_xc_spec(),
             max_cycle=self.max_cycle,
             conv_tol=self.conv_tol,
             conv_tol_density=self.conv_tol_density,
@@ -270,7 +360,7 @@ class RKS(_BaseKS):
     def _build_reference(self, spec: MoleculeSpec) -> Any:
         if self._scf_inputs is not None:
             self._scf_inputs = complete_restricted_response_inputs(self._scf_inputs,spec,self.mol.basis)
-        return build_restricted_reference_from_facade(
+        reference = build_restricted_reference_from_facade(
             spec,
             **self._build_options(spec),
             compute_local_hfx_features=self.compute_local_hfx_features,
@@ -282,6 +372,10 @@ class RKS(_BaseKS):
             scf_inputs=self._scf_inputs,
             scf_result=self.scf_result,
         )
+        if self._is_external_xc() and self.scf_result is not None:
+            reference = replace(reference, fock_matrix=self.scf_result.fock_matrix,
+                mf_energy=self.scf_result.total_energy, exact_exchange_fraction=0., xc_spec=None)
+        return reference
 
     def _build_scf_result(self, spec: MoleculeSpec) -> Any:
         result, inputs = build_restricted_scf_result_from_facade(
@@ -295,7 +389,7 @@ class RKS(_BaseKS):
         return result
 
     def _build_options(self, spec):
-        return dict(mol=self.mol,xc=self.xc,grids_level=self.grids_level,max_l=self.max_l,
+        return dict(mol=self.mol,xc=self._standard_xc_spec(),grids_level=self.grids_level,max_l=self.max_l,
             integral_backend=self.integral_backend,geometry_grad_policy=self.geometry_grad_policy,
             grid_ao_backend=self.grid_ao_backend,rks_config=self._config(),init_guess=self.init_guess,
             chkfile=self.chkfile,sap_basis=self.sap_basis,init_guess_chkfile_project=self.init_guess_chkfile_project,
@@ -326,6 +420,8 @@ class RKS(_BaseKS):
         self._configure_jax_cache()
         for name in _SCF_RESULT_FIELDS:
             setattr(self,name,None)
+        if self._is_external_xc():
+            return self._run_external_xc()
         result = self._build_scf_result(self._spec())
         self._sync_from_scf_result(result)
         self._cached_scf_key = self._scf_signature()
@@ -385,7 +481,7 @@ class UKS(_BaseKS):
 
     def _config(self) -> UKSConfig:
         return UKSConfig(
-            xc_spec=self.xc,
+            xc_spec=self._standard_xc_spec(),
             max_cycle=self.max_cycle,
             conv_tol=self.conv_tol,
             conv_tol_density=self.conv_tol_density,
@@ -400,7 +496,7 @@ class UKS(_BaseKS):
         return build_unrestricted_reference_from_facade(
             spec,
             mol=self.mol,
-            xc=self.xc,
+            xc=self._standard_xc_spec(),
             grids_level=self.grids_level,
             max_l=self.max_l,
             integral_backend=self.integral_backend,
@@ -417,6 +513,8 @@ class UKS(_BaseKS):
     def kernel(self) -> Any:
         self._configure_jax_cache()
         self.converged = False
+        if self._is_external_xc():
+            return self._run_external_xc()
         reference = self._build_reference(self._spec())
         reference = self._put_on_requested_device(reference)
         self._sync_from_reference(reference)

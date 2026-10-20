@@ -42,7 +42,7 @@ from pyscf import dft, gto
 
 from gradscf.model import neural_xc
 from gradscf.data.hdf5_cache import read_restricted_molecule, write_restricted_molecule
-from gradscf.dft.libxc_jax.jax_libxc import b3lyp_component_basis
+from gradscf.dft.xc import b3lyp_component_basis
 from gradscf.model.neural_xc import (
     DEFAULT_INPUT_FEATURE_MODE,
     DEFAULT_NETWORK_ARCHITECTURE,

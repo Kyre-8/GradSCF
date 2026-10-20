@@ -48,10 +48,14 @@ from .q0 import screened_w_imag_axis_head_wing, transition_moments_gamma
 
 
 def _validate_gw_reference(mf):
-    from ...dft.libxc_jax.jax_libxc import hybrid_coeff
+    from ...dft.xc import hybrid_coeff, parse_recipe
     from ...pbc.scf import validate_reference
 
     validate_reference(mf)
+    recipe = parse_recipe(mf.xc)
+    recipe.require_complete_support()
+    if recipe.exact_exchange.omega is not None:
+        raise NotImplementedError('Periodic GW range-separated starting potentials are not implemented.')
     if mf.exxdiv != "ewald" and hybrid_coeff(mf.xc) != 0:
         raise NotImplementedError(
             "Periodic GW currently requires Ewald exchange for HF/hybrid references."

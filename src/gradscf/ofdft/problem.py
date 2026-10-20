@@ -11,7 +11,7 @@ import numpy as np
 
 from ..solvers.nonlinear import minimize_sphere, SphereConfig
 from ..scf.autodiff import attach_scf_backward
-from ..dft.libxc_jax.jax_libxc import xc_type, hybrid_coeff
+from ..dft.xc import xc_type, hybrid_coeff, parse_recipe
 from .types import OFDFTConfig, OFDFTResult
 from .kinetic import KineticFunctional
 from .energy import energy_components, amplitude
@@ -124,7 +124,10 @@ def run_ofdft(data, *, kinetic=None, kinetic_params=None, xc_energy_fn=None, xc_
     _validate(data)
     cfg = config or OFDFTConfig()
     kinetic = KineticFunctional() if kinetic is None else kinetic
-    if cfg.xc is not None and (xc_type(cfg.xc) not in ('LDA','GGA') or hybrid_coeff(cfg.xc)!=0):
+    if cfg.xc is not None:
+        parse_recipe(cfg.xc).require_complete_support()
+    if cfg.xc is not None and (xc_type(cfg.xc) not in ('LDA','GGA') or hybrid_coeff(cfg.xc)!=0
+            or parse_recipe(cfg.xc).exact_exchange.omega is not None):
         raise ValueError('OFDFT supports density-only LDA/GGA XC; hybrids/meta-GGA need orbital information.')
     if cfg.xc is not None and xc_energy_fn is not None:
         raise ValueError('Set config.xc=None when supplying a custom XC energy callback.')

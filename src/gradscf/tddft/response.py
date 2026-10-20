@@ -723,6 +723,7 @@ def _restricted_ao_response_action(
         _, long_range, short_range = rsh
         alpha = jnp.asarray(short_range, dtype=dtype)
         eri_lr = jnp.asarray(molecule.eri_lr, dtype=dtype)
+        include_exchange = True
     df_factors = getattr(molecule, "df_factors", None)
     mode = str(two_electron_mode).lower()
     if mode == "df" and (df_factors is None or int(jnp.asarray(df_factors).size) == 0):
@@ -768,18 +769,9 @@ def _restricted_ao_response_action(
 
 
 def _restricted_rsh_coefficients(molecule):
-    """Validate the fixed full-RSH data carried by a restricted response state."""
-    coefficients = getattr(molecule, "range_separated_coefficients", None)
-    if coefficients is None and getattr(molecule, "eri_lr", None) is None:
-        return None
-    from gradscf.scf.rsh import rsh_preset, validate_rsh_inputs
+    from gradscf.scf.rsh import response_rsh_coefficients
 
-    expected = rsh_preset("wb97xd").to_range_separated_hybrid_coefficients()
-    if coefficients is None or tuple(coefficients) != expected:
-        raise ValueError("Restricted RSH response requires fixed wb97xd coefficients (0.2, 1, 0.222036).")
-    validate_rsh_inputs("wb97xd", getattr(molecule, "rep_tensor", None),
-                        getattr(molecule, "eri_lr", None), getattr(molecule, "dispersion_energy", None))
-    return expected
+    return response_rsh_coefficients(molecule)
 
 
 def _validate_restricted_rsh_mode(molecule, two_electron_mode):
@@ -895,7 +887,9 @@ def _build_restricted_response_operator_data(
     functional_rsh = getattr(resolved_xc, "range_separated_coefficients", None)
     if rsh is not None or functional_rsh is not None:
         if rsh is None or functional_rsh != rsh:
-            raise ValueError("A full RSH reference requires the matching complete wb97xd response functional.")
+            raise ValueError("A full RSH reference requires a matching complete response functional.")
+        from gradscf.scf.rsh import response_rsh_coefficients
+        response_rsh_coefficients(molecule, xc_spec=getattr(resolved_xc, "xc_spec", None))
         _validate_restricted_rsh_mode(molecule, response_options.two_electron_mode)
     _raise_if_strict_local_hf_response(resolved_xc)
     weights = jnp.asarray(molecule.grid.weights)

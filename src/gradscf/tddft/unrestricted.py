@@ -284,6 +284,16 @@ def _unrestricted_ao_response_action(
         raise ValueError("The molecule must provide rep_tensor for Hartree/exchange response.")
     eri = jnp.asarray(molecule.rep_tensor, dtype=dtype)
     alpha = jnp.asarray(hybrid_fraction, dtype=dtype)
+    from ..scf.rsh import response_rsh_coefficients
+    rsh = response_rsh_coefficients(molecule)
+    eri_lr = None
+    if rsh is not None:
+        from .response import _validate_restricted_rsh_mode
+        _validate_restricted_rsh_mode(molecule, "auto")
+        _, long_range, short_range = rsh
+        alpha = jnp.asarray(short_range, dtype=dtype)
+        eri_lr = jnp.asarray(molecule.eri_lr, dtype=dtype)
+        include_exchange = True
 
     def action(density_alpha: Array, density_beta: Array) -> tuple[Array, Array]:
         density_alpha = jnp.asarray(density_alpha, dtype=dtype)
@@ -297,7 +307,11 @@ def _unrestricted_ao_response_action(
         j_alpha, k_alpha = _jk_from_full_eri(eri, density_alpha)
         j_beta, k_beta = _jk_from_full_eri(eri, density_beta)
         j_total = j_alpha + j_beta
-        return j_total - alpha * k_alpha, j_total - alpha * k_beta
+        exchange_a, exchange_b = alpha*k_alpha, alpha*k_beta
+        if eri_lr is not None:
+            exchange_a = exchange_a+(long_range-short_range)*_jk_from_full_eri(eri_lr, density_alpha)[1]
+            exchange_b = exchange_b+(long_range-short_range)*_jk_from_full_eri(eri_lr, density_beta)[1]
+        return j_total-exchange_a, j_total-exchange_b
 
     return action
 
@@ -433,11 +447,19 @@ def _build_unrestricted_response_operator_data(
     xc_params: Any | None = None,
     occupation_tolerance: float = 1e-8,
 ) -> _UnrestrictedResponseOperatorData:
-    from ..scf.rsh import reject_rsh_response
-    reject_rsh_response(molecule)
+    from ..scf.rsh import response_rsh_coefficients
+    rsh = response_rsh_coefficients(molecule)
     resolved_xc = _resolve_xc_functional(molecule, xc_functional, xc_params)
     if isinstance(resolved_xc, str):
         resolved_xc = UnrestrictedSemilocalResponseFunctional(resolved_xc)
+    functional_rsh = getattr(resolved_xc, "range_separated_coefficients", None)
+    if rsh is not None or functional_rsh is not None:
+        from ..scf.molecules import RestrictedMolecule
+        if isinstance(molecule, RestrictedMolecule):
+            raise NotImplementedError("Range-separated unrestricted TD requires an unrestricted reference.")
+        if rsh is None or functional_rsh != rsh:
+            raise ValueError("A full RSH reference requires a matching complete unrestricted response functional.")
+        response_rsh_coefficients(molecule, xc_spec=getattr(resolved_xc, "xc_spec", None))
     _raise_if_strict_local_hf_response(resolved_xc)
     orbo_a, orbv_a, orbo_b, orbv_b, de_a, de_b = _unrestricted_orbital_data(
         molecule,

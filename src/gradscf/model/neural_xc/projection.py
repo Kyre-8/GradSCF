@@ -24,7 +24,7 @@ from gradscf.dft.hfx import (
     hfx_nu_source,
     is_chunked_hfx_nu,
 )
-from ...dft.libxc_jax.jax_libxc import RestrictedFeatureBundle
+from ...dft.xc import RestrictedFeatureBundle
 
 
 class NeuralXCProjectionMixin:

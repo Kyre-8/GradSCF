@@ -14,7 +14,7 @@ from gradscf.integrals import (
     overlap_hcore_matrices,
     overlap_matrix,
 )
-from gradscf.dft.libxc_jax.jax_libxc import parse_xc
+from gradscf.dft.xc import parse_xc
 from gradscf.dft.hfx import _local_hfx_features_from_basis_dm
 from gradscf.dft.pt2 import _local_pt2_feature_from_restricted_orbitals
 from gradscf.scf.builders import _build_restricted_reference

@@ -22,10 +22,14 @@ def ks_dipoles(mf, *, valence=None, conduction=None):
     """
     from ...pbc.scf import validate_reference
     from ...pbc.optics import velocity_matrix
-    from ...dft.libxc_jax.jax_libxc import hybrid_coeff, xc_type
+    from ...dft.xc import hybrid_coeff, parse_recipe, xc_type
     validate_reference(mf, low_dimensional=True)
     if mf.cell.dimension < 3 and mf.exxdiv is not None:
         raise ValueError('Reduced-dimensional optical references require exxdiv=None.')
+    recipe = parse_recipe(mf.xc)
+    recipe.require_complete_support()
+    if recipe.exact_exchange.omega is not None:
+        raise NotImplementedError('Screened-hybrid optical velocity operators are not implemented.')
     if mf.unrestricted or hybrid_coeff(mf.xc) != 0 or xc_type(mf.xc) not in ('LDA', 'GGA'):
         raise NotImplementedError('KS optical vertices currently require restricted LDA/GGA references.')
     c, energy = mf.result.mo_coeff_spin[0], mf.result.mo_energy_spin[0]

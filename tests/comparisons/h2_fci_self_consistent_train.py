@@ -24,7 +24,7 @@ from gradscf.model import neural_xc
 from gradscf.model.neural_xc import training
 from pyscf_data_reference import restricted_reference_from_pyscf
 from gradscf.tools.spectra import HARTREE_TO_EV
-from gradscf.dft.libxc_jax import b3lyp_component_basis
+from gradscf.dft.xc import b3lyp_component_basis
 
 
 jax.config.update("jax_enable_x64", True)

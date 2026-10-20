@@ -11,7 +11,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from gradscf import integrals, scf
-from gradscf.dft.libxc_jax.jax_libxc import xc_type
+from gradscf.dft.xc import xc_type
 from gradscf.scf.inputs import build_rks_integral_inputs, build_uks_integral_inputs
 from gradscf.scf.rsh import local_xc_spec, rsh_preset
 

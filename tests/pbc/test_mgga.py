@@ -8,12 +8,32 @@ from gradscf.pbc import _kpoint, gto
 from gradscf.integrals.periodic.fft import build_inputs
 
 
-def test_unrestricted_mgga_bundle_does_not_discard_cross_spin_gradient():
-    from gradscf.dft.libxc_jax.jax_libxc import (
-        RestrictedFeatureBundle, eval_xc_energy_density_unrestricted)
-    features = RestrictedFeatureBundle(*map(jnp.asarray, (.4, .3, .01, -.004, .02, .25, .19)))
-    with pytest.raises(NotImplementedError, match='spin gradients'):
-        eval_xc_energy_density_unrestricted('r2scan', features)
+def test_unrestricted_mgga_bundle_preserves_cross_spin_gradient_against_libxc():
+    pytest.importorskip('jax_xc')
+    libxc = pytest.importorskip('pyscf.dft.libxc')
+    from gradscf.dft.xc import RestrictedFeatureBundle, eval_xc_energy_density_unrestricted
+    # Hold both spin-gradient norms fixed while changing their relative angle.
+    # Both Gram matrices are positive definite and nonparallel.
+    rho_a, rho_b = jnp.full(2, .4), jnp.full(2, .3)
+    aa, bb = jnp.full(2, .01), jnp.full(2, .02)
+    ab = jnp.array([-.004, .006])
+    tau_a, tau_b = jnp.full(2, .25), jnp.full(2, .19)
+    def energy(cross):
+        features = RestrictedFeatureBundle(rho_a, rho_b, aa, cross, bb, tau_a, tau_b)
+        return eval_xc_energy_density_unrestricted('r2scan', features)
+    alpha_gradient = np.zeros((2, 3));alpha_gradient[:, 0] = np.sqrt(np.asarray(aa))
+    beta_gradient = np.zeros((2, 3));beta_gradient[:, 0] = np.asarray(ab)/alpha_gradient[:, 0]
+    beta_gradient[:, 1] = np.sqrt(np.asarray(bb)-beta_gradient[:, 0]**2)
+    fields = np.zeros((2, 6, 2))
+    fields[:, 0] = np.asarray([rho_a, rho_b])
+    fields[0, 1:4] = alpha_gradient.T;fields[1, 1:4] = beta_gradient.T
+    fields[:, 5] = np.asarray([tau_a, tau_b])
+    epsilon, potential, _, _ = libxc.eval_xc('R2SCAN', fields, spin=1, deriv=1)
+    actual = energy(ab)
+    np.testing.assert_allclose(actual, epsilon*np.asarray(rho_a+rho_b), rtol=2e-9, atol=1e-11)
+    assert abs(actual[0]-actual[1]) > 1e-8
+    derivative = jax.grad(lambda cross: jnp.sum(energy(cross)))(ab)
+    np.testing.assert_allclose(derivative, potential[1][:, 1], rtol=2e-8, atol=1e-10)
 
 
 def test_r2scan_spin_fields_match_libxc():

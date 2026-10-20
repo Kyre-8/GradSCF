@@ -11,7 +11,7 @@ from gradscf.tddft._semilocal_response import SemilocalResponseFunctional
 from gradscf.tddft import RestrictedCasidaTDDFT
 from gradscf.tddft.casida import solve_casida_from_tdhf_operator
 from gradscf.tddft.types import TDDFTResult
-from gradscf.dft.libxc_jax.jax_xc_adapter import MissingJAXXCError, load_jax_xc
+from gradscf.dft.xc._jax_xc import MissingJAXXCError, load_jax_xc
 
 
 @dataclass(frozen=True)

@@ -10,6 +10,8 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+from .registry import component_requires_laplacian, local_composite_definitions
+
 
 class MissingJAXXCError(ImportError):
     """Raised when the configured environment does not provide ``jax_xc``."""
@@ -46,54 +48,7 @@ _STRICT_JAX_XC_FUNCTIONALS = {
 
 _HybridTerm = tuple[float, str, dict[str, float]]
 
-SAFE_JAX_XC_WRAPPED_COMPOSITES: dict[str, tuple[_HybridTerm, ...]] = {
-    "pbe0": (
-        (0.75, "gga_x_pbe", {}),
-        (1.0, "gga_c_pbe", {}),
-    ),
-    "pbeh": (
-        (0.75, "gga_x_pbe", {}),
-        (1.0, "gga_c_pbe", {}),
-    ),
-    "hyb_gga_xc_pbeh": (
-        (0.75, "gga_x_pbe", {}),
-        (1.0, "gga_c_pbe", {}),
-    ),
-    "hyb_gga_xc_pbe0_13": (
-        (0.75, "gga_x_pbe", {}),
-        (1.0, "gga_c_pbe", {}),
-    ),
-    "b3lyp": (
-        (0.08, "lda_x", {}),
-        (0.72, "gga_x_b88", {}),
-        (0.19, "lda_c_vwn_rpa", {}),
-        (0.81, "gga_c_lyp", {}),
-    ),
-    "hyb_gga_xc_b3lyp": (
-        (0.08, "lda_x", {}),
-        (0.72, "gga_x_b88", {}),
-        (0.19, "lda_c_vwn_rpa", {}),
-        (0.81, "gga_c_lyp", {}),
-    ),
-    "bhandhlyp": (
-        (0.5, "gga_x_b88", {}),
-        (1.0, "gga_c_lyp", {}),
-    ),
-    "hyb_gga_xc_bhandhlyp": (
-        (0.5, "gga_x_b88", {}),
-        (1.0, "gga_c_lyp", {}),
-    ),
-    "hyb_gga_xc_hse03": (
-        (1.0, "gga_x_wpbeh", {"_omega": 0.0}),
-        (-0.25, "gga_x_wpbeh", {"_omega": 0.18898815748423098}),
-        (1.0, "gga_c_pbe", {}),
-    ),
-    "hyb_gga_xc_hse06": (
-        (1.0, "gga_x_wpbeh", {"_omega": 0.0}),
-        (-0.25, "gga_x_wpbeh", {"_omega": 0.11}),
-        (1.0, "gga_c_pbe", {}),
-    ),
-}
+SAFE_JAX_XC_WRAPPED_COMPOSITES: dict[str, tuple[_HybridTerm, ...]] = local_composite_definitions()
 
 _EXPERIMENTAL_JAX_XC_FUNCTIONALS = {
     "gga_x_rpbe",
@@ -104,11 +59,9 @@ _EXPERIMENTAL_JAX_XC_FUNCTIONALS = {
     "hyb_gga_xc_wb97x",
 }
 
-_KNOWN_MISMATCH_JAX_XC_FUNCTIONALS = {
-    "hyb_gga_xc_b97",
-    "hyb_gga_xc_b97_1",
-    "hyb_gga_xc_wb97x",
-}
+# Legacy array-conversion mismatches are repaired by parameter_factory. Keep
+# this explicit deny-list for independently demonstrated unresolved channels.
+_KNOWN_MISMATCH_JAX_XC_FUNCTIONALS: set[str] = set()
 
 _JAX_XC_FUNCTIONAL_PREFIXES = (
     "lda_",
@@ -117,6 +70,27 @@ _JAX_XC_FUNCTIONAL_PREFIXES = (
     "hyb_gga_",
     "hyb_mgga_",
 )
+
+
+def ensure_finite(value, *, context="XC evaluation"):
+    """Check eager values; traced graphs retain failures for caller validation."""
+    if not isinstance(value, jax.core.Tracer) and not np.all(np.isfinite(np.asarray(value))):
+        raise FloatingPointError(f"{context} returned non-finite values.")
+    return value
+
+
+def _validate_runtime_omega(omega):
+    """Require positive tunable omega when its primal value is concrete.
+
+    Fully dynamic JIT callers must keep omega positive; validation introduces
+    no host callback. Static local terms can separately fix omega exactly zero.
+    """
+    value = omega
+    while isinstance(value, jax.core.Tracer) and hasattr(value, "primal"):
+        value = value.primal
+    if value is not None and not isinstance(value, jax.core.Tracer):
+        if not np.isfinite(float(value)) or float(value) <= 0.:
+            raise ValueError("Runtime omega must be positive; a static fixed-zero local term is a separate limit.")
 
 
 def _is_mgga_name(name: str) -> bool:
@@ -157,9 +131,14 @@ def load_jax_xc() -> tuple[Any, str]:
     try:
         module = importlib.import_module("jax_xc")
     except (ImportError, OSError) as exc:
+        causes = []
+        current = exc
+        while current is not None and len(causes) < 5:
+            causes.append(f"{type(current).__name__}: {current}")
+            current = current.__cause__ or current.__context__
         raise MissingJAXXCError(
             "Traditional XC evaluation requires the optional package 'jax_xc' "
-            "to be installed in the active Python environment."
+            "to load in the active Python environment. " + " Caused by: ".join(causes)
         ) from exc
     return _JAXXCModule(module), "upstream"
 
@@ -231,7 +210,7 @@ def jax_xc_functional_info(name: str) -> JAXXCFunctionalInfo:
         reason = "Available from installed jax_xc but not validated for Neural XC training."
         if canonical in _KNOWN_MISMATCH_JAX_XC_FUNCTIONALS:
             reason = (
-                "B97-family jax_xc output has benchmark mismatches against PySCF/libxc; "
+                "This local channel has an unresolved independent PySCF/Libxc reference mismatch; "
                 "explicit experimental opt-in is required."
             )
         elif _is_mgga_name(canonical):
@@ -289,6 +268,8 @@ def _raise_if_not_allowed(
     *,
     allow_experimental_jax_xc: bool,
 ) -> None:
+    if component_requires_laplacian(info.name):
+        raise NotImplementedError(f"XC component {info.name!r} requires a density Laplacian; rho/grad/tau alone are insufficient.")
     if info.status == "unavailable":
         raise KeyError(f"jax_xc functional {info.name!r} is unavailable: {info.reason}")
     if info.status == "experimental" and not bool(allow_experimental_jax_xc):
@@ -325,7 +306,7 @@ def _wb97xd_parameter_factory(factory):
                   for i, field in enumerate(fields)}
         return p._replace(params=p.params._replace(**arrays))
 
-    from .wb97_local import invoke
+    from ._compat import invoke
 
     namespace = dict(factory.__globals__, get_p=get_p, invoke=invoke)
     wrapped = FunctionType(factory.__code__, namespace, factory.__name__,
@@ -342,14 +323,17 @@ class _JAXXCModule:
         self.__version__ = getattr(module, "__version__", None)
 
     def __getattr__(self, name: str):
+        from ._compat import parameter_factory
+
         if name in SAFE_JAX_XC_WRAPPED_COMPOSITES:
             return self._hybrid_factory(name)
         if name == "lda_c_pw":
-            from .jax_xc_compat import pw_parameter_factory
+            from ._compat import pw_parameter_factory
             return pw_parameter_factory(getattr(self._module, name))
         if name == "hyb_gga_xc_wb97x_d":
             return _wb97xd_parameter_factory(getattr(self._module, name))
-        return getattr(self._module, name)
+        factory = getattr(self._module, name)
+        return parameter_factory(factory)
 
     def _hybrid_factory(self, name: str):
         terms = SAFE_JAX_XC_WRAPPED_COMPOSITES[name]
@@ -407,8 +391,9 @@ def _evaluate_factory_from_restricted_features(
     family: str,
 ) -> jnp.ndarray:
     rho = jnp.maximum(jnp.asarray(features.rho), _DENSITY_FLOOR)
-    sigma = jnp.maximum(jnp.asarray(features.sigma), 0.0)
-    grad_mag = jnp.sqrt(sigma)
+    raw_sigma = jnp.asarray(features.sigma)
+    sigma = jnp.where(raw_sigma >= 0., raw_sigma, 0.)
+    grad_mag = jnp.sqrt(sigma + _UNRESTRICTED_DERIVATIVE_FLOOR**2)
     tau = jnp.maximum(jnp.asarray(features.tau_a + features.tau_b), 0.0)
     origin = jnp.zeros((3,), dtype=rho.dtype)
 
@@ -430,7 +415,7 @@ def _evaluate_factory_from_restricted_features(
         value = point_eval(rho, grad_mag, tau)
     else:
         value = jax.vmap(point_eval)(rho, grad_mag, tau)
-    return jnp.nan_to_num(value, nan=0.0, posinf=0.0, neginf=0.0)
+    return ensure_finite(value, context="restricted local XC energy")
 
 
 def _evaluate_factory_from_unrestricted_features(
@@ -439,19 +424,11 @@ def _evaluate_factory_from_unrestricted_features(
     *,
     family: str,
 ) -> jnp.ndarray:
-    if family == "MGGA":
-        raise NotImplementedError(
-            "Unrestricted MGGA requires explicit spin gradients and tau; use "
-            "eval_xc_energy_density_unrestricted_from_density_gradients. "
-            "The feature-bundle orbital bridge does not preserve sigma_ab."
-        )
+    from .features import spin_gradients_from_features
+
     rho_a = jnp.maximum(jnp.asarray(features.rho_a), _DENSITY_FLOOR)
     rho_b = jnp.maximum(jnp.asarray(features.rho_b), _DENSITY_FLOOR)
-    sigma_aa = jnp.maximum(jnp.asarray(features.sigma_aa), 0.0)
-    sigma_bb = jnp.maximum(jnp.asarray(features.sigma_bb), 0.0)
-    gradient_floor2 = _UNRESTRICTED_DERIVATIVE_FLOOR**2
-    grad_a = jnp.sqrt(jnp.maximum(sigma_aa, gradient_floor2))
-    grad_b = jnp.sqrt(jnp.maximum(sigma_bb, gradient_floor2))
+    grad_a, grad_b = spin_gradients_from_features(features)
     tau_a = jnp.maximum(jnp.asarray(features.tau_a), 0.0)
     tau_b = jnp.maximum(jnp.asarray(features.tau_b), 0.0)
     origin = jnp.zeros((3,), dtype=rho_a.dtype)
@@ -460,8 +437,8 @@ def _evaluate_factory_from_unrestricted_features(
         def rho_fn(r):
             return jnp.asarray(
                 [
-                    rho_a_value + grad_a_value * r[0],
-                    rho_b_value + grad_b_value * r[0],
+                    rho_a_value + jnp.dot(grad_a_value, r),
+                    rho_b_value + jnp.dot(grad_b_value, r),
                 ],
                 dtype=rho_a.dtype,
             )
@@ -487,7 +464,7 @@ def _evaluate_factory_from_unrestricted_features(
         value = point_eval(rho_a, rho_b, grad_a, grad_b, tau_a, tau_b)
     else:
         value = jax.vmap(point_eval)(rho_a, rho_b, grad_a, grad_b, tau_a, tau_b)
-    return jnp.nan_to_num(value, nan=0.0, posinf=0.0, neginf=0.0)
+    return ensure_finite(value, context="unrestricted local XC energy")
 
 
 def eval_jax_xc_energy_density_from_unrestricted_density_gradients(

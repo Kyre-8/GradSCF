@@ -17,7 +17,7 @@ from ..pbc.response import _fields,_shifted_ao,q_kernel,_validate_q_domain
 from ..integrals.periodic.coulomb import coulomb_kernel,ewald_curvature
 from ..integrals.periodic.fft import _pair_potential
 from ..integrals.periodic.pseudo import local_potential,_projector_overlap
-from ..dft.libxc_jax.jax_libxc import xc_type,hybrid_coeff
+from ..dft.xc import xc_type,hybrid_coeff,parse_recipe
 
 
 def _mixed(function,x,u,v):
@@ -72,6 +72,8 @@ def geometry_curvature(source,q,u,v):
     u is the real amplitude of the -q row and v of the +q column. This is
     an internal numerical assembly, not an SCF/training facade.
     """
+    if parse_recipe(source.xc).exact_exchange.omega is not None:
+        raise NotImplementedError("Finite-q geometry curvature requires screened exchange derivatives for RSH.")
     _validate_q_domain(source.inputs, source.exxdiv)
     cell=source.cell;data=source.inputs;density=source.result.density_spin
     q=np.asarray(q,dtype=float);kw=weights_for(data);volume=jnp.linalg.det(cell.lattice)

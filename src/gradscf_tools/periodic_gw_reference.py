@@ -29,7 +29,7 @@ def evaluate_query(mf, kpts, orbs, trial_energy, *, nw=32, eta=1e-3):
     """Return independent Sigma_x, Sigma_c and Dyson residuals (Hartree)."""
     from gradscf.integrals.periodic.fft import build_band_inputs
     from gradscf.pbc._kpoint import grid_xc_potential, project_xc_potential
-    from gradscf.dft.libxc_jax.jax_libxc import xc_type
+    from gradscf.dft.xc import xc_type
     from gradscf.pbc.momentum import wrap_to_kmesh
 
     inputs = mf.inputs

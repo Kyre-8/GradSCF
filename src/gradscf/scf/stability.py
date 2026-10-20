@@ -333,6 +333,14 @@ def uks_stability(
     )
 
 
+def _validate_stability_source(source):
+    from .rsh import reject_rsh_response
+
+    reject_rsh_response(source)
+    if callable(getattr(source, '_is_external_xc', None)) and source._is_external_xc():
+        raise NotImplementedError('Orbital stability for external XC energies is not implemented.')
+
+
 def restricted_stability(
     source,
     *,
@@ -349,8 +357,9 @@ def restricted_stability(
         raise ValueError("Restricted stability channel must be internal or spin")
     from .diagnostics import _restricted_scf_state
     from .rks import _make_jk_builder, _energy_and_raw_fock_for_density
-    from ..dft.libxc_jax.jax_libxc import hybrid_coeff, xc_type
+    from ..dft.xc import hybrid_coeff, xc_type
 
+    _validate_stability_source(source)
     result, inputs = _restricted_scf_state(source)
     cfg = source._config()
     if cfg.jk_backend not in {"full","df"} or cfg.potential_clip is not None:
@@ -694,6 +703,7 @@ def unrestricted_stability(
     """Facade adapter to the same real unrestricted curvature problem."""
     from .diagnostics import _unrestricted_scf_state
 
+    _validate_stability_source(source)
     ref = _unrestricted_scf_state(source)
     coeff, occ = ref.mo_coeff, np.asarray(ref.mo_occ)
     dimension, rotate, energy, args, diagonal = _unrestricted_problem(

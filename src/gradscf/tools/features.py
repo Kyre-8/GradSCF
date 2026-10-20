@@ -11,7 +11,7 @@ from jax import core as jax_core
 from jax.lax import Precision
 from jaxtyping import Array
 
-from ..dft.libxc_jax.jax_libxc import (
+from ..dft.xc import (
     RestrictedFeatureBundle,
     restricted_feature_bundle_from_rho_grad_tau,
 )

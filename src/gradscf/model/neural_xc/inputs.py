@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 from jax.lax import Precision
 
-from ...dft.libxc_jax.jax_libxc import RestrictedFeatureBundle
+from ...dft.xc import RestrictedFeatureBundle
 
 _DM21_BETA = 1.0 / 1024.0
 
