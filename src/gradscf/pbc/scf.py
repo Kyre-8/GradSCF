@@ -3,15 +3,19 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 import numpy as np
-from ..integrals.periodic.fft import build_inputs,get_jk
-from ..scf.core import _orthogonalizer,_diagonalize_fock,_build_density_from_occ
-from ..scf.uks import run_unrestricted_scf_scan,_unrestricted_xc_energy_and_potential_on_grid
-from ..scf.rks import _vxc_matrix_from_grid_potential
-from ..scf.energy import XCContribution,unrestricted_energy,unrestricted_fock
-from ..scf.autodiff import SCFDifferentiationConfig,attach_scf_backward
-from ..dft.libxc_jax.jax_libxc import hybrid_coeff,xc_type
+from ..integrals.periodic.fft import build_inputs
+from ..dft.xc import parse_recipe
 from .kpoints import weights_for,time_reversal_plan
-from ._kpoint import run_kpoint_scf
+from ._kpoint import run_kpoint_scf,energy_and_fock,_named_xc_spec
+
+
+def _xc_arguments(xc,functional):
+    from ..dft.functional import Functional
+    if isinstance(xc,Functional):
+        if functional is not None:
+            raise ValueError('Specify one external Functional using xc or functional, not both.')
+        return None,xc
+    return _named_xc_spec(xc),functional
 
 
 def validate_reference(mf, *, integer=True, equal_weights=True, external=False, low_dimensional=False):
@@ -64,21 +68,19 @@ class PeriodicSCFResult(NamedTuple):
     chemical_potential: object = None
 
 
-def gamma_energy_and_fock(density,inputs,*,xc='hf',exxdiv='ewald',mesh=None):
-    alpha=hybrid_coeff(xc);kind=xc_type(xc)
-    j,k=get_jk(inputs,density,exxdiv=exxdiv,with_k=alpha!=0,mesh=mesh)
-    ao=inputs.ao[0,0];deriv=inputs.ao[0]
-    exc,va,vb,ga,gb=_unrestricted_xc_energy_and_potential_on_grid(
-        ao=ao,ao_deriv1=deriv,weights=inputs.weights,density_a=density[0],density_b=density[1],
-        xc_spec=xc,density_floor=1e-12,potential_clip=None,xc_kind=kind)
-    potentials=jnp.stack([_vxc_matrix_from_grid_potential(ao=ao,ao_deriv1=deriv,
-        ao_laplacian=jnp.zeros_like(ao),weights=inputs.weights,vxc_rho=v,vxc_grad=g,
-        vxc_tau=jnp.zeros_like(v),vxc_lapl=jnp.zeros_like(v),xc_kind=kind)
-        for v,g in ((va,ga),(vb,gb))])
-    contribution=XCContribution(exc,potentials,alpha)
-    return (unrestricted_energy(density,inputs.hcore[0],j,k,contribution,
-                nuclear_repulsion=inputs.nuclear_repulsion),
-            unrestricted_fock(inputs.hcore[0],j,k,contribution))
+def _gamma_mesh(inputs,mesh):
+    if mesh is None:
+        mesh=getattr(getattr(inputs,'exchange_context',None),'mesh',None)
+    if mesh is None or len(mesh)!=3:raise ValueError('Gamma SCF requires the explicit FFT mesh.')
+    return tuple(mesh)
+
+
+def gamma_energy_and_fock(density,inputs,*,xc='hf',exxdiv='ewald',mesh=None,
+                          functional=None,params=None):
+    """Gamma array convention around the same periodic XC/Fock map."""
+    energy,fock=energy_and_fock(jnp.asarray(density)[:,None],inputs,
+        mesh=_gamma_mesh(inputs,mesh),xc=xc,exxdiv=exxdiv,functional=functional,params=params)
+    return energy,fock[:,0]
 
 
 def run_gamma_scf(inputs,*,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
@@ -88,54 +90,14 @@ def run_gamma_scf(inputs,*,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
     """Array-valued SCF with implicit/explicit derivatives on fixed FFT topology."""
     if inputs.overlap.shape[0]!=1:
         raise NotImplementedError('This solver currently accepts Gamma only.')
-    if temperature is not None or functional is not None or reduction is not None or xc_type(xc)=='MGGA':
-        if mesh is None:raise ValueError('Thermal/external/meta-GGA Gamma SCF requires the explicit FFT mesh')
-        density=None if init_density is None else jnp.asarray(init_density)[:,None]
-        return run_kpoint_scf(inputs,mesh=mesh,nelec=nelec,xc=xc,exxdiv=exxdiv,
-            max_cycle=max_cycle,conv_tol=conv_tol,conv_tol_density=conv_tol_density,
-            conv_tol_grad=conv_tol_grad,damping=damping,level_shift=level_shift,
-            init_density=density,differentiation=differentiation,temperature=temperature,
-            functional=functional,params=params,reduction=reduction)
-    if xc_type(xc) not in ('HF','LDA','GGA'):
-        raise NotImplementedError('Periodic XC currently supports LDA/GGA/global hybrids.')
-    n=inputs.overlap.shape[-1]
-    if any(v<0 or v>n or v!=int(v) for v in nelec) or sum(nelec)==0 or max_cycle<1:
-        raise ValueError('Zero-temperature SCF requires integer occupations and positive max_cycle.')
-    config=differentiation or SCFDifferentiationConfig(mode='explicit')
-    # Stop before staging the numerical scan: stopping only its output lets
-    # eager reverse AD allocate unused iteration-by-grid residual arrays.
-    forward_inputs=inputs
-    if config.mode=='implicit':
-        forward_inputs,init_density=jax.tree.map(jax.lax.stop_gradient,(inputs,init_density))
-    s=forward_inputs.overlap[0];x=_orthogonalizer(s,1e-10)
-    eps,c=_diagonalize_fock(forward_inputs.hcore[0],x)
-    occ=jnp.stack([(jnp.arange(n)<count).astype(s.dtype) for count in nelec])
-    coeff=jnp.stack([c,c]);energies=jnp.stack([eps,eps])
-    density=jax.vmap(_build_density_from_occ)(coeff,occ) if init_density is None else jnp.asarray(init_density)
-    if density.shape!=(2,n,n):raise ValueError('Initial spin density must have shape (2,nao,nao).')
-    def evaluate(d,args):return gamma_energy_and_fock(d,args,xc=xc,exxdiv=exxdiv,mesh=mesh)
-    def builder(d,*_):
-        e,f=evaluate(d,forward_inputs)
-        return f,f,e
-    out=run_unrestricted_scf_scan(fock_builder=builder,density_spin=density,
-        mo_coeff_spin=coeff,mo_occ_spin=occ,mo_energy_spin=energies,overlap=s,
-        max_cycle=max_cycle,damping=damping,conv_tol=conv_tol,conv_tol_density=conv_tol_density,
-        conv_tol_grad=conv_tol_grad,orthogonalization_eps=1e-10,level_shift=level_shift)
-    density,coeff,energies,_,converged,cycles,*_=out
-    if config.mode=='implicit':
-        def residual(d,args):
-            _,f=evaluate(d,args)
-            transform=_orthogonalizer(args.overlap[0],1e-10)
-            _,cnew=jax.vmap(lambda f:_diagonalize_fock(f,transform))(f)
-            return jax.vmap(_build_density_from_occ)(cnew,occ)-d
-        density=attach_scf_backward(inputs,solution=density,residual=residual,
-                                    converged=converged,config=config)
-        _,f=evaluate(density,inputs)
-        live_transform=_orthogonalizer(inputs.overlap[0],1e-10)
-        energies,coeff=jax.vmap(lambda f:_diagonalize_fock(f,live_transform))(f)
-    energy,fock=evaluate(density,inputs)
-    return PeriodicSCFResult(energy,density[:,None],coeff[:,None],energies[:,None],
-                             occ[:,None],fock[:,None],converged,cycles,energy)
+    if temperature is None and sum(nelec)==0:
+        raise ValueError('Zero-temperature Gamma SCF requires nonzero electron populations.')
+    density=None if init_density is None else jnp.asarray(init_density)[:,None]
+    return run_kpoint_scf(inputs,mesh=_gamma_mesh(inputs,mesh),nelec=nelec,xc=xc,exxdiv=exxdiv,
+        max_cycle=max_cycle,conv_tol=conv_tol,conv_tol_density=conv_tol_density,
+        conv_tol_grad=conv_tol_grad,damping=damping,level_shift=level_shift,
+        init_density=density,differentiation=differentiation,temperature=temperature,
+        functional=functional,params=params,reduction=reduction)
 
 
 class _SCF:
@@ -145,6 +107,7 @@ class _SCF:
 
     def __init__(self,cell,*,kpts=None,kweights=None,xc=None,exxdiv='ewald',temperature=None,
                  functional=None,params=None,time_reversal=False,symmetry=False,**controls):
+        xc,functional=_xc_arguments(xc,functional)
         self.cell=cell if hasattr(cell,'topology') else cell.build()
         self.kpts=jnp.zeros((1,3)) if kpts is None else jnp.asarray(kpts).reshape(-1,3)
         if not self.k_sampling and (self.kpts.shape!=(1,3) or np.any(np.asarray(self.kpts)!=0)):
@@ -164,6 +127,9 @@ class _SCF:
 
     def kernel(self,dm0=None):
         if not jax.config.x64_enabled:raise ValueError('Periodic SCF requires JAX float64.')
+        self.xc,self.functional=_xc_arguments(self.xc,self.functional)
+        if self.functional is not None and (self.default_xc=='hf' or self.xc is not None):
+            raise ValueError('Use a periodic KS class with one external Functional and no named xc baseline.')
         self.inputs=build_inputs(self.cell,kpts=self.kpts,kweights=self.kweights)
         if self.symmetry:
             from .reduction import SpatialReduction
@@ -179,7 +145,9 @@ class _SCF:
                     or not bool(self.reduction.consistent(self.inputs.hcore))
                     or not bool(self.reduction.weights_consistent(w))):
                 raise ValueError('Inputs violate the requested symmetry; use the full mesh or refine the FFT grid.')
-        if (self.functional is None and hybrid_coeff(self.xc)!=0 and self.exxdiv in ('ewald','vcut_sph')
+        exchange=None if self.functional is not None else parse_recipe(self.xc).exact_exchange
+        if (exchange is not None and any((exchange.full_range,exchange.short_range,exchange.long_range))
+                and self.exxdiv in ('ewald','vcut_sph')
                 and not np.allclose(self.inputs.kweights,1/len(self.kpts),atol=1e-12,rtol=0)):
             raise NotImplementedError('Finite-cell exchange quadrature requires equal k weights; use exxdiv=None for general weights')
         density=None
@@ -205,7 +173,7 @@ class _SCF:
         return self.e_tot
 
     def run(self,**controls):
-        for name in ('temperature','functional','params','time_reversal','symmetry'):
+        for name in ('xc','temperature','functional','params','time_reversal','symmetry'):
             if name in controls:setattr(self,name,controls.pop(name))
         self.controls.update(controls);self.kernel();return self
 

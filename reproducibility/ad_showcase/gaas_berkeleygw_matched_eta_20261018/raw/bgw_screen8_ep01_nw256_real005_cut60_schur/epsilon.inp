@@ -1,0 +1,19 @@
+# Same Gaussian Bloch orbitals; all physical bands retained in WFN.
+epsilon_cutoff 8.0000000000
+number_bands 14
+degeneracy_check_override
+frequency_dependence 2
+frequency_dependence_method 2
+number_imaginary_freqs 256
+plasma_freq 2.721138506
+broadening 0.027211386245988
+delta_frequency .05
+frequency_low_cutoff 60.0
+frequency_high_cutoff 60.0
+no_min_fftgrid
+verbosity 2
+write_vcoul
+begin qpoints
+0.000000000000 0.000000000000 0.001000000000 1.0 1
+0.500000000000 0.000000000000 0.000000000000 1.0 0
+end

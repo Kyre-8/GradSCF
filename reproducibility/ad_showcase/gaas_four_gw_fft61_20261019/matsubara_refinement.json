@@ -1,0 +1,98 @@
+{
+  "scope": "Raw same-model fine61 SC512/1024 refinement; no pole fitting or continuation",
+  "frame": "SRC align_source unitary/intertwining checks passed",
+  "sigma_argument_note": "Common relative iomega nodes, each Sigma sampled at its own absolute z=mu+iomega; not a fixed-absolute-z error and no manual frequency shift",
+  "quadrature_note": "beta400 and Gauss factor4 fixed; Nt changes4096 to8192 with nw",
+  "controls": {
+    "source_kmesh": [
+      2,
+      1,
+      1
+    ],
+    "fft_mesh": [
+      61,
+      61,
+      61
+    ],
+    "beta_hartree_inverse": 400.0,
+    "time_oversampling": 4,
+    "time_quadrature": "gauss",
+    "nw": [
+      512,
+      1024
+    ],
+    "ntau": [
+      4096,
+      8192
+    ],
+    "screening_cutoff_rydberg": 16.0,
+    "fc": false,
+    "exxdiv": null
+  },
+  "inputs": {
+    "512": {
+      "directory": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/sc512_fft61_20261019",
+      "files": {
+        "scgw.npz": {
+          "sha256": "caa88f3c75c3fe01ea369b5aa82b66d673b515fbf80af60f8781184a446f0da9",
+          "zip_crc_passed": true
+        },
+        "scgw_dyson_diagnostics.npz": {
+          "sha256": "cb46a4b71825fbf2762b700964b558f2bed24098c1a998a59bd839c059573034",
+          "zip_crc_passed": true
+        }
+      },
+      "forward_implementation_sha256": {
+        "matsubara": "0b017682eba391909969ef0c025567b8878b00070fc776ded57c11e10f34f25b",
+        "scgw": "e3ab5d0c7ffda6ef1d479e17e597719b203591a58aa1666ebd02d9822001f58d",
+        "source": "f021849276aea5af49a27b9ff1bfc74c9950feda2da0028899d66eae370f3b3a"
+      },
+      "fixed_point_residual_hartree": 4.137753938054218e-07,
+      "particle_number_error": 0.0
+    },
+    "1024": {
+      "directory": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/gaas_four_gw_fft61_20261019_r1",
+      "files": {
+        "scgw.npz": {
+          "sha256": "dd683f57b9bb0064328e4f1df280a18ed6a1fe49fd9a6f39e64ca6affa2dee24",
+          "zip_crc_passed": true
+        },
+        "scgw_dyson_diagnostics.npz": {
+          "sha256": "09a6c79b266949db4c74780d5369d32074ebabea3fac52e55a1d10ff04b731ac",
+          "zip_crc_passed": true
+        }
+      },
+      "forward_implementation_sha256": {
+        "matsubara": "0b017682eba391909969ef0c025567b8878b00070fc776ded57c11e10f34f25b",
+        "scgw": "e3ab5d0c7ffda6ef1d479e17e597719b203591a58aa1666ebd02d9822001f58d",
+        "source": "f021849276aea5af49a27b9ff1bfc74c9950feda2da0028899d66eae370f3b3a"
+      },
+      "fixed_point_residual_hartree": 4.194749338796777e-07,
+      "particle_number_error": 0.0
+    }
+  },
+  "chemical_potential_512_hartree": 0.4913753249973078,
+  "chemical_potential_1024_hartree": 0.49134642224741465,
+  "chemical_potential_difference_hartree": -2.8902749893144897e-05,
+  "density_spin_summed_max_absolute": 4.197985052032825e-05,
+  "fock_max_absolute_hartree": 1.9586308670049846e-05,
+  "moment_max_absolute_hartree_squared": 7.958552270857788e-05,
+  "sigma_first64": {
+    "max_absolute_hartree": 5.51959901860066e-06,
+    "relative_frobenius": 8.717198985975022e-05,
+    "positive_frequency_interval_hartree": [
+      0.007853981633974483,
+      0.9974556675147593
+    ]
+  },
+  "sigma_first128": {
+    "max_absolute_hartree": 5.700618183466274e-06,
+    "relative_frobenius": 9.37423056102138e-05,
+    "positive_frequency_interval_hartree": [
+      0.007853981633974483,
+      2.0027653166634933
+    ]
+  },
+  "elapsed_seconds": 0.6883558129775338,
+  "cpu_seconds": 0.686181187
+}

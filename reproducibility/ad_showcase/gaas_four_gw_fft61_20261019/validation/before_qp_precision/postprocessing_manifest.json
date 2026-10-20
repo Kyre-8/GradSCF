@@ -1,0 +1,163 @@
+{
+  "scope": "Public analyze of four fresh FFT61 source2 results; no source-GW recalculation",
+  "directory": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/gaas_four_gw_fft61_20261019_r1",
+  "allowed_cpu_ids": [
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31
+  ],
+  "options": {
+    "path_points": 121,
+    "dos_kmesh": [
+      4,
+      4,
+      4
+    ],
+    "axis_ev": [
+      -250.0,
+      250.0
+    ],
+    "axis_count": 10001,
+    "frequency_cutoff_hartree": 2.01,
+    "fit_tolerance": 0.0001,
+    "rank_tolerance": 1e-12,
+    "spectral_eta_ev": 0.1,
+    "particle_tolerance": 0.001
+  },
+  "continuous_path": "Original unwrapped ASE path; only interpolation weights wrap",
+  "controller_wall_limit_seconds": 1800,
+  "controller_rss_limit_gib": 64,
+  "complete": true,
+  "sc1024_gate_passed": true,
+  "sc1024_run_path": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/scgw_fft61_controls_20261019/nw1024/run.json",
+  "sc1024_run_sha256": "35ccfd7b3f10e9a328f9a80cf9771ddaebe5ed639d28686ad8c7f9928090e100",
+  "sc1024_run": {
+    "command": [
+      "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+      "-u",
+      "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/scgw_fft61_controls_20261019/run.py",
+      "1024"
+    ],
+    "cwd": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016",
+    "nw": 1024,
+    "return_code": 0,
+    "elapsed_seconds": 1638.7703620909888,
+    "peak_rss_kib": 40924576,
+    "allowed_cpu_ids": [
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95
+    ],
+    "rss_limit_kib": 201326592,
+    "wall_limit_seconds": 7000,
+    "termination_reason": null,
+    "accepted": true
+  },
+  "input_sha256": {
+    "g0w0.npz": "bb59c475b4ba61b9171a6d08ee7b2d25c901b5c1c632ae690e25fca82ca0b669",
+    "g0w0.json": "46ac1f724658eaf5211aec666ba186fa499ca064f817836a692b475ad334452e",
+    "evgw.npz": "7981aab1c1d839906cdcde36a2f11a7113e9a59007db886d8c70738cb260e916",
+    "evgw.json": "ff2d4e2a50f81afcc3d6ca5db7380f458e68d57110af63497a5e0040a1cfd604",
+    "qsgw.npz": "d548b176b3aa6f1b27a1dc318ceb1b95ea4def38e32b4bc10c4c0f972a6bccf5",
+    "qsgw.json": "82de94bd6ef5748c11713d2faa057576482194d6bee5686de9f831d93b0fe048",
+    "scgw.npz": "dd683f57b9bb0064328e4f1df280a18ed6a1fe49fd9a6f39e64ca6affa2dee24",
+    "scgw.json": "05b4d3678741204fd38c99c45e5c1a0274ac6ccfb75bc00d7b35dee5597b163c"
+  },
+  "implementation_sha256": {
+    "examples/pbc/band_structures/gaas_gw_spectra.py": "2f7cda11cc4c4f324ac74f59338e171e3d27036e8945c62c57fcdc7c7df05078",
+    "examples/pbc/band_structures/gaas_self_consistent_gw.py": "b17bb3c678ccc66dd3e4b9a8eb22f18f9671416ab43035f02b4bd01a341f3594",
+    "src/gradscf/gw/pbc/spectrum.py": "89262a39dc4d584cbc156e773c6a4cd244609dc61582de5223427ab7dbcc3111",
+    "src/gradscf/gw/pbc/interpolation.py": "f1558be076b41ab61c00c1f689a188f2ccfbb5397fb457bd70bc6acfa5ac84bb",
+    "src/gradscf/solvers/poles.py": "82328417587ebb50cc144729ee40f64559f2318a488c34a3c9865f5dc38936a9",
+    "src/gradscf_tools/gaas_gw_plot.py": "a864d0a05dcc59f9ff13eda2fa637d865a75b657c565f85f696dd3321a01e40c"
+  },
+  "elapsed_seconds": 411.5376347400015,
+  "gaps": {
+    "pbe": {
+      "gamma_direct_ev": 0.28386067858929254,
+      "sampled_gap_ev": 0.28386067858929254,
+      "minimum_direct_ev": 0.28386067858929254
+    },
+    "g0w0": {
+      "gamma_direct_ev": 0.38847779008333977,
+      "sampled_gap_ev": 0.38847779008333977,
+      "minimum_direct_ev": 0.38847779008333977,
+      "sampled_gap_change_ev": 0.10461711149404723,
+      "gamma_gap_change_ev": 0.10461711149404723,
+      "minimum_direct_gap_change_ev": 0.10461711149404723
+    },
+    "evgw": {
+      "gamma_direct_ev": 1.033671314172418,
+      "sampled_gap_ev": 0.6069948076083347,
+      "minimum_direct_ev": 1.033671314172418,
+      "sampled_gap_change_ev": 0.32313412901904215,
+      "gamma_gap_change_ev": 0.7498106355831256,
+      "minimum_direct_gap_change_ev": 0.7498106355831256
+    },
+    "qsgw": {
+      "gamma_direct_ev": 1.2997116634708927,
+      "sampled_gap_ev": 1.2005266461158115,
+      "minimum_direct_ev": 1.2997116634708927,
+      "sampled_gap_change_ev": 0.916665967526519,
+      "gamma_gap_change_ev": 1.0158509848816002,
+      "minimum_direct_gap_change_ev": 1.0158509848816002
+    },
+    "scgw": {
+      "gamma_direct_ev": null,
+      "sampled_gap_ev": null,
+      "minimum_direct_ev": null,
+      "sampled_gap_change_ev": null,
+      "gamma_gap_change_ev": null,
+      "minimum_direct_gap_change_ev": null
+    }
+  },
+  "output_sha256": {
+    "comparison.npz": "a0b5f22ed9ee3c4422b9569fdb1771a4cbc99d4bbd5f971abc907420bf344323",
+    "comparison.json": "21b294b7c55ab0e8c4b70691e638d226c38197b8883cd615aff92af90e0bd4f5",
+    "gaas_four_gw.png": "f1b2be5a33eda473fe89f6266149886150efe6e50db5ca79082e6b8707691913",
+    "gaas_four_gw.pdf": "df0376b586b07a5321c9cc79c68bdd032e2711597445a12666a469f0f25689bc",
+    "gaps.csv": "970d78ef70b7c27c971833b4de76daeb82b04f68587c9d9397f59f84f3ba6769"
+  }
+}

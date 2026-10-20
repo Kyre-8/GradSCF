@@ -1,0 +1,33 @@
+{
+  "baseline.npz": {
+    "bytes": 1554628,
+    "sha256": "561e23acb21f3c4bab692db6a757a7eeab6852b7a1ad571c78ac9d78d64765e4",
+    "remote_sha_matches": true,
+    "zip_crc_failure": null,
+    "members": 17
+  },
+  "rank5e13.npz": {
+    "bytes": 1564586,
+    "sha256": "b41cc904dc858bea62a1cb44d4a48c8875f1f69e8ca276f977e5fd160b0ee06e",
+    "remote_sha_matches": true,
+    "zip_crc_failure": null,
+    "members": 17
+  },
+  "cutoff151.npz": {
+    "bytes": 1529126,
+    "sha256": "f7de3e9f893df37878bebeb2d917ecab7e1625ed870e2ddf053429ed28532bb2",
+    "remote_sha_matches": true,
+    "zip_crc_failure": null,
+    "members": 17
+  },
+  "result.json": {
+    "bytes": 29602,
+    "sha256": "052f9ba8ccad93a59c7ad5471a77200f0843635c46a855b087743ca2512683fd",
+    "remote_sha_matches": true
+  },
+  "gamma_run.json": {
+    "bytes": 660,
+    "sha256": "03218d7a10eab0f07a5ff7f8fc1304d0641fe5e9516d7154f17a439872bcc53f",
+    "remote_sha_matches": true
+  }
+}

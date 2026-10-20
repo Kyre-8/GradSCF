@@ -1,0 +1,154 @@
+{
+  "complete": true,
+  "reference_source": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/gaas_four_gw_fft61_qp_guard_20261019",
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "fft_mesh": [
+    61,
+    61,
+    61
+  ],
+  "basis": "gth-szv",
+  "pseudo": "gth-pbe",
+  "fc": false,
+  "exxdiv": null,
+  "screening_cutoff_rydberg": 16.0,
+  "reference_energy_max_error_hartree": 0.0,
+  "reference_density_max_error": 0.0,
+  "shapes": {
+    "energy": [
+      2,
+      14
+    ],
+    "coeff": [
+      2,
+      14,
+      14
+    ],
+    "hcore": [
+      2,
+      14,
+      14
+    ],
+    "reference_potential": [
+      2,
+      14,
+      14
+    ],
+    "reference_fock": [
+      2,
+      14,
+      14
+    ],
+    "kpoints": [
+      2,
+      3
+    ],
+    "lattice": [
+      3,
+      3
+    ],
+    "table": [
+      2,
+      2
+    ],
+    "inverse": [
+      2,
+      2
+    ],
+    "reference_density": [
+      2,
+      14,
+      14
+    ],
+    "overlap_ao": [
+      2,
+      14,
+      14
+    ],
+    "overlap_mo": [
+      2,
+      14,
+      14
+    ],
+    "nocc": [],
+    "madelung": [],
+    "nuclear_repulsion": [],
+    "bare_0": [
+      2,
+      203,
+      14,
+      14
+    ],
+    "correlation_0": [
+      2,
+      200,
+      14,
+      14
+    ],
+    "bare_1": [
+      2,
+      191,
+      14,
+      14
+    ],
+    "correlation_1": [
+      2,
+      190,
+      14,
+      14
+    ]
+  },
+  "conventions": {
+    "frame": "fixed orthonormal reference MO at each k",
+    "density": "per spin",
+    "momentum": "bare_q[ki,P,m,n] joins ki to table[ki,q]=ki-q",
+    "k_normalization": "no k weights included in factors; each physical k sum applies 1/Nk",
+    "scope": "Exact native source snapshot; not an implemented external-input bridge"
+  },
+  "metadata": {
+    "fc": false,
+    "compression_tolerance": 1e-12,
+    "compression": [
+      {
+        "rank": 203,
+        "original_rank": 226981,
+        "relative_gram_residual": 2.169783393873858e-13
+      },
+      {
+        "rank": 191,
+        "original_rank": 226981,
+        "relative_gram_residual": 3.4420033244008766e-13
+      }
+    ],
+    "mesh": [
+      61,
+      61,
+      61
+    ],
+    "screening_cutoff_rydberg": 16.0,
+    "screening_compression": [
+      {
+        "rank": 200,
+        "original_rank": 331,
+        "relative_gram_residual": 3.842211878949528e-13,
+        "plane_waves": 331
+      },
+      {
+        "rank": 190,
+        "original_rank": 332,
+        "relative_gram_residual": 4.0647809400493264e-13,
+        "plane_waves": 332
+      }
+    ],
+    "scope": "3D source-k finite Hamiltonian; no Gamma-cell correction or material convergence",
+    "reference_hartree_residual": 1.489426151857226e-10,
+    "reference_fock_residual": 6.217275180991155e-15,
+    "reference_exchange_potential_difference": 0.7359496969989212
+  },
+  "elapsed_seconds": 53.79812876400001,
+  "sha256": "f8a8d0b94c4c9ee912e6d28ae8f6a599ee3016dd55b3472c020eed1700e59594"
+}

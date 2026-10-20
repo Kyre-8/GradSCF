@@ -1,6 +1,7 @@
 # Generic XC functional interface
 
-`dft.Functional` connects an external feature builder and external network
+`dft.custom_xc(input_fn=..., energy_fn=...)` constructs the existing
+`dft.Functional`, connecting an external feature builder and external formula or network
 energy to the existing GradSCF SCF, AD, response and training code. It does not
 choose the network architecture, prescribe a feature vector, or add an XC
 baseline automatically. It introduces no separate SCF solver or trainer.
@@ -29,12 +30,25 @@ step. The old locations have been removed, with no forwarding files.
 ```python
 from gradscf import dft
 
-functional = dft.Functional(
+functional = dft.custom_xc(
     input_fn=make_inputs,         # DensityInputs -> array PyTree
     energy_fn=energy,             # (params, inputs) -> scalar XC energy, Ha
     init_fn=initialize,           # optional (key, inputs) -> parameter mapping
 )
 ```
+
+For direct SCF, use `dft.RKS(mol, xc=functional, params=params).run()` or
+`dft.UKS` with the same arguments. The periodic RKS/KRKS/UKS/KUKS facades
+accept the same `xc` object and explicit parameters. Molecular adiabatic
+response uses the full energy Hessian and the current SCF parameters;
+changing parameters requires rerunning SCF before response.
+
+`dft.custom_xc(spec)` is the other form: it constructs a
+`TraditionalXCFunctional` with complete semilocal, HF/RSH and extra-term
+metadata. It cannot be mixed with energy callbacks. See the
+[traditional XC library](xc/README.md) for its operator and availability
+contracts. Both forms use existing implementations, with no extra solver or
+trainer and no dependency on the built-in neural model.
 
 `make_inputs` and `energy` must be JAX differentiable to the order required by
 the requested loss. Flax, Haiku or pure-JAX networks can be called inside
@@ -158,7 +172,7 @@ updates and can differ from the attempted `step` after a rejection.
 The new facade rejects density/orbital-energy supervision in fixed-density
 mode instead of silently running SCF. Low-level loss helpers retain their
 existing behavior for advanced callers. See
-[the training API guide](../training/README.md) for migration and metric names.
+[the training API guide](../model/neural_xc/training/README.md) for migration and metric names.
 
 ## Executed demonstration and validation
 
@@ -231,7 +245,7 @@ FCI cross-checks and limitations are in
 [h2_fci_results/README.md](../../../examples/training/h2_fci_results/README.md).
 
 Earlier short-API/explicit-name validation: 106 passed, 3 skipped, 1 known
-baseline failure deselected; see [training/README.md](../training/README.md#validation).
+baseline failure deselected; see [training/README.md](../model/neural_xc/training/README.md#validation).
 
 ## Module-layout validation
 

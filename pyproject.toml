@@ -33,11 +33,11 @@ dev = [
   "pytest>=8.0",
 ]
 upstreams = [
-  "jax-xc>=0.0.12",
+  "jax-xc>=0.0.9",
 ]
 reproducibility = [
   "h5py>=3.8",
-  "jax-xc>=0.0.12",
+  "jax-xc>=0.0.9",
   "matplotlib>=3.7",
   "scipy>=1.10",
 ]
@@ -57,6 +57,7 @@ exclude = ["gradscf.integrals._native.*", "gradscf.integrals.basis.data.pyscf_ba
 [tool.setuptools.package-data]
 "gradscf.model" = ["README.md"]
 "gradscf.dft" = ["*.md"]
+"gradscf.dft.xc" = ["_catalog.json", "*.md"]
 "gradscf.dfpt" = ["*.md"]
 "gradscf.pbc" = ["*.md"]
 "gradscf.model.neural_xc.training" = ["*.md"]

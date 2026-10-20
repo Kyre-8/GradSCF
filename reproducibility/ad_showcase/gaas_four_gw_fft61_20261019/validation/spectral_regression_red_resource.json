@@ -1,0 +1,35 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/gw/pbc/test_spectrum_time_reversal.py"
+  ],
+  "cwd": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016",
+  "return_code": 1,
+  "elapsed_seconds": 1.1990680299932137,
+  "peak_rss_kib": 189540,
+  "allowed_cpu_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "rss_limit_kib": 8388608,
+  "wall_limit_seconds": 180.0,
+  "termination_reason": null,
+  "accepted": false
+}

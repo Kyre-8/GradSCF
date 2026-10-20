@@ -1,0 +1,220 @@
+{
+  "common": {
+    "bgw_epsilon_binary_sha256": "ed42c2af85fa944ab4e3d922ec4b3d964ed6b5c78b1399581192cbac9dc653f3",
+    "bgw_sigma_binary_sha256": "cc584f8354ee93e9337e2c3c9095107062965a7daa0c9b0253688f3c7438f1ac",
+    "native_eta_g_hartree": 0.0,
+    "native_screening_eta_hartree": 0.001000000043584257,
+    "bgw_plasma_frequency_hartree": 0.1,
+    "bgw_imaginary_points": 256,
+    "source_kmesh": [
+      2,
+      1,
+      1
+    ],
+    "full_internal_bands": 14,
+    "screening_cutoff_rydberg": 8.0,
+    "bgw_bare_cutoff_rydberg": 399.0,
+    "native_bare": "full FFT",
+    "q0_fractional": [
+      0.0,
+      0.0,
+      0.001
+    ],
+    "body_protocol": "Certified head-Schur copy; not ordinary bulk semiconductor output"
+  },
+  "rows": [
+    {
+      "id": "real005_cut200",
+      "real_W_spacing_ev": 0.05,
+      "real_W_cutoff_ev": 200,
+      "Sigma_evaluation_spacing_ev": 0.1,
+      "Sigma_evaluation_half_window_ev": 20.0,
+      "native_samples": "same saved baseline .1eV/.01eV actual grid",
+      "native_source_sha256": {
+        "src/gradscf/gw/pbc/source.py": "fcccebf7933e5ef5def9e4fb0789c31b857e107addfdf2baf7af6566a111da76",
+        "src/gradscf/gw/qp.py": "65ec34064a7272cdc72c700ff4ab656e5f1c4fc898f01cb5d0ebdd318fda12b7",
+        "src/gradscf/gw/freq.py": "d1562e54b5a163b3ec9f75104e4eb77d8e43db0a6a6170d3bde6e91b7771da10",
+        "src/gradscf/gw/pbc/query.py": "32da4ca526e8ff3bbd78d877f1c51515c0fad8adf5b8695df899b554d9857d6c",
+        "src/gradscf_tools/berkeleygw.py": "dd39a75b30a6e9407850f67db63abb54219e1bd848ad9b4423e7edb97858d573",
+        "examples/pbc/band_structures/gaas_self_consistent_gw.py": "6c4d480cd4e899d8d030508f602f1ec7724e290eb6689331ef0b124a37879e0a",
+        "examples/pbc/band_structures/berkeleygw_gaas.py": "de6113ae4afe57848047149c63c568fc1ce29773522548ab62bf34d58d9cc861"
+      },
+      "bgw_input_sha256": {
+        "WFN": "88b928fb52ddf6cc98d8af6d672b292abe9040c0426ae7d809c85507a91cf92f",
+        "WFNq": "7899fef898cd56a178b7f51d8847e2892d4277b275868524d067528f6492cca0",
+        "epsilon.inp": "c3af0ae5a4ce40632f75fa9c77dff3be2a3ff99c195bb80d1e970b7f74b8bbcb",
+        "sigma.inp": "1d12a4be4514fa1305355843ae96a390a3efdd5206b055603d9d1ad8dc62ae08",
+        "eps0mat": "5a4523824c16208c8c93cb5f7217e30cb277a34d3846a651f1666ad069dcc7de",
+        "epsmat": "d1423cbdce0316965e0728774bb99d3d08063aa52687101f42abde8a54d9dcea"
+      },
+      "native_reference_comparison_bgw_case": "bgw_screen8_ep01_nw256_real005_schur"
+    },
+    {
+      "id": "real005_cut60",
+      "real_W_spacing_ev": 0.05,
+      "real_W_cutoff_ev": 60.0,
+      "Sigma_evaluation_spacing_ev": 0.1,
+      "Sigma_evaluation_half_window_ev": 20.0,
+      "native_samples": "same saved baseline .1eV/.01eV actual grid",
+      "native_source_sha256": {
+        "src/gradscf/gw/pbc/source.py": "fcccebf7933e5ef5def9e4fb0789c31b857e107addfdf2baf7af6566a111da76",
+        "src/gradscf/gw/qp.py": "65ec34064a7272cdc72c700ff4ab656e5f1c4fc898f01cb5d0ebdd318fda12b7",
+        "src/gradscf/gw/freq.py": "d1562e54b5a163b3ec9f75104e4eb77d8e43db0a6a6170d3bde6e91b7771da10",
+        "src/gradscf/gw/pbc/query.py": "32da4ca526e8ff3bbd78d877f1c51515c0fad8adf5b8695df899b554d9857d6c",
+        "src/gradscf_tools/berkeleygw.py": "dd39a75b30a6e9407850f67db63abb54219e1bd848ad9b4423e7edb97858d573",
+        "examples/pbc/band_structures/gaas_self_consistent_gw.py": "6c4d480cd4e899d8d030508f602f1ec7724e290eb6689331ef0b124a37879e0a",
+        "examples/pbc/band_structures/berkeleygw_gaas.py": "de6113ae4afe57848047149c63c568fc1ce29773522548ab62bf34d58d9cc861"
+      },
+      "bgw_input_sha256": {
+        "WFN": "88b928fb52ddf6cc98d8af6d672b292abe9040c0426ae7d809c85507a91cf92f",
+        "WFNq": "7899fef898cd56a178b7f51d8847e2892d4277b275868524d067528f6492cca0",
+        "epsilon.inp": "488e78a1d50f2b2ceaca7620475ca2581cfce0c7b1fd6f0e6b6300ca599caf80",
+        "sigma.inp": "1d12a4be4514fa1305355843ae96a390a3efdd5206b055603d9d1ad8dc62ae08",
+        "eps0mat": "6185faa71edbb0423703692d4027eafc40283d0ae18af876f46cab48072d47a0",
+        "epsmat": "2e10ff9c6c186ed41af8f431cd0f88c65db21371dc073099a5c7fc174be10375"
+      },
+      "native_reference_comparison_bgw_case": "bgw_screen8_ep01_nw256_real005_schur"
+    },
+    {
+      "id": "real001_cut60",
+      "real_W_spacing_ev": 0.01,
+      "real_W_cutoff_ev": 60.0,
+      "Sigma_evaluation_spacing_ev": 0.1,
+      "Sigma_evaluation_half_window_ev": 20.0,
+      "native_samples": "same saved baseline .1eV/.01eV actual grid",
+      "native_source_sha256": {
+        "src/gradscf/gw/pbc/source.py": "fcccebf7933e5ef5def9e4fb0789c31b857e107addfdf2baf7af6566a111da76",
+        "src/gradscf/gw/qp.py": "65ec34064a7272cdc72c700ff4ab656e5f1c4fc898f01cb5d0ebdd318fda12b7",
+        "src/gradscf/gw/freq.py": "d1562e54b5a163b3ec9f75104e4eb77d8e43db0a6a6170d3bde6e91b7771da10",
+        "src/gradscf/gw/pbc/query.py": "32da4ca526e8ff3bbd78d877f1c51515c0fad8adf5b8695df899b554d9857d6c",
+        "src/gradscf_tools/berkeleygw.py": "dd39a75b30a6e9407850f67db63abb54219e1bd848ad9b4423e7edb97858d573",
+        "examples/pbc/band_structures/gaas_self_consistent_gw.py": "6c4d480cd4e899d8d030508f602f1ec7724e290eb6689331ef0b124a37879e0a",
+        "examples/pbc/band_structures/berkeleygw_gaas.py": "de6113ae4afe57848047149c63c568fc1ce29773522548ab62bf34d58d9cc861"
+      },
+      "bgw_input_sha256": {
+        "WFN": "88b928fb52ddf6cc98d8af6d672b292abe9040c0426ae7d809c85507a91cf92f",
+        "WFNq": "7899fef898cd56a178b7f51d8847e2892d4277b275868524d067528f6492cca0",
+        "epsilon.inp": "57fdbef76aeb4fcaed8a2d435020840559669533bf6b77d0a7b916f20179d3db",
+        "sigma.inp": "1d12a4be4514fa1305355843ae96a390a3efdd5206b055603d9d1ad8dc62ae08",
+        "eps0mat": "a0d81713ccf51ed115b20c7a35f83f823a2d4e951a16aff0b58d19474403bdba",
+        "epsmat": "9042a25d2d6f485effc91bc4d76206afaece24b5fc2f4a93431d5a0404eb7099"
+      },
+      "native_reference_comparison_bgw_case": "bgw_screen8_ep01_nw256_real005_schur"
+    },
+    {
+      "id": "real0005_cut60",
+      "real_W_spacing_ev": 0.005,
+      "real_W_cutoff_ev": 60.0,
+      "Sigma_evaluation_spacing_ev": 0.1,
+      "Sigma_evaluation_half_window_ev": 20.0,
+      "native_samples": "same saved baseline .1eV/.01eV actual grid",
+      "native_source_sha256": {
+        "src/gradscf/gw/pbc/source.py": "fcccebf7933e5ef5def9e4fb0789c31b857e107addfdf2baf7af6566a111da76",
+        "src/gradscf/gw/qp.py": "65ec34064a7272cdc72c700ff4ab656e5f1c4fc898f01cb5d0ebdd318fda12b7",
+        "src/gradscf/gw/freq.py": "d1562e54b5a163b3ec9f75104e4eb77d8e43db0a6a6170d3bde6e91b7771da10",
+        "src/gradscf/gw/pbc/query.py": "32da4ca526e8ff3bbd78d877f1c51515c0fad8adf5b8695df899b554d9857d6c",
+        "src/gradscf_tools/berkeleygw.py": "dd39a75b30a6e9407850f67db63abb54219e1bd848ad9b4423e7edb97858d573",
+        "examples/pbc/band_structures/gaas_self_consistent_gw.py": "6c4d480cd4e899d8d030508f602f1ec7724e290eb6689331ef0b124a37879e0a",
+        "examples/pbc/band_structures/berkeleygw_gaas.py": "de6113ae4afe57848047149c63c568fc1ce29773522548ab62bf34d58d9cc861"
+      },
+      "bgw_input_sha256": {
+        "WFN": "88b928fb52ddf6cc98d8af6d672b292abe9040c0426ae7d809c85507a91cf92f",
+        "WFNq": "7899fef898cd56a178b7f51d8847e2892d4277b275868524d067528f6492cca0",
+        "epsilon.inp": "8e6f3408a4aa5cd3d1439223d9d12f1755241d5e246e99d1ab3db3f085ad9a92",
+        "sigma.inp": "1d12a4be4514fa1305355843ae96a390a3efdd5206b055603d9d1ad8dc62ae08",
+        "eps0mat": "303d9d9ca67c60771f20b3ef6784dc19ef559a92af6929acdc5c44046fbdfd52",
+        "epsmat": "170f2bead8158d45162af82e54a0f56405f0e29bab73188934f58f22272caad0"
+      },
+      "native_reference_comparison_bgw_case": "bgw_screen8_ep01_nw256_real005_schur"
+    },
+    {
+      "id": "real0005_cut60_eval001",
+      "real_W_spacing_ev": 0.005,
+      "real_W_cutoff_ev": 60.0,
+      "Sigma_evaluation_spacing_ev": 0.01,
+      "Sigma_evaluation_half_window_ev": 20.0,
+      "native_samples": "final .01eV/.005eV actual grid",
+      "native_source_sha256": {
+        "src/gradscf/gw/pbc/source.py": "f021849276aea5af49a27b9ff1bfc74c9950feda2da0028899d66eae370f3b3a",
+        "src/gradscf/gw/qp.py": "65ec34064a7272cdc72c700ff4ab656e5f1c4fc898f01cb5d0ebdd318fda12b7",
+        "src/gradscf/gw/freq.py": "d1562e54b5a163b3ec9f75104e4eb77d8e43db0a6a6170d3bde6e91b7771da10",
+        "src/gradscf/gw/pbc/query.py": "32da4ca526e8ff3bbd78d877f1c51515c0fad8adf5b8695df899b554d9857d6c",
+        "src/gradscf_tools/berkeleygw.py": "5470b3f4e3c34d93595e103c15780e3c94cd397871966662b3ddd39cc9eaed0c",
+        "examples/pbc/band_structures/gaas_self_consistent_gw.py": "6c4d480cd4e899d8d030508f602f1ec7724e290eb6689331ef0b124a37879e0a",
+        "examples/pbc/band_structures/berkeleygw_gaas.py": "de6113ae4afe57848047149c63c568fc1ce29773522548ab62bf34d58d9cc861"
+      },
+      "bgw_input_sha256": {
+        "WFN": "88b928fb52ddf6cc98d8af6d672b292abe9040c0426ae7d809c85507a91cf92f",
+        "WFNq": "7899fef898cd56a178b7f51d8847e2892d4277b275868524d067528f6492cca0",
+        "epsilon.inp": "8e6f3408a4aa5cd3d1439223d9d12f1755241d5e246e99d1ab3db3f085ad9a92",
+        "sigma.inp": "b8967863a1cb198292e1ae3fb56d77d964cfb30c25f7c21b2d5c7ef7372cb984",
+        "eps0mat": "303d9d9ca67c60771f20b3ef6784dc19ef559a92af6929acdc5c44046fbdfd52",
+        "epsmat": "170f2bead8158d45162af82e54a0f56405f0e29bab73188934f58f22272caad0"
+      },
+      "native_reference_comparison_bgw_case": "bgw_screen8_ep01_nw256_real0005_cut60_schur_eval001"
+    }
+  ],
+  "native_literal_qa": [
+    {
+      "band": 6,
+      "saved_literal_fields_equal": {
+        "native_exchange_hartree": true,
+        "native_vref_hartree": true,
+        "native_correlation_on_shell_hartree": true
+      },
+      "selected_native_energy_literal_equal": true,
+      "selected_native_weight_literal_equal": true
+    },
+    {
+      "band": 7,
+      "saved_literal_fields_equal": {
+        "native_exchange_hartree": true,
+        "native_vref_hartree": true,
+        "native_correlation_on_shell_hartree": true
+      },
+      "selected_native_energy_literal_equal": true,
+      "selected_native_weight_literal_equal": true
+    },
+    {
+      "band": 8,
+      "saved_literal_fields_equal": {
+        "native_exchange_hartree": true,
+        "native_vref_hartree": true,
+        "native_correlation_on_shell_hartree": true
+      },
+      "selected_native_energy_literal_equal": true,
+      "selected_native_weight_literal_equal": true
+    },
+    {
+      "band": 9,
+      "saved_literal_fields_equal": {
+        "native_exchange_hartree": true,
+        "native_vref_hartree": true,
+        "native_correlation_on_shell_hartree": true
+      },
+      "selected_native_energy_literal_equal": true,
+      "selected_native_weight_literal_equal": true
+    },
+    {
+      "band": 10,
+      "saved_literal_fields_equal": {
+        "native_exchange_hartree": true,
+        "native_vref_hartree": true,
+        "native_correlation_on_shell_hartree": true
+      },
+      "selected_native_energy_literal_equal": true,
+      "selected_native_weight_literal_equal": true
+    },
+    {
+      "band": 11,
+      "saved_literal_fields_equal": {
+        "native_exchange_hartree": true,
+        "native_vref_hartree": true,
+        "native_correlation_on_shell_hartree": true
+      },
+      "selected_native_energy_literal_equal": true,
+      "selected_native_weight_literal_equal": true
+    }
+  ],
+  "source_hash_note": "Each row records actual executed fingerprints. source.py differs only by one-line k JIT specialization, independently reconstructed by whole-file SHA. query/qp/freq hashes and saved native scalar fields/selected energies are identical. Do not label all code byte-identical."
+}

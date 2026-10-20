@@ -1,0 +1,232 @@
+{
+  "source": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/gaas_four_gw_fft61_qp_guard_20261019",
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "fine_kmesh": [
+    4,
+    4,
+    4
+  ],
+  "source_fractional": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      -0.5,
+      1.0094867743364432e-17,
+      1.0094867743364432e-17
+    ]
+  ],
+  "source_indices": [
+    0,
+    32
+  ],
+  "l_star_fractional": [
+    [
+      -0.5,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      -0.5,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      -0.5
+    ],
+    [
+      -0.5,
+      -0.5,
+      -0.5
+    ]
+  ],
+  "units": "eV; fractional reciprocal-lattice coordinates",
+  "scgw_definition": "Saved selected finite-eta ReSigma Dyson roots, not principal peaks or spectral-onset gaps",
+  "scgw_all_64x14_roots_certified": true,
+  "methods": {
+    "pbe": {
+      "gamma_direct_ev": 0.28386067858929254,
+      "source_node_gap_ev": 0.28386067858929254,
+      "sampled_gap_ev": 0.28386067858929254,
+      "minimum_direct_ev": 0.28386067858929254,
+      "source_definition": "Reference bands at source nodes",
+      "source_node_reproduction_max_error_hartree": null,
+      "vbm_fractional": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "cbm_fractional": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "l_star_valence_relative_gamma_ev": [
+        -1.492702240357117,
+        -1.4569913470497722,
+        -1.4569913470178009,
+        -1.4569913470301852
+      ],
+      "l_star_conduction_relative_gamma_ev": [
+        0.8374276145780881,
+        1.0524758707488093,
+        1.0524758705982376,
+        1.0524758707263537
+      ],
+      "l_star_valence_spread_ev": 0.03571089333931605,
+      "l_star_conduction_spread_ev": 0.21504825617072118,
+      "previous_gap_max_error_ev": 0.0
+    },
+    "g0w0": {
+      "gamma_direct_ev": 0.38847779008333977,
+      "source_node_gap_ev": 0.3884777900832763,
+      "sampled_gap_ev": 0.38847779008333977,
+      "minimum_direct_ev": 0.38847779008333977,
+      "source_definition": "Direct saved source QP energies",
+      "source_node_reproduction_max_error_hartree": 6.217248937900877e-15,
+      "vbm_fractional": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "cbm_fractional": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "l_star_valence_relative_gamma_ev": [
+        -2.0555887309234873,
+        -2.5509903340344655,
+        -2.5509903340884565,
+        -0.8033976541060466
+      ],
+      "l_star_conduction_relative_gamma_ev": [
+        1.3422145104257615,
+        1.0979856330357969,
+        1.0979856329534123,
+        2.6638063621681733
+      ],
+      "l_star_valence_spread_ev": 1.7475926799824097,
+      "l_star_conduction_spread_ev": 1.565820729214761,
+      "previous_gap_max_error_ev": 0.0
+    },
+    "evgw": {
+      "gamma_direct_ev": 1.033671314172418,
+      "source_node_gap_ev": 1.0336713141724136,
+      "sampled_gap_ev": 0.6069948076083347,
+      "minimum_direct_ev": 1.033671314172418,
+      "source_definition": "Direct saved source QP energies",
+      "source_node_reproduction_max_error_hartree": 1.3322676295501878e-14,
+      "vbm_fractional": [
+        -0.5,
+        -0.5,
+        -0.5
+      ],
+      "cbm_fractional": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "l_star_valence_relative_gamma_ev": [
+        -2.1415165985672013,
+        -2.5340853697936723,
+        -2.534085369781517,
+        0.4266765065640834
+      ],
+      "l_star_conduction_relative_gamma_ev": [
+        0.7869850756745809,
+        1.0027169289608713,
+        1.0027169289975109,
+        3.4483784768890495
+      ],
+      "l_star_valence_spread_ev": 2.960761876357756,
+      "l_star_conduction_spread_ev": 2.661393401214468,
+      "previous_gap_max_error_ev": 0.0
+    },
+    "qsgw": {
+      "gamma_direct_ev": 1.2997116634708927,
+      "source_node_gap_ev": 1.2997116634708774,
+      "sampled_gap_ev": 1.2005266461158115,
+      "minimum_direct_ev": 1.2997116634708927,
+      "source_definition": "Direct saved source QP energies",
+      "source_node_reproduction_max_error_hartree": 1.3322676295501878e-14,
+      "vbm_fractional": [
+        -0.5,
+        -0.5,
+        -0.5
+      ],
+      "cbm_fractional": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "l_star_valence_relative_gamma_ev": [
+        -2.277737415510736,
+        -2.5521784584680947,
+        -2.552178475904786,
+        0.09918501735508113
+      ],
+      "l_star_conduction_relative_gamma_ev": [
+        0.9487212596448886,
+        0.9745687754965783,
+        0.9745688512076385,
+        3.4892817194573507
+      ],
+      "l_star_valence_spread_ev": 2.651363493259867,
+      "l_star_conduction_spread_ev": 2.540560459812462,
+      "previous_gap_max_error_ev": 0.0
+    },
+    "scgw": {
+      "gamma_direct_ev": 1.0310192499930781,
+      "source_node_gap_ev": 1.0310192499930781,
+      "sampled_gap_ev": 1.0310192499930781,
+      "minimum_direct_ev": 1.0310192499930781,
+      "source_definition": "Saved continued matrix roots queried at source nodes",
+      "source_node_reproduction_max_error_hartree": null,
+      "vbm_fractional": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "cbm_fractional": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "l_star_valence_relative_gamma_ev": [
+        -2.097644590741175,
+        -2.3969700942921506,
+        -2.3969705542277353,
+        -0.1717105730913511
+      ],
+      "l_star_conduction_relative_gamma_ev": [
+        0.8695731373767964,
+        0.9505473576011466,
+        0.9505473688906645,
+        1.9650763923971482
+      ],
+      "l_star_valence_spread_ev": 2.2252599811363845,
+      "l_star_conduction_spread_ev": 1.0955032550203518,
+      "previous_gap_max_error_ev": 0.0
+    }
+  },
+  "scgw_maximum_selected_root_residual_hartree": 5.639383959810118e-10,
+  "scgw_selected_root_Z_range": [
+    0.020961815863777218,
+    2.646735458384532
+  ],
+  "input_sha256": {
+    "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/gaas_four_gw_fft61_qp_guard_20261019/comparison.npz": "276641b5525d0e920a8841b84bf6e289ef70d94cc7359c6295f80a489f29a19c",
+    "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/gaas_four_gw_fft61_qp_guard_20261019/comparison.json": "3f11ae97f4ddd01fd56bd9a5d686c4ebe8713d3ea6b3fa15513abe3b9242fda9",
+    "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_native_edges_20261019/bands.npz": "f8326a868500f02bfc1d5ac2ab6ab7b6e8760f782994b1db71876871c9311ca0"
+  },
+  "elapsed_seconds": 0.055816060000324796
+}

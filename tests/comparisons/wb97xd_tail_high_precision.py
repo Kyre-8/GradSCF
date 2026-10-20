@@ -17,7 +17,7 @@ import numpy as np
 import jax_xc.impl.hyb_gga_xc_wb97 as expanded
 from pyscf.dft import libxc
 
-from gradscf.dft.libxc_jax.jax_xc_adapter import (
+from gradscf.dft.xc._jax_xc import (
     eval_jax_xc_energy_density_from_unrestricted_density_gradients as evaluate,
     load_jax_xc,
 )

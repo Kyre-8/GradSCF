@@ -1,0 +1,218 @@
+{
+  "complete": true,
+  "no_scf": true,
+  "model": "gan_r2scan_compact",
+  "xc": {
+    "energy_native": -15.920949014433877,
+    "energy_pyscf": -15.925215042235486,
+    "energy_signed_error": 0.00426602780160934,
+    "potential": {
+      "max_abs": 0.018863403357661568,
+      "rms": 0.00032860503151823945,
+      "reference_max_abs": 3.316738186691518
+    }
+  },
+  "mesh": [
+    21,
+    21,
+    33
+  ],
+  "kmesh": [
+    2,
+    1,
+    1
+  ],
+  "basis": "gth-dzvp-molopt-sr",
+  "pseudo": "gth-pbe",
+  "coordinates_angstrom": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      -1.5006514549516698e-17,
+      1.8411700084457163,
+      0.637755
+    ],
+    [
+      -1.5006514549516698e-17,
+      1.8411700084457163,
+      2.5925
+    ],
+    [
+      0.0,
+      0.0,
+      3.2302549999999997
+    ]
+  ],
+  "lattice_angstrom": [
+    [
+      3.189,
+      0.0,
+      0.0
+    ],
+    [
+      -1.5945,
+      2.7617550126685746,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      5.185
+    ]
+  ],
+  "dm_definition": "D_total(k)=(Ne/nao)*inverse(S_PySCF(k)); D_alpha=D_beta=D_total/2",
+  "hostname": "c20",
+  "jax": "0.10.0",
+  "pyscf": "2.13.0",
+  "backend": "cpu",
+  "minimum_dm_eigenvalue": 0.008671042786340474,
+  "electron_count_metric_pyscf": 36.00000000000046,
+  "fractional_kpoints": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      -0.5,
+      1.0849990221554328e-17,
+      0.0
+    ]
+  ],
+  "stage": "complete",
+  "elapsed_seconds": 54.41471245299908,
+  "grid_representative_error": 3.3306690738754696e-16,
+  "integrals": {
+    "overlap": {
+      "max_abs": 0.001390584737027023,
+      "rms": 3.438146983489563e-05,
+      "reference_max_abs": 6.946105423112117
+    },
+    "kinetic": {
+      "max_abs": 0.09980054688944584,
+      "rms": 0.002518352733468092,
+      "reference_max_abs": 13.988517967520979
+    },
+    "hcore": {
+      "max_abs": 0.2146523559342004,
+      "rms": 0.0031914712227393135,
+      "reference_max_abs": 5.597570803666736
+    },
+    "pseudopotential": {
+      "max_abs": 0.18851544509744045,
+      "rms": 0.0031110197138907525,
+      "reference_max_abs": 19.57572548834545
+    },
+    "nuclear_repulsion": {
+      "native": -116.6395772438299,
+      "pyscf": -116.63957724382989,
+      "signed_error": -1.4210854715202004e-14
+    }
+  },
+  "electron_count_metric_native": 35.99398177915284,
+  "hartree": {
+    "max_abs": 0.0767592169981155,
+    "rms": 0.0013239037593588512,
+    "reference_max_abs": 5.4981437971453015
+  },
+  "energy_components": {
+    "one_body_native": 59.42201901524442,
+    "one_body_pyscf": 59.690822637887564,
+    "hartree_native": 13.176153031477412,
+    "hartree_pyscf": 13.216464303425193,
+    "xc_native": -15.920949014433877,
+    "xc_pyscf": -15.925215042235486
+  },
+  "ao": {
+    "values": {
+      "max_abs": 0.07342667845330803,
+      "rms": 0.0005543199247664189,
+      "reference_max_abs": 2.3121516754933964
+    },
+    "gradients": {
+      "max_abs": 0.8769479543553147,
+      "rms": 0.0037334073486651785,
+      "reference_max_abs": 7.859756980854452
+    }
+  },
+  "xc_inputs": {
+    "rho": {
+      "max_abs": 0.08113073892331218,
+      "rms": 0.0017962716701400785,
+      "reference_max_abs": 1.166273377550172
+    },
+    "gradient": {
+      "max_abs": 0.5336153374619637,
+      "rms": 0.01028323065651082,
+      "reference_max_abs": 3.303378703864119
+    },
+    "tau": {
+      "max_abs": 2.5404364691152796,
+      "rms": 0.0536603761639225,
+      "reference_max_abs": 19.58940555698361
+    }
+  },
+  "same_ao_xc_inputs": {
+    "rho": {
+      "max_abs": 6.980527267330672e-15,
+      "rms": 1.024095896412687e-15,
+      "reference_max_abs": 1.166273377550172
+    },
+    "gradient": {
+      "max_abs": 7.993605777301127e-15,
+      "rms": 8.796507454568879e-16,
+      "reference_max_abs": 3.303378703864119
+    },
+    "tau": {
+      "max_abs": 2.842170943040401e-14,
+      "rms": 9.040159701456221e-16,
+      "reference_max_abs": 19.58940555698361
+    }
+  },
+  "electron_count_grid_native": 35.993981779152136,
+  "electron_count_grid_pyscf": 36.00052127528501,
+  "same_fields_xc": {
+    "energy_density": {
+      "max_abs": 4.884981308350689e-15,
+      "rms": 9.884361025022838e-16,
+      "reference_max_abs": 2.369489156394296
+    },
+    "energy_signed_error": -2.9341269719904154e-13,
+    "point_gradient": {
+      "rho": {
+        "max_abs": 4.18554080283684e-14,
+        "rms": 6.7915314982618585e-15,
+        "reference_max_abs": 1.5547089941688648
+      },
+      "gradient": {
+        "max_abs": 3.995935526912575e-15,
+        "rms": 4.712354936904589e-16,
+        "reference_max_abs": 0.014477650325954775
+      },
+      "tau": {
+        "max_abs": 1.5536183450848284e-14,
+        "rms": 1.3763713259923228e-15,
+        "reference_max_abs": 0.041747050638376325
+      }
+    },
+    "potential_same_ao": {
+      "max_abs": 4.04121180963557e-14,
+      "rms": 2.5422405534423843e-15,
+      "reference_max_abs": 3.316738186691518
+    },
+    "libxc_point_vs_nruks_energy": 0.0
+  },
+  "source_sha256": {
+    "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+    "src/gradscf/integrals/periodic/fft.py": "049ab17a1bb1d7ed7f8074e42a1a6381a6c25b76b875e049559737910db07375",
+    "src/gradscf/integrals/periodic/ao.py": "eb2e34a5dbdeb9117bb0ebad3529a45e55638162acd8d05cf82c8cf101899417",
+    "src/gradscf/integrals/periodic/pseudo.py": "75c6391b106e8a1f8623fa06b8d68b134688e526ad82b5e0fa188d049f40df4a",
+    "src/gradscf/scf/uks.py": "37ffbd81c9852b2364b786701aabfd8d10d42a2a2413e442aca4f8322e813263",
+    "src/gradscf/dft/libxc_jax/jax_xc_adapter.py": "c5728b0364aae90c88a03f855b2a6f27ce619bb198ee97ad7fb7f9f8a5ca64cd",
+    "/home/yjiao/gradscf_checks/ad-showcase-completion-bse-ready-20261016/tests/pbc/diagnose_gan_r2scan.py": "25c42e3245df974fecd7011044abc9143a0417bce337161996a66ef941208842"
+  },
+  "scope": "Diagnostic completion only; no parity gate or SCF convergence is asserted."
+}

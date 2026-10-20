@@ -208,3 +208,29 @@ def _density_weights(molecule,density):
         weights=weights_for(molecule)
         return weights[0] if jnp.ndim(density)==2 else weights
     return None
+
+
+def custom_xc(spec: str | None = None, *, input_fn: Callable | None = None,
+              energy_fn: Callable | None = None, init_fn: Callable | None = None,
+              name: str | None = None):
+    """Construct a complete traditional recipe or an external energy functional.
+
+    ``custom_xc(spec)`` retains the recipe's exchange and extra physical terms.
+    ``custom_xc(input_fn=..., energy_fn=...)`` returns the existing Functional:
+    inputs may be any PyTree and energy_fn(params, inputs) returns total XC
+    energy in Hartree (per cell for PBC). Both handwritten formulas and neural
+    models use this same contract. Supply parameters explicitly to SCF/Trainer;
+    no baseline or exact exchange is inferred from a scalar energy callback.
+    """
+    if spec is not None:
+        if not isinstance(spec, str) or any(value is not None for value in
+                                           (input_fn, energy_fn, init_fn)):
+            raise TypeError('Use either a traditional spec recipe or input_fn/energy_fn callbacks.')
+        from .xc import TraditionalXCFunctional
+        return TraditionalXCFunctional(spec, name=name)
+    if not callable(input_fn) or not callable(energy_fn):
+        raise TypeError('Custom energy models require callable input_fn and energy_fn.')
+    if init_fn is not None and not callable(init_fn):
+        raise TypeError('init_fn must be callable or None.')
+    return Functional(input_fn, energy_fn, init_fn,
+                      name='custom_xc' if name is None else name)

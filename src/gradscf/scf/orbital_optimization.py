@@ -16,7 +16,7 @@ from ..solvers.nonlinear.minimize import solve_orbitals
 from ..solvers.nonlinear import stationary_value
 from .autodiff import SCFDifferentiationConfig, attach_scf_backward, normalize_scf_gradient_mode
 from .uks import UKSConfig, _raw_fock_and_energy_for_state
-from ..dft.libxc_jax.jax_libxc import hybrid_coeff, xc_type
+from ..dft.xc import hybrid_coeff, xc_type
 from .rsh import local_xc_spec, rsh_preset, validate_rsh_inputs
 
 

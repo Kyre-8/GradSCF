@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/run_matched_bgw_frequency.py"
+  ],
+  "cwd": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016",
+  "return_code": 0,
+  "elapsed_seconds": 77.8532881809806,
+  "peak_rss_kib": 2514252,
+  "allowed_cpu_ids": [
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95
+  ],
+  "rss_limit_kib": 16777216,
+  "wall_limit_seconds": 600,
+  "termination_reason": null,
+  "accepted": true
+}

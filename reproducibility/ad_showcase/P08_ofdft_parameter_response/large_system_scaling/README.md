@@ -16,38 +16,58 @@ Their settings are Python variables; there is no command-line interface.
 
 ## Accepted results on 2026-10-16
 
-The current accepted GPU6 family contains 1 and 27 atoms. The frozen Python
+The accepted GPU6 family contains 1, 27 and 125 atoms. The frozen Python
 source SHA256 is
 `124faf9f7813a8a18dccc2f698c3a02ac27ad1af00b0ac47e6dbba105c8cdf22`.
-The two-size acceptance record is preserved in
-[`verification_manifest_1_27.json`](verification_manifest_1_27.json).
-The 125- and 343-atom tasks have not yet been run; no scaling exponent is
-inferred from these two points.
+The three-size acceptance record is
+[`verification_manifest.json`](verification_manifest.json); the earlier
+[`two-size record`](verification_manifest_1_27.json) is retained separately.
+The 343-atom case was not run and is outside this compact delivery. No
+asymptotic scaling exponent is inferred from these three measurements.
 
 | Al atoms | FFT grid | Euler RMS / Ha | Energy difference / Ha atom⁻¹ | Density relative L2 difference |
 | ---: | :---: | ---: | ---: | ---: |
 | 1 | 17³ | 9.34e-10 | 2.04e-14 | 7.15e-8 |
 | 27 | 51³ | 1.87e-14 | 1.32e-15 | 6.24e-8 |
+| 125 | 85³ | 2.34e-14 | 5.00e-15 | 5.56e-8 |
 
 Differences in this table compare the same discrete WGC model against the
 independent DFTpy optimizer with the NumPy WGC adapter. They do not measure
-the KEDF error relative to Kohn–Sham DFT or experiment. The 27-atom ground
-density agrees with primitive-cell replication to relative L2 8.84e-11,
-while its density JVP has a nonprimitive component of relative L2 0.2225
-under a one-primitive-cell translation. The response test therefore contains
-a resolved supercell response signal.
+the KEDF error relative to Kohn–Sham DFT or experiment. Both larger ground
+densities agree with primitive-cell replication to relative L2 8.84e-11.
+Their density JVPs have nonprimitive components of relative L2 0.2225 and
+0.05954 under a one-primitive-cell translation, respectively. These response
+tests therefore contain resolved supercell response signals.
 
 | Al atoms | Forward / s | Full JVP / s | Full VJP / s | Full HVP / s | Peak RSS / GiB | Sampled GPU peak / GiB |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 1 | 4.712 | 8.395 | 7.746 | 13.615 | 4.985 | 2.802 |
 | 27 | 9.606 | 17.731 | 18.510 | 32.836 | 6.359 | 3.628 |
+| 125 | 19.979 | 37.933 | 38.424 | 70.382 | 12.632 | 11.392 |
 
 Times are medians of three synchronized warm executions; each full derivative
 operation includes the forward relaxation. Memory covers the complete fresh
-process. Both resource records contain no CPU-affinity violation, foreign
+process. All three resource records contain no CPU-affinity violation, foreign
 GPU6 compute PID or sampling error. See [`scaling.csv`](scaling.csv),
 [`scaling.png`](scaling.png) and the complete finite-difference step figure
 [`response_fd_steps.png`](response_fd_steps.png).
+
+The Al125 native task completed in 1713.33 seconds, including input assembly,
+compilation, warm samples and its internal differences. The independent CPU
+reference completed in 678.94 seconds with 1,514,620 KiB peak RSS; all seven
+reference optimizations converged without an LBFGS-history restart. Its
+baseline Euler RMS is 1.00e-7 Ha. At potential steps 3e-3, 1e-3 and 3e-4 Ha,
+the independent JVP relative errors are 5.37e-5, 1.59e-5 and 9.89e-5;
+the smaller-step error increase is retained. The full two-component energy
+HVP and the directional density-observable VJP checks remain distinct.
+
+This completion reuses the original native measurements; it does not rerun
+Al1, Al27 or Al125. A static
+[`source audit`](delivery_source_verification.json) confirms that four relevant
+core files and four public driver/adapter files match release `58e9f5d`
+byte for byte. The original frozen-source and resource records remain the
+authority for the timings; this is not a whole-repository revalidation.
+The only new electronic calculation was the independent Al125 reference.
 
 An independent primitive-cell grid check from 17³ to 23³ gives an energy
 increment of 1.11e-7 Ha, full-Fourier density and density-JVP relative L2
@@ -269,6 +289,16 @@ native/reference joins, particle counts, finite arrays, reference agreement,
 the primitive-density replication invariant and the full HVP vector check,
 then writes `verification_manifest.json`. All numerical postprocessing is
 performed on jy_gpu_1; local checks are static source review and visual QA.
+The completion's commands and raw native/reference/plot logs are archived
+outside this result capsule under the ignored local directory
+`artifacts/ad_showcase/development/completion_20261016/ofdft/`.
+Its `prior_1_27/` subdirectory preserves the previous two-size plot/table
+assets corresponding to the historical acceptance record.
+The original remote reference launcher used the earlier shallow completion
+path; its archived command preserves that actual path. Public examples import
+production `gradscf` code or the declared external DFTpy oracle, never an
+implementation from the archive. This capsule contains data, figures and
+documentation only.
 
 ## Diagnosis and regression evidence
 

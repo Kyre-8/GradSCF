@@ -1,0 +1,59 @@
+{
+  "complete": true,
+  "backend": "JAX CPU float64",
+  "scf_seconds": 14.097437040007208,
+  "nw": 16,
+  "eta_hartree": 0.001,
+  "fc": false,
+  "band_touching": true,
+  "gap_tol_hartree": 1e-05,
+  "root_method": "hybrid",
+  "root_tolerance_hartree": 1e-09,
+  "rows": [
+    {
+      "point": 6,
+      "cartesian_kpoint": [
+        0.19308469666357822,
+        0.11147750159511412,
+        0.0
+      ],
+      "old_energy_hartree": -0.7499780905398065,
+      "energy_hartree": -0.7499780905398041,
+      "on_shell_hartree": -0.7108437925190859,
+      "linearized_hartree": -0.9392255675616209,
+      "residue": 0.20646676670741282,
+      "candidate_count": 3,
+      "branch_valid": true,
+      "converged": true,
+      "residual_hartree": 2.7755575615628914e-16,
+      "elapsed_seconds": 25.57020984799601
+    },
+    {
+      "point": 7,
+      "cartesian_kpoint": [
+        0.22526547944084124,
+        0.13005708519429982,
+        0.0
+      ],
+      "old_energy_hartree": -1.139976745724737,
+      "energy_hartree": -0.7666881945001578,
+      "on_shell_hartree": -0.6827057961920827,
+      "linearized_hartree": -0.9198043737170565,
+      "residue": 0.381479328328009,
+      "candidate_count": 2,
+      "branch_valid": true,
+      "converged": true,
+      "residual_hartree": 6.686318165805005e-14,
+      "elapsed_seconds": 13.54208014701726
+    }
+  ],
+  "checkpoint_sha256": "00d0691c456341e49bc7ce656b121c4e92b51034dd01e110e4f21e978d1bb1eb",
+  "previous_result_sha256": "deacd570a8af9f91bf9cd798a82d0296c4a32e34fad48f79e8241475a9f0b8d1",
+  "source_sha256": {
+    "src/gradscf/gw/pbc/query.py": "de1915dc5f29023a484d3c673f5129db1664e07511c05e0a9aaf5adf69200690",
+    "src/gradscf/gw/pbc/product_basis.py": "20d836cd000687f0354592dbab01feff388701082f60b6254dcc0122af2def40",
+    "src/gradscf/gw/qp.py": "65ec34064a7272cdc72c700ff4ab656e5f1c4fc898f01cb5d0ebdd318fda12b7",
+    "src/gradscf/gw/self_energy.py": "7cbce56245388be3ee9ec099ef02776a1d8f983084969021143535e2a836f70b"
+  },
+  "scope": "Root-selection diagnostic in the original compact finite model; no material convergence claim"
+}

@@ -47,7 +47,9 @@ def wrap_to_kmesh(kpts: np.ndarray, tol: float = 1e-8) -> np.ndarray:
     """Wrap k points into [-0.5, 0.5) in fractional (mesh) coordinates."""
     fractional = np.asarray(kpts, dtype=float)
     wrapped = fractional - np.floor(fractional + 0.5)
-    wrapped[np.abs(wrapped + 0.5) < tol] = -0.5
+    # A skew reciprocal inverse can put -0.5 just below the boundary; floor
+    # then produces +0.5 minus roundoff. Both edges denote the same point.
+    wrapped[np.abs(np.abs(wrapped) - 0.5) < tol] = -0.5
     return wrapped
 
 

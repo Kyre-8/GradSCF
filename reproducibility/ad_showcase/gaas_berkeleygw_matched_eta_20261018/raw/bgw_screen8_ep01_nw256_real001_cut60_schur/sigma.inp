@@ -1,0 +1,23 @@
+# Complete finite-space diagonal CD calculation at every source k point.
+number_bands 14
+band_index_min 7
+band_index_max 12
+screened_coulomb_cutoff 8.0000000000
+bare_coulomb_cutoff 399.0000000000
+degeneracy_check_override
+no_symmetries_q_grid
+frequency_dependence 2
+frequency_dependence_method 2
+frequency_grid_shift 2
+delta_frequency_eval 0.1
+max_frequency_eval 20.0
+cd_integration_method 2
+screening_semiconductor
+verbosity 2
+write_vcoul
+begin kpoints
+0.0 0.0 0.0 1.0
+end
+# Declared Sigma body-head debug protocol.
+cell_average_cutoff 0.0
+skip_averagew

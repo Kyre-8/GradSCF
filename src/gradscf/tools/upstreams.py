@@ -5,7 +5,7 @@ from typing import Any
 
 import jax.numpy as jnp
 
-from ..dft.libxc_jax.jax_xc_adapter import MissingJAXXCError, load_jax_xc
+from ..dft.xc._jax_xc import MissingJAXXCError, load_jax_xc
 from .types import GroundStateReference
 
 

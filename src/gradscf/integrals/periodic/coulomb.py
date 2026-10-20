@@ -23,6 +23,23 @@ class ReducedBoundary:
         return cls(children[0], *metadata)
 
 
+@jax.tree_util.register_pytree_node_class
+@dataclass(frozen=True)
+class ScreenedExchangeContext:
+    """Static BvK geometry used to fix screened-Ewald AD truncation topology."""
+    reference_lattice: tuple
+    kmesh: tuple
+    precision: float
+    mesh: tuple = ()
+
+    def tree_flatten(self):
+        return (), (self.reference_lattice, self.kmesh, self.precision, self.mesh)
+
+    @classmethod
+    def tree_unflatten(cls, metadata, children):
+        return cls(*metadata)
+
+
 def _integer_box(n):
     return jnp.asarray(list(itertools.product(range(-n,n+1),repeat=3)),dtype=float)
 
@@ -117,14 +134,43 @@ def coulomb_kernel(gvectors, *, boundary=None):
     return jnp.where(g2>1e-24,4*jnp.pi/jnp.where(g2>1e-24,g2,1.),0.)
 
 
-def exchange_kernel(gvectors, *, lattice, nk, exxdiv='ewald', boundary=None):
+def exchange_kernel(gvectors, *, lattice, nk, exxdiv='ewald', boundary=None,
+                    omega=None, range_part='full'):
     """Exchange quadrature kernel; Hartree retains its own boundary.
 
     vcut_sph uses Rc=(3*Nk*V/(4*pi))**(1/3), with an analytic finite G=0
     limit. The sinc expression avoids subtraction and square-root derivatives
     at zero. This is the finite-cell spherical truncation used by PySCF
     (Phys. Rev. B 77, 193110); k convergence remains necessary.
+
+    Screened 3D exchange uses erfc(omega*r)/r (short) or erf(omega*r)/r
+    (long), omega in inverse Bohr. Reduced boundaries and screened spherical
+    truncation are unsupported. Screened Ewald corrections are separate.
     """
+    if range_part not in ('full','short','long'):
+        raise ValueError('range_part must be full, short or long.')
+    if range_part != 'full':
+        if boundary is not None:
+            raise NotImplementedError('Screened exchange currently requires 3D electrostatics.')
+        if exxdiv not in ('ewald',None):
+            raise NotImplementedError('Screened exchange does not support vcut_sph.')
+        if omega is None:
+            raise ValueError('Screened exchange requires a positive omega in inverse Bohr.')
+        if isinstance(omega,(int,float,np.number)) and (not np.isfinite(omega) or omega<=0):
+            raise ValueError('Screened exchange requires a positive finite omega.')
+        omega=jnp.asarray(omega)
+        g2=jnp.sum(gvectors*gvectors,axis=-1)
+        x=g2/(4*omega**2)
+        small=x<1e-6
+        ratio=jnp.where(small,1-x/2+x*x/6-x**3/24,
+                        -jnp.expm1(-x)/jnp.where(small,1.,x))
+        short=jnp.pi/omega**2*ratio
+        # Full Coulomb omits G=0. Retain the finite SR limit and put its
+        # negative into LR, so the same regularized operator is SR+LR.
+        value=short if range_part=='short' else coulomb_kernel(gvectors)-short
+        return value*jnp.where(jnp.isfinite(omega)&(omega>0),1.,jnp.nan)
+    if omega is not None:
+        raise ValueError('omega requires range_part=short or long.')
     if exxdiv in ('ewald',None):
         return coulomb_kernel(gvectors,boundary=boundary)
     if exxdiv!='vcut_sph':
@@ -138,3 +184,36 @@ def exchange_kernel(gvectors, *, lattice, nk, exxdiv='ewald', boundary=None):
     argument=jnp.sqrt(jnp.where(small,1.,square))/(2*jnp.pi)
     factor=jnp.where(small,1-square/12+square**2/360-square**3/20160,jnp.sinc(argument)**2)
     return 2*jnp.pi*radius**2*factor
+
+
+def screened_exchange_correction(lattice,full_madelung,context,omega,range_part,
+                                 *,reference_omega=None):
+    """Screened probe-charge correction relative to the finite SR/LR G=0.
+
+    The Gaussian reciprocal sum is the attenuated Ewald probe charge used by
+    PySCF. Its static bounds use reference geometry and omega; live lattice
+    and omega retain derivatives. A traced omega requires reference_omega.
+    The two corrections sum exactly to the full Coulomb Madelung constant.
+    """
+    if context is None:
+        raise ValueError('Screened Ewald exchange requires the BvK reference context.')
+    if reference_omega is None:
+        if not isinstance(omega,(int,float,np.number)):
+            raise ValueError('A traced screened-Ewald omega requires reference_omega for fixed topology.')
+        reference_omega=float(omega)
+    if not np.isfinite(reference_omega) or reference_omega<=0:
+        raise ValueError('reference_omega must be positive and finite.')
+    reference=np.asarray(context.kmesh)[:,None]*np.asarray(context.reference_lattice)
+    reciprocal=2*np.pi*np.linalg.inv(reference).T
+    cutoff=2*reference_omega*np.sqrt(-np.log(context.precision*1e-3))
+    ng=int(np.ceil(cutoff/np.linalg.svd(reciprocal)[1].min()))+2
+    indices=_integer_box(ng)
+    supercell=jnp.asarray(context.kmesh)[:,None]*lattice
+    gv=indices@(2*jnp.pi*jnp.linalg.inv(supercell).T)
+    g2=jnp.sum(gv*gv,axis=-1)
+    volume=jnp.linalg.det(supercell)
+    omega=jnp.asarray(omega)
+    reciprocal_sum=jnp.sum(coulomb_kernel(gv)*jnp.exp(-g2/(4*omega**2)))/volume
+    long_probe=2*omega/jnp.sqrt(jnp.pi)-reciprocal_sum
+    long=long_probe+jnp.pi/(omega**2*volume)
+    return full_madelung-long if range_part=='short' else long

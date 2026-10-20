@@ -1,0 +1,478 @@
+{
+  "complete": true,
+  "passed": true,
+  "stage": "complete",
+  "material": "gaas",
+  "case": "gaas_szv_qp_stable_refined_20261017",
+  "calculate_gw": true,
+  "system": "gaas",
+  "scf_converged": true,
+  "scf_energy_hartree": -78.2841098699605,
+  "scf_seconds": 17.401106397001058,
+  "checkpoint": "reproducibility/ad_showcase/material_gw_bands/gaas_szv_reference_20261017/scf_reference.npz",
+  "checkpoint_sha256": "31ff7c1b78bec7ee34d51d344f730185045ba7890eef21581e552c7d5311e9e0",
+  "xc": "pbe",
+  "basis": "gth-szv",
+  "pseudo": "gth-pbe",
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "mesh": [
+    21,
+    21,
+    21
+  ],
+  "electrostatic_dimension": 3,
+  "exxdiv": "ewald",
+  "temperature_hartree": null,
+  "lattice_bohr": [
+    [
+      0.0,
+      5.341594350001832,
+      5.341594350001832
+    ],
+    [
+      5.341594350001832,
+      0.0,
+      5.341594350001832
+    ],
+    [
+      5.341594350001832,
+      5.341594350001832,
+      0.0
+    ]
+  ],
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      2.670797175000916,
+      2.670797175000916,
+      2.670797175000916
+    ]
+  ],
+  "nocc": 9,
+  "nmo": 14,
+  "output_bands": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "query_fractional": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.125,
+      0.0,
+      0.125
+    ],
+    [
+      0.25,
+      0.0,
+      0.25
+    ],
+    [
+      0.375,
+      0.0,
+      0.375
+    ],
+    [
+      -0.5,
+      0.0,
+      -0.5
+    ],
+    [
+      -0.5,
+      0.125,
+      -0.375
+    ],
+    [
+      -0.5,
+      0.25,
+      -0.25
+    ],
+    [
+      0.375,
+      0.375,
+      -0.25
+    ],
+    [
+      0.3125,
+      0.3125,
+      -0.375
+    ],
+    [
+      0.25,
+      0.25,
+      -0.5
+    ],
+    [
+      0.1875,
+      0.1875,
+      0.375
+    ],
+    [
+      0.125,
+      0.125,
+      0.25
+    ],
+    [
+      0.0625,
+      0.0625,
+      0.125
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.1,
+      0.1,
+      0.1
+    ],
+    [
+      0.2,
+      0.2,
+      0.2
+    ],
+    [
+      0.30000000000000004,
+      0.30000000000000004,
+      0.30000000000000004
+    ],
+    [
+      0.4,
+      0.4,
+      0.4
+    ],
+    [
+      -0.5,
+      -0.5,
+      -0.5
+    ]
+  ],
+  "path_fractional": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.125,
+      0.0,
+      0.125
+    ],
+    [
+      0.25,
+      0.0,
+      0.25
+    ],
+    [
+      0.375,
+      0.0,
+      0.375
+    ],
+    [
+      0.5,
+      0.0,
+      0.5
+    ],
+    [
+      0.5,
+      0.125,
+      0.625
+    ],
+    [
+      0.5,
+      0.25,
+      0.75
+    ],
+    [
+      0.375,
+      0.375,
+      0.75
+    ],
+    [
+      0.3125,
+      0.3125,
+      0.625
+    ],
+    [
+      0.25,
+      0.25,
+      0.5
+    ],
+    [
+      0.1875,
+      0.1875,
+      0.375
+    ],
+    [
+      0.125,
+      0.125,
+      0.25
+    ],
+    [
+      0.0625,
+      0.0625,
+      0.125
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.1,
+      0.1,
+      0.1
+    ],
+    [
+      0.2,
+      0.2,
+      0.2
+    ],
+    [
+      0.30000000000000004,
+      0.30000000000000004,
+      0.30000000000000004
+    ],
+    [
+      0.4,
+      0.4,
+      0.4
+    ],
+    [
+      0.5,
+      0.5,
+      0.5
+    ]
+  ],
+  "path": "GXWKGL",
+  "point_count": 19,
+  "tick_labels": [
+    "G",
+    "X",
+    "W",
+    "K",
+    "G",
+    "L"
+  ],
+  "tick_positions": [
+    0.0,
+    1.1114190485520998,
+    1.6671285728281497,
+    1.6671285728281497,
+    2.8459664917847856,
+    3.8084836220808347
+  ],
+  "energy_zero_hartree": 0.29609093813255444,
+  "completed_point_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "full_internal_bands": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "full_screening_occupied": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "full_screening_virtual": [
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "lehmann_channels": "OV+VO",
+  "screening_rank": 180,
+  "nw": 16,
+  "eta_hartree": 0.001,
+  "fc": false,
+  "solver": "direct",
+  "maxiter": 80,
+  "pole_subtraction": true,
+  "imaginary_green_eta_hartree": 0.0,
+  "root_tolerance_hartree": 1e-09,
+  "degenerate_subspace_method": "projected nonlinear Dyson equation",
+  "boundary": "3D periodic body only",
+  "band_touching": false,
+  "gap_tolerance_hartree": 1e-07,
+  "max_query_array_bytes": 2147483648,
+  "query_chunk_size": 1,
+  "source_sha256": {
+    "examples/pbc/band_structures/gw_bands.py": "456d30beab6452012ef5013e27425ca8c5e5d0ba662d9a06f7509dbd497bb855",
+    "examples/pbc/band_structures/systems.py": "9d5fd37d3a8323378ff63da03c77604e32b171e95af1a6824c5376a68ef98870",
+    "src/gradscf/gw/pbc/query.py": "d294e39a98ebc8b0185ea8d9c5b4d3ae4341bc08813b8dea9fec8962be04dd6e",
+    "src/gradscf/gw/pbc/product_basis.py": "3c8819a167dfed28a5f176248958cf6f04f8918cf2b0b5305adfb1bf497ab189",
+    "src/gradscf/gw/screened.py": "308493c8837febc20df005ffd8dcd5131fd4c9de12f80fde59c493ca90ab13e2",
+    "src/gradscf/gw/self_energy.py": "98564a4e79e6a15d94177925a2b769dd156c93aff95d5135c7ac5d3a66b0b871",
+    "src/gradscf/pbc/scf.py": "e5372ab2e02795728ff6b9e5afdbaaab598c5ac1babe3be1d1cf03f5782f2c99",
+    "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+    "src/gradscf/pbc/bands.py": "6c302a0e8bdd34b048eca8857520e7c6d7ade0925d31cb8ad4e31fcb82a09193",
+    "src/gradscf/solvers/nonlinear/scalar.py": "f20e5f681cbde7ab0f159d7daadc29cc45931f0649a79f14927362b37d44464b"
+  },
+  "scope": "Native compact finite model; direct QP points; no material convergence or GW AD claim",
+  "current_query": 18,
+  "method": "periodic_query_full_cd_subtracted",
+  "computed_count": 114,
+  "accepted_count": 114,
+  "max_computed_residual_hartree": 3.481520627346413e-13,
+  "gw_seconds": 45.0110799139984,
+  "elapsed_seconds": 69.7100116670008,
+  "peak_rss_kib": 4481620,
+  "backend": "cpu",
+  "dtype": "float64/complex128",
+  "hostname": "c20",
+  "phase": "failed_scalar_root_refinement",
+  "provenance_from": "reproducibility/ad_showcase/material_gw_bands/gaas_szv_qp_stable_path_20261017",
+  "provenance_bands_sha256": "cf37f6fe87e41be0079a10342d928b6fb70bb8e466677dd461a29054a2096ef7",
+  "provenance_native_sha256": "f86aa1f309a50ca1edbee4990addca0f2dfc403a9403af06585c6a5f2803cfd8",
+  "refinement_source_sha256": {
+    "examples/pbc/band_structures/gw_bands.py": "456d30beab6452012ef5013e27425ca8c5e5d0ba662d9a06f7509dbd497bb855",
+    "examples/pbc/band_structures/systems.py": "9d5fd37d3a8323378ff63da03c77604e32b171e95af1a6824c5376a68ef98870",
+    "src/gradscf/pbc/scf.py": "e5372ab2e02795728ff6b9e5afdbaaab598c5ac1babe3be1d1cf03f5782f2c99",
+    "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+    "src/gradscf/pbc/bands.py": "6c302a0e8bdd34b048eca8857520e7c6d7ade0925d31cb8ad4e31fcb82a09193",
+    "src/gradscf/integrals/periodic/fft.py": "049ab17a1bb1d7ed7f8074e42a1a6381a6c25b76b875e049559737910db07375",
+    "src/gradscf/integrals/periodic/coulomb.py": "14936907d747618893019617468f5ddf5c7cf019a8512f1cb7b3105179df5469",
+    "src/gradscf_tools/periodic_gw_plot.py": "070210c58abcb27e2ac3e040a7456eeb2c19e2ee820b71d9da9b55fa77d041c2",
+    "src/gradscf/gw/pbc/query.py": "d294e39a98ebc8b0185ea8d9c5b4d3ae4341bc08813b8dea9fec8962be04dd6e",
+    "src/gradscf/gw/pbc/product_basis.py": "3c8819a167dfed28a5f176248958cf6f04f8918cf2b0b5305adfb1bf497ab189",
+    "src/gradscf/gw/pbc/interaction.py": "53ab962a0f22466a168b3c7525af5d598a50617f064b427912a8fc4d0ff9b29a",
+    "src/gradscf/gw/screened.py": "308493c8837febc20df005ffd8dcd5131fd4c9de12f80fde59c493ca90ab13e2",
+    "src/gradscf/gw/self_energy.py": "98564a4e79e6a15d94177925a2b769dd156c93aff95d5135c7ac5d3a66b0b871",
+    "src/gradscf/gw/freq.py": "d1562e54b5a163b3ec9f75104e4eb77d8e43db0a6a6170d3bde6e91b7771da10",
+    "src/gradscf/pbc/momentum.py": "0966b4d8ddb645cd31bdf5bb349007196d4037271198a42d844673575984eea8",
+    "src/gradscf/solvers/eigen/dense.py": "4083a14b36f631c55c503c9b5aa1b713f10aba2130fd4107f113434d91671781",
+    "src/gradscf/solvers/nonlinear/scalar.py": "f20e5f681cbde7ab0f159d7daadc29cc45931f0649a79f14927362b37d44464b",
+    "src/gradscf/solvers/linear/complex.py": "5c272a7da13e41299fec71b3a2a78a27733ec51834792af3805accba78d8a5e5",
+    "src/gradscf/solvers/linear/direct.py": "102a5267d7453f7a056194c5be2cf02f468de687de7a8d1b04fff872672d05fa",
+    "src/gradscf/solvers/linear/implicit.py": "238fc7ece16897cd3beac424955a3995401ac812540bd5580b8843342c29104e",
+    "src/gradscf/solvers/operators.py": "69d7b396471f8b436e1b1d03624e16edd7ed89b6e58e56fb76b49aa2fbd9bdf8",
+    "src/gradscf/solvers/types.py": "c540b421a7155de156b953560c71b9c9dbe911e706a47b69b1cc001aca9523c1"
+  },
+  "execution_script_sha256": "fb9b5b5377064fc19a571461bee0fcf197b249105f75305aa7949ccb1deebbf3",
+  "refinement_root_config": {
+    "method": "hybrid",
+    "ftol": 1e-09,
+    "xtol": 1e-09,
+    "maxiter": 120
+  },
+  "refinement_requested_cells": [
+    [
+      3,
+      11
+    ],
+    [
+      7,
+      11
+    ]
+  ],
+  "refinement_attempts": [
+    {
+      "point": 3,
+      "band": 11,
+      "accepted": true,
+      "old_qp_hartree": 0.8007938208597126,
+      "old_residual_hartree": -0.00785654912731535,
+      "new_qp_hartree": 0.8208627636119851,
+      "new_residual_hartree": 1.3183898417423734e-16
+    },
+    {
+      "point": 7,
+      "band": 11,
+      "accepted": true,
+      "old_qp_hartree": 0.6965758362299289,
+      "old_residual_hartree": -0.09442132080214852,
+      "new_qp_hartree": 0.8012345570459298,
+      "new_residual_hartree": -1.85268467234323e-14
+    }
+  ],
+  "patched_cells": [
+    [
+      3,
+      11
+    ],
+    [
+      7,
+      11
+    ]
+  ],
+  "gw_time_scope": "Refinement phase only; original 19-point resources are separate",
+  "refinement_scf_seconds": 24.695228620999842,
+  "refinement_scf_energy_hartree": -78.28410986996056,
+  "source_spectrum_max_error_hartree": 2.258679354660842e-12,
+  "query_ks_max_error_hartree": 2.5614267651352662e-12,
+  "refinement_scalar_root_method": "hybrid",
+  "original_successful_cells_bitwise_unchanged": true,
+  "all_unpatched_arrays_bitwise_unchanged": true,
+  "refinement_cpu_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ]
+}

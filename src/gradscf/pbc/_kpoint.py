@@ -1,20 +1,63 @@
 """Complex k-mesh SCF; common DIIS, convergence, XC and AD infrastructure."""
 import jax
 import jax.numpy as jnp
-from ..integrals.periodic.fft import get_kpoint_jk
+from ..integrals.periodic.fft import get_kpoint_jk,_kpoint_exchange
 from ..solvers.nonlinear.diis import diis_extrapolate,DIIS_SPACE
 from ..scf.convergence import convergence_reached
-from ..scf.uks import _point_unrestricted_xc_value_and_grad_kernel
 from ..scf.autodiff import SCFDifferentiationConfig,attach_scf_backward
-from ..dft.libxc_jax.jax_libxc import hybrid_coeff,xc_type
+from ..dft.xc import parse_recipe
+from ..dft.xc.evaluate import grid_value_and_grad
 from .kpoints import weights_for
+
+# Retain the old private test hook while its implementation lives in XC core.
+_point_unrestricted_xc_value_and_grad_kernel=grid_value_and_grad
+
+
+def _named_xc_spec(xc):
+    """Keep a custom_xc named object on the complete traditional recipe path."""
+    return getattr(xc,'spec',xc)
+
+
+def _validate_external_baseline(xc,functional):
+    if (functional is not None and xc is not None
+            and not (isinstance(xc,str) and xc.strip().lower()=='hf')):
+        raise ValueError('External functional supplies the complete XC energy; omit the named XC baseline.')
+
+
+def exchange_matrix(density,inputs,*,mesh,recipe,exxdiv,**options):
+    """Recipe-weighted physical full/SR/LR exchange on periodic AO blocks."""
+    exchange=recipe.exact_exchange
+    result=None
+    for coefficient,part in ((exchange.full_range,'full'),
+                             (exchange.short_range,'short'),
+                             (exchange.long_range,'long')):
+        if coefficient:
+            matrix=_kpoint_exchange(inputs,density,mesh=mesh,exxdiv=exxdiv,
+                omega=None if part=='full' else exchange.omega,range_part=part,**options)
+            result=coefficient*matrix if result is None else result+coefficient*matrix
+    if result is not None:return result
+    target=options.get('query',None)
+    ao=inputs.ao if target is None else target.ao
+    targets=options.get('targets',None)
+    nk=ao.shape[0] if targets is None else len(targets)
+    return jnp.zeros((density.shape[0],nk,ao.shape[-1],ao.shape[-1]),
+                     dtype=jnp.result_type(density,ao))
 
 
 def energy_and_fock(density,inputs,*,mesh,xc='hf',exxdiv='ewald',functional=None,params=None,integration=None):
-    """Energy and Fock; optional IBZ targets retain complete source-k sums."""
-    alpha=hybrid_coeff(xc) if functional is None else 0.
+    """Energy and Fock; optional IBZ targets retain complete source-k sums.
+
+    With an external functional, legacy xc='hf' is a default placeholder and
+    adds no HF XC. The callback supplies its entire XC energy.
+    """
+    xc=_named_xc_spec(xc)
+    _validate_external_baseline(xc,functional)
+    recipe=None if functional is not None else parse_recipe(xc)
+    if recipe is not None:recipe.require_complete_support()
     targets=None if integration is None else integration.representatives
-    j,k=get_kpoint_jk(inputs,density,mesh=mesh,exxdiv=exxdiv,with_k=alpha!=0,targets=targets)
+    j,k=get_kpoint_jk(inputs,density,mesh=mesh,exxdiv=exxdiv,with_k=False,targets=targets)
+    if recipe is not None:
+        k=exchange_matrix(density,inputs,mesh=mesh,recipe=recipe,exxdiv=exxdiv,targets=targets)
     valid=jnp.asarray(True)
     if integration is not None:
         valid=(integration.sampling_consistent(inputs)&integration.consistent_density(density)
@@ -22,7 +65,7 @@ def energy_and_fock(density,inputs,*,mesh,xc='hf',exxdiv='ewald',functional=None
     if functional is None:
         exc,potential=grid_xc_potential(density,inputs,xc=xc)
         ao=inputs.ao if targets is None else inputs.ao[targets]
-        vxc=project_xc_potential(ao,inputs.weights,potential,xc_type(xc))
+        vxc=project_xc_potential(ao,inputs.weights,potential,recipe.kind)
     else:
         from ..dft.derivatives import xc_energy_and_potential_from_density
         result=xc_energy_and_potential_from_density(params,molecule=inputs,density=density,
@@ -36,8 +79,8 @@ def energy_and_fock(density,inputs,*,mesh,xc='hf',exxdiv='ewald',functional=None
     if integration is not None:
         h=h[targets];density=density[:,targets];kw=integration.reduce_weights(kw)
     energy=jnp.einsum('k,skpq,kqp->',kw,density,h+.5*j).real
-    energy-=.5*alpha*jnp.einsum('k,skpq,skqp->',kw,density,k).real
-    energy=energy+exc+inputs.nuclear_repulsion;fock=h+j-alpha*k+vxc
+    energy-=.5*jnp.einsum('k,skpq,skqp->',kw,density,k).real
+    energy=energy+exc+inputs.nuclear_repulsion;fock=h+j-k+vxc
     if integration is not None:
         fock=integration.expand_operator(fock)
     return jnp.where(valid,energy,jnp.nan),jnp.where(valid,fock,jnp.nan)
@@ -45,7 +88,8 @@ def energy_and_fock(density,inputs,*,mesh,xc='hf',exxdiv='ewald',functional=None
 
 def grid_xc_potential(density,inputs,*,xc):
     """XC fields on the SCF grid, reused for non-self-consistent band queries."""
-    kind=xc_type(xc)
+    xc=_named_xc_spec(xc)
+    kind=parse_recipe(xc).kind
     if kind=='HF':return jnp.array(0.),None
     variables=grid_xc_variables(density,inputs,kind)
     energies,potential=_point_unrestricted_xc_value_and_grad_kernel(xc,kind)(variables)
@@ -87,11 +131,15 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
                    conv_tol=1e-10,conv_tol_density=1e-8,conv_tol_grad=1e-7,
                    damping=0.,level_shift=0.,init_density=None,differentiation=None,
                    temperature=None,functional=None,params=None,reduction=None):
+    """Common periodic SCF; callback xc='hf' is a placeholder, with no added HF."""
     from .scf import PeriodicSCFResult
     from .occupations import fermi_density, fermi_occupations, density_entropy
+    xc=_named_xc_spec(xc)
+    _validate_external_baseline(xc,functional)
     if functional is None:
         if params is not None:raise ValueError('params requires an external functional')
-        if xc_type(xc) not in ('HF','LDA','GGA','MGGA'):raise NotImplementedError('Unsupported periodic XC.')
+        recipe=parse_recipe(xc);recipe.require_complete_support()
+        if recipe.kind not in ('HF','LDA','GGA','MGGA'):raise NotImplementedError('Unsupported periodic XC.')
     else:
         from ..dft import Functional
         if not isinstance(functional,Functional):raise TypeError('Use dft.Functional for external periodic XC')

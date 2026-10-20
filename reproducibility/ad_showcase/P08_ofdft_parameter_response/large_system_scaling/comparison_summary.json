@@ -7,6 +7,10 @@
     "3": {
       "energy_error_hartree_per_atom": 1.3158198810372225e-15,
       "density_relative_l2_error": 6.239247164594021e-08
+    },
+    "5": {
+      "energy_error_hartree_per_atom": 5.002220859751105e-15,
+      "density_relative_l2_error": 5.564296466405378e-08
     }
   },
   "finite_ks_comparison": [

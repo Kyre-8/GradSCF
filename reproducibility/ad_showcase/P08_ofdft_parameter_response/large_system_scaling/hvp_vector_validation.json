@@ -62,6 +62,37 @@
         0.001,
         0.0003
       ]
+    },
+    {
+      "atoms": 125,
+      "native_hvp": [
+        -424.34494105359124,
+        -594.254806259114
+      ],
+      "reference_hvp": [
+        [
+          -424.32276310758635,
+          -594.230731544123
+        ],
+        [
+          -424.34244549364325,
+          -594.2514229821302
+        ],
+        [
+          -424.3244770304052,
+          -594.2248346022008
+        ]
+      ],
+      "relative_l2_error": [
+        4.482688032812506e-05,
+        5.757368674388745e-06,
+        4.970011673643309e-05
+      ],
+      "steps_hartree": [
+        0.003,
+        0.001,
+        0.0003
+      ]
     }
   ],
   "definition": "Independent DFTpy density central differences contracted with P.T@diag(weights); potential linear in theta",

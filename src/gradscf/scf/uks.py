@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from functools import lru_cache
 from typing import Any, Callable, Literal
 
 import jax
@@ -12,6 +11,7 @@ from jaxtyping import Array
 from ..tools.features import (
     MoleculeLikeState,
     _spin_density_and_gradient,
+    _spin_tau,
     molecule_grid_view,
 )
 from .core import (
@@ -34,11 +34,16 @@ from .rks import (
     _orthogonalizer,
     _vxc_matrix_from_grid_potential,
 )
-from ..dft.libxc_jax.jax_libxc import (
-    eval_xc_energy_density_unrestricted_from_density_gradients,
+from ..dft.xc import (
     hybrid_coeff,
     parse_xc,
     xc_type,
+)
+from ..dft.xc.evaluate import (
+    point_energy as _point_unrestricted_xc_energy,
+    grid_energy as _point_unrestricted_xc_energy_kernel,
+    grid_value_and_grad as _point_unrestricted_xc_value_and_grad_kernel,
+    grid_hessian as _point_unrestricted_xc_hessian_kernel,
 )
 
 
@@ -107,57 +112,6 @@ def _validate_spin_occ(mo_occ: Array, *, nao: int, nelec: int, label: str) -> Ar
     return occ
 
 
-@lru_cache(maxsize=64)
-def _point_unrestricted_xc_energy(
-    xc_spec: str,
-    xc_kind: str,
-):
-    xc_spec_norm = str(xc_spec)
-    xc_kind_norm = str(xc_kind).upper()
-
-    def point_energy(variables: Array) -> Array:
-        rho_a = jnp.where(variables[0] >= 0.0, variables[0], 0.0)
-        rho_b = jnp.where(variables[1] >= 0.0, variables[1], 0.0)
-        zero_grad = jnp.zeros((3,), dtype=variables.dtype)
-        if xc_kind_norm == "LDA":
-            grad_a = zero_grad
-            grad_b = zero_grad
-        elif xc_kind_norm in ("GGA", "MGGA"):
-            grad_a = variables[2:5]
-            grad_b = variables[5:8]
-        else:
-            raise ValueError(f"Unsupported XC kind={xc_kind_norm!r}.")
-        return eval_xc_energy_density_unrestricted_from_density_gradients(
-            xc_spec_norm,
-            rho_a,
-            rho_b,
-            grad_a,
-            grad_b,
-            tau_a=variables[8] if xc_kind_norm == "MGGA" else None,
-            tau_b=variables[9] if xc_kind_norm == "MGGA" else None,
-        )
-
-    return point_energy
-
-
-@lru_cache(maxsize=64)
-def _point_unrestricted_xc_energy_kernel(xc_spec: str, xc_kind: str):
-    return jax.jit(jax.vmap(_point_unrestricted_xc_energy(xc_spec, xc_kind)))
-
-
-@lru_cache(maxsize=64)
-def _point_unrestricted_xc_value_and_grad_kernel(xc_spec: str, xc_kind: str):
-    point_energy = _point_unrestricted_xc_energy(xc_spec, xc_kind)
-    return jax.jit(jax.vmap(jax.value_and_grad(point_energy)))
-
-
-@lru_cache(maxsize=64)
-def _point_unrestricted_xc_hessian_kernel(xc_spec: str, xc_kind: str):
-    """Independent local-field Hessians; never a grid-by-grid Hessian."""
-    point_energy = _point_unrestricted_xc_energy(xc_spec, xc_kind)
-    return jax.jit(jax.vmap(jax.jacfwd(jax.grad(point_energy))))
-
-
 def _unrestricted_xc_energy_and_potential_on_grid(
     *,
     ao: Array,
@@ -170,20 +124,25 @@ def _unrestricted_xc_energy_and_potential_on_grid(
     potential_clip: float | None,
     xc_kind: str,
     compute_potential: bool = True,
-) -> tuple[Array, Array | None, Array | None, Array | None, Array | None]:
+    return_tau: bool = False,
+) -> tuple[Array | None, ...]:
+    if xc_kind == "MGGA" and not return_tau:
+        raise ValueError("MGGA grid potentials require return_tau=True to retain both kinetic-density potentials.")
     rho_a, grad_a = _spin_density_and_gradient(ao, ao_deriv1, density_a)
     rho_b, grad_b = _spin_density_and_gradient(ao, ao_deriv1, density_b)
     rho_total = rho_a + rho_b
     if xc_kind == "HF":
         if not compute_potential:
-            return jnp.asarray(0.0, dtype=rho_total.dtype), None, None, None, None
+            result = (jnp.asarray(0.0, dtype=rho_total.dtype), None, None, None, None)
+            return result + (None, None) if return_tau else result
         zeros = jnp.zeros_like(rho_total)
         zero_grads = jnp.zeros((rho_total.shape[0], 3), dtype=rho_total.dtype)
-        return jnp.asarray(0.0, dtype=rho_total.dtype), zeros, zeros, zero_grads, zero_grads
+        result = (jnp.asarray(0.0, dtype=rho_total.dtype), zeros, zeros, zero_grads, zero_grads)
+        return result + (zeros, zeros) if return_tau else result
 
     if xc_kind == "LDA":
         response_variables = jnp.stack([rho_a, rho_b], axis=-1)
-    elif xc_kind == "GGA":
+    elif xc_kind in {"GGA", "MGGA"}:
         response_variables = jnp.concatenate(
             [
                 rho_a[..., None],
@@ -193,38 +152,37 @@ def _unrestricted_xc_energy_and_potential_on_grid(
             ],
             axis=-1,
         )
+        if xc_kind == "MGGA":
+            response_variables = jnp.concatenate([response_variables,
+                _spin_tau(ao_deriv1, density_a)[:, None],
+                _spin_tau(ao_deriv1, density_b)[:, None]], axis=-1)
     else:
         raise ValueError(f"Unsupported XC kind={xc_kind!r}.")
 
     mask = rho_total > density_floor
-    truncate_wb97xd = str(xc_spec).lower() == "hyb_gga_xc_wb97x_d"
-    if truncate_wb97xd:
-        # Match restricted SCF's explicit energy/potential grid cutoff. Safe
-        # inputs prevent invalid inactive-branch Hessians leaking through AD;
-        # the active local functional remains unchanged.
-        response_variables = jnp.where(mask[:, None], response_variables,
-                                       jnp.ones_like(response_variables))
+    response_variables = jnp.where(mask[:, None], response_variables,
+                                   jnp.ones_like(response_variables))
     if compute_potential:
         point_exc, point_grad = _point_unrestricted_xc_value_and_grad_kernel(
             xc_spec, xc_kind)(response_variables)
     else:
         point_exc = _point_unrestricted_xc_energy_kernel(xc_spec, xc_kind)(response_variables)
-    point_exc = jnp.nan_to_num(point_exc, nan=0.0, posinf=0.0, neginf=0.0)
-    if truncate_wb97xd:
-        point_exc = jnp.where(mask, point_exc, 0.)
+    point_exc = jnp.where(mask, point_exc, 0.)
     exc = jnp.tensordot(weights, point_exc, axes=(0, 0))
     if not compute_potential:
-        return exc, None, None, None, None
+        result = (exc, None, None, None, None)
+        return result + (None, None) if return_tau else result
 
-    point_grad = jnp.nan_to_num(point_grad, nan=0.0, posinf=0.0, neginf=0.0)
     vxc_rho_a = jnp.where(mask, point_grad[:, 0], 0.0)
     vxc_rho_b = jnp.where(mask, point_grad[:, 1], 0.0)
-    if xc_kind == "GGA":
+    if xc_kind in {"GGA", "MGGA"}:
         vxc_grad_a = jnp.where(mask[:, None], point_grad[:, 2:5], 0.0)
         vxc_grad_b = jnp.where(mask[:, None], point_grad[:, 5:8], 0.0)
     else:
         vxc_grad_a = jnp.zeros((rho_total.shape[0], 3), dtype=rho_total.dtype)
         vxc_grad_b = jnp.zeros((rho_total.shape[0], 3), dtype=rho_total.dtype)
+    vxc_tau_a = jnp.where(mask, point_grad[:, 8], 0.) if xc_kind == "MGGA" else jnp.zeros_like(rho_total)
+    vxc_tau_b = jnp.where(mask, point_grad[:, 9], 0.) if xc_kind == "MGGA" else jnp.zeros_like(rho_total)
 
     if potential_clip is not None:
         clip = jnp.asarray(potential_clip, dtype=rho_total.dtype)
@@ -232,7 +190,10 @@ def _unrestricted_xc_energy_and_potential_on_grid(
         vxc_rho_b = jnp.clip(vxc_rho_b, -clip, clip)
         vxc_grad_a = jnp.clip(vxc_grad_a, -clip, clip)
         vxc_grad_b = jnp.clip(vxc_grad_b, -clip, clip)
-    return exc, vxc_rho_a, vxc_rho_b, vxc_grad_a, vxc_grad_b
+        vxc_tau_a = jnp.clip(vxc_tau_a, -clip, clip)
+        vxc_tau_b = jnp.clip(vxc_tau_b, -clip, clip)
+    result = (exc, vxc_rho_a, vxc_rho_b, vxc_grad_a, vxc_grad_b)
+    return result + (vxc_tau_a, vxc_tau_b) if return_tau else result
 
 
 def _spin_jk_matrices(
@@ -291,7 +252,11 @@ def _unrestricted_vxc_matrices(
     vxc_grad_a: Array,
     vxc_grad_b: Array,
     xc_kind: str,
+    vxc_tau_a: Array | None = None,
+    vxc_tau_b: Array | None = None,
 ) -> tuple[Array, Array]:
+    if xc_kind in {"MGGA", "MGGA_LAPL"} and (vxc_tau_a is None or vxc_tau_b is None):
+        raise ValueError("MGGA AO potentials require both spin kinetic-density potentials.")
     zeros_a = jnp.zeros_like(vxc_rho_a)
     zeros_b = jnp.zeros_like(vxc_rho_b)
     return (
@@ -302,7 +267,7 @@ def _unrestricted_vxc_matrices(
             weights=weights,
             vxc_rho=vxc_rho_a,
             vxc_grad=vxc_grad_a,
-            vxc_tau=zeros_a,
+            vxc_tau=zeros_a if vxc_tau_a is None else vxc_tau_a,
             vxc_lapl=zeros_a,
             xc_kind=xc_kind,
         ),
@@ -313,7 +278,7 @@ def _unrestricted_vxc_matrices(
             weights=weights,
             vxc_rho=vxc_rho_b,
             vxc_grad=vxc_grad_b,
-            vxc_tau=zeros_b,
+            vxc_tau=zeros_b if vxc_tau_b is None else vxc_tau_b,
             vxc_lapl=zeros_b,
             xc_kind=xc_kind,
         ),
@@ -367,21 +332,23 @@ def _raw_fock_and_energy_for_state(
         k_a = sr*k_a + delta*_build_jk(eri_lr, density_a)[1]
         k_b = sr*k_b + delta*_build_jk(eri_lr, density_b)[1]
     extra_fock_a = extra_fock_b = jnp.zeros_like(h)
+    vxc_tau_a = vxc_tau_b = None
     include_hf_energy = bound_xc is None
     if bound_xc is None:
         alpha_eff = jnp.asarray(1.0 if rsh is not None else alpha, dtype=h.dtype)
         ao_laplacian = jnp.zeros_like(ao)
-        xc_energy, vxc_rho_a, vxc_rho_b, vxc_grad_a, vxc_grad_b = _unrestricted_xc_energy_and_potential_on_grid(
+        xc_energy, vxc_rho_a, vxc_rho_b, vxc_grad_a, vxc_grad_b, vxc_tau_a, vxc_tau_b = _unrestricted_xc_energy_and_potential_on_grid(
             ao=ao,
             ao_deriv1=ao_deriv1,
             weights=weights,
             density_a=density_a,
             density_b=density_b,
-            xc_spec=local_xc_spec(cfg.xc_spec),
+            xc_spec=cfg.xc_spec,
             density_floor=cfg.density_floor,
             potential_clip=cfg.potential_clip,
             xc_kind=xc_kind,
             compute_potential=compute_potential,
+            return_tau=True,
         )
     else:
         molecule_state = _molecule_like_state_for_bound_xc(
@@ -420,7 +387,8 @@ def _raw_fock_and_energy_for_state(
         vxc_matrix_a, vxc_matrix_b = _unrestricted_vxc_matrices(
             ao=ao, ao_deriv1=ao_deriv1, ao_laplacian=ao_laplacian, weights=weights,
             vxc_rho_a=vxc_rho_a, vxc_rho_b=vxc_rho_b,
-            vxc_grad_a=vxc_grad_a, vxc_grad_b=vxc_grad_b, xc_kind=xc_kind)
+            vxc_grad_a=vxc_grad_a, vxc_grad_b=vxc_grad_b, xc_kind=xc_kind,
+            vxc_tau_a=vxc_tau_a, vxc_tau_b=vxc_tau_b)
         potential = jnp.stack([vxc_matrix_a, vxc_matrix_b])
     xc=XCContribution(xc_energy,potential,alpha_eff,
         jnp.stack([extra_fock_a,extra_fock_b]),energy_includes_exact_exchange=not include_hf_energy)
@@ -578,10 +546,7 @@ def run_unrestricted_scf_scan(
                 eigenvalue_jitter=eigenvalue_jitter,
             )
         )(fock_eff_i)
-        mo_energy_new = jnp.nan_to_num(mo_energy_new, nan=0.0, posinf=0.0, neginf=0.0)
-        mo_coeff_new = jnp.nan_to_num(mo_coeff_new, nan=0.0, posinf=0.0, neginf=0.0)
         density_new = _build_density_spin(mo_coeff_new, mo_occ_spin)
-        density_new = jnp.nan_to_num(density_new, nan=0.0, posinf=0.0, neginf=0.0)
         density_next = density_new
         _fock_eff_next, raw_fock_next, energy_next = _unpack_fock_builder_output(
             fock_builder(density_next, mo_coeff_new, mo_energy_new),
@@ -600,6 +565,9 @@ def run_unrestricted_scf_scan(
             conv_tol_density=conv_tol_density, conv_tol_grad=conv_tol_grad,
             energy_only=energy_only, has_prior_cycle=has_prior_cycle,
         )
+        converged_step = (converged_step & jnp.all(jnp.isfinite(raw_fock_next))
+                          & jnp.all(jnp.isfinite(mo_coeff_new))
+                          & jnp.all(jnp.isfinite(mo_energy_new)))
         converged_next = jnp.logical_or(
             converged_i,
             converged_step,
@@ -761,11 +729,6 @@ def run_uks_from_integrals(
     if bound_xc is None:
         parse_xc(local_xc_spec(cfg.xc_spec))
         xc_kind = xc_type(local_xc_spec(cfg.xc_spec))
-        if xc_kind == "MGGA":
-            raise NotImplementedError(
-                "UKS SCF matrix assembly currently supports LDA/GGA/HF semilocal terms. "
-                "MGGA requires tau-dependent AO Hessian terms."
-            )
     s = jnp.asarray(overlap)
     h = jnp.asarray(hcore)
     eri = jnp.asarray(eri)
@@ -780,8 +743,8 @@ def run_uks_from_integrals(
     nao = int(s.shape[0])
     if nalpha < 0 or nalpha > nao or nbeta < 0 or nbeta > nao or (nalpha + nbeta) <= 0:
         raise ValueError("Invalid occupation counts for UKS.")
-    if xc_kind == "GGA" and ao_deriv1.shape[0] < 4:
-        raise ValueError("GGA UKS requires ao_deriv1 to include AO values plus first derivatives.")
+    if xc_kind in {"GGA", "MGGA"} and ao_deriv1.shape[0] < 4:
+        raise ValueError("GGA/MGGA UKS requires ao_deriv1 to include AO values plus first derivatives.")
 
     x = _orthogonalizer(s, cfg.orthogonalization_eps)
     core_mo_energy, core_mo_coeff = _diagonalize_fock(h, x)

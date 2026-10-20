@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from gradscf.dft.libxc_jax.jax_xc_adapter import _JAXXCModule
+from gradscf.dft.xc._jax_xc import _JAXXCModule
 
 
 def _module():

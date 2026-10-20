@@ -1,0 +1,20 @@
+{
+  "complete": true,
+  "passed": true,
+  "scope": "Independent NumPy Fourier/full chi/dense W/Sigma; shared SCF and band orbitals",
+  "checked_indices": [
+    0,
+    1,
+    3
+  ],
+  "sigma_max_error_hartree": 2.2555302541880032e-17,
+  "residual_max_error_hartree": 6.539907504432563e-16,
+  "max_independent_residual_hartree": 6.505213034913027e-16,
+  "max_two_sided_difference_hartree": 5.2160320194202675e-18,
+  "elapsed_seconds": 26.821269879998,
+  "tolerance_hartree": 2e-10,
+  "source_sha256": {
+    "/home/yjiao/gradscf_checks/ad-showcase-query-20261016/examples/gw/compare_periodic_bands.py": "0fb6b0b708c4371a6d2280808ac820881276dadda5c671634380b9421ae86816",
+    "src/gradscf_tools/periodic_gw_reference.py": "d7c2acc7100440c632009f2f459f78867e1001c4e2dbc50bfd10111fba136b44"
+  }
+}

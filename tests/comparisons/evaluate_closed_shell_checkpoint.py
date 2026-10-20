@@ -27,7 +27,7 @@ jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 
 from gradscf.model import neural_xc
-from gradscf.dft.libxc_jax.jax_libxc import b3lyp_component_basis
+from gradscf.dft.xc import b3lyp_component_basis
 from gradscf.model.neural_xc import (
     DEFAULT_INPUT_FEATURE_MODE,
     DEFAULT_NETWORK_ARCHITECTURE,

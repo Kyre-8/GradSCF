@@ -1,0 +1,79 @@
+--- a/Epsilon/input.f90
++++ b/Epsilon/input.f90
+@@ -713,7 +713,7 @@
+         ') specified in epsilon.inp is larger than the number of bands (',a,') available in WFN.')
+       call die(tmpstr, only_root_writes = .true.)
+     endif
+-    if(cwfn%nband.eq.kp%mnband) then
++    if(cwfn%nband.eq.kp%mnband .and. .not.pol%degeneracy_check_override) then
+       call die("You must provide one more band in WFN than used in epsilon.inp in order to assess degeneracy.")
+     endif
+ 
+@@ -723,6 +723,8 @@
+ ! quasiparticle energies from file (in eV)
+ 
+     if(peinf%inode == 0) then
++      ! Finite external orbital basis: no omitted band exists beyond mnband.
++      if(cwfn%nband+vwfn%ncore_excl < kp%mnband) then
+       if(any(abs(kp%el(cwfn%nband+vwfn%ncore_excl, 1:kp%nrk, 1:kp%nspin) - &
+                  kp%el(cwfn%nband + 1 +vwfn%ncore_excl, 1:kp%nrk, 1:kp%nspin)) .lt. TOL_Degeneracy)) then
+         if(pol%degeneracy_check_override) then
+@@ -738,6 +740,8 @@
+         endif
+       endif
+ 
++      endif ! finite-space boundary lookahead
++
+       if(any (kp%ifmax(:,:) < vwfn%nband+vwfn%ncore_excl .or. kp%ifmax(:,:) > vwfn%nband+vwfn%ncore_excl + pol%ncrit &
+         .and. .not. pol%do_rpa)) then
+         write(0,'(a,i6,a,i6,a)') 'epsilon.inp says there are ', vwfn%nband, ' fully occupied bands and ', &
+@@ -752,7 +756,7 @@
+         call die("number_partial_occup and WFN inconsistent.")
+       endif
+ 
+-      call assess_degeneracies(kp, kp%el(cwfn%nband + 1+vwfn%ncore_excl, :, :), cwfn%nband, pol%efermi, TOL_Degeneracy, &
++      call assess_degeneracies(kp, kp%el(min(cwfn%nband + 1+vwfn%ncore_excl,kp%mnband), :, :), cwfn%nband, pol%efermi, TOL_Degeneracy, &
+                                ncore_excl=vwfn%ncore_excl)
+ 
+       call calc_qtot(kp, crys%celvol, pol%efermi, qtot, omega_plasma, write7 = .true.)
+--- a/Sigma/input.f90
++++ b/Sigma/input.f90
+@@ -640,7 +640,7 @@
+         3x,'is larger than the number of bands (',a,') available in WFN_inner.',/)
+     endif
+     do_ch_sum = .not.((sig%freq_dep == -1) .or. (sig%freq_dep == 0 .and. sig%exact_ch == 1))
+-    if(sig%ntband.eq.kp%mnband) then
++    if(sig%ntband.eq.kp%mnband .and. .not.sig%degeneracy_check_override) then
+       if(.not.ep_read) then
+         call die("You must provide one more band in WFN_inner than used in sigma.inp number_bands in order to assess degeneracy.")
+       else
+@@ -719,7 +719,7 @@
+     endif ! EP k+phonq mapping
+ 
+ 
+-    if(do_ch_sum .and. (.not.ep_read)) then
++    if(do_ch_sum .and. (.not.ep_read) .and. sig%ntband+sig%ncore_excl < kp%mnband) then
+       if(any(abs(kp%el(sig%ntband+sig%ncore_excl, 1:kp%nrk, 1:kp%nspin) - &
+                  kp%el(sig%ntband+sig%ncore_excl+1, 1:kp%nrk, 1:kp%nspin)) .lt. sig%tol/RYD)) then
+         if(sig%degeneracy_check_override) then
+@@ -752,7 +752,7 @@
+   if(peinf%inode == 0) then
+     ! ZL: assess_degeneracies will allocate kp%degeneracy
+     ! kp%el is still in Ry here, but sig%tol is in eV.
+-    call assess_degeneracies(kp, kp%el(sig%ntband+sig%ncore_excl+1, :, :), sig%ntband, sig%efermi, sig%tol/RYD, sig = sig, &
++    call assess_degeneracies(kp, kp%el(min(sig%ntband+sig%ncore_excl+1,kp%mnband), :, :), sig%ntband, sig%efermi, sig%tol/RYD, sig = sig, &
+                              ncore_excl=sig%ncore_excl)
+     if(.not.ep_read) then
+       call calc_qtot(kp, crys%celvol, sig%efermi, qtot, omega_plasma, write7=.false.)
+--- a/Common/input_utils.f90
++++ b/Common/input_utils.f90
+@@ -65,6 +65,9 @@
+           do ik = 1, kp%nrk
+             do is = 1, kp%nspin
+               if(jj > nband) then
++                ! A complete finite external basis has no omitted next state.
++                ! Still assess every degeneracy among its actual states.
++                if(nband+band_offset == kp%mnband) cycle
+                 energy_compare = kp_el_extra(ik, is)
+               else
+                 energy_compare = kp%el(jj+band_offset, ik, is)

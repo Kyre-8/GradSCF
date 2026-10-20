@@ -50,7 +50,7 @@ def test_xc_matches_existing_jax_xc_adapter():
     pytest.importorskip("jax_xc", reason="Optional jax-xc runtime required")
     from gradscf.ofdft import periodic_inputs, energy_components, KineticFunctional
     from gradscf.dft.xc import make_classic_xc_functional, RestrictedFeatureBundle
-    from gradscf.dft.libxc_jax.jax_libxc import restricted_feature_bundle_from_rho_grad_tau
+    from gradscf.dft.xc import restricted_feature_bundle_from_rho_grad_tau
     data = periodic_inputs(jnp.eye(3)*5.,(3,3,3),nelectron=2.)
     phi = jnp.ones(27)*jnp.sqrt(2/125)
     for xc in ('svwn','pbe'):

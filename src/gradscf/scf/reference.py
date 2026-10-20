@@ -130,10 +130,11 @@ def _array_signature(value):
     return array.shape, array.dtype.str, hashlib.sha256(array.tobytes()).digest()
 
 
-def reference_state_signature(source):
+def reference_state_signature(source, *, allow_range_separated=False):
     """Fingerprint a validated eager post-HF input, including mutable arrays."""
     from .rsh import reject_rsh_response
-    reject_rsh_response(source)
+    if not allow_range_separated:
+        reject_rsh_response(source)
     if isinstance(source, UnrestrictedReference):
         return (source.nocc, tuple(_array_signature(a) for a in (*source.h1, *source.eri)),
                 _array_signature(source.nuclear_repulsion))
@@ -154,7 +155,7 @@ def reference_state_signature(source):
     )
 
 
-def as_reference(source):
+def as_reference(source, *, allow_range_separated=False):
     """Resolve an AO/grid state from an SCF facade or an explicit array state.
 
     This is an eager source adapter, not the MO Hamiltonian adapter used by
@@ -162,7 +163,12 @@ def as_reference(source):
     convergence and spin/representation validation.
     """
     from .rsh import reject_rsh_response
-    reject_rsh_response(source)
+    if not allow_range_separated:
+        reject_rsh_response(source)
+    else:
+        ensure = getattr(source, '_ensure_reference', None)
+        if callable(ensure):
+            return ensure()  # Source freshness checks remain in force.
     convert = getattr(source, 'to_reference', None)
     if callable(convert):
         return convert()

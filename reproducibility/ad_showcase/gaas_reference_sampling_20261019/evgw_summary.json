@@ -1,0 +1,213 @@
+{
+  "model": "Independent BerkeleyGW GaAs-EPM/GPP; no absolute agreement claim with native GTH-SZV/CD",
+  "external_evgw_accepted": false,
+  "external_evgw_status": "not_converged",
+  "external_evgw_gamma_gap_ev": null,
+  "external_evgw_sampled_gap_ev": null,
+  "external_evgw_minimum_direct_gap_ev": null,
+  "evgw_fine_spectrum_produced": false,
+  "internal_bands": 18,
+  "source_kmesh": [
+    2,
+    2,
+    2
+  ],
+  "tolerance_ev": 1e-05,
+  "last_physical_residual_ev": 0.01201882432100021,
+  "phases": {
+    "initial_mix03": {
+      "directory": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_reference_evgw_20261019",
+      "accepted": false,
+      "iterations": 17,
+      "feedback": "eqp1",
+      "mixing": 0.3,
+      "last_iteration_residual_ev": 0.313240500183003,
+      "last_physical_eqp0_residual_ev": 0.4414317271830015,
+      "failure": "Slow mix=0.3 trajectory stopped at complete pair; continue same equations with mix=0.7",
+      "end_stage": "stopped_after_complete_sigma_pair",
+      "comparable_gap_ev": null,
+      "fine_produced": false,
+      "stage_count": 53,
+      "all_external_stages_exit_zero": true,
+      "external_stage_seconds": 407.7877185279999,
+      "peak_monitored_rss_kib": 149012
+    },
+    "eqp1_mix07_cycle": {
+      "directory": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_reference_evgw_mix07_20261019",
+      "accepted": false,
+      "iterations": 26,
+      "feedback": "eqp1",
+      "mixing": 0.7,
+      "last_iteration_residual_ev": 0.010962277752998517,
+      "last_physical_eqp0_residual_ev": 0.01345163375300018,
+      "failure": "Observed band15 alternating residual at mix=0.7; same equations continue with mix=0.3",
+      "end_stage": "stopped_after_complete_sigma_pair",
+      "comparable_gap_ev": null,
+      "fine_produced": false,
+      "stage_count": 78,
+      "all_external_stages_exit_zero": true,
+      "external_stage_seconds": 633.5705994179999,
+      "peak_monitored_rss_kib": 148980
+    },
+    "raw_seed_gate_failure": {
+      "directory": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_reference_evgw_mix03_recovery_20261019",
+      "accepted": false,
+      "iterations": 1,
+      "feedback": "eqp1",
+      "mixing": 0.3,
+      "last_iteration_residual_ev": 0.02848547400000001,
+      "last_physical_eqp0_residual_ev": 0.034044186999999226,
+      "failure": "RuntimeError('evGW raw residual grew by over twofold; stopping unstable trajectory')",
+      "end_stage": "iteration000/q/run",
+      "comparable_gap_ev": null,
+      "fine_produced": false,
+      "stage_count": 3,
+      "all_external_stages_exit_zero": true,
+      "external_stage_seconds": 25.177947011999777,
+      "peak_monitored_rss_kib": 148588
+    },
+    "damped_eqp1_mix03": {
+      "directory": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_reference_evgw_mix03_continuation_20261019",
+      "accepted": false,
+      "iterations": 15,
+      "feedback": "eqp1",
+      "mixing": 0.3,
+      "last_iteration_residual_ev": 0.010984683104002357,
+      "last_physical_eqp0_residual_ev": 0.013308902104000708,
+      "failure": "Full18-state Eqp1 residual still oscillates at mix=0.3; physical EqP0 route requires source audit",
+      "end_stage": "stopped_after_complete_sigma_pair",
+      "comparable_gap_ev": null,
+      "fine_produced": false,
+      "stage_count": 45,
+      "all_external_stages_exit_zero": true,
+      "external_stage_seconds": 413.6423924949995,
+      "peak_monitored_rss_kib": 149044
+    },
+    "eqp0_mix01": {
+      "directory": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_reference_evgw_eqp0_20261019",
+      "accepted": false,
+      "iterations": 18,
+      "feedback": "eqp0",
+      "mixing": 0.1,
+      "last_iteration_residual_ev": 0.01201882432100021,
+      "last_physical_eqp0_residual_ev": 0.01201882432100021,
+      "failure": "Final full18-state GPP Eqp0 physical residual does not decay; no fine spectrum produced",
+      "end_stage": "stopped_after_complete_sigma_pair",
+      "comparable_gap_ev": null,
+      "fine_produced": false,
+      "stage_count": 54,
+      "all_external_stages_exit_zero": true,
+      "external_stage_seconds": 447.5091022190004,
+      "peak_monitored_rss_kib": 149076
+    }
+  },
+  "g0w0_baseline": {
+    "accepted": true,
+    "scope": "Independently completed one-shot EPM/GPP; no failed evGW state is interpolated",
+    "source_table": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_reference_evgw_20261019/iteration000/g/eqp1.dat",
+    "coarse_gap": {
+      "sampled_gap_ev": 3.424335267,
+      "minimum_direct_gap_ev": 3.424335267,
+      "gamma_gap_ev": 3.424335267,
+      "vbm_fractional": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "cbm_fractional": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "fine": {
+      "4": {
+        "sampled_gap_ev": 3.424335267,
+        "minimum_direct_gap_ev": 3.424335267,
+        "gamma_gap_ev": 3.424335267,
+        "vbm_fractional": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "cbm_fractional": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "8": {
+        "sampled_gap_ev": 3.424335267,
+        "minimum_direct_gap_ev": 3.424335267,
+        "gamma_gap_ev": 3.424335267,
+        "vbm_fractional": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "cbm_fractional": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "derivative_control": {
+    "0.1": {
+      "g": {
+        "eqp0_saved_values_identical": true,
+        "max_eqp0_difference_ev": 0.0,
+        "gamma15_z": 0.429235814,
+        "minimum_z": 0.429235814,
+        "maximum_z": 1.256865798,
+        "max_eqp1_difference_from_baseline_ev": 0.002528277999999773
+      },
+      "q": {
+        "eqp0_saved_values_identical": true,
+        "max_eqp0_difference_ev": 0.0,
+        "gamma15_z": 0.461990049,
+        "minimum_z": 0.461990049,
+        "maximum_z": 1.276533221,
+        "max_eqp1_difference_from_baseline_ev": 0.004366297000000685
+      }
+    },
+    "0.01": {
+      "g": {
+        "eqp0_saved_values_identical": true,
+        "max_eqp0_difference_ev": 0.0,
+        "gamma15_z": 0.204454282,
+        "minimum_z": 0.204454282,
+        "maximum_z": 0.849658735,
+        "max_eqp1_difference_from_baseline_ev": 0.004005830000000543
+      },
+      "q": {
+        "eqp0_saved_values_identical": true,
+        "max_eqp0_difference_ev": 0.0,
+        "gamma15_z": 0.338832944,
+        "minimum_z": 0.338832944,
+        "maximum_z": 0.857777521,
+        "max_eqp1_difference_from_baseline_ev": 0.005846501000000615
+      }
+    },
+    "0.001": {
+      "g": {
+        "eqp0_saved_values_identical": true,
+        "max_eqp0_difference_ev": 0.0,
+        "gamma15_z": 0.048480875,
+        "minimum_z": 0.048480875,
+        "maximum_z": 0.986766538,
+        "max_eqp1_difference_from_baseline_ev": 0.005031087000002543
+      },
+      "q": {
+        "eqp0_saved_values_identical": true,
+        "max_eqp0_difference_ev": 0.0,
+        "gamma15_z": 0.945185772,
+        "minimum_z": 0.138446127,
+        "maximum_z": 2.117584585,
+        "max_eqp1_difference_from_baseline_ev": 0.0014411479999978383
+      }
+    }
+  },
+  "derivative_restart_supported": false
+}

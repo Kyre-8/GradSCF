@@ -18,7 +18,7 @@ from ...tddft._unrestricted_semilocal_response import (
     pack_spin_grid_tangents,
     unpack_spin_grid_response,
 )
-from ...dft.libxc_jax.jax_libxc import RestrictedFeatureBundle
+from ...dft.xc import RestrictedFeatureBundle
 from .components import (
     SemilocalEnergyDensityFn,
     SemilocalEnergyDensityModule,

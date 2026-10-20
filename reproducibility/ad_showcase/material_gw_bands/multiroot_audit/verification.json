@@ -1,0 +1,14 @@
+{
+  "downloaded_files": {
+    "result.json": "fc11e552b0016ce71cdfc034993a336204e03f6a6742f1064b82b620d6e7ebd2",
+    "budget.json": "126a0bfac232e6993ebeef77e6608f967dc957f37607b10bc0362b1f5fcf8841",
+    "exit_code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "workflow_sha256": {
+    "probe.py": "94672fe25745b437be51f78378dc10ef5ca550dbf6d33924a6dd88e619b5328b",
+    "run.py": "b14f1c316087380b023a6ef63df4204bb7a4005cfce4d9c1c241f8f16210f7f7"
+  },
+  "source_files_checked": 22,
+  "source_match": true,
+  "scope": "Hash/metadata/link checks only; no local numerical calculation."
+}

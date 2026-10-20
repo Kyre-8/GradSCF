@@ -4,7 +4,8 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 from .ao import bloch_grid
-from .coulomb import ewald_energy,coulomb_kernel,exchange_kernel,ReducedBoundary
+from .coulomb import (ewald_energy,coulomb_kernel,exchange_kernel,ReducedBoundary,
+                      ScreenedExchangeContext,screened_exchange_correction)
 from .pseudo import local_potential,nonlocal_matrix
 
 
@@ -27,9 +28,10 @@ class PeriodicInputs(NamedTuple):
     ionic_charges: object = None
     ao_laplacian: object = None
     boundary: object = None
+    exchange_context: object = None
 
 
-def _context(cell,parameters,lattice,ft,gv,kpts):
+def _context(cell,parameters,lattice,ft,gv,kpts,kmesh):
     volume=jnp.linalg.det(lattice);ngrid=int(np.prod(cell.mesh))
     q=gv[None]+kpts[:,None]
     values=-jnp.sum(q*q,axis=-1)[...,None]*ft*ngrid/volume
@@ -37,7 +39,9 @@ def _context(cell,parameters,lattice,ft,gv,kpts):
     return dict(lattice=lattice,atom_coords=parameters.nuclear_coords,
                 atom_charges=jnp.asarray(cell.topology.nuclear_charges,dtype=lattice.dtype),
                 ionic_charges=jnp.asarray(cell.charges,dtype=lattice.dtype),ao_laplacian=laplacian,
-                boundary=_boundary(cell,lattice))
+                boundary=_boundary(cell,lattice),
+                exchange_context=None if kmesh is None else ScreenedExchangeContext(
+                    tuple(map(tuple,np.asarray(cell.lattice))),tuple(kmesh),cell.precision,tuple(cell.mesh)))
 
 
 def _boundary(cell,lattice):
@@ -90,7 +94,7 @@ def build_inputs(cell,*,parameters=None,lattice=None,kpts=None,kweights=None):
     enuc,mad=_electrostatic(cell,parameters,lattice,(1,1,1))
     return PeriodicInputs(overlap[None],(kinetic+local+nonlocal_pp)[None],kinetic[None],ao,coords,
         jnp.full(ngrid,volume/ngrid),potential,enuc,mad,kpts,gv,jnp.asarray(w),
-        **_context(cell,parameters,lattice,ft,gv,kpts))
+        **_context(cell,parameters,lattice,ft,gv,kpts,(1,1,1)))
 
 
 def get_jk(inputs,density_spin,*,exxdiv='ewald',with_k=True,mesh=None):
@@ -137,10 +141,11 @@ def _assemble_kpoints(cell,parameters,lattice,ao,ft,gv,coords,kpts,kmesh,*,elect
         enuc,mad=electrostatic
     return PeriodicInputs(overlaps,cores,kinetics,ao,coords,
         jnp.full(ngrid,volume/ngrid),None,enuc,mad,kpts,gv,
-        **_context(cell,parameters,lattice,ft,gv,kpts))
+        **_context(cell,parameters,lattice,ft,gv,kpts,kmesh))
 
 
-def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True,targets=None):
+def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True,targets=None,
+                  omega=None,range_part='full',reference_omega=None):
     """Full source-k sums with optional representative target contractions."""
     if exxdiv not in ('ewald','vcut_sph',None):raise NotImplementedError('Unsupported exchange correction.')
     ao=inputs.ao[:,0];nk=ao.shape[0];weight=inputs.weights[0]
@@ -152,7 +157,8 @@ def get_kpoint_jk(inputs,density_spin,*,mesh,exxdiv='ewald',with_k=True,targets=
     target_ao=ao if targets is None else ao[jnp.asarray(targets)]
     j=weight*jnp.einsum('kgp,g,kgq->kpq',target_ao.conj(),vr,target_ao)
     if not with_k:return j,jnp.zeros((density_spin.shape[0],)+j.shape,dtype=density_spin.dtype)
-    return j,_kpoint_exchange(inputs,density_spin,mesh=mesh,exxdiv=exxdiv,targets=targets)
+    return j,_kpoint_exchange(inputs,density_spin,mesh=mesh,exxdiv=exxdiv,targets=targets,
+                              omega=omega,range_part=range_part,reference_omega=reference_omega)
 
 
 def _pair_potential(pairs,kernel,mesh):
@@ -162,7 +168,8 @@ def _pair_potential(pairs,kernel,mesh):
         *kernel.reshape(tuple(mesh)+(1,1)),axes=(0,1,2)).reshape(pairs.shape)
 
 
-def _kpoint_exchange(inputs,density_spin,*,mesh,exxdiv,bra=None,bra_overlap=None,targets=None,query=None):
+def _kpoint_exchange(inputs,density_spin,*,mesh,exxdiv,bra=None,bra_overlap=None,targets=None,query=None,
+                     omega=None,range_part='full',reference_omega=None):
     """Shared diagonal/finite-q/query exchange on the same source-k density."""
     if query is not None and (bra is not None or bra_overlap is not None or targets is not None):
         raise ValueError('Use either arbitrary query inputs or finite-q/representative targets.')
@@ -174,6 +181,10 @@ def _kpoint_exchange(inputs,density_spin,*,mesh,exxdiv,bra=None,bra_overlap=None
     target_bra=bra if query is None else target_ao
     target_kpoints=inputs.kpoints if query is None else query.kpoints
     target_overlap=bra_overlap if query is None else query.overlap
+    correction=inputs.madelung
+    if exxdiv=='ewald' and range_part!='full':
+        correction=screened_exchange_correction(inputs.lattice,inputs.madelung,
+            inputs.exchange_context,omega,range_part,reference_omega=reference_omega)
     matrices=[]
     for target in (range(len(target_kpoints)) if targets is None else targets):
         k=jnp.zeros((density_spin.shape[0],target_ao.shape[-1],target_ao.shape[-1]),
@@ -181,7 +192,8 @@ def _kpoint_exchange(inputs,density_spin,*,mesh,exxdiv,bra=None,bra_overlap=None
         for source in range(nk):
             pairs=ao[source].conj()[:,:,None]*target_ao[target][:,None,:]
             kernel=exchange_kernel(inputs.gvectors+target_kpoints[target]-inputs.kpoints[source],
-                lattice=inputs.lattice,nk=nk,exxdiv=exxdiv,boundary=inputs.boundary)
+                lattice=inputs.lattice,nk=nk,exxdiv=exxdiv,boundary=inputs.boundary,
+                omega=omega,range_part=range_part)
             potential=_pair_potential(pairs,kernel,mesh)
             k=k+weight*kw[source]*jnp.einsum('gp,gs,tsr,grq->tpq',target_bra[target].conj(),bra[source],density_spin[:,source],potential)
         if exxdiv=='ewald':
@@ -191,7 +203,7 @@ def _kpoint_exchange(inputs,density_spin,*,mesh,exxdiv,bra=None,bra_overlap=None
                 s=target_overlap[target]
                 match=jnp.all(abs(inputs.kpoints-target_kpoints[target])<1e-10,axis=1)
                 dm=jnp.einsum('k,skpq->spq',match.astype(density_spin.dtype),density_spin)
-            k=k+inputs.madelung*jnp.einsum('pr,trs,sq->tpq',target_overlap[target],dm,s)
+            k=k+correction*jnp.einsum('pr,trs,sq->tpq',target_overlap[target],dm,s)
         if exxdiv in ('ewald','vcut_sph'):
             k=k*jnp.where(jnp.all(jnp.abs(kw-1/nk)<1e-12),1.,jnp.nan)
         matrices.append(k)

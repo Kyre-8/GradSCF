@@ -19,7 +19,7 @@ from .g0w0 import g0w0_cd_unrestricted, _mo_factors
 
 
 class UGW:
-    """Spin-unrestricted G0W0/evGW/evGW0 (contour deformation), HF starts.
+    """Spin-unrestricted G0W0/evGW/evGW0 from HF or complete KS states.
 
     Parameters
     ----------
@@ -52,18 +52,19 @@ class UGW:
         mf = self._scf
         if not mf.converged or mf._cached_scf_key != mf._scf_signature():
             raise RuntimeError("SCF source changed or is unconverged; run SCF and GW again")
-        reference = as_reference(mf)
+        reference = as_reference(mf, allow_range_separated=True)
         arrays = []
         for name in ("mo_energy", "mo_coeff", "mo_occ"):
             value = _array_signature(getattr(reference, name))
             if value != _array_signature(getattr(mf, name)):
                 raise RuntimeError("SCF orbitals changed; run SCF and GW again")
             arrays.append(value)
-        for name in ("rdm1", "h1e", "df_factors", "rep_tensor", "dipole_integrals"):
+        for name in ("rdm1", "h1e", "fock_matrix", "df_factors", "rep_tensor", "dipole_integrals"):
             value = getattr(reference, name, None)
             arrays.append(None if value is None else _array_signature(value))
         return (self.nw, self.eta, self.qp_solver, self.method, self.max_cycle,
-                self.conv_tol, self.damp, reference_state_signature(mf), tuple(arrays))
+                self.conv_tol, self.damp,
+                reference_state_signature(mf, allow_range_separated=True), tuple(arrays))
 
     def state_signature(self):
         """Reject stale SCF/GW data before downstream optical calculations."""
@@ -88,7 +89,7 @@ class UGW:
         naux, nmo = self._ao_factors.shape[0], c.shape[-1]
         if naux > max_aux or 2 * naux * nmo * nmo > max_factor_elements:
             raise ValueError("BSE factors exceed max_aux or max_factor_elements")
-        ref = as_reference(self._scf)
+        ref = as_reference(self._scf, allow_range_separated=True)
         if any(x is None for x in (self.result.screening_energy,
                                    self.result.qp_computed_mask, self.result.converged_mask)):
             raise ValueError("GW result is missing screening or QP coverage metadata")
@@ -134,7 +135,7 @@ class UGW:
             raise ValueError("qp_solver selects the G0W0 root, not the evGW outer fixed point")
         mf = self._scf
         signature = self._source_signature()
-        reference = as_reference(mf)
+        reference = as_reference(mf, allow_range_separated=True)
         if reference is None:
             raise RuntimeError(
                 "Unrestricted GW expects the UKS unrestricted reference "
@@ -150,17 +151,12 @@ class UGW:
         rdm1 = np.asarray(reference.rdm1)
         df_factors = self._df_factors(reference)
 
-        # The unrestricted reference does not carry Fock matrices.  For an
-        # HF starting point they are reconstructed from the densities inside
-        # the driver; DFT starting points need the UKSResult Fock matrices,
-        # which are not exposed by the current facade -- fail explicitly.
+        # F-h-J contains the whole starting potential, including semilocal,
+        # tau-dependent and nonlocal hybrid/RSH exchange contributions.
+        fock = getattr(reference, "fock_matrix", None)
         hfx = float(getattr(reference, "exact_exchange_fraction", 0.0) or 0.0)
-        if abs(hfx - 1.0) > 1e-12:
-            raise NotImplementedError(
-                "Unrestricted GW currently supports HF starting points only "
-                "(v^mf is rebuilt as -K_sigma).  DFT starting points require "
-                "spin Fock matrices that the UKS facade does not expose yet."
-            )
+        if fock is None and abs(hfx - 1.0) > 1e-12:
+            raise ValueError("A DFT GW starting point requires actual spin Fock matrices.")
         from .evgw import evgw_cd_unrestricted
         driver = g0w0_cd_unrestricted if self.method == "g0w0" else evgw_cd_unrestricted
         controls = dict(qp_solver=self.qp_solver) if self.method == "g0w0" else dict(
@@ -171,8 +167,8 @@ class UGW:
             mo_coeff=(jnp.asarray(mo_coeff[0]), jnp.asarray(mo_coeff[1])),
             nocc=(nocc_a, nocc_b),
             df_factors=df_factors,
-            fock_matrix=None,
-            hcore_matrix=None,
+            fock_matrix=None if fock is None else tuple(jnp.asarray(f) for f in fock),
+            hcore_matrix=None if fock is None else jnp.asarray(reference.h1e),
             density_matrix=(jnp.asarray(rdm1[0]), jnp.asarray(rdm1[1])),
             nw=self.nw,
             eta=self.eta,

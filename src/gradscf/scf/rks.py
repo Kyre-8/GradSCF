@@ -26,13 +26,12 @@ from ..tools.features import (
     molecule_grid_view,
     restricted_grid_features_with_gradients,
 )
-from ..dft.libxc_jax.jax_libxc import (
-    eval_xc_energy_density,
+from ..dft.xc import (
     hybrid_coeff,
     parse_xc,
-    restricted_feature_bundle_from_rho_grad_tau,
     xc_type,
 )
+from ..dft.xc.evaluate import grid_value_and_grad
 from .convergence import convergence_reached
 from .core import (
     _build_density_from_occ,
@@ -483,39 +482,21 @@ def _array_xc_value_and_grad_kernel(
     xc_kind: str,
     density_floor: float,
 ) -> Callable[[Array], tuple[Array, Array]]:
-    xc_spec_norm = str(xc_spec)
-    xc_kind_norm = str(xc_kind)
-    density_floor_value = float(density_floor)
-
-    def point_exc_array(variables: Array) -> Array:
-        rho = jnp.maximum(variables[:, 0], density_floor_value)
-        if xc_kind_norm == "LDA":
-            grad = jnp.zeros((variables.shape[0], 3), dtype=variables.dtype)
-            tau = jnp.zeros_like(rho)
-        elif xc_kind_norm == "GGA":
-            grad = variables[:, 1:4]
-            tau = jnp.zeros_like(rho)
-        elif xc_kind_norm == "MGGA":
-            grad = variables[:, 1:4]
-            tau = jnp.maximum(variables[:, 4], 0.0)
-        else:
-            raise ValueError(f"Unsupported XC kind={xc_kind_norm!r}.")
-        features = restricted_feature_bundle_from_rho_grad_tau(
-            rho,
-            grad,
-            tau,
-            density_floor=density_floor_value,
-        )
-        return eval_xc_energy_density(xc_spec_norm, features)
-
-    def unweighted_sum(variables: Array) -> Array:
-        return jnp.sum(point_exc_array(variables))
-
-    value_and_grad = jax.value_and_grad(unweighted_sum)
-
     def kernel(variables: Array) -> tuple[Array, Array]:
-        _, grad = value_and_grad(variables)
-        return point_exc_array(variables), grad
+        rho = jnp.maximum(variables[:, :1], density_floor)
+        blocks = [rho/2, rho/2]
+        if xc_kind in {"GGA", "MGGA"}:
+            blocks.extend([variables[:, 1:4]/2, variables[:, 1:4]/2])
+        if xc_kind == "MGGA":
+            tau = jnp.maximum(variables[:, 4:5], 0.)
+            blocks.extend([tau/2, tau/2])
+        values, spin_grad = grid_value_and_grad(xc_spec, xc_kind)(jnp.concatenate(blocks, axis=-1))
+        gradients = [(spin_grad[:, :1]+spin_grad[:, 1:2])/2]
+        if xc_kind in {"GGA", "MGGA"}:
+            gradients.append((spin_grad[:, 2:5]+spin_grad[:, 5:8])/2)
+        if xc_kind == "MGGA":
+            gradients.append((spin_grad[:, 8:9]+spin_grad[:, 9:10])/2)
+        return values, jnp.concatenate(gradients, axis=-1)
 
     return jax.jit(kernel)
 
@@ -530,7 +511,10 @@ def _xc_energy_and_potential_on_grid(
     density_floor: float,
     potential_clip: float | None,
     xc_kind: str,
-) -> tuple[Array, Array, Array]:
+    return_tau: bool = False,
+) -> tuple[Array, ...]:
+    if xc_kind == "MGGA" and not return_tau:
+        raise ValueError("MGGA grid potentials require return_tau=True to retain the kinetic-density potential.")
     rho = jnp.maximum(jnp.asarray(rho), density_floor)
     grad = jnp.asarray(grad)
     tau = jnp.maximum(jnp.asarray(tau), 0.0)
@@ -538,7 +522,8 @@ def _xc_energy_and_potential_on_grid(
 
     if xc_kind == "HF":
         zeros = jnp.zeros_like(rho)
-        return jnp.asarray(0.0, dtype=rho.dtype), zeros, jnp.zeros((rho.shape[0], 3), dtype=rho.dtype)
+        result = (jnp.asarray(0.0, dtype=rho.dtype), zeros, jnp.zeros((rho.shape[0], 3), dtype=rho.dtype))
+        return result + (zeros,) if return_tau else result
 
     if xc_kind == "LDA":
         response_variables = rho[..., None]
@@ -550,22 +535,17 @@ def _xc_energy_and_potential_on_grid(
         raise ValueError(f"Unsupported XC kind={xc_kind!r}.")
 
     mask = rho > density_floor
-    truncate_wb97xd = str(xc_spec).lower() == "hyb_gga_xc_wb97x_d"
-    if truncate_wb97xd:
-        # Apply the declared quadrature cutoff before the generated B97
-        # expression; inactive grid tails can otherwise have NaN Hessians.
-        # A regular dummy point keeps every inactive AD branch finite.
-        response_variables = jnp.where(mask[:, None], response_variables,
-                                       jnp.ones_like(response_variables))
+    # The quadrature cutoff applies to energy and all potential channels.
+    # Evaluate inactive points at a regular dummy input before masking, so
+    # invalid tail branches cannot contaminate higher derivatives.
+    response_variables = jnp.where(mask[:, None], response_variables,
+                                   jnp.ones_like(response_variables))
     point_exc, point_grad = _array_xc_value_and_grad_kernel(
         xc_spec,
         xc_kind,
         density_floor,
     )(response_variables)
-    point_exc = jnp.nan_to_num(point_exc, nan=0.0, posinf=0.0, neginf=0.0)
-    point_grad = jnp.nan_to_num(point_grad, nan=0.0, posinf=0.0, neginf=0.0)
-    if truncate_wb97xd:
-        point_exc = jnp.where(mask, point_exc, 0.)
+    point_exc = jnp.where(mask, point_exc, 0.)
     exc = jnp.tensordot(weights, point_exc, axes=(0, 0))
 
     vxc_rho = jnp.where(mask, point_grad[:, 0], 0.0)
@@ -573,12 +553,15 @@ def _xc_energy_and_potential_on_grid(
         vxc_grad = jnp.where(mask[:, None], point_grad[:, 1:4], 0.0)
     else:
         vxc_grad = jnp.zeros((rho.shape[0], 3), dtype=rho.dtype)
+    vxc_tau = jnp.where(mask, point_grad[:, 4], 0.) if xc_kind == "MGGA" else jnp.zeros_like(rho)
 
     if potential_clip is not None:
         clip = jnp.asarray(potential_clip, dtype=rho.dtype)
         vxc_rho = jnp.clip(vxc_rho, -clip, clip)
         vxc_grad = jnp.clip(vxc_grad, -clip, clip)
-    return exc, vxc_rho, vxc_grad
+        vxc_tau = jnp.clip(vxc_tau, -clip, clip)
+    result = (exc, vxc_rho, vxc_grad)
+    return result + (vxc_tau,) if return_tau else result
 
 
 def _vxc_matrix_from_grid_potential(
@@ -659,15 +642,16 @@ def _fock_components_for_density(
     del mo_energy
     rho, grad = _spin_density_and_gradient(ao, ao_deriv1, density)
     tau = _spin_tau(ao_deriv1, density)
-    xc_energy, vxc_rho, vxc_grad = _xc_energy_and_potential_on_grid(
+    xc_energy, vxc_rho, vxc_grad, vxc_tau = _xc_energy_and_potential_on_grid(
         rho=rho,
         grad=grad,
         tau=tau,
         weights=weights,
-        xc_spec=local_xc_spec(cfg.xc_spec),
+        xc_spec=cfg.xc_spec,
         density_floor=cfg.density_floor,
         potential_clip=cfg.potential_clip,
         xc_kind=xc_kind,
+        return_tau=True,
     )
     vxc_matrix = _vxc_matrix_from_grid_potential(
         ao=ao,
@@ -676,7 +660,7 @@ def _fock_components_for_density(
         weights=weights,
         vxc_rho=vxc_rho,
         vxc_grad=vxc_grad,
-        vxc_tau=jnp.zeros_like(vxc_rho),
+        vxc_tau=vxc_tau,
         vxc_lapl=jnp.zeros_like(vxc_rho),
         xc_kind=xc_kind,
     )
@@ -1078,16 +1062,6 @@ def _run_rks_from_integrals_shared(
     rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy, jk_backend=cfg.jk_backend)
     parse_xc(local_xc_spec(cfg.xc_spec))
     xc_kind = xc_type(local_xc_spec(cfg.xc_spec))
-    if xc_kind == "MGGA":
-        if traceable:
-            raise NotImplementedError(
-                "Traceable RKS matrix assembly currently supports LDA/GGA/HF semilocal terms. "
-                "MGGA requires tau-dependent AO Hessian terms."
-            )
-        raise NotImplementedError(
-            "RKS SCF matrix assembly currently supports LDA/GGA/HF semilocal terms. "
-            "MGGA requires tau-dependent AO Hessian terms."
-        )
 
     s = jnp.asarray(overlap)
     h = jnp.asarray(hcore)

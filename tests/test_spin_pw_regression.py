@@ -9,7 +9,7 @@ def test_pw_energy_potential_spin_symmetry_and_jit_match_reference():
     pytest.importorskip("jax_xc")
     pytest.importorskip("pyscf")
     from pyscf.dft import libxc
-    from gradscf.dft.libxc_jax.jax_xc_adapter import eval_jax_xc_energy_density_from_unrestricted_density_gradients
+    from gradscf.dft.xc._jax_xc import eval_jax_xc_energy_density_from_unrestricted_density_gradients
 
     def energy(rho):
         return eval_jax_xc_energy_density_from_unrestricted_density_gradients(

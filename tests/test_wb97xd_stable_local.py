@@ -34,7 +34,7 @@ def test_active_wb97xd_tail_third_derivative_is_finite_and_matches_fd(point):
 
 @pytest.mark.parametrize("density", [1e-2, 1e-5, 1e-8, 1e-11])
 def test_factored_local_matches_libxc_across_sr_attenuation_branches(density):
-    from gradscf.dft.libxc_jax.jax_xc_adapter import (
+    from gradscf.dft.xc._jax_xc import (
         eval_jax_xc_energy_density_from_unrestricted_density_gradients,
     )
     libxc = pytest.importorskip("pyscf.dft.libxc")
@@ -73,7 +73,7 @@ def test_factored_local_matches_libxc_across_sr_attenuation_branches(density):
 
 @pytest.mark.parametrize("minority", [1e-8, 0.])
 def test_factored_local_high_spin_and_absent_spin_are_finite(minority):
-    from gradscf.dft.libxc_jax.jax_xc_adapter import (
+    from gradscf.dft.xc._jax_xc import (
         eval_jax_xc_energy_density_from_unrestricted_density_gradients,
     )
     libxc = pytest.importorskip("pyscf.dft.libxc")
@@ -92,7 +92,7 @@ def test_factored_local_high_spin_and_absent_spin_are_finite(minority):
 
 @pytest.mark.parametrize("side", [-1, 1])
 def test_sr_attenuation_derivative_near_existing_branch_matches_fd(side):
-    from gradscf.dft.libxc_jax.wb97_local import _sr_attenuation
+    from gradscf.dft.xc._compat import _sr_attenuation
 
     point = jnp.asarray(1.35 + side*1e-4)
     derivative = jax.grad(_sr_attenuation)
@@ -111,7 +111,7 @@ def test_sr_attenuation_derivative_near_existing_branch_matches_fd(side):
 
 
 def test_sr_attenuation_exact_boundary_uses_selected_series_derivative():
-    from gradscf.dft.libxc_jax.wb97_local import _sr_attenuation
+    from gradscf.dft.xc._compat import _sr_attenuation
 
     point, step = jnp.asarray(1.35), 1e-5
     derivative = jax.grad(_sr_attenuation)(point)

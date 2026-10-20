@@ -1,7 +1,7 @@
 """PySCF-style DFT namespace for GradSCF.
 
 Lazy ``__getattr__`` dispatch (same pattern as ``gradscf/__init__.py``) so
-that importing the leaf subpackage ``gradscf.dft.libxc_jax`` does not pull
+that importing the leaf subpackage ``gradscf.dft.xc`` does not pull
 in the SCF facade chain (which would create a circular import via
 ``scf -> dft``).
 """
@@ -12,6 +12,7 @@ from importlib import import_module
 
 _EXPORTS = {
     "Functional": "dft.functional",
+    "custom_xc": "dft.functional",
     "DensityInputs": "dft.functional",
     "XCEnergyPotentialResult": "dft.derivatives",
     "xc_energy_and_potential_from_density": "dft.derivatives",
@@ -47,7 +48,7 @@ _EXPORTS = {
     "xc_type": "dft.xc",
 }
 
-_SUBMODULES = ("xc", "functional", "derivatives", "hfx", "pt2", "libxc_jax")
+_SUBMODULES = ("xc", "functional", "derivatives", "hfx", "pt2", "dispersion")
 
 
 def __getattr__(name: str):

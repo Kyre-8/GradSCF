@@ -1,8 +1,10 @@
-"""Periodic (k-point) GW -- planned Stage 2.
+"""Periodic GW on native restricted/unrestricted mean-field references.
 
-This subpackage will provide KRGW/KUGW with contour deformation on top of
-``gradscf.pbc`` mean-field objects, including the q -> 0 head/wing
-corrections of the inverse dielectric matrix.
+KRGW/KUGW retain their existing paired-response contour-deformation paths.
+The source-k model supplies full-complex G0W0, evGW, mode-A qsGW and matrix
+Matsubara scGW on a common finite 3D Hamiltonian. The latter are eager forward
+methods with fc=False; they do not inherit outer AD or long-wavelength head
+completion from other drivers. See each function's numerical/AD contract.
 
 References
 ----------
@@ -22,6 +24,11 @@ from ...pbc.momentum import momentum_transfer_table, wrap_to_kmesh
 from .krgw import KRGW, evgw_cd_gamma, g0w0_cd_gamma
 from .kugw import KUGW, g0w0_cd_gamma_unrestricted
 from .ksigma import g0w0_cd_kpoints
+from .query import g0w0_bands
+from .source import PeriodicGWModel, build_periodic_model
+from .evgw import g0w0_model, evgw_cd_kpoints
+from .qsgw import qsgw_cd_kpoints
+from .scgw import scgw_matsubara_kpoints
 
 
 __all__ = [
@@ -30,7 +37,14 @@ __all__ = [
     "g0w0_cd_gamma",
     "g0w0_cd_gamma_unrestricted",
     "g0w0_cd_kpoints",
+    "g0w0_bands",
     "evgw_cd_gamma",
+    "PeriodicGWModel",
+    "build_periodic_model",
+    "g0w0_model",
+    "evgw_cd_kpoints",
+    "qsgw_cd_kpoints",
+    "scgw_matsubara_kpoints",
     "gamma_product_factors",
     "kpoint_product_factors",
     "momentum_transfer_table",

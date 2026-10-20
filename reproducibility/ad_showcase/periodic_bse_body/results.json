@@ -1,0 +1,103 @@
+{
+  "complete": true,
+  "model": "3D periodic H2 array",
+  "xc": "pbe",
+  "basis": "gth-szv",
+  "pseudo": "gth-pbe",
+  "lattice_bohr": [
+    [
+      6.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      6.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      6.0
+    ]
+  ],
+  "coordinates_bohr": [
+    [
+      3.0,
+      3.0,
+      2.3
+    ],
+    [
+      3.0,
+      3.0,
+      3.7
+    ]
+  ],
+  "mesh": [
+    7,
+    7,
+    7
+  ],
+  "kmesh": [
+    2,
+    1,
+    1
+  ],
+  "nocc": 1,
+  "volume_bohr3": 216.0,
+  "scf_energy_hartree": -1.120910535539132,
+  "gw_method": "periodic_cd_transition",
+  "gw_nw": 16,
+  "gw_eta_hartree": 0.001,
+  "gw_fc": false,
+  "qp_energies_hartree": [
+    [
+      -0.6335538914907025,
+      0.7047794947613121
+    ],
+    [
+      -0.6041555372468123,
+      0.734176859570231
+    ]
+  ],
+  "qp_max_residual_hartree": 5.551115123125783e-17,
+  "bse_max_residual_hartree": 6.497413668604471e-16,
+  "hermiticity_error": 1.1103541512333807e-16,
+  "ip_energies_ev": [
+    36.417906699204615,
+    36.41787977530745
+  ],
+  "ip_strengths_per_cell": [
+    0.16402877152512668,
+    0.17312113256761658
+  ],
+  "bse_energies_ev": [
+    34.641827559525915,
+    40.53121979600116
+  ],
+  "bse_strengths_per_cell": [
+    0.32064959285618744,
+    6.767023642865125e-05
+  ],
+  "optical_vertex": "Length vertex i*v_KS/Delta_KS, including GTH nonlocal velocity",
+  "normalization": "Euclidean x^dagger x=1; singlet sqrt(2), k factor sqrt(1/Nk)",
+  "bse_static_screening": "Full OV+VO Lehmann response; no time-reversal reduction",
+  "scope": "Static TDA body only; no direct q0 head/wing correction, material convergence or AD claim.",
+  "elapsed_seconds": 33.768126201000996,
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "backend": "cpu",
+  "dtype": "float64/complex128",
+  "source_sha256": {
+    "/home/yjiao/gradscf_checks/ad-showcase-completion-bse-ready-20261016/examples/bse/periodic_hydrogen.py": "dffd9499a23e0ced764af34a1869c8fe01b083ea0baec9b8da4ce607a6988cf9",
+    "src/gradscf/bse/pbc/kernel.py": "da621edd72981feb300e0e209e049a2bd6a163d74517a59cfbcd3c6054267c78",
+    "src/gradscf/bse/pbc/response.py": "2899a61c29a1785e4b323c30b7124607052cbed3180f44dad6e57add75319d1c",
+    "src/gradscf/bse/pbc/properties.py": "9c6982215ef556e4b2d5e63197ba288fec9e7d04cf27e5b296f62dd4395e4a96",
+    "src/gradscf/gw/pbc/ksigma.py": "5f888ef9cde7bbe431e9714b4c61bf7259ab78801eb4a03561461fedc78a4c23",
+    "src/gradscf/gw/pbc/product_basis.py": "b7e69e1e24f5c916c622ac53704b414ec621cfd1c14346134f809f8f6bc3305d",
+    "src/gradscf/gw/screened.py": "308493c8837febc20df005ffd8dcd5131fd4c9de12f80fde59c493ca90ab13e2",
+    "src/gradscf/gw/types.py": "8f820f969921891b6cd69256cd5980564aac05bb827f550e688b9fa0652aa578",
+    "src/gradscf/pbc/optics.py": "2f76c64c507830cb74229b382c5000f2b2a0a16a40d92fde1512fde505842504"
+  }
+}

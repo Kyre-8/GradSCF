@@ -1,0 +1,426 @@
+{
+  "scope": "Saved-array source/realization/query TR consistency only; no SCF, fitting or projection",
+  "source": "jobs/gaas_four_methods_20261018/sc512_fft61_20261019/scgw.npz",
+  "source_sha256": "caa88f3c75c3fe01ea369b5aa82b66d673b515fbf80af60f8781184a446f0da9",
+  "convention": "Common covariant AO frame from SRC interpolate_operator; at source TRIM compare same-z transpose, not conjugate Sigma(z)",
+  "norm": "Frobenius difference divided by max of the two Frobenius norms; no matrix is modified",
+  "source_records": [
+    {
+      "k_index": 0,
+      "overlap_TR": {
+        "relative_frobenius": 1.4603257436831493e-16,
+        "absolute_frobenius": 8.858999897145048e-16,
+        "max_abs": 3.468860737287105e-16,
+        "unit": "dimensionless"
+      },
+      "pbe_fock_TR": {
+        "relative_frobenius": 1.166456500933694e-16,
+        "absolute_frobenius": 1.932016055814095e-15,
+        "max_abs": 8.88363165566402e-16,
+        "unit": "Hartree"
+      },
+      "source_fock_TR": {
+        "relative_frobenius": 3.7304959167961425e-15,
+        "absolute_frobenius": 7.115036163455379e-14,
+        "max_abs": 2.2933419706560586e-14,
+        "unit": "Hartree"
+      },
+      "source_moment_TR": {
+        "relative_frobenius": 4.608260795195955e-15,
+        "absolute_frobenius": 2.9038692276359347e-15,
+        "max_abs": 8.712119916782862e-16,
+        "unit": "Hartree^2"
+      },
+      "source_sigma_selected_iw_TR": {
+        "relative_frobenius": 1.7884197891624705e-14,
+        "absolute_frobenius": 3.350535874886964e-14,
+        "max_abs": 1.4528664905597922e-15,
+        "unit": "Hartree"
+      },
+      "source_sigma_all_stored_iw_TR": {
+        "relative_frobenius": 1.447012855169525e-14,
+        "absolute_frobenius": 5.217518225824394e-14,
+        "max_abs": 1.4534206386345679e-15,
+        "unit": "Hartree"
+      },
+      "fit_residues_same_pole_TR": {
+        "relative_frobenius": 0.439190824452014,
+        "absolute_frobenius": 0.15655402436076965,
+        "max_abs": 0.026759982057833767,
+        "unit": "Hartree^2"
+      },
+      "fit_moment_TR": {
+        "relative_frobenius": 7.631911505560568e-15,
+        "absolute_frobenius": 4.80920545819405e-15,
+        "max_abs": 1.2003033543436133e-15,
+        "unit": "Hartree^2"
+      },
+      "fit_sigma_selected_iw_TR": {
+        "relative_frobenius": 1.4449648917690307e-07,
+        "absolute_frobenius": 2.7070863059350897e-07,
+        "max_abs": 2.0203721078241436e-08,
+        "unit": "Hartree"
+      },
+      "fit_sigma_retarded_axis_TR": {
+        "relative_frobenius": 0.3012660046470556,
+        "absolute_frobenius": 3.2588161018084376,
+        "max_abs": 0.1763584522730168,
+        "unit": "Hartree"
+      },
+      "fit_sigma_selected_iw_vs_raw": {
+        "relative_frobenius": 2.448714476213258e-07,
+        "absolute_frobenius": 4.587572655544848e-07,
+        "max_abs": 9.054873870454095e-08,
+        "unit": "Hartree"
+      },
+      "saved_measure_fock_vs_aligned_source": {
+        "relative_frobenius": 9.287991964713492e-16,
+        "absolute_frobenius": 5.604565487027397e-15,
+        "max_abs": 3.552713678800501e-15,
+        "unit": "Hartree"
+      }
+    },
+    {
+      "k_index": 1,
+      "overlap_TR": {
+        "relative_frobenius": 4.007710707612679e-16,
+        "absolute_frobenius": 2.5511787234458004e-15,
+        "max_abs": 7.240755830356811e-16,
+        "unit": "dimensionless"
+      },
+      "pbe_fock_TR": {
+        "relative_frobenius": 6.232922022016298e-15,
+        "absolute_frobenius": 1.0324983079545761e-13,
+        "max_abs": 3.254790889727353e-14,
+        "unit": "Hartree"
+      },
+      "source_fock_TR": {
+        "relative_frobenius": 3.845895244156875e-15,
+        "absolute_frobenius": 7.348855655402232e-14,
+        "max_abs": 2.4586361666514635e-14,
+        "unit": "Hartree"
+      },
+      "source_moment_TR": {
+        "relative_frobenius": 5.467583604999536e-15,
+        "absolute_frobenius": 3.4535795461912988e-15,
+        "max_abs": 1.0284029617965828e-15,
+        "unit": "Hartree^2"
+      },
+      "source_sigma_selected_iw_TR": {
+        "relative_frobenius": 2.525940633430663e-14,
+        "absolute_frobenius": 4.880301702158184e-14,
+        "max_abs": 2.1466155464115e-15,
+        "unit": "Hartree"
+      },
+      "source_sigma_all_stored_iw_TR": {
+        "relative_frobenius": 2.0146676127749937e-14,
+        "absolute_frobenius": 7.421322249700935e-14,
+        "max_abs": 2.1470959926795842e-15,
+        "unit": "Hartree"
+      },
+      "fit_residues_same_pole_TR": {
+        "relative_frobenius": 0.31968674314523104,
+        "absolute_frobenius": 0.10731880032463817,
+        "max_abs": 0.01174760051271845,
+        "unit": "Hartree^2"
+      },
+      "fit_moment_TR": {
+        "relative_frobenius": 8.88640196263786e-15,
+        "absolute_frobenius": 5.613063882432e-15,
+        "max_abs": 1.4766062735723318e-15,
+        "unit": "Hartree^2"
+      },
+      "fit_sigma_selected_iw_TR": {
+        "relative_frobenius": 1.720976447002895e-07,
+        "absolute_frobenius": 3.325052137007996e-07,
+        "max_abs": 2.4193813816859832e-08,
+        "unit": "Hartree"
+      },
+      "fit_sigma_retarded_axis_TR": {
+        "relative_frobenius": 0.4182487530166609,
+        "absolute_frobenius": 5.082868625262673,
+        "max_abs": 0.23223571817129485,
+        "unit": "Hartree"
+      },
+      "fit_sigma_selected_iw_vs_raw": {
+        "relative_frobenius": 2.390690303744877e-07,
+        "absolute_frobenius": 4.6189882012823537e-07,
+        "max_abs": 2.5779410494461935e-08,
+        "unit": "Hartree"
+      },
+      "saved_measure_fock_vs_aligned_source": {
+        "relative_frobenius": 1.1002844505677858e-15,
+        "absolute_frobenius": 6.924332913348166e-15,
+        "max_abs": 5.329070518200751e-15,
+        "unit": "Hartree"
+      }
+    }
+  ],
+  "query_records": [
+    {
+      "indices": [
+        32,
+        33
+      ],
+      "fractional_points": [
+        [
+          0.4913793103448278,
+          0.4913793103448278,
+          0.4913793103448278
+        ],
+        [
+          0.5086206896551722,
+          0.5086206896551722,
+          0.5086206896551722
+        ]
+      ],
+      "same_scalar_weights": {
+        "relative_frobenius": 1.59739213105283e-16,
+        "absolute_frobenius": 1.5700924586837752e-16,
+        "max_abs": 1.1102230246251565e-16,
+        "unit": "dimensionless"
+      },
+      "sewing_unitarity": {
+        "relative_frobenius": 1.9275455958093744e-15,
+        "absolute_frobenius": 7.212215216903723e-15,
+        "max_abs": 1.9984014443252818e-15,
+        "unit": "dimensionless"
+      },
+      "pbe_TR_sewing": {
+        "relative_frobenius": 3.22275065293832e-14,
+        "absolute_frobenius": 1.77051849027085e-13,
+        "max_abs": 4.893166405733712e-14,
+        "unit": "Hartree"
+      },
+      "mixed_static_AO_TR": {
+        "relative_frobenius": 3.82182873898458e-14,
+        "absolute_frobenius": 1.0015056318578119e-13,
+        "max_abs": 3.0812676356345657e-14,
+        "unit": "Hartree"
+      },
+      "mixed_residues_AO_TR": {
+        "relative_frobenius": 0.3197359454676592,
+        "absolute_frobenius": 0.10550301032720882,
+        "max_abs": 0.011545055676292274,
+        "unit": "Hartree^2"
+      },
+      "query_fock_TR_sewing": {
+        "relative_frobenius": 4.025887434110417e-14,
+        "absolute_frobenius": 2.5563543352938054e-13,
+        "max_abs": 7.133951950995781e-14,
+        "unit": "Hartree"
+      },
+      "query_residues_TR_sewing": {
+        "relative_frobenius": 0.6133672173921234,
+        "absolute_frobenius": 0.10467076606143312,
+        "max_abs": 0.014463399743068525,
+        "unit": "Hartree^2"
+      },
+      "query_sigma_retarded_TR_sewing": {
+        "relative_frobenius": 0.3421424351738546,
+        "absolute_frobenius": 5.8444724836773325,
+        "max_abs": 0.4582949812789387,
+        "unit": "Hartree"
+      }
+    },
+    {
+      "indices": [
+        34,
+        35
+      ],
+      "fractional_points": [
+        [
+          0.4956896551724139,
+          0.4956896551724139,
+          0.4956896551724139
+        ],
+        [
+          0.5043103448275861,
+          0.5043103448275861,
+          0.5043103448275861
+        ]
+      ],
+      "same_scalar_weights": {
+        "relative_frobenius": 3.1673711260534066e-16,
+        "absolute_frobenius": 3.1401849173675503e-16,
+        "max_abs": 2.220446049250313e-16,
+        "unit": "dimensionless"
+      },
+      "sewing_unitarity": {
+        "relative_frobenius": 2.310066891833938e-15,
+        "absolute_frobenius": 8.643478849772374e-15,
+        "max_abs": 3.9968028886505635e-15,
+        "unit": "dimensionless"
+      },
+      "pbe_TR_sewing": {
+        "relative_frobenius": 3.0817973850630974e-14,
+        "absolute_frobenius": 1.6931102490615233e-13,
+        "max_abs": 4.747769237661548e-14,
+        "unit": "Hartree"
+      },
+      "mixed_static_AO_TR": {
+        "relative_frobenius": 3.845112163885684e-14,
+        "absolute_frobenius": 1.0078185995718315e-13,
+        "max_abs": 3.108457690152533e-14,
+        "unit": "Hartree"
+      },
+      "mixed_residues_AO_TR": {
+        "relative_frobenius": 0.3196988345985396,
+        "absolute_frobenius": 0.10640219777202872,
+        "max_abs": 0.011646328094505361,
+        "unit": "Hartree^2"
+      },
+      "query_fock_TR_sewing": {
+        "relative_frobenius": 3.953403224337445e-14,
+        "absolute_frobenius": 2.510404886709248e-13,
+        "max_abs": 6.96364949027255e-14,
+        "unit": "Hartree"
+      },
+      "query_residues_TR_sewing": {
+        "relative_frobenius": 0.6133053379444049,
+        "absolute_frobenius": 0.10556335212325227,
+        "max_abs": 0.014590269304683887,
+        "unit": "Hartree^2"
+      },
+      "query_sigma_retarded_TR_sewing": {
+        "relative_frobenius": 0.3429518870668904,
+        "absolute_frobenius": 5.891463125109523,
+        "max_abs": 0.4621766496918339,
+        "unit": "Hartree"
+      }
+    },
+    {
+      "indices": [
+        36,
+        37
+      ],
+      "fractional_points": [
+        [
+          0.49784482758620696,
+          0.49784482758620696,
+          0.49784482758620696
+        ],
+        [
+          0.502155172413793,
+          0.502155172413793,
+          0.502155172413793
+        ]
+      ],
+      "same_scalar_weights": {
+        "relative_frobenius": 4.730623860806463e-16,
+        "absolute_frobenius": 4.710277376051325e-16,
+        "max_abs": 3.3306690738754696e-16,
+        "unit": "dimensionless"
+      },
+      "sewing_unitarity": {
+        "relative_frobenius": 2.2026606236154297e-15,
+        "absolute_frobenius": 8.241601392906768e-15,
+        "max_abs": 3.6637359812630166e-15,
+        "unit": "dimensionless"
+      },
+      "pbe_TR_sewing": {
+        "relative_frobenius": 2.9893817852248246e-14,
+        "absolute_frobenius": 1.6423449867663708e-13,
+        "max_abs": 5.077259537062196e-14,
+        "unit": "Hartree"
+      },
+      "mixed_static_AO_TR": {
+        "relative_frobenius": 3.8567921840138185e-14,
+        "absolute_frobenius": 1.0109864046550876e-13,
+        "max_abs": 3.122053034614708e-14,
+        "unit": "Hartree"
+      },
+      "mixed_residues_AO_TR": {
+        "relative_frobenius": 0.31968974012802504,
+        "absolute_frobenius": 0.10685834996945888,
+        "max_abs": 0.011696964303611905,
+        "unit": "Hartree^2"
+      },
+      "query_fock_TR_sewing": {
+        "relative_frobenius": 3.9163227780162414e-14,
+        "absolute_frobenius": 2.4868850380898423e-13,
+        "max_abs": 7.383381599928038e-14,
+        "unit": "Hartree"
+      },
+      "query_residues_TR_sewing": {
+        "relative_frobenius": 0.6132967438838857,
+        "absolute_frobenius": 0.10601601404208914,
+        "max_abs": 0.01465370501686833,
+        "unit": "Hartree^2"
+      },
+      "query_sigma_retarded_TR_sewing": {
+        "relative_frobenius": 0.34336572741568466,
+        "absolute_frobenius": 5.915128454087545,
+        "max_abs": 0.46407992395823144,
+        "unit": "Hartree"
+      }
+    },
+    {
+      "indices": [
+        38,
+        39
+      ],
+      "fractional_points": [
+        [
+          0.4989224137931035,
+          0.4989224137931035,
+          0.4989224137931035
+        ],
+        [
+          0.5010775862068966,
+          0.5010775862068966,
+          0.5010775862068966
+        ]
+      ],
+      "same_scalar_weights": {
+        "relative_frobenius": 4.720439751245445e-16,
+        "absolute_frobenius": 4.710277376051325e-16,
+        "max_abs": 3.3306690738754696e-16,
+        "unit": "dimensionless"
+      },
+      "sewing_unitarity": {
+        "relative_frobenius": 2.3302194927355558e-15,
+        "absolute_frobenius": 8.71888297779862e-15,
+        "max_abs": 5.10702591327572e-15,
+        "unit": "dimensionless"
+      },
+      "pbe_TR_sewing": {
+        "relative_frobenius": 2.9869665957000095e-14,
+        "absolute_frobenius": 1.6410198454255856e-13,
+        "max_abs": 5.013443880943569e-14,
+        "unit": "Hartree"
+      },
+      "mixed_static_AO_TR": {
+        "relative_frobenius": 3.862644789541303e-14,
+        "absolute_frobenius": 1.0125739305389702e-13,
+        "max_abs": 3.128850128525798e-14,
+        "unit": "Hartree"
+      },
+      "mixed_residues_AO_TR": {
+        "relative_frobenius": 0.3196874891724063,
+        "absolute_frobenius": 0.10708804133037682,
+        "max_abs": 0.01172228240816518,
+        "unit": "Hartree^2"
+      },
+      "query_fock_TR_sewing": {
+        "relative_frobenius": 3.909358569272582e-14,
+        "absolute_frobenius": 2.4824728788347453e-13,
+        "max_abs": 7.271836865469013e-14,
+        "unit": "Hartree"
+      },
+      "query_residues_TR_sewing": {
+        "relative_frobenius": 0.6132979492454795,
+        "absolute_frobenius": 0.10624391928844773,
+        "max_abs": 0.014685422954731384,
+        "unit": "Hartree^2"
+      },
+      "query_sigma_retarded_TR_sewing": {
+        "relative_frobenius": 0.34357495450926706,
+        "absolute_frobenius": 5.927003862257855,
+        "max_abs": 0.46502203070726383,
+        "unit": "Hartree"
+      }
+    }
+  ],
+  "seconds": 2.6940914769947995
+}

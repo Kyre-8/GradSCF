@@ -1,0 +1,799 @@
+{
+  "date": "2026-10-18",
+  "remote": "jy_gpu_1",
+  "backend": "JAX CPU float64",
+  "jax_version": "0.10.0",
+  "hardware": "Intel Xeon Platinum 8457C",
+  "unique_passed_cases": 434,
+  "unique_group_counts": {
+    "qp_contour": 104,
+    "outer": 69,
+    "scgw": 50,
+    "query": 100,
+    "molecular_derivatives": 38,
+    "unrestricted_reference": 2,
+    "restricted_reference": 3,
+    "invariants": 23,
+    "streaming": 15,
+    "reduced_interaction": 13,
+    "gamma_contract": 13,
+    "hf_source": 4
+  },
+  "groups": [
+    {
+      "case": "final/common",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/test_qp_selection.py",
+          "tests/gw/test_gw_qp.py",
+          "tests/gw/test_qp_jvp.py",
+          "tests/gw/test_qp_methods.py",
+          "tests/gw/test_qp_branch_seeds.py",
+          "tests/gw/test_molecular_controls.py",
+          "tests/gw/test_contour_pole_limit.py",
+          "tests/gw/test_g0w0_occupation_labels.py"
+        ],
+        "return_code": 1,
+        "peak_rss_kib": 4634044,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": false,
+        "elapsed_seconds": 183.42209043898038,
+        "allowed_cpu_ids": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ]
+      },
+      "pytest_summary": [
+        "100",
+        "",
+        "177.20"
+      ],
+      "log_sha256": "c0cfcbf1295b8d9c88bf3a72c18cfe7f7b229d394c58a795d9824bf1ea43bceb"
+    },
+    {
+      "case": "final/outer",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/test_gw_outer_response.py",
+          "tests/gw/test_outer_spectrum_validity.py",
+          "tests/gw/test_gw_evgw.py",
+          "tests/gw/test_gw_qsgw.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 4872312,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 402.8597526609956,
+        "allowed_cpu_ids": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      "pytest_summary": [
+        "69",
+        "",
+        "392.13"
+      ],
+      "log_sha256": "4235cf96e4fc29e2e4655b3a314c122c61227b188874208a7169d69e9dc78295"
+    },
+    {
+      "case": "phase4/scgw",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/test_gw_scgw_response.py",
+          "tests/gw/test_gw_scgw.py",
+          "tests/gw/test_gw_matsubara.py",
+          "tests/gw/test_scgw_ep.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 3508000,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 472.33481264900183,
+        "allowed_cpu_ids": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      "pytest_summary": [
+        "50",
+        "",
+        "465.68"
+      ],
+      "log_sha256": "2773c2cdf8db6e37fb99b4f0d59bc77a377d32dcc2bbc237500d477597f4c1cf"
+    },
+    {
+      "case": "final/query_final",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_query.py",
+          "tests/gw/pbc/test_query_reduced.py",
+          "tests/gw/pbc/test_query_retry.py",
+          "tests/gw/pbc/test_query_subspace.py",
+          "tests/gw/pbc/test_query_touching.py",
+          "tests/gw/pbc/test_query_qcell.py",
+          "tests/gw/pbc/test_full_response.py",
+          "tests/pbc/test_momentum_wrap.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 5416128,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 186.1758794549969,
+        "allowed_cpu_ids": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      "pytest_summary": [
+        "100",
+        "",
+        "177.53"
+      ],
+      "log_sha256": "c5eb751a95a6879ca6a8257e322797c9daffa03b0d9625d828c302c80589c23c"
+    },
+    {
+      "case": "final/molecular_derivatives",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/test_gw_differentiability.py",
+          "tests/gw/test_transition_screening.py",
+          "tests/gw/test_gw_poles.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 4102820,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 95.59133357700193,
+        "allowed_cpu_ids": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      "pytest_summary": [
+        "38",
+        "",
+        "90.69"
+      ],
+      "log_sha256": "c5c6c9da5d693124a47e012d186b0982cbbf7ac1a207eb012c846e24b1d8eb38"
+    },
+    {
+      "case": "final/unrestricted_reference",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/test_gw_cd_ugw.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 2749528,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 55.870775789022446,
+        "allowed_cpu_ids": [
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63
+        ]
+      },
+      "pytest_summary": [
+        "2",
+        "",
+        "53.24"
+      ],
+      "log_sha256": "bbf240ff04b191ab058153dfa308a6dcd3c34350cf3c450506baa92f3f1f0faf"
+    },
+    {
+      "case": "final/restricted_reference",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/test_gw_cd_rgw.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 1873060,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 125.51067465599044,
+        "allowed_cpu_ids": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      "pytest_summary": [
+        "3",
+        "",
+        "124.17"
+      ],
+      "log_sha256": "7ab71301d90fbcbf99a78dfbe799361543feb5486e52e49f15e1981051999937"
+    },
+    {
+      "case": "final/invariants",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_kpoint_invariants.py",
+          "tests/gw/pbc/test_kpoint_residue_mask.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 5527552,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 215.25961542601,
+        "allowed_cpu_ids": [
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63
+        ]
+      },
+      "pytest_summary": [
+        "23",
+        "",
+        "206.61"
+      ],
+      "log_sha256": "a1217cb571554c5b6e5c7dd769a25b5e491e84069e5ee33592a82c81335e7cec"
+    },
+    {
+      "case": "final/streaming_body",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_kpoint_streaming.py",
+          "-k",
+          "not head_wing and not small_real_periodic"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 2148020,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 46.54421843599994,
+        "allowed_cpu_ids": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      "pytest_summary": [
+        "10",
+        "5",
+        "43.76"
+      ],
+      "log_sha256": "9ab1708db9c9a3310a02c6a8c396b918afb2ff93d28117cb99199a9198597855"
+    },
+    {
+      "case": "final/streaming_head",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_kpoint_streaming.py",
+          "-k",
+          "head_wing"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 2615580,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 65.56241683699773,
+        "allowed_cpu_ids": [
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79
+        ]
+      },
+      "pytest_summary": [
+        "3",
+        "12",
+        "61.92"
+      ],
+      "log_sha256": "b9fb2b8fcfc8afbb3d2cce6eb42a9f246deb2a9a7b438e2ffa43f2f6dcbcaee9"
+    },
+    {
+      "case": "final/native_full",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_kpoint_streaming.py",
+          "-k",
+          "small_real_periodic"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 3349128,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 96.08313192499918,
+        "allowed_cpu_ids": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ]
+      },
+      "pytest_summary": [
+        "2",
+        "13",
+        "91.12"
+      ],
+      "log_sha256": "dfe86d9d2eaa7538314fa402e24d18fa7ff59b9c86f6996a5b1e16fa51ba29b8"
+    },
+    {
+      "case": "final/reduced_interaction",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_reduced_interaction.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 1131440,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 8.755758638988482,
+        "allowed_cpu_ids": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ]
+      },
+      "pytest_summary": [
+        "13",
+        "",
+        "7.77"
+      ],
+      "log_sha256": "5791e6b74e1d4f1b161746ce9ac1dc32f5544f65e0bf4734a6a2cc001e2ad7db"
+    },
+    {
+      "case": "final/gamma",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_legacy_driver_contract.py",
+          "-k",
+          "not preserves_empty_and_full_spin_contours and not real_spectrum_response"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 3771208,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 286.2453505420126,
+        "allowed_cpu_ids": [
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79
+        ]
+      },
+      "pytest_summary": [
+        "8",
+        "3",
+        "283.72"
+      ],
+      "log_sha256": "c0e6ce7597f62fb23c9619753184c65c0f74516401fd42987dfe405984c23a50"
+    },
+    {
+      "case": "final/gamma_remaining",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_legacy_driver_contract.py",
+          "-k",
+          "preserves_empty_and_full_spin_contours or real_spectrum_response"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 4151292,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 556.7000755780027,
+        "allowed_cpu_ids": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ]
+      },
+      "pytest_summary": [
+        "3",
+        "8",
+        "554.19"
+      ],
+      "log_sha256": "9071d7364c9fd567ef880c05f5772b659649d087d4a441930dc564104b8b2b67"
+    },
+    {
+      "case": "final/kpoint_static",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_legacy_driver_contract.py",
+          "-k",
+          "single_k_endpoint or kpoint_result"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 2337648,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 47.43675921601243,
+        "allowed_cpu_ids": [
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95
+        ]
+      },
+      "pytest_summary": [
+        "3",
+        "10",
+        "45.33"
+      ],
+      "log_sha256": "4d29d2692e6ed2af464ae354418f068384a5d1dcca73c9aa562068f2d82add17"
+    },
+    {
+      "case": "final/contour",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/test_contour_pole_limit.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 1982248,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 23.51459027599776,
+        "allowed_cpu_ids": [
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95
+        ]
+      },
+      "pytest_summary": [
+        "18",
+        "",
+        "21.64"
+      ],
+      "log_sha256": "0803c5bacee4db423e7a174cef77598c04c681715f6ef4959cc4be92a15a2b22"
+    },
+    {
+      "case": "final/hf_source",
+      "resource": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_query_hf.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 2318776,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 37.28104558700579,
+        "allowed_cpu_ids": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ]
+      },
+      "pytest_summary": [
+        "4",
+        "",
+        "34.97"
+      ],
+      "log_sha256": "2d90f601fd0f040b64947956a56aa0c20831ba650a7ba681cbea5003ccd8a03f"
+    }
+  ],
+  "notes": [
+    "QP/contour union: final/common had 100 passes and four underresolved tests; final/contour passed all18 after320-node correction with identical production and tolerance.",
+    "Gamma contract union excludes negative-weight case repeated in kpoint_static.",
+    "scGW production file hashes were checked byte-identical against the phase4 upload archive.",
+    "Only scGW first-order zero-interaction degeneracy support; no interacting or fourth-order claim.",
+    "Default dense water group stopped at600s without final result; cached array-driver matched-branch reference is validated.",
+    "Combined periodic allocation/materialization errors were followed by passing independent-process groups.",
+    "Source snapshots and completed diagnostics are explicit; no full-suite, GPU or bulk-convergence claim."
+  ]
+}

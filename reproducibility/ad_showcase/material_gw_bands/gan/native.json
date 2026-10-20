@@ -1,0 +1,452 @@
+{
+  "complete": true,
+  "passed": true,
+  "stage": "complete",
+  "material": "gan",
+  "case": "gan_szv_qp_stable_path_20261017",
+  "calculate_gw": true,
+  "system": "gan",
+  "scf_converged": true,
+  "scf_energy_hartree": -168.25241149244937,
+  "scf_seconds": 17.688179312999637,
+  "checkpoint": "reproducibility/ad_showcase/material_gw_bands/gan_szv_reference_20261017/scf_reference.npz",
+  "checkpoint_sha256": "bc6ad3d3e52bd16c2d13f14cf023f1cd3f24bdc31eaa6ab9a4eaeb0e21e61c02",
+  "xc": "pbe",
+  "basis": "gth-szv",
+  "pseudo": "gth-pbe",
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "mesh": [
+    21,
+    21,
+    33
+  ],
+  "electrostatic_dimension": 3,
+  "exxdiv": "ewald",
+  "temperature_hartree": null,
+  "lattice_bohr": [
+    [
+      6.026336611237983,
+      0.0,
+      0.0
+    ],
+    [
+      -3.0131683056189913,
+      5.218960597088318,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      9.798229955869845
+    ]
+  ],
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      -2.8358202582887406e-17,
+      3.4793070647255457,
+      1.2051822845719908
+    ],
+    [
+      -2.8358202582887406e-17,
+      3.4793070647255457,
+      4.899114977934922
+    ],
+    [
+      0.0,
+      0.0,
+      6.104297262506913
+    ]
+  ],
+  "nocc": 18,
+  "nmo": 28,
+  "output_bands": [
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "query_fractional": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.16666666666666666,
+      0.0,
+      0.0
+    ],
+    [
+      0.3333333333333333,
+      0.0,
+      0.0
+    ],
+    [
+      -0.5,
+      0.0,
+      0.0
+    ],
+    [
+      0.3333333333333333,
+      0.3333333333333333,
+      0.0
+    ],
+    [
+      0.25,
+      0.25,
+      0.0
+    ],
+    [
+      0.16666666666666666,
+      0.16666666666666666,
+      0.0
+    ],
+    [
+      0.08333333333333331,
+      0.08333333333333331,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      -0.5
+    ],
+    [
+      0.125,
+      0.0,
+      -0.5
+    ],
+    [
+      0.25,
+      0.0,
+      -0.5
+    ],
+    [
+      0.375,
+      0.0,
+      -0.5
+    ],
+    [
+      -0.5,
+      0.0,
+      -0.5
+    ],
+    [
+      0.41666666666666663,
+      0.16666666666666666,
+      -0.5
+    ],
+    [
+      0.3333333333333333,
+      0.3333333333333333,
+      -0.5
+    ],
+    [
+      0.2777777777777778,
+      0.2777777777777778,
+      -0.5
+    ],
+    [
+      0.2222222222222222,
+      0.2222222222222222,
+      -0.5
+    ],
+    [
+      0.16666666666666666,
+      0.16666666666666666,
+      -0.5
+    ],
+    [
+      0.1111111111111111,
+      0.1111111111111111,
+      -0.5
+    ],
+    [
+      0.05555555555555558,
+      0.05555555555555558,
+      -0.5
+    ],
+    [
+      0.0,
+      0.0,
+      -0.5
+    ]
+  ],
+  "path_fractional": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.16666666666666666,
+      0.0,
+      0.0
+    ],
+    [
+      0.3333333333333333,
+      0.0,
+      0.0
+    ],
+    [
+      0.5,
+      0.0,
+      0.0
+    ],
+    [
+      0.3333333333333333,
+      0.3333333333333333,
+      0.0
+    ],
+    [
+      0.25,
+      0.25,
+      0.0
+    ],
+    [
+      0.16666666666666666,
+      0.16666666666666666,
+      0.0
+    ],
+    [
+      0.08333333333333331,
+      0.08333333333333331,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5
+    ],
+    [
+      0.125,
+      0.0,
+      0.5
+    ],
+    [
+      0.25,
+      0.0,
+      0.5
+    ],
+    [
+      0.375,
+      0.0,
+      0.5
+    ],
+    [
+      0.5,
+      0.0,
+      0.5
+    ],
+    [
+      0.41666666666666663,
+      0.16666666666666666,
+      0.5
+    ],
+    [
+      0.3333333333333333,
+      0.3333333333333333,
+      0.5
+    ],
+    [
+      0.2777777777777778,
+      0.2777777777777778,
+      0.5
+    ],
+    [
+      0.2222222222222222,
+      0.2222222222222222,
+      0.5
+    ],
+    [
+      0.16666666666666666,
+      0.16666666666666666,
+      0.5
+    ],
+    [
+      0.1111111111111111,
+      0.1111111111111111,
+      0.5
+    ],
+    [
+      0.05555555555555558,
+      0.05555555555555558,
+      0.5
+    ],
+    [
+      0.0,
+      0.0,
+      0.5
+    ]
+  ],
+  "path": "GMKGALHA",
+  "point_count": 22,
+  "tick_labels": [
+    "G",
+    "M",
+    "K",
+    "G",
+    "A",
+    "L",
+    "H",
+    "A"
+  ],
+  "tick_positions": [
+    0.0,
+    1.1375348787922344,
+    1.1375348787922344,
+    2.451047015758804,
+    2.451047015758804,
+    3.588581894551038,
+    4.245337963034323,
+    5.5588501000008925
+  ],
+  "energy_zero_hartree": 0.4343572919792187,
+  "completed_point_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+  ],
+  "full_internal_bands": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27
+  ],
+  "full_screening_occupied": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "full_screening_virtual": [
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27
+  ],
+  "lehmann_channels": "OV+VO",
+  "screening_rank": 720,
+  "nw": 16,
+  "eta_hartree": 0.001,
+  "fc": false,
+  "solver": "direct",
+  "maxiter": 80,
+  "pole_subtraction": true,
+  "imaginary_green_eta_hartree": 0.0,
+  "root_tolerance_hartree": 1e-09,
+  "degenerate_subspace_method": "projected nonlinear Dyson equation",
+  "boundary": "3D periodic body only",
+  "band_touching": false,
+  "gap_tolerance_hartree": 1e-07,
+  "max_query_array_bytes": 2147483648,
+  "query_chunk_size": 1,
+  "source_sha256": {
+    "examples/pbc/band_structures/gw_bands.py": "456d30beab6452012ef5013e27425ca8c5e5d0ba662d9a06f7509dbd497bb855",
+    "examples/pbc/band_structures/systems.py": "9d5fd37d3a8323378ff63da03c77604e32b171e95af1a6824c5376a68ef98870",
+    "src/gradscf/gw/pbc/query.py": "d294e39a98ebc8b0185ea8d9c5b4d3ae4341bc08813b8dea9fec8962be04dd6e",
+    "src/gradscf/gw/pbc/product_basis.py": "3c8819a167dfed28a5f176248958cf6f04f8918cf2b0b5305adfb1bf497ab189",
+    "src/gradscf/gw/screened.py": "308493c8837febc20df005ffd8dcd5131fd4c9de12f80fde59c493ca90ab13e2",
+    "src/gradscf/gw/self_energy.py": "98564a4e79e6a15d94177925a2b769dd156c93aff95d5135c7ac5d3a66b0b871",
+    "src/gradscf/pbc/scf.py": "e5372ab2e02795728ff6b9e5afdbaaab598c5ac1babe3be1d1cf03f5782f2c99",
+    "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+    "src/gradscf/pbc/bands.py": "6c302a0e8bdd34b048eca8857520e7c6d7ade0925d31cb8ad4e31fcb82a09193",
+    "src/gradscf/solvers/nonlinear/scalar.py": "f20e5f681cbde7ab0f159d7daadc29cc45931f0649a79f14927362b37d44464b"
+  },
+  "scope": "Native compact finite model; direct QP points; no material convergence or GW AD claim",
+  "current_query": 21,
+  "method": "periodic_query_full_cd_subtracted",
+  "computed_count": 132,
+  "accepted_count": 132,
+  "max_computed_residual_hartree": 1.505323643513634e-13,
+  "gw_seconds": 1523.1079414590004,
+  "elapsed_seconds": 1553.8967768809998,
+  "peak_rss_kib": 6472548,
+  "backend": "cpu",
+  "dtype": "float64/complex128",
+  "hostname": "c20"
+}

@@ -1,0 +1,13 @@
+....................................................................     [100%]
+============================= slowest 10 durations =============================
+8.83s call     tests/gw/test_g0w0_occupation_labels.py::test_fixed_gw_self_energy_is_covariant_under_occupied_orbital_permutation
+4.91s call     tests/test_green_factors.py::test_pair_adjoint_storage_preserves_all_cross_k_coulomb_contractions[partners0]
+4.57s call     tests/gw/test_qp_selection.py::test_noniterative_qp_modes_do_not_certify_a_negative_weight[linearized]
+4.03s call     tests/solvers/test_shifted.py::test_degenerate_shifted_solve_response[0.2]
+2.03s call     tests/gw/test_outer_spectrum_validity.py::test_qsgw_records_the_final_screening_spectrum[configuration1]
+1.86s call     tests/solvers/test_shifted.py::test_cached_refinement_preserves_original_equation_and_response[False]
+1.83s call     tests/solvers/test_shifted.py::test_general_shifted_equation_forward_jvp_and_nonconjugating_vjp[real_general]
+1.62s call     tests/solvers/test_poles.py::test_known_feasible_14_orbital_noncommuting_six_pole_measure
+1.55s call     tests/solvers/test_eager_nonlinear.py::test_eager_diis_converges_stiff_linear_map_to_independent_root
+1.41s call     tests/solvers/test_shifted.py::test_degenerate_shifted_solve_response[(0.2+0.1j)]
+68 passed in 56.86s

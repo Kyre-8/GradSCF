@@ -36,7 +36,7 @@ from gradscf.tools.features import restricted_grid_features_with_gradients
 from gradscf.tddft.casida import _restricted_delta_eps
 from gradscf.tddft.response import gen_tdhf_vind
 from gradscf.tddft.types import TDDFTResult
-from gradscf.dft.libxc_jax.jax_libxc import eval_xc_response_tensor, hybrid_coeff, xc_type
+from gradscf.dft.xc import eval_xc_response_tensor, hybrid_coeff, xc_type
 
 
 HARTREE_TO_EV = 27.211386245988

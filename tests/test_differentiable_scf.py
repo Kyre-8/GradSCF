@@ -9,7 +9,7 @@ import gradscf.model.neural_xc.training.targets as training_targets
 import gradscf.model.neural_xc.training.trainer as training_trainer
 import gradscf.scf.differentiable as scf_differentiable
 import gradscf.scf.rks as scf_rks
-from gradscf.dft.libxc_jax.jax_libxc import b3lyp_component_basis
+from gradscf.dft.xc import b3lyp_component_basis
 from gradscf.model.neural_xc import make_neural_xc_functional
 from gradscf.dft.hfx import ChunkedHFXNu
 from pyscf_reference import restricted_reference_from_pyscf

@@ -7,11 +7,11 @@ import optax
 import pytest
 from flax import linen as nn
 
-from gradscf.dft.libxc_jax.jax_libxc import (
+from gradscf.dft.xc import (
     RestrictedFeatureBundle,
     b3lyp_component_basis,
 )
-from gradscf.dft.libxc_jax import jax_xc_adapter
+from gradscf.dft.xc import _jax_xc as jax_xc_adapter
 from gradscf.model.neural_xc import (
     ResidualMixingMLP,
     available_semilocal_components,
@@ -984,13 +984,13 @@ def test_semilocal_xc_alias_expands_to_component_channels_for_neural_basis():
 
 
 def test_neural_xc_rejects_experimental_jax_xc_semilocal_by_default(monkeypatch):
-    import gradscf.dft.libxc_jax.jax_xc_adapter as jax_xc_adapter
+    import gradscf.dft.xc._jax_xc as jax_xc_adapter
 
     class FakeModule:
         __version__ = "fake"
 
         @staticmethod
-        def hyb_gga_xc_b97(*, polarized=False):
+        def gga_x_rpbe(*, polarized=False):
             del polarized
             return lambda rho_fn, r, mo_fn=None: rho_fn(r)
 
@@ -1002,13 +1002,13 @@ def test_neural_xc_rejects_experimental_jax_xc_semilocal_by_default(monkeypatch)
 
     with pytest.raises(ValueError, match="allow_experimental_jax_xc=True"):
         make_neural_xc_functional(
-            semilocal_xc="hyb_gga_xc_b97",
+            semilocal_xc="gga_x_rpbe",
             hidden_dims=(8,),
         )
 
 
 def test_neural_xc_accepts_experimental_jax_xc_with_explicit_opt_in(monkeypatch):
-    import gradscf.dft.libxc_jax.jax_xc_adapter as jax_xc_adapter
+    import gradscf.dft.xc._jax_xc as jax_xc_adapter
 
     class FakeModule:
         __version__ = "fake"
@@ -1035,7 +1035,7 @@ def test_neural_xc_accepts_experimental_jax_xc_with_explicit_opt_in(monkeypatch)
 
 
 def test_neural_xc_accepts_dynamic_mgga_with_explicit_opt_in(monkeypatch):
-    import gradscf.dft.libxc_jax.jax_xc_adapter as jax_xc_adapter
+    import gradscf.dft.xc._jax_xc as jax_xc_adapter
 
     class FakeModule:
         __version__ = "fake"
@@ -3257,7 +3257,7 @@ def test_strict_response_mode_matches_pyscf_b3lyp_tolerance():
             name=f"b3lyp_like_{mode}",
         )
         params = functional.init_from_molecule(jax.random.PRNGKey(30), reference)
-        bound = functional.bind_to_molecule(params, reference)
+        bound = functional.bind_to_molecule_for_response(params, reference)
         solver = RestrictedCasidaTDDFT(molecule=reference, xc_functional=bound)
         result = solver.kernel(nstates=6)
         pred_energies = jnp.asarray(result.excitation_energies)

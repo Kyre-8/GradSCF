@@ -1,0 +1,8 @@
+{
+  "baseline_sha256": "fcccebf7933e5ef5def9e4fb0789c31b857e107addfdf2baf7af6566a111da76",
+  "final_sha256": "f021849276aea5af49a27b9ff1bfc74c9950feda2da0028899d66eae370f3b3a",
+  "baseline_decorator": "@partial(jax.jit, static_argnames=('k', 'nk', 'linear_config'))",
+  "final_decorator": "@partial(jax.jit, static_argnames=('nk', 'linear_config'))",
+  "text_sha_reconstruction_matches": true,
+  "scope": "The whole source.py snapshots differ only by static versus dynamic JIT specialization of k; no physics formula, parameter, data or comment changed. Other source fingerprints remain recorded separately."
+}

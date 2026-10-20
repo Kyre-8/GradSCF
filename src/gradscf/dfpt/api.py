@@ -10,9 +10,12 @@ from .ofdft import ofdft_problem
 def _molecular(mf, tolerance):
     from ..scf.facade import RKS
     from ..scf.rks import _make_jk_builder, _energy_and_raw_fock_for_density
-    from ..dft.libxc_jax.jax_libxc import hybrid_coeff, xc_type
+    from ..dft.xc import hybrid_coeff, xc_type
     if not isinstance(mf, RKS):
         raise NotImplementedError('Molecular facade currently supports RHF/RKS; use ks_problem for custom spin builders')
+    if mf._is_external_xc():
+        raise NotImplementedError('For an external Functional use DFPT(mf.to_reference(), '
+                                  'functional=mf.xc, params=mf.params).')
     mf.to_reference()  # validates a converged, current source and completes arrays
     data, cfg = mf._scf_inputs, mf._config()
     if xc_type(cfg.xc_spec) not in ('HF', 'LDA', 'GGA'):

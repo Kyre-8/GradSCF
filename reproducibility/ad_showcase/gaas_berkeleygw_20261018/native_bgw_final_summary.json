@@ -1,0 +1,346 @@
+{
+  "scope": "Same-orbital diagonal finite-body G0 comparison at Gamma; not a complete or bulk gap",
+  "units": "eV unless named otherwise",
+  "preservation": {
+    "bgw_screen8_ep01_nw256_schur": {
+      "WFN": true,
+      "WFNq": true,
+      "vxc.dat": true,
+      "sigma.inp": true,
+      "original_eps0_unchanged": true,
+      "nonzero_q_epsmat_unchanged": true,
+      "epsilon_input_unchanged": true
+    },
+    "bgw_screen8_ep01_nw256_real005": {
+      "WFN": true,
+      "WFNq": true,
+      "vxc.dat": true,
+      "sigma.inp": true
+    },
+    "bgw_screen8_ep01_nw256_real005_schur": {
+      "WFN": true,
+      "WFNq": true,
+      "vxc.dat": true,
+      "sigma.inp": true,
+      "original_eps0_unchanged": true,
+      "nonzero_q_epsmat_unchanged": true,
+      "epsilon_input_unchanged": true
+    }
+  },
+  "installed_bgw_hartree_to_ev": 27.21138506,
+  "reporting_hartree_to_ev": 27.211386245988,
+  "cases": {
+    "native_bgw_screen8_ep01_bgw256_native128": {
+      "rows": [
+        {
+          "band": 6,
+          "delta_exchange_ev": 0.009420170438375541,
+          "delta_correlation_on_shell_ev": -0.04534876843373753,
+          "native_root_ev": 12.445005924927194,
+          "bgw_table_root_ev": 12.477889678898462,
+          "bgw_minus_native_root_ev": 0.032883753971268005,
+          "bgw_physical_minus_actual_vxc_root_ev": -2.8470381970907625e-07,
+          "native_candidates": 2,
+          "bgw_candidates": 2,
+          "bgw_original_flag": "MULT:4",
+          "native_residual_at_bgw_root_ev": 0.039236319141899574,
+          "bgw_residual_at_native_root_ev": -0.0654282355025749
+        },
+        {
+          "band": 7,
+          "delta_exchange_ev": 0.009098155039729335,
+          "delta_correlation_on_shell_ev": -0.026552754846107106,
+          "native_root_ev": 12.931840339369204,
+          "bgw_table_root_ev": 12.920849744740272,
+          "bgw_minus_native_root_ev": -0.010990594628931904,
+          "bgw_physical_minus_actual_vxc_root_ev": -4.325875518002633e-07,
+          "native_candidates": 1,
+          "bgw_candidates": 1,
+          "bgw_original_flag": "unique",
+          "native_residual_at_bgw_root_ev": -0.014081361583903313,
+          "bgw_residual_at_native_root_ev": 0.013915191859690043
+        },
+        {
+          "band": 8,
+          "delta_exchange_ev": 0.010078830422095758,
+          "delta_correlation_on_shell_ev": -0.03368323190171058,
+          "native_root_ev": 12.60438417160896,
+          "bgw_table_root_ev": 12.60475880260407,
+          "bgw_minus_native_root_ev": 0.0003746309951108194,
+          "bgw_physical_minus_actual_vxc_root_ev": -3.374122221304349e-07,
+          "native_candidates": 1,
+          "bgw_candidates": 1,
+          "bgw_original_flag": "MULT:3",
+          "native_residual_at_bgw_root_ev": 0.0005786002010266377,
+          "bgw_residual_at_native_root_ev": -0.0006188904039225481
+        },
+        {
+          "band": 9,
+          "delta_exchange_ev": 0.00047210564926826215,
+          "delta_correlation_on_shell_ev": 0.10834018243097808,
+          "native_root_ev": 13.242400247078393,
+          "bgw_table_root_ev": 13.227362967157799,
+          "bgw_minus_native_root_ev": -0.015037279920594586,
+          "bgw_physical_minus_actual_vxc_root_ev": -4.299891681184729e-07,
+          "native_candidates": 1,
+          "bgw_candidates": 1,
+          "bgw_original_flag": "MULT:4",
+          "native_residual_at_bgw_root_ev": -0.018735469478536944,
+          "bgw_residual_at_native_root_ev": 0.01886577138837768
+        },
+        {
+          "band": 10,
+          "delta_exchange_ev": 0.002367695787987634,
+          "delta_correlation_on_shell_ev": 0.018847657204959192,
+          "native_root_ev": 16.66412410166237,
+          "bgw_table_root_ev": 16.668469519428715,
+          "bgw_minus_native_root_ev": 0.004345417766346048,
+          "bgw_physical_minus_actual_vxc_root_ev": -2.396017408372018e-07,
+          "native_candidates": 2,
+          "bgw_candidates": 2,
+          "bgw_original_flag": "MULT:3",
+          "native_residual_at_bgw_root_ev": 0.00795238478326341,
+          "bgw_residual_at_native_root_ev": -0.008480517312801325
+        },
+        {
+          "band": 11,
+          "delta_exchange_ev": 0.00223022102559508,
+          "delta_correlation_on_shell_ev": 0.019218627445604975,
+          "native_root_ev": 16.703394478456946,
+          "bgw_table_root_ev": 16.704259135864916,
+          "bgw_minus_native_root_ev": 0.0008646574079705895,
+          "bgw_physical_minus_actual_vxc_root_ev": -2.6221806561213784e-07,
+          "native_candidates": 2,
+          "bgw_candidates": 2,
+          "bgw_original_flag": "MULT:6",
+          "native_residual_at_bgw_root_ev": 0.0014046998625366436,
+          "bgw_residual_at_native_root_ev": -0.00157194716768771
+        }
+      ],
+      "local_window_6_to11": {
+        "native": {
+          "occupied_band": 7,
+          "empty_band": 9,
+          "window_gamma_gap_ev": 0.3105599077091892
+        },
+        "bgw": {
+          "occupied_band": 7,
+          "empty_band": 9,
+          "window_gamma_gap_ev": 0.3065132224175269
+        }
+      },
+      "reference_error_hartree": 1.836530927334934e-11,
+      "max_correlation_on_shell_difference_ev": 0.10834018243097808,
+      "max_selected_root_difference_ev": 0.032883753971268005,
+      "max_known_vxc_unit_root_difference_ev": 4.325875518002633e-07
+    },
+    "native_bgw_screen8_schur_native128": {
+      "rows": [
+        {
+          "band": 6,
+          "delta_exchange_ev": 0.009420170438375541,
+          "delta_correlation_on_shell_ev": -0.00636874724262238,
+          "native_root_ev": 12.445005924927194,
+          "bgw_table_root_ev": 12.495775458791641,
+          "bgw_minus_native_root_ev": 0.050769533864446374,
+          "bgw_physical_minus_actual_vxc_root_ev": -2.6787343000567473e-07,
+          "native_candidates": 2,
+          "bgw_candidates": 1,
+          "bgw_original_flag": "MULT:3",
+          "native_residual_at_bgw_root_ev": 0.05548577639382487,
+          "bgw_residual_at_native_root_ev": -0.10998669702757807
+        },
+        {
+          "band": 7,
+          "delta_exchange_ev": 0.009098155039729335,
+          "delta_correlation_on_shell_ev": -0.00520297741859299,
+          "native_root_ev": 12.931840339369204,
+          "bgw_table_root_ev": 12.927122692089192,
+          "bgw_minus_native_root_ev": -0.004717647280011534,
+          "bgw_physical_minus_actual_vxc_root_ev": -4.3071649845522985e-07,
+          "native_candidates": 1,
+          "bgw_candidates": 1,
+          "bgw_original_flag": "unique",
+          "native_residual_at_bgw_root_ev": -0.0060397575128642,
+          "bgw_residual_at_native_root_ev": 0.005998960281262376
+        },
+        {
+          "band": 8,
+          "delta_exchange_ev": 0.010078830422095758,
+          "delta_correlation_on_shell_ev": -0.005611190366211322,
+          "native_root_ev": 12.60438417160896,
+          "bgw_table_root_ev": 12.608823044175132,
+          "bgw_minus_native_root_ev": 0.004438872566172264,
+          "bgw_physical_minus_actual_vxc_root_ev": -3.3617091249465533e-07,
+          "native_candidates": 1,
+          "bgw_candidates": 1,
+          "bgw_original_flag": "MULT:3",
+          "native_residual_at_bgw_root_ev": 0.006844417230076847,
+          "bgw_residual_at_native_root_ev": -0.00736009460197068
+        },
+        {
+          "band": 9,
+          "delta_exchange_ev": 0.00047210564926826215,
+          "delta_correlation_on_shell_ev": 0.013070446520117275,
+          "native_root_ev": 13.242400247078393,
+          "bgw_table_root_ev": 13.23673076279044,
+          "bgw_minus_native_root_ev": -0.0056694842879535965,
+          "bgw_physical_minus_actual_vxc_root_ev": -4.297836280591738e-07,
+          "native_candidates": 1,
+          "bgw_candidates": 1,
+          "bgw_original_flag": "MULT:4",
+          "native_residual_at_bgw_root_ev": -0.007065805705666243,
+          "bgw_residual_at_native_root_ev": 0.007116336678238314
+        },
+        {
+          "band": 10,
+          "delta_exchange_ev": 0.002367695787987634,
+          "delta_correlation_on_shell_ev": 0.01996764578597306,
+          "native_root_ev": 16.66412410166237,
+          "bgw_table_root_ev": 16.670956130079013,
+          "bgw_minus_native_root_ev": 0.006832028416641581,
+          "bgw_physical_minus_actual_vxc_root_ev": -2.379799243188567e-07,
+          "native_candidates": 2,
+          "bgw_candidates": 1,
+          "bgw_original_flag": "MULT:3",
+          "native_residual_at_bgw_root_ev": 0.012482528843001089,
+          "bgw_residual_at_native_root_ev": -0.013424252635863675
+        },
+        {
+          "band": 11,
+          "delta_exchange_ev": 0.00223022102559508,
+          "delta_correlation_on_shell_ev": 0.019088731814543566,
+          "native_root_ev": 16.703394478456946,
+          "bgw_table_root_ev": 16.707564711148017,
+          "bgw_minus_native_root_ev": 0.004170232691070609,
+          "bgw_physical_minus_actual_vxc_root_ev": -2.6051283128812704e-07,
+          "native_candidates": 2,
+          "bgw_candidates": 2,
+          "bgw_original_flag": "MULT:6",
+          "native_residual_at_bgw_root_ev": 0.006765792741766834,
+          "bgw_residual_at_native_root_ev": -0.007631108801392134
+        }
+      ],
+      "local_window_6_to11": {
+        "native": {
+          "occupied_band": 7,
+          "empty_band": 9,
+          "window_gamma_gap_ev": 0.3105599077091892
+        },
+        "bgw": {
+          "occupied_band": 7,
+          "empty_band": 9,
+          "window_gamma_gap_ev": 0.3096080707012483
+        }
+      },
+      "reference_error_hartree": 1.836530927334934e-11,
+      "max_correlation_on_shell_difference_ev": 0.01996764578597306,
+      "max_selected_root_difference_ev": 0.050769533864446374,
+      "max_known_vxc_unit_root_difference_ev": 4.3071649845522985e-07
+    },
+    "native_bgw_screen8_real005_schur_native128": {
+      "rows": [
+        {
+          "band": 6,
+          "delta_exchange_ev": 0.009420170438375541,
+          "delta_correlation_on_shell_ev": -0.006228747569720444,
+          "native_root_ev": 12.445005924927194,
+          "bgw_table_root_ev": 12.459077826070747,
+          "bgw_minus_native_root_ev": 0.014071901143552506,
+          "bgw_physical_minus_actual_vxc_root_ev": -1.8279189046491485e-07,
+          "native_candidates": 2,
+          "bgw_candidates": 2,
+          "bgw_original_flag": "MULT:5",
+          "native_residual_at_bgw_root_ev": 0.020869513070485807,
+          "bgw_residual_at_native_root_ev": -0.04280250170834463
+        },
+        {
+          "band": 7,
+          "delta_exchange_ev": 0.009098155039729335,
+          "delta_correlation_on_shell_ev": -0.0050429061586163984,
+          "native_root_ev": 12.931840339369204,
+          "bgw_table_root_ev": 12.926197803398297,
+          "bgw_minus_native_root_ev": -0.0056425359709062544,
+          "bgw_physical_minus_actual_vxc_root_ev": -4.292985573861983e-07,
+          "native_candidates": 1,
+          "bgw_candidates": 1,
+          "bgw_original_flag": "MULT:2",
+          "native_residual_at_bgw_root_ev": -0.007224645259263777,
+          "bgw_residual_at_native_root_ev": 0.007198747391681551
+        },
+        {
+          "band": 8,
+          "delta_exchange_ev": 0.010078830422095758,
+          "delta_correlation_on_shell_ev": -0.005613727619322263,
+          "native_root_ev": 12.60438417160896,
+          "bgw_table_root_ev": 12.605065149237976,
+          "bgw_minus_native_root_ev": 0.000680977629016338,
+          "bgw_physical_minus_actual_vxc_root_ev": -3.414844019478963e-07,
+          "native_candidates": 1,
+          "bgw_candidates": 1,
+          "bgw_original_flag": "MULT:3",
+          "native_residual_at_bgw_root_ev": 0.0010516003052303557,
+          "bgw_residual_at_native_root_ev": -0.0011115597838432581
+        },
+        {
+          "band": 9,
+          "delta_exchange_ev": 0.00047210564926826215,
+          "delta_correlation_on_shell_ev": 0.013070387447714769,
+          "native_root_ev": 13.242400247078393,
+          "bgw_table_root_ev": 13.236998947243618,
+          "bgw_minus_native_root_ev": -0.005401299834775808,
+          "bgw_physical_minus_actual_vxc_root_ev": -4.3081329809380136e-07,
+          "native_candidates": 1,
+          "bgw_candidates": 1,
+          "bgw_original_flag": "MULT:4",
+          "native_residual_at_bgw_root_ev": -0.006731625856760743,
+          "bgw_residual_at_native_root_ev": 0.006763507653106046
+        },
+        {
+          "band": 10,
+          "delta_exchange_ev": 0.002367695787987634,
+          "delta_correlation_on_shell_ev": 0.016097859516711378,
+          "native_root_ev": 16.66412410166237,
+          "bgw_table_root_ev": 16.662510954811598,
+          "bgw_minus_native_root_ev": -0.0016131468507734992,
+          "bgw_physical_minus_actual_vxc_root_ev": -2.4003221320897154e-07,
+          "native_candidates": 2,
+          "bgw_candidates": 2,
+          "bgw_original_flag": "MULT:4",
+          "native_residual_at_bgw_root_ev": -0.002962582763721937,
+          "bgw_residual_at_native_root_ev": 0.003142571379991363
+        },
+        {
+          "band": 11,
+          "delta_exchange_ev": 0.00223022102559508,
+          "delta_correlation_on_shell_ev": 0.015238558302136598,
+          "native_root_ev": 16.703394478456946,
+          "bgw_table_root_ev": 16.704904228378354,
+          "bgw_minus_native_root_ev": 0.0015097499214083727,
+          "bgw_physical_minus_actual_vxc_root_ev": -2.8151201012010395e-07,
+          "native_candidates": 2,
+          "bgw_candidates": 2,
+          "bgw_original_flag": "MULT:4",
+          "native_residual_at_bgw_root_ev": 0.0024520574097463515,
+          "bgw_residual_at_native_root_ev": -0.0025566105169140636
+        }
+      ],
+      "local_window_6_to11": {
+        "native": {
+          "occupied_band": 7,
+          "empty_band": 9,
+          "window_gamma_gap_ev": 0.3105599077091892
+        },
+        "bgw": {
+          "occupied_band": 7,
+          "empty_band": 9,
+          "window_gamma_gap_ev": 0.3108011438453211
+        }
+      },
+      "reference_error_hartree": 1.836530927334934e-11,
+      "max_correlation_on_shell_difference_ev": 0.016097859516711378,
+      "max_selected_root_difference_ev": 0.014071901143552506,
+      "max_known_vxc_unit_root_difference_ev": 4.3081329809380136e-07
+    }
+  }
+}

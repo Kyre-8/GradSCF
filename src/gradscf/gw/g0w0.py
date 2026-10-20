@@ -36,6 +36,7 @@ from collections.abc import Sequence
 from math import isfinite
 from numbers import Integral
 
+import jax
 import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
@@ -43,7 +44,7 @@ from jaxtyping import Array
 from gradscf.integrals.molecular.jk import build_j_from_df, build_jk_from_df
 from .freq import scaled_legendre_grid
 from .polarizability import rho_response_iw
-from .qp import _df_dw_batch, sigma_cd_batch, solve_qp_batch
+from .qp import _df_dw_batch, qp_residual_batch, sigma_cd_batch, solve_qp_batch
 from .screened import screened_w_imag_axis
 from .poles import (
     rpa_resolvent,
@@ -143,7 +144,9 @@ def _qp_loop(
     evaluate_only: bool = False,
     g_orbitals=None,
     return_weight=False,
+    return_diagnostics=False,
     wmn_static=None,
+    del_w_static=None,
     resolvent_data=None,
     qp_initial=None,
     qp_tol=1e-6,
@@ -175,6 +178,8 @@ def _qp_loop(
     }
     if q0 is not None:
         shared["q0"] = q0
+    if del_w_static is not None:
+        shared["del_w_static"] = jnp.asarray(del_w_static)
     if resolvent_data is not None:
         shared["resolvent_data"] = resolvent_data
     stacked = {
@@ -217,7 +222,7 @@ def _qp_loop(
         zfac = 1.0 / _df_dw_batch(omega0, e_base, dv, shared, stacked)
         roots = omega0 + zfac * (e_base + jnp.real(sig0) + dv - omega0)
     else:
-        roots, done = solve_qp_batch(
+        roots, done, diagnostics = solve_qp_batch(
             e_mf[jnp.asarray(orbs)],
             delta_v[jnp.asarray(orbs)],
             shared,
@@ -227,6 +232,7 @@ def _qp_loop(
             method=qp_solver,
             tol=qp_tol,
             initial_guess=None if qp_initial is None else jnp.asarray(qp_initial)[jnp.asarray(orbs)],
+            return_diagnostics=True,
         )
 
     # Compute the same observables and status eagerly and under transforms.
@@ -236,8 +242,11 @@ def _qp_loop(
     residual = roots - e_base - jnp.real(sig_roots) - dv
     if linearized or evaluate_only:
         done = jnp.isfinite(roots) & (jnp.abs(residual) < qp_tol)
+        slope = _df_dw_batch(roots, e_base, dv, shared, stacked)
+        done &= jnp.isfinite(slope) & (slope > 1e-10)
         if linearized:
             done = done & jnp.isfinite(zfac)
+    done &= jnp.isfinite(sig_roots)
     qp_energy = e_mf.copy()
     sigma_qp = jnp.zeros_like(qp_energy, dtype=jnp.complex128)
     converged_mask = jnp.ones_like(qp_energy, dtype=bool)
@@ -246,13 +255,36 @@ def _qp_loop(
     converged_mask = converged_mask.at[jnp.asarray(orbs)].set(done)
     qp_residual = jnp.zeros_like(qp_energy).at[jnp.asarray(orbs)].set(residual)
     result = (qp_energy, sigma_qp, converged_mask, jnp.all(done), qp_residual)
-    if not return_weight:
+    if not return_weight and not return_diagnostics:
         return result
-    slope = _df_dw_batch(roots, e_base, dv, shared, stacked)
-    valid_slope = jnp.isfinite(slope) & (jnp.abs(slope) > 1e-10)
-    weights = jnp.full_like(qp_energy, jnp.nan).at[jnp.asarray(orbs)].set(
-        jnp.where(valid_slope, 1 / slope, jnp.nan))
-    return (*result, weights)
+    nonlinear = not linearized and not evaluate_only
+    if nonlinear:
+        local_weight = diagnostics.weight
+    else:
+        valid_slope = jnp.isfinite(slope) & (jnp.abs(slope) > 1e-10)
+        local_weight = jnp.where(valid_slope, 1/jnp.where(slope != 0, slope, 1.), jnp.nan)
+    weights = jnp.full_like(qp_energy, jnp.nan).at[jnp.asarray(orbs)].set(local_weight)
+    if not return_diagnostics:
+        return (*result, weights)
+    if nonlinear:
+        local_on_shell, linear = diagnostics.on_shell, diagnostics.linearized
+    else:
+        equation = lambda w: qp_residual_batch(w, e_base, dv, shared, stacked)
+        f0, slope0 = jax.jvp(equation, (e_base,), (jnp.ones_like(e_base),))
+        local_on_shell = e_base-f0
+        linear = jnp.where(jnp.isfinite(slope0) & (jnp.abs(slope0) > 1e-10),
+                          e_base-f0/jnp.where(slope0 != 0, slope0, 1.), jnp.nan)
+    on_shell = jnp.full_like(qp_energy, jnp.nan).at[jnp.asarray(orbs)].set(local_on_shell)
+    linear = jnp.full_like(qp_energy, jnp.nan).at[jnp.asarray(orbs)].set(linear)
+    count = jnp.zeros_like(qp_energy, dtype=jnp.int32)
+    branch = jnp.zeros_like(qp_energy, dtype=bool)
+    if nonlinear:
+        count = count.at[jnp.asarray(orbs)].set(diagnostics.candidate_count)
+        branch = branch.at[jnp.asarray(orbs)].set(diagnostics.branch_valid)
+    else:
+        branch = branch.at[jnp.asarray(orbs)].set(jnp.isfinite(slope) & (slope > 1e-10))
+    return (*result, weights, dict(qp_on_shell=on_shell, qp_linearized=linear,
+                                  qp_candidate_count=count, qp_branch_valid=branch))
 
 
 def g0w0_cd_restricted(
@@ -382,8 +414,11 @@ def g0w0_cd_restricted(
     screen = poles if screening_energy is None else jnp.asarray(screening_energy, dtype=poles.dtype)
     if poles.shape != mo_energy.shape or screen.shape != mo_energy.shape:
         raise ValueError("G/W energy spectra must have shape (nmo,)")
+    from .outer_response import require_occupation_gap
+    require_occupation_gap(poles, nocc, 'G0W0 G')
+    require_occupation_gap(screen, nocc, 'G0W0 W')
     screen_pairs = (screen[oi_array], screen[va_array])
-    ef = 0.5 * (poles[nocc - 1] + poles[nocc])
+    ef = 0.5 * (jnp.max(poles[:nocc]) + jnp.min(poles[nocc:]))
     freqs, wts = scaled_legendre_grid(nw)
 
     def response_fn(omega):
@@ -402,7 +437,7 @@ def g0w0_cd_restricted(
         wmn_static = (screened_w_imag_axis(b_mn, response_fn, jnp.zeros(1))[0]
                       if wmn_static_fixed is None else wmn_static_fixed)
 
-    qp_energy, sigma_qp, converged_mask, converged, residual, weight = _qp_loop(
+    qp_energy, sigma_qp, converged_mask, converged, residual, weight, diagnostics = _qp_loop(
         mo_energy=poles,
         b_mn=b_mn,
         channels=((screen_pairs, b_ov, 2.0),),
@@ -421,6 +456,7 @@ def g0w0_cd_restricted(
         evaluate_only=evaluate_only,
         g_orbitals=gi,
         return_weight=True,
+        return_diagnostics=True,
         wmn_static=wmn_static,
         resolvent_data=resolvent_data,
         qp_initial=qp_initial,
@@ -441,6 +477,7 @@ def g0w0_cd_restricted(
         screening_occupied=oi,
         screening_virtual=va,
         method="g0w0",
+        **diagnostics,
     )
 
 
@@ -534,8 +571,11 @@ def g0w0_cd_unrestricted(
     delta_v_a = jnp.diag(vk_mo_a - vmf_mo_a)
     delta_v_b = jnp.diag(vk_mo_b - vmf_mo_b)
 
-    ef_a = 0.5 * (p_a[nocc_a - 1] + p_a[nocc_a])
-    ef_b = 0.5 * (p_b[nocc_b - 1] + p_b[nocc_b])
+    from .outer_response import require_occupation_gap
+    for spectrum, occupation in ((p_a, nocc_a), (p_b, nocc_b), (s_a, nocc_a), (s_b, nocc_b)):
+        require_occupation_gap(spectrum, occupation, 'Unrestricted G0W0')
+    ef_a = 0.5 * (jnp.max(p_a[:nocc_a]) + jnp.min(p_a[nocc_a:]))
+    ef_b = 0.5 * (jnp.max(p_b[:nocc_b]) + jnp.min(p_b[nocc_b:]))
 
     freqs, wts = scaled_legendre_grid(nw)
 
@@ -549,7 +589,7 @@ def g0w0_cd_unrestricted(
     wmn = screened_w_imag_axis(b_a, response_fn, freqs)
     channels = ((s_a, b_ov_a, 1.0), (s_b, b_ov_b, 1.0))
 
-    qp_a, sig_a, mask_a, conv_a, residual_a = _qp_loop(
+    qp_a, sig_a, mask_a, conv_a, residual_a, weight_a, diagnostics_a = _qp_loop(
         mo_energy=p_a,
         b_mn=b_a,
         channels=channels,
@@ -567,9 +607,10 @@ def g0w0_cd_unrestricted(
         e_mf=e_a,
         linearized=linearized,
         evaluate_only=evaluate_only,
+        return_diagnostics=True,
     )
     wmn_b = screened_w_imag_axis(b_b, response_fn, freqs)
-    qp_b, sig_b, mask_b, conv_b, residual_b = _qp_loop(
+    qp_b, sig_b, mask_b, conv_b, residual_b, weight_b, diagnostics_b = _qp_loop(
         mo_energy=p_b,
         b_mn=b_b,
         channels=channels,
@@ -587,6 +628,7 @@ def g0w0_cd_unrestricted(
         e_mf=e_b,
         linearized=linearized,
         evaluate_only=evaluate_only,
+        return_diagnostics=True,
     )
     return GWResult(
         mo_energy=jnp.stack([qp_a, qp_b]),
@@ -598,6 +640,9 @@ def g0w0_cd_unrestricted(
         qp_residual=jnp.stack([residual_a, residual_b]),
         qp_computed_mask=jnp.zeros((2,nmo),dtype=bool).at[:,jnp.asarray(orbs)].set(not evaluate_only),
         screening_energy=jnp.stack([s_a, s_b]),
+        qp_weight=jnp.stack([weight_a, weight_b]),
+        method='g0w0',
+        **{key: jnp.stack((diagnostics_a[key], diagnostics_b[key])) for key in diagnostics_a},
     )
 
 
