@@ -16,7 +16,7 @@ from gradscf.scf.inputs.types import RKSIntegralInputs, UKSIntegralInputs
 from gradscf.scf.core import _unrestricted_spin_electron_counts
 from gradscf.scf.inputs import grid as _grid
 from gradscf.data.molecule import MoleculeSpec, parse_molecule_spec
-from gradscf.dft.libxc_jax.jax_libxc import parse_xc, xc_type
+from gradscf.dft.xc import parse_recipe, parse_xc, xc_type
 from gradscf.scf.rsh import local_xc_spec, rsh_preset
 
 
@@ -52,8 +52,13 @@ def _build_common(*, atom, basis, cfg, xc_spec, unit, charge, spin, cart,
     if mode not in {"native", "jax"}:
         raise ValueError("integral_backend must be 'native'/'cpu' or 'jax'; the external GPU backend was removed")
     rsh = rsh_preset(xc_spec)
+    recipe = parse_recipe(xc_spec)
+    original_chg = recipe.dispersion is not None and rsh is not None and rsh.name == "wb97x-d"
+    recipe.require_complete_support(provided=("dispersion",) if original_chg else ())
+    if recipe.needs_laplacian:
+        raise NotImplementedError("This molecular XC assembly requires an implemented density-Laplacian operator.")
     if rsh is not None and (mode != "native" or cfg.jk_backend != "full"):
-        raise NotImplementedError("Range-separated wb97xd requires native full ERI assembly.")
+        raise NotImplementedError("Range-separated XC requires native full ERI assembly.")
     if grid_ao_backend != "jax":
         raise ValueError("Only grid_ao_backend='jax' is supported")
     if geometry_grad_policy not in {"analytic", "error", "zero"}:
@@ -71,7 +76,7 @@ def _build_common(*, atom, basis, cfg, xc_spec, unit, charge, spin, cart,
     if context.geometry_is_traced and geometry_grad_policy == "error":
         raise NotImplementedError("Geometry gradients are disabled by geometry_grad_policy='error'")
     eri_lr = dispersion_energy = None
-    if rsh is not None:
+    if original_chg:
         from gradscf.dft.dispersion import wb97xd_dispersion_energy
         dispersion_energy = wb97xd_dispersion_energy(spec.symbols, spec.coords_bohr)
     if mode == "native":

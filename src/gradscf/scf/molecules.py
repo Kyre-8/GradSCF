@@ -28,6 +28,7 @@ class QuadratureGrid:
         "response_df_metadata",
         "range_separated_coefficients",
         "xc_density_floor",
+        "xc_spec",
     )
 )
 @dataclass(frozen=True)
@@ -77,6 +78,7 @@ class RestrictedMolecule:
     dispersion_energy: jnp.ndarray | None = None
     range_separated_coefficients: tuple[float, float, float] | None = None
     xc_density_floor: float = 1e-12
+    xc_spec: str | None = None
     # Optional real AO Fock matrix for noncanonical restricted TD response.
     # A dynamic pytree leaf: occupied/virtual projections retain input AD.
     # None preserves the canonical mo_energy-difference contract.
@@ -90,6 +92,8 @@ class RestrictedMolecule:
     static_fields=(
         "nocc_alpha",
         "nocc_beta",
+        "xc_spec",
+        "range_separated_coefficients",
         "scf_converged",
         "scf_cycles",
         "runtime_scf_backend",
@@ -136,6 +140,8 @@ class UnrestrictedMolecule:
     eri_lr: jnp.ndarray | None = None
     dispersion_energy: jnp.ndarray | None = None
     range_separated_coefficients: tuple[float, float, float] | None = None
+    fock_matrix: jnp.ndarray | None = None
+    xc_spec: str | None = None
 
     @property
     def eri_pair_matrix(self):

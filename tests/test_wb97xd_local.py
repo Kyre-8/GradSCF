@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from gradscf.dft.libxc_jax.jax_xc_adapter import (
+from gradscf.dft.xc._jax_xc import (
     eval_jax_xc_energy_density_from_unrestricted_density_gradients,
 )
 
@@ -39,8 +39,8 @@ def test_wb97xd_local_energy_potential_kernel_against_libxc(point):
 
 
 def test_wb97xd_preset_exposes_only_validated_local_channel():
-    from gradscf.dft.libxc_jax.jax_libxc import get_rsh_functional_preset, parse_xc
-    from gradscf.dft.libxc_jax.jax_xc_adapter import jax_xc_functional_info
+    from gradscf.dft.xc import get_rsh_functional_preset, parse_xc
+    from gradscf.dft.xc._jax_xc import jax_xc_functional_info
 
     preset = get_rsh_functional_preset("wb97xd")
     assert preset.jax_local_xc_spec == "hyb_gga_xc_wb97x_d"
@@ -63,8 +63,8 @@ def test_wb97xd_local_rejects_unvalidated_omega():
 
 @pytest.mark.parametrize("point", [[0.8, 0.08, -0.03, 0.07], [0.03, 0.01, 0.02, 0.03]])
 def test_wb97xd_restricted_local_energy_potential_kernel(point):
-    from gradscf.dft.libxc_jax.jax_libxc import restricted_feature_bundle_from_rho_grad_tau
-    from gradscf.dft.libxc_jax.jax_xc_adapter import eval_jax_xc_from_restricted_features
+    from gradscf.dft.xc import restricted_feature_bundle_from_rho_grad_tau
+    from gradscf.dft.xc._jax_xc import eval_jax_xc_from_restricted_features
     libxc = pytest.importorskip("pyscf.dft.libxc")
     rho = np.asarray(point, dtype=np.float64)
     reference = [libxc.eval_xc_eff("WB97X_D", rho[:, None], deriv=i, spin=0)

@@ -196,10 +196,14 @@ def export_scf(mf, directory, *, kpoints=None, kgrid=None, shift=(0., 0., 0.),
     from gradscf.pbc.kpoints import kmesh_shape
     from gradscf.pbc._kpoint import grid_xc_potential, project_xc_potential
     from gradscf.integrals.periodic.fft import build_band_inputs
-    from gradscf.dft.libxc_jax.jax_libxc import hybrid_coeff, xc_type
+    from gradscf.dft.xc import hybrid_coeff, parse_recipe, xc_type
 
     validate_reference(mf, integer=True, equal_weights=True)
     kind = xc_type(mf.xc)
+    recipe = parse_recipe(mf.xc)
+    recipe.require_complete_support()
+    if recipe.exact_exchange.omega is not None:
+        raise NotImplementedError('BGW export of screened starting potentials is not implemented.')
     if mf.cell.dimension != 3 or mf.unrestricted or kind not in ('LDA', 'GGA') or hybrid_coeff(mf.xc):
         raise NotImplementedError('BGW export currently requires a restricted pure LDA/GGA 3D reference')
     lattice = np.asarray(mf.cell.lattice)

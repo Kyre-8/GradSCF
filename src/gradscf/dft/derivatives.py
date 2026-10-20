@@ -74,12 +74,16 @@ def xc_energy_and_potential_from_density(
         extra_fock = jnp.zeros_like(vxc_matrix)
     else:
         extra_fock = jnp.asarray(extra_fock_matrix, dtype=vxc_matrix.dtype)
-        extra_fock = jnp.nan_to_num(extra_fock, nan=0.0, posinf=0.0, neginf=0.0)
         if symmetrize:
             extra_fock = 0.5 * (extra_fock + jnp.swapaxes(extra_fock.conj(), -1, -2))
 
     alpha = jnp.asarray(exact_exchange_fraction, dtype=density_arr.real.dtype)
-    alpha = jnp.clip(jnp.nan_to_num(alpha, nan=0.0, posinf=1.0, neginf=0.0), 0.0, 1.0)
+    # Invalid contributions must remain visible under tracing; eager callers
+    # get an explicit error. Model constraints belong in the model itself.
+    for label, value in (("energy", xc_energy), ("potential", vxc_matrix),
+                         ("extra Fock", extra_fock), ("exchange coefficient", alpha)):
+        if not isinstance(value, jax.core.Tracer) and not bool(jnp.all(jnp.isfinite(value))):
+            raise FloatingPointError(f"Custom XC {label} must be finite.")
 
     return XCEnergyPotentialResult(
         xc_energy=jnp.asarray(xc_energy, dtype=density_arr.real.dtype),

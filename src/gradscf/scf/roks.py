@@ -9,7 +9,7 @@ import jax
 import jax.numpy as jnp
 from jaxtyping import Array
 
-from ..dft.libxc_jax.jax_libxc import hybrid_coeff, xc_type
+from ..dft.xc import hybrid_coeff, parse_recipe, xc_type
 from .core import _build_density_from_occ, _contains_jax_tracer, _host_float_unless_traced
 from .core import _diagonalize_fock, _orthogonalizer, _validate_density_matrix
 from .facade import _BaseKS
@@ -110,6 +110,10 @@ def run_roks_from_integrals(
     """
 
     cfg = ROKSConfig() if config is None else config
+    recipe = parse_recipe(cfg.xc_spec)
+    recipe.require_complete_support()
+    if recipe.exact_exchange.omega is not None:
+        raise NotImplementedError("ROKS range-separated exchange operators are not implemented.")
     s, h, eri = map(jnp.asarray, (overlap, hcore, eri))
     nao = h.shape[0]
     if any(not isinstance(n, int) or n < 0 or n > nao for n in (nalpha, nbeta)) or nalpha + nbeta == 0:

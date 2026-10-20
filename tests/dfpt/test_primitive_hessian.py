@@ -37,7 +37,7 @@ def test_bare_geometry_curvature_matches_supercell(xc):
     from gradscf.pbc.phonon import _replica
     from gradscf.integrals.periodic.fft import build_inputs,get_kpoint_jk
     from gradscf.pbc._kpoint import grid_xc_potential
-    from gradscf.dft.libxc_jax.jax_libxc import hybrid_coeff
+    from gradscf.dft.xc import hybrid_coeff
     exxdiv=None if xc=='hf-noewald' else 'ewald'
     xc='hf' if xc=='hf-noewald' else xc
     cell=gto.M(atom='H .4 .5 .6; H 1.8 .8 .9',a=np.eye(3)*6,unit='Bohr',mesh=(15,)*3)

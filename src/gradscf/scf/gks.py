@@ -11,13 +11,13 @@ import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
 
-from ..dft.libxc_jax.jax_libxc import hybrid_coeff, xc_type
+from ..dft.xc import grid_value_and_grad, hybrid_coeff, parse_recipe, xc_type
 from .core import _contains_jax_tracer, _host_float_unless_traced
 from .facade import _BaseKS
 from gradscf.scf.inputs.assembly import build_uks_integral_inputs
 from .convergence import convergence_reached
 from .rks import RKSResult, _PYSCF_LIKE_DIIS_SPACE, _diis_extrapolate
-from .uks import UKSConfig, _point_unrestricted_xc_value_and_grad_kernel
+from .uks import UKSConfig
 from .uks import _unrestricted_vxc_matrices, _unrestricted_xc_energy_and_potential_on_grid
 
 
@@ -55,6 +55,10 @@ def _validate_hermitian(a: Array, shape: tuple[int, int], name: str) -> None:
 
 
 def _validate_mode(config: GKSConfig) -> str:
+    recipe = parse_recipe(config.xc_spec)
+    recipe.require_complete_support()
+    if recipe.exact_exchange.omega is not None:
+        raise NotImplementedError("GKS range-separated exchange operators are not implemented.")
     if config.collinear not in {"col", "ncol"}:
         raise NotImplementedError("GKS supports col and ncol; mcol is not implemented.")
     kind = xc_type(config.xc_spec)
@@ -120,9 +124,7 @@ def _generalized_xc(density, ao, deriv, weights, cfg, kind):
     safe_norm = jnp.sqrt(jnp.maximum(norm2, cutoff**2))
     magnitude = jnp.where(norm2 >= cutoff**2, safe_norm, 0.)
     rho = jnp.stack([(total + magnitude) * .5, (total - magnitude) * .5], axis=1)
-    values, potentials = _point_unrestricted_xc_value_and_grad_kernel(cfg.xc_spec, "LDA")(rho)
-    values = jnp.nan_to_num(values, nan=0., posinf=0., neginf=0.)
-    potentials = jnp.nan_to_num(potentials, nan=0., posinf=0., neginf=0.)
+    values, potentials = grid_value_and_grad(cfg.xc_spec, "LDA")(rho)
     potentials = jnp.where((total > cfg.density_floor)[:, None], potentials, 0.)
     if cfg.potential_clip is not None:
         potentials = jnp.clip(potentials, -cfg.potential_clip, cfg.potential_clip)

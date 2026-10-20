@@ -17,7 +17,7 @@ from ..integrals.periodic.ao import bloch_grid
 from ..integrals.periodic.coulomb import coulomb_kernel
 from ..integrals.periodic.pseudo import local_potential,_projector_overlap
 from ..integrals.periodic.fft import _pair_potential
-from ..dft.libxc_jax.jax_libxc import xc_type,hybrid_coeff
+from ..dft.xc import xc_type,hybrid_coeff,parse_recipe
 
 
 class DisplacementSource(NamedTuple):
@@ -90,6 +90,8 @@ def displacement_source(source,q,displacements):
 
 def _displacement_source(source,q,displacements):
     """Array assembly after the public entry point has validated the snapshot."""
+    if parse_recipe(source.xc).exact_exchange.omega is not None:
+        raise NotImplementedError("Finite-q geometry sources require screened exchange derivatives for RSH.")
     _validate_q_domain(source.inputs, source.exxdiv)
     cell=source.cell;data=source.inputs;d=source.result.density_spin
     q=np.asarray(q,dtype=float)

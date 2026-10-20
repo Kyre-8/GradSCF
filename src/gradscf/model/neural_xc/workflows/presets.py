@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from gradscf.dft.libxc_jax.jax_libxc import b3lyp_component_basis
+from gradscf.dft.xc import b3lyp_component_basis
 from .config import ExperimentConfig, SystemConfig
 from .types import (
     NeuralXCTrainingConfig,

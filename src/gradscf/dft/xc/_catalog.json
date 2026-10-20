@@ -1,0 +1,1989 @@
+{
+  "provenance": {
+    "jax_xc_inventory_version": "0.0.9",
+    "jax_xc_parameter_library_version": "6.0.0",
+    "requested_standard_names": 96,
+    "parsed_standard_names": 78,
+    "installed_upstream_factory_count": 624,
+    "counts_scope": "Environment snapshot counts, not complete supported method counts",
+    "parameter_reader_source": {
+      "version": "Libxc 6.0.0",
+      "url": "https://gitlab.com/libxc/libxc/-/raw/6.0.0/src/mgga_xc_b97mv.c",
+      "sha256": "4cdde56c8c75551ad7e28869f34e082f24ec9e2abeb53750b6fa94c7fcb790ff"
+    },
+    "zero_omega_specialization_source": {
+      "version": "Libxc 6.0.0",
+      "url": "https://gitlab.com/libxc/libxc/-/raw/6.0.0/maple/gga_exc/gga_x_wpbeh.mpl",
+      "sha256": "429835517c3382aeb890b98245f3961e2c6b022c09ce5e5456afdaa5a724385b"
+    },
+    "pyscf_version": "2.13.0",
+    "libxc_version": "7.0.0",
+    "export_date": "2026-10-19",
+    "inventory_sha256": "7e2a0d86d141816e36cfd8511e92a158498678629d12a6ec22fb0289b67d80a8",
+    "source": "PySCF dft.libxc complete recipe metadata; runtime uses only jax_xc"
+  },
+  "names": {
+    "slater": {
+      "family": "LDA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 1,
+          "name": "lda_x",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "P. A. M. Dirac.,  Math. Proc. Cambridge Philos. Soc. 26, 376 (1930)",
+        "F. Bloch.,  Z. Phys. 57, 545 (1929)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "svwn": {
+      "family": "LDA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 1,
+          "name": "lda_x",
+          "coefficient": 1
+        },
+        {
+          "id": 7,
+          "name": "lda_c_vwn",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "P. A. M. Dirac.,  Math. Proc. Cambridge Philos. Soc. 26, 376 (1930)",
+        "F. Bloch.,  Z. Phys. 57, 545 (1929)",
+        "S. H. Vosko, L. Wilk, and M. Nusair.,  Can. J. Phys. 58, 1200 (1980)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "lda,pw": {
+      "family": "LDA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 1,
+          "name": "lda_x",
+          "coefficient": 1
+        },
+        {
+          "id": 12,
+          "name": "lda_c_pw",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "P. A. M. Dirac.,  Math. Proc. Cambridge Philos. Soc. 26, 376 (1930)",
+        "F. Bloch.,  Z. Phys. 57, 545 (1929)",
+        "J. P. Perdew and Y. Wang.,  Phys. Rev. B 45, 13244 (1992)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "lda,pz": {
+      "family": "LDA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 1,
+          "name": "lda_x",
+          "coefficient": 1
+        },
+        {
+          "id": 9,
+          "name": "lda_c_pz",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "P. A. M. Dirac.,  Math. Proc. Cambridge Philos. Soc. 26, 376 (1930)",
+        "F. Bloch.,  Z. Phys. 57, 545 (1929)",
+        "J. P. Perdew and A. Zunger.,  Phys. Rev. B 23, 5048 (1981)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "pbe": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 101,
+          "name": "gga_x_pbe",
+          "coefficient": 1
+        },
+        {
+          "id": 130,
+          "name": "gga_c_pbe",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 77, 3865 (1996)",
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 78, 1396 (1997)",
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 77, 3865 (1996)",
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 78, 1396 (1997)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "pbesol": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 116,
+          "name": "gga_x_pbe_sol",
+          "coefficient": 1
+        },
+        {
+          "id": 133,
+          "name": "gga_c_pbe_sol",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. P. Perdew, A. Ruzsinszky, G. I. Csonka, O. A. Vydrov, G. E. Scuseria, L. A. Constantin, X. Zhou, and K. Burke.,  Phys. Rev. Lett. 100, 136406 (2008)",
+        "J. P. Perdew, A. Ruzsinszky, G. I. Csonka, O. A. Vydrov, G. E. Scuseria, L. A. Constantin, X. Zhou, and K. Burke.,  Phys. Rev. Lett. 100, 136406 (2008)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "revpbe": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 102,
+          "name": "gga_x_pbe_r",
+          "coefficient": 1
+        },
+        {
+          "id": 130,
+          "name": "gga_c_pbe",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Y. Zhang and W. Yang.,  Phys. Rev. Lett. 80, 890 (1998)",
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 77, 3865 (1996)",
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 78, 1396 (1997)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "rpbe": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 117,
+          "name": "gga_x_rpbe",
+          "coefficient": 1
+        },
+        {
+          "id": 130,
+          "name": "gga_c_pbe",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "B. Hammer, L. B. Hansen, and J. K. Nørskov.,  Phys. Rev. B 59, 7413 (1999)",
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 77, 3865 (1996)",
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 78, 1396 (1997)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "pw91": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 109,
+          "name": "gga_x_pw91",
+          "coefficient": 1
+        },
+        {
+          "id": 134,
+          "name": "gga_c_pw91",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. P. Perdew. In P. Ziesche and H. Eschrig, editors, Proceedings of the 75. WE-Heraeus-Seminar and 21st Annual International Symposium on Electronic Structure of Solids, 11. Berlin, 1991. Akademie Verlag.",
+        "J. P. Perdew, J. A. Chevary, S. H. Vosko, K. A. Jackson, M. R. Pederson, D. J. Singh, and C. Fiolhais.,  Phys. Rev. B 46, 6671 (1992)",
+        "J. P. Perdew, J. A. Chevary, S. H. Vosko, K. A. Jackson, M. R. Pederson, D. J. Singh, and C. Fiolhais.,  Phys. Rev. B 48, 4978 (1993)",
+        "J. P. Perdew. In P. Ziesche and H. Eschrig, editors, Proceedings of the 75. WE-Heraeus-Seminar and 21st Annual International Symposium on Electronic Structure of Solids, 11. Berlin, 1991. Akademie Verlag.",
+        "J. P. Perdew, J. A. Chevary, S. H. Vosko, K. A. Jackson, M. R. Pederson, D. J. Singh, and C. Fiolhais.,  Phys. Rev. B 46, 6671 (1992)",
+        "J. P. Perdew, J. A. Chevary, S. H. Vosko, K. A. Jackson, M. R. Pederson, D. J. Singh, and C. Fiolhais.,  Phys. Rev. B 48, 4978 (1993)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "blyp": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 106,
+          "name": "gga_x_b88",
+          "coefficient": 1
+        },
+        {
+          "id": 131,
+          "name": "gga_c_lyp",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "A. D. Becke.,  Phys. Rev. A 38, 3098 (1988)",
+        "C. Lee, W. Yang, and R. G. Parr.,  Phys. Rev. B 37, 785 (1988)",
+        "B. Miehlich, A. Savin, H. Stoll, and H. Preuss.,  Chem. Phys. Lett. 157, 200 (1989)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "bp86": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 106,
+          "name": "gga_x_b88",
+          "coefficient": 1
+        },
+        {
+          "id": 132,
+          "name": "gga_c_p86",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "A. D. Becke.,  Phys. Rev. A 38, 3098 (1988)",
+        "J. P. Perdew.,  Phys. Rev. B 33, 8822 (1986)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "olyp": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 110,
+          "name": "gga_x_optx",
+          "coefficient": 1
+        },
+        {
+          "id": 131,
+          "name": "gga_c_lyp",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "N. C. Handy and A. J. Cohen.,  Mol. Phys. 99, 403 (2001)",
+        "C. Lee, W. Yang, and R. G. Parr.,  Phys. Rev. B 37, 785 (1988)",
+        "B. Miehlich, A. Savin, H. Stoll, and H. Preuss.,  Chem. Phys. Lett. 157, 200 (1989)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "opbe": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 110,
+          "name": "gga_x_optx",
+          "coefficient": 1
+        },
+        {
+          "id": 130,
+          "name": "gga_c_pbe",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "N. C. Handy and A. J. Cohen.,  Mol. Phys. 99, 403 (2001)",
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 77, 3865 (1996)",
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 78, 1396 (1997)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "xlyp": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 166,
+          "name": "gga_xc_xlyp",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "X. Xu and W. A. Goddard.,  Proc. Natl. Acad. Sci. U. S. A. 101, 2673 (2004)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "kt2": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 146,
+          "name": "gga_xc_kt2",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "T. W. Keal and D. J. Tozer.,  J. Chem. Phys. 119, 3015 (2003)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "hcth93": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 161,
+          "name": "gga_xc_hcth_93",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "F. A. Hamprecht, A. J. Cohen, D. J. Tozer, and N. C. Handy.,  J. Chem. Phys. 109, 6264 (1998)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "hcth120": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 162,
+          "name": "gga_xc_hcth_120",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "A. D. Boese, N. L. Doltsinis, N. C. Handy, and M. Sprik.,  J. Chem. Phys. 112, 1670 (2000)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "hcth147": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 163,
+          "name": "gga_xc_hcth_147",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "A. D. Boese, N. L. Doltsinis, N. C. Handy, and M. Sprik.,  J. Chem. Phys. 112, 1670 (2000)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "hcth407": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 164,
+          "name": "gga_xc_hcth_407",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "A. D. Boese and N. C. Handy.,  J. Chem. Phys. 114, 5497 (2001)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "tpss": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 202,
+          "name": "mgga_x_tpss",
+          "coefficient": 1
+        },
+        {
+          "id": 231,
+          "name": "mgga_c_tpss",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. Tao, J. P. Perdew, V. N. Staroverov, and G. E. Scuseria.,  Phys. Rev. Lett. 91, 146401 (2003)",
+        "J. P. Perdew, J. Tao, V. N. Staroverov, and G. E. Scuseria.,  J. Chem. Phys. 120, 6898 (2004)",
+        "J. Tao, J. P. Perdew, V. N. Staroverov, and G. E. Scuseria.,  Phys. Rev. Lett. 91, 146401 (2003)",
+        "J. P. Perdew, J. Tao, V. N. Staroverov, and G. E. Scuseria.,  J. Chem. Phys. 120, 6898 (2004)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "revtpss": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 212,
+          "name": "mgga_x_revtpss",
+          "coefficient": 1
+        },
+        {
+          "id": 241,
+          "name": "mgga_c_revtpss",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. P. Perdew, A. Ruzsinszky, G. I. Csonka, L. A. Constantin, and J. Sun.,  Phys. Rev. Lett. 103, 026403 (2009)",
+        "J. P. Perdew, A. Ruzsinszky, G. I. Csonka, L. A. Constantin, and J. Sun.,  Phys. Rev. Lett. 106, 179902 (2011)",
+        "J. P. Perdew, A. Ruzsinszky, G. I. Csonka, L. A. Constantin, and J. Sun.,  Phys. Rev. Lett. 103, 026403 (2009)",
+        "J. P. Perdew, A. Ruzsinszky, G. I. Csonka, L. A. Constantin, and J. Sun.,  Phys. Rev. Lett. 106, 179902 (2011)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "scan": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 263,
+          "name": "mgga_x_scan",
+          "coefficient": 1
+        },
+        {
+          "id": 267,
+          "name": "mgga_c_scan",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. Sun, A. Ruzsinszky, and J. P. Perdew.,  Phys. Rev. Lett. 115, 036402 (2015)",
+        "J. Sun, A. Ruzsinszky, and J. P. Perdew.,  Phys. Rev. Lett. 115, 036402 (2015)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "rscan": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 493,
+          "name": "mgga_x_rscan",
+          "coefficient": 1
+        },
+        {
+          "id": 494,
+          "name": "mgga_c_rscan",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "A. P. Bartók and J. R. Yates.,  J. Chem. Phys. 150, 161101 (2019)",
+        "A. P. Bartók and J. R. Yates.,  J. Chem. Phys. 150, 161101 (2019)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "r2scan": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 497,
+          "name": "mgga_x_r2scan",
+          "coefficient": 1
+        },
+        {
+          "id": 498,
+          "name": "mgga_c_r2scan",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. W. Furness, A. D. Kaplan, J. Ning, J. P. Perdew, and J. Sun.,  J. Phys. Chem. Lett. 11, 8208-8215 (2020)",
+        "J. W. Furness, A. D. Kaplan, J. Ning, J. P. Perdew, and J. Sun.,  J. Phys. Chem. Lett. 11, 9248-9248 (2020)",
+        "J. W. Furness, A. D. Kaplan, J. Ning, J. P. Perdew, and J. Sun.,  J. Phys. Chem. Lett. 11, 8208-8215 (2020)",
+        "J. W. Furness, A. D. Kaplan, J. Ning, J. P. Perdew, and J. Sun.,  J. Phys. Chem. Lett. 11, 9248-9248 (2020)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "m06l": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 203,
+          "name": "mgga_x_m06_l",
+          "coefficient": 1
+        },
+        {
+          "id": 233,
+          "name": "mgga_c_m06_l",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Y. Zhao and D. G. Truhlar.,  J. Chem. Phys. 125, 194101 (2006)",
+        "Y. Zhao and D. G. Truhlar.,  J. Chem. Phys. 125, 194101 (2006)",
+        "Y. Zhao and D. G. Truhlar.,  Theor. Chem. Acc. 120, 215 (2008)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "m11l": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.25,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 226,
+          "name": "mgga_x_m11_l",
+          "coefficient": 1
+        },
+        {
+          "id": 75,
+          "name": "mgga_c_m11_l",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "R. Peverati and D. G. Truhlar.,  J. Phys. Chem. Lett. 3, 117 (2012)",
+        "R. Peverati and D. G. Truhlar.,  J. Phys. Chem. Lett. 3, 117 (2012)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "mn12l": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 227,
+          "name": "mgga_x_mn12_l",
+          "coefficient": 1
+        },
+        {
+          "id": 74,
+          "name": "mgga_c_mn12_l",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "R. Peverati and D. G. Truhlar.,  Phys. Chem. Chem. Phys. 14, 13171 (2012)",
+        "R. Peverati and D. G. Truhlar.,  Phys. Chem. Chem. Phys. 14, 13171 (2012)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "mn15l": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 260,
+          "name": "mgga_x_mn15_l",
+          "coefficient": 1
+        },
+        {
+          "id": 261,
+          "name": "mgga_c_mn15_l",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "H. S. Yu, X. He, and D. G. Truhlar.,  J. Chem. Theory Comput. 12, 1280-1293 (2016)",
+        "H. S. Yu, X. He, and D. G. Truhlar.,  J. Chem. Theory Comput. 12, 1280-1293 (2016)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "pkzb": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 213,
+          "name": "mgga_x_pkzb",
+          "coefficient": 1
+        },
+        {
+          "id": 239,
+          "name": "mgga_c_pkzb",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. P. Perdew, S. Kurth, A. Zupan, and P. Blaha.,  Phys. Rev. Lett. 82, 2544 (1999)",
+        "J. P. Perdew, S. Kurth, A. Zupan, and P. Blaha.,  Phys. Rev. Lett. 82, 2544 (1999)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "ms0": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 221,
+          "name": "mgga_x_ms0",
+          "coefficient": 1
+        },
+        {
+          "id": 83,
+          "name": "gga_c_regtpss",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. Sun, B. Xiao, and A. Ruzsinszky.,  J. Chem. Phys. 137, 051101 (2012)",
+        "J. P. Perdew, A. Ruzsinszky, G. I. Csonka, L. A. Constantin, and J. Sun.,  Phys. Rev. Lett. 103, 026403 (2009)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "ms1": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 222,
+          "name": "mgga_x_ms1",
+          "coefficient": 1
+        },
+        {
+          "id": 83,
+          "name": "gga_c_regtpss",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. Sun, R. Haunschild, B. Xiao, I. W. Bulik, G. E. Scuseria, and J. P. Perdew.,  J. Chem. Phys. 138, 044113 (2013)",
+        "J. P. Perdew, A. Ruzsinszky, G. I. Csonka, L. A. Constantin, and J. Sun.,  Phys. Rev. Lett. 103, 026403 (2009)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "ms2": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 223,
+          "name": "mgga_x_ms2",
+          "coefficient": 1
+        },
+        {
+          "id": 83,
+          "name": "gga_c_regtpss",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. Sun, R. Haunschild, B. Xiao, I. W. Bulik, G. E. Scuseria, and J. P. Perdew.,  J. Chem. Phys. 138, 044113 (2013)",
+        "J. P. Perdew, A. Ruzsinszky, G. I. Csonka, L. A. Constantin, and J. Sun.,  Phys. Rev. Lett. 103, 026403 (2009)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "mvs": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 257,
+          "name": "mgga_x_mvs",
+          "coefficient": 1
+        },
+        {
+          "id": 83,
+          "name": "gga_c_regtpss",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. Sun, J. P. Perdew, and A. Ruzsinszky.,  Proc. Natl. Acad. Sci. U. S. A. 112, 685-689 (2015)",
+        "J. P. Perdew, A. Ruzsinszky, G. I. Csonka, L. A. Constantin, and J. Sun.,  Phys. Rev. Lett. 103, 026403 (2009)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "bloc": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 244,
+          "name": "mgga_x_bloc",
+          "coefficient": 1
+        },
+        {
+          "id": 247,
+          "name": "mgga_c_tpssloc",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "L. A. Constantin, E. Fabiano, and F. Della Sala.,  J. Chem. Theory Comput. 9, 2256 (2013)",
+        "L. A. Constantin, E. Fabiano, and F. Della Sala.,  Phys. Rev. B 86, 035130 (2012)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "pbe0": {
+      "family": "GGA",
+      "exact_exchange": 0.25,
+      "rsh": [
+        0.0,
+        0.25,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 406,
+          "name": "hyb_gga_xc_pbeh",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "C. Adamo and V. Barone.,  J. Chem. Phys. 110, 6158 (1999)",
+        "M. Ernzerhof and G. E. Scuseria.,  J. Chem. Phys. 110, 5029 (1999)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "b3lyp": {
+      "family": "GGA",
+      "exact_exchange": 0.2,
+      "rsh": [
+        0.0,
+        0.2,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 402,
+          "name": "hyb_gga_xc_b3lyp",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "P. J. Stephens, F. J. Devlin, C. F. Chabalowski, and M. J. Frisch.,  J. Phys. Chem. 98, 11623 (1994)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "b3lyp5": {
+      "family": "GGA",
+      "exact_exchange": 0.2,
+      "rsh": [
+        0.0,
+        0.2,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 1,
+          "name": "lda_x",
+          "coefficient": 0.08
+        },
+        {
+          "id": 106,
+          "name": "gga_x_b88",
+          "coefficient": 0.72
+        },
+        {
+          "id": 131,
+          "name": "gga_c_lyp",
+          "coefficient": 0.81
+        },
+        {
+          "id": 7,
+          "name": "lda_c_vwn",
+          "coefficient": 0.19
+        }
+      ],
+      "references": [
+        "P. A. M. Dirac.,  Math. Proc. Cambridge Philos. Soc. 26, 376 (1930)",
+        "F. Bloch.,  Z. Phys. 57, 545 (1929)",
+        "A. D. Becke.,  Phys. Rev. A 38, 3098 (1988)",
+        "C. Lee, W. Yang, and R. G. Parr.,  Phys. Rev. B 37, 785 (1988)",
+        "B. Miehlich, A. Savin, H. Stoll, and H. Preuss.,  Chem. Phys. Lett. 157, 200 (1989)",
+        "S. H. Vosko, L. Wilk, and M. Nusair.,  Can. J. Phys. 58, 1200 (1980)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "b3pw91": {
+      "family": "GGA",
+      "exact_exchange": 0.2,
+      "rsh": [
+        0.0,
+        0.2,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 401,
+          "name": "hyb_gga_xc_b3pw91",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "A. D. Becke.,  J. Chem. Phys. 98, 5648 (1993)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "b3p86": {
+      "family": "GGA",
+      "exact_exchange": 0.2,
+      "rsh": [
+        0.0,
+        0.2,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 403,
+          "name": "hyb_gga_xc_b3p86",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Defined through Gaussian implementation."
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "bhandhlyp": {
+      "family": "GGA",
+      "exact_exchange": 0.5,
+      "rsh": [
+        0.0,
+        0.5,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 436,
+          "name": "hyb_gga_xc_bhandhlyp",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "A. D. Becke.,  J. Chem. Phys. 98, 1372 (1993)",
+        "Defined through Gaussian implementation."
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "bhandh": {
+      "family": "GGA",
+      "exact_exchange": 0.5,
+      "rsh": [
+        0.0,
+        0.5,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 435,
+          "name": "hyb_gga_xc_bhandh",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "A. D. Becke.,  J. Chem. Phys. 98, 1372 (1993)",
+        "Defined through Gaussian implementation."
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "o3lyp": {
+      "family": "GGA",
+      "exact_exchange": 0.1161,
+      "rsh": [
+        0.0,
+        0.1161,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 404,
+          "name": "hyb_gga_xc_o3lyp",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "W.-M. Hoe, A. J. Cohen, and N. C. Handy.,  Chem. Phys. Lett. 341, 319–328 (2001)",
+        "A. J. Cohen and N. C. Handy.,  Mol. Phys. 99, 607 (2001)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "x3lyp": {
+      "family": "GGA",
+      "exact_exchange": 0.218,
+      "rsh": [
+        0.0,
+        0.218,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 411,
+          "name": "hyb_gga_xc_x3lyp",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "X. Xu and W. A. Goddard.,  Proc. Natl. Acad. Sci. U. S. A. 101, 2673 (2004)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "b97": {
+      "family": "GGA",
+      "exact_exchange": 0.1943,
+      "rsh": [
+        0.0,
+        0.1943,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 407,
+          "name": "hyb_gga_xc_b97",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "A. D. Becke.,  J. Chem. Phys. 107, 8554 (1997)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "b97_1": {
+      "family": "GGA",
+      "exact_exchange": 0.21,
+      "rsh": [
+        0.0,
+        0.21,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 408,
+          "name": "hyb_gga_xc_b97_1",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "F. A. Hamprecht, A. J. Cohen, D. J. Tozer, and N. C. Handy.,  J. Chem. Phys. 109, 6264 (1998)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "b97_2": {
+      "family": "GGA",
+      "exact_exchange": 0.21,
+      "rsh": [
+        0.0,
+        0.21,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 410,
+          "name": "hyb_gga_xc_b97_2",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "P. J. Wilson, T. J. Bradley, and D. J. Tozer.,  J. Chem. Phys. 115, 9233 (2001)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "mpw1pbe": {
+      "family": "GGA",
+      "exact_exchange": 0.25,
+      "rsh": [
+        0.0,
+        0.25,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 119,
+          "name": "gga_x_mpw91",
+          "coefficient": 0.75
+        },
+        {
+          "id": 130,
+          "name": "gga_c_pbe",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "C. Adamo and V. Barone.,  J. Chem. Phys. 108, 664 (1998)",
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 77, 3865 (1996)",
+        "J. P. Perdew, K. Burke, and M. Ernzerhof.,  Phys. Rev. Lett. 78, 1396 (1997)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "mpw1k": {
+      "family": "GGA",
+      "exact_exchange": 0.428,
+      "rsh": [
+        0.0,
+        0.428,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 405,
+          "name": "hyb_gga_xc_mpw1k",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "B. J. Lynch, P. L. Fast, M. Harris, and D. G. Truhlar.,  J. Phys. Chem. A 104, 4811 (2000)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "tpssh": {
+      "family": "MGGA",
+      "exact_exchange": 0.1,
+      "rsh": [
+        0.0,
+        0.1,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 457,
+          "name": "hyb_mgga_xc_tpssh",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "V. N. Staroverov, G. E. Scuseria, J. Tao, and J. P. Perdew.,  J. Chem. Phys. 119, 12129 (2003)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "revtpssh": {
+      "family": "MGGA",
+      "exact_exchange": 0.1,
+      "rsh": [
+        0.0,
+        0.1,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 458,
+          "name": "hyb_mgga_xc_revtpssh",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "G. I. Csonka, J. P. Perdew, and A. Ruzsinszky.,  J. Chem. Theory Comput. 6, 3688 (2010)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "scan0": {
+      "family": "MGGA",
+      "exact_exchange": 0.25,
+      "rsh": [
+        0.0,
+        0.25,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 264,
+          "name": "hyb_mgga_x_scan0",
+          "coefficient": 1
+        },
+        {
+          "id": 267,
+          "name": "mgga_c_scan",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "K. Hui and J.-D. Chai.,  J. Chem. Phys. 144, 044114 (2016)",
+        "J. Sun, A. Ruzsinszky, and J. P. Perdew.,  Phys. Rev. Lett. 115, 036402 (2015)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "m05": {
+      "family": "MGGA",
+      "exact_exchange": 0.28,
+      "rsh": [
+        0.0,
+        0.28,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 438,
+          "name": "hyb_mgga_x_m05",
+          "coefficient": 1
+        },
+        {
+          "id": 237,
+          "name": "mgga_c_m05",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Y. Zhao, N. E. Schultz, and D. G. Truhlar.,  J. Chem. Phys. 123, 161103 (2005)",
+        "Y. Zhao, N. E. Schultz, and D. G. Truhlar.,  J. Chem. Phys. 123, 161103 (2005)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "m05_2x": {
+      "family": "MGGA",
+      "exact_exchange": 0.56,
+      "rsh": [
+        0.0,
+        0.56,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 439,
+          "name": "hyb_mgga_x_m05_2x",
+          "coefficient": 1
+        },
+        {
+          "id": 238,
+          "name": "mgga_c_m05_2x",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Y. Zhao, N. E. Schultz, and D. G. Truhlar.,  J. Chem. Theory Comput. 2, 364 (2006)",
+        "Y. Zhao, N. E. Schultz, and D. G. Truhlar.,  J. Chem. Theory Comput. 2, 364 (2006)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "m06": {
+      "family": "MGGA",
+      "exact_exchange": 0.27,
+      "rsh": [
+        0.0,
+        0.27,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 449,
+          "name": "hyb_mgga_x_m06",
+          "coefficient": 1
+        },
+        {
+          "id": 235,
+          "name": "mgga_c_m06",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Y. Zhao and D. G. Truhlar.,  Theor. Chem. Acc. 120, 215 (2008)",
+        "Y. Zhao and D. G. Truhlar.,  Theor. Chem. Acc. 120, 215 (2008)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "m06_2x": {
+      "family": "MGGA",
+      "exact_exchange": 0.54,
+      "rsh": [
+        0.0,
+        0.54,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 450,
+          "name": "hyb_mgga_x_m06_2x",
+          "coefficient": 1
+        },
+        {
+          "id": 236,
+          "name": "mgga_c_m06_2x",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Y. Zhao and D. G. Truhlar.,  Theor. Chem. Acc. 120, 215 (2008)",
+        "Y. Zhao and D. G. Truhlar.,  Theor. Chem. Acc. 120, 215 (2008)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "m06hf": {
+      "family": "MGGA",
+      "exact_exchange": 1.0,
+      "rsh": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 444,
+          "name": "hyb_mgga_x_m06_hf",
+          "coefficient": 1
+        },
+        {
+          "id": 234,
+          "name": "mgga_c_m06_hf",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Y. Zhao and D. G. Truhlar.,  J. Phys. Chem. A 110, 13126 (2006)",
+        "Y. Zhao and D. G. Truhlar.,  J. Phys. Chem. A 110, 13126 (2006)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "mn15": {
+      "family": "MGGA",
+      "exact_exchange": 0.44,
+      "rsh": [
+        0.0,
+        0.44,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 268,
+          "name": "hyb_mgga_x_mn15",
+          "coefficient": 1
+        },
+        {
+          "id": 269,
+          "name": "mgga_c_mn15",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "H. S. Yu, X. He, S. L. Li, and D. G. Truhlar.,  Chem. Sci. 7, 5032-5051 (2016)",
+        "H. S. Yu, X. He, S. L. Li, and D. G. Truhlar.,  Chem. Sci. 7, 5032-5051 (2016)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "pw6b95": {
+      "family": "MGGA",
+      "exact_exchange": 0.28,
+      "rsh": [
+        0.0,
+        0.28,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 451,
+          "name": "hyb_mgga_xc_pw6b95",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Y. Zhao and D. G. Truhlar.,  J. Phys. Chem. A 109, 5656 (2005)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "b1b95": {
+      "family": "MGGA",
+      "exact_exchange": 0.28,
+      "rsh": [
+        0.0,
+        0.28,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 440,
+          "name": "hyb_mgga_xc_b88b95",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "A. D. Becke.,  J. Chem. Phys. 104, 1040 (1996)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "bb1k": {
+      "family": "MGGA",
+      "exact_exchange": 0.42,
+      "rsh": [
+        0.0,
+        0.42,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 443,
+          "name": "hyb_mgga_xc_bb1k",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Y. Zhao, B. J. Lynch, and D. G. Truhlar.,  J. Phys. Chem. A 108, 2715 (2004)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "lc_wpbe": {
+      "family": "GGA",
+      "exact_exchange": 1.0,
+      "rsh": [
+        0.4,
+        1.0,
+        -1.0
+      ],
+      "terms": [
+        {
+          "id": 478,
+          "name": "hyb_gga_xc_lc_wpbe",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "O. A. Vydrov and G. E. Scuseria.,  J. Chem. Phys. 125, 234109 (2006)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "lrc_wpbeh": {
+      "family": "GGA",
+      "exact_exchange": 1.0,
+      "rsh": [
+        0.2,
+        1.0,
+        -0.8
+      ],
+      "terms": [
+        {
+          "id": 465,
+          "name": "hyb_gga_xc_lrc_wpbeh",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "M. A. Rohrdanz, K. M. Martins, and J. M. Herbert.,  J. Chem. Phys. 130, 054112 (2009)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "lc_blyp": {
+      "family": "GGA",
+      "exact_exchange": 1.0,
+      "rsh": [
+        0.33,
+        1.0,
+        -1.0
+      ],
+      "terms": [
+        {
+          "id": 400,
+          "name": "hyb_gga_xc_lc_blyp",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Y. Tawada, T. Tsuneda, S. Yanagisawa, T. Yanai, and K. Hirao.,  J. Chem. Phys. 120, 8425-8433 (2004)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "cam_b3lyp": {
+      "family": "GGA",
+      "exact_exchange": 0.65,
+      "rsh": [
+        0.33,
+        0.65,
+        -0.46
+      ],
+      "terms": [
+        {
+          "id": 433,
+          "name": "hyb_gga_xc_cam_b3lyp",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "T. Yanai, D. P. Tew, and N. C. Handy.,  Chem. Phys. Lett. 393, 51 (2004)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "wb97": {
+      "family": "GGA",
+      "exact_exchange": 1.0,
+      "rsh": [
+        0.4,
+        1.0,
+        -1.0
+      ],
+      "terms": [
+        {
+          "id": 463,
+          "name": "hyb_gga_xc_wb97",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J.-D. Chai and M. Head-Gordon.,  J. Chem. Phys. 128, 084106 (2008)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "wb97x": {
+      "family": "GGA",
+      "exact_exchange": 1.0,
+      "rsh": [
+        0.3,
+        1.0,
+        -0.842294
+      ],
+      "terms": [
+        {
+          "id": 464,
+          "name": "hyb_gga_xc_wb97x",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J.-D. Chai and M. Head-Gordon.,  J. Chem. Phys. 128, 084106 (2008)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "hse03": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.10606601717798213,
+        0.0,
+        0.25
+      ],
+      "terms": [
+        {
+          "id": 427,
+          "name": "hyb_gga_xc_hse03",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. Heyd, G. E. Scuseria, and M. Ernzerhof.,  J. Chem. Phys. 118, 8207 (2003)",
+        "J. Heyd, G. E. Scuseria, and M. Ernzerhof.,  J. Chem. Phys. 124, 219906 (2006)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "hse06": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.11,
+        0.0,
+        0.25
+      ],
+      "terms": [
+        {
+          "id": 428,
+          "name": "hyb_gga_xc_hse06",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. Heyd, G. E. Scuseria, and M. Ernzerhof.,  J. Chem. Phys. 118, 8207 (2003)",
+        "J. Heyd, G. E. Scuseria, and M. Ernzerhof.,  J. Chem. Phys. 124, 219906 (2006)",
+        "A. V. Krukau, O. A. Vydrov, A. F. Izmaylov, and G. E. Scuseria.,  J. Chem. Phys. 125, 224106 (2006)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "mn12sx": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.11,
+        0.0,
+        0.25
+      ],
+      "terms": [
+        {
+          "id": 248,
+          "name": "hyb_mgga_x_mn12_sx",
+          "coefficient": 1
+        },
+        {
+          "id": 73,
+          "name": "mgga_c_mn12_sx",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "R. Peverati and D. G. Truhlar.,  Phys. Chem. Chem. Phys. 14, 16187 (2012)",
+        "R. Peverati and D. G. Truhlar.,  Phys. Chem. Chem. Phys. 14, 16187 (2012)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "b97d": {
+      "family": "GGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 170,
+          "name": "gga_xc_b97_d",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "S. Grimme.,  J. Comput. Chem. 27, 1787 (2006)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "wb97x_d": {
+      "family": "GGA",
+      "exact_exchange": 1.0,
+      "rsh": [
+        0.2,
+        1.0,
+        -0.777964
+      ],
+      "terms": [
+        {
+          "id": 471,
+          "name": "hyb_gga_xc_wb97x_d",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J.-D. Chai and M. Head-Gordon.,  Phys. Chem. Chem. Phys. 10, 6615-6620 (2008)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "wb97x_d3": {
+      "family": "GGA",
+      "exact_exchange": 1.0,
+      "rsh": [
+        0.25,
+        1.0,
+        -0.804272
+      ],
+      "terms": [
+        {
+          "id": 399,
+          "name": "hyb_gga_xc_wb97x_d3",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "Y.-S. Lin, G.-D. Li, S.-P. Mao, and J.-D. Chai.,  J. Chem. Theory Comput. 9, 263-272 (2013)"
+      ],
+      "needs_laplacian": false,
+      "nlc": []
+    },
+    "b97m_v": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 254,
+          "name": "mgga_xc_b97m_v",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "N. Mardirossian and M. Head-Gordon.,  J. Chem. Phys. 142, 074111 (2015)"
+      ],
+      "needs_laplacian": false,
+      "nlc": [
+        [
+          [
+            6.0,
+            0.01
+          ],
+          1
+        ]
+      ]
+    },
+    "wb97x_v": {
+      "family": "GGA",
+      "exact_exchange": 1.0,
+      "rsh": [
+        0.3,
+        1.0,
+        -0.833
+      ],
+      "terms": [
+        {
+          "id": 466,
+          "name": "hyb_gga_xc_wb97x_v",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "N. Mardirossian and M. Head-Gordon.,  Phys. Chem. Chem. Phys. 16, 9904-9924 (2014)"
+      ],
+      "needs_laplacian": false,
+      "nlc": [
+        [
+          [
+            6.0,
+            0.01
+          ],
+          1
+        ]
+      ]
+    },
+    "wb97m_v": {
+      "family": "MGGA",
+      "exact_exchange": 1.0,
+      "rsh": [
+        0.3,
+        1.0,
+        -0.85
+      ],
+      "terms": [
+        {
+          "id": 531,
+          "name": "hyb_mgga_xc_wb97m_v",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "N. Mardirossian and M. Head-Gordon.,  J. Chem. Phys. 144, 214110 (2016)"
+      ],
+      "needs_laplacian": false,
+      "nlc": [
+        [
+          [
+            6.0,
+            0.01
+          ],
+          1
+        ]
+      ]
+    },
+    "scan_rvv10": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 263,
+          "name": "mgga_x_scan",
+          "coefficient": 1
+        },
+        {
+          "id": 292,
+          "name": "mgga_c_scan_rvv10",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "J. Sun, A. Ruzsinszky, and J. P. Perdew.,  Phys. Rev. Lett. 115, 036402 (2015)",
+        "H. Peng, Z.-H. Yang, J. P. Perdew, and J. Sun.,  Phys. Rev. X 6, 041005 (2016)"
+      ],
+      "needs_laplacian": false,
+      "nlc": [
+        [
+          [
+            15.7,
+            0.0093
+          ],
+          1
+        ]
+      ]
+    },
+    "scanl": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 700,
+          "name": "mgga_x_scanl",
+          "coefficient": 1
+        },
+        {
+          "id": 702,
+          "name": "mgga_c_scanl",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "D. Mejia-Rodriguez and S. B. Trickey.,  Phys. Rev. A 96, 052512 (2017)",
+        "D. Mejia-Rodriguez and S. B. Trickey.,  Phys. Rev. B 98, 115161 (2018)",
+        "J. Sun, A. Ruzsinszky, and J. P. Perdew.,  Phys. Rev. Lett. 115, 036402 (2015)",
+        "D. Mejia-Rodriguez and S. B. Trickey.,  Phys. Rev. A 96, 052512 (2017)",
+        "D. Mejia-Rodriguez and S. B. Trickey.,  Phys. Rev. B 98, 115161 (2018)",
+        "J. Sun, A. Ruzsinszky, and J. P. Perdew.,  Phys. Rev. Lett. 115, 036402 (2015)"
+      ],
+      "needs_laplacian": true,
+      "nlc": []
+    },
+    "r2scanl": {
+      "family": "MGGA",
+      "exact_exchange": 0.0,
+      "rsh": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "terms": [
+        {
+          "id": 718,
+          "name": "mgga_x_r2scanl",
+          "coefficient": 1
+        },
+        {
+          "id": 719,
+          "name": "mgga_c_r2scanl",
+          "coefficient": 1
+        }
+      ],
+      "references": [
+        "D. Mejía-Rodríguez and S. B. Trickey.,  Phys. Rev. B 102, 121109 (2020)",
+        "J. W. Furness, A. D. Kaplan, J. Ning, J. P. Perdew, and J. Sun.,  J. Phys. Chem. Lett. 11, 8208-8215 (2020)",
+        "J. W. Furness, A. D. Kaplan, J. Ning, J. P. Perdew, and J. Sun.,  J. Phys. Chem. Lett. 11, 9248-9248 (2020)",
+        "D. Mejía-Rodríguez and S. B. Trickey.,  Phys. Rev. B 102, 121109 (2020)",
+        "J. W. Furness, A. D. Kaplan, J. Ning, J. P. Perdew, and J. Sun.,  J. Phys. Chem. Lett. 11, 8208-8215 (2020)",
+        "J. W. Furness, A. D. Kaplan, J. Ning, J. P. Perdew, and J. Sun.,  J. Phys. Chem. Lett. 11, 9248-9248 (2020)"
+      ],
+      "needs_laplacian": true,
+      "nlc": []
+    }
+  }
+}

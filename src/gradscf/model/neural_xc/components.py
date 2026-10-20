@@ -5,7 +5,7 @@ from typing import Any, Callable, Sequence
 
 import jax.numpy as jnp
 from jaxtyping import Array
-from ...dft.libxc_jax.jax_libxc import (
+from ...dft.xc import (
     FRIENDLY_XC_COMPONENT_ALIASES,
     JAXXCFunctionalInfo,
     JAXXCStatus,

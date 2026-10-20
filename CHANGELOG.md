@@ -2,6 +2,21 @@
 
 ## Unreleased — GradSCF
 
+### Shared XC recipes and external functionals
+
+- Consolidate traditional functional recipes and local JAX energy, potential
+  and Hessian kernels in `gradscf.dft.xc`; migrate consumers from the retired
+  `dft.libxc_jax` implementation.
+- Add `dft.custom_xc` for complete traditional expressions and external energy
+  callbacks, retaining current-density inputs, explicit model parameters and
+  the existing fixed-density, explicit and implicit training modes.
+- Complete molecular and periodic tau-dependent and screened-exchange
+  assembly, molecular GW/BSE starting-state integration, and TD parameter/cache
+  binding. Reject unavailable extra terms and unsupported consumer operators.
+- Repair upstream parameter bindings and screened-kernel differentiation,
+  including the small-gradient WPBE curvature; add independent reference tests,
+  public examples and documented validation boundaries.
+
 ### Model-owned training and workflows
 
 - Move XC training and workflows into `gradscf.model.neural_xc`; remove the

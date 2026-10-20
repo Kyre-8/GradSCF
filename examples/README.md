@@ -42,6 +42,7 @@ code from `reproducibility/` or the development archive.
 | [pbc](pbc/) | Periodic basis, SCF, forces, temperature and symmetry. |
 | [solvers](solvers/README.md) | Shared linear/eigenvalue solvers and degenerate response. |
 | [training](training/README.md) | Neural XC, force supervision and response targets. |
+| [xc](xc/README.md) | Complete traditional recipes, custom formulas and external-model adapters. |
 | [thermally_excited_graphite](thermally_excited_graphite/README.md) | Graphite phonons, electronic-temperature scans, local anharmonic diagnostics and relative vibrational spectra. |
 
 ## Periodic foundations

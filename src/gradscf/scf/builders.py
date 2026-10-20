@@ -10,7 +10,7 @@ import numpy as np
 from gradscf.integrals import precompile_eri_kernels
 from gradscf.scf.inputs.types import GeometryGradPolicy
 from ..data.molecule import MoleculeSpec, parse_molecule_spec
-from ..dft.libxc_jax.jax_libxc import hybrid_coeff, parse_xc
+from ..dft.xc import hybrid_coeff, parse_xc
 from gradscf.dft.hfx import _local_hfx_features_from_basis_dm
 from gradscf.dft.pt2 import (
     _local_pt2_feature_and_fock_response_from_restricted_orbitals,
@@ -298,6 +298,7 @@ def _build_restricted_reference(
         dispersion_energy=getattr(scf_inputs, "dispersion_energy", None),
         range_separated_coefficients=getattr(rks, "range_separated_coefficients", None),
         xc_density_floor=cfg.density_floor,
+        xc_spec=xc_spec_resolved,
     )
 
 
@@ -549,6 +550,7 @@ def _build_unrestricted_reference(
         mo_occ=jnp.stack([uks.mo_occ_alpha, uks.mo_occ_beta], axis=0),
         mo_energy=jnp.stack([uks.mo_energy_alpha, uks.mo_energy_beta], axis=0),
         rdm1=jnp.stack([uks.density_matrix_alpha, uks.density_matrix_beta], axis=0),
+        fock_matrix=jnp.stack([uks.fock_matrix_alpha, uks.fock_matrix_beta], axis=0),
         h1e=jnp.asarray(h1e),
         nuclear_repulsion=_host_float_unless_traced(uks.nuclear_repulsion),
         atom_coords=jnp.asarray(basis_cart.atom_coords),
@@ -576,6 +578,7 @@ def _build_unrestricted_reference(
         eri_lr=getattr(scf_inputs, "eri_lr", None),
         dispersion_energy=getattr(scf_inputs, "dispersion_energy", None),
         range_separated_coefficients=getattr(uks, "range_separated_coefficients", None),
+        xc_spec=xc_spec_resolved,
     )
 
 

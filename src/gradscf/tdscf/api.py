@@ -117,17 +117,17 @@ class _BaseTD:
     def molecule(self) -> Any:
         from ..scf.rsh import rsh_preset
 
-        rsh_source = (rsh_preset(getattr(self.mf, "xc", "")) is not None
+        rsh_source = (rsh_preset(getattr(self.mf, "xc", None) or getattr(self.mf, "xc_spec", "")) is not None
                       or getattr(self.mf, "range_separated_coefficients", None) is not None
                       or getattr(self.mf, "eri_lr", None) is not None)
         if rsh_source:
-            from ..scf.facade import RKS
-            from ..scf.molecules import RestrictedMolecule
+            from ..scf.facade import RKS, UKS
+            from ..scf.molecules import RestrictedMolecule, UnrestrictedMolecule
             from ..tddft.response import _restricted_rsh_coefficients
 
-            if not isinstance(self.mf, (RKS, RestrictedMolecule)):
-                raise NotImplementedError("Range-separated TD response currently supports closed-shell RKS singlets only.")
-            if not getattr(self, "singlet", True):
+            if not isinstance(self.mf, (RKS, UKS, RestrictedMolecule, UnrestrictedMolecule)):
+                raise NotImplementedError("Range-separated TD response requires a molecular RKS/UKS reference.")
+            if isinstance(self.mf, (RKS, RestrictedMolecule)) and not getattr(self, "singlet", True):
                 raise NotImplementedError("Range-separated triplet TD response is not implemented; only singlets are supported.")
             if self.xc_params is not None:
                 raise NotImplementedError("Range-separated TD response does not support XC parameter overrides.")
@@ -135,12 +135,16 @@ class _BaseTD:
                 override = self.xc_functional
                 if isinstance(override, SemilocalResponseFunctional):
                     override = override.xc_spec
-                if not isinstance(override, str) or rsh_preset(override) is None:
+                if hasattr(override, "spec"):
+                    override = override.spec
+                if str(override).lower() == "hyb_gga_xc_wb97x_d":
                     raise NotImplementedError("Range-separated TD response requires the complete wb97xd functional.")
+                if not isinstance(override, str) or rsh_preset(override) is None:
+                    raise NotImplementedError("Range-separated TD response requires a complete named RSH functional.")
             # This private TD adapter deliberately leaves the general
             # to_reference/as_reference GW/DFPT boundary closed. Reuse the
             # facade's existing freshness and converged-state checks.
-            reference = self.mf._ensure_reference() if isinstance(self.mf, RKS) else self.mf
+            reference = self.mf._ensure_reference() if isinstance(self.mf, (RKS, UKS)) else self.mf
             _restricted_rsh_coefficients(reference)
             return reference
         return as_reference(self.mf)
@@ -151,12 +155,18 @@ class _BaseTD:
 
     def _resolved_xc_functional(self) -> Any | None:
         if self.xc_functional is not None:
-            if isinstance(self.xc_functional, str):
-                return SemilocalResponseFunctional(self.xc_functional)
-            return self.xc_functional
-        source_xc = getattr(self.mf, "xc", None)
+            functional = getattr(self.xc_functional, "spec", self.xc_functional)
+            if isinstance(functional, str):
+                return SemilocalResponseFunctional(functional)
+            return functional
+        source_xc = getattr(self.mf, "xc", None) or getattr(self.mf, "xc_spec", None)
+        source_xc = getattr(source_xc, "spec", source_xc)
         if source_xc is None and getattr(self.mf, "range_separated_coefficients", None) is not None:
-            source_xc = "wb97xd"
+            from ..scf.rsh import rsh_preset
+            if tuple(self.mf.range_separated_coefficients) == rsh_preset("wb97xd").to_range_separated_hybrid_coefficients():
+                source_xc = "wb97xd"
+            else:
+                raise ValueError("An RSH array reference without xc_spec requires an explicit complete xc_functional.")
         if source_xc is None:
             return None
         if isinstance(source_xc, str):
@@ -164,10 +174,18 @@ class _BaseTD:
         return source_xc
 
     def _common_solver_kwargs(self, molecule: Any) -> dict[str, Any]:
+        from ..dft.functional import Functional
+
+        params = self.xc_params
+        inherit_params = self.xc_functional is None or (
+            isinstance(self.xc_functional, Functional)
+            and self.xc_functional is getattr(self.mf, "xc", None))
+        if params is None and inherit_params:
+            params = getattr(self.mf, "params", None)
         return {
             "molecule": molecule,
             "xc_functional": self._resolved_xc_functional(),
-            "xc_params": self.xc_params,
+            "xc_params": params,
             "occupation_tolerance": self.occupation_tolerance,
             "excitation_threshold": self.excitation_threshold,
         }
@@ -195,7 +213,10 @@ class _BaseTD:
         kwargs = self._common_solver_kwargs(molecule)
         source_xc = self.xc_functional
         if source_xc is None:
-            source_xc = getattr(self.mf, "xc", None)
+            source_xc = getattr(self.mf, "xc", None) or getattr(self.mf, "xc_spec", None)
+        if source_xc is None:
+            source_xc = getattr(kwargs["xc_functional"], "xc_spec", None)
+        source_xc = getattr(source_xc, "spec", source_xc)
         if isinstance(source_xc, str):
             source_xc = UnrestrictedSemilocalResponseFunctional(source_xc)
         kwargs["xc_functional"] = source_xc

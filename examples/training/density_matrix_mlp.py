@@ -36,7 +36,8 @@ class XCNetwork(nn.Module):
 
 
 model = XCNetwork()
-functional = dft.Functional(make_inputs, model.apply, init_fn=model.init)
+functional = dft.custom_xc(input_fn=make_inputs, energy_fn=model.apply,
+                          init_fn=model.init)
 
 if __name__ == '__main__':
     # GradSCF supplies integrals and an HF initial density. Learned SCF then uses

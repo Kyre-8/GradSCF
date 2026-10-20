@@ -41,6 +41,15 @@ correction. Unsupported nonuniform Ewald calculations are rejected by the facade
 and marked nonfinite in the array contraction path. Changing sampling requires
 a new SCF calculation.
 
+Named range-separated recipes use their full, short-range `erfc(omega*r)/r`
+and long-range `erf(omega*r)/r` exchange coefficients in the same periodic Fock
+map. The screened kernels currently support 3D cells with `exxdiv='ewald'` or
+`None`; screened reduced-dimensional and `vcut_sph` calculations raise explicit
+errors. Ewald uses the corresponding screened probe-charge correction, and
+the two screened operators sum to the full-range operator. FFT mesh and k-point
+convergence remain necessary. Recipes requiring dispersion, NLC or PT2 are
+rejected when those complete energy terms are unavailable.
+
 `pbc.kpoints.symmetry_reduce` builds orbit indices and multiplicities under supplied
 reciprocal-space rotations and optional time reversal. It is metadata for scalar
 sums, not an irreducible-SCF backend or an automatic space-group finder. Users
@@ -277,11 +286,21 @@ mf.run(params=new_params)  # Recompute before constructing a new response.
 ```
 
 Here `dft` is `gradscf.pbc.dft`; construct `functional` using
-`gradscf.dft.Functional`. Potential/kernel evaluation uses the shared derivative
+`gradscf.dft.Functional` or
+`gradscf.dft.custom_xc(input_fn=..., energy_fn=...)`. The facade also accepts
+`xc=functional, params=params`; passing both `xc=functional` and `functional=...`
+is an error. `gradscf.dft.custom_xc('pbe0')` returns a named traditional object:
+passing it as `xc` preserves every required physical term of its recipe.
+Potential/kernel evaluation uses the shared derivative
 module. For complex density blocks, its convention is
 `dE = Re sum_sk w_k Tr(V_sk dD_sk)`: conjugate the JAX gradient and divide by
 k weights once. The kernel is the JVP of this physical potential, with no
 locality approximation or four-index Hessian allocation.
+
+The array energy/SCF/q-kernel functions retain `xc='hf'` as their historical
+default placeholder when `functional=...` is supplied; it adds no HF XC term.
+An explicit non-HF named baseline together with a callback raises `ValueError`.
+Include the entire desired XC baseline in the callback energy.
 
 For parameter training, use `pbc.scf.run_kpoint_scf(..., functional=..., params=...)`
 and `dfpt.periodic_problem(inputs, result, ..., functional=..., params=...)`
@@ -315,9 +334,12 @@ equal-weight consumers. They reject thermal/nonuniform references rather than
 silently replacing their occupations. Optical postprocessing, bands, DFPT, and
 GW share reference freshness checks, including temperature, k points, weights,
 and exchange correction.
-External periodic models are currently supported by SCF and q=0 DFPT, but not
-by the TD/GW, optical or band-query consumers: an arbitrary energy model does
-not specify their missing off-grid/dynamical operators.
+External periodic models support SCF, static q=0 DFPT and adiabatic q=0
+TDA/TDDFT. The latter differentiates the complete real AO energy callback,
+including nonlocal feature construction, and applies its full Hessian through
+the same physical Fock map. External models remain unsupported by GW, optical
+and band-query consumers: an arbitrary energy callback does not supply their
+additional operators.
 
 ## Forces and stress
 

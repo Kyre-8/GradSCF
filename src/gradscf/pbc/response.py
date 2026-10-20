@@ -9,8 +9,8 @@ import jax.numpy as jnp
 from . import _kpoint
 from .kpoints import weights_for,reciprocal_vectors
 from ..integrals.periodic.coulomb import coulomb_kernel
-from ..integrals.periodic.fft import _kpoint_exchange
-from ..dft.libxc_jax.jax_libxc import hybrid_coeff,xc_type
+from ..dft.xc import parse_recipe
+from ..dft.xc.evaluate import grid_hessian
 
 
 def _validate_q_domain(inputs, exxdiv):
@@ -80,15 +80,21 @@ def project_q_potential(inputs,transfer,potential):
 
 
 def q_kernel(inputs,density,transfer,*,mesh,xc='hf',exxdiv='ewald',functional=None,params=None):
-    """Return the complex-linear finite-q Fock derivative on a fixed AO basis."""
+    """Return the complex-linear finite-q Fock derivative on a fixed AO basis.
+
+    For a callback, xc='hf' is the legacy placeholder and adds no HF XC.
+    """
     _validate_q_domain(inputs, exxdiv)
+    xc=_kpoint._named_xc_spec(xc)
+    _kpoint._validate_external_baseline(xc,functional)
     if functional is None:
         if params is not None:raise ValueError('params requires an external functional')
-        kind=xc_type(xc);alpha=hybrid_coeff(xc)
+        recipe=parse_recipe(xc);recipe.require_complete_support()
+        kind=recipe.kind
         external_action=None
     else:
         from .functional import finite_q_kernel
-        kind='HF';alpha=0.
+        kind='HF';recipe=None
         external_action=finite_q_kernel(functional,params,inputs,density,transfer)
     if kind not in ('HF','LDA','GGA','MGGA'):raise NotImplementedError('Unsupported finite-q XC kernel')
     ao=inputs.ao;plus=_shifted_ao(inputs,transfer);kw=weights_for(inputs)
@@ -98,12 +104,8 @@ def q_kernel(inputs,density,transfer,*,mesh,xc='hf',exxdiv='ewald',functional=No
     xc_action=None
     if kind!='HF':
         variables=_kpoint.grid_xc_variables(density,inputs,kind)
-        if kind=='MGGA':
-            from ..scf.uks import _point_unrestricted_xc_hessian_kernel
-            hessian=_point_unrestricted_xc_hessian_kernel(xc,kind)(variables)
-            xc_action=lambda fields:jnp.einsum('gij,gj->gi',hessian,fields)
-        else:
-            _,xc_action=jax.linearize(lambda v:_kpoint._point_unrestricted_xc_value_and_grad_kernel(xc,kind)(v)[1],variables)
+        hessian=grid_hessian(xc,kind)(variables)
+        xc_action=lambda fields:jnp.einsum('gij,gj->gi',hessian,fields)
     def apply(d):
         fields=_fields(d,ao,plus,kw,'LDA' if kind=='HF' else kind)
         rho=fields[:,:2].sum(axis=1)
@@ -115,8 +117,8 @@ def q_kernel(inputs,density,transfer,*,mesh,xc='hf',exxdiv='ewald',functional=No
             f+=_project(ao,plus,inputs.weights,vxc,kind)
         if external_action is not None:
             f+=external_action(d)
-        if alpha:
-            f-=alpha*_kpoint_exchange(inputs,d,mesh=mesh,exxdiv=exxdiv,
-                                     bra=plus[:,0],bra_overlap=inputs.overlap[transfer.partners])
+        if recipe is not None:
+            f-=_kpoint.exchange_matrix(d,inputs,mesh=mesh,recipe=recipe,exxdiv=exxdiv,
+                                      bra=plus[:,0],bra_overlap=inputs.overlap[transfer.partners])
         return f
     return apply

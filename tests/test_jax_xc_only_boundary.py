@@ -1,8 +1,8 @@
 import jax.numpy as jnp
 import pytest
 
-import gradscf.dft.libxc_jax.jax_xc_adapter as jax_xc_adapter
-from gradscf.dft.libxc_jax.jax_libxc import (
+import gradscf.dft.xc._jax_xc as jax_xc_adapter
+from gradscf.dft.xc import (
     LocalXCTermSpec,
     RestrictedFeatureBundle,
     eval_xc_energy_density,

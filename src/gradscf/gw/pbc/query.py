@@ -27,7 +27,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from ...dft.libxc_jax.jax_libxc import hybrid_coeff, xc_type
+from ...dft.xc import hybrid_coeff, parse_recipe, xc_type
 from ...integrals.periodic.fft import build_band_inputs, get_kpoint_jk
 from ...integrals.periodic.coulomb import ReducedBoundary
 from ...pbc._kpoint import grid_xc_potential, project_xc_potential
@@ -320,6 +320,10 @@ def _source(mf, fc):
     if mf.exxdiv not in (None, 'ewald'):
         raise NotImplementedError('Arbitrary-k GW requires exxdiv=None or ewald')
     kind = xc_type(mf.xc)
+    recipe = parse_recipe(mf.xc)
+    recipe.require_complete_support()
+    if recipe.exact_exchange.omega is not None:
+        raise NotImplementedError('Periodic GW query screened starting potentials are not implemented.')
     if kind != 'HF' and (hybrid_coeff(mf.xc) != 0 or kind not in ('LDA', 'GGA')):
         raise NotImplementedError('GW query supports HF source points or pure LDA/GGA references')
     if kind == 'HF' and fc:
