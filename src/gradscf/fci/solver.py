@@ -2,10 +2,11 @@
 from typing import NamedTuple
 import jax
 import jax.numpy as jnp
+from gradscf._memory import DEFAULT_MAX_MEMORY_MB, resolve_memory_mb
 from gradscf.ao2mo import validate_integrals
 from ..solvers import EigenSolverConfig, EigenResponseConfig, LinearOperator, solve_hermitian
 from ..solvers.diagnostics import require_converged_derivative
-from .hamiltonian import DEFAULT_WORKSPACE, build_hamiltonian, coefficient_array
+from .hamiltonian import DEFAULT_WORKSPACE, _action_tiles, build_hamiltonian, coefficient_array
 
 
 class FCIResult(NamedTuple):
@@ -44,21 +45,30 @@ def _physical_integrals_valid(h, g):
 
 
 def solve_fci(h1, eri, space, *, ecore=0., config=None, response=None,
-              ci0=None, probes=None, max_workspace_elements=DEFAULT_WORKSPACE):
+              ci0=None, probes=None, max_workspace_elements=DEFAULT_WORKSPACE,
+              max_memory=DEFAULT_MAX_MEMORY_MB):
     """Solve a fixed electron/spatial-orbital space; numerical configs are shared.
 
     Coefficients have (nroots,nalpha_strings,nbeta_strings) shape. A subspace
     response instead returns only energy_sum and projector probes, including
     internal degeneracy. The constant ecore is kept out of spectral gap tests.
+    max_memory budgets known preparation arrays and each operator action in
+    decimal MB, not the complete Davidson/dense/AD process residency.
     """
+    max_memory = resolve_memory_mb(max_memory)
     cfg = config or EigenSolverConfig(atol=1e-10, max_subspace=40)
     policy = response
     h,g = validate_integrals(h1,eri,space.norb)
     core = jnp.asarray(ecore)
     if core.shape != () or jnp.iscomplexobj(core):
         raise ValueError("ecore must be a real scalar")
+    dtype = jnp.result_type(h,g)
+    _action_tiles(space,dtype,1,max_workspace_elements,max_memory,
+        arrays=(h,g,core,ci0,probes),
+        extra_bytes=(3*g.size+(cfg.nroots+1)*space.size)*jnp.dtype(dtype).itemsize)
     physical = _physical_integrals_valid(h,g) & jnp.isfinite(core)
-    original = build_hamiltonian(h,g,space,max_workspace_elements=max_workspace_elements)
+    original = build_hamiltonian(h,g,space,max_workspace_elements=max_workspace_elements,
+                                 max_memory=max_memory)
     # closure_convert hoists inexact leaves, not a captured boolean tracer.
     # Keep the same NaN guard explicit under nested JIT; its tangent is zero.
     physical_gate = physical.astype(original.dtype)

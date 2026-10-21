@@ -435,11 +435,17 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
 
   - [x] **WF-21a:** alpha/beta/RHS Hamiltonian tiles, unit AD parity and
     measured action/reverse-residual memory and warm-time tradeoff.
-  - [ ] **WF-21b:** public facade capacity checks and joint solver budget.
+  - [x] **WF-21b1:** public facade preparation/action budgets and tiled
+    capacity checks.
+  - [ ] **WF-21b2:** joint solver state, operator workspace and AD budget.
 - [ ] **WF-22 — CI/FCI properties and geometry integration.** Stream bra/ket
   contractions and existing perturbative-CI corrections where applicable.
   Acceptance: energy/RDM identities and observable contractions, geometry
   gradient/HVP, root-cluster guards; necessary full-CI state size reported early.
+
+  - [x] **WF-22a:** tiled FCI one-/two-RDM, transition and spin contractions,
+    public budget propagation and measured first-reverse lifetime.
+  - [ ] **WF-22b:** CI perturbative properties and relaxed geometry integration.
 
 ### Recursive MP
 
@@ -1111,3 +1117,62 @@ requires its own explicit decision and numerical validation.
   old actual gradient failed its finite-derivative check; direct hit a bounded
   timeout. Neither is a successful matched aniline benchmark. Their compiled
   allocations are estimates, not a replacement for valid complete results.
+
+
+### 2026-10-21 — WF-21b1 / WF-22a: verified FCI facade and density tiles
+
+- FCISolver/solve_fci now pass the resolved source/override budget to their
+  existing Hamiltonian action. A metadata forecast of active h/g, preparation
+  scratch and necessary CI states replaces the old P*Ndet capacity rejection
+  before molecular transformation. Shared dense/Davidson numerical algorithms
+  are unchanged. Budget changes invalidate cached facade properties.
+- FCI densities reduce determinant tiles directly into requested one-/two-body
+  moments. Same-state bra/ket actions are reused; transition left/right actions
+  remain distinct. Complete beta tiles use the verified whole-row gather
+  strategy. The checkpointed carry contains only moments, not CI-state history.
+  Spin exchange is reduced directly without forming a two-RDM. Existing real
+  PySCF index/normalization conventions and necessary nact^4 outputs remain.
+- New low-budget property tests found four public methods using the RDM default
+  rather than their facade budget (4 genuine DID-NOT-RAISE failures). All RDM,
+  transition and spin facade entry points now pass the same max_memory. The
+  obsolete full-excitation-stack capacity helper was removed once no caller
+  remained. No extra solver or duplicate density implementation was retained.
+- REDs: missing solver budget/full-stack precheck 19 failures; original RDM
+  stacks/low tile cap 6 failures; property budget bypass 4 failures. Final
+  combined API/action/RDM/forward/response/nested suite: 75 passed, exit 0,
+  189.66 s pytest / 198.12 s process, 4,639,596 KiB RSS, CPU112-119. It includes
+  independent PySCF densities/spin/energies, unequal bra/ket, raw CI gradient/HVP
+  and two-step FD, multiple roots/cluster guards, active/core mapping and stale
+  budgets. Earlier separate 19-new/46-existing suites also passed.
+- Matched RDM benchmark on CPU96-103, JAX0.10.0, float64, seed2201, default
+  60,000MB/8M policy: nact12 / 853,776 determinants, old/new warm
+  1.571182/0.865614 s, whole-process RSS 9,084,120/1,360,120 KiB, compiled
+  temporaries 6,891,679,872/454,064,440 bytes. Compiled output allocation is
+  unchanged at 500,008 bytes. All public outputs agree within 1.94e-14 over
+  nact8/10/12 and a nonidentical-bra/ket transition comparison.
+- Small-case costs are retained: nact8 forward 4.090/5.200 ms, nact10
+  transition 53.349/55.926 ms. The two-tile reduction adds small-loop overhead;
+  avoiding full E stacks provides the measured larger-space benefit. There is
+  no universal speedup claim. nact8 reverse warm improves 5.234/3.744 ms,
+  compiled temporaries 20,150,088/10,297,672 bytes, with raw CI gradients within
+  1.33e-15; total small reverse process RSS is essentially unchanged.
+- Saved-residual/JAXPR inspection on this first-reverse case retains one CI
+  array, fixed maps/probes, normalization scalars and two tile indices. No full
+  E stack or per-tile complete-CI history is retained. All ten benchmark
+  processes exited zero. Exact input/output hashes, source versions, compile/
+  first/warm samples and time-v RSS are in local `wf22-rdm-efficiency/` and
+  remote corresponding results. These are numerical-action measurements,
+  not a complete FCI solver or molecular geometry benchmark.
+- Final hashes: api.py
+  `bd6c938f3b69eda7829386dd8ac9f450355289d7e238a7e76c636beb1494f6c8`;
+  solver.py `52027295001530fee2cacb78ba1a51c6f22d18fa636e2a045e03f32e762eb931`;
+  rdm.py `5d4919d003c8e2fd7c5bee64ca0c7cec87120a6badfe5beea5157332fb16d2d5`;
+  Hamiltonian after unused-guard removal
+  `e14ddbe62738fc88890c6451c7f1d7e9a807304252f980faa942c4783f0df499`.
+  Independent math/device review passed; its whole-row gather and actual-link
+  trap suggestions were applied before final validation. No local numerics.
+- Completion review: WF-21b1/22a are verified. The same nominal budget reaches
+  preparation, actions and densities, but retained solver/adjoint state is not
+  yet jointly reserved; that remains WF-21b2/29. The shared planner conservatively
+  reserves three CI output versions even for density reductions; avoid a second
+  planner, and refine that over-reservation with common ownership in WF-29.

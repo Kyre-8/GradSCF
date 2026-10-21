@@ -15,17 +15,6 @@ from .cistring import FCISpace, _link_maps
 DEFAULT_WORKSPACE = 8_000_000
 
 
-def _check_workspace(space, max_workspace_elements, *, include_eri=False):
-    """Capacity guard for helpers that still construct full excitation stacks."""
-    if not isinstance(space, FCISpace):
-        raise TypeError("Expected an FCISpace")
-    if (not isinstance(max_workspace_elements, Integral) or isinstance(max_workspace_elements,bool)
-            or max_workspace_elements < 1 or space.norb**2 * space.size > max_workspace_elements):
-        raise ValueError("FCI excitation tensor exceeds max_workspace_elements")
-    if include_eri and space.norb**4 > max_workspace_elements:
-        raise ValueError("FCI integral tensor exceeds max_workspace_elements")
-
-
 def _action_tiles(space, dtype, nrhs, max_workspace_elements, max_memory, *,
                   arrays=(), extra_bytes=0):
     """Plan a string tile before enumerating links or gathering coefficients.
