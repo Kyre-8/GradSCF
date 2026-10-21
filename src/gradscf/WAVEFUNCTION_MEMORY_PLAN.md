@@ -270,11 +270,18 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   geometry JVP/VJP and directional second derivatives on tiny R/U systems;
   fail-on-full-ERI instrumentation; unchanged dense-path regression. RSH/custom
   XC expansion is not required to close this HF task and must remain guarded.
-- [ ] **WF-02 — Shared block and byte-budget contract.** Add only the metadata,
+- [ ] **WF-02 — Shared block and byte-budget contract** (`in_progress`). Add only the metadata,
   block/action requests, accounting and ownership required by MP2 and CC.
   Acceptance: dense/DF request equivalence, dtype/device retention, invalid
   representation errors, cache lifetime and minimum-memory diagnostics. Include
   an early target-device capability check; full device validation remains WF-30.
+
+  - [x] **WF-02a:** budget the existing array-block entry point and bound DF
+    auxiliary intermediates; validate nested AD and CPU/GPU7 execution.
+  - [ ] **WF-02b:** wire caller budgets/resident-state ownership into the MP/CC
+    consumers as WF-05/09 migrate, rather than using the block default everywhere.
+  - [ ] **WF-02c:** complete the native block/capability contract with WF-03/04,
+    including target-device capacity when JIT tracing hides concrete devices.
 - [ ] **WF-03 — Exact native partial AO2MO.** Generate requested MO tiles without
   full AO-pair or full MO ERI. Reuse shell traversal and half transformations.
   Acceptance: asymmetric coefficient sets, permutation symmetry, packed/dense
@@ -581,3 +588,69 @@ requires its own explicit decision and numerical validation.
   because its step description lacked CPU IDs. This is a runner failure, not a
   failed geometry derivative. The focused test is rerun directly with 16 CPUs
   and all GPUs disabled. Algorithm work continues without Slurm changes.
+
+### 2026-10-21 — WF-02: bounded AO2MO increment started
+
+- Status: `in_progress`. Extend the existing `transform_eri_block` rather than
+  introduce another provider hierarchy. First bound auxiliary-axis DF transforms
+  by the shared byte budget, retaining dense/s4 small reference paths and charging
+  their resident arrays/output. This does not remove the resident AO/DF input.
+- Reviewed local PySCF 2.9.0 `mp/mp2.py::_ao2mo_ovov`, `mp/dfmp2.py` auxiliary
+  batching, and `ao2mo/outcore.py::half_e1`. Exact source SHA256 values are saved
+  in ignored `artifacts/wavefunction-memory-20261021/pyscf-source-review.json`.
+  This is an algorithm/source comparison, not a numerical speed comparison.
+- Native partial AO2MO has no existing block ABI at this baseline. WF-03 still
+  needs shell-slab/half transformations; evaluating one J/K per MO pair will not
+  be introduced as a production shortcut. WF-04 must supply its contracted
+  coordinate/coefficient derivatives before the geometry adapter consumes it.
+- Focused tests are written before production changes: budget errors, auxiliary
+  temporary shapes, asymmetric blocks, dtype, JVP/VJP and HVP. WF-02 remains open
+  until its shared contract and integration criteria are met.
+
+### 2026-10-21 — WF-02a: verified bounded array-block increment
+
+- Initial RED: 2 expected failures for the missing `max_memory` argument, exit 1,
+  2.71 s, CPU `56-71`, GPUs disabled. Evidence: `wf02-red/red-result.json`.
+- Extended the existing `integrals/molecular/ao2mo.py`; no provider hierarchy,
+  alternate solver or method-local integral implementation was added. The public
+  entry validates and dispatches; `_eri_block_size` plans static storage and
+  `_transform_df_eri_block` performs the exact auxiliary-block contraction.
+- Initial numerical tests passed, but quality review found an eager-tail budget
+  bug: three full outputs could coexist while only two were charged. The revised
+  minimum-budget test failed on frozen source `c5fe99e6...db39a4` before the fix
+  (exit 1, 2.84 s, no budget rejection before contraction). Evidence:
+  `wf02-tail-red/red-result.json`. This was a forward-workspace defect, not AD
+  history storage. Fixed DF accounting to three outputs; dense/s4 remain two.
+- Final source SHA256:
+  `fbb7847f01a6528ffd47725072e75c296ff4f4151bb2019e0c224bde38c334aa`.
+  Test SHA256:
+  `c80d3ec64dc9b78969a9d36a87e2bd4aa9889efa14786b1bc856962a9a421f14`.
+  The frozen manifest verified 1061 source/test files; native library is unchanged.
+- Final commands (all direct execution on c20, no Slurm):
+
+  ```text
+  python -m pytest -q -p no:cacheprovider tests/integrals/test_ao2mo_memory.py
+  python -m pytest -q -p no:cacheprovider tests/mp/test_integrals.py tests/mp/test_mp2.py tests/mp/test_noncanonical.py
+  ```
+
+- Results: 18 new CPU cases passed (5.42 s pytest / 6.38 s process); the same
+  18 cases passed on physical GPU7 (9.09 / 10.16 s); 39 related CPU MP cases passed
+  (99.15 / 104.76 s). Every group exited 0. CPU affinity `56-71`, GPU-test CPU
+  affinity `72-87`, at most 32 logical CPUs concurrently. GPU7 was selected by
+  UUID `GPU-b7c1537a-ac7b-2381-a910-866b9afb9ae8`; GPU6 was never visible.
+  JAX 0.10.0, float64 enabled (explicit float32/mixed cases also tested), seed
+  812/813. Tests include factors and four coefficient matrices in JVP/VJP/HVP,
+  two FD steps, remainder/empty axes, dtype, shape and pre-allocation guards.
+- Observed host test-process peak RSS: CPU 833,692 KiB; GPU test 1,345,332 KiB;
+  MP regressions 4,282,268 KiB. These are test-suite host peaks, not method-level
+  memory savings, device peak VRAM, or warmed speed comparisons. Final evidence:
+  `/home/yjiao/gradscf_checks/wavefunction-memory-20261021/wf02-green2/`.
+- Specification re-review and independent quality re-review passed; the tail
+  finding is closed. Readability review retained two small helpers and advised
+  against further cosmetic changes.
+- Plan review: WF-02a is verified. The outer WF-02 task remains `in_progress`:
+  caller-level budget inheritance, native capability/ownership and unknown-JIT-
+  device capacity need WF-02b/c. Native exact non-DF half transformations and their
+  geometry adjoints are still WF-03/04; no DF approximation was introduced to
+  replace a non-DF model. Full AD/Krylov/process budgeting remains WF-29, with
+  measured end-to-end scaling required at WF-08/32. Overall scope is unchanged.
