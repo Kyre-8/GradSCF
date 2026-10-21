@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from numbers import Integral
 from typing import Any, NamedTuple
 
@@ -304,15 +304,18 @@ class GKS(_BaseKS):
     def _config(self) -> GKSConfig:
         return GKSConfig(xc_spec=self.xc, collinear=self.collinear, max_cycle=self.max_cycle,
                          conv_tol=self.conv_tol, conv_tol_density=self.conv_tol_density,
-                         conv_tol_grad=self.conv_tol_grad, damping=self.damp, level_shift=self.level_shift)
+                         conv_tol_grad=self.conv_tol_grad, damping=self.damp, level_shift=self.level_shift,
+                         grid_block_size=self.grid_block_size, grid_max_memory=self.grid_max_memory)
 
     def kernel(self, dm0: Array | None = None) -> Any:
         cfg = self._config()
         _validate_mode(cfg)
+        if cfg.grid_block_size > 0:
+            raise NotImplementedError('Generalized SCF does not support streamed grid AO data; use grid_block_size=-1.')
         self._configure_jax_cache()
         supplied = dm0 if dm0 is not None else (None if isinstance(self.init_guess, str) else self.init_guess)
         inputs = build_uks_integral_inputs(
-            atom=self._spec(), basis=self.mol.basis, config=UKSConfig(xc_spec=self.xc),
+            atom=self._spec(), basis=self.mol.basis, config=replace(cfg, grid_block_size=-1),
             xc_spec=self.xc, unit=self.mol.unit, charge=self.mol.charge, spin=self.mol.spin,
             cart=self.mol.cart, grids_level=self.grids_level, max_l=self.max_l,
             integral_backend=self.integral_backend, grid_ao_backend=self.grid_ao_backend,

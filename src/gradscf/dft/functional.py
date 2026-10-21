@@ -1,5 +1,6 @@
 """External JAX energy functionals with SCF-current, differentiable inputs."""
 from dataclasses import dataclass
+from functools import cached_property
 from typing import Any, Callable, ClassVar
 
 import jax
@@ -18,8 +19,10 @@ class DensityInputs:
 
     Atomic units; rho/grad_rho/tau/laplacian_rho are spin sums. Their *_spin
     counterparts have leading alpha/beta axis. tau = 1/2 sum |grad psi|^2.
-    Fixed-geometry AO/grid arrays are reused; density-derived values are never
-    cached across SCF steps. MO energies/orbitals and reference HFX/PT2 caches
+    A grid provider forms small physical features blockwise. Explicitly asking
+    for ao/ao_deriv1 materializes those full-grid arrays for legacy callbacks.
+    Values are cached only within this trial-density input object, never across
+    SCF steps. MO energies/orbitals and reference HFX/PT2 caches
     are deliberately absent: they are not functions of this trial D alone.
     """
     density_matrix: Any
@@ -29,12 +32,20 @@ class DensityInputs:
     def total_density_matrix(self):
         return self.density_matrix.sum(axis=0)
 
-    @property
+    @cached_property
     def ao(self):
+        provider = getattr(self._molecule, "grid_ao", None)
+        if provider is not None:
+            return provider.map(lambda ao, dao, lap, coords, weights: ao, deriv=0)
         return self._molecule.ao
 
-    @property
+    @cached_property
     def ao_deriv1(self):
+        provider = getattr(self._molecule, "grid_ao", None)
+        if provider is not None:
+            values = provider.map(
+                lambda ao, dao, lap, coords, weights: jnp.moveaxis(dao, 0, 1), deriv=1)
+            return jnp.moveaxis(values, 1, 0)
         return _ao_and_derivatives(self._molecule)[1]
 
     @property
@@ -57,17 +68,41 @@ class DensityInputs:
     def overlap_matrix(self):
         return self._molecule.overlap_matrix
 
-    @property
+    @cached_property
     def rho_spin(self):
+        provider = getattr(self._molecule, "grid_ao", None)
+        if provider is not None:
+            def density(ao, dao, lap, coords, weights):
+                values = jax.vmap(lambda d: _restricted_rho_kernel(ao, d[None]))(self.density_matrix)
+                return values.T
+            return provider.map(density, deriv=0).T
         return jax.vmap(lambda d: _restricted_rho_kernel(self.ao, d[None]))(self.density_matrix)
 
     @property
     def rho(self):
-        return _restricted_rho_kernel(self.ao, self.density_matrix)
+        return self.rho_spin.sum(axis=0)
+
+    @cached_property
+    def _gradient_tau_spin(self):
+        provider = getattr(self._molecule, "grid_ao", None)
+        if provider is None:
+            gradient = jax.vmap(lambda d: _spin_density_and_gradient(
+                self.ao, self.ao_deriv1, d)[1])(self.density_matrix)
+            tau = jax.vmap(lambda d: _spin_tau(self.ao_deriv1, d))(self.density_matrix)
+            return gradient, tau
+
+        def quantities(ao, dao, lap, coords, weights):
+            gradient = jax.vmap(lambda d: _spin_density_and_gradient(ao, dao, d)[1])(
+                self.density_matrix)
+            tau = jax.vmap(lambda d: _spin_tau(dao, d))(self.density_matrix)
+            return jnp.moveaxis(gradient, 0, 1), tau.T
+
+        gradient, tau = provider.map(quantities, deriv=1)
+        return jnp.moveaxis(gradient, 1, 0), tau.T
 
     @property
     def grad_rho_spin(self):
-        return jax.vmap(lambda d: _spin_density_and_gradient(self.ao, self.ao_deriv1, d)[1])(self.density_matrix)
+        return self._gradient_tau_spin[0]
 
     @property
     def grad_rho(self):
@@ -75,14 +110,20 @@ class DensityInputs:
 
     @property
     def tau_spin(self):
-        return jax.vmap(lambda d: _spin_tau(self.ao_deriv1, d))(self.density_matrix)
+        return self._gradient_tau_spin[1]
 
     @property
     def tau(self):
         return self.tau_spin.sum(axis=0)
 
-    @property
+    @cached_property
     def laplacian_rho_spin(self):
+        provider = getattr(self._molecule, "grid_ao", None)
+        if provider is not None:
+            def laplacian(ao, dao, lap, coords, weights):
+                values = jax.vmap(lambda d: _spin_laplacian(ao, dao, lap, d))(self.density_matrix)
+                return values.T
+            return provider.map(laplacian, deriv=2).T
         lapl = _ao_laplacian(self._molecule)
         return jax.vmap(lambda d: _spin_laplacian(self.ao, self.ao_deriv1, lapl, d))(self.density_matrix)
 

@@ -253,6 +253,7 @@ def _unrestricted_problem(
     grid_weights,
     config,
     fock=None,
+    grid_ao=None,
 ):
     if config.jk_backend != "full" or config.potential_clip is not None:
         raise NotImplementedError(
@@ -270,6 +271,7 @@ def _unrestricted_problem(
         ao=jnp.asarray(ao),
         ao_deriv1=jnp.asarray(ao_deriv1),
         grid_weights=jnp.asarray(grid_weights),
+        grid_ao=grid_ao,
     )
     if fock is None:
         _, fock = evaluate(density_from(coeff), args)
@@ -289,6 +291,7 @@ def uks_stability(
     ao_deriv1,
     grid_weights,
     config: UKSConfig,
+    grid_ao=None,
     stability_tol=1e-5,
     eigensolver_tol=1e-7,
     max_cycle=100,
@@ -314,6 +317,7 @@ def uks_stability(
         ao_deriv1=ao_deriv1,
         grid_weights=grid_weights,
         config=config,
+        grid_ao=grid_ao,
         fock=jnp.stack([result.fock_matrix_alpha, result.fock_matrix_beta]),
     )
     return _curvature_check(
@@ -395,6 +399,7 @@ def restricted_stability(
             ao_deriv1=inputs.ao_deriv1,
             grid_weights=inputs.grid_weights,
             config=spin_cfg,
+            grid_ao=getattr(inputs, 'grid_ao', None),
         )
 
         def spin_angles(x):
@@ -463,6 +468,7 @@ def restricted_stability(
             alpha=alpha,
             cfg=cfg,
             xc_kind=kind,
+            grid_ao=getattr(inputs, 'grid_ao', None),
         )[0]
 
     c = result.mo_coeff
@@ -557,6 +563,7 @@ def stabilize_uks_from_integrals(
     options = {
         key: scf_inputs[key] for key in ("eri", "ao", "ao_deriv1", "grid_weights")
     }
+    options['grid_ao'] = scf_inputs.get('grid_ao')
     return _stabilize(
         run_uks_from_integrals,
         lambda result: uks_stability(
@@ -716,6 +723,7 @@ def unrestricted_stability(
         ao_deriv1=ref.ao_deriv1,
         grid_weights=ref.grid.weights,
         config=source._config(),
+        grid_ao=getattr(ref, 'grid_ao', None),
     )
     return _curvature_check(
         coeff=coeff,

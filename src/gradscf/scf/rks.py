@@ -80,6 +80,8 @@ class RKSConfig:
     auxbasis: str | None = None
     direct_scf_tol: float = 0.0
     direct_scf_workers: int = 1
+    grid_block_size: int = 0
+    grid_max_memory: float = 256.0
     convergence_metric: Literal["energy_and_residual", "energy"] = "energy_and_residual"
 
 
@@ -578,8 +580,8 @@ def _xc_energy_and_potential_on_grid(
 def _vxc_matrix_from_grid_potential(
     *,
     ao: Array,
-    ao_deriv1: Array,
-    ao_laplacian: Array,
+    ao_deriv1: Array | None,
+    ao_laplacian: Array | None,
     weights: Array,
     vxc_rho: Array,
     vxc_grad: Array,
@@ -631,6 +633,46 @@ def _vxc_matrix_from_grid_potential(
     return 0.5 * (vxc_matrix + vxc_matrix.T)
 
 
+def _restricted_xc_energy_and_matrix(
+    *,
+    density: Array,
+    ao: Array,
+    ao_deriv1: Array | None,
+    weights: Array,
+    cfg: RKSConfig,
+    xc_kind: str,
+    grid_ao: Any | None = None,
+) -> tuple[Array, Array]:
+    """Integrate built-in XC, reducing AO blocks before advancing the grid."""
+    dtype = jnp.result_type(density, ao, weights)
+    initial = (jnp.asarray(0., dtype=dtype), jnp.zeros(density.shape, dtype=dtype))
+    if xc_kind == "HF":
+        return initial
+
+    def contribution(carry, block_ao, derivative, laplacian, coords, block_weights):
+        del laplacian, coords
+        if xc_kind == "LDA":
+            rho = jnp.einsum("rp,pq,rq->r", block_ao, density, block_ao,
+                             precision=Precision.HIGHEST)
+            grad = jnp.zeros((block_ao.shape[0], 3), dtype=rho.dtype)
+        else:
+            rho, grad = _spin_density_and_gradient(block_ao, derivative, density)
+        tau = _spin_tau(derivative, density) if xc_kind == "MGGA" else jnp.zeros_like(rho)
+        energy, v_rho, v_grad, v_tau = _xc_energy_and_potential_on_grid(
+            rho=rho, grad=grad, tau=tau, weights=block_weights,
+            xc_spec=cfg.xc_spec, density_floor=cfg.density_floor,
+            potential_clip=cfg.potential_clip, xc_kind=xc_kind, return_tau=True)
+        potential = _vxc_matrix_from_grid_potential(
+            ao=block_ao, ao_deriv1=derivative, ao_laplacian=None, weights=block_weights,
+            vxc_rho=v_rho, vxc_grad=v_grad, vxc_tau=v_tau,
+            vxc_lapl=jnp.zeros_like(rho), xc_kind=xc_kind)
+        return carry[0] + energy, carry[1] + potential
+
+    if grid_ao is None:
+        return contribution(initial, ao, ao_deriv1, None, None, weights)
+    return grid_ao.reduce(contribution, initial, deriv=0 if xc_kind == "LDA" else 1)
+
+
 def _fock_components_for_density(
     *,
     density: Array,
@@ -648,33 +690,13 @@ def _fock_components_for_density(
     alpha: Array,
     cfg: RKSConfig,
     xc_kind: str,
+    grid_ao: Any | None = None,
 ) -> tuple[Array, Array, Array, Array]:
     j_mat, k_mat = jk_builder(density, mo_coeff, mo_occ, density_last, j_last, k_last)
     del mo_energy
-    rho, grad = _spin_density_and_gradient(ao, ao_deriv1, density)
-    tau = _spin_tau(ao_deriv1, density)
-    xc_energy, vxc_rho, vxc_grad, vxc_tau = _xc_energy_and_potential_on_grid(
-        rho=rho,
-        grad=grad,
-        tau=tau,
-        weights=weights,
-        xc_spec=cfg.xc_spec,
-        density_floor=cfg.density_floor,
-        potential_clip=cfg.potential_clip,
-        xc_kind=xc_kind,
-        return_tau=True,
-    )
-    vxc_matrix = _vxc_matrix_from_grid_potential(
-        ao=ao,
-        ao_deriv1=ao_deriv1,
-        ao_laplacian=jnp.zeros_like(ao),
-        weights=weights,
-        vxc_rho=vxc_rho,
-        vxc_grad=vxc_grad,
-        vxc_tau=vxc_tau,
-        vxc_lapl=jnp.zeros_like(vxc_rho),
-        xc_kind=xc_kind,
-    )
+    xc_energy, vxc_matrix = _restricted_xc_energy_and_matrix(
+        density=density, ao=ao, ao_deriv1=ao_deriv1, weights=weights,
+        cfg=cfg, xc_kind=xc_kind, grid_ao=grid_ao)
     xc = XCContribution(xc_energy,vxc_matrix,alpha)
     return j_mat,k_mat,xc,restricted_fock(h,j_mat,k_mat,xc)
 
@@ -697,6 +719,7 @@ def _energy_and_raw_fock_for_density(
     alpha: Array,
     cfg: RKSConfig,
     xc_kind: str,
+    grid_ao: Any | None = None,
 ) -> tuple[Array, Array, Array, Array, Array]:
     j_mat, k_mat, xc, fock = _fock_components_for_density(
         density=density,
@@ -714,6 +737,7 @@ def _energy_and_raw_fock_for_density(
         alpha=alpha,
         cfg=cfg,
         xc_kind=xc_kind,
+        grid_ao=grid_ao,
     )
 
     total=restricted_energy(density,h,j_mat,k_mat,xc,nuclear_repulsion=enuc)
@@ -1058,6 +1082,7 @@ def _run_rks_from_integrals_shared(
     ao: Array,
     ao_deriv1: Array,
     grid_weights: Array,
+    grid_ao: Any | None = None,
     df_factors: Array | None = None,
     direct_basis: CartesianBasis | None = None,
     init_density: Array | None = None,
@@ -1154,6 +1179,7 @@ def _run_rks_from_integrals_shared(
         alpha=alpha,
         cfg=cfg,
         xc_kind=xc_kind,
+        grid_ao=grid_ao,
     )
 
     def energy_and_fock_builder(
@@ -1182,6 +1208,7 @@ def _run_rks_from_integrals_shared(
             alpha=alpha,
             cfg=cfg,
             xc_kind=xc_kind,
+            grid_ao=grid_ao,
         )
 
     scf_kwargs = dict(
@@ -1275,6 +1302,7 @@ def run_rks_from_integrals(
     ao: Array,
     ao_deriv1: Array,
     grid_weights: Array,
+    grid_ao: Any | None = None,
     df_factors: Array | None = None,
     direct_basis: CartesianBasis | None = None,
     init_density: Array | None = None,
@@ -1296,6 +1324,7 @@ def run_rks_from_integrals(
         ao=ao,
         ao_deriv1=ao_deriv1,
         grid_weights=grid_weights,
+        grid_ao=grid_ao,
         df_factors=df_factors,
         direct_basis=direct_basis,
         init_density=init_density,
@@ -1331,6 +1360,7 @@ def run_rks_from_integrals_traceable(
     ao: Array,
     ao_deriv1: Array,
     grid_weights: Array,
+    grid_ao: Any | None = None,
     df_factors: Array | None = None,
     direct_basis: CartesianBasis | None = None,
     init_density: Array | None = None,
@@ -1352,6 +1382,7 @@ def run_rks_from_integrals_traceable(
         ao=ao,
         ao_deriv1=ao_deriv1,
         grid_weights=grid_weights,
+        grid_ao=grid_ao,
         df_factors=df_factors,
         direct_basis=direct_basis,
         init_density=init_density,

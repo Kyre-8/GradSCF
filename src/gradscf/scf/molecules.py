@@ -86,8 +86,13 @@ class RestrictedMolecule:
     # Optional native AO J/K action. Its plan is static and its basis
     # parameters are dynamic pytree leaves; no ERI array is required.
     direct_basis: Any | None = None
+    grid_ao: Any | None = None
 
     def density(self) -> jnp.ndarray:
+        if self.grid_ao is not None:
+            return self.grid_ao.map(
+                lambda ao, _dao, _lap, _coords, _weights:
+                    jnp.einsum("spq,rp,rq->rs", self.rdm1, ao, ao), deriv=0)
         return jnp.einsum("spq,rp,rq->rs", self.rdm1, self.ao, self.ao)
 
 
@@ -148,6 +153,7 @@ class UnrestrictedMolecule:
     # The same spatial AO provider serves both spin densities. Its topology
     # is static; numerical basis parameters remain dynamic PyTree leaves.
     direct_basis: Any | None = None
+    grid_ao: Any | None = None
 
     @property
     def eri_pair_matrix(self):
@@ -155,6 +161,10 @@ class UnrestrictedMolecule:
         return self.rep_tensor if self.rep_tensor.ndim==2 else None
 
     def density(self) -> jnp.ndarray:
+        if self.grid_ao is not None:
+            return self.grid_ao.map(
+                lambda ao, _dao, _lap, _coords, _weights:
+                    jnp.einsum("spq,rp,rq->r", self.rdm1, ao, ao), deriv=0)
         return jnp.einsum("spq,rp,rq->r", self.rdm1, self.ao, self.ao)
 
 

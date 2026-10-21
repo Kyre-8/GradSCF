@@ -160,10 +160,15 @@ def _unrestricted_orbital_data(
 
 
 def _spin_densities_on_grid(molecule: Any) -> tuple[Array, Array]:
-    ao = jnp.asarray(molecule.ao)
     rdm1 = jnp.asarray(molecule.rdm1)
     if rdm1.ndim != 3 or rdm1.shape[0] != 2:
         raise ValueError("Unrestricted response requires spin-resolved rdm1 with shape (2, nao, nao).")
+    provider = getattr(molecule, "grid_ao", None)
+    if provider is not None:
+        density = provider.map(lambda ao, dao, lap, coords, weights:
+            jnp.einsum("spq,gp,gq->gs", rdm1, ao, ao, precision=Precision.HIGHEST), deriv=0)
+        return density[:, 0], density[:, 1]
+    ao = jnp.asarray(molecule.ao)
     rho_a = jnp.einsum("pq,rp,rq->r", rdm1[0], ao, ao, precision=Precision.HIGHEST)
     rho_b = jnp.einsum("pq,rp,rq->r", rdm1[1], ao, ao, precision=Precision.HIGHEST)
     return rho_a, rho_b

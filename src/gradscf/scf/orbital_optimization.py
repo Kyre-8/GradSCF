@@ -115,6 +115,8 @@ def _problem_functions(method, xc_spec, collinear, occupation_rows, *, uks_confi
         from .gks import GKSConfig, generalized_energy_and_fock
         cfg = GKSConfig(xc_spec=xc_spec, collinear=collinear)
         def evaluate(density, args, *, compute_potential=True):
+            if args.get('grid_ao') is not None:
+                raise NotImplementedError('Generalized orbital minimization requires dense grid AO data.')
             total, _, fock = generalized_energy_and_fock(density=density[0],
                 hcore=args['hcore'], eri=args['eri'], nuclear_repulsion=args['nuclear_repulsion'],
                 ao=args['ao'], ao_deriv1=args['ao_deriv1'], grid_weights=args['grid_weights'], config=cfg)
@@ -132,7 +134,7 @@ def _problem_functions(method, xc_spec, collinear, occupation_rows, *, uks_confi
                 alpha=jnp.asarray(1. if rsh_preset(xc_spec) is not None else hybrid_coeff(xc_spec),
                                   dtype=density.dtype), cfg=cfg, xc_kind=kind,
                 eri_lr=args.get('eri_lr'), dispersion_energy=args.get('dispersion_energy'),
-                compute_potential=compute_potential)
+                compute_potential=compute_potential, grid_ao=args.get('grid_ao'))
             return total, jnp.stack([fa,fb]) if compute_potential else None
 
     def energy(angles, base, args):
@@ -143,7 +145,7 @@ def _problem_functions(method, xc_spec, collinear, occupation_rows, *, uks_confi
 def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
               grid_weights, mo_coeff, mo_occ, xc_spec, collinear, max_iterations,
               gradient_tolerance, gradient_mode, differentiation, orthonormalize_initial,
-              eri_lr=None, dispersion_energy=None):
+              eri_lr=None, dispersion_energy=None, grid_ao=None):
     rsh = validate_rsh_inputs(xc_spec, eri, eri_lr, dispersion_energy)
     if rsh is not None and method == 'gks':
         raise NotImplementedError('Range-separated GKS orbital minimization is not supported.')
@@ -192,7 +194,7 @@ def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
     dimension, rotate, density_from, evaluate, energy = _problem_functions(method, xc_spec, collinear, topology)
     args = dict(metric=metric, hcore=jnp.asarray(hcore), eri=jnp.asarray(eri),
         nuclear_repulsion=jnp.asarray(nuclear_repulsion), ao=jnp.asarray(ao),
-        ao_deriv1=jnp.asarray(ao_deriv1), grid_weights=jnp.asarray(grid_weights))
+        ao_deriv1=jnp.asarray(ao_deriv1), grid_weights=jnp.asarray(grid_weights), grid_ao=grid_ao)
     if rsh is not None:
         # Both arrays cross the custom implicit boundary as ordinary dynamic
         # leaves, including their geometry/field dependence.
@@ -250,7 +252,7 @@ def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
 def minimize_uks_from_integrals(*, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
     grid_weights, mo_coeff, mo_occ, xc_spec='hf', max_iterations=500, gradient_tolerance=1e-7,
     gradient_mode=None, differentiation=None, orthonormalize_initial=False,
-    eri_lr=None, dispersion_energy=None):
+    eri_lr=None, dispersion_energy=None, grid_ao=None):
     """UHF/UKS fixed occupations; backward mode is ``implicit`` or ``explicit``.
 
     Supply static ``mo_occ`` of shape (2,nao), and float64 coefficients of shape
@@ -265,14 +267,15 @@ def minimize_uks_from_integrals(*, overlap, hcore, eri, nuclear_repulsion, ao, a
 def minimize_roks_from_integrals(*, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
     grid_weights, mo_coeff, mo_occ, xc_spec='hf', max_iterations=500, gradient_tolerance=1e-7,
     gradient_mode=None, differentiation=None, orthonormalize_initial=False,
-    eri_lr=None, dispersion_energy=None):
+    eri_lr=None, dispersion_energy=None, grid_ao=None):
     """ROHF/ROKS shared spatial orbitals; see ``minimize_uks_from_integrals``."""
     return _minimize(method='roks', collinear='col', **locals())
 
 
 def minimize_gks_from_integrals(*, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
     grid_weights, mo_coeff, mo_occ, xc_spec='hf', collinear='col', max_iterations=500,
-    gradient_tolerance=1e-7, gradient_mode=None, differentiation=None, orthonormalize_initial=False):
+    gradient_tolerance=1e-7, gradient_mode=None, differentiation=None, orthonormalize_initial=False,
+    grid_ao=None):
     """GHF/GKS complex spinors with spatial overlap and static 0/1 occupations."""
     return _minimize(method='gks', **locals())
 

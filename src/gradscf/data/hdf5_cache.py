@@ -45,6 +45,47 @@ _BASIS_TOPOLOGY_FIELDS = (
 )
 
 
+def _validate_grid_ao(provider: Any, grid: QuadratureGrid) -> None:
+    from gradscf.integrals.grids.blocks import AOGrid
+
+    if type(provider) is not AOGrid:
+        raise TypeError(f"Unsupported AO grid provider type: {type(provider).__name__}.")
+    for field in ("coords", "weights"):
+        value = getattr(grid, field)
+        if value is None or not np.array_equal(np.asarray(getattr(provider, field)), np.asarray(value)):
+            raise ValueError(f"AO grid provider {field} must match the molecule grid before caching.")
+
+
+def _replace_grid_ao(group: Any, provider: Any) -> None:
+    if "grid_ao" in group:
+        del group["grid_ao"]
+    if provider is None:
+        return
+    target = group.create_group("grid_ao")
+    target.attrs["kind"] = "cartesian"
+    target.attrs["block_size"] = int(provider.block_size)
+    target.attrs["nprims"] = np.asarray(provider.nprims, dtype=np.int64)
+    target.attrs["angulars"] = np.asarray(provider.angulars, dtype=np.int64).reshape(provider.nao, 3)
+    for field in ("centers", "exponents", "coefficients"):
+        _write_array(target, field, getattr(provider, field))
+
+
+def _read_grid_ao(group: Any, grid: QuadratureGrid, *, array_backend: str) -> Any:
+    from gradscf.integrals.grids.blocks import AOGrid
+
+    kind = str(group.attrs.get("kind", ""))
+    if kind != "cartesian":
+        raise ValueError(f"Unsupported AO grid provider kind: {kind!r}.")
+    return AOGrid(
+        coords=grid.coords, weights=grid.weights,
+        **{field: _read_array(group, field, array_backend=array_backend)
+           for field in ("centers", "exponents", "coefficients")},
+        nprims=tuple(int(value) for value in group.attrs["nprims"]),
+        angulars=tuple(tuple(int(value) for value in row) for row in group.attrs["angulars"]),
+        block_size=int(group.attrs["block_size"]),
+    )
+
+
 def _validate_direct_basis(provider: Any) -> None:
     from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
 
@@ -210,6 +251,9 @@ def write_restricted_molecule(group: Any, molecule: RestrictedMolecule) -> None:
     provider = molecule.direct_basis
     if provider is not None:
         _validate_direct_basis(provider)
+    grid_provider = getattr(molecule, "grid_ao", None)
+    if grid_provider is not None:
+        _validate_grid_ao(grid_provider, molecule.grid)
     group.attrs["nuclear_repulsion"] = float(molecule.nuclear_repulsion)
     group.attrs["exact_exchange_fraction"] = float(molecule.exact_exchange_fraction)
     if molecule.mf_energy is not None:
@@ -234,6 +278,7 @@ def write_restricted_molecule(group: Any, molecule: RestrictedMolecule) -> None:
         _write_array(group, field, getattr(molecule, field))
     _write_hfx_nu(group, molecule)
     _replace_direct_basis(group, provider)
+    _replace_grid_ao(group, grid_provider)
 
 
 def write_unrestricted_molecule(group: Any, molecule: UnrestrictedMolecule) -> None:
@@ -242,6 +287,9 @@ def write_unrestricted_molecule(group: Any, molecule: UnrestrictedMolecule) -> N
     provider = molecule.direct_basis
     if provider is not None:
         _validate_direct_basis(provider)
+    grid_provider = getattr(molecule, "grid_ao", None)
+    if grid_provider is not None:
+        _validate_grid_ao(grid_provider, molecule.grid)
     group.attrs["nuclear_repulsion"] = float(molecule.nuclear_repulsion)
     group.attrs["exact_exchange_fraction"] = float(molecule.exact_exchange_fraction)
     if molecule.mf_energy is not None:
@@ -264,6 +312,7 @@ def write_unrestricted_molecule(group: Any, molecule: UnrestrictedMolecule) -> N
             _write_array(group, field, getattr(molecule, field))
     _write_hfx_nu(group, molecule)
     _replace_direct_basis(group, provider)
+    _replace_grid_ao(group, grid_provider)
 
 
 def read_restricted_molecule(
@@ -335,6 +384,8 @@ def read_restricted_molecule(
             _read_direct_basis(group["direct_basis"], array_backend=array_backend)
             if "direct_basis" in group else None
         ),
+        grid_ao=(_read_grid_ao(group["grid_ao"], grid, array_backend=array_backend)
+                 if "grid_ao" in group else None),
         **kwargs,
     )
 
@@ -393,6 +444,8 @@ def read_unrestricted_molecule(
             _read_direct_basis(group["direct_basis"], array_backend=array_backend)
             if "direct_basis" in group else None
         ),
+        grid_ao=(_read_grid_ao(group["grid_ao"], grid, array_backend=array_backend)
+                 if "grid_ao" in group else None),
         runtime_scf_backend=(
             str(group.attrs["runtime_scf_backend"])
             if "runtime_scf_backend" in group.attrs

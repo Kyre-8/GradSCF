@@ -40,6 +40,33 @@ def functional():
     return Functional(input_fn=inputs, energy_fn=energy)
 
 
+@pytest.fixture(params=[False, True], ids=['dense-toy', 'streamed-real-ao'])
+def training_molecule(request):
+    """Keep the original toy and add actual Gaussian AO blocks to its trainer.
+
+    The streamed variant is independently checked against finite differences;
+    its AO grid differs from the original synthetic toy. Dense/streamed
+    agreement for identical real AOs is tested in test_streamed_external_xc.
+    """
+    state = molecule()
+    if not request.param:
+        return state
+    from gradscf.integrals.basis import CartesianAO, CartesianBasis
+    from gradscf.integrals.grids.blocks import AOGrid
+
+    basis = CartesianBasis(aos=(
+        CartesianAO(jnp.asarray([-.7, 0., 0.]), (0, 0, 0),
+                    jnp.asarray([.8]), jnp.asarray([1.])),
+        CartesianAO(jnp.asarray([.7, 0., 0.]), (0, 0, 0),
+                    jnp.asarray([.9]), jnp.asarray([1.])),
+    ), precompute_eri_groups=False)
+    coords = jnp.asarray([[-.5, .1, 0.], [.3, .2, -.1], [.7, -.2, .3]])
+    grid = QuadratureGrid(state.grid.weights, coords)
+    provider = AOGrid.from_basis(basis, coords, grid.weights, block_size=2)
+    return replace(state, ao=jnp.zeros((0, 2)), ao_deriv1=jnp.zeros((4, 0, 2)),
+                   ao_laplacian=None, grid=grid, grid_ao=provider)
+
+
 @pytest.mark.parametrize('mode', ['explicit', 'implicit'])
 def test_dfpt_functional_parameter_gradient_includes_relaxed_reference(mode):
     from gradscf import dfpt
@@ -213,9 +240,14 @@ def test_spin_context_and_missing_physical_quantity():
 
 @pytest.mark.parametrize('mode, backward', [
     ('fixed_density','implicit'), ('self_consistent','explicit'), ('self_consistent','implicit')])
-def test_three_training_modes_have_fd_gradients_and_accept_external_params(mode, backward):
+def test_three_training_modes_have_fd_gradients_and_accept_external_params(mode, backward, training_molecule):
     from gradscf.model.neural_xc.training import MolecularTrainingConfig, MolecularTrainingDatum, molecular_loss, Trainer
-    f, mol = functional(), molecule()
+    f, mol = functional(), training_molecule
+    if mol.grid_ao is not None:
+        assert mol.ao.shape[0] == mol.ao_deriv1.shape[1] == 0
+        current = f.inputs_for_density(mol, mol.rdm1)
+        assert current['local'][0].shape == mol.grid.weights.shape
+        assert np.isfinite(np.asarray(current['local'][0])).all()
     cfg = MolecularTrainingConfig(mode=mode,scf_gradient_mode=backward,
         e0_total_mse_weight=1.,scf_max_cycle=60,scf_damping=0.,
         scf_conv_tol_density=1e-10,scf_conv_tol_energy=1e-12,

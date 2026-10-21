@@ -155,6 +155,10 @@ def _build_restricted_reference(
     if include_dipole_integrals and scf_inputs.dipole_integrals is None:
         spec = atom if isinstance(atom,MoleculeSpec) else parse_molecule_spec(atom,unit=unit,charge=charge,spin=spin)
         scf_inputs = complete_restricted_response_inputs(scf_inputs,spec,basis)
+    if scf_inputs.grid_ao is not None and (compute_local_hfx_features or compute_local_pt2_features):
+        raise NotImplementedError(
+            "Legacy local HFX/PT2 feature caches require dense grid AO data; "
+            "use grid_block_size=-1 for these explicit feature requests.")
     basis_cart = scf_inputs.basis
     s = scf_inputs.overlap
     h1e = scf_inputs.hcore
@@ -269,6 +273,7 @@ def _build_restricted_reference(
     )
     return RestrictedMolecule(
         ao=ao,
+        grid_ao=scf_inputs.grid_ao,
         grid=QuadratureGrid(weights=weights, coords=coords),
         dipole_integrals=dipole_integrals,
         rep_tensor=rep_tensor,
@@ -479,6 +484,10 @@ def _build_unrestricted_reference(
         verbose=verbose,
         **mol_kwargs,
     )
+    if scf_inputs.grid_ao is not None and (compute_local_hfx_features or compute_local_pt2_features):
+        raise NotImplementedError(
+            "Legacy local HFX/PT2 feature caches require dense grid AO data; "
+            "use grid_block_size=-1 for these explicit feature requests.")
     basis_cart = scf_inputs.basis
     s = scf_inputs.overlap
     h1e = scf_inputs.hcore
@@ -555,6 +564,7 @@ def _build_unrestricted_reference(
     nocc_beta = int(np.count_nonzero(np.asarray(uks.mo_occ_beta) > 1e-8))
     return UnrestrictedMolecule(
         ao=ao,
+        grid_ao=scf_inputs.grid_ao,
         grid=QuadratureGrid(weights=weights, coords=coords),
         dipole_integrals=dipole_integrals,
         rep_tensor=jnp.asarray(eri),

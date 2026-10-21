@@ -35,6 +35,7 @@ _GRID_PAYLOAD_DEPENDENCY_FIELDS = frozenset(
         "ao",
         "ao_deriv1",
         "ao_laplacian",
+        "grid_ao",
         "grid",
         "rdm1",
         "mo_coeff",
@@ -494,10 +495,33 @@ def _build_vxc_matrix_from_components(
     v_lapl: Array,
     xc_kind: str,
 ) -> Array:
+    provider = getattr(molecule, "grid_ao", None)
+    kind = _normalize_response_feature_kind(xc_kind)
+    if provider is not None:
+        from gradscf.integrals.grids.blocks import grid_slice
+
+        dtype = jnp.result_type(provider.centers, provider.exponents,
+                               provider.coefficients, weights, v_rho, v_grad, v_tau, v_lapl)
+        initial = (jnp.asarray(0, dtype=jnp.int32),
+                   jnp.zeros((provider.nao, provider.nao), dtype=dtype))
+
+        def accumulate(carry, ao, dao, lap, coords, block_weights):
+            index, matrix = carry
+            start = index * provider.block_size
+            block = _vxc_matrix_from_grid_potential(
+                ao=ao, ao_deriv1=dao, ao_laplacian=lap,
+                weights=grid_slice(weights, start, provider.block_size),
+                vxc_rho=grid_slice(v_rho, start, provider.block_size),
+                vxc_grad=grid_slice(v_grad, start, provider.block_size),
+                vxc_tau=grid_slice(v_tau, start, provider.block_size),
+                vxc_lapl=grid_slice(v_lapl, start, provider.block_size), xc_kind=kind)
+            return index + 1, matrix + block
+
+        deriv = 2 if kind == "MGGA_LAPL" else 0 if kind == "LDA" else 1
+        return provider.reduce(accumulate, initial, deriv=deriv)[1]
     ao = jnp.asarray(molecule.ao)
     ao_deriv1 = getattr(molecule, "ao_deriv1", None)
     ao_laplacian = getattr(molecule, "ao_laplacian", None)
-    kind = _normalize_response_feature_kind(xc_kind)
     if ao_deriv1 is None:
         kind = "LDA"
         ao_deriv1_arr = jnp.zeros((4, ao.shape[0], ao.shape[1]), dtype=ao.dtype)

@@ -50,12 +50,12 @@ def _global_network():
         energy_fn=energy, name="geometry_joint_spin_global"), {"scale": jnp.asarray(.003)}
 
 
-def _assemble(spec, distance, unrestricted, xc_spec, direct, *, basis="sto-3g"):
+def _assemble(spec, distance, unrestricted, xc_spec, direct, *, basis="sto-3g", grid_block_size=0):
     coordinates = jnp.asarray(spec.coords_bohr).at[1, 2].set(distance)
     options = dict(xc_spec=xc_spec, jk_backend="direct" if direct else "full",
                    direct_scf_tol=0., direct_scf_workers=1, max_cycle=100,
                    conv_tol=1e-11, conv_tol_density=1e-10, conv_tol_grad=1e-8,
-                   damping=.1)
+                   damping=.1, grid_block_size=grid_block_size)
     config = UKSConfig(**options) if unrestricted else RKSConfig(**options)
     build = build_uks_integral_inputs if unrestricted else build_rks_integral_inputs
     controls = {} if unrestricted else {"include_dipole_integrals": False}
@@ -80,6 +80,7 @@ def _reference(inputs, coordinates, unrestricted, *, coefficients, occupations,
     preset = rsh_preset(xc_spec)
     common = dict(
         ao=inputs.ao, ao_deriv1=inputs.ao_deriv1, ao_laplacian=inputs.ao_laplacian,
+        grid_ao=inputs.grid_ao,
         grid=QuadratureGrid(inputs.grid_weights, inputs.coords),
         dipole_integrals=(jnp.zeros((3, inputs.hcore.shape[0], inputs.hcore.shape[0]))
                          if inputs.dipole_integrals is None else inputs.dipole_integrals),
@@ -158,9 +159,10 @@ def _neural_reference(inputs, coordinates, unrestricted, model, params):
     return replace(state, fock_matrix=fock), info.converged
 
 
-def _excitation(spec, distance, unrestricted, xc_spec, full_td, direct, model, params, *, basis="sto-3g"):
+def _excitation(spec, distance, unrestricted, xc_spec, full_td, direct, model, params, *, basis="sto-3g", grid_block_size=0):
     inputs, config, coordinates = _assemble(spec, distance, unrestricted,
-        "hf" if xc_spec == "network" else xc_spec, direct, basis=basis)
+        "hf" if xc_spec == "network" else xc_spec, direct, basis=basis,
+        grid_block_size=grid_block_size)
     if xc_spec == "network":
         state, ground_converged = _neural_reference(inputs, coordinates, unrestricted, model, params)
         functional, response_params = model, params
@@ -248,6 +250,43 @@ def test_heh_both_spin_channels_relaxed_geometry_matches_full_and_finite_differe
 def test_restricted_pbe_full_tddft_relaxed_geometry_matches_full_and_finite_difference():
     spec = parse_molecule_spec("H 0 0 0; H 0 0 1.6", unit="Bohr", charge=0, spin=0)
     _check_relaxed_excitation_geometry(spec, False, "pbe", True)
+
+
+@pytest.mark.parametrize("unrestricted", [False, True], ids=["rks", "uks"])
+def test_streamed_full_tddft_relaxed_geometry_matches_dense_grid(unrestricted, record_property):
+    """Rebuild and differentiate the AO provider, moving grid, SCF and roots."""
+    spec = parse_molecule_spec("He 0 0 0; H 0 0 1.6" if unrestricted else
+                               "H 0 0 0; H 0 0 1.6", unit="Bohr", spin=int(unrestricted))
+    basis = "6-31g" if unrestricted else "sto-3g"
+    model, params = _global_network()
+    point, step = jnp.asarray(1.6), 2e-4
+    results = []
+    for block_size in (-1, 128):
+        function = jax.jit(lambda bond: _excitation(
+            spec, bond, unrestricted, "pbe", True, True, model, params,
+            basis=basis, grid_block_size=block_size))
+        value, converged, _, _ = function(point)
+        assert bool(converged) and np.isfinite(value)
+        energy = lambda bond: function(bond)[0]
+        gradient = jax.grad(energy)(point)
+        tangent = jax.jvp(energy, (point,), (jnp.asarray(1.),))[1]
+        plus, minus = function(point + step), function(point - step)
+        assert bool(plus[1]) and bool(minus[1])
+        assert jnp.linalg.norm(plus[2] - minus[2]) > 1e-8
+        np.testing.assert_allclose(gradient, tangent, atol=3e-8, rtol=2e-6)
+        np.testing.assert_allclose(gradient, (plus[0] - minus[0]) / (2 * step),
+                                   atol=3e-6, rtol=3e-4)
+        results.append((value, gradient))
+    np.testing.assert_allclose(results[1][0], results[0][0], atol=3e-9, rtol=0.)
+    np.testing.assert_allclose(results[1][1], results[0][1], atol=8e-7, rtol=3e-5)
+    pytest.importorskip("pyscf")
+    reference = lambda bond: _pyscf_excitation(spec, bond, "pbe", unrestricted, basis)
+    reference_value = reference(float(point))
+    reference_gradient = (reference(float(point + step)) - reference(float(point - step))) / (2 * step)
+    record_property("pyscf_energy_error_ha", float(abs(results[1][0] - reference_value)))
+    record_property("pyscf_derivative_error_ha_per_bohr", float(abs(results[1][1] - reference_gradient)))
+    np.testing.assert_allclose(results[1][0], reference_value, atol=3e-7, rtol=0.)
+    np.testing.assert_allclose(results[1][1], reference_gradient, atol=4e-6, rtol=4e-4)
 
 
 def _pyscf_excitation(spec, distance, xc_spec, unrestricted, basis):

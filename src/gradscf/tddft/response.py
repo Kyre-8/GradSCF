@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import Any, Callable
 
 import jax
@@ -11,6 +12,7 @@ from jaxtyping import Array
 
 from ..tools.features import (
     infer_response_feature_kind,
+    molecule_grid_block,
     normalize_response_feature_kind,
 )
 from gradscf.integrals.molecular.eri import _metadata_arrays
@@ -282,6 +284,15 @@ def _restricted_response_factors(
     grid_start: Any = 0,
     grid_size: int | None = None,
 ) -> _RestrictedResponseFactors:
+    if getattr(molecule, "grid_ao", None) is not None:
+        if grid_size is None:
+            raise ValueError("Streamed AO response factors require a grid block size.")
+        molecule = molecule_grid_block(
+            molecule, grid_start, grid_size,
+            deriv=0 if feature_kind == "LDA" else 2 if feature_kind == "MGGA_LAPL" else 1,
+        )
+        grid_size = None
+
     def on_grid(value, axis=0):
         array = jnp.asarray(value)
         if grid_size is not None:
@@ -419,6 +430,9 @@ def _restricted_grid_xc_response(
         raise ValueError("block_size must be a positive integer.")
     ngrids = int(weighted_hessian.shape[-1])
     width = min(int(block_size), max(1, ngrids))
+    provider = getattr(molecule, "grid_ao", None)
+    if provider is not None:
+        width = min(width, provider.block_size)
     full_blocks, tail = divmod(ngrids, width)
 
     def block_factors(start, size):
@@ -490,24 +504,70 @@ def _restricted_grid_xc_response_hvp(
     weights = jnp.asarray(molecule.grid.weights, dtype=dtype)
     nocc = int(orbo.shape[1])
     nvir = int(orbv.shape[1])
-    factors = _restricted_response_factors(
-        molecule,
-        orbo,
-        orbv,
-        feature_kind=feature_kind,
-        dtype=dtype,
-    )
+    factors = None
+    if getattr(molecule, "grid_ao", None) is None:
+        factors = _restricted_response_factors(
+            molecule, orbo, orbv, feature_kind=feature_kind, dtype=dtype)
 
     def action(x: Array) -> Array:
         original_shape = jnp.asarray(x).shape
         values = jnp.asarray(x, dtype=dtype).reshape(-1, nocc, nvir)
-        projected = _project_restricted_transition_to_grid(factors, values)
+        projected = (_project_restricted_transition_to_grid(factors, values) if factors is not None else
+                     _project_transition_to_full_grid(
+                         molecule, orbo, orbv, values, feature_kind=feature_kind, dtype=dtype))
         weighted = response_hvp(molecule, projected)
         weighted = jnp.asarray(weighted, dtype=dtype) * weights[None, None, :]
-        out = 2.0 * _project_grid_response_to_restricted_transition(factors, weighted)
+        out = 2.0 * (_project_grid_response_to_restricted_transition(factors, weighted)
+                     if factors is not None else _project_full_grid_to_transition(
+                         molecule, orbo, orbv, weighted, feature_kind=feature_kind, dtype=dtype))
         return out.reshape(original_shape)
 
     return action
+
+
+def _project_transition_to_full_grid(molecule, orbo, orbv, values, *, feature_kind, dtype):
+    """Preserve a global callback's complete field without retaining full AO."""
+    provider = getattr(molecule, "grid_ao", None)
+    if provider is None:
+        factors = _restricted_response_factors(
+            molecule, orbo, orbv, feature_kind=feature_kind, dtype=dtype)
+        return _project_restricted_transition_to_grid(factors, values)
+
+    def project(ao, dao, lap, coords, weights):
+        view = SimpleNamespace(ao=ao, ao_deriv1=dao, ao_laplacian=lap)
+        factors = _restricted_response_factors(
+            view, orbo, orbv, feature_kind=feature_kind, dtype=dtype)
+        return _project_restricted_transition_to_grid(factors, values).transpose(2, 0, 1)
+
+    deriv = 0 if feature_kind == "LDA" else 2 if feature_kind == "MGGA_LAPL" else 1
+    return provider.map(project, deriv=deriv).transpose(1, 2, 0)
+
+
+def _project_full_grid_to_transition(molecule, orbo, orbv, weighted, *, feature_kind, dtype):
+    provider = getattr(molecule, "grid_ao", None)
+    if provider is None:
+        factors = _restricted_response_factors(
+            molecule, orbo, orbv, feature_kind=feature_kind, dtype=dtype)
+        return _project_grid_response_to_restricted_transition(factors, weighted)
+    ngrids = int(weighted.shape[-1])
+    width = min(provider.block_size, max(1, ngrids))
+    full_blocks, tail = divmod(ngrids, width)
+
+    def contribution(start, size):
+        factors = _restricted_response_factors(
+            molecule, orbo, orbv, feature_kind=feature_kind, dtype=dtype,
+            grid_start=start, grid_size=size)
+        block = jax.lax.dynamic_slice_in_dim(weighted, start, size, axis=2)
+        return _project_grid_response_to_restricted_transition(factors, block)
+
+    rematerialized = jax.checkpoint(contribution, static_argnums=(1,))
+    initial = jnp.zeros((weighted.shape[0], orbo.shape[1], orbv.shape[1]), dtype=dtype)
+    result = jax.lax.fori_loop(
+        0, full_blocks,
+        lambda index, total: total + rematerialized(index * width, width), initial)
+    if tail:
+        result = result + rematerialized(full_blocks * width, tail)
+    return result
 
 
 def _as_nonlocal_response_diagonal(

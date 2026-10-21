@@ -67,6 +67,8 @@ class _BaseKS:
     integral_backend: Literal["native", "jax", "cpu", "libcint"] = "cpu"
     geometry_grad_policy: Literal["analytic", "error", "zero"] = "analytic"
     grid_ao_backend: Literal["jax"] = "jax"
+    grid_block_size: int = 0
+    grid_max_memory: float = 256.
     execution_device: Literal["auto", "cpu", "gpu"] = "auto"
     init_guess: Any = "hcore"
     chkfile: str | None = None
@@ -135,7 +137,7 @@ class _BaseKS:
         initial = initializer._build_reference(spec)
         if isinstance(self, RKS):
             self._scf_inputs = initializer._scf_inputs
-        if initial.ao_laplacian is None:
+        if initial.ao_laplacian is None and getattr(initial, "grid_ao", None) is None:
             from ..integrals import basis_from_molecule_spec, evaluate_cartesian_ao_with_derivatives
             basis = basis_from_molecule_spec(spec, basis=self.mol.basis,
                 max_l=self.max_l, precompute_eri_groups=False)
@@ -363,6 +365,8 @@ class RKS(_BaseKS):
             auxbasis=self.auxbasis,
             direct_scf_tol=self.direct_scf_tol,
             direct_scf_workers=self.direct_scf_workers,
+            grid_block_size=self.grid_block_size,
+            grid_max_memory=self.grid_max_memory,
         )
 
     def _build_reference(self, spec: MoleculeSpec) -> Any:
@@ -502,6 +506,8 @@ class UKS(_BaseKS):
             auxbasis=self.auxbasis,
             direct_scf_tol=self.direct_scf_tol,
             direct_scf_workers=self.direct_scf_workers,
+            grid_block_size=self.grid_block_size,
+            grid_max_memory=self.grid_max_memory,
         )
 
     def _build_reference(self, spec: MoleculeSpec) -> Any:

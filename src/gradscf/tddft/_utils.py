@@ -33,6 +33,9 @@ def _restricted_channel(molecule: Any) -> tuple[Array, Array, Array]:
 
 
 def _density_on_grid(molecule: Any) -> Array:
+    if getattr(molecule, "grid_ao", None) is not None:
+        from ..tools.features import restricted_grid_response_variables
+        return restricted_grid_response_variables(molecule, feature_kind="LDA")[0]
     if hasattr(molecule, "density"):
         density = molecule.density()
     else:

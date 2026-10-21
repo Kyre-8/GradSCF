@@ -72,7 +72,9 @@ def _build_common(*, atom, basis, cfg, xc_spec, unit, charge, spin, cart,
     needs_grid = not (xc_type(local_xc_spec(xc_spec)) == "HF" and np.any(np.asarray(spec.charges) == 0))
     context = _prepare_basis_grid_context(spec=spec, basis=basis, max_l=max_l,
         grids_level=grids_level, precompute_eri_groups=(mode == "jax"),
-        needs_ao_laplacian=laplacian, needs_grid=needs_grid)
+        needs_ao_laplacian=laplacian, needs_grid=needs_grid,
+        grid_block_size=getattr(cfg, "grid_block_size", -1),
+        grid_max_memory=getattr(cfg, "grid_max_memory", 256.))
     if context.geometry_is_traced and geometry_grad_policy == "error":
         raise NotImplementedError("Geometry gradients are disabled by geometry_grad_policy='error'")
     eri_lr = dispersion_energy = None
@@ -161,7 +163,8 @@ def build_rks_integral_inputs(*, atom, basis, config=None, xc_spec=None,
         nuclear_repulsion=spec.nuclear_repulsion,coords=ctx.coords,grid_weights=ctx.grid_weights,
         ao=ao,ao_deriv1=dao,ao_laplacian=lap,dipole_integrals=dipole,init_density=initial.density,
         molecule_charge=int(spec.charge),geometry_is_traced=ctx.geometry_is_traced,
-        integral_backend=mode,grid_ao_backend="jax",eri_lr=eri_lr,dispersion_energy=dispersion_energy)
+        integral_backend=mode,grid_ao_backend="jax",eri_lr=eri_lr,dispersion_energy=dispersion_energy,
+        grid_ao=ctx.grid_ao)
 
 
 def build_uks_integral_inputs(*, atom, basis, config=None, xc_spec=None,
@@ -202,6 +205,7 @@ def build_uks_integral_inputs(*, atom, basis, config=None, xc_spec=None,
         coords=ctx.coords,grid_weights=ctx.grid_weights,ao=ao,ao_deriv1=dao,ao_laplacian=lap,
         dipole_integrals=dipole,init_density_alpha=initial.density_alpha,init_density_beta=initial.density_beta,
         total_electrons=total,molecule_charge=int(spec.charge),geometry_is_traced=ctx.geometry_is_traced,
-        integral_backend=mode,grid_ao_backend="jax",eri_lr=eri_lr,dispersion_energy=dispersion_energy)
+        integral_backend=mode,grid_ao_backend="jax",eri_lr=eri_lr,dispersion_energy=dispersion_energy,
+        grid_ao=ctx.grid_ao)
 
 __all__ = ["RKSIntegralInputs", "UKSIntegralInputs", "build_rks_integral_inputs", "build_uks_integral_inputs"]

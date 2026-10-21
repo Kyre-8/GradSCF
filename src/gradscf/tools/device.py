@@ -30,6 +30,7 @@ def put_restricted_molecule_on_device(
     return replace(
         molecule,
         ao=jax.device_put(molecule.ao, device),
+        grid_ao=(None if molecule.grid_ao is None else jax.device_put(molecule.grid_ao, device)),
         dipole_integrals=jax.device_put(molecule.dipole_integrals, device),
         rep_tensor=jax.device_put(molecule.rep_tensor, device),
         mo_coeff=jax.device_put(molecule.mo_coeff, device),
@@ -140,6 +141,7 @@ def put_molecule_on_device(
 
     for name in (
         "ao",
+        "grid_ao",
         "dipole_integrals",
         "rep_tensor",
         "mo_coeff",
