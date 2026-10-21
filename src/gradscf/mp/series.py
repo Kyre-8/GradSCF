@@ -224,7 +224,8 @@ def _run_series(h1, eri, denominator_tol, canonical_tol, *, nocc, frozen,
         return jnp.concatenate((fock_action(state)[1:], -y[-1:]))
     jacdiag = jnp.concatenate((gaps[1:], -jnp.ones(1, zero.dtype)))
     safe = jnp.where(jnp.abs(jacdiag) > denominator_tol, jacdiag, 1.)
-    operator = LinearOperator((space.size, space.size), zero.dtype, jacobian, diagonal=jacdiag)
+    operator = LinearOperator((space.size, space.size), zero.dtype, jacobian, diagonal=jacdiag,
+                              exact_diagonal=config.orbital_basis == "canonical")
     linear = LinearSolverConfig(method="direct" if space.size <= 128 else "gmres",
         max_dense=128, rtol=1e-11, atol=1e-13, maxiter=100, restart=min(40, space.size))
     k = config.order // 2 if config.wavefunction_order is None else config.wavefunction_order

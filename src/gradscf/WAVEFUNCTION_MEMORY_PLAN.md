@@ -1964,3 +1964,48 @@ requires its own explicit decision and numerical validation.
 - This primal slice is accepted within the existing WF-29c/16/17; no additional
   task branch is created. Charged Wvvvv algorithm/lifetime changes, Lambda/DIIS,
   implicit-response storage and joint method/AD/process budgets remain open.
+
+### 2026-10-22 — WF-25/29: exact canonical Taylor linear solves
+
+- A static explicit exact-diagonal declaration on the common LinearOperator
+  permits a stopped numerical diagonal factor inside the existing checked
+  custom_linear_solve. The original live action owns all AD; primal, tangent
+  and transpose RHS still receive true-residual checks. Invalid/nonfinite/zero
+  factors reject even zero RHS. Block broadcasting and RHS/output dtype are
+  preserved; no denominator shift/clamp or second response solver is added.
+- Only canonical MP declares this exact structure. Noncanonical MP retains its
+  full block-diagonal Fock action even at a numerically diagonal point, including
+  its off-diagonal first/second response. Matrix inputs and preconditioners do
+  not imply exact structure. The old generic solve/as_operator ASTs are unchanged;
+  the MP kernel differs only by this single static keyword, not its equations,
+  Taylor recurrence, coefficients, orbital space or physical tolerances.
+- Seventy-three fixed cases pass: fifteen new common solve and five new MP
+  cases, twenty-four original MP and twenty-nine old shared-solver cases.
+  Coverage includes vector/block, float32/64/mixed dtype, zero RHS response,
+  invalid and stale factors, transpose/second response, R/U series/tensor raw
+  H/G JVP/VJP/HVP, coefficients/T2/waves, strong/weak tolerance boundaries,
+  independent E2...E12 and true-pole rejection. All final groups exit0.
+- The API-missing RED is retained. A separate four-case observer failure was a
+  test's reused outer JIT, not a demonstrated numerical discrepancy; that group
+  was interrupted with exit2. Separate lambda wrappers repaired only the test
+  tracing boundary, then all five MP cases passed with unchanged physics/tols.
+- The original H6 cached-response test (SHA `0cfdaf43`) was attempted once in a
+  fresh process, unchanged input/fixture/assertions and recorded compile/cache
+  flags on CPU88-95, with a fixed
+  595-second timeout plus 5-second kill bound. Actual exit124 at 595.044 s;
+  cold test body did not complete and warm repeat never began. There is no
+  completed H6 value/gradient/HVP, warm time, speed ratio or terminal RSS result
+  from this attempt. A running VmHWM observation of 8,177,584 KiB is explicitly
+  partial; the 596,264 KiB initial phase snapshot is not a measured peak.
+- Root and independent review checked numerical-factor versus AD ownership,
+  the unchanged raw charts, structural declaration, zero-RHS/transpose tests
+  and finite scope. All numeric work is remote CPU64-71/88-95, no GPU, builds or
+  installs. The correctness slice is accepted; H6 performance and the existing
+  Taylor history/packed-space/joint-budget gates remain open. No cache-warning
+  investigation, additional attempt, extra TODO or automatic timeout extension
+  follows this finite measurement.
+- Root verified all sixty-one archived evidence entries, six final patch/test
+  hashes, raw XML and process exits. Evidence: `exact-diagonal-evidence.tar.gz`
+  SHA `94b37c66...d26a`, summary and static proofs alongside it; final common
+  operator/solve/MP kernels `b5936aed`/`1d168384`/`2a5696d1`. The fixed workflow
+  ended with no active owned runner or reserved CPU, without merging/pushing.

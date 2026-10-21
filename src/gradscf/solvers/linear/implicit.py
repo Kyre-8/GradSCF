@@ -12,12 +12,38 @@ from .gmres import gmres_solve
 
 def checked_linear_solve(matvec, rhs, *, config, converged=True,
                          preconditioner=None, transpose_preconditioner=None,
-                         cholesky=None):
+                         cholesky=None, diagonal_factor=None):
     """Internal vector/block kernel; validity is checked inside the opaque solve.
 
     Placing a nonlinear residual predicate in a linear tangent map would break
     transposition. Both primal and transposed numerical solves are checked here.
     """
+    if diagonal_factor is not None:
+        if cholesky is not None:
+            raise ValueError("Supply either an exact diagonal or Cholesky factor")
+        factor = jnp.asarray(diagonal_factor)
+        if factor.shape != (rhs.shape[0],):
+            raise ValueError("Exact diagonal factor must match the operator shape")
+        if not jnp.issubdtype(factor.dtype, jnp.floating):
+            raise NotImplementedError("Exact diagonal solves require real floating-point data")
+        factor = jax.lax.stop_gradient(factor.astype(rhs.dtype))
+        finite = jnp.isfinite(factor) & (factor != 0)
+        safe = jnp.where(finite, factor, 1.).reshape((-1,)+(1,)*(rhs.ndim-1))
+        action = matvec if rhs.ndim == 1 else lambda x: jax.vmap(
+            matvec, in_axes=1, out_axes=1)(x)
+
+        def solve(operator, value):
+            candidate = value/safe
+            norm, valid = linear_residual(operator, candidate, value,
+                rtol=config.rtol, atol=config.atol,
+                converged=jnp.asarray(converged) & jnp.all(finite))
+            return jnp.where(valid, candidate, jnp.nan), (norm, valid)
+
+        # The stopped factor is numerical only. AD differentiates the original
+        # action, including RHS response at zero and all off-diagonal tangents.
+        return jax.lax.custom_linear_solve(action, rhs, solve=solve,
+            transpose_solve=solve, has_aux=True)
+
     if rhs.size == 0:
         return rhs, (jnp.asarray(0., dtype=rhs.real.dtype), jnp.asarray(converged))
 
@@ -100,6 +126,8 @@ def solve_linear(matrix_or_operator, rhs, *, config=None, preconditioner=None,
     the upstream GMRES info flag is never treated as a convergence certificate.
     An optional lower Cholesky factor reuses a real SPD matrix factorization;
     implicit response and both primal/transpose residual checks are retained.
+    Explicit exact-diagonal operator structure bypasses dense/Krylov work, with
+    the same true-residual checks and implicit response through the live action.
     """
     config = LinearSolverConfig() if config is None else config
     op = as_operator(matrix_or_operator)
@@ -113,7 +141,7 @@ def solve_linear(matrix_or_operator, rhs, *, config=None, preconditioner=None,
     rhs = rhs.astype(jnp.result_type(rhs.dtype, op.dtype))
     solution, (norm, valid) = checked_linear_solve(op.apply, rhs, config=config,
         preconditioner=preconditioner, transpose_preconditioner=transpose_preconditioner,
-        cholesky=cholesky)
+        cholesky=cholesky, diagonal_factor=op.diagonal if op.exact_diagonal else None)
     return LinearResult(solution, norm, valid, jnp.where(valid, 0, 1))
 
 

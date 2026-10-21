@@ -14,6 +14,8 @@ class LinearOperator:
     Numerical parameters captured by the callables remain differentiable. This
     container itself is not a dynamic JIT argument. T is an algebraic transpose,
     not a conjugate transpose. The initial public solver API accepts real data.
+    ``exact_diagonal`` declares the complete operator family to be diagonal;
+    an approximate preconditioner or a numerically diagonal point is insufficient.
     """
     shape: tuple[int, int]
     dtype: Any
@@ -21,12 +23,17 @@ class LinearOperator:
     diagonal: Array | None = None
     matmat: Callable[[Array], Array] | None = None
     transpose_matvec: Callable[[Array], Array] | None = None
+    exact_diagonal: bool = False
 
     def __post_init__(self):
         if len(self.shape) != 2 or min(self.shape) < 0:
             raise ValueError("Invalid operator shape")
         if self.diagonal is not None and self.diagonal.shape != (min(self.shape),):
             raise ValueError("Operator diagonal shape mismatch")
+        if not isinstance(self.exact_diagonal, bool):
+            raise TypeError("exact_diagonal must be a static bool")
+        if self.exact_diagonal and (self.shape[0] != self.shape[1] or self.diagonal is None):
+            raise ValueError("An exact diagonal declaration requires a square operator and diagonal")
 
     def apply(self, values: Array) -> Array:
         values = jnp.asarray(values)
@@ -50,7 +57,8 @@ class LinearOperator:
             def transpose(v):
                 return jax.linear_transpose(self.matvec, jnp.zeros(self.shape[1], self.dtype))(v)[0]
         return LinearOperator(self.shape[::-1], self.dtype, transpose,
-                              diagonal=self.diagonal, transpose_matvec=self.matvec)
+                              diagonal=self.diagonal, transpose_matvec=self.matvec,
+                              exact_diagonal=self.exact_diagonal)
 
 
 def as_operator(matrix_or_operator) -> LinearOperator:
