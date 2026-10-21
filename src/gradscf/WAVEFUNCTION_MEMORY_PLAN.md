@@ -288,6 +288,9 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
     including target-device capacity when JIT tracing hides concrete devices.
   - [x] **WF-02d:** establish the dedicated AO2MO domain package and migrate
     existing callers without redundant forwarding files.
+  - [x] **WF-02e:** keep static byte-reservation validation in `_memory`,
+    shared by integral and solver consumers without an integral-to-solver
+    dependency or duplicated validation code.
 - [ ] **WF-03 — Exact native partial AO2MO** (`in_progress`). Generate requested MO tiles without
   full AO-pair or full MO ERI. Reuse shell traversal and half transformations.
   Acceptance: asymmetric coefficient sets, permutation symmetry, packed/dense
@@ -1328,3 +1331,16 @@ requires its own explicit decision and numerical validation.
   alongside commands/XML. This clears a narrow composition gate, not all
   combinations or the final project regression. MP broad-suite total-time
   limits and large-aniline diagnostics remain explicit open items.
+
+
+### 2026-10-21 — WF-02e: common reservation validation
+
+- Moved the existing nonnegative-integer byte validator unchanged to `_memory`
+  and updated solver/FCI imports. This enables AO2MO caller reservations without
+  creating an integral-to-solver dependency. No numerical equation or budget
+  formula changed. Twelve existing reservation/minimum/capacity checks passed,
+  19 deselected, exit 0; CPU104-111, 13.07 s pytest / 14.65 s process,
+  1,218,584 KiB RSS. Evidence: remote `memory-validator-move1/` manifest/log/XML.
+- Completion review closes only this shared utility move. The next native
+  multiple-request transformation and all-consumer ownership remain separate
+  WF-03b2b/02b increments, with their own numerical and efficiency gates.

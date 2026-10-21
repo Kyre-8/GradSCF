@@ -5,20 +5,12 @@ user operator's undeclared internals. Response solves have a separate lifetime
 and are deliberately not charged to the numerical Ritz solve.
 """
 from dataclasses import replace
-from numbers import Integral
 
 import jax
 import jax.numpy as jnp
 
-from gradscf._memory import workspace_bytes
+from gradscf._memory import validate_reserved_bytes, workspace_bytes
 from .eigen.davidson import _davidson_max_subspace, _solver_dtype
-
-
-def validate_reserved_bytes(value, *, name="reserved_bytes"):
-    """Validate a caller's static byte count before combining reservations."""
-    if isinstance(value, bool) or not isinstance(value, Integral) or value < 0:
-        raise ValueError(f"{name} must be a nonnegative integer")
-    return int(value)
 
 
 def _largest_fitting(lower, upper, fits):

@@ -7,9 +7,9 @@ from numbers import Integral
 import jax
 import jax.numpy as jnp
 from gradscf.ao2mo import validate_integrals
-from .._memory import DEFAULT_MAX_MEMORY_MB, array_storage_bytes, workspace_bytes
+from .._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
+                       validate_reserved_bytes, workspace_bytes)
 from ..solvers import LinearOperator
-from ..solvers.memory import validate_reserved_bytes
 from .cistring import FCISpace, _link_maps
 
 

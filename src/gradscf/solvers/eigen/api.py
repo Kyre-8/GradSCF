@@ -12,8 +12,8 @@ from ..types import (
 )
 from .primal import solve_ritz
 from .response import attach_spectral_response, spectral_values
-from ..memory import apply_columns, plan_hermitian, validate_reserved_bytes
-from gradscf._memory import array_storage_bytes
+from ..memory import apply_columns, plan_hermitian
+from gradscf._memory import array_storage_bytes, validate_reserved_bytes
 
 
 def solve_hermitian(

@@ -1,6 +1,6 @@
 """Shared working-array budgets in decimal MB, without allocator changes."""
 from math import isfinite, prod
-from numbers import Real
+from numbers import Integral, Real
 import os
 from pathlib import Path
 
@@ -8,6 +8,13 @@ import numpy as np
 
 
 DEFAULT_MAX_MEMORY_MB = 60000.0
+
+
+def validate_reserved_bytes(value, *, name="reserved_bytes"):
+    """Validate a static caller reservation before combining byte budgets."""
+    if isinstance(value, bool) or not isinstance(value, Integral) or value < 0:
+        raise ValueError(f"{name} must be a nonnegative integer")
+    return int(value)
 
 
 def validate_memory_mb(value, *, name="max_memory") -> float:

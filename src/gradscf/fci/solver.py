@@ -2,12 +2,13 @@
 from typing import NamedTuple
 import jax
 import jax.numpy as jnp
-from gradscf._memory import DEFAULT_MAX_MEMORY_MB, array_storage_bytes, resolve_memory_mb
+from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
+                             resolve_memory_mb, validate_reserved_bytes)
 from gradscf.ao2mo import validate_integrals
 from ..solvers import EigenSolverConfig, EigenResponseConfig, LinearOperator, solve_hermitian
 from ..solvers.diagnostics import require_converged_derivative
 from ..solvers.eigen.davidson import _solver_dtype
-from ..solvers.memory import plan_hermitian, validate_reserved_bytes
+from ..solvers.memory import plan_hermitian
 from .hamiltonian import (DEFAULT_WORKSPACE, _action_tiles, _link_storage_bytes,
                            build_hamiltonian, coefficient_array)
 
