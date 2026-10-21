@@ -29,24 +29,48 @@ def _density_from_lambda(h1, eri, result, left, *, nocc, frozen, config):
 
         densities = jax.grad(lagrangian)(tuple(map(jnp.asarray, h1)))
         return tuple(jnp.where(result.converged & left.converged, d, jnp.nan) for d in densities)
-    no, nv = result.t1.shape
-    space = AmplitudeSpace(no, nv, config.method)
+    h = jnp.asarray(h1)
+    # Preserve the raw API's Hermitian partial even for off-manifold inputs;
+    # the outer right/left states still depend on the original raw Hamiltonian.
+    ints = prepare_integrals(.5*(h+h.T), eri, nocc=nocc, frozen=frozen)
+    density = _density_from_integrals(
+        ints, result, left, nmo=h.shape[0], nocc=nocc, frozen=frozen, config=config
+    )
+    return density.astype(h.dtype)
 
-    def lagrangian(raw_h):
-        # Derivative for a real Hermitian perturbation; PySCF's public RDM1 is
-        # also symmetrized. This is an orbital-unrelaxed, spin-summed MO density.
-        h = 0.5 * (raw_h + raw_h.T)
-        ints = prepare_integrals(h, eri, nocc=nocc, frozen=frozen)
-        r = space.pack(*residual(result.t1, result.t2, ints, model=config.method))
-        e = ints.reference_energy + correlation_energy(
-            result.t1, result.t2, ints, model=config.method
+
+def _density_from_integrals(ints, result, left, *, nmo, nocc, frozen=None, config=None):
+    """Restricted MO 1-RDM from the local Hermitian one-body partial.
+
+    ``nmo/nocc/frozen`` describe the full supplied orbital frame. Only active
+    Fock entries, their diagonal energies and the full occupied reference trace
+    depend on the zero one-body perturbation; ERI blocks stay supplied objects.
+    The prepared Fock itself is not symmetrized. T and Lambda remain live outer
+    dependencies, so nested derivatives include both states' implicit response.
+    """
+    cfg = CCConfig() if config is None else config
+    frozen = frozen_indices(nmo, nocc, frozen)
+    occupied = [i for i in range(nocc) if i not in frozen]
+    virtual = [i for i in range(nocc, nmo) if i not in frozen]
+    if (len(occupied), len(virtual)) != (ints.nocc, ints.nvir):
+        raise ValueError("Full orbital metadata does not match prepared CC active space")
+    active = jnp.asarray(occupied+virtual, dtype=jnp.int32)
+    space = AmplitudeSpace(ints.nocc, ints.nvir, cfg.method)
+
+    def lagrangian(raw_delta):
+        delta = .5*(raw_delta+raw_delta.T)
+        selected = delta[jnp.ix_(active, active)]
+        perturbed = ints._replace(
+            fock=ints.fock+selected,
+            mo_energy=ints.mo_energy+jnp.diag(selected),
+            reference_energy=ints.reference_energy+2*jnp.trace(delta[:nocc, :nocc]),
         )
+        r = space.pack(*residual(result.t1, result.t2, perturbed, model=cfg.method))
+        e = perturbed.reference_energy+correlation_energy(
+            result.t1, result.t2, perturbed, model=cfg.method)
         return e + jnp.vdot(left.adjoint, r).real
 
-    # T and lambda are held fixed for this *partial* derivative. Do not apply
-    # stop_gradient: an outer derivative of the density must include both states'
-    # implicit response, which is verified against reconverged finite differences.
-    density = jax.grad(lagrangian)(jnp.asarray(h1))
+    density = jax.grad(lagrangian)(jnp.zeros((nmo, nmo), dtype=ints.fock.dtype))
     return jnp.where(result.converged & left.converged, density, jnp.nan)
 
 

@@ -1613,3 +1613,33 @@ requires its own explicit decision and numerical validation.
   `ci-columns/`. Completion review closes compact column scheduling only;
   byte-selected creator/spectator/RHS widths, caches, integral preparation
   and whole-state/AD budget ownership remain in the existing WF-18/20/29 scope.
+
+
+### 2026-10-22 — WF-09c: prepared Lambda and one-body partial
+
+- Restricted raw Lambda now prepares then calls `solve_lambda_from_integrals`;
+  R/U share the same original VJP/linear-solve/packed-dual numerical body.
+  No additional solver or integral copy is introduced. A prepared density
+  partial perturbs only active Fock/diagonal energies and the full occupied
+  reference trace, retaining the supplied ERI objects and live T/Lambda response.
+- Raw density still prepares at sym(h), including off-manifold h, then returns
+  the original h dtype. Prepared Fock data are not symmetrized. Tests preserve
+  frozen core/virtual mappings, electron count, one-body contractions and
+  failed-state diagnostics; no derivative through either state is detached.
+- Twenty-six new distinct cases and twelve old R/U regressions pass across
+  recorded shards: four restricted models, packed duals, full/frozen joint
+  h/g JVP/VJP/HVP with reconverged finite differences, raw first/second
+  response, mixed dtype, empty spaces and PySCF density/Lambda references.
+  The first batch retains its real exit 1 after seventeen passes and an LLVM
+  allocation failure; the failed f32 case passes in a fresh process with the
+  same source, test and tolerances. Other completed shards exit 0. Cumulative
+  JIT resource pressure is a hypothesis, not an observed tensor-capacity cause;
+  no global VM setting changed. No dependency skips were recorded.
+- Root and an independent read-only reviewer checked the math/chart, code,
+  XML/exits and matching source hashes `012b0164`/`837b791b`/`59ed2410`.
+  Evidence: `wf09b2-prepared-properties/`, thirty-one small files, archive SHA
+  `55c9df1e...f2c3`. All tests used CPU80-87, no GPU or local numerical tests.
+- This closes the executed Lambda/1-RDM part only, within the fixed WF-09c.
+  Prepared triples/EOM/RDM2 consumers remain; facade/relaxed geometry and
+  complete CC/Lambda/AD memory ownership remain WF-09d/15/29. No new child
+  plan or broader geometry/performance completion is implied.

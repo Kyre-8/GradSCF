@@ -24,20 +24,35 @@ def solve_lambda(h1, eri, result, *, nocc, frozen=None, config=None):
     """
     cfg = CCConfig() if config is None else config
     unrestricted = isinstance(nocc, (tuple, list))
-    if unrestricted:
-        if cfg.method not in {"ccsd", "ccd"}:
-            raise NotImplementedError("Unrestricted Lambda supports CCSD and CCD")
-        ints, occupied, virtual = prepare_ucc_integrals(h1, eri, nocc=nocc, frozen=frozen)
-        space = SpinAmplitudeSpace(occupied, virtual, cfg.method)
-        x = space.pack(*space.from_blocks(result.t1, result.t2, ints.fock.dtype))
-        r = lambda t: space.pack(*_spin_equations.residual(*space.unpack(t), ints))
-        e = lambda t: _spin_equations.correlation_energy(*space.unpack(t), ints)
-    else:
+    if not unrestricted:
         ints = prepare_integrals(h1, eri, nocc=nocc, frozen=frozen)
-        space = AmplitudeSpace(ints.nocc, ints.nvir, cfg.method)
-        x = space.pack(result.t1, result.t2)
-        r = lambda t: space.pack(*residual(*space.unpack(t), ints, model=cfg.method))
-        e = lambda t: correlation_energy(*space.unpack(t), ints, model=cfg.method)
+        return solve_lambda_from_integrals(ints, result, config=cfg)
+    if cfg.method not in {"ccsd", "ccd"}:
+        raise NotImplementedError("Unrestricted Lambda supports CCSD and CCD")
+    ints, occupied, virtual = prepare_ucc_integrals(h1, eri, nocc=nocc, frozen=frozen)
+    space = SpinAmplitudeSpace(occupied, virtual, cfg.method)
+    x = space.pack(*space.from_blocks(result.t1, result.t2, ints.fock.dtype))
+    r = lambda t: space.pack(*_spin_equations.residual(*space.unpack(t), ints))
+    e = lambda t: _spin_equations.correlation_energy(*space.unpack(t), ints)
+    return _solve_left(space, x, r, e, result, cfg, unrestricted=True)
+
+
+def solve_lambda_from_integrals(ints, result, *, config=None):
+    """Restricted Lambda from prepared blocks, using the shared VJP solve.
+
+    The caller supplies the same active-space integral snapshot and model used
+    for the right state. No integral preparation, symmetrization or copy is
+    performed; derivatives follow the supplied integral chart.
+    """
+    cfg = CCConfig() if config is None else config
+    space = AmplitudeSpace(ints.nocc, ints.nvir, cfg.method)
+    x = space.pack(result.t1, result.t2)
+    r = lambda t: space.pack(*residual(*space.unpack(t), ints, model=cfg.method))
+    e = lambda t: correlation_energy(*space.unpack(t), ints, model=cfg.method)
+    return _solve_left(space, x, r, e, result, cfg)
+
+
+def _solve_left(space, x, r, e, result, cfg, *, unrestricted=False):
     current, pullback = jax.vjp(r, x)
     valid = (
         result.converged
