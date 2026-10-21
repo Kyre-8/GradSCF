@@ -467,7 +467,7 @@ section 8 are provenance, not additional active TODO levels.
   Acceptance: direct action/matmat parity, Davidson forward/response, no all-pairs
   connection build; repeated-call cache release and blockwise JVP/VJP.
 
-  - [ ] **WF-20a** (`in_progress`): replace Python-expanded multi-RHS batches
+  - [x] **WF-20a** (`verified`): replace Python-expanded multi-RHS batches
     with the existing shared compact column loop; preserve empty/small batches
     and validate values, coefficient/integral response and measured warm-time/
     workspace tradeoff. Byte-selected widths and cache ownership remain open.
@@ -1576,3 +1576,40 @@ requires its own explicit decision and numerical validation.
   parents, checkbox indentation zero or two spaces, and maximum four children
   per parent. No numerical code or method scope changed. Further fixes and
   test shards must converge on these existing acceptance conditions.
+
+
+### 2026-10-22 — WF-20a: compact CI multi-column lifetime
+
+- Replaced the Python list of four-column action results plus concatenate
+  with the existing shared `apply_columns` loop. It writes one final output
+  and executes one static batch body. Empty and at-most-four-column inputs
+  retain their existing direct action; rank projections, scalar MP actions,
+  integral kernels and numerical/eigen-response owners are unchanged.
+- Structural RED: one failure, twelve numerical passes. All fifteen new
+  R/U value, tail, coefficient/integral JVP/VJP/HVP cases then passed, exit 0,
+  330.64 s pytest / 343.59 s process. Two GPU7 cases passed in 149.18 s,
+  including an explicit device assertion on every response output leaf.
+  GPU6 was hidden and GPU7 was idle before and after the UUID-selected run.
+- Six existing solver/PySCF/FD/vector/rotation cases were selected. Their
+  combined process hit its 600 s total cap after four completed cases; that
+  process is not marked passed and produced no complete XML. Only the two
+  remaining cases were rerun separately: vector response 331.75 s and multiroot
+  rotation 105.16 s, both exit 0 with complete XML. No threshold or case changed.
+- Matched synthetic nmo12/nocc4/CISD1425, f64, seed2312, CPU72-79,
+  OMP4/BLAS1, five warm samples, old/new isolated processes: at 24 columns
+  warm 3.57555/3.61390 ms (+1.07%), XLA scratch 8,304,040/2,231,864 bytes,
+  observed RSS 3,342,196/2,228,380 KiB and compile 38.80/13.36 s. Maximum
+  output difference is 2.67e-15. Single-column scratch/output is unchanged;
+  warm 0.62723/0.65838 ms (+4.97%). This is a sigma-action measurement,
+  not a converged-CI or whole-gradient scaling claim.
+- The original stage used the pre-relocation shared memory module. Root
+  verified its `apply_columns` AST is identical, then integrated the current
+  `_memory` validator import in a separate frozen stage: four structural/
+  empty/tail checks pass, 34.95 s, exit 0; all current hashes match locally.
+  Final CI/column-test hashes start `4d35c458`/`97ee14e5`. Opt-in GPU assertions
+  were added after the original CPU run; its original test hash is retained.
+- Root reviewed the code, independent math/dtype/closure/AD review, raw logs,
+  XML, process exits, comparison JSON and source lineage. Evidence:
+  `ci-columns/`. Completion review closes compact column scheduling only;
+  byte-selected creator/spectator/RHS widths, caches, integral preparation
+  and whole-state/AD budget ownership remain in the existing WF-18/20/29 scope.

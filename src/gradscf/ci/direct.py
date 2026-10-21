@@ -19,6 +19,7 @@ import numpy as np
 from gradscf.ao2mo import validate_integrals, validate_unrestricted_integrals
 from ..fci.cistring import excite
 from ..solvers import LinearOperator
+from ..solvers.memory import apply_columns
 from .space import CISpace, UCISpace
 
 
@@ -343,14 +344,14 @@ def _operator(hs, gs, space, block_size, block_diagonal=False,
     def matmat(vectors):
         if vectors.shape[1] == 0:
             return jnp.zeros_like(vectors)
-        return jnp.concatenate([columns(values, constant, vectors[:, start:start+4])
-                                for start in range(0, vectors.shape[1], 4)], axis=1)
+        return apply_columns(unbatched, vectors, 4)
 
     dtype = jnp.result_type(*focks)
-    return LinearOperator((space.size, space.size), dtype, matvec,
-                          diagonal=_diagonal(focks, gs, constant, topology, space.size,
-                                             max_input_rank, max_output_rank),
-                          matmat=matmat, transpose_matvec=matvec)
+    unbatched = LinearOperator((space.size, space.size), dtype, matvec,
+        matmat=lambda vectors: columns(values, constant, vectors), transpose_matvec=matvec)
+    return replace(unbatched, matmat=matmat,
+        diagonal=_diagonal(focks, gs, constant, topology, space.size,
+                           max_input_rank, max_output_rank))
 
 
 def _from_integrals(h1, eri, space, block_size, max_input_rank, max_output_rank,
