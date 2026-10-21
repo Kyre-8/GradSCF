@@ -26,7 +26,7 @@ class CCIntegrals(NamedTuple):
 
     @property
     def nvir(self):
-        return self.vvvv.shape[0]
+        return self.fock.shape[0] - self.nocc
 
 
 def prepare_integrals(h1, eri, *, nocc, nuclear_repulsion=0.0, frozen=None):
@@ -44,20 +44,20 @@ def prepare_integrals(h1, eri, *, nocc, nuclear_repulsion=0.0, frozen=None):
     occ = [i for i in range(nocc) if i not in frozen]
     vir = [i for i in range(nocc, h.shape[0]) if i not in frozen]
     active = jnp.asarray(occ + vir, dtype=jnp.int32)
-    no = len(occ)
     f = f[jnp.ix_(active, active)]
-    g = g[jnp.ix_(active, active, active, active)]
-    o, v = slice(None, no), slice(no, None)
+    o = jnp.asarray(occ, dtype=jnp.int32)
+    v = jnp.asarray(vir, dtype=jnp.int32)
+    # Extract only the CC blocks; a complete active-space ERI copy is unnecessary.
     return CCIntegrals(
         f,
         jnp.diag(f),
-        g[o, o, o, o],
-        g[o, v, o, o],
-        g[o, v, o, v],
-        g[o, o, v, v],
-        g[o, v, v, o],
-        g[o, v, v, v],
-        g[v, v, v, v],
+        g[jnp.ix_(o, o, o, o)],
+        g[jnp.ix_(o, v, o, o)],
+        g[jnp.ix_(o, v, o, v)],
+        g[jnp.ix_(o, o, v, v)],
+        g[jnp.ix_(o, v, v, o)],
+        g[jnp.ix_(o, v, v, v)],
+        g[jnp.ix_(v, v, v, v)],
         e,
     )
 

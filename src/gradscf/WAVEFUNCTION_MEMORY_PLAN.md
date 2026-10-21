@@ -353,6 +353,10 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
 - [ ] **WF-09 — RCC integral preparation.** Request only required blocks; make
   orbital counts independent of `vvvv.shape`. Acceptance: frozen/core indexing,
   dense/DF/direct small equivalence, no transient full-MO conversion.
+
+  - [x] **WF-09a:** remove the extra full active-space ERI copy in the
+    existing MO-array path; derive virtual counts from the Fock dimension.
+  - [ ] **WF-09b:** prepare requested AO-source blocks and share consumers.
 - [ ] **WF-10 — RCC vvvv and intermediate actions.** Factor bare-vvvv contraction
   from dressing; tile tau/W consumers and release/recompute by lifetime.
   Acceptance: residual and energy term comparison, converged CCD/CCSD, JVP/VJP,
@@ -887,3 +891,28 @@ requires its own explicit decision and numerical validation.
   spin blocks, Qia, T2, resolvent and AD/solver state require WF-29 integration.
   Full relaxed molecular geometry is being verified under WF-07. These test
   process peaks are not a measured MP2 scale comparison.
+
+
+### 2026-10-21 — WF-09a: verified restricted CC block extraction
+
+- The MO-array entry now gathers each of its seven required blocks directly
+  from the original ERI. It no longer first copies the complete active-space
+  four-index tensor. Frozen cores still contribute to the full Fock/HF energy;
+  selected occupied/virtual ordering and arbitrary raw-integral derivatives
+  remain unchanged. Virtual dimension is derived from Fock, independently of
+  `vvvv`, preparing consumers for a later virtual-pair action.
+- RED: seven failures and five passes, exit 1, 7.52 / 8.97 s. Six cases detected
+  the forbidden active-four-index copy; one detected the old vvvv-dependent
+  orbital count. Final twelve cases passed, exit 0, 9.29 / 10.70 s,
+  1,102,328 KiB peak RSS, including float32/64, frozen occupied/virtual spaces,
+  empty O/V spaces and raw block gradient/HVP parity.
+- Twenty-six existing RCC/CC2/QCISD cases passed, exit 0, 216.64 s pytest /
+  223.18 s process, 3,519,240 KiB peak RSS. They include residuals, energies,
+  amplitudes, Lambda, frozen spaces, triples and enabled model responses.
+  Remote `wf09a-green1/` and local `artifacts/wavefunction-memory-20261021/wf09a/`
+  retain commands, hashes and JUnit evidence. CPU96-103, no GPU, no local numerics.
+- Production SHA256:
+  `4cfd8a9f07879a4404a519be09ef67b673efb69166bfaaf45683720d22fd2649`.
+  Independent specification/quality review passed. The original complete MO
+  input and vvvv block still exist: this closes WF-09a only, not WF-09 or WF-10.
+  No large-molecule process-memory improvement is inferred from this unit test.
