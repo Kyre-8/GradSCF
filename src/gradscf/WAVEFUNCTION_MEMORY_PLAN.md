@@ -88,7 +88,7 @@ Source anchors are relative to the worktree:
 
 - `src/gradscf_tools/{molecular_response,correlated_response}.py`;
 - `src/gradscf/scf/{reference,orbital_optimization}.py`;
-- `src/gradscf/integrals/{plan.py,molecular/ao2mo.py}`;
+- `src/gradscf/integrals/plan.py` and `src/gradscf/ao2mo/`;
 - `src/gradscf/integrals/backends/native/{jk.py,autodiff/geometry.py}`;
 - `src/gradscf/cc/{integrals,_equations,_intermediates,uccsd,triples,properties}.py`;
 - `src/gradscf/cc/eom/{operators,_charged}.py`;
@@ -319,12 +319,20 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   to OVOV/OV-factor consumption, preserving with/without-T2 behavior and public
   conventions. Acceptance: PySCF and dense GradSCF energy/T2, no full AO/MO
   materialization, non-DF and existing DF tests; byte-accounted resident T2.
+
+  - [x] **WF-05a:** native direct SCF-to-OVOV and pure orbital preparation,
+    existing dense/s4/DF compatibility and construction preflight.
+  - [ ] **WF-05b:** joint block/T2/solver ownership and measured method scaling.
 - [ ] **WF-06 — Unrestricted and noncanonical MP2.** Supply aa/ab/bb channels
   without spin ERI, retaining the shared tensor-sum resolvent. Acceptance:
   closed/open-shell equality as appropriate, occupied/virtual rotation covariance,
   strict internal degeneracy, residual tolerance, JVP/VJP/HVP. Streaming the
   noncanonical inverse itself is a separate optimization if necessary-state
   storage still fits poorly; do not relabel an unchanged O(o²v²) solve as streamed.
+
+  - [x] **WF-06a:** native aa/ab/bb preparation from saved UHF Focks,
+    noncanonical rotation and coefficient JVP/VJP/HVP, mixed dtype regressions.
+  - [ ] **WF-06b:** whole-caller spin/resolvent/AD residency and scaling.
 - [ ] **WF-07 — CorrelatedEnergy MP2 geometry integration.** Remove its obligatory
   full-MO conversion for R/U MP2. Keep moving S/h/J/K, stationary SCF, live C and
   correlation response. Acceptance: energy, full gradient, HVP and one small
@@ -844,3 +852,38 @@ requires its own explicit decision and numerical validation.
   full AO-pair data; WF-05/06 now connects direct SCF and selected MP2 blocks,
   reusing live converged Focks rather than reconstructing them. The overall
   engineering plan remains unchanged beyond the requested package boundary.
+
+
+### 2026-10-21 — WF-05a / WF-06a: verified native direct MP2 preparation
+
+- Added a pure `mp.integrals.from_orbitals` entry taking live coefficients,
+  full MO-frame Focks, occupations and the total HF energy. It requests only
+  selected OVOV blocks or existing DF Qia factors. No full MO/spin ERI or
+  separate orbital diagonalization is introduced. Frozen and noncanonical
+  reference checks remain in force.
+- Eager RHF uses saved integral inputs and Fock; UHF reads its existing solved
+  reference payload directly. Neither rebuilds the source nor recomputes J/K.
+  Native/projected direct providers reach the shared AO2MO package. The legacy
+  JAX-direct reference retains packed construction with a metadata preflight.
+- RED: the original native adapter reached forbidden packed construction.
+  Initial GREEN exposed ten UHF test-fixture errors: standard UKS has no saved
+  `_scf_inputs`, so the actual existing reference payload was used. A second
+  RED reproduced two legacy-direct compatibility failures and two mixed-dtype
+  carry failures; one all-float32 oracle cancellation issue was also corrected
+  in the test without loosening production validity tolerances.
+- Final production SHA256:
+  `a54596cfd568ae086b2de140a811d7abd190339cf6ea3965179e9d5ff25a4121`.
+  Twenty-five new CPU cases passed, exit 0, 63.61 s pytest / 68.00 s process,
+  3,280,700 KiB peak RSS. Cases include independent PySCF R/U MP2 energies,
+  frozen/with-T2 controls, full-integral/rebuild traps, pure coefficient gradient
+  and HVP, occupied/virtual rotations and float32/mixed-float64 data.
+- All 130 existing MP integral/MP2/noncanonical/post-HF budget cases passed,
+  exit 0, 104.03 s pytest / 110.19 s process, 4,290,760 KiB peak RSS. Remote
+  snapshot `wavefunction-memory-20261021/mp2-direct-green2/` contains
+  `direct-mp2-cpu2` and `mp2-legacy-regression` logs/XML/result JSON. Numerical
+  runs used CPU56-71, float64 default, JAX0.10.0/PySCF2.13.0, GPU invisible.
+- Independent static implementation review passed. Completion review closes
+  WF-05a/06a only. Each transform still has a separate budget; retained sibling
+  spin blocks, Qia, T2, resolvent and AD/solver state require WF-29 integration.
+  Full relaxed molecular geometry is being verified under WF-07. These test
+  process peaks are not a measured MP2 scale comparison.

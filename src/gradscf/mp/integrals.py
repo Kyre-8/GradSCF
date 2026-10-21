@@ -1,11 +1,13 @@
 """Canonical MP blocks; frozen cores still contribute to the HF Fock and energy."""
+from numbers import Integral
 from typing import NamedTuple
 
 import numpy as np
 import jax
 import jax.numpy as jnp
 
-from gradscf._memory import resolve_memory_mb
+from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
+                             resolve_memory_mb, workspace_bytes)
 from gradscf.ao2mo import validate_integrals, validate_unrestricted_integrals, frozen_indices, unrestricted_frozen_indices, transform_eri_block
 
 
@@ -128,15 +130,102 @@ def prepare_integrals(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., froze
                                        frozen_gap_tol=frozen_gap_tol))
 
 
-def from_scf(source, *, frozen=None, frozen_gap_tol=1e-10, max_memory=None):
-    """Reuse converged HF AO data; DF retains only Q/occupied/virtual factors.
+def from_orbitals(coefficients, focks, nocc, reference_energy, *, frozen=None,
+                  frozen_gap_tol=1e-10, max_memory=DEFAULT_MAX_MEMORY_MB,
+                  eri=None, eri_pair_matrix=None, df_factors=None, direct_basis=None):
+    """Prepare MP2 occupied/virtual data from a real, supplied HF orbital frame.
 
-    This is an eager adapter. It does not rerun SCF or transform complete MO ERIs.
+    ``focks`` contains one restricted or two unrestricted full MO-frame Focks;
+    ``reference_energy`` is the total HF energy, including nuclear repulsion.
+    ``nocc`` is a static integer or (nalpha, nbeta) tuple. Frozen orbitals are
+    removed only from the correlation space, preserving their Fock and energy
+    contributions. No canonicalization or SCF source validation occurs here.
+
+    Exactly one AO ERI representation is required. Native direct inputs retain
+    only selected ovov blocks; DF keeps the existing Qia factors. ``max_memory``
+    budgets each block transform, not all spin blocks, MP amplitudes or AD state.
+    """
+    max_memory = resolve_memory_mb(max_memory)
+    unrestricted = isinstance(nocc, tuple)
+    cs = tuple(map(jnp.asarray, coefficients)) if unrestricted else (jnp.asarray(coefficients),)
+    if len(cs) != (2 if unrestricted else 1) or any(c.ndim != 2 for c in cs):
+        raise ValueError("Supply one restricted or two unrestricted AO/MO coefficient matrices")
+    if any(c.shape != cs[0].shape for c in cs):
+        raise ValueError("Alpha and beta MO spaces must have equal dimensions")
+    focks = tuple(map(jnp.asarray, focks))
+    if len(focks) != len(cs) or any(f.shape != (c.shape[1], c.shape[1])
+                                   for c, f in zip(cs, focks)):
+        raise ValueError("Supply one full MO-frame Fock matrix for each coefficient matrix")
+    reference_energy = jnp.asarray(reference_energy)
+    if reference_energy.ndim != 0:
+        raise ValueError("reference_energy must be scalar")
+    if any(jnp.iscomplexobj(x) for x in (*cs, *focks, reference_energy)):
+        raise NotImplementedError("MP requires real orbitals, Focks and reference energy")
+    nmo = cs[0].shape[1]
+    if unrestricted:
+        ns = nocc
+        fr = unrestricted_frozen_indices(nmo, ns, frozen)
+    else:
+        if isinstance(nocc, bool) or not isinstance(nocc, Integral) or not 0 <= nocc <= nmo:
+            raise ValueError("nocc must be an integer between 0 and nmo")
+        ns = (nocc,)
+        fr = (frozen_indices(nmo, nocc, frozen),)
+    if sum(x is not None for x in (eri, eri_pair_matrix, df_factors, direct_basis)) != 1:
+        raise ValueError("Supply exactly one of eri, eri_pair_matrix, df_factors, direct_basis")
+    integral_dtype = (jnp.float64 if direct_basis is not None else
+                      jnp.asarray(next(x for x in (eri, eri_pair_matrix, df_factors)
+                                       if x is not None)).dtype)
+    dtype = jnp.result_type(*cs, *focks, integral_dtype)
+    if jnp.issubdtype(dtype, jnp.complexfloating):
+        raise NotImplementedError("MP requires real integral data")
+    # Denominators, accumulators and optional amplitudes must share the dtype
+    # of the transformed interaction; native direct integrals are float64.
+    focks = tuple(f.astype(dtype) for f in focks)
+    selections = tuple(active_indices(nmo, no, f) for no, f in zip(ns, fr))
+    ovs = tuple((c[:, o], c[:, v]) for c, (o, v) in zip(cs, selections))
+    energies = tuple(jnp.diag(f)[jnp.concatenate((o, v))]
+                     for f, (o, v) in zip(focks, selections))
+    pairs = ((0, 0), (0, 1), (1, 1)) if unrestricted else ((0, 0),)
+    if df_factors is not None:
+        factors = jnp.asarray(df_factors)
+        if factors.ndim != 3 or factors.shape[1:] != (cs[0].shape[0],) * 2:
+            raise ValueError("df_factors must have shape (naux, nao, nao)")
+        if jnp.iscomplexobj(factors):
+            raise NotImplementedError("MP requires real DF factors")
+        ov_factors = tuple(jnp.einsum("Qpq,pi,qa->Qia", factors, o, v, precision="highest")
+                           for o, v in ovs)
+        blocks = None
+        finite_data = (factors, *ov_factors)
+    else:
+        blocks = tuple(transform_eri_block((*ovs[a], *ovs[b]),
+                                           eri=eri, eri_pair_matrix=eri_pair_matrix,
+                                           direct_basis=direct_basis, max_memory=max_memory)
+                       for a, b in pairs)
+        ov_factors = None
+        finite_data = (*blocks, *jax.tree.leaves(direct_basis))
+    finite = jnp.all(jnp.stack([jnp.all(jnp.isfinite(x))
+                              for x in (reference_energy, *cs, *focks, *finite_data)]))
+    return MPIntegrals(energies, tuple(len(o) for o, _ in selections), blocks,
+                       ov_factors, reference_energy, canonical_error(focks), finite,
+                       _active_focks(focks, selections), reference_error(
+                           focks, nocc, frozen=frozen,
+                           orbital_basis="noncanonical", frozen_gap_tol=frozen_gap_tol))
+
+
+def from_scf(source, *, frozen=None, frozen_gap_tol=1e-10, max_memory=None):
+    """Reuse current converged HF Focks and AO data without rebuilding J/K.
+
+    This eager adapter validates the SCF source and occupations. The pure
+    ``from_orbitals`` helper prepares selected correlation blocks, including
+    exact native-direct inputs without a saved AO ERI tensor or pair matrix.
+    UKS already owns a solved reference payload; it is read directly without
+    invoking a reference builder. Legacy restricted JAX direct inputs retain
+    their small-system packed AO reference path after a construction preflight.
     """
     max_memory = resolve_memory_mb(max_memory, source)
     from ..scf.facade import RKS, UKS
-    from ..scf.rks import _build_jk
-    from gradscf.integrals.molecular.jk import build_jk_from_df
+    from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
+
     if not isinstance(source, (RKS, UKS)) or str(source.xc).lower() != "hf":
         raise NotImplementedError("Canonical MP requires RHF/UHF; ROHF and DFT are not supported")
     source._check_reference_source()
@@ -145,61 +234,53 @@ def from_scf(source, *, frozen=None, frozen_gap_tol=1e-10, max_memory=None):
         raise NotImplementedError("MP requires real orbitals")
     unrestricted = isinstance(source, UKS)
     if unrestricted:
-        ref = source.to_reference()
-        h, g, factors = ref.h1e, ref.rep_tensor, ref.df_factors
+        ref = source.reference
+        if ref is None or ref.fock_matrix is None:
+            raise RuntimeError("Solved UHF Fock data is missing; run SCF again before MP")
         ns = (ref.nocc_alpha, ref.nocc_beta)
         cs = tuple(coeff)
-        density = jnp.asarray(ref.rdm1)
-        jk = (lambda d: build_jk_from_df(factors, d)) if factors is not None else (lambda d: _build_jk(g, d))
-        ja, ka = jk(density[0])
-        jb, kb = jk(density[1])
-        focks = (cs[0].T @ (h + ja + jb - ka) @ cs[0],
-                 cs[1].T @ (h + ja + jb - kb) @ cs[1])
-        fr = unrestricted_frozen_indices(coeff.shape[-1], ns, frozen)
-        kwargs = {"df_factors": factors} if factors is not None else {
-            "eri" if jnp.ndim(g) == 4 else "eri_pair_matrix": g}
+        focks = tuple(c.T @ f @ c for c, f in zip(cs, ref.fock_matrix))
+        factors, direct, eri, pair = ref.df_factors, ref.direct_basis, ref.rep_tensor, None
     else:
         inputs = source._scf_inputs
-        ns = (inputs.nelectron // 2,)
         if inputs.nelectron % 2:
             raise ValueError("RMP requires an even electron count")
-        cs = (coeff,)
+        ns, cs = (inputs.nelectron // 2,), (coeff,)
         focks = (coeff.T @ source.scf_result.fock_matrix @ coeff,)
-        factors = inputs.df_factors
-        fr = (frozen_indices(coeff.shape[1], ns[0], frozen),)
-        if factors is not None:
-            kwargs = {"df_factors": factors}
-        elif inputs.eri is not None:
-            kwargs = {"eri": inputs.eri}
-        else:
-            pair = inputs.response_eri_pair_matrix()
-            if pair is None:
-                raise ValueError("MP requires two-electron integral data; direct-only SCF has no saved ERIs")
-            kwargs = {"eri_pair_matrix": pair}
+        factors, direct = inputs.df_factors, inputs.direct_basis
+        eri, pair = inputs.eri, inputs.eri_pair_matrix
     expected = tuple((np.arange(c.shape[1]) < no).astype(int) for c, no in zip(cs, ns))
     expected = np.stack(expected) if unrestricted else 2 * expected[0]
     if not np.array_equal(np.asarray(source.mo_occ), expected):
         raise ValueError("MP requires integer occupations and occupied orbitals first")
-    selections = tuple(active_indices(c.shape[1], no, f) for c, no, f in zip(cs, ns, fr))
-    ovs = tuple((c[:, o], c[:, v]) for c, (o, v) in zip(cs, selections))
-    energies = tuple(jnp.diag(f)[jnp.concatenate((o, v))]
-                     for f, (o, v) in zip(focks, selections))
-    pairs = ((0, 0), (0, 1), (1, 1)) if unrestricted else ((0, 0),)
     if factors is not None:
-        ov_factors = tuple(jnp.einsum("Qpq,pi,qa->Qia", factors, o, v, precision="highest")
-                           for o, v in ovs)
-        blocks = None
-        finite_data = (factors, *ov_factors)
+        kwargs = {"df_factors": factors}
+    elif isinstance(direct, (NativeDirectBasis, ProjectedNativeDirectBasis)):
+        kwargs = {"direct_basis": direct}
+    elif eri is not None and eri.size:
+        kwargs = {"eri" if eri.ndim == 4 else "eri_pair_matrix": eri}
+    elif pair is not None:
+        kwargs = {"eri_pair_matrix": pair}
+    elif not unrestricted and direct is not None:
+        npair = coeff.shape[0] * (coeff.shape[0] + 1) // 2
+        itemsize = max(8, np.dtype(jnp.result_type(coeff, inputs.hcore)).itemsize)
+        resident = array_storage_bytes(coeff, *focks, inputs.overlap, inputs.hcore,
+            inputs.ao, inputs.ao_deriv1, inputs.ao_laplacian, inputs.coords, inputs.grid_weights)
+        device = getattr(coeff, "device", None)
+        device = device() if callable(device) else device
+        available = workspace_bytes(max_memory, resident_bytes=resident, device=device)
+        # Packed JAX construction can retain an accumulator, a chunk result
+        # and their sum; scan accumulators also carry a sentinel AO-pair row.
+        required = 3 * (npair + 1)**2 * itemsize
+        if required > available:
+            raise ValueError("Legacy packed AO ERI construction buffers exceed the max_memory budget")
+        pair = inputs.response_eri_pair_matrix()
+        if pair is None:
+            raise ValueError("MP requires two-electron integral data")
+        kwargs = {"eri_pair_matrix": pair}
     else:
-        blocks = tuple(transform_eri_block((*ovs[a], *ovs[b]),
-                                           max_memory=max_memory, **kwargs)
-                       for a, b in pairs)
-        ov_factors = None
-        finite_data = (*kwargs.values(), *blocks)
-    finite = jnp.isfinite(source.e_tot) & jnp.all(jnp.stack([
-        jnp.all(jnp.isfinite(x)) for x in (*focks, *finite_data)]))
-    return MPIntegrals(energies, tuple(len(o) for o, _ in selections), blocks,
-                       ov_factors, jnp.asarray(source.e_tot), canonical_error(focks), finite,
-                       _active_focks(focks, selections), reference_error(
-                           focks, ns if unrestricted else ns[0], frozen=frozen,
-                           orbital_basis="noncanonical", frozen_gap_tol=frozen_gap_tol))
+        raise ValueError("MP requires two-electron integral data")
+    return from_orbitals(cs if unrestricted else coeff, focks,
+                         ns if unrestricted else ns[0], source.e_tot,
+                         frozen=frozen, frozen_gap_tol=frozen_gap_tol,
+                         max_memory=max_memory, **kwargs)
