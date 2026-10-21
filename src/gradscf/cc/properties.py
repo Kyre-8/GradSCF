@@ -89,15 +89,27 @@ def make_rdm1(h1, eri, result, *, nocc, frozen=None, config=None):
 
 
 def _rdm2_from_lambda(h1, eri, result, left, *, nocc, frozen, config):
-    if config.method not in {"ccsd", "ccd", "ccs"}:
+    h = jnp.asarray(h1[0] if isinstance(nocc, (tuple, list)) else h1)
+    return _rdm2_from_states(result, left, nmo=h.shape[0], nocc=nocc,
+                             frozen=frozen, dtype=h.dtype, config=config)
+
+
+def _rdm2_from_states(result, left, *, nmo, nocc, dtype, frozen=None, config=None):
+    """Dense 2-RDM from full-frame metadata and stationary right/left states.
+
+    No integrals are required. ``dtype`` retains the raw h1 input chart; state
+    amplitudes may promote it just as in the raw wrapper. The existing full
+    spin-orbital four-index allocation remains an in-core reference algorithm.
+    """
+    cfg = CCConfig() if config is None else config
+    if cfg.method not in {"ccsd", "ccd", "ccs"}:
         raise NotImplementedError("The CC 2-RDM currently supports CCS, CCD and CCSD")
     unrestricted = isinstance(nocc, (tuple, list))
+    n = nmo
     if unrestricted:
-        n = jnp.asarray(h1[0]).shape[0]
         counts = tuple(nocc)
         frozen_sets = unrestricted_frozen_indices(n, counts, frozen)
     else:
-        n = jnp.asarray(h1).shape[0]
         counts = (nocc, nocc)
         frozen_sets = (frozen_indices(n, nocc, frozen),)*2
     occupied = [[s*n+i for i in range(no) if i not in fr]
@@ -108,9 +120,9 @@ def _rdm2_from_lambda(h1, eri, result, left, *, nocc, frozen, config):
 
     def to_spin(a, b):
         if unrestricted:
-            return space.from_blocks(a, b, jnp.asarray(h1[0]).dtype)
+            return space.from_blocks(a, b, dtype)
         same_spin = b-b.swapaxes(2, 3)
-        return space.from_blocks((a, a), (same_spin, b, same_spin), jnp.asarray(h1).dtype)
+        return space.from_blocks((a, a), (same_spin, b, same_spin), dtype)
 
     t1, t2 = to_spin(result.t1, result.t2)
     l1, l2 = to_spin(left.l1, left.l2)

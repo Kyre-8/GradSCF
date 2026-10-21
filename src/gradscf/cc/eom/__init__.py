@@ -2,7 +2,8 @@
 
 from .types import EOMConfig, EOMResult, EOMPrecisionDiagnostics, DysonResult
 from .amplitudes import EOMAmplitudeSpace
-from .operators import build_eom_operator, run_eom
+from .operators import (build_eom_operator, run_eom,
+                        build_eom_operator_from_integrals, run_eom_from_integrals)
 from .api import EOMEE, EOMIP, EOMEA
 from .properties import dyson_orbitals
 
@@ -15,6 +16,8 @@ __all__ = [
     "EOMAmplitudeSpace",
     "build_eom_operator",
     "run_eom",
+    "build_eom_operator_from_integrals",
+    "run_eom_from_integrals",
     "EOMEE",
     "EOMIP",
     "EOMEA",

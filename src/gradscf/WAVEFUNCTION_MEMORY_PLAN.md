@@ -378,9 +378,9 @@ section 8 are provenance, not additional active TODO levels.
     existing seven-block container, one shared batch and one numerical ground
     body reused by the MO entry. Bare-vvvv storage stays explicit. Includes
     the verified historical WF-09b1 checkpoint.
-  - [ ] **WF-09c** (`in_progress`): prepared Lambda, properties, triples and
+  - [x] **WF-09c** (`verified`): prepared Lambda, properties, triples and
     EOM reuse one snapshot. Preserve their model/state/frozen checks and raw-MO
-    APIs; Lambda/1-RDM is the currently executing part of this fixed scope.
+    APIs; the original dense RDM2/EA algorithms and provider guards remain.
     Historical implementation label: WF-09b2.
   - [ ] **WF-09d** (`in_progress`): switch the eager SCF facade and relaxed molecular adapter
     after prepared consumers pass; validate full-space metadata, freshness,
@@ -618,11 +618,10 @@ For **each completed task**, before starting the next dependent task:
 
 1. Check the implementation against that TODO's full scope and acceptance.
 2. Review correctness/specification, then code quality/reuse. Resolve findings.
-3. Append exact evidence and remaining limits to section 8. Update the checkbox
-   only when its acceptance is satisfied; otherwise record the narrower progress.
-4. Re-read dependencies and the global forward/AD/device matrix. Record whether
-   the plan remains valid or what changed and why. Do not silently remove scope.
-5. Keep the diff focused and commit a reviewable change when verified. Do not
+3. Review the evidence, remaining limits, dependencies and forward/AD/device
+   matrix in section 8. Update the checkbox only when acceptance is satisfied;
+   otherwise record narrower progress. Explain changes without removing scope.
+4. Keep the diff focused and commit a reviewable change when verified. Do not
    merge or push the engineering branch without a user instruction.
 
 Keep this review inside the fixed TODO structure: merge a newly discovered
@@ -1795,3 +1794,38 @@ requires its own explicit decision and numerical validation.
   `wf10b-native-action/cuda-component-manifest.json` and companion logs/XML.
   This is the finite action/AD device gate, not full CC CUDA/geometry scaling,
   a total GPU budget guarantee, or closure of the open performance criterion.
+
+### 2026-10-22 — WF-09c: remaining prepared consumers accepted
+
+- Prepared triples/scalar and EE/IP/EA build/run entries share the original
+  numerical bodies and solver ownership. RDM2 consumes full-frame metadata and
+  right/left states without integral preparation; its original dense full-spin
+  allocation and dtype-promotion behavior remain explicit. Lambda/1-RDM were
+  accepted in the earlier checkpoint. No method-local solver is introduced.
+- Independent/root review exposed two semicanonical-auto raw-chart differences:
+  damaged T2 changes the packed spin residual norm, and raw ERI pair-exchange
+  breaking changes the two UHF Focks independently. The raw API retains its
+  original UCC dispatch. Its complete diagnostics/dtypes, a critical validity
+  threshold and the directed g[0,0,2,3] VJP match the original UCC oracle.
+  The new prepared general entry declares its physical single-Fock/pair-symmetric
+  T2 chart and rejects states outside it; it does not construct spin vvvv merely
+  to reproduce a diagnostic for an unsupported damaged state.
+- Thirty new unique cases plus ten existing reference cases pass in eighteen
+  bounded batches, all exit0/no skips, CPU80-87. These cover six triples choices,
+  JVP/VJP/HVP and reconverged FD, all EOM sectors' energy/left/right vector
+  response, full/frozen RDM2 outer AD, capacities, invalid states/denominators,
+  explicit AD-order guards and PySCF references. The longest process is 355.06 s.
+  Initial missing-entry and real chart-guard RED failures remain recorded.
+- Unchanged canonical contractions/loop AST match the original and both tested
+  prepared versions (`7339a878`). The final changed prefix, six-case value/
+  diagnostic/dtype matrix and semicanonical response pass separately; unchanged
+  EOM/RDM files and test drivers have matching hashes. This reuses valid
+  evidence without rerunning an identical canonical campaign for a new filename
+  hash. Root reviewed the sixty-nine evidence entries, exact exits/XML, source
+  hashes and independent review. Evidence: `wf09c-prepared-consumers/` and archive
+  SHA `b5436b75...5c01`; final triples/EOM/properties `25f1ecc8`/`a21ff091`/
+  `7c194b56`. No local numerical work, native build, GPU or extra TODO was used.
+- Closure applies to WF-09c's reuse contract. Dense EA Wvvvv/RDM2, virtual-provider
+  compatibility beyond ground actions, total-budget ownership and full method
+  scaling remain their existing WF-10/14/15/16/17/27/29 gates. Facade/relaxed
+  geometry integration is the dependent WF-09d, with its own measured evidence.

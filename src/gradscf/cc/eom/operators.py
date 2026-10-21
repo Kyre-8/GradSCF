@@ -23,6 +23,33 @@ def build_eom_operator(
         raise NotImplementedError(
             "Initial EOM-CCSD requires a real restricted reference"
         )
+    space = _checked_space(ground, cfg, cc_cfg)
+    if jnp.size(eri) > cfg.max_intermediate_elements:
+        raise ValueError("EOM input integrals exceed max_intermediate_elements")
+    ints = prepare_integrals(h1, eri, nocc=nocc, frozen=frozen)
+    return _build_operator(ints, ground, space, cfg, cc_cfg)
+
+
+def build_eom_operator_from_integrals(ints, ground, *, config=None, cc_config=None):
+    """EE/IP/EA operator from the same prepared restricted integral snapshot.
+
+    The capacity guard counts supplied storage leaves, without a full MO ERI
+    estimate. Matrix-free virtual ERIs are explicitly unsupported here: EA's
+    current transformed Wvvvv remains dense and needs separate validation.
+    """
+    cfg = EOMConfig() if config is None else config
+    cc_cfg = CCConfig() if cc_config is None else cc_config
+    if isinstance(ground.t1, (tuple, list)):
+        raise NotImplementedError("Initial EOM-CCSD requires a real restricted reference")
+    space = _checked_space(ground, cfg, cc_cfg)
+    if not hasattr(ints.vvvv, "shape"):
+        raise NotImplementedError("Prepared EOM currently requires dense virtual ERIs")
+    if sum(jnp.size(x) for x in jax.tree.leaves(ints)) > cfg.max_intermediate_elements:
+        raise ValueError("Prepared EOM integral storage exceeds max_intermediate_elements")
+    return _build_operator(ints, ground, space, cfg, cc_cfg)
+
+
+def _checked_space(ground, cfg, cc_cfg):
     if cc_cfg.method != "ccsd":
         raise ValueError("EOM-CCSD requires the CCSD ground-state model")
     if jnp.ndim(ground.t1) != 2:
@@ -35,9 +62,11 @@ def build_eom_operator(
         )
     if not space.size or cfg.nroots > space.size:
         raise ValueError("Invalid root count or empty EOM sector")
-    if jnp.size(eri) > cfg.max_intermediate_elements:
-        raise ValueError("EOM input integrals exceed max_intermediate_elements")
-    ints = prepare_integrals(h1, eri, nocc=nocc, frozen=frozen)
+    return space
+
+
+def _build_operator(ints, ground, space, cfg, cc_cfg):
+    no, nv = ground.t1.shape
     if (no, nv) != (ints.nocc, ints.nvir):
         raise ValueError("CC amplitudes and active EOM space differ")
     tspace = AmplitudeSpace(no, nv)
@@ -112,6 +141,18 @@ def run_eom(h1, eri, ground, *, nocc, frozen=None, config=None, cc_config=None):
     op, space, valid = build_eom_operator(
         h1, eri, ground, nocc=nocc, frozen=frozen, config=cfg, cc_config=cc_config
     )
+    return _run_operator(op, valid, cfg)
+
+
+def run_eom_from_integrals(ints, ground, *, config=None, cc_config=None):
+    """Prepared EE/IP/EA roots with the same solver and response contracts."""
+    cfg = EOMConfig() if config is None else config
+    op, _, valid = build_eom_operator_from_integrals(
+        ints, ground, config=cfg, cc_config=cc_config)
+    return _run_operator(op, valid, cfg)
+
+
+def _run_operator(op, valid, cfg):
     solved = solve_nonhermitian(
         op,
         vector_response=cfg.vector_response,
