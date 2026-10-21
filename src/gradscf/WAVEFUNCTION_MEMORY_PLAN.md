@@ -415,6 +415,10 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   Acceptance: h_eff/E_core/ERI equality, active/frozen mapping, coefficient and
   geometry derivatives. A dense nact^4 input can remain a budgeted small-CAS
   choice; it is not a full total-MO tensor.
+
+  - [x] **WF-19a:** native/projected CAS ERIs and AO core folding, fixed-frame
+    coefficient/geometry products through two and allocation preflights.
+  - [ ] **WF-19b:** all reference representations and joint consumer budgets.
 - [ ] **WF-20 — CI action/cache budget.** Replace fixed creator/spectator/RHS
   batches with byte planning and bound numerical/RDM caches by bytes.
   Acceptance: direct action/matmat parity, Davidson forward/response, no all-pairs
@@ -424,6 +428,10 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   Acceptance: alpha/beta signs, rectangular spin sectors, multiple RHS, transpose
   action and HVP; extra workspace scales with tile size, while input/output CI
   vectors and iterative subspace remain explicitly charged.
+
+  - [x] **WF-21a:** alpha/beta/RHS Hamiltonian tiles, unit AD parity and
+    measured action/reverse-residual memory and warm-time tradeoff.
+  - [ ] **WF-21b:** public facade capacity checks and joint solver budget.
 - [ ] **WF-22 — CI/FCI properties and geometry integration.** Stream bra/ket
   contractions and existing perturbative-CI corrections where applicable.
   Acceptance: energy/RDM identities and observable contractions, geometry
@@ -916,3 +924,68 @@ requires its own explicit decision and numerical validation.
   Independent specification/quality review passed. The original complete MO
   input and vvvv block still exist: this closes WF-09a only, not WF-09 or WF-10.
   No large-molecule process-memory improvement is inferred from this unit test.
+
+
+### 2026-10-21 — WF-19a: verified native active-FCI preparation
+
+- Active-space preparation requests only nact^4 MO ERIs from the shared AO2MO
+  package. Closed cores are folded in AO space with D=2*Cc*Cc.T, V=J-.5*K,
+  Ecore+=Tr[D*(h+.5*V)] and h_active+=Ca.T*V*Ca. Existing native J/K is reused
+  with zero screening; no second integral engine or full total-MO ERI is added.
+  The pure helper retains coefficient, hcore, core energy and provider leaves.
+- Molecular max_memory inherits the source or an override. Static active/core
+  arrays and minimum native tiles are checked before J/K/integral work. Review
+  exposed two further preparation holes: legacy packed construction and explicit
+  reference core folding reached allocation before budget checks. Both failed
+  new remote traps (2 failed, exit 1), then received metadata-only preflights.
+- Final 32 cases passed, exit 0, 54.17 s pytest / 57.54 s process,
+  2,804,556 KiB RSS on CPU88-95, JAX CPU/float64, GPU invisible. Cases cover
+  reordered CAS/frozen core, independent same-frame dense Hamiltonian/FCI/RDM1,
+  inherited/overridden/stale budgets, ordinary/projected provider coefficient
+  and coordinate products through two, finite differences and early errors.
+  The initial run had 16 passes and 14 ROHF fixture errors: ROHF does not expose
+  direct-SCF controls. Its fixed-frame test now runs existing full SCF then
+  adapts the integral representation exactly; no direct ROHF-SCF claim is made.
+- Final reference.py SHA256:
+  `24c0e483165505906a9cf374e3530005b6df44375bd921654b12a1ad630d108c`.
+  Evidence: remote `wf19-green2/logs/active-fci-cpu2.*`, mirrored under local
+  `artifacts/wavefunction-memory-20261021/wf19-green2/`. Independent review passed.
+- Completion review closes WF-19a only. The pure preparation test is not a
+  relaxed molecular FCI geometry test; full public solver, RDM, sibling-array
+  lifetime and AD budget integration remain WF-19b/21b/22/29.
+
+### 2026-10-21 — WF-21a: verified tiled FCI action and measured AD residency
+
+- Hamiltonian contraction now visits alpha/beta/RHS tiles: gather E*C locally,
+  contract the orbital-pair kernel, then transpose-scatter the contribution.
+  Whole beta/RHS tiles use complete row access. Partial tiles retain explicit
+  tail masks before and after contraction. Checkpoint the complete additive
+  body; retain the original full excitation helper only for unmigrated RDMs.
+- max_workspace_elements bounds one P*A*B*R tile. max_memory counts known
+  h/g/coefficient/maps, three output versions, six tile buffers and preparation
+  scratch, with the common reserve. Core absorption's extra ERI buffers were
+  added after a real preflight RED. This is not a total eigensolver RSS limit.
+- Final 38 CPU cases passed, exit 0, 19.19 / 21.00 s, 1,383,504 KiB RSS.
+  Coverage includes unequal spin strings, vacuum/full occupancy, multiple RHS,
+  remainder tiles, mixed dtype, transpose action, JVP/VJP/HVP and allocation
+  traps. Independent specification/quality review of the final row path passed.
+  Production SHA256:
+  `35cdc09415282f184b5f137bdb653e326ce65c9bf528842718922fb77da75683`.
+- Matched source/inputs, CPU72-87, seed2104, float64, JAX0.10.0, noGPU:
+  nact=12 and 853,776 determinants, default 60,000MB/8M tile-element policy:
+  old/new warm action 0.490625/0.407317 s; process RSS 3,536,780/928,992 KiB;
+  compiled temporary bytes 2,950,649,856/199,973,792. Sigma agrees within
+  6.94e-17 over nact8/10/12. A 64MB tile policy instead needs 0.598595 s and
+  766,872 KiB: lower memory with a measured 22% timing cost. Tiny nact8 has
+  18.2% overhead on a 31-repeat audit; no universal speedup is claimed.
+- Reverse audit takes raw ERI and CI-vector gradients of a fixed bilinear
+  probe. Old/new gradients agree within 3.56e-15. Saved numerical residuals
+  retain one input c, g, probe and maps; scan history is only scalar indices,
+  not number_of_tiles times the CI state. At nact8, old/wide/one-row compiled
+  gradient temporary bytes are 7,604,832/4,014,456/235,000. Warm gradients cost
+  0.002956/0.003983/0.005051 s: recomputation trades time for memory here.
+- Evidence and exact commands/hashes are under remote/local
+  `wf21-row-measurements/`; the local `WF21_ROW_MEASUREMENTS.md` explains policies
+  and all process exits. Thin benchmark runners call src only. These measurements
+  cover one action and its first reverse derivative, not a complete FCI solve,
+  RDM or relaxed geometry response. WF-21b/22/29 remain open.

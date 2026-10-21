@@ -1,5 +1,6 @@
 """Eager FCI facades and PySCF-shaped active-space solver methods."""
 import numpy as np
+from gradscf._memory import resolve_memory_mb
 from ..solvers import EigenSolverConfig
 from ..scf.reference import _array_signature
 from .cistring import make_fci_space
@@ -141,14 +142,18 @@ class FCISolver:
 
 
 class _MolecularFCI(FCISolver):
-    def __init__(self,source,*,core=0,active=None,**kwargs):
+    """Bind a source; max_memory currently budgets reference preparation."""
+
+    def __init__(self,source,*,core=0,active=None,max_memory=None,**kwargs):
         super().__init__(**kwargs)
         self.source,self.core = source,core
         self.active = None if active is None else tuple(active)
+        self.max_memory = resolve_memory_mb(max_memory,source)
 
     def _key(self):
         norb,_ = source_dimensions(self.source,self.spin)
-        return super()._key(),orbital_selection(norb,self.core,self.active),source_signature(self.source)
+        return (super()._key(),orbital_selection(norb,self.core,self.active),
+                source_signature(self.source),self.max_memory)
 
     def kernel(self,ci0=None):
         self._reset()
@@ -158,7 +163,7 @@ class _MolecularFCI(FCISolver):
         # Capacity is checked before transforming any AO four-index integrals.
         space = self._space(len(active),active_nelec)
         hamiltonian._check_workspace(space,self.max_workspace_elements,include_eri=True)
-        h,g,ecore = active_reference(self.source,core,active)
+        h,g,ecore = active_reference(self.source,core,active,max_memory=self.max_memory)
         return super().kernel(h,g,len(active),active_nelec,ci0=ci0,ecore=ecore)
 
 

@@ -156,22 +156,30 @@ boolean/derivative rejection policy for invalid integrals.
 
 ## Resources and current scope
 
-Defaults: 1,000,000 determinants, 4,000,000 orbital-pair/string-map entries, and
-8,000,000 elements per dominant contraction tensor. The workspace limit also
-bounds active MO ERI and returned 2-RDM tensors. Davidson vectors are processed
-in bounded column blocks and their contraction intermediates are rematerialized
-in reverse mode. These are **array capacity checks, not a bound on total peak
-RSS**: several buffers, numerical solver storage and compiler memory coexist.
-Dense reference solves retain the shared `max_dense` guard (2048 by default).
+Defaults retain 1,000,000 determinants and 4,000,000 orbital-pair/string-map
+entries. Low-level Hamiltonian actions use an 8,000,000-element **tile** cap,
+rather than stacking every E_pq*C. Alpha/beta/RHS tiles share a forward-array
+`max_memory` budget (decimal MB, default 60000), with rematerialized reverse
+contributions. Known inputs, link maps, output versions and local workspace are
+charged before contraction. The existing public molecular capacity precheck
+and RDM full-stack guards have not yet migrated to this tile policy.
+
+Native molecular active-reference preparation transforms only active MO ERIs
+and folds doubly occupied cores with existing AO J/K. `FCI(source,
+max_memory=...)` currently budgets this preparation, inheriting the source's
+budget by default. A requested nact^4 active ERI is still necessary storage.
+These are **array planning checks, not a total process RSS or solver-memory
+ceiling**. Dense solves retain shared `max_dense` (2048 by default).
 
 FCI guesses emphasize the lowest diagonal determinants, with small deterministic
 full-support perturbations plus additional random columns. This keeps the
 search from being confined to a guessed spin or spatial invariant sector while
 retaining useful reference determinants in larger product spaces.
 
-This JAX reference implementation stores full active MO ERIs and orbital-pair
-excitation tensors. Its speed/memory are not claimed to match an optimized C
-FCI implementation. Separate alpha/beta orbital frames, complex/GHF/PBC FCI,
+This implementation stores full active MO ERIs and the CI vectors, while its
+Hamiltonian action has bounded excitation tiles. Unmigrated RDM helpers still
+construct orbital-pair excitation stacks. Its speed/memory are not claimed to
+match an optimized C FCI implementation. Separate alpha/beta orbital frames, complex/GHF/PBC FCI,
 point-group/total-spin projection, selected CI, 3/4-RDMs, CASCI/CASSCF drivers and
 state-averaged orbital optimization are not included in this increment.
 
