@@ -257,6 +257,16 @@ Status vocabulary: `pending`, `in_progress`, `implemented_unverified`, `verified
 `blocked`, `deferred`. A check requires the verification specified for that task,
 plus a plan review entry. A narrower completed subtask cannot close a larger task.
 
+Planning constraint (2026-10-22): the existing WF-00 through WF-34 are the fixed
+top-level scope. Each TODO may have **one child level and at most four children**.
+No grandchildren or new top-level tasks may be added to work around this limit.
+Implementation steps, bug fixes, test shards and retry attempts belong to their
+existing TODO and evidence record; they are not new plan branches. Consolidate
+related work before starting it and retain a finite acceptance condition.
+Evidence may satisfy several related integration gates without repeating the
+implementation or the same test campaign. Historical checkpoint labels in
+section 8 are provenance, not additional active TODO levels.
+
 ### Foundation and first complete geometry slice
 
 - [x] **WF-00 — Isolated baseline, inventory and engineering plan.** Create the
@@ -280,17 +290,14 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
     auxiliary intermediates; validate nested AD and CPU/GPU7 execution.
   - [ ] **WF-02b:** wire caller budgets/resident-state ownership into the MP/CC
     consumers as WF-05/09 migrate, rather than using the block default everywhere.
-
-    - [x] **WF-02b1:** MP/CC/CI facades inherit the SCF budget, accept an
-      explicit override, and forward the current method budget to shared MO
-      adapters and requested blocks. Joint resident-state ownership is still open.
+    Facade inheritance/overrides and forwarding are verified; joint ownership
+    remains open. Historical checkpoint: WF-02b1.
   - [ ] **WF-02c:** complete the native block/capability contract with WF-03/04,
     including target-device capacity when JIT tracing hides concrete devices.
   - [x] **WF-02d:** establish the dedicated AO2MO domain package and migrate
-    existing callers without redundant forwarding files.
-  - [x] **WF-02e:** keep static byte-reservation validation in `_memory`,
-    shared by integral and solver consumers without an integral-to-solver
-    dependency or duplicated validation code.
+    existing callers without redundant forwarding files; share byte-reservation
+    validation in `_memory` without an integral-to-solver dependency or a second
+    validator. Includes the verified historical WF-02e checkpoint.
 - [ ] **WF-03 — Exact native partial AO2MO** (`in_progress`). Generate requested MO tiles without
   full AO-pair or full MO ERI. Reuse shell traversal and half transformations.
   Acceptance: asymmetric coefficient sets, permutation symmetry, packed/dense
@@ -298,24 +305,17 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
 
   - [x] **WF-03a:** native static shell-slice producer using the pinned shell
     fill driver, without a full AO tensor or a new integral engine.
-  - [ ] **WF-03b:** bounded half transformations consuming slabs; no quadratic
-    Python-unrolled graph or separate full integral traversal per MO pair.
-
-    - [x] **WF-03b1:** dynamic shell endpoints with static padded storage and
-      shared coordinate products through order two; compact differentiated loops.
-    - [ ] **WF-03b2:** shared AO-to-MO half transformations, coefficient response,
-      caller integration and measured conversion workspace/time.
-
-      - [x] **WF-03b2a:** exact compact half-transform kernel and small-system
-        forward/coefficient/coordinate response on CPU and GPU7.
-      - [ ] **WF-03b2b:** consumer integration, multiple-request reuse and
-        measured conversion/scaling workspace and timing.
-
-        - [x] **WF-03b2b1:** batch native requests share one shell traversal
-          and local first/second/half transforms, with joint output/resident
-          reservations. Validate native physical symmetry separately from raw
-          dense/s4/DF inputs and retain single-request efficiency. Consumer
-          migration and converged-method measurements remain open.
+  - [x] **WF-03b:** bounded compact half transformations with dynamic shell
+    endpoints/static padded storage, coefficient response and coordinate products
+    through order two on CPU/GPU7. Includes historical WF-03b1/WF-03b2a.
+  - [x] **WF-03c:** multiple requests share traversal and first/second/half
+    transformations; joint output/resident reservations, physical/native versus
+    raw array charts, and single-request/multiple-request efficiency verified.
+    Includes historical WF-03b2b1.
+  - [ ] **WF-03d:** integrate the shared transformations with the method
+    consumers and measure conversion/scaling workspace and time. Reuse the
+    corresponding WF-05/06/09/12/18/19 integration evidence; do not create a
+    separate migration or benchmark campaign for the same consumer.
 - [ ] **WF-04 — Block integral JVP/VJP and HVP** (`in_progress`). Add coefficient/coordinate
   derivatives and contracted reverse accumulation. Acceptance: tangent/cotangent
   duality, dense AD, coordinate finite difference and HVP; structural/runtime
@@ -374,16 +374,17 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
 
   - [x] **WF-09a:** remove the extra full active-space ERI copy in the
     existing MO-array path; derive virtual counts from the Fock dimension.
-  - [ ] **WF-09b:** prepare requested AO-source blocks and share consumers.
-
-    - [x] **WF-09b1** (`verified`): pure live-C/Fock/reference-energy
-      preparation into the existing seven-block container, one shared batch,
-      and one numerical ground-state body reused by the old MO entry. Keep
-      bare-vvvv storage explicit; facade and post-CC migration follow only
-      after their own state/frozen/property compatibility gates.
-    - [ ] **WF-09b2:** prepared Lambda, property, triples and EOM consumers;
-      reuse one snapshot before switching the eager SCF facade or molecular
-      geometry adapter. Preserve state/frozen guards and explicit-MO APIs.
+  - [x] **WF-09b:** pure live-C/Fock/reference-energy preparation into the
+    existing seven-block container, one shared batch and one numerical ground
+    body reused by the MO entry. Bare-vvvv storage stays explicit. Includes
+    the verified historical WF-09b1 checkpoint.
+  - [ ] **WF-09c** (`in_progress`): prepared Lambda, properties, triples and
+    EOM reuse one snapshot. Preserve their model/state/frozen checks and raw-MO
+    APIs; Lambda/1-RDM is the currently executing part of this fixed scope.
+    Historical implementation label: WF-09b2.
+  - [ ] **WF-09d:** switch the eager SCF facade and relaxed molecular adapter
+    after prepared consumers pass; validate full-space metadata, freshness,
+    properties and absence of hidden complete-MO materialization.
 - [ ] **WF-10 — RCC vvvv and intermediate actions.** Factor bare-vvvv contraction
   from dressing; tile tau/W consumers and release/recompute by lifetime.
   Acceptance: residual and energy term comparison, converged CCD/CCSD, JVP/VJP,
@@ -478,9 +479,10 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
 
   - [x] **WF-21a:** alpha/beta/RHS Hamiltonian tiles, unit AD parity and
     measured action/reverse-residual memory and warm-time tradeoff.
-  - [x] **WF-21b1:** public facade preparation/action budgets and tiled
+  - [x] **WF-21b:** public facade preparation/action budgets and tiled
     capacity checks.
-  - [ ] **WF-21b2:** joint solver state, operator workspace and AD budget.
+  - [ ] **WF-21c:** joint solver state, operator workspace and AD budget.
+    The prior WF-21b1/WF-21b2 labels remain only in their evidence records.
 - [ ] **WF-22 — CI/FCI properties and geometry integration.** Stream bra/ket
   contractions and existing perturbative-CI corrections where applicable.
   Acceptance: energy/RDM identities and observable contractions, geometry
@@ -620,6 +622,12 @@ For **each completed task**, before starting the next dependent task:
    the plan remains valid or what changed and why. Do not silently remove scope.
 5. Keep the diff focused and commit a reviewable change when verified. Do not
    merge or push the engineering branch without a user instruction.
+
+Keep this review inside the fixed TODO structure: merge a newly discovered
+implementation detail or failed test into the owning item, record its evidence,
+and continue toward that item's existing acceptance. Do not grow another level
+of plan or split off extra TODOs for each experiment. Starting a further planned
+part does not reopen an already accepted foundation unless new evidence fails it.
 
 If a new path fails physics/AD or worsens peak/time, keep the old explicit small
 reference available and leave the new default disabled. Do not raise tensor
@@ -1552,3 +1560,19 @@ requires its own explicit decision and numerical validation.
   Completion review closes this pure foundation. Prepared post-consumers,
   facade/relaxed geometry integration, bare-vvvv actions and joint amplitude/
   AD budgets remain WF-09b2/10b and subsequent tasks.
+
+
+### 2026-10-22 — Plan convergence rule
+
+- Applied the user's limit to every active TODO: one child level, at most four
+  children. The existing thirty-five parent items are unchanged; no new parent
+  was introduced to hide deeper work. Folded repeated foundation checkpoints
+  into WF-02/03 and flattened RCC integration into WF-09a through WF-09d.
+- Existing evidence and verified progress are preserved. Old multi-part labels
+  in this historical ledger remain identifiers for their original frozen runs,
+  not active child plans. The executing prepared Lambda/property work is now
+  part of WF-09c; CI column scheduling and MP staging remain WF-20a/WF-25a.
+- Local structural inspection checks only the Markdown: thirty-five unique
+  parents, checkbox indentation zero or two spaces, and maximum four children
+  per parent. No numerical code or method scope changed. Further fixes and
+  test shards must converge on these existing acceptance conditions.
