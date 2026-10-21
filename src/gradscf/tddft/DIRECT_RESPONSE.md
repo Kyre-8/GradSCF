@@ -1,5 +1,8 @@
 # Bounded non-DF molecular response
 
+Current SCF/TDDFT AO grid streaming, memory controls and external-model
+boundaries are documented in [Molecular AO grid streaming](../integrals/grids/STREAMING.md).
+
 The native restricted direct-SCF reference supplies an AO J/K action to
 CIS, TDA and TDHF without requiring an AO ERI array or complete MO ERIs.
 CPU response operators can reuse exact s8 integrals when the workspace budget
@@ -60,8 +63,9 @@ Standard HF has no semilocal XC kernel. Its response bypasses all quadrature
 feature projection, including an otherwise useless `grid * occ * vir` tensor.
 Conventional weighted grid kernels use block-local occupied/virtual factors
 and two-sided projections, without a full `feature * grid * occ * vir`
-transition tensor. This removes a response intermediate; the reference's
-full-grid AO values and derivatives are still resident.
+transition tensor. Streamed references also obtain their AO values and spatial
+derivatives from the shared `grid_ao` supplier inside these grid blocks. The
+dense small-system reference path retains its original arrays.
 
 Ordinary HF TDHF combines its two transition densities before the AO action:
 
@@ -97,10 +101,11 @@ assembled. Numerical eigensolvers and spectral-response mathematics remain
 owned by `gradscf.solvers`; there is no new method-local iterative solver.
 
 This budget covers the current direct-HF primary arrays. It is not a process
-RSS cap: full-grid AO caches, pre-existing full/DF integrals, nested adjoint
+RSS cap: explicitly requested full-grid AO arrays, pre-existing full/DF integrals, nested adjoint
 work, external functional internals, XLA compilation and allocator residency
-need separate accounting. General grid streaming and broader shared budgets
-are later increments.
+need separate accounting. The shared AO supplier additionally plans its
+primitive/grid workspace using `grid_max_memory`; response blocks respect
+both limits. These controls are working-array estimates, not an RSS cap.
 
 ### Budgeted integral reuse
 
@@ -273,8 +278,9 @@ during each run. No native rebuild or dependency installation was required.
 Three CUDA checks were skipped after CUDA initialization failed on the current
 server; this follow-up does not claim a new GPU numerical pass. Per the user's
 final instruction, further validation focuses on CPU memory on `jy_gpu_1`.
-General DFT grid streaming, large-system partial integral caches and the DF
-exchange workspace remain separate work.
+General DFT grid streaming was outside that measurement. Its subsequent
+implementation uses the shared AO supplier described above. Large-system
+partial integral caches and the DF exchange workspace remain separate work.
 
 ## External neural functionals
 
@@ -303,14 +309,16 @@ values and parameter/density JVP/VJP, and all three training modes against a
 dense small-AO oracle and finite differences. These are compatibility checks,
 not large-molecule neural training or convergence evidence.
 
-The callback's internal tensors, complete-grid HVP inputs, and reference AO
-cache are not bounded by `grid_block_size`. External-functional initialization
-also currently prepares a full-grid AO Laplacian so arbitrary input callbacks
-can request it, including when a particular model only uses the density
-matrix. A shared lazy AO/grid provider is needed to remove that residency
-without guessing a model's input requirements. Coordinate AD uses the same
-direct provider as conventional XC. Primitive exponent/coefficient AD remains
-unsupported, independently of the neural functional's parameter derivatives.
+The callback's internal tensors and complete-grid small-feature HVP inputs
+are not bounded by `grid_block_size`. Streamed external-functional inputs
+generate density, gradient, kinetic-density and Laplacian features from the
+AO supplier on demand. Initialization does not prepare a full-grid AO
+Laplacian merely because a model could request that feature. Explicit
+`DensityInputs.ao`/`ao_deriv1` requests still materialize full arrays, and legacy
+local-HFX/PT2 caches require the dense path. Coordinate AD uses the same direct
+provider as conventional XC. The AO supplier retains basis-parameter AD;
+primitive exponent/coefficient AD of native direct integrals retains its
+existing unsupported boundary, independently of network parameter derivatives.
 
 ## Large-system follow-up, 2026-10-20
 

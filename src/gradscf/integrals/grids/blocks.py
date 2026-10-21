@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from functools import partial
 from typing import Any, Callable
 
 import jax
@@ -45,9 +44,7 @@ def ao_block_size(basis, *, deriv: int, max_memory: float, requested: int = 0) -
     return min(requested, limit) if requested else limit
 
 
-@partial(jax.tree_util.register_dataclass,
-         data_fields=("coords", "weights", "centers", "exponents", "coefficients"),
-         meta_fields=("nprims", "angulars", "block_size"))
+@jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class AOGrid:
     """AO supplier with dynamic geometry/basis leaves and bounded grid blocks.
@@ -66,6 +63,14 @@ class AOGrid:
     nprims: tuple[int, ...]
     angulars: tuple[tuple[int, int, int], ...]
     block_size: int
+
+    def tree_flatten(self):
+        return ((self.coords, self.weights, self.centers, self.exponents, self.coefficients),
+                (self.nprims, self.angulars, self.block_size))
+
+    @classmethod
+    def tree_unflatten(cls, metadata, children):
+        return cls(*children, *metadata)
 
     @classmethod
     def from_basis(cls, basis, coords, weights, *, block_size: int = 4096):
