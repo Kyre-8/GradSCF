@@ -7,6 +7,7 @@ the documented libcint/PySCF layout and are static under ``jax.jit``.
 """
 
 import operator as operator_module
+from functools import lru_cache, partial
 
 import jax
 import jax.numpy as jnp
@@ -130,6 +131,33 @@ def evaluate_eri_slab(atm, bas, env, bounds, shape, cart=True):
     return call(jnp.asarray(atoms), jnp.asarray(basis), env, bounds, cart=np.int32(cart))
 
 
+@lru_cache(maxsize=64)
+def _one_electron_value(operator, atoms_key, basis_key, nao, cart):
+    """Bounded matrix value on CPU, or on CUDA through the native CPU bridge.
+
+    This raw packed-ENV primitive has no derivative rule. Parameter separation
+    and supported derivatives remain owned by the existing AD front ends.
+    """
+    from jax.extend import core
+    from jax.interpreters import batching
+    from .autodiff.common import batch_product, register_cpu_product
+
+    atoms = np.asarray(atoms_key, dtype=np.int32)
+    basis = np.asarray(basis_key, dtype=np.int32)
+    shape = (3, nao, nao) if operator == "dipole" else (nao, nao)
+    primitive = core.Primitive("gradscf_one_electron_value_" + operator)
+
+    def call(env):
+        function = jax.ffi.ffi_call("gradscf_integrals_cpu_v1",
+            jax.ShapeDtypeStruct(shape, jnp.float64), vmap_method="sequential")
+        return function(jnp.asarray(atoms), jnp.asarray(basis), env, operator=np.int32(_OPERATORS[operator]),
+                        cart=np.int32(cart))
+
+    register_cpu_product(primitive, call, lambda env: shape)
+    batching.primitive_batchers[primitive] = partial(batch_product, primitive)
+    return primitive.bind
+
+
 def evaluate(operator, atm, bas, env, nao, cart=True, *, shell_slice=None):
     """Evaluate full Cartesian/spherical AO integrals, eagerly or inside JIT.
 
@@ -145,7 +173,9 @@ def evaluate(operator, atm, bas, env, nao, cart=True, *, shell_slice=None):
 
     This raw-ENV entry point is value-only. IntegralPlan.evaluate separates
     geometry from basis data and adds native coordinate JVP/VJP. Arbitrary
-    ENV differentiation raises; no finite differences or callbacks are hidden.
+    ENV differentiation raises. One-electron values on CUDA explicitly use the
+    native CPU host bridge; full ERI values remain CPU-only. No finite
+    differences are used.
     """
     if operator not in _OPERATORS:
         raise ValueError(f"Unknown native integral operator {operator!r}")
@@ -189,7 +219,10 @@ def evaluate(operator, atm, bas, env, nao, cart=True, *, shell_slice=None):
                                vmap_method="sequential")
         return call(jnp.asarray(atoms), jnp.asarray(basis), env,
                     cart=np.int32(cart), shell_slice=np.asarray(shell_slice, dtype=np.int32))
-    shape = (nao,)*4 if operator == "eri" else ((3, nao, nao) if operator == "dipole" else (nao, nao))
+    if operator != "eri":
+        return _one_electron_value(operator, tuple(map(tuple, atoms)),
+                                   tuple(map(tuple, basis)), nao, bool(cart))(env)
+    shape = (nao,)*4
     call = jax.ffi.ffi_call("gradscf_integrals_cpu_v1",
                             jax.ShapeDtypeStruct(shape, jnp.float64),
                             vmap_method="sequential")

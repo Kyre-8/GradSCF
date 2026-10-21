@@ -333,7 +333,7 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   - [x] **WF-06a:** native aa/ab/bb preparation from saved UHF Focks,
     noncanonical rotation and coefficient JVP/VJP/HVP, mixed dtype regressions.
   - [ ] **WF-06b:** whole-caller spin/resolvent/AD residency and scaling.
-- [ ] **WF-07 — CorrelatedEnergy MP2 geometry integration.** Remove its obligatory
+- [x] **WF-07 — CorrelatedEnergy MP2 geometry integration.** Remove its obligatory
   full-MO conversion for R/U MP2. Keep moving S/h/J/K, stationary SCF, live C and
   correlation response. Acceptance: energy, full gradient, HVP and one small
   mixed perturbation against dense AD/finite differences; N2 pi-degeneracy test;
@@ -1066,3 +1066,48 @@ requires its own explicit decision and numerical validation.
   it does not close the complete geometry/scaling/whole-budget engineering
   project. The additional check cost is explicit; it is not replaced by an
   unchecked tangent/adjoint solve to improve a timing result.
+
+
+### 2026-10-21 — WF-07: verified complete selected-block MP2 geometry response
+
+- CorrelatedEnergy now consumes the live solved C/Fock/HF energy and shared
+  MP2 orbital preparation instead of obligatory full MO tensors. Noncanonical
+  R/U MP2 and internal orbital degeneracy use the existing tensor resolvent.
+  Explicit jk_backend='direct' removes moving full AO ERIs as well; default
+  full HF remains available. max_memory inherits the source for transformation
+  planning, without claiming a total SCF/solver/AD process ceiling.
+- RED was the missing direct constructor entry. The new three-case CPU suite
+  passed complete energy, nuclear gradient, potential response, mixed HVP,
+  two-step FD, translational invariance and N2 strict pi degeneracy, with full
+  AO evaluation/full MO transformation traps. Independent original MP2 R/U/N2
+  PySCF gradients pass. The pre-existing nested Raman defect was isolated and
+  fixed in the shared solver as recorded above, preserving the tensor API.
+- Full GPU integration exposed two genuine native boundaries: missing CUDA
+  lowering for the nuclear geometry VJP, then a CPU FFI value sent to CUDA.
+  Reused the existing bounded CPU-product bridge for first/second one-electron
+  products and raw one-electron values. Static NumPy tables are cached; GPU
+  arrays are not retained as native metadata. Full AO ERI transfer is not added.
+  Raw ENV still has no AD rule, and cubic/quartic full products remain CPU-only.
+- Final combined snapshot: seven CPU MP2 cases passed, three unrelated CC cases
+  deselected, exit 0, 256.19 s pytest / 260.52 s process, 2,356,020 KiB RSS.
+  Five GPU7 cases passed, exit 0, 57.67 / 59.80 s, 2,135,092 KiB host RSS:
+  full direct MP2 nuclear gradient/HVP plus overlap/kinetic/nuclear/dipole
+  geometry products. Every GPU output leaf is asserted device-resident and
+  compared with a CPU dense oracle. Native CPU value/geometry/Hessian/higher/
+  coefficient/exponent/direct-response regressions: 169 passed, exit 0,
+  293.42 / 304.77 s, 8,433,060 KiB RSS. No local numerics were run.
+- Final source hashes: workflow
+  `30bf3ca6952a05d1a3c191a8043124bde1c9836c594cb35219458e57c00b7670`;
+  native ffi `0973bae736e734ccc18a58178e58980cd6c6baaf5bec527afe1e82955f75cbc5`;
+  geometry `ab0a22c1311eb2c76a9c9e77d13cbfae187cff859c54db414eea32e799da1103`.
+  Independent reviews passed. Remote `correlated-final1/` and
+  `correlated-gpu-green3/` logs, manifests and local integration archive retain
+  commands/environment/source lineage. CPU groups stayed within the project
+  64-CPU limit; GPU7 was UUID-selected after an idle check, GPU6 hidden.
+- Completion review closes WF-07's numerical integration gate, not WF-08 or
+  the whole project. This bridge is native CPU integration compatible with CUDA,
+  not a GPU integral kernel or evidence of GPU acceleration. Water/direct has
+  significant warm overhead, and the aniline performance gate remains open:
+  old actual gradient failed its finite-derivative check; direct hit a bounded
+  timeout. Neither is a successful matched aniline benchmark. Their compiled
+  allocations are estimates, not a replacement for valid complete results.

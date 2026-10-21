@@ -5,7 +5,9 @@ basis derivatives cannot silently become zero. Coordinate Hessians use native
 shell contractions for bilinear JVPs and their adjoints, without constructing
 an integral-coordinate Jacobian. Cartesian S/T/nuclear/full-Coulomb ERIs also
 have cubic/quartic products; higher orders, spherical and dipole higher
-products, and mixed basis-parameter derivatives remain explicitly unsupported.
+products, and mixed basis-parameter derivatives remain explicitly unsupported. First/second
+one-electron products on CUDA use the existing bounded CPU host bridge; cubic
+and quartic full-integral products remain CPU-only.
 """
 from functools import lru_cache, partial
 
@@ -38,7 +40,9 @@ def _geometry_function(operator, atoms_key, basis_key, nao, cart, shell_slice=No
     bounded = shell_slice is not None or slab_shape is not None
 
     def register(primitive, call, output_shape):
-        if bounded:
+        if bounded or operator != "eri":
+            # One-electron matrices and bounded ERI slabs use the same native
+            # CPU products behind a CUDA host bridge. Full ERIs remain CPU-only.
             register_cpu_product(primitive, call, output_shape)
         else:
             primitive.def_impl(call)
