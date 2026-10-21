@@ -1028,3 +1028,41 @@ requires its own explicit decision and numerical validation.
   combine many compilation signatures and do not establish a matched single-
   system speedup or memory saving. AO-source preparation, block-sparse residuals,
   full geometry tests and total budget remain WF-12b/13/29/30.
+
+
+### 2026-10-21 — WF-06 response gate: fix pre-existing nested diagnostic batching
+
+- A complete mixed Raman regression exposed JAX's `vmap out_axes[0]` failure
+  in `jvp(jacfwd(dipole))`. Isolated controls showed the original full-MO
+  workflow fails too. Initial hypotheses about selected AO2MO/live Focks/the
+  stationary HF energy were disproved; no such physical dependency was removed.
+- A pure tensor-inverse toy localized the failure to convergence/residual
+  auxiliary outputs of JAX0.10 `custom_linear_solve(has_aux=True)`. Using those
+  outputs in a physical validity mask contaminated the nominally unbatched
+  primal under nested batching. The same solution with diagnostics recomputed
+  from its operator/RHS passes the transform.
+- The shared tensor-sum solver now returns only its solution from the opaque
+  solve. Every numerical primal/tangent/adjoint solve still checks its true
+  residual internally and returns NaN on failure. Public residual/convergence
+  are recomputed from the physical returned solution, adding one operator
+  application. No tolerance, SCF/MP2 equation, jacfwd API or gradient dependency
+  changed. A failed NaN solution now also reports a NaN public residual instead
+  of the old possible finite diagnostic of its unmasked candidate.
+- RED: three pure diagnostic-mask cases failed, exit 1, 4.05 / 5.12 s. Final
+  three new plus three old tensor-sum cases passed, 10.50 / 11.79 s, exit 0,
+  1,048,644 KiB RSS. Dense Kronecker and two-step FD comparisons pass; singular
+  systems retain invalid forward/gradient/nested response with a nonzero mixed
+  derivative fixture. Both original and selected full Raman cases passed,
+  respectively 45.26 / 47.15 s and 42.43 / 44.19 s, exit 0, including scalar
+  reverse-cubed, tensor response, symmetry and two-step FD. All 155 MP2/
+  noncanonical/native-direct/orbital/budget regressions passed, 164.21 / 171.84 s,
+  exit 0, 4,622,624 KiB RSS. CPU72-87, noGPU, no local numerical execution.
+- Source SHA256:
+  `f0b5139fee94f19881aaab1695660f723cfe8fdb2f004e8fce1220e56658d3c5`.
+  Independent code review passed. Evidence and withdrawn hypotheses are in
+  local `raman-diagnostic/DIAGNOSIS.md` and `downloaded/`, with remote
+  `raman-diagnostic`, `raman-legacy-green` and `raman-green` snapshots.
+- Completion review: this closes the nested diagnostic-mask defect only;
+  it does not close the complete geometry/scaling/whole-budget engineering
+  project. The additional check cost is explicit; it is not replaced by an
+  unchecked tangent/adjoint solve to improve a timing result.

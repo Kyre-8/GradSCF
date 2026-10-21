@@ -68,8 +68,13 @@ def solve_tensor_sum(factors, rhs, *, denominator_tol=1e-10, rtol=1e-10, atol=1e
             transformed = _apply_axis(basis, transformed, axis)
         norm, converged = linear_residual(matvec, transformed, value,
                                           rtol=rtol, atol=atol, converged=valid)
-        return jnp.where(converged, transformed, jnp.nan), (norm, converged)
+        return jnp.where(converged, transformed, jnp.nan)
 
-    solution, (norm, converged) = jax.lax.custom_linear_solve(
-        operator, rhs, solve=solve, symmetric=True, has_aux=True)
+    solution = jax.lax.custom_linear_solve(
+        operator, rhs, solve=solve, symmetric=True)
+    # JAX 0.10 can batch opaque-solve auxiliary diagnostics with tangent RHSs,
+    # contaminating an outer jacfwd's unbatched primal. Check each numerical
+    # solve above, then report the physical residual without auxiliary outputs.
+    norm, converged = linear_residual(operator, solution, rhs,
+                                      rtol=rtol, atol=atol, converged=valid)
     return TensorSumResult(solution, norm, converged, minimum)
