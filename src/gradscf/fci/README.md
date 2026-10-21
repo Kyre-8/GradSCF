@@ -161,14 +161,15 @@ entries. Low-level Hamiltonian actions use an 8,000,000-element **tile** cap,
 rather than stacking every E_pq*C. Alpha/beta/RHS tiles share a forward-array
 `max_memory` budget (decimal MB, default 60000), with rematerialized reverse
 contributions. Known inputs, link maps, output versions and local workspace are
-charged before contraction. Public facade preparation/action checks and density contractions use the
-same tile policy. Requested full two-RDMs retain their explicit nact^4 output
+charged before contraction. Public facade preparation/action checks and density
+contractions use the same tile policy. Requested full two-RDMs retain their explicit nact^4 output
 capacity check.
 
 Native molecular active-reference preparation transforms only active MO ERIs
 and folds doubly occupied cores with existing AO J/K. `FCI(source,
 max_memory=...)` shares the source-inherited/overridden budget across
-preparation, Hamiltonian actions and densities. A requested nact^4 active ERI is still necessary storage.
+preparation, Hamiltonian actions and densities. A requested nact^4 active ERI
+is still necessary storage.
 These are **array planning checks, not a total process RSS or solver-memory
 ceiling**. Dense solves retain shared `max_dense` (2048 by default).
 
@@ -178,8 +179,8 @@ search from being confined to a guessed spin or spatial invariant sector while
 retaining useful reference determinants in larger product spaces.
 
 This implementation stores full active MO ERIs and the CI vectors, while its
-Hamiltonian and density contractions have bounded excitation tiles. Its speed/memory are not claimed to
-match an optimized C FCI implementation. Separate alpha/beta orbital frames, complex/GHF/PBC FCI,
+Hamiltonian and density contractions have bounded excitation tiles. Its
+speed/memory are not claimed to match an optimized C FCI implementation. Separate alpha/beta orbital frames, complex/GHF/PBC FCI,
 point-group/total-spin projection, selected CI, 3/4-RDMs, CASCI/CASSCF drivers and
 state-averaged orbital optimization are not included in this increment.
 

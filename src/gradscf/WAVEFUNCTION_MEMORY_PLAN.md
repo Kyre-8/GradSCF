@@ -1176,3 +1176,24 @@ requires its own explicit decision and numerical validation.
   yet jointly reserved; that remains WF-21b2/29. The shared planner conservatively
   reserves three CI output versions even for density reductions; avoid a second
   planner, and refine that over-reservation with common ownership in WF-29.
+
+
+### 2026-10-21 — WF-31a: public native-direct N2 geometry example
+
+- Added `examples/mp/direct_geometry.py`, a linear, no-CLI public example:
+  native direct RHF, implicit noncanonical MP2 total energy, nuclear gradient
+  and stretch HVP at exact internal pi degeneracy. It retains the complete
+  STO-3G orbital space and checks the stationary branch and translation sum.
+  Existing basis-parameter examples remain separate.
+- Executed once against the verified `correlated-final1` source on CPU112-119,
+  exit 0, 29.71 s process, 1,248,536 KiB peak RSS. Total energy is
+  -107.651843995332 Hartree, z gradients +/-0.323413809 Hartree/Bohr and stretch
+  HVP z components -/+2.096236923 Hartree/Bohr^2. Recorded actual output is
+  included as comments at the script end. Script body SHA before output comments:
+  `aa7dcdc1396ac7b1d16445a90c5d0c151553267a24015d08acfe01be6a302592`.
+  Evidence: remote `direct-geometry-example/{example.log,result.json}`.
+- Updated MP storage/geometry documentation to describe the new native-direct
+  path and canonical AO2MO package. Higher MP geometry, necessary T2 storage
+  and unsupported native basis derivatives retain their stated boundaries.
+- Completion review: this is only WF-31a; final capability table/examples for
+  the remaining migrated wavefunction methods await those methods' gates.

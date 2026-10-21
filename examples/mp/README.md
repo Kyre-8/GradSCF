@@ -44,6 +44,7 @@ NumPy recurrence. They are not native GradSCF high-order or AD results.
 | --- | --- |
 | Molecular MP interfaces | [molecular.py](molecular.py) |
 | Parameter gradients | [implicit_gradient.py](implicit_gradient.py) |
+| Direct nuclear gradient and HVP, internal MO degeneracy | [direct_geometry.py](direct_geometry.py) |
 | Residual/Taylor MP series | [taylor_series.py](taylor_series.py) |
 | Water comparison | [compare_water_pyscf.py](compare_water_pyscf.py) |
 | Multiple molecular references | [compare_molecules_pyscf.py](compare_molecules_pyscf.py), [validation report](MOLECULAR_VALIDATION.md) |

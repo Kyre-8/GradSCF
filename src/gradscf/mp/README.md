@@ -54,7 +54,12 @@ accepts an arbitrary-order `MPConfig`; `method="mp2"` remains limited to order 2
 Both default to the noncanonical frame. This path differentiates the complete
 occupied/virtual Fock operator rather than individual canonical eigenvectors.
 Within-block MO degeneracy is allowed when the physical excitation resolvent
-and HF response remain nonsingular. See [SERIES.md](SERIES.md).
+and HF response remain nonsingular. MP2 requests selected occupied/virtual
+blocks, and explicit `jk_backend="direct"` also removes full moving AO ERIs.
+See the [direct N2 gradient/HVP example](../../../examples/mp/direct_geometry.py)
+and [SERIES.md](SERIES.md). Higher-order geometry still uses the full-MO
+reference adapter. `max_memory` inherits the source for integral planning;
+complete solver/AD state requires separate accounting.
 
 ## Results and validity
 
@@ -99,8 +104,11 @@ For DF it retains `B[Q,i,a]` per spin and contracts one occupied-index slice
 at a time. With `with_t2=False`, neither full MO ERIs nor the full MP2 doubles
 tensor are constructed by the DF evaluation. The loop is checkpointed for AD.
 This is an algorithmic storage property, not a measured GPU peak-memory claim.
-The dense/s4 path still stores the selected `ovov` block. Direct-only SCF
-without saved two-electron data is explicitly rejected.
+Dense/s4 and exact native-direct paths store selected `ovov` blocks. Native
+RHF/UHF sources reuse their saved Focks and live integral providers without
+materializing AO-pair/full MO ERIs or rebuilding J/K. The legacy restricted
+JAX-direct adapter retains its packed reference with a construction preflight.
+All shared transformations are maintained in `gradscf.ao2mo`.
 Noncanonical MP2 solves a four-axis tensor equation and keeps its internal
 amplitude tensor even when `with_t2=False`; its storage is O(nocc^2 nvir^2).
 
