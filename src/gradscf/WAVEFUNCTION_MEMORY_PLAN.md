@@ -382,7 +382,7 @@ section 8 are provenance, not additional active TODO levels.
     EOM reuse one snapshot. Preserve their model/state/frozen checks and raw-MO
     APIs; Lambda/1-RDM is the currently executing part of this fixed scope.
     Historical implementation label: WF-09b2.
-  - [ ] **WF-09d:** switch the eager SCF facade and relaxed molecular adapter
+  - [ ] **WF-09d** (`in_progress`): switch the eager SCF facade and relaxed molecular adapter
     after prepared consumers pass; validate full-space metadata, freshness,
     properties and absence of hidden complete-MO materialization.
 - [ ] **WF-10 — RCC vvvv and intermediate actions.** Factor bare-vvvv contraction
@@ -1753,3 +1753,31 @@ requires its own explicit decision and numerical validation.
   existing `wf08-aniline-forward-audit/`. All numeric work used remote CPU64-71,
   no GPU. WF-08 remains open: this bounded diagnosis is not an additional
   subplan, a completed direct benchmark, or a reason to repeat long jobs blindly.
+
+### 2026-10-22 — WF-09d: shared solved-HF source prerequisite
+
+- Move the existing eager RHF/UHF source reading into the internal small
+  `ao2mo.scf` module, not MP or CC. One six-field NamedTuple carries C, full MO
+  Focks, full occupations, reference energy, the existing AO hcore and exactly
+  one AO representation. MP delegates to it and its original orbital preparation;
+  no complete MO integral, J/K evaluation, provider hierarchy or solver is added.
+  SCF freshness, occupations, HF restrictions, physical Fock transport and
+  native/projected/dense/s4/DF/legacy-JAX selection/preflight remain in force.
+- Independent review identified mutable public `e_tot` as an unsafe authority
+  for the new CC consumer. A six-case RED demonstrates the alias/missing-field
+  failures. The helper now reads RKSResult.total_energy or the solved UHF
+  reference.mf_energy, rejecting absent/None records. It retains hcore by
+  reference for MO-density dtype metadata without transforming a full h_MO.
+- Final twenty-six narrow cases plus two existing actual R/U physical-Fock
+  workflow cases pass: exit0, 32.87 s pytest / 35.23 s process, RSS 2,084,716 KiB.
+  Seventeen existing direct MP2/PySCF/legacy-JAX cases previously passed in an
+  invocation that also had two genuine old-workflow failures; that invocation
+  stays exit1. Only the committed physical-Fock workflow dependency was then
+  supplied and those two cases rerun successfully. Neither the old failed run
+  nor two initial array-comparison test errors are relabeled as clean passes.
+- Root reviewed the extraction and authoritative-energy fix, all sixty archive
+  entries, raw XML/exits and local/final source hashes (`9ab61768`/`5eea2af9`/
+  `f9a86c4c`). Evidence: `ao-source-evidence.tar.gz` (SHA `14ae5385...7312`) and
+  `ao-source-summary.json`. CPU88-95 only, no local numeric tests or native build.
+  This closes the common source prerequisite within WF-09d, not its remaining
+  CC facade/geometry integration or joint memory ownership; no new child TODO.
