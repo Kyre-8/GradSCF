@@ -6,8 +6,9 @@ import jax
 import jax.numpy as jnp
 from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
                              resolve_memory_mb, validate_reserved_bytes, workspace_bytes)
-from gradscf.ao2mo import validate_integrals, frozen_indices, transform_eri_blocks
+from gradscf.ao2mo import VirtualERI, validate_integrals, frozen_indices, transform_eri_blocks
 from gradscf.ao2mo.blocks import _array_source
+from gradscf.ao2mo.actions import _native_action_basis
 
 
 _BLOCK_SPACES = ((0, 0, 0, 0), (0, 1, 0, 0), (0, 1, 0, 1),
@@ -73,7 +74,7 @@ def prepare_integrals(h1, eri, *, nocc, nuclear_repulsion=0.0, frozen=None):
 
 def from_orbitals(coefficients, fock, nocc, reference_energy, *, frozen=None,
                   eri=None, eri_pair_matrix=None, df_factors=None, direct_basis=None,
-                  max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0):
+                  max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0, vvvv='dense'):
     """Prepare seven restricted CC blocks from a supplied real orbital frame.
 
     ``fock`` is the complete MO-frame Fock before freezing; ``reference_energy``
@@ -83,11 +84,19 @@ def from_orbitals(coefficients, fock, nocc, reference_energy, *, frozen=None,
     array inputs preserve their supplied dtypes and raw differentiation chart.
 
     One AO2MO batch shares the original decimal-MB budget with the known inputs,
-    selected Fock/energy and caller ``reserved_bytes``. Bare vvvv remains resident.
+    selected Fock/energy and caller ``reserved_bytes``. ``vvvv='dense'`` retains
+    seven blocks. Explicit ``vvvv='direct'`` keeps six blocks and a native
+    exchange action for bare vvvv, using the same budget for each RHS batch.
     Amplitudes, solver workspaces and complete AD storage remain caller-owned.
     """
     max_memory = resolve_memory_mb(max_memory)
     reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    if vvvv not in ('dense', 'direct'):
+        raise ValueError("vvvv must be 'dense' or 'direct'")
+    if vvvv == 'direct' and direct_basis is None:
+        raise ValueError("vvvv='direct' requires a native direct_basis")
+    if vvvv == 'direct':
+        _native_action_basis(direct_basis)
     c, f, energy = map(jnp.asarray, (coefficients, fock, reference_energy))
     if c.ndim != 2 or f.shape != (c.shape[1], c.shape[1]) or energy.ndim != 0:
         raise ValueError('Supply AO/MO coefficients, a full MO Fock and scalar reference_energy')
@@ -134,8 +143,14 @@ def from_orbitals(coefficients, fock, nocc, reference_energy, *, frozen=None,
     energies = jnp.diag(selected_fock)
     selected_energy = energy.astype(jnp.float64) if direct_basis is not None else energy
     resident = array_storage_bytes(c, f, energy, selected_fock, energies, selected_energy, o, v, active)
-    blocks = transform_eri_blocks((c[:, o], c[:, v]), _BLOCK_SPACES, **options,
+    requests = _BLOCK_SPACES if vvvv == 'dense' else _BLOCK_SPACES[:-1]
+    co, cv = c[:, o], c[:, v]
+    blocks = transform_eri_blocks((co, cv), requests, **options,
         max_memory=max_memory, reserved_bytes=reserved_bytes+resident)
+    if vvvv == 'direct':
+        reservation = reserved_bytes+array_storage_bytes(c, f, energy, selected_fock,
+            energies, selected_energy, co, o, v, active, *blocks)
+        blocks += (VirtualERI(cv, direct_basis, max_memory, reservation),)
     return CCIntegrals(selected_fock, energies, *blocks, selected_energy)
 
 

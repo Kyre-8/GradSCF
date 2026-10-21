@@ -394,8 +394,10 @@ section 8 are provenance, not additional active TODO levels.
     smaller-scratch choice for occupied-dominated spaces. Algebra/AD and action
     measurements include CC2's complete singles-pair construction. Retain
     factored inputs when expanding their outer product would cost more.
-  - [ ] **WF-10b:** remove the bare-vvvv residency through shared AO-source
-    actions, joint amplitude budgets and measured converged calculations.
+  - [ ] **WF-10b** (`in_progress`): remove the bare-vvvv residency through
+    shared AO-source actions, joint amplitude budgets and measured converged
+    calculations. The explicit native action passes component correctness;
+    measured speed regressions keep the performance gate open and dense default.
 - [ ] **WF-11 — Existing approximate CC/QCI branches.** Inspect separate CCS,
   CC2/linearized/QCI pathways and migrate applicable consumers. Acceptance:
   branch-specific energy/residual/derivative regressions; explicit exceptions
@@ -1680,3 +1682,42 @@ requires its own explicit decision and numerical validation.
   `mp-series-staging-evidence/` and `mp-series-staging-summary.json`. All numerical
   work was remote; GPU6 was hidden. This closes WF-25a only: packed contractions,
   history scheduling and full molecular block/AD integration remain WF-24/25/26.
+
+### 2026-10-22 — WF-10b: explicit native virtual action, performance open
+
+- `ao2mo.actions.VirtualERI` contracts general nonsymmetric virtual RHSs via
+  Cv X Cv.T -> native exchange K -> Cv.T K Cv. No complete AO/MO/vvvv is
+  materialized. A single pytree retains live basis/coefficient response;
+  constrained multi-block reverse loops rematerialize density/K. Nested basis
+  projections are explicitly rejected. Raw dense integral charts and the small
+  virtual-space fast branch remain unchanged.
+- Restricted `from_orbitals(..., vvvv='direct')` prepares six shared blocks and
+  this action in the existing ten-field container. `vvvv='dense'` remains the
+  default. The original forward byte plan charges native/bridge/projection/RHS
+  workspace and caller reservations; it is not a complete solver/AD/process cap.
+- Final CPU72-79, float64: twenty provider/import/tail/geometry/coefficient/RHS
+  checks pass, plus 109 raw/default-dense/implicit ground response regressions.
+  XML has zero failures/errors/skips; process exits are zero, 50.50/384.54 s,
+  with RSS 1,818,712/5,462,980 KiB. No native build, local numeric test or GPU
+  was used. Separate combined-consumer and target-device gates remain open.
+- The physical action uses the existing water/cart cc-pVTZ RHF frame, 65 AO
+  and sixty actual virtual orbitals, input SHA `6212593e...ea0e`, 512 MB and
+  identical 4x4x60x60 RHSs. All 57,600 outputs agree with L-infinity 3.511e-12
+  (atol 2e-11, rtol 2e-10). Five-sample warm dense/direct medians are
+  14.192/397.500 ms, RSS 1,119,300/654,520 KiB, XLA scratch
+  103,680,000/1,082,944 bytes. The action is **28.008x slower**. Its native
+  exchange stage costs 392.865 ms, including integral traversal and density
+  contraction; density/projection cost 0.487/0.547 ms. This is not a timing of
+  the isolated integral kernel. The earlier C25x48 overcomplete probe is kept
+  only as algebraic stress evidence, not physical virtual-space scaling.
+- Water/STO-3G CCSD converges in thirteen iterations on both paths, residual
+  about 7.866e-11 and total-energy difference 2.842e-14 Hartree. Tiny-space
+  direct warm time is also 17.437x slower; its RSS is slightly higher. These
+  observations justify retaining explicit opt-in, not enabling it by default or
+  closing the efficiency criterion. No subsequent expensive molecule was added.
+- Root and an independent read-only reviewer checked the action/dense charts,
+  tail/AD and budget boundary. Root verified six-file hashes, XML/exits, the
+  physical per-element report and input lineage. Evidence: `wf10b-native-action/`, final
+  action SHA `042b1243`, native library `3eeaa2e5`. The remaining joint budget,
+  provider consumers and performance work stays within WF-10/14/15/16/17/29;
+  no new plan branch is created for these findings.

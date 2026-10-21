@@ -21,6 +21,7 @@
 from functools import partial
 from math import prod
 import jax.numpy as np
+from gradscf.ao2mo.actions import VirtualERI, contract_vvvv
 
 einsum = partial(np.einsum, precision="highest")
 
@@ -125,7 +126,7 @@ def contract_Wvvvv(t1, eris, x):
     ``(..., nocc, nvir)`` before multiplying t1.
     If three virtual arrays cost less than that scratch, use a transient W
     only for this action. This static shape choice never caches a dressing;
-    the bare chemists' vvvv input remains dense.
+    Native bare-vvvv providers always use the action without a dense W.
     """
     nocc, nvir = t1.shape
     factored = isinstance(x, tuple)
@@ -136,18 +137,17 @@ def contract_Wvvvv(t1, eris, x):
         x = np.asarray(x)
         batch = prod(x.shape[:-2])
     eris_ovvv = np.asarray(eris.get_ovvv())
-    eris_vvvv = np.asarray(eris.vvvv)
-    if 3*nvir**4 < batch*nocc*nvir:
+    if not isinstance(eris.vvvv, VirtualERI) and 3*nvir**4 < batch*nocc*nvir:
         dressed = einsum("kcbd,ka->abcd", eris_ovvv, -t1)
         # D[b,a,d,c] is the other original dressing; no ERI symmetry is used.
         dressed += dressed.transpose(1, 0, 3, 2)
-        dressed += eris_vvvv.transpose(0, 2, 1, 3)
+        dressed += np.asarray(eris.vvvv).transpose(0, 2, 1, 3)
         if factored:
             return einsum("abcd,ic,jd->ijab", dressed, left, right)
         return einsum("abcd,...cd->...ab", dressed, x)
     if factored:
         x = einsum("ic,jd->ijcd", left, right)
-    result = einsum("acbd,...cd->...ab", eris_vvvv, x)
+    result = contract_vvvv(eris.vvvv, x)
     contracted = einsum("kdac,...cd->...ka", eris_ovvv, x)
     result -= einsum("...ka,kb->...ab", contracted, t1)
     contracted = einsum("kcbd,...cd->...kb", eris_ovvv, x)
