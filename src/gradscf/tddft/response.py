@@ -51,6 +51,7 @@ class _RestrictedResponseOperatorData:
     fock_occupied: Array | None = None
     fock_virtual: Array | None = None
     memory_plan: Any | None = None
+    linear_xc_response: bool = False
 
 
 def _assert_finite(values: Array, *, label: str) -> None:
@@ -1045,6 +1046,7 @@ def _build_restricted_response_operator_data(
         delta_eps = jnp.diag(fock_virtual)[None, :] - jnp.diag(fock_occupied)[:, None]
 
     xc_response_action_fn = None
+    linear_xc_response = False
     hybrid_fraction = 0.0
     nonlocal_xc_a_action_fn = None
     nonlocal_xc_b_action_fn = None
@@ -1124,6 +1126,7 @@ def _build_restricted_response_operator_data(
                 block_size=memory_plan.grid_block_size,
                 compute_diagonal=False,
             )
+            linear_xc_response = True
         else:
             feature_kind = normalize_response_feature_kind(
                 getattr(resolved_xc, "response_feature_kind", None),
@@ -1152,6 +1155,7 @@ def _build_restricted_response_operator_data(
                 block_size=memory_plan.grid_block_size,
                 compute_diagonal=False,
             )
+            linear_xc_response = True
 
         (
             pair_nonlocal_a_action,
@@ -1208,6 +1212,7 @@ def _build_restricted_response_operator_data(
         fock_occupied=fock_occupied,
         fock_virtual=fock_virtual,
         memory_plan=memory_plan,
+        linear_xc_response=linear_xc_response,
     )
 
 
@@ -1289,7 +1294,6 @@ def _restricted_tdhf_action(
     y: Array,
 ) -> tuple[Array, Array]:
     if (data.ao_mo_response_action_fn is None
-            and data.xc_response_action_fn is None
             and data.nonlocal_xc_a_action_fn is None
             and data.nonlocal_xc_b_action_fn is None):
         # For ordinary real AO J/K, R(D.T)=R(D).T. Combining X and Y
@@ -1299,11 +1303,16 @@ def _restricted_tdhf_action(
             + _restricted_transition_density(data.orbo, data.orbv, y, bottom=True)
         )
         response = data.ao_response_action_fn(density)
+        # Fixed grid tensors give linear actions. Opaque callbacks can clip
+        # their output, so retain their separate X/Y evaluations.
+        xc_response = (_restricted_xc_action(data, x + y)
+                       if data.linear_xc_response else
+                       _restricted_xc_action(data, x) + _restricted_xc_action(data, y))
         return (
             _restricted_fock_action(data, x) + _restricted_project_response(
-                response, data.orbo, data.orbv, bottom=False),
+                response, data.orbo, data.orbv, bottom=False) + xc_response,
             _restricted_fock_action(data, y) + _restricted_project_response(
-                response, data.orbo, data.orbv, bottom=True),
+                response, data.orbo, data.orbv, bottom=True) + xc_response,
         )
     return (
         _restricted_a_action(data, x) + _restricted_b_action(data, y),

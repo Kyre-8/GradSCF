@@ -67,7 +67,7 @@ transition tensor. Streamed references also obtain their AO values and spatial
 derivatives from the shared `grid_ao` supplier inside these grid blocks. The
 dense small-system reference path retains its original arrays.
 
-Ordinary HF TDHF combines its two transition densities before the AO action:
+Real AO TDHF/TDDFT combines its two transition densities before the AO action:
 
 \[
 D=2C_vX^{\mathsf T}C_o^{\mathsf T}+2C_oYC_v^{\mathsf T}.
@@ -77,8 +77,10 @@ For real spatial integrals, the linear map
 \(R(D)=J[D]-\alpha K[D]/2\) obeys
 \(R(D^{\mathsf T})=R(D)^{\mathsf T}\). The two TDHF rows therefore use one
 integral traversal and two projections of the same AO result. Occupied/virtual
-Fock terms remain separate. XC, custom nonlocal and low-rank actions retain
-their existing separate A/B treatment.
+Fock terms remain separate. Fixed grid XC kernels apply once to `X+Y` and
+contribute the same result to both rows. Opaque XC callbacks instead evaluate
+`F(X)+F(Y)`, preserving legacy output clipping that is not linear. Custom
+nonlocal A/B and low-rank actions retain their existing separate treatment.
 
 ## Workspace and cache lifetime
 
