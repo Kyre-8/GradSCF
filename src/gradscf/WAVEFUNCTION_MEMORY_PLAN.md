@@ -361,6 +361,10 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
     aniline, preserving noncanonical response and explicit invalid-input guards.
     Small-system geometry/HVP checks close this correctness prerequisite;
     measured full-gradient/scaling performance and larger oracles remain open.
+  - [x] **WF-08b:** complete the fixed-aniline selected-MP2 full-input geometry
+    gradient, one warm execution and independent same-basis PySCF comparison.
+    Keep the dense-AO input lineage explicit; direct input and increasing-size
+    scaling plus total-budget closure are still separate acceptance gates.
 
 ### Coupled cluster, perturbative corrections and EOM
 
@@ -372,11 +376,14 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
     existing MO-array path; derive virtual counts from the Fock dimension.
   - [ ] **WF-09b:** prepare requested AO-source blocks and share consumers.
 
-    - [ ] **WF-09b1** (`in_progress`): pure live-C/Fock/reference-energy
+    - [x] **WF-09b1** (`verified`): pure live-C/Fock/reference-energy
       preparation into the existing seven-block container, one shared batch,
       and one numerical ground-state body reused by the old MO entry. Keep
       bare-vvvv storage explicit; facade and post-CC migration follow only
       after their own state/frozen/property compatibility gates.
+    - [ ] **WF-09b2:** prepared Lambda, property, triples and EOM consumers;
+      reuse one snapshot before switching the eager SCF facade or molecular
+      geometry adapter. Preserve state/frozen guards and explicit-MO APIs.
 - [ ] **WF-10 — RCC vvvv and intermediate actions.** Factor bare-vvvv contraction
   from dressing; tile tau/W consumers and release/recompute by lifetime.
   Acceptance: residual and energy term comparison, converged CCD/CCSD, JVP/VJP,
@@ -1482,3 +1489,66 @@ requires its own explicit decision and numerical validation.
   `wf08-aniline-forward-audit/`. Completion review closes the correctness
   prerequisite only; WF-08 performance, direct scaling and total-memory
   acceptance remain open.
+
+
+### 2026-10-22 — WF-08b: completed aniline gradient and warm reference
+
+- Corrected the thin runner to save every finite first/warm result immediately
+  with its fingerprint. An interrupted partial run stays incomplete. The
+  subsequent same-input full-AO/selected-MP2 process completed one warm sample,
+  exit 0 in 557.91 s: compile 14.00 s, first 263.36 s, warm 259.80 s; observed
+  RSS 23,488,236 KiB and XLA scratch 22,467,944,088 bytes are separate metrics.
+  CPU64-71, OMP4/BLAS1, f64, no GPU; 60,000 MB input budget. This is one warm
+  sample, not a statistical scaling result, and it remains slow.
+- An independent PySCF 2.13.0 full/Cartesian 6-31G* calculation used the same
+  fixed 14-atom coordinates, hcore guess, 50 electrons, no frozen/DF, SCF
+  energy/gradient targets 1e-12/1e-10 and four threads in the same affinity.
+  HF seed difference is 1.59e-12 Eh; MP2 total/correlation differences are
+  4.04e-12/1.83e-13 Eh. All 42 gradient components agree within 4.56e-8
+  Eh/Bohr; translation residual is 3.82e-12 Eh/Bohr. Original acceptance
+  thresholds 3e-9 Eh and 3e-7 Eh/Bohr are unchanged. HF takes 2.40 s and
+  PySCF MP2 energy/gradient 13.11 s; those are distinct from JAX compile time.
+- Source/input/library hashes match the previous isolated Fock-fix stage;
+  this does not validate the later combined AO2MO batch branch. Root reviewed
+  the actual result JSON, process exits, oracle differences and the 16-file
+  evidence archive (195,681 bytes, SHA `98be5c04...b518`). Evidence:
+  `wf08-aniline-forward-audit/`. Completion review closes this one-molecule
+  numerical/performance observation. WF-08 direct/scaling/total-budget work
+  and the large speed gap remain open, without repeating the failed 3-warm run.
+
+
+### 2026-10-22 — WF-09b1: selected RCC preparation and one ground body
+
+- `cc.integrals.from_orbitals` prepares the existing seven-block container
+  from live C, full pre-freezing Fock/reference energy and one AO source.
+  A single shared batch includes known caller/Fock/coefficient reservations.
+  Native data promote Fock/energy to f64; raw array inputs retain their chart.
+  Bare vvvv is still resident. The original raw `prepare_integrals` is unchanged.
+- Extracted `run_cc_from_integrals` from the original ground entry. AST
+  comparison verifies that its complete numerical body is unchanged; old
+  `run_cc` now prepares then calls the same solver/implicit-response owner.
+  No facade or post-CC consumer has switched to this preparation yet.
+- Initial source `3868f544`: all 46 new cases pass (42 forward/solver/structure/
+  budget plus four raw/native coefficient/geometry JVP/VJP/HVP/FD), then 41
+  existing RCC, CC2/LCC, QCI, Lambda/(T)/density and virtual-action regressions
+  pass. These geometry tests hold C/F/E as independent supplied inputs; they
+  are not complete SCF-relaxed CC nuclear gradients. All process exits zero.
+- A later shape-before-budget regression failed three scalar-source cases,
+  then reused the shared AO2MO source validator. Final source `9abcb69a`
+  passes 37 overlapping array/response/shape/reservation cases. No native
+  mathematics or prepared numerical body changed. Do not add overlapping
+  phases as independent test coverage. CPU80-87 only, no local numeric/GPU test.
+- Isolated matched RHF-frame preparation compares full-MO AO2MO then block
+  selection with the new preparation, not seven redundant independent
+  transforms. Water/Cartesian 19 AO: warm 21.017 to 17.731 ms; scratch
+  2,691,816 to 1,273,568 bytes; RSS essentially unchanged. At 65 AO: warm
+  0.477329 to 0.554637 s (+16.2%), scratch 364,736,040 to 228,244,000 bytes,
+  RSS 1,314,344 to 1,251,212 KiB. This explicit speed/memory tradeoff remains
+  below the investigation threshold; it is not a universal speedup or 2x RSS
+  reduction. Timing used the earlier source; only array validation changed.
+- Maximum block/Fock/reference differences are 1.09e-13/1.90e-12/3.56e-13 Eh.
+  Root reviewed the code, raw XML/process exits, AST assertions and hashes.
+  Evidence: `rcc-prepared/`, forty small JSON/XML/log files, no large arrays.
+  Completion review closes this pure foundation. Prepared post-consumers,
+  facade/relaxed geometry integration, bare-vvvv actions and joint amplitude/
+  AD budgets remain WF-09b2/10b and subsequent tasks.

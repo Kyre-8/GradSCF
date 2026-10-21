@@ -28,10 +28,20 @@ def run_cc(
     the conventional (T) correction separately requires a canonical reference.
     Zero/small denominators are diagnosed rather than silently regularized.
     """
-    cfg = CCConfig() if config is None else config
     ints = prepare_integrals(
         h1, eri, nocc=nocc, nuclear_repulsion=nuclear_repulsion, frozen=frozen
     )
+    return run_cc_from_integrals(ints, config=config, t1=t1, t2=t2)
+
+
+def run_cc_from_integrals(ints, *, config=None, t1=None, t2=None):
+    """Solve a restricted model from prepared blocks using the shared CC body.
+
+    The caller owns the integral snapshot and all reference/frozen-space
+    preparation. Iteration, convergence and implicit response are identical to
+    ``run_cc``; this entry does not prepare or copy the integral tensors.
+    """
+    cfg = CCConfig() if config is None else config
     no, nv = ints.nocc, ints.nvir
     space = AmplitudeSpace(no, nv, cfg.method)
     d1, d2 = denominators(ints)

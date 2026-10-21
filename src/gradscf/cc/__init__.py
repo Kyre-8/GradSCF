@@ -1,7 +1,7 @@
 """Real molecular coupled cluster, quadratic CI and implicit response."""
 
 from .types import CCConfig, CCReference, CCResult, LambdaResult, TriplesResult
-from .ground import run_cc
+from .ground import run_cc, run_cc_from_integrals
 from .lambda_equations import solve_lambda
 from .triples import triples_correction, evaluate_triples
 from .properties import make_rdm1, make_rdm2
@@ -25,6 +25,7 @@ __all__ = [
     "CCResult",
     "LambdaResult",
     "run_cc",
+    "run_cc_from_integrals",
     "solve_lambda",
     "triples_correction",
     "evaluate_triples",
