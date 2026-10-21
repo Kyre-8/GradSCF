@@ -5,7 +5,7 @@ import numpy as np
 from ...scf.reference import _array_signature
 from .types import EOMConfig, EOMPrecisionDiagnostics
 from .amplitudes import EOMAmplitudeSpace
-from .operators import run_eom
+from .operators import run_eom, run_eom_from_integrals
 
 
 class _EOM:
@@ -73,15 +73,12 @@ class _EOM:
         self.converged = None
         cfg = self._config()
         ref = self._source()
-        self.result = run_eom(
-            ref.h1,
-            ref.eri,
-            self.ground.result,
-            nocc=ref.nocc,
-            frozen=self.ground.frozen,
-            config=cfg,
-            cc_config=self.ground._config(),
-        )
+        if self.ground._integrals is not None:
+            self.result = run_eom_from_integrals(self.ground._integrals,
+                self.ground.result, config=cfg, cc_config=self.ground._config())
+        else:
+            self.result = run_eom(ref.h1, ref.eri, self.ground.result, nocc=ref.nocc,
+                frozen=self.ground.frozen, config=cfg, cc_config=self.ground._config())
         self.e = self.result.energies
         self.right_vectors, self.left_vectors = (
             self.result.right_vectors,

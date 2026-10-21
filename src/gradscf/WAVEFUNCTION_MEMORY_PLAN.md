@@ -368,7 +368,7 @@ section 8 are provenance, not additional active TODO levels.
 
 ### Coupled cluster, perturbative corrections and EOM
 
-- [ ] **WF-09 — RCC integral preparation.** Request only required blocks; make
+- [x] **WF-09 — RCC integral preparation** (`verified`). Request only required blocks; make
   orbital counts independent of `vvvv.shape`. Acceptance: frozen/core indexing,
   dense/DF/direct small equivalence, no transient full-MO conversion.
 
@@ -382,7 +382,7 @@ section 8 are provenance, not additional active TODO levels.
     EOM reuse one snapshot. Preserve their model/state/frozen checks and raw-MO
     APIs; the original dense RDM2/EA algorithms and provider guards remain.
     Historical implementation label: WF-09b2.
-  - [ ] **WF-09d** (`in_progress`): switch the eager SCF facade and relaxed molecular adapter
+  - [x] **WF-09d** (`verified`): switch the eager SCF facade and relaxed molecular adapter
     after prepared consumers pass; validate full-space metadata, freshness,
     properties and absence of hidden complete-MO materialization.
 - [ ] **WF-10 — RCC vvvv and intermediate actions.** Factor bare-vvvv contraction
@@ -1829,3 +1829,35 @@ requires its own explicit decision and numerical validation.
   compatibility beyond ground actions, total-budget ownership and full method
   scaling remain their existing WF-10/14/15/16/17/27/29 gates. Facade/relaxed
   geometry integration is the dependent WF-09d, with its own measured evidence.
+
+### 2026-10-22 — WF-09d: restricted SCF facade and relaxed response
+
+- Restricted SCF CC now prepares one selected snapshot and reuses it for ground,
+  Lambda, density, triples and EE/IP/EA. Explicit MO/UHF/ROHF references retain
+  their raw path. Full nocc/nmo/frozen and density dtype metadata remain separate
+  from the active container. Failed rebuilds clear the old state before validation.
+- The relaxed restricted CCSD/(T) adapter transports live C, Hermitian F and HF
+  energy into the same pure preparer. Native direct removes moving full AO ERIs;
+  neither route constructs complete MO ERIs. Bare-vvvv stays dense. Streamed (T)
+  keeps its second-order AD contract and original third-order rejection.
+- Fourteen new facade cases pass across fixed shards, including a real native
+  direct SCF -> CC -> Lambda/density path that forbids complete AO/MO integrals.
+  Fifty final metadata/legacy executions verify budget forwarding, energy-alias
+  safety, normalized HF names, frozen/raw/UHF compatibility, stale states and
+  existing eager EOM/FCI-limit references. Counts overlap the narrow helper
+  campaign; they are executions, not fifty additional physical molecules.
+- Both new H4/STO-3G geometry cases pass final value/gradient/JVP/HVP against
+  complete-MO oracles, 3e-9 Hartree energy tolerance, duality/translation and FD
+  at 3e-4/1e-4 Bohr; (T) is explicitly nonzero. Final processes 154.43/202.12 s,
+  RSS 2,742,480/2,983,392 KiB. The unchanged CCSD third-order mixed Raman test
+  passes separately, 233.75 s, RSS 3,481,588 KiB. These are validation runtimes,
+  not warm benchmarks or a whole-process limit from the 32/128 MB array budgets.
+- Root and independent review resolved the authoritative-energy issue and
+  checked raw paths/metadata/AD ownership. Final changed code hashes and exact
+  XML/exits match; original REDs/earlier assertions remain recorded, alongside
+  the stronger final geometry reruns. Evidence: `wf09d-rcc-integration/`, all
+  numeric work remote CPU64-71/96-103, no GPU/build/local test. Newer WIP UCC/
+  non-Hermitian planner changes were excluded from this frozen acceptance.
+- All four WF-09 children now meet their restricted-preparation scope. Shared
+  total solver/AD ownership, unknown external JIT target capacity, unrestricted
+  facade migration and large-method scaling retain their existing separate gates.

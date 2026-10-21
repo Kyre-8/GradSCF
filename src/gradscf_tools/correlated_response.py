@@ -7,6 +7,7 @@ from gradscf import cc, mp
 from gradscf._memory import resolve_memory_mb
 from gradscf.ao2mo import transform_integrals, transform_unrestricted_integrals
 from gradscf.ao2mo.reference import transform_fock
+from gradscf.cc.integrals import from_orbitals as cc_from_orbitals
 from gradscf.mp.integrals import from_orbitals
 from gradscf.mp.mp2 import evaluate_mp2
 from gradscf.solvers import EigenResponseConfig, EigenSolverConfig, solve_hermitian
@@ -24,10 +25,11 @@ class CorrelatedEnergy:
     CCSD(T) adds the bounded-panel general-reference correction in the same
     transported frame. Its JVP/VJP supports second-order response; third-order
     requests raise explicitly. Ordinary MP/CCSD response behavior is unchanged.
-    MP2 transforms only occupied/virtual blocks. Explicit ``jk_backend='direct'``
-    also removes full moving AO ERIs through the native shell/direct operators.
-    Its noncanonical resolvent still owns O(o**2*v**2) state. CC and higher MP
-    retain full MO integrals and remain small-system reference paths here.
+    MP2 and restricted CC transform only their required occupied/virtual blocks.
+    Explicit ``jk_backend='direct'`` also removes full moving AO ERIs through
+    the native shell/direct operators. MP2's noncanonical resolvent still owns
+    O(o**2*v**2) state; restricted CC retains a bare vvvv block. Unrestricted CC
+    and higher MP still use full MO reference integrals in this adapter.
     ``max_memory`` inherits the SCF source budget and plans MO transformation
     arrays; complete solver/AD process residency requires separate accounting.
     No frozen orbitals, density fitting or DFT reference is used here.
@@ -63,8 +65,11 @@ class CorrelatedEnergy:
         self.config = config
         self._selected_mp2 = (self.method in {"mp", "mp2"} and config.order == 2
                               and not config._use_series(self.reference.unrestricted))
-        if jk_backend == "direct" and not self._selected_mp2:
-            raise NotImplementedError("Direct correlated inputs require order-2 MP without a series expansion.")
+        self._selected_cc = (self.method in {"ccsd", "ccsd(t)"}
+                             and not self.reference.unrestricted)
+        if jk_backend == "direct" and not (self._selected_mp2 or self._selected_cc):
+            raise NotImplementedError(
+                "Direct correlated inputs require order-2 MP or restricted CCSD/(T).")
 
     def __call__(self, coordinates, field=None, *, potential=None):
         state, inputs = self.reference.solve_with_inputs(coordinates, field, potential=potential)
@@ -83,14 +88,20 @@ class CorrelatedEnergy:
             else:
                 coefficients, canonical_valid = canonicalize(coefficients, state.fock_matrix.mean(axis=0))
                 valid &= canonical_valid
-        if self._selected_mp2:
+        if self._selected_mp2 or self._selected_cc:
             cs = tuple(coefficients) if self.reference.unrestricted else (coefficients,)
             fs = tuple(state.fock_matrix) if self.reference.unrestricted else (state.fock_matrix.mean(axis=0),)
             focks = tuple(transform_fock(f, c) for c, f in zip(cs, fs))
-            data = from_orbitals(coefficients, focks, self.nocc, state.total_energy,
-                eri=inputs["eri"], direct_basis=inputs.get("direct_basis"),
-                frozen_gap_tol=self.config.denominator_tol, max_memory=self.max_memory)
-            result = evaluate_mp2(data, self.config)
+            options = dict(eri=inputs["eri"], direct_basis=inputs.get("direct_basis"),
+                           max_memory=self.max_memory)
+            if self._selected_mp2:
+                data = from_orbitals(coefficients, focks, self.nocc, state.total_energy,
+                    frozen_gap_tol=self.config.denominator_tol, **options)
+                result = evaluate_mp2(data, self.config)
+            else:
+                data = cc_from_orbitals(coefficients, focks[0], self.nocc,
+                                       state.total_energy, **options)
+                result = cc.run_cc_from_integrals(data, config=self.config)
         else:
             transform = transform_unrestricted_integrals if self.reference.unrestricted else transform_integrals
             h1, eri = transform(inputs["hcore"], coefficients, eri=inputs["eri"],
@@ -102,10 +113,11 @@ class CorrelatedEnergy:
         valid &= result.valid if self.method in {"mp", "mp2"} else result.converged
         total = result.total_energy
         if self.method == "ccsd(t)":
-            correction = cc.evaluate_triples(
-                h1, eri, result, nocc=self.nocc, orbital_basis="semicanonical",
-                algorithm="streamed", denominator_tol=self.config.denominator_tol,
-                residual_tol=self.config.residual_tol)
+            options = dict(orbital_basis="semicanonical", algorithm="streamed",
+                denominator_tol=self.config.denominator_tol, residual_tol=self.config.residual_tol)
+            correction = (cc.evaluate_triples_from_integrals(data, result, **options)
+                if self._selected_cc else cc.evaluate_triples(
+                    h1, eri, result, nocc=self.nocc, **options))
             total += correction.energy
             valid &= correction.valid
         return jnp.where(valid, total, jnp.nan)

@@ -199,6 +199,8 @@ def test_facade_kernel_forwards_current_method_budget(name, solved_hf, monkeypat
     boundary = ("unrestricted_reference_from_source" if unrestricted else "reference_from_source")
     if name == "mp2":
         boundary = "from_scf"
+    elif name == "ccsd" and not unrestricted:
+        boundary = "from_orbitals"
     elif name == "cis" and not unrestricted:
         boundary = "solve_cis_response"
     calculation = _method(name, solved_hf)

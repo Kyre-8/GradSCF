@@ -84,6 +84,14 @@ def test_restricted_pair_storage_is_preserved():
     assert list(payload.ao_kwargs) == [key] and payload.ao_kwargs[key] is value
 
 
+@pytest.mark.parametrize('unrestricted', [False, True])
+def test_shared_source_accepts_normalized_hf_name(unrestricted):
+    from gradscf.ao2mo.scf import prepare_scf_source
+    source, _, _, _, _ = _source(unrestricted)
+    source.xc = ' HF '
+    assert prepare_scf_source(source).nocc == ((2, 1) if unrestricted else 2)
+
+
 @pytest.mark.parametrize("unrestricted", [False, True])
 def test_mp_from_scf_uses_shared_source_and_existing_orbital_preparation(unrestricted, monkeypatch):
     integrals = import_module("gradscf.mp.integrals")

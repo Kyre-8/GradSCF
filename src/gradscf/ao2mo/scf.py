@@ -29,7 +29,7 @@ def prepare_scf_source(source, *, max_memory=None):
     from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
 
     max_memory = resolve_memory_mb(max_memory, source)
-    if not isinstance(source, (RKS, UKS)) or str(source.xc).lower() != "hf":
+    if not isinstance(source, (RKS, UKS)) or str(source.xc).strip().lower() != "hf":
         raise NotImplementedError("Post-HF source preparation requires RHF/UHF; ROHF and DFT are not supported")
     source._check_reference_source()
     coeff = jnp.asarray(source.mo_coeff)
