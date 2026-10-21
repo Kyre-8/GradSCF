@@ -17,3 +17,8 @@ _GradSCFCoefficientHessianJVP
 _GradSCFCoefficientHessianVJP
 _GradSCFExponentJVP
 _GradSCFExponentVJP
+_GradSCFERISlice
+_GradSCFERISliceGeometryJVP
+_GradSCFERISliceGeometryVJP
+_GradSCFERISliceGeometryHessianJVP
+_GradSCFERISliceGeometryHessianVJP

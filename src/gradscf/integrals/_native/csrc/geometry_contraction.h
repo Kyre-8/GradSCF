@@ -1,11 +1,12 @@
 // Shared second-coordinate contraction. Higher products differentiate only
 // the shell evaluator; index permutations and nuclear-center terms stay shared.
 #pragma once
-#include "tables.h"
+#include "eri_window.h"
 
 template<class Evaluate, class Accumulate>
 void for_each_geometry_hessian_entry(IntegralTables& t, int op, int cart,
-                                     Evaluate&& evaluate, Accumulate&& add) {
+                                     Evaluate&& evaluate, Accumulate&& add,
+                                     const ERIWindow* window=nullptr) {
   // Shadow shells may have been appended, but never enter the physical loop.
   const int nshell=int(t.ao.size())-1;
   // Each call contributes one ordered Hessian entry. Cross-slot entries
@@ -15,13 +16,14 @@ void for_each_geometry_hessian_entry(IntegralTables& t, int op, int cart,
   };
   const int n=t.n;
   auto index2=[&](int c,int i,int j) { return (size_t(c)*n+i)*n+j; };
-  auto index4=[&](int i,int j,int k,int l) { return ((size_t(i)*n+j)*n+k)*n+l; };
+  auto index4=[&](int i,int j,int k,int l) {
+    return window ? window->index(i,j,k,l) : ((size_t(i)*n+j)*n+k)*n+l;
+  };
   std::vector<double> block,cache;
   if (op==4) {
     Intor kernels_cart[]={int2e_ipip1_cart,int2e_ipvip1_cart,int2e_ip1ip2_cart};
     Intor kernels_sph[]={int2e_ipip1_sph,int2e_ipvip1_sph,int2e_ip1ip2_sph};
-    for (int i=0; i<nshell; ++i) for (int j=0; j<nshell; ++j)
-      for (int k=0; k<nshell; ++k) for (int l=0; l<nshell; ++l) {
+    for_each_eri_shell(t,window,[&](int i,int j,int k,int l) {
         int shells[]={i,j,k,l};
         int di=t.ao[i+1]-t.ao[i],dj=t.ao[j+1]-t.ao[j];
         int dk=t.ao[k+1]-t.ao[k],dl=t.ao[l+1]-t.ao[l];
@@ -49,7 +51,7 @@ void for_each_geometry_hessian_entry(IntegralTables& t, int op, int cart,
                 }
               }
         }
-      }
+      });
   } else {
     Intor same_cart[]={int1e_ipipovlp_cart,int1e_ipipkin_cart,int1e_ipiprinv_cart,int1e_ipipr_cart};
     Intor same_sph[]={int1e_ipipovlp_sph,int1e_ipipkin_sph,int1e_ipiprinv_sph,int1e_ipipr_sph};
@@ -120,10 +122,12 @@ void for_each_geometry_hessian_entry(IntegralTables& t, int op, int cart,
 template<bool transpose, class Evaluate>
 void contract_geometry_hessian(IntegralTables& t, int op, int cart,
                                 const double* u, const double* input,
-                                double* output, Evaluate&& evaluate) {
+                                double* output, Evaluate&& evaluate,
+                                const ERIWindow* window=nullptr) {
   auto add=[&](size_t index,int a,int b,double value) {
+    if (index==ERIWindow::outside) return;
     if constexpr (transpose) output[a]+=value*u[b]*input[index];
     else output[index]+=value*u[a]*input[b];
   };
-  for_each_geometry_hessian_entry(t,op,cart,evaluate,add);
+  for_each_geometry_hessian_entry(t,op,cart,evaluate,add,window);
 }

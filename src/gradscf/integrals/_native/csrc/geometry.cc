@@ -3,20 +3,26 @@
 #include "eri_geometry_entries.h"
 
 template<bool transpose>
-static ffi::Error Geometry(ffi::BufferR2<ffi::S32> atoms,
+static ffi::Error GeometryImpl(ffi::BufferR2<ffi::S32> atoms,
                            ffi::BufferR2<ffi::S32> basis,
                            ffi::BufferR1<ffi::F64> environment,
                            ffi::Buffer<ffi::F64> vector,
                            ffi::ResultBuffer<ffi::F64> result,
-                           int32_t op, int32_t cart) {
+                           int32_t op, int32_t cart,
+                           const int32_t* slice=nullptr,size_t count=0) {
   try {
     IntegralTables t(atoms,basis,environment,op,cart,true);
+    ERIWindow window(t,slice,count);
+    if (slice && op!=4) throw std::invalid_argument("shell_slice applies only to ERI");
+    auto check_shape=[&](const ffi::Buffer<ffi::F64>& buffer) {
+      if (slice) window.check_shape(buffer); else t.check_shape(buffer,op);
+    };
     if constexpr (transpose) {
-      t.check_shape(vector,op);
+      check_shape(vector);
       if (result->dimensions().size()!=1 || result->element_count()!=t.env.size())
         throw std::invalid_argument("Invalid geometry VJP output shape");
     } else {
-      t.check_shape(*result,op);
+      check_shape(*result);
       if (vector.dimensions().size()!=1 || vector.element_count()!=t.env.size())
         throw std::invalid_argument("Invalid geometry JVP direction shape");
       std::vector<bool> allowed(t.env.size(),false);
@@ -33,6 +39,7 @@ static ffi::Error Geometry(ffi::BufferR2<ffi::S32> atoms,
     double* output=result->typed_data();
     std::fill(output,output+result->element_count(),0.);
     auto add=[&](size_t integral_index, int env_index, double derivative) {
+      if (integral_index==ERIWindow::outside) return;
       if constexpr (transpose) output[env_index]+=derivative*input[integral_index];
       else output[integral_index]+=derivative*input[env_index];
     };
@@ -40,7 +47,7 @@ static ffi::Error Geometry(ffi::BufferR2<ffi::S32> atoms,
     auto index2=[&](int c,int i,int j) { return (size_t(c)*n+i)*n+j; };
     std::vector<double> block,cache;
     if (op==4) {
-      for_each_eri_geometry_entry(t,cart,add);
+      for_each_eri_geometry_entry(t,cart,add,slice ? &window : nullptr);
     } else {
       Intor ips_cart[]={int1e_ipovlp_cart,int1e_ipkin_cart,int1e_ipnuc_cart,int1e_irp_cart};
       Intor ips_sph[]={int1e_ipovlp_sph,int1e_ipkin_sph,int1e_ipnuc_sph,int1e_irp_sph};
@@ -88,6 +95,21 @@ static ffi::Error Geometry(ffi::BufferR2<ffi::S32> atoms,
   }
 }
 
+template<bool transpose>
+static ffi::Error Geometry(ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<ffi::S32> basis,
+                           ffi::BufferR1<ffi::F64> env,ffi::Buffer<ffi::F64> vector,
+                           ffi::ResultBuffer<ffi::F64> result,int32_t op,int32_t cart) {
+  return GeometryImpl<transpose>(atoms,basis,env,vector,result,op,cart);
+}
+
+template<bool transpose>
+static ffi::Error ERISliceGeometry(ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<ffi::S32> basis,
+                                   ffi::BufferR1<ffi::F64> env,ffi::Buffer<ffi::F64> vector,
+                                   ffi::ResultBuffer<ffi::F64> result,int32_t op,int32_t cart,
+                                   ffi::Span<const int32_t> slice) {
+  return GeometryImpl<transpose>(atoms,basis,env,vector,result,op,cart,slice.begin(),slice.size());
+}
+
 extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFGeometryJVP(XLA_FFI_CallFrame*);
 extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFGeometryVJP(XLA_FFI_CallFrame*);
 #define GEOMETRY_BIND ffi::Ffi::Bind().Arg<ffi::BufferR2<ffi::S32>>() \
@@ -96,3 +118,9 @@ extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFGeometry
     .Attr<int32_t>("operator").Attr<int32_t>("cart")
 XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFGeometryJVP, Geometry<false>, GEOMETRY_BIND);
 XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFGeometryVJP, Geometry<true>, GEOMETRY_BIND);
+extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFERISliceGeometryJVP(XLA_FFI_CallFrame*);
+extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFERISliceGeometryVJP(XLA_FFI_CallFrame*);
+XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFERISliceGeometryJVP, ERISliceGeometry<false>,
+                              GEOMETRY_BIND.Attr<ffi::Span<const int32_t>>("shell_slice"));
+XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFERISliceGeometryVJP, ERISliceGeometry<true>,
+                              GEOMETRY_BIND.Attr<ffi::Span<const int32_t>>("shell_slice"));

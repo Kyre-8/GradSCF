@@ -20,6 +20,11 @@ def register_integrals():
         )
     handle = ctypes.CDLL(str(library), mode=ctypes.RTLD_LOCAL)
     targets = {"gradscf_ecp_cpu_v1": "GradSCFECP", "gradscf_integrals_cpu_v1": "GradSCFIntegrals",
+               "gradscf_eri_slice_cpu_v1": "GradSCFERISlice",
+               "gradscf_eri_slice_geometry_jvp_cpu_v1": "GradSCFERISliceGeometryJVP",
+               "gradscf_eri_slice_geometry_vjp_cpu_v1": "GradSCFERISliceGeometryVJP",
+               "gradscf_eri_slice_geometry_hessian_jvp_cpu_v1": "GradSCFERISliceGeometryHessianJVP",
+               "gradscf_eri_slice_geometry_hessian_vjp_cpu_v1": "GradSCFERISliceGeometryHessianVJP",
                "gradscf_geometry_jvp_cpu_v1": "GradSCFGeometryJVP",
                "gradscf_geometry_vjp_cpu_v1": "GradSCFGeometryVJP",
                "gradscf_geometry_hessian_jvp_cpu_v1": "GradSCFGeometryHessianJVP",

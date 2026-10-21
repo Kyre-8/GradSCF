@@ -91,7 +91,8 @@ class IntegralPlan:
                          cutoff=screening_threshold,workers=workers,
                          with_j=with_j,with_k=with_k,coordinates=coordinates)
 
-    def evaluate(self, operator, parameters, *, origin=None, ecps=None, aosym='s1', omega=0.0):
+    def evaluate(self, operator, parameters, *, origin=None, ecps=None, aosym='s1', omega=0.0,
+                 shell_slice=None):
         """Bind current values and evaluate an operator.
 
         Reference one-electron calls skip ERI layouts. Reference eager ERI
@@ -101,8 +102,20 @@ class IntegralPlan:
         in inverse Bohr; its derivatives and short-range ERIs are unsupported.
         Long-range s4/s8 values and geometry AD currently gather from the full
         ERI, so their temporary storage remains O(nao**4).
+        A static eight-endpoint ``shell_slice`` selects four half-open native
+        s1 ERI shell ranges, with local AO axes and geometry AD through order
+        two. On CUDA, bounded windows/products use the CPU shell engine.
         """
         omega = _validate_omega(omega)
+        if shell_slice is not None:
+            if operator != "eri":
+                raise ValueError("shell_slice applies only to ERI.")
+            if aosym != "s1":
+                raise ValueError("shell_slice requires the s1 ERI layout.")
+            if self.backend != "native":
+                raise NotImplementedError("shell_slice requires the native backend.")
+            from .backends.native.ffi import _eri_shell_slice
+            shell_slice, _ = _eri_shell_slice(self.bas, self.topology.cart, shell_slice)
         if omega and operator != "eri":
             raise ValueError("Nonzero omega applies only to the eri operator.")
         if omega and self.backend != "native":
@@ -158,7 +171,8 @@ class IntegralPlan:
             if omega:
                 env = env.at[8].set(omega)  # libcint PTR_RANGE_OMEGA
             return evaluate_geometry(operator, atm, bas, env, coords, origin,
-                                     self.topology.nao, cart=self.topology.cart)
+                                     self.topology.nao, cart=self.topology.cart,
+                                     shell_slice=shell_slice)
         from .backends import jax_reference
         names = {"overlap": "overlap_matrix", "kinetic": "kinetic_matrix",
                  "nuclear": "nuclear_attraction_matrix", "dipole": "dipole_matrix", "eri": "eri_tensor"}

@@ -16,18 +16,33 @@ from jax.interpreters import ad, batching, mlir
 import jax.numpy as jnp
 import numpy as np
 
-from ..ffi import evaluate as evaluate_values, _OPERATORS
-from .common import batch_product
+from ..ffi import evaluate as evaluate_values, _OPERATORS, _eri_shell_slice
+from .common import batch_product, register_cpu_product
 
 
 @lru_cache(maxsize=64)
-def _geometry_function(operator, atoms_key, basis_key, nao, cart):
+def _geometry_function(operator, atoms_key, basis_key, nao, cart, shell_slice=None):
     atoms = np.asarray(atoms_key, dtype=np.int32)
     basis = np.asarray(basis_key, dtype=np.int32)
     offsets = atoms[:, 1, None]+np.arange(3)[None, :]
     if np.unique(offsets).size != offsets.size:
         raise ValueError("Native geometry plans require distinct coordinate storage per atom/center")
     shape = (nao,)*4 if operator == "eri" else ((3, nao, nao) if operator == "dipole" else (nao, nao))
+    slice_attrs = {}
+    if shell_slice is not None:
+        shell_slice, shape = _eri_shell_slice(basis, cart, shell_slice)
+        slice_attrs = {"shell_slice": np.asarray(shell_slice, dtype=np.int32)}
+
+    def register(primitive, call, output_shape):
+        if shell_slice is not None:
+            register_cpu_product(primitive, call, output_shape)
+        else:
+            primitive.def_impl(call)
+            primitive.def_abstract_eval(lambda *args: jax.core.ShapedArray(output_shape(*args), jnp.float64))
+            mlir.register_lowering(primitive, mlir.lower_fun(call, multiple_results=False), platform="cpu")
+
+    def target(name):
+        return name.replace("gradscf_", "gradscf_eri_slice_", 1) if shell_slice is not None else name
 
     def pack(env, coords, origin):
         env = env.at[offsets].set(coords, unique_indices=True)
@@ -37,21 +52,17 @@ def _geometry_function(operator, atoms_key, basis_key, nao, cart):
         call = jax.ffi.ffi_call(target, jax.ShapeDtypeStruct(output_shape, jnp.float64),
                                 vmap_method="sequential")
         return call(jnp.asarray(atoms), jnp.asarray(basis), env, vector,
-                    operator=np.int32(_OPERATORS[operator]), cart=np.int32(cart))
+                    operator=np.int32(_OPERATORS[operator]), cart=np.int32(cart), **slice_attrs)
 
     # At fixed env these are mutually adjoint linear maps. Keep both behind
     # primitives so mixed AD differentiates their vector arguments without
     # reaching the raw FFI or materializing an integral Jacobian.
     linear = core.Primitive(f"gradscf_geometry_jvp_{operator}")
     adjoint = core.Primitive(f"gradscf_geometry_vjp_{operator}")
-    product = lambda env, denv: ffi_product("gradscf_geometry_jvp_cpu_v1", env, denv, shape)
-    adjoint_product = lambda env, cot: ffi_product("gradscf_geometry_vjp_cpu_v1", env, cot, env.shape)
-    linear.def_impl(product)
-    adjoint.def_impl(adjoint_product)
-    linear.def_abstract_eval(lambda env, denv: jax.core.ShapedArray(shape, jnp.float64))
-    adjoint.def_abstract_eval(lambda env, cot: jax.core.ShapedArray(env.shape, jnp.float64))
-    mlir.register_lowering(linear, mlir.lower_fun(product, multiple_results=False), platform="cpu")
-    mlir.register_lowering(adjoint, mlir.lower_fun(adjoint_product, multiple_results=False), platform="cpu")
+    product = lambda env, denv: ffi_product(target("gradscf_geometry_jvp_cpu_v1"), env, denv, shape)
+    adjoint_product = lambda env, cot: ffi_product(target("gradscf_geometry_vjp_cpu_v1"), env, cot, env.shape)
+    register(linear, product, lambda env, denv: shape)
+    register(adjoint, adjoint_product, lambda env, cot: env.shape)
 
     second = core.Primitive(f"gradscf_geometry_hessian_jvp_{operator}")
     second_adjoint = core.Primitive(f"gradscf_geometry_hessian_vjp_{operator}")
@@ -60,18 +71,14 @@ def _geometry_function(operator, atoms_key, basis_key, nao, cart):
         call = jax.ffi.ffi_call(target, jax.ShapeDtypeStruct(output_shape, jnp.float64),
                                 vmap_method="sequential")
         return call(jnp.asarray(atoms), jnp.asarray(basis), env, left, right,
-                    operator=np.int32(_OPERATORS[operator]), cart=np.int32(cart))
+                    operator=np.int32(_OPERATORS[operator]), cart=np.int32(cart), **slice_attrs)
 
     hessian_product = lambda env, u, v: second_product(
-        "gradscf_geometry_hessian_jvp_cpu_v1", env, u, v, shape)
+        target("gradscf_geometry_hessian_jvp_cpu_v1"), env, u, v, shape)
     hessian_adjoint = lambda env, u, cot: second_product(
-        "gradscf_geometry_hessian_vjp_cpu_v1", env, u, cot, env.shape)
-    second.def_impl(hessian_product)
-    second_adjoint.def_impl(hessian_adjoint)
-    second.def_abstract_eval(lambda env, u, v: jax.core.ShapedArray(shape, jnp.float64))
-    second_adjoint.def_abstract_eval(lambda env, u, cot: jax.core.ShapedArray(env.shape, jnp.float64))
-    mlir.register_lowering(second, mlir.lower_fun(hessian_product, multiple_results=False), platform="cpu")
-    mlir.register_lowering(second_adjoint, mlir.lower_fun(hessian_adjoint, multiple_results=False), platform="cpu")
+        target("gradscf_geometry_hessian_vjp_cpu_v1"), env, u, cot, env.shape)
+    register(second, hessian_product, lambda env, u, v: shape)
+    register(second_adjoint, hessian_adjoint, lambda env, u, cot: env.shape)
 
     products, adjoints = {2: second}, {2: second_adjoint}
 
@@ -102,7 +109,7 @@ def _geometry_function(operator, atoms_key, basis_key, nao, cart):
         mlir.register_lowering(reverse, mlir.lower_fun(pull, multiple_results=False), platform="cpu")
         return forward, reverse
 
-    for order in (3, 4):
+    for order in (() if shell_slice is not None else (3, 4)):
         products[order], adjoints[order] = higher_primitives(order)
 
     def transpose(other, cotangent, env, vector):
@@ -131,6 +138,8 @@ def _geometry_function(operator, atoms_key, basis_key, nao, cart):
         env, *vectors = primals
         denv, *dvectors = tangents
         if not isinstance(denv, ad.Zero):
+            if shell_slice is not None:
+                raise NotImplementedError("Native shell_slice third geometry derivatives are not supported")
             if order == 4:
                 raise NotImplementedError("Native fifth geometry derivatives are not supported")
             if not cart or operator not in ("overlap", "kinetic", "nuclear", "eri"):
@@ -177,15 +186,23 @@ def _geometry_function(operator, atoms_key, basis_key, nao, cart):
         ad.primitive_transposes[primitive] = partial(transpose, other)
         ad.primitive_jvps[primitive] = partial(derivative, primitive)
         batching.primitive_batchers[primitive] = partial(batch_product, primitive)
-    for order in (2, 3, 4):
+    for order in products:
         for primitive, is_adjoint in ((products[order], False), (adjoints[order], True)):
             ad.primitive_transposes[primitive] = partial(multilinear_transpose, order, is_adjoint)
             ad.primitive_jvps[primitive] = partial(multilinear_derivative, order, is_adjoint)
             batching.primitive_batchers[primitive] = partial(batch_product, primitive)
 
+    if shell_slice is not None:
+        sliced_value = core.Primitive("gradscf_eri_slice_value")
+        register(sliced_value, lambda env: evaluate_values(
+            operator, atoms, basis, env, nao, cart, shell_slice=shell_slice), lambda env: shape)
+        batching.primitive_batchers[sliced_value] = partial(batch_product, sliced_value)
+
     @jax.custom_jvp
     def value(env, coords, origin):
-        return evaluate_values(operator, atoms, basis, pack(env, coords, origin), nao, cart)
+        packed = pack(env, coords, origin)
+        return (evaluate_values(operator, atoms, basis, packed, nao, cart) if shell_slice is None
+                else sliced_value.bind(packed))
 
     @partial(value.defjvp, symbolic_zeros=True)
     def value_jvp(primals, tangents):
@@ -205,8 +222,9 @@ def _geometry_function(operator, atoms_key, basis_key, nao, cart):
     return value
 
 
-def evaluate_geometry(operator, atm, bas, env, coords, origin, nao, cart=True):
+def evaluate_geometry(operator, atm, bas, env, coords, origin, nao, cart=True, *, shell_slice=None):
     """Evaluate with geometry AD; env contains only fixed nongeometry values."""
     atoms_key = tuple(tuple(int(x) for x in row) for row in atm)
     basis_key = tuple(tuple(int(x) for x in row) for row in bas)
-    return _geometry_function(operator, atoms_key, basis_key, nao, cart)(env, coords, origin)
+    shell_slice, _ = _eri_shell_slice(np.asarray(bas), cart, shell_slice)
+    return _geometry_function(operator, atoms_key, basis_key, nao, cart, shell_slice)(env, coords, origin)

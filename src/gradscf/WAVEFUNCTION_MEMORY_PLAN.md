@@ -282,14 +282,23 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
     consumers as WF-05/09 migrate, rather than using the block default everywhere.
   - [ ] **WF-02c:** complete the native block/capability contract with WF-03/04,
     including target-device capacity when JIT tracing hides concrete devices.
-- [ ] **WF-03 — Exact native partial AO2MO.** Generate requested MO tiles without
+- [ ] **WF-03 — Exact native partial AO2MO** (`in_progress`). Generate requested MO tiles without
   full AO-pair or full MO ERI. Reuse shell traversal and half transformations.
   Acceptance: asymmetric coefficient sets, permutation symmetry, packed/dense
   oracle, frozen/core indexing, measured conversion time and tile workspace.
-- [ ] **WF-04 — Block integral JVP/VJP and HVP.** Add coefficient/coordinate
+
+  - [x] **WF-03a:** native static shell-slice producer using the pinned shell
+    fill driver, without a full AO tensor or a new integral engine.
+  - [ ] **WF-03b:** bounded half transformations consuming slabs; no quadratic
+    Python-unrolled graph or separate full integral traversal per MO pair.
+- [ ] **WF-04 — Block integral JVP/VJP and HVP** (`in_progress`). Add coefficient/coordinate
   derivatives and contracted reverse accumulation. Acceptance: tangent/cotangent
   duality, dense AD, coordinate finite difference and HVP; structural/runtime
   absence of full ERI cotangent; explicit unsupported basis/mixed-order guards.
+
+  - [x] **WF-04a:** local slab cotangents and coordinate products through order
+    two, reusing the existing geometry primitive family; CPU and bounded GPU
+    bridge verification. Preserve the existing full-integral higher products.
 - [ ] **WF-05 — Restricted MP2 integral/energy path.** Connect the shared provider
   to OVOV/OV-factor consumption, preserving with/without-T2 behavior and public
   conventions. Acceptance: PySCF and dense GradSCF energy/T2, no full AO/MO
@@ -654,3 +663,48 @@ requires its own explicit decision and numerical validation.
   geometry adjoints are still WF-03/04; no DF approximation was introduced to
   replace a non-DF model. Full AD/Krylov/process budgeting remains WF-29, with
   measured end-to-end scaling required at WF-08/32. Overall scope is unchanged.
+
+### 2026-10-21 — WF-03a / WF-04a: verified native shell windows
+
+- Reused the pinned `GTOnr2e_fill_s1` driver and existing first/second geometry
+  contractions. Static eight-endpoint shell windows produce local AO tensors;
+  reverse products consume only those local cotangents. The eight inverse
+  symmetry boxes restrict contributing shell traversal without removing the
+  multiplicity of derivative emissions. Existing full-integral third/fourth
+  products and vendor sources are unchanged.
+- RED: the missing `shell_slice` entry failed remotely before implementation.
+  The first build exposed the installed JAX FFI Span API (`begin()`, not `data()`);
+  three mechanical call-site fixes resolved that build error. The rebuilt native
+  library SHA256 is
+  `276875681817b5a47561ed3cf9e47137bebb11a4ac292f1cd9fa740c0bccaa42`.
+  Existing compiler and LP64 BLAS were reused; no dependency was installed.
+- Initial GREEN: 21 new CPU cases, one physical-GPU7 case, and 112 existing
+  native value/geometry/Hessian/higher/direct-response cases passed, all exit 0.
+  Pytest times were 10.24, 3.72 and 211.33 s. Evidence is in remote
+  `wavefunction-memory-20261021/wf03-native/` (slice and native-regression logs,
+  XML, result JSON). The 112-case group peaked at 7,671,624 KiB host RSS.
+- Review then found that guaranteed shell/cache int32 overflow could be checked
+  after declaring a CUDA output. Two metadata-only tests reproduced this before
+  the correction (exit 1). The shared capacity helper now rejects this before
+  primitive/output declaration; full ERI thresholds are preserved. Final
+  `ffi.py` SHA256:
+  `7b60a9b7de00f5a7d4b6ed843b9ed5cf86235bd94223d41c477fe9ea642565f9`.
+- Final GREEN on manifest `wf02b-green1.json` (1120 verified source/test files):
+  23 shell-window cases plus 21 existing value cases passed, exit 0, 12.53 s
+  pytest / 13.80 s process, 1,053,464 KiB RSS. Updated GPU7 coverage includes
+  eager primal/VJP as well as JIT primal/JVP/VJP/nonlinear HVP: one case passed,
+  exit 0, 6.49 / 7.68 s, host RSS 1,942,660 KiB. Evidence is in remote
+  `wavefunction-memory-20261021/wf02b-green1/`. CPU affinities were `56-71` and
+  `72-87`; at most 32 logical CPUs concurrently. GPU6 was never exposed.
+- Tests cover asymmetric windows/nonzero origins, cartesian and spherical s/d
+  shells, Coulomb and long-range ERIs, coordinate/coefficient response, two FD
+  steps, tangent/cotangent duality, nested no-full-AO-shape inspection, and
+  explicit unsupported primitive-basis/third-order guards. Independent spec and
+  quality reviews passed, including the capacity fix.
+- Completion review: only WF-03a and WF-04a are verified. Their CPU shell engine
+  has a bounded CUDA callback bridge; this is not a native GPU integral kernel
+  or a measured GPU speedup. Static windows alone do not make production AO2MO
+  scalable. WF-03b next adds padded dynamic slabs and compact half-transform
+  loops, avoiding one Python/JIT graph per shell pair. Outer WF-03/04 and the
+  end-to-end MP2 and total-AD budget gates remain open. The full project scope
+  and sequence remain valid.
