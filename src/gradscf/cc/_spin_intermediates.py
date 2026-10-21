@@ -2,6 +2,8 @@
 # Licensed under the Apache License, Version 2.0 (see LICENSE.pyscf).
 # Adapted from PySCF 2.9.0; see NOTICE.md for attribution and changes.
 """Spin-orbital CCSD intermediates, real in-core JAX contractions."""
+from math import prod
+
 import jax.numpy as np
 from jax.numpy import einsum
 
@@ -46,13 +48,37 @@ def cc_Woooo(t1, t2, eris):
     Wmnij += 0.25*einsum('ijef,mnef->mnij', tau, eris.oovv)
     return Wmnij
 
-def cc_Wvvvv(t1, t2, eris):
-    tau = make_tau(t2, t1, t1)
+def cc_Wvvvv(t1, t2, eris, *, tau=None):
+    if tau is None:
+        tau = make_tau(t2, t1, t1)
     eris_ovvv = np.asarray(eris.ovvv)
     tmp = einsum('mb,mafe->bafe', t1, eris_ovvv)
     Wabef = np.asarray(eris.vvvv) - tmp + tmp.transpose(1,0,2,3)
     Wabef += einsum('mnab,mnef->abef', tau, 0.25*np.asarray(eris.oovv))
     return Wabef
+
+
+def contract_Wvvvv(t1, t2, eris, x, *, tau=None):
+    """Apply W to (..., v, v) without its large dressed-vvvv intermediate.
+
+    The ovvv/oovv dressings contract with x first; their workspace scales as
+    batch*o*v and batch*o**2. Bare vvvv remains an existing dense input. For
+    occupied-dominated spaces, the original transient W can be smaller.
+    Neither path assumes permutation symmetry of raw integrals or amplitudes.
+    """
+    nocc, nvir = t1.shape
+    x = np.asarray(x)
+    batch = prod(x.shape[:-2])
+    if 3*nvir**4 < batch*(2*nocc*nvir+nocc**2):
+        return einsum('abef,...ef->...ab', cc_Wvvvv(t1, t2, eris, tau=tau), x)
+    if tau is None:
+        tau = make_tau(t2, t1, t1)
+    result = einsum('abef,...ef->...ab', eris.vvvv, x)
+    contracted = einsum('mbef,...ef->...mb', eris.ovvv, x)
+    result -= einsum('ma,...mb->...ab', t1, contracted)
+    result += einsum('mb,...ma->...ab', t1, contracted)
+    contracted = einsum('mnef,...ef->...mn', eris.oovv, x)
+    return result + 0.25*einsum('mnab,...mn->...ab', tau, contracted)
 
 def cc_Wovvo(t1, t2, eris):
     eris_ovvo = -np.asarray(eris.ovov).transpose(0,1,3,2)

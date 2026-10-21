@@ -18,7 +18,6 @@ def residual(t1, t2, eris):
     Foo = imd.cc_Foo(t1, t2, eris)
     Fov = imd.cc_Fov(t1, t2, eris)
     Woooo = imd.cc_Woooo(t1, t2, eris)
-    Wvvvv = imd.cc_Wvvvv(t1, t2, eris)
     Wovvo = imd.cc_Wovvo(t1, t2, eris)
 
 
@@ -40,7 +39,7 @@ def residual(t1, t2, eris):
     t2new -= tmp - tmp.transpose(1,0,2,3)
     t2new += np.asarray(eris.oovv).conj()
     t2new += 0.5*einsum('mnab,mnij->ijab', tau, Woooo)
-    t2new += 0.5*einsum('ijef,abef->ijab', tau, Wvvvv)
+    t2new += 0.5*imd.contract_Wvvvv(t1, t2, eris, tau, tau=tau)
     tmp = einsum('imae,mbej->ijab', t2, Wovvo)
     tmp -= -einsum('ie,ma,mbje->ijab', t1, t1, eris.ovov)
     tmp = tmp - tmp.transpose(1,0,2,3)

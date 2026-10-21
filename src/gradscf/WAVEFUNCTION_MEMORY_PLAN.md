@@ -420,7 +420,7 @@ section 8 are provenance, not additional active TODO levels.
   - [ ] **WF-12b** (`in_progress`): AO-source selected blocks, byte ownership
     and scale evidence. The pure producer/shared solve bridge is verified;
     spin-vvvv/residual adoption and shared method scaling remain with WF-13/32.
-- [ ] **WF-13 — UCC residual/amplitude workspace.** Reduce repeated dense
+- [ ] **WF-13 — UCC residual/amplitude workspace** (`in_progress`). Reduce repeated dense
   spin-amplitude expansion using block consumers. Acceptance: UCCD/UCCSD forward,
   adjoints and geometry HVP, restricted-limit comparison; packed-coordinate
   normalization and dual factors preserved.
@@ -1890,3 +1890,38 @@ requires its own explicit decision and numerical validation.
   static proof alongside it. The fixed producer slice is accepted; no more
   experiment branches are attached. The existing WF-13/14/15/29/32 gates retain
   residual/consumer adoption, amplitudes, adjoints and combined measured scaling.
+
+### 2026-10-22 — WF-13: contract spin virtual dressings before expansion
+
+- The spin residual applies its virtual intermediate directly to tau. The ovvv
+  and oovv dressings first contract the trial pair into batch*o*v/batch*o**2
+  arrays; no large dressed-vvvv array is formed. Occupied-dominated spaces keep
+  the original smaller transient W. Bare spin-vvvv remains a dense input.
+  Signs/indices do not assume raw ERI, amplitude or trial-pair symmetries.
+- Both branches reuse the same explicit tau, preserving its independent AD
+  and its two live appearances in the residual. The original explicit W is
+  retained as the oracle. The nonlinear/implicit/adjoint solvers, packed
+  coordinates, physical equations and dtype promotion remain unchanged.
+- Twenty-four new cases pass: float32/64, mixed precision, empty spaces,
+  arbitrary leading dimensions, raw JVP/VJP/HVP, independent tau response,
+  and a fail-on-dressed-W residual trap. Thirteen existing cases pass, including
+  UCCSD/UCCD, unequal spins/frozen/empty channels, PySCF residual/amplitudes,
+  implicit response, and full H3/STO-3G relaxed geometry gradient/HVP with two
+  finite-difference steps. All final processes exit0; no skips/timeouts. The
+  missing-action RED, old residual trap and one fixed tau-branch RED are saved.
+- Matched f64 action, o=8/v=64, fixed seeds6521/6525, CPU64-71, fifteen warm
+  samples: explicit/factored median 385.635/42.697 ms, XLA scratch
+  402,653,184/155,189,248 bytes, output 2,097,152 bytes unchanged, maximum
+  difference 3.89e-16. Isolated process RSS is 1,333,388/1,220,480 KiB;
+  compilation 0.0462/0.0715 s and first action 0.4059/0.0631 s. This is a seeded
+  algebraic action, not physical molecular scaling or the total CC speedup.
+- Root and independent review checked the old raw chart, branch choice, dtype,
+  tau ownership and test oracle. All thirty-four evidence entries, raw XML,
+  process exits and final patch hashes match; raw UCC's solve tail is AST-identical
+  to the newer prepared-bridge body. The frozen source manifest records this
+  baseline explicitly rather than claiming a test of concurrent unrelated WIP.
+  Evidence: `wf13-spin-action/`, archive SHA `30cfdc97...4359`; final kernels
+  `3d1e53ca`/`f1c2169d`. All numeric work remote CPU64-79, no GPU/build/install.
+- This finite residual-action slice is accepted within the existing WF-13.
+  Dense spin-vvvv, packed-amplitude expansion and joint method/AD budgets remain
+  open; there is no new TODO branch or claim that the whole parent is complete.
