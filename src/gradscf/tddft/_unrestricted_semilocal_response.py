@@ -149,7 +149,7 @@ def _build_blocked_spin_response_action(
     ngrids = int(weights.shape[0])
     width = min(int(block_size), max(1, ngrids))
     provider = getattr(molecule, "grid_ao", None)
-    if provider is not None:
+    if provider is not None and not getattr(provider, "adaptive", False):
         width = min(width, provider.block_size)
     full_blocks, tail = divmod(ngrids, width)
 
@@ -226,17 +226,19 @@ def build_unrestricted_semilocal_response_action(
 
         def action(alpha, beta):
             tangent_a = _project_transition_to_full_grid(
-                molecule, orbo_a, orbv_a, alpha, feature_kind=kind, dtype=dtype)
+                molecule, orbo_a, orbv_a, alpha, feature_kind=kind, dtype=dtype,
+                block_size=block_size)
             tangent_b = _project_transition_to_full_grid(
-                molecule, orbo_b, orbv_b, beta, feature_kind=kind, dtype=dtype)
+                molecule, orbo_b, orbv_b, beta, feature_kind=kind, dtype=dtype,
+                block_size=block_size)
             response_a, response_b = response_hvp(molecule, tangent_a, tangent_b)
             return (
                 _project_full_grid_to_transition(
                     molecule, orbo_a, orbv_a, jnp.asarray(response_a, dtype=dtype) * weights[None, None],
-                    feature_kind=kind, dtype=dtype),
+                    feature_kind=kind, dtype=dtype, block_size=block_size),
                 _project_full_grid_to_transition(
                     molecule, orbo_b, orbv_b, jnp.asarray(response_b, dtype=dtype) * weights[None, None],
-                    feature_kind=kind, dtype=dtype),
+                    feature_kind=kind, dtype=dtype, block_size=block_size),
             )
 
         return action

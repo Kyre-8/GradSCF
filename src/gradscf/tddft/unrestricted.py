@@ -40,10 +40,13 @@ from .response import (
     _needs_exchange_terms, _raise_if_strict_local_hf_response,
     _map_response_vectors, _restricted_fock_action,
     _jk_from_df_factors, _j_from_df_factors,
+    _response_grid_view,
 )
 from .response_options import (
     ResponseKernelOptions, normalize_response_kernel_options, plan_response_memory,
+    _response_memory_inputs,
 )
+from .._memory import DEFAULT_MAX_MEMORY_MB
 
 
 def _pytree_dataclass(cls):
@@ -298,7 +301,9 @@ def _unrestricted_ao_response_action(
     response_options: ResponseKernelOptions | None = None,
     eri_cache_bytes: int = 0,
 ) -> Callable[[Array, Array], tuple[Array, Array]]:
-    response_options = normalize_response_kernel_options(response_options)
+    response_options = normalize_response_kernel_options(
+        response_options,
+        default_max_memory=getattr(molecule, "max_memory", DEFAULT_MAX_MEMORY_MB))
     alpha = jnp.asarray(hybrid_fraction, dtype=dtype)
     from ..scf.rsh import response_rsh_coefficients
     rsh = response_rsh_coefficients(molecule)
@@ -507,6 +512,7 @@ def _unrestricted_memory_plan(molecule, resolved_xc, de_a, de_b, options, *,
                         else options.integral_cache), direct_workers=options.direct_workers,
         direct_tol=options.direct_tol,
         grid_block_size=options.grid_block_size if resolved_xc is not None and not standard_hf else 0,
+        **_response_memory_inputs(molecule, resolved_xc, spin_channels=2),
     )
 
 
@@ -519,7 +525,9 @@ def _build_unrestricted_response_operator_data(
     need_b_terms: bool = True,
     response_kernel_options: ResponseKernelOptions | dict[str, Any] | None = None,
 ) -> _UnrestrictedResponseOperatorData:
-    response_options = normalize_response_kernel_options(response_kernel_options)
+    response_options = normalize_response_kernel_options(
+        response_kernel_options,
+        default_max_memory=getattr(molecule, "max_memory", DEFAULT_MAX_MEMORY_MB))
     from ..scf.rsh import response_rsh_coefficients
     rsh = response_rsh_coefficients(molecule)
     resolved_xc = _resolve_xc_functional(molecule, xc_functional, xc_params)
@@ -551,6 +559,7 @@ def _build_unrestricted_response_operator_data(
                           for o, v in zip(fock_occupied, fock_virtual))
     memory_plan = _unrestricted_memory_plan(
         molecule, resolved_xc, de_a, de_b, response_options, rpa=need_b_terms)
+    molecule = _response_grid_view(molecule, memory_plan.grid_block_size)
     hybrid_fraction_raw = getattr(molecule, "exact_exchange_fraction", 0.0)
     hybrid_fraction: Any = (
         float(hybrid_fraction_raw)
@@ -1183,7 +1192,8 @@ def _unrestricted_solver_memory_plan(driver, de_a, de_b, nstates, *, rpa=False):
     return _unrestricted_memory_plan(
         driver.molecule,
         _resolve_xc_functional(driver.molecule, driver.xc_functional, driver.xc_params),
-        de_a, de_b, normalize_response_kernel_options(driver.response_kernel_options),
+        de_a, de_b, normalize_response_kernel_options(driver.response_kernel_options,
+            default_max_memory=getattr(driver.molecule, "max_memory", DEFAULT_MAX_MEMORY_MB)),
         nroots=nroots, max_subspace=driver.davidson_max_subspace, rpa=rpa,
     )
 

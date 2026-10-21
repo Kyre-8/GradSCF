@@ -274,6 +274,7 @@ def _build_restricted_reference(
     return RestrictedMolecule(
         ao=ao,
         grid_ao=scf_inputs.grid_ao,
+        max_memory=cfg.max_memory,
         grid=QuadratureGrid(weights=weights, coords=coords),
         dipole_integrals=dipole_integrals,
         rep_tensor=rep_tensor,
@@ -565,6 +566,7 @@ def _build_unrestricted_reference(
     return UnrestrictedMolecule(
         ao=ao,
         grid_ao=scf_inputs.grid_ao,
+        max_memory=cfg.max_memory,
         grid=QuadratureGrid(weights=weights, coords=coords),
         dipole_integrals=dipole_integrals,
         rep_tensor=jnp.asarray(eri),

@@ -329,7 +329,15 @@ def test_standard_spin_grid_blocks_match_full_hvp_without_grid_ov(
 
     def bounded_factors(*args, **kwargs):
         size = kwargs.get("grid_size")
-        assert size is not None and 1 <= size <= 3, "Do not construct full-grid orbital factors"
+        if size is None:
+            # The shared AO supplier can pass an already sliced local view.
+            view = args[0]
+            size = view.ao.shape[0]
+            assert getattr(view, "grid_ao", None) is None
+            derivative = getattr(view, "ao_deriv1", None)
+            assert derivative is None or derivative.shape[1] == size <= 3
+            assert view.grid.weights.shape[0] == size
+        assert 1 <= size <= 3, "Do not construct full-grid orbital factors"
         factor_sizes.append(size)
         return original(*args, **kwargs)
 

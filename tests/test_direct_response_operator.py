@@ -133,7 +133,8 @@ def test_large_transition_space_has_no_quartic_or_full_response_workspace():
         mo_energy=jnp.linspace(-2., 2., nao), nocc=no,
         ao=jnp.zeros((1, nao)), grid=SimpleNamespace(weights=jnp.ones(1)),
         direct_basis=DensityAction(), df_factors=None, eri_pair_matrix=None, rep_tensor=None)
-    action, _, _ = build_restricted_tda_operator(mol, SemilocalResponseFunctional("hf"))
+    action, _, _ = build_restricted_tda_operator(mol, SemilocalResponseFunctional("hf"),
+        response_kernel_options={"max_memory": 2000.})
     graph = jax.make_jaxpr(action)(jax.ShapeDtypeStruct((42, dim), jnp.float64))
 
     def shapes(value):

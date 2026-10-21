@@ -33,7 +33,7 @@ class _Reference(SimpleNamespace):
     """Weak-referenceable view for the existing semilocal kernel cache."""
 
 
-def _reference(parameter, *, streamed, unrestricted=False):
+def _reference(parameter, *, streamed, unrestricted=False, adaptive=False):
     center = jnp.asarray([-.2, .1, -.1]) + parameter * jnp.asarray([.1, -.2, .3])
     basis = CartesianBasis(aos=tuple(
         CartesianAO(center=center + offset, angular=(0, 0, 0),
@@ -48,6 +48,7 @@ def _reference(parameter, *, streamed, unrestricted=False):
     weights = jnp.asarray([.2, .4, .1, .3, .15, .25, .35]) * jnp.exp(.2 * parameter)
     if streamed:
         provider = AOGrid.from_basis(basis, coords, weights, block_size=3)
+        provider = replace(provider, adaptive=adaptive)
         ao, dao, lap = jnp.zeros((0, 3)), jnp.zeros((4, 0, 3)), None
     else:
         values = evaluate_cartesian_ao(basis, coords, deriv=2)
@@ -126,6 +127,176 @@ def test_streamed_pbe_response_preserves_geometry_jvp_and_vjp(unrestricted):
     np.testing.assert_allclose(jax.grad(lambda p: loss(actual, p))(point),
                                jax.grad(lambda p: loss(expected, p))(point),
                                atol=3e-10, rtol=3e-10)
+
+
+@pytest.mark.parametrize("adaptive", [False, True])
+@pytest.mark.parametrize("unrestricted", [False, True])
+def test_response_adapts_automatic_grid_but_preserves_manual_block_cap(
+        adaptive, unrestricted, monkeypatch):
+    values = jnp.asarray([[[.2, -.3]], [[-.1, .4]]])
+    molecule = _reference(.04, streamed=True, unrestricted=unrestricted, adaptive=adaptive)
+    occupied, virtual = _orbitals()
+    sizes = []
+    original = AOGrid.block
+
+    def block(provider, start, size, **kwargs):
+        sizes.append(size)
+        return original(provider, start, size, **kwargs)
+
+    monkeypatch.setattr(AOGrid, "block", block)
+    if unrestricted:
+        functional = UnrestrictedSemilocalResponseFunctional("pbe")
+        action = build_unrestricted_semilocal_response_action(
+            molecule, occupied, virtual, .9 * occupied, virtual[:, ::-1],
+            functional.spin_grid_response_hvp, feature_kind="GGA", dtype=jnp.float64,
+            block_size=5,
+        )
+        jax.block_until_ready(jax.jit(action)(values, -.4 * values))
+    else:
+        hessian = SemilocalResponseFunctional("pbe").grid_response_tensor(molecule)
+        action, _ = response._restricted_grid_xc_response(
+            molecule, occupied, virtual, hessian * molecule.grid.weights[None, None],
+            feature_kind="GGA", dtype=jnp.float64, block_size=5, compute_diagonal=False,
+        )
+        jax.block_until_ready(jax.jit(action)(values))
+    assert max(sizes) == (5 if adaptive else 3)
+
+
+@pytest.mark.parametrize("unrestricted", [False, True])
+def test_global_hvp_keeps_complete_fields_with_planned_adaptive_blocks(unrestricted, monkeypatch):
+    values = jnp.asarray([[[.2, -.3]], [[-.1, .4]]])
+    molecule = _reference(.04, streamed=True, unrestricted=unrestricted, adaptive=True)
+    occupied, virtual = _orbitals()
+    sizes = []
+    original = AOGrid.block
+
+    def block(provider, start, size, **kwargs):
+        sizes.append(size)
+        return original(provider, start, size, **kwargs)
+
+    def global_hvp(mol, tangent):
+        assert tangent.shape[-1] == 7
+        return .2 * tangent + .07 * jnp.sum(tangent, axis=-1, keepdims=True)
+
+    monkeypatch.setattr(AOGrid, "block", block)
+    if unrestricted:
+        def spin_hvp(mol, alpha, beta):
+            return global_hvp(mol, alpha + .3 * beta), global_hvp(mol, beta + .3 * alpha)
+
+        action = build_unrestricted_semilocal_response_action(
+            molecule, occupied, virtual, .9 * occupied, virtual[:, ::-1], spin_hvp,
+            feature_kind="GGA", dtype=jnp.float64, block_size=5,
+        )
+        actual = jax.jit(action)(values, -.4 * values)
+        dense = build_unrestricted_semilocal_response_action(
+            _reference(.04, streamed=False, unrestricted=True), occupied, virtual,
+            .9 * occupied, virtual[:, ::-1], spin_hvp, feature_kind="GGA", dtype=jnp.float64,
+        )(values, -.4 * values)
+    else:
+        action = response._restricted_grid_xc_response_hvp(
+            molecule, occupied, virtual, global_hvp, feature_kind="GGA", dtype=jnp.float64,
+            block_size=5,
+        )
+        actual = jax.jit(action)(values)
+        dense = response._restricted_grid_xc_response_hvp(
+            _reference(.04, streamed=False), occupied, virtual, global_hvp,
+            feature_kind="GGA", dtype=jnp.float64,
+        )(values)
+    for observed, expected in zip(jax.tree.leaves(actual), jax.tree.leaves(dense), strict=True):
+        np.testing.assert_allclose(observed, expected, atol=2e-11, rtol=2e-11)
+    assert max(sizes) == 5
+
+
+@pytest.mark.parametrize("adaptive", [False, True])
+def test_restricted_response_preparation_obeys_planned_grid_block(adaptive, monkeypatch):
+    molecule = _reference(.04, streamed=True, adaptive=adaptive)
+    molecule.grid_ao = replace(molecule.grid_ao, block_size=7)
+    molecule.mo_coeff = jnp.eye(3)
+    molecule.mo_occ = jnp.array([2., 0., 0.])
+    molecule.mo_energy = jnp.array([-.6, .2, .7])
+    molecule.nocc = 1
+    molecule.rep_tensor = jnp.zeros((0, 0, 0, 0))
+    molecule.direct_basis = SimpleNamespace(
+        get_jk=lambda density: (density, jnp.zeros_like(density)))
+    sizes = []
+    original = AOGrid.block
+
+    def block(provider, start, size, **kwargs):
+        sizes.append(size)
+        return original(provider, start, size, **kwargs)
+
+    monkeypatch.setattr(AOGrid, "block", block)
+    vind = response.build_restricted_tdhf_operator(
+        molecule, SemilocalResponseFunctional("pbe"), response_kernel_options={
+            "two_electron_mode": "direct", "integral_cache": "none", "grid_block_size": 3})
+    assert vind.memory_plan.grid_block_size == 3
+    assert molecule.grid_ao.block_size == 7, "Response planning must not mutate the SCF reference"
+    assert sizes and max(sizes) <= 3, "Density and XC kernel preparation must obey the response plan"
+    values = jnp.array([[.2, -.3, -.1, .4]])
+    assert np.isfinite(np.asarray(jax.jit(vind)(values))).all()
+
+
+@pytest.mark.parametrize("unrestricted", [False, True])
+def test_global_hvp_caps_manual_provider_by_planned_grid_block(unrestricted, monkeypatch):
+    values = jnp.asarray([[[.2, -.3]], [[-.1, .4]]])
+    molecule = _reference(.04, streamed=True, unrestricted=unrestricted)
+    molecule.grid_ao = replace(molecule.grid_ao, block_size=7)
+    occupied, virtual = _orbitals()
+    sizes = []
+    original = AOGrid.block
+
+    def block(provider, start, size, **kwargs):
+        sizes.append(size)
+        return original(provider, start, size, **kwargs)
+
+    def global_hvp(mol, tangent):
+        assert tangent.shape[-1] == mol.grid.weights.shape[0] == 7
+        return .2 * tangent + .07 * jnp.sum(tangent, axis=-1, keepdims=True)
+
+    monkeypatch.setattr(AOGrid, "block", block)
+    if unrestricted:
+        def spin_hvp(mol, alpha, beta):
+            return global_hvp(mol, alpha + .3 * beta), global_hvp(mol, beta + .3 * alpha)
+
+        action = build_unrestricted_semilocal_response_action(
+            molecule, occupied, virtual, .9 * occupied, virtual[:, ::-1], spin_hvp,
+            feature_kind="GGA", dtype=jnp.float64, block_size=3,
+        )
+        actual = jax.jit(action)(values, -.4 * values)
+        expected = build_unrestricted_semilocal_response_action(
+            _reference(.04, streamed=False, unrestricted=True), occupied, virtual,
+            .9 * occupied, virtual[:, ::-1], spin_hvp, feature_kind="GGA", dtype=jnp.float64,
+        )(values, -.4 * values)
+    else:
+        actual = jax.jit(response._restricted_grid_xc_response_hvp(
+            molecule, occupied, virtual, global_hvp, feature_kind="GGA", dtype=jnp.float64,
+            block_size=3,
+        ))(values)
+        expected = response._restricted_grid_xc_response_hvp(
+            _reference(.04, streamed=False), occupied, virtual, global_hvp,
+            feature_kind="GGA", dtype=jnp.float64,
+        )(values)
+    for observed, wanted in zip(jax.tree.leaves(actual), jax.tree.leaves(expected), strict=True):
+        np.testing.assert_allclose(observed, wanted, atol=2e-11, rtol=2e-11)
+    assert sizes and max(sizes) <= 3
+    assert molecule.grid_ao.block_size == 7
+
+
+def test_semilocal_response_cache_releases_discarded_preparation_view():
+    import gc
+    import weakref
+    from gradscf.tddft import _semilocal_response
+
+    molecule = _reference(.04, streamed=True)
+    functional = SemilocalResponseFunctional("pbe")
+    functional.grid_response_tensor(molecule)
+    key = (id(molecule), "pbe")
+    assert key in _semilocal_response._GRID_RESPONSE_TENSOR_CACHE
+    reference = weakref.ref(molecule)
+    del molecule
+    gc.collect()
+    assert reference() is None
+    assert key not in _semilocal_response._GRID_RESPONSE_TENSOR_CACHE
 
 
 @pytest.mark.parametrize("unrestricted", [False, True])

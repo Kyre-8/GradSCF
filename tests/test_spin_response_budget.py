@@ -21,12 +21,13 @@ def test_two_spin_channels_share_budget_without_dropping_requested_roots(rpa):
 def test_spin_channels_pay_once_for_shared_s8_cache():
     provider = NativeDirectBasis(SimpleNamespace(topology=SimpleNamespace(nao=4)), None)
     arguments = (4, 3, 1, np.float64, .2)
-    restricted = plan_response_memory(*arguments, direct_basis=provider, spin_channels=1)
-    unrestricted = plan_response_memory(*arguments, direct_basis=provider, spin_channels=2)
+    device = SimpleNamespace(platform="cpu")
+    restricted = plan_response_memory(*arguments, direct_basis=provider, spin_channels=1, device=device)
+    unrestricted = plan_response_memory(*arguments, direct_basis=provider, spin_channels=2, device=device)
     assert unrestricted.eri_cache_bytes == restricted.eri_cache_bytes == provider.eri_cache_nbytes
     assert 1 <= unrestricted.batch_size < restricted.batch_size
     per_vector = 8 * (2 * 60 * 4**2 + 4 * 3)
-    assert 2 * unrestricted.eri_cache_bytes + unrestricted.batch_size * per_vector <= 50_000
+    assert 2 * unrestricted.eri_cache_bytes + unrestricted.batch_size * per_vector <= 80_000
 
 
 @pytest.mark.parametrize("channels", [0, 3, True, 1.5])

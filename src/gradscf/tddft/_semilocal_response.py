@@ -73,5 +73,6 @@ class SemilocalResponseFunctional:
         tensor = jnp.einsum("ai,gab,bj->ijg", projection, spin_hessian, projection)
         tensor = jnp.where(active[None, None, :], tensor, 0.)
         if not _contains_tracer(tensor):
-            _GRID_RESPONSE_TENSOR_CACHE[cache_key] = (weakref.ref(molecule), tensor)
+            reference = weakref.ref(molecule, lambda _: _GRID_RESPONSE_TENSOR_CACHE.pop(cache_key, None))
+            _GRID_RESPONSE_TENSOR_CACHE[cache_key] = (reference, tensor)
         return tensor

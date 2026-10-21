@@ -6,6 +6,7 @@ from typing import Any
 import jax.numpy as jnp
 import numpy as np
 
+from gradscf._memory import DEFAULT_MAX_MEMORY_MB
 from gradscf.scf.molecules import QuadratureGrid, RestrictedMolecule, UnrestrictedMolecule
 
 
@@ -64,6 +65,7 @@ def _replace_grid_ao(group: Any, provider: Any) -> None:
     target = group.create_group("grid_ao")
     target.attrs["kind"] = "cartesian"
     target.attrs["block_size"] = int(provider.block_size)
+    target.attrs["adaptive"] = bool(provider.adaptive)
     target.attrs["nprims"] = np.asarray(provider.nprims, dtype=np.int64)
     target.attrs["angulars"] = np.asarray(provider.angulars, dtype=np.int64).reshape(provider.nao, 3)
     for field in ("centers", "exponents", "coefficients"):
@@ -83,6 +85,7 @@ def _read_grid_ao(group: Any, grid: QuadratureGrid, *, array_backend: str) -> An
         nprims=tuple(int(value) for value in group.attrs["nprims"]),
         angulars=tuple(tuple(int(value) for value in row) for row in group.attrs["angulars"]),
         block_size=int(group.attrs["block_size"]),
+        adaptive=bool(group.attrs.get("adaptive", False)),
     )
 
 
@@ -256,6 +259,7 @@ def write_restricted_molecule(group: Any, molecule: RestrictedMolecule) -> None:
         _validate_grid_ao(grid_provider, molecule.grid)
     group.attrs["nuclear_repulsion"] = float(molecule.nuclear_repulsion)
     group.attrs["exact_exchange_fraction"] = float(molecule.exact_exchange_fraction)
+    group.attrs["max_memory"] = float(molecule.max_memory)
     if molecule.mf_energy is not None:
         group.attrs["mf_energy"] = float(molecule.mf_energy)
     if molecule.nocc is not None:
@@ -292,6 +296,7 @@ def write_unrestricted_molecule(group: Any, molecule: UnrestrictedMolecule) -> N
         _validate_grid_ao(grid_provider, molecule.grid)
     group.attrs["nuclear_repulsion"] = float(molecule.nuclear_repulsion)
     group.attrs["exact_exchange_fraction"] = float(molecule.exact_exchange_fraction)
+    group.attrs["max_memory"] = float(molecule.max_memory)
     if molecule.mf_energy is not None:
         group.attrs["mf_energy"] = float(molecule.mf_energy)
     if molecule.nocc_alpha is not None:
@@ -347,6 +352,7 @@ def read_restricted_molecule(
     elif hfx_nu_storage != "array":
         raise ValueError(f"Unsupported hfx_nu_storage={hfx_nu_storage!r}.")
     return RestrictedMolecule(
+        max_memory=float(group.attrs.get("max_memory", DEFAULT_MAX_MEMORY_MB)),
         ao=kwargs.pop("ao"),
         grid=grid,
         dipole_integrals=kwargs.pop("dipole_integrals"),
@@ -422,6 +428,7 @@ def read_unrestricted_molecule(
     elif hfx_nu_storage != "array":
         raise ValueError(f"Unsupported hfx_nu_storage={hfx_nu_storage!r}.")
     return UnrestrictedMolecule(
+        max_memory=float(group.attrs.get("max_memory", DEFAULT_MAX_MEMORY_MB)),
         ao=kwargs.pop("ao"),
         grid=grid,
         dipole_integrals=kwargs.pop("dipole_integrals"),

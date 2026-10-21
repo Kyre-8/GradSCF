@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from copy import copy
 from types import SimpleNamespace
 from typing import Any, Callable
 
@@ -26,7 +27,9 @@ from .response_options import (
     ResponseKernelOptions,
     normalize_response_kernel_options,
     plan_response_memory,
+    _response_memory_inputs,
 )
+from .._memory import DEFAULT_MAX_MEMORY_MB
 
 
 _RESPONSE_FEATURE_COUNTS = {
@@ -275,6 +278,16 @@ class _RestrictedResponseFactors:
     channels: tuple[tuple[tuple[float, Array, Array], ...], ...]
 
 
+def _response_grid_view(molecule, block_size):
+    """Limit preparation work without changing the reference's quadrature."""
+    provider = getattr(molecule, "grid_ao", None)
+    if provider is None or block_size < 1 or provider.block_size <= block_size:
+        return molecule
+    view = copy(molecule)
+    object.__setattr__(view, "grid_ao", replace(provider, block_size=int(block_size)))
+    return view
+
+
 def _restricted_response_factors(
     molecule: Any,
     orbo: Array,
@@ -432,7 +445,7 @@ def _restricted_grid_xc_response(
     ngrids = int(weighted_hessian.shape[-1])
     width = min(int(block_size), max(1, ngrids))
     provider = getattr(molecule, "grid_ao", None)
-    if provider is not None:
+    if provider is not None and not getattr(provider, "adaptive", False):
         width = min(width, provider.block_size)
     full_blocks, tail = divmod(ngrids, width)
 
@@ -501,6 +514,7 @@ def _restricted_grid_xc_response_hvp(
     *,
     feature_kind: str,
     dtype: Any,
+    block_size: int | None = None,
 ) -> Callable[[Array], Array]:
     weights = jnp.asarray(molecule.grid.weights, dtype=dtype)
     nocc = int(orbo.shape[1])
@@ -515,24 +529,32 @@ def _restricted_grid_xc_response_hvp(
         values = jnp.asarray(x, dtype=dtype).reshape(-1, nocc, nvir)
         projected = (_project_restricted_transition_to_grid(factors, values) if factors is not None else
                      _project_transition_to_full_grid(
-                         molecule, orbo, orbv, values, feature_kind=feature_kind, dtype=dtype))
+                         molecule, orbo, orbv, values, feature_kind=feature_kind, dtype=dtype,
+                         block_size=block_size))
         weighted = response_hvp(molecule, projected)
         weighted = jnp.asarray(weighted, dtype=dtype) * weights[None, None, :]
         out = 2.0 * (_project_grid_response_to_restricted_transition(factors, weighted)
                      if factors is not None else _project_full_grid_to_transition(
-                         molecule, orbo, orbv, weighted, feature_kind=feature_kind, dtype=dtype))
+                         molecule, orbo, orbv, weighted, feature_kind=feature_kind, dtype=dtype,
+                         block_size=block_size))
         return out.reshape(original_shape)
 
     return action
 
 
-def _project_transition_to_full_grid(molecule, orbo, orbv, values, *, feature_kind, dtype):
+def _project_transition_to_full_grid(molecule, orbo, orbv, values, *, feature_kind, dtype,
+                                     block_size=None):
     """Preserve a global callback's complete field without retaining full AO."""
     provider = getattr(molecule, "grid_ao", None)
     if provider is None:
         factors = _restricted_response_factors(
             molecule, orbo, orbv, feature_kind=feature_kind, dtype=dtype)
         return _project_restricted_transition_to_grid(factors, values)
+
+    if block_size is not None:
+        width = (int(block_size) if getattr(provider, "adaptive", False)
+                 else min(provider.block_size, int(block_size)))
+        provider = replace(provider, block_size=width)
 
     def project(ao, dao, lap, coords, weights):
         view = SimpleNamespace(ao=ao, ao_deriv1=dao, ao_laplacian=lap)
@@ -544,14 +566,18 @@ def _project_transition_to_full_grid(molecule, orbo, orbv, values, *, feature_ki
     return provider.map(project, deriv=deriv).transpose(1, 2, 0)
 
 
-def _project_full_grid_to_transition(molecule, orbo, orbv, weighted, *, feature_kind, dtype):
+def _project_full_grid_to_transition(molecule, orbo, orbv, weighted, *, feature_kind, dtype,
+                                     block_size=None):
     provider = getattr(molecule, "grid_ao", None)
     if provider is None:
         factors = _restricted_response_factors(
             molecule, orbo, orbv, feature_kind=feature_kind, dtype=dtype)
         return _project_grid_response_to_restricted_transition(factors, weighted)
     ngrids = int(weighted.shape[-1])
-    width = min(provider.block_size, max(1, ngrids))
+    width = provider.block_size if block_size is None else int(block_size)
+    if not getattr(provider, "adaptive", False):
+        width = min(width, provider.block_size)
+    width = min(width, max(1, ngrids))
     full_blocks, tail = divmod(ngrids, width)
 
     def contribution(start, size):
@@ -1014,7 +1040,9 @@ def _build_restricted_response_operator_data(
     response_kernel_options: ResponseKernelOptions | dict[str, Any] | None = None,
     singlet: bool = True,
 ) -> _RestrictedResponseOperatorData:
-    response_options = normalize_response_kernel_options(response_kernel_options)
+    response_options = normalize_response_kernel_options(
+        response_kernel_options,
+        default_max_memory=getattr(molecule, "max_memory", DEFAULT_MAX_MEMORY_MB))
     resolved_xc = _resolve_xc_functional(molecule, xc_functional, xc_params)
     if not singlet and getattr(resolved_xc, "xc_spec", None) != "hf":
         raise NotImplementedError("The triplet AO response option currently requires HF.")
@@ -1063,7 +1091,9 @@ def _build_restricted_response_operator_data(
         direct_workers=response_options.direct_workers, direct_tol=response_options.direct_tol,
         grid_block_size=(response_options.grid_block_size
                          if resolved_xc is not None and not standard_hf else 0),
+        **_response_memory_inputs(molecule, resolved_xc),
     )
+    molecule = _response_grid_view(molecule, memory_plan.grid_block_size)
     if standard_hf:
         # HF has no quadrature contribution. Even a zero local kernel would
         # otherwise construct a useless grid-by-occupied-by-virtual tensor.
@@ -1096,6 +1126,7 @@ def _build_restricted_response_operator_data(
                 grid_response_hvp,
                 feature_kind=str(feature_kind),
                 dtype=jnp.asarray(weights).dtype,
+                block_size=memory_plan.grid_block_size,
             )
         elif callable(grid_response_tensor):
             strict_tensor = _as_grid_response_tensor(

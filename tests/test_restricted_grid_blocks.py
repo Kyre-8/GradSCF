@@ -182,12 +182,13 @@ def test_custom_grid_hvp_keeps_cross_grid_coupling_and_full_grid_call():
 def test_joint_grid_budget_keeps_one_vector_and_one_grid_point_at_minimum():
     from gradscf.tddft.response_options import plan_response_memory
 
-    nao, dim, budget = 4, 4, 12_000
+    nao, dim, budget = 4, 4, 14_000
     plan = plan_response_memory(nao, dim, 1, np.float64, budget / 1_000_000,
                                 integral_cache="none", grid_block_size=4096)
     vector_bytes = 8 * (12 * nao**2 + 4 * dim)
     grid_point_bytes = 8 * (96 * nao + 384)
-    action_bytes = max(vector_bytes + grid_point_bytes, budget // 4)
+    usable = budget - budget // 5
+    action_bytes = max(vector_bytes + grid_point_bytes, usable // 2)
     assert plan.batch_size == plan.grid_block_size == 1
     assert plan.eri_cache_bytes == 0
     assert plan.batch_size * vector_bytes + plan.grid_block_size * grid_point_bytes <= action_bytes
@@ -270,7 +271,8 @@ def test_joint_budget_accounts_for_32_native_workers_at_full_dabna_dimensions(rp
                                    direct_workers=workers, **kwargs)
     vector_bytes = 8 * ((12 + 4 * workers) * nao**2 + (8 if rpa else 4) * dim)
     grid_point_bytes = 8 * (96 * nao + 384)
-    action_bytes = max(vector_bytes + grid_point_bytes, budget // 4)
+    usable = budget - budget // 5
+    action_bytes = max(vector_bytes + grid_point_bytes, usable // 2)
     assert plan.eri_cache_bytes == 0
     assert 1 <= plan.batch_size < one_worker.batch_size <= 32
     assert 1 <= plan.grid_block_size <= grid_cap
@@ -295,4 +297,5 @@ def test_hf_zero_grid_plan_releases_grid_quota_for_native_vectors():
     assert hf.eri_cache_bytes == 0
     assert 1 <= grid.batch_size < hf.batch_size <= 32
     vector_bytes = 8 * ((12 + 4) * nao**2 + 4 * dim)
-    assert hf.batch_size * vector_bytes <= max(vector_bytes, budget // 4)
+    usable = budget - budget // 5
+    assert hf.batch_size * vector_bytes <= max(vector_bytes, usable // 2)

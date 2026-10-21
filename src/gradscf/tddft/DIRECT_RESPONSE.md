@@ -25,7 +25,8 @@ tdhf = tdscf.TDDFT(mf, nstates=5, max_memory=1024.)
 tdhf_result = tdhf.kernel()  # An HF reference gives TDHF.
 ```
 
-`max_memory` is decimal MB and defaults to 2000. Low-level response callers
+SCF and TD `max_memory` is decimal MB and defaults to 60000 (60 GB). TD facades inherit
+the SCF/reference budget unless explicitly overridden. Low-level response callers
 can set the same value in `ResponseKernelOptions`. Restricted CIS singlets
 and triplets share the AO action; unrestricted CIS and TDHF triplets are not
 new capabilities of this increment.
@@ -119,10 +120,11 @@ four-index array or a four-index exchange gather.
 
 For \(P=N_{\rm AO}(N_{\rm AO}+1)/2\), the s8 cache occupies
 \(C=8P(P+1)/2\) bytes. It is generated directly in this layout; an s4 buffer
-is not constructed first. The existing action share \(H\), approximately one
-quarter of `max_memory`, pays for both the cache and vector workspace. The
-planner admits the cache only when \(2C+w\le H\), then chooses
-\(b=\min(32,\lfloor(H-2C)/w\rfloor)\). The second packed buffer covers the
+is not constructed first. The action share is one half of the usable budget,
+after the runtime reserve and known resident arrays. It pays for the cache,
+native workspaces, vector microbatches and grid blocks together. The planner
+charges two packed buffers, admits a cache only when the joint minimum fits,
+and selects up to 32 vector columns. The second packed buffer covers the
 zero-basis JVP/recomputation temporary. The per-vector estimate includes up to
 eight native workers and three concurrent J/K calls in a mixed zero-basis /
 density JVP, in addition to AO/projection arrays. This is a bounded estimate

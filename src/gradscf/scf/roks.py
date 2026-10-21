@@ -242,6 +242,7 @@ class ROKS(_BaseKS):
         return ROKSConfig(xc_spec=self.xc, max_cycle=self.max_cycle, conv_tol=self.conv_tol,
                           conv_tol_density=self.conv_tol_density, conv_tol_grad=self.conv_tol_grad,
                           damping=self.damp, level_shift=self.level_shift,
+                          max_memory=self.max_memory,
                           grid_block_size=self.grid_block_size, grid_max_memory=self.grid_max_memory)
 
     def kernel(self) -> Any:

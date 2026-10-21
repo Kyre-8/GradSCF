@@ -33,6 +33,13 @@ remove quadrature points. Native direct J/K avoids storing four-center ERIs,
 and Davidson uses response actions without constructing the complete A/B
 matrices. This example does not use density fitting or TDA.
 
+The default total budget is 60000 decimal MB (60 GB). SCF automatically
+chooses AO blocks within it; TDDFT uses the same budget for resident arrays,
+Davidson work, vector batches and grid blocks. `run_case(..., max_memory=...)`
+sets the budget. A runtime reserve and practical block ceilings are retained;
+using the budget does not mean allocating all available memory. External job
+limits and monitoring remain necessary for process-wide memory enforcement.
+
 Run on the authorized compute node from the repository root:
 
 ```sh
@@ -61,9 +68,9 @@ with h5py.File("artifacts/dabna2/monomer_pbe_level3/scf_reference.h5") as archiv
 
 td = tdscf.TDDFT(reference, xc_functional="pbe", nstates=20,
     eigensolver="davidson", davidson_tol=1e-6, davidson_max_iter=512,
-    davidson_max_subspace=160, max_memory=8000.,
+    davidson_max_subspace=160, max_memory=60000.,
     response_kernel_options=dict(two_electron_mode="direct", integral_cache="none",
-        direct_tol=1e-12, direct_workers=16, grid_block_size=256))
+        direct_tol=1e-12, direct_workers=16))
 result = td.kernel()
 ```
 

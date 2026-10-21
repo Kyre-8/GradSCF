@@ -7,6 +7,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 
+from .._memory import DEFAULT_MAX_MEMORY_MB, validate_memory_mb
 from ..data.molecule import MoleculeSpec
 from ..tools.jax_runtime import configure_jax_persistent_cache
 from .builders import (
@@ -68,7 +69,8 @@ class _BaseKS:
     geometry_grad_policy: Literal["analytic", "error", "zero"] = "analytic"
     grid_ao_backend: Literal["jax"] = "jax"
     grid_block_size: int = 0
-    grid_max_memory: float = 256.
+    grid_max_memory: float | None = None
+    max_memory: float = field(default=DEFAULT_MAX_MEMORY_MB, kw_only=True)
     execution_device: Literal["auto", "cpu", "gpu"] = "auto"
     init_guess: Any = "hcore"
     chkfile: str | None = None
@@ -90,6 +92,11 @@ class _BaseKS:
     _cached_scf_key: Any | None = field(default=None,init=False,repr=False)
     _cached_response_key: Any | None = field(default=None,init=False,repr=False)
     _cached_orbital_key: Any | None = field(default=None, init=False, repr=False)
+
+    def __post_init__(self):
+        self.max_memory = validate_memory_mb(self.max_memory)
+        if self.grid_max_memory is not None:
+            self.grid_max_memory = validate_memory_mb(self.grid_max_memory, name="grid_max_memory")
 
     def _orbital_signature(self):
         from .reference import _array_signature
@@ -365,6 +372,7 @@ class RKS(_BaseKS):
             auxbasis=self.auxbasis,
             direct_scf_tol=self.direct_scf_tol,
             direct_scf_workers=self.direct_scf_workers,
+            max_memory=self.max_memory,
             grid_block_size=self.grid_block_size,
             grid_max_memory=self.grid_max_memory,
         )
@@ -506,6 +514,7 @@ class UKS(_BaseKS):
             auxbasis=self.auxbasis,
             direct_scf_tol=self.direct_scf_tol,
             direct_scf_workers=self.direct_scf_workers,
+            max_memory=self.max_memory,
             grid_block_size=self.grid_block_size,
             grid_max_memory=self.grid_max_memory,
         )

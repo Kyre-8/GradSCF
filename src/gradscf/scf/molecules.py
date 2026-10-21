@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import jax.numpy as jnp
 
+from .._memory import DEFAULT_MAX_MEMORY_MB, validate_memory_mb
 from ._pytree import pytree_dataclass
 
 
@@ -29,6 +30,7 @@ class QuadratureGrid:
         "range_separated_coefficients",
         "xc_density_floor",
         "xc_spec",
+        "max_memory",
     )
 )
 @dataclass(frozen=True)
@@ -87,6 +89,10 @@ class RestrictedMolecule:
     # parameters are dynamic pytree leaves; no ERI array is required.
     direct_basis: Any | None = None
     grid_ao: Any | None = None
+    max_memory: float = field(default=DEFAULT_MAX_MEMORY_MB, kw_only=True)
+
+    def __post_init__(self):
+        object.__setattr__(self, "max_memory", validate_memory_mb(self.max_memory))
 
     def density(self) -> jnp.ndarray:
         if self.grid_ao is not None:
@@ -107,6 +113,7 @@ class RestrictedMolecule:
         "runtime_scf_backend",
         "runtime_scf_options",
         "hfx_nu_api",
+        "max_memory",
     )
 )
 @dataclass(frozen=True)
@@ -154,6 +161,10 @@ class UnrestrictedMolecule:
     # is static; numerical basis parameters remain dynamic PyTree leaves.
     direct_basis: Any | None = None
     grid_ao: Any | None = None
+    max_memory: float = field(default=DEFAULT_MAX_MEMORY_MB, kw_only=True)
+
+    def __post_init__(self):
+        object.__setattr__(self, "max_memory", validate_memory_mb(self.max_memory))
 
     @property
     def eri_pair_matrix(self):

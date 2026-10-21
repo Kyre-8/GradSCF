@@ -9,6 +9,7 @@ import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
 
+from .._memory import DEFAULT_MAX_MEMORY_MB, validate_memory_mb
 from gradscf.integrals.basis import CartesianBasis
 from gradscf.integrals import (
     build_j_from_eri_pair_matrix,
@@ -81,8 +82,15 @@ class RKSConfig:
     direct_scf_tol: float = 0.0
     direct_scf_workers: int = 1
     grid_block_size: int = 0
-    grid_max_memory: float = 256.0
+    grid_max_memory: float | None = None
+    max_memory: float = field(default=DEFAULT_MAX_MEMORY_MB, kw_only=True)
     convergence_metric: Literal["energy_and_residual", "energy"] = "energy_and_residual"
+
+    def __post_init__(self):
+        object.__setattr__(self, "max_memory", validate_memory_mb(self.max_memory))
+        if self.grid_max_memory is not None:
+            object.__setattr__(self, "grid_max_memory",
+                               validate_memory_mb(self.grid_max_memory, name="grid_max_memory"))
 
 
 @pytree_dataclass

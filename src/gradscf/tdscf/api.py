@@ -194,10 +194,14 @@ class _BaseTD:
         }
 
     def _response_options(self):
-        options = self.response_kernel_options
+        from .._memory import DEFAULT_MAX_MEMORY_MB
+        from ..tddft.response_options import normalize_response_kernel_options
+
+        options = normalize_response_kernel_options(
+            self.response_kernel_options,
+            default_max_memory=getattr(self.mf, "max_memory", DEFAULT_MAX_MEMORY_MB))
         if self.max_memory is not None:
-            from ..tddft.response_options import normalize_response_kernel_options
-            options = replace(normalize_response_kernel_options(options), max_memory=self.max_memory)
+            options = normalize_response_kernel_options(replace(options, max_memory=self.max_memory))
         return options
 
     def _restricted_solver_kwargs(self, molecule: Any) -> dict[str, Any]:

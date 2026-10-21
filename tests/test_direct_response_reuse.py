@@ -33,9 +33,9 @@ def test_cache_budget_reserves_native_worker_and_transpose_arrays(system):
     assert plan.eri_cache_bytes == cache
     per_vector = 8 * (60 * basis.nao**2 + 4 * 3)
     native_fixed = 3*_native_direct_workspace_bytes(basis, 8, 0.)
-    assert native_fixed + 2*cache + plan.batch_size * per_vector <= 2_000_000 // 4
+    assert native_fixed + 2*cache + plan.batch_size * per_vector <= 800_000
     # Enough for the direct minimum, but not for the cache plus its workers.
-    small = plan_response_memory(basis.nao, 3, 1, np.float64, .18, direct_basis=basis)
+    small = plan_response_memory(basis.nao, 3, 1, np.float64, .225, direct_basis=basis)
     assert small.eri_cache_bytes == 0
     disabled = plan_response_memory(basis.nao, 3, 1, np.float64, 2.,
                                     direct_basis=basis, integral_cache="none")
@@ -157,6 +157,6 @@ def test_projected_and_cuda_plans_keep_direct_workspace(system, monkeypatch):
     projected = ProjectedNativeDirectBasis(basis, jnp.eye(basis.nao))
     assert plan_response_memory(4, 3, 1, np.float64, .2,
                                 direct_basis=projected).eri_cache_bytes == 0
-    monkeypatch.setattr(jax, "default_backend", lambda: "gpu")
-    assert plan_response_memory(4, 3, 1, np.float64, .2,
-                                direct_basis=basis).eri_cache_bytes == 0
+    assert plan_response_memory(4, 3, 1, np.float64, .25,
+                                direct_basis=basis,
+                                device=SimpleNamespace(platform="gpu", memory_stats=lambda: {})).eri_cache_bytes == 0

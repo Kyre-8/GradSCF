@@ -7,6 +7,9 @@ from typing import Any, Literal, NamedTuple
 
 import numpy as np
 
+from .._memory import DEFAULT_MAX_MEMORY_MB, array_storage_bytes, validate_memory_mb, workspace_bytes
+from ..integrals.backends.native.jk import native_jk_workspace_bytes as _native_direct_workspace_bytes
+
 
 TwoElectronMode = Literal["auto", "direct", "df", "ris"]
 RISFit = Literal["s", "sp", "spd"]
@@ -21,11 +24,11 @@ class ResponseKernelOptions:
     ris_j_fit: RISFit = "sp"
     ris_k_fit: RISFit = "s"
     ris_aux_chunk_size: int = 256
-    max_memory: float = 2000.0
+    max_memory: float = DEFAULT_MAX_MEMORY_MB
     integral_cache: Literal["auto", "none"] = "auto"
     direct_tol: float = 0.0
     direct_workers: int = 8
-    grid_block_size: int = 2048
+    grid_block_size: int = 8192
 
 
 _OPTION_FIELDS = {field.name for field in fields(ResponseKernelOptions)}
@@ -35,16 +38,18 @@ _RIS_FITS = {"s", "sp", "spd"}
 
 def normalize_response_kernel_options(
     options: ResponseKernelOptions | dict[str, Any] | None,
+    *,
+    default_max_memory: float = DEFAULT_MAX_MEMORY_MB,
 ) -> ResponseKernelOptions:
     if options is None:
-        normalized = ResponseKernelOptions()
+        normalized = ResponseKernelOptions(max_memory=default_max_memory)
     elif isinstance(options, ResponseKernelOptions):
         normalized = options
     elif isinstance(options, dict):
         unknown = sorted(set(options) - _OPTION_FIELDS)
         if unknown:
             raise ValueError(f"Unknown response kernel option(s): {', '.join(unknown)}.")
-        normalized = ResponseKernelOptions(**options)
+        normalized = ResponseKernelOptions(**{"max_memory": default_max_memory, **options})
     else:
         raise TypeError(
             "response_kernel_options must be None, a ResponseKernelOptions instance, "
@@ -77,9 +82,7 @@ def normalize_response_kernel_options(
         raise ValueError("ris_theta must be positive.")
     if int(normalized.ris_aux_chunk_size) <= 0:
         raise ValueError("ris_aux_chunk_size must be positive.")
-    if (isinstance(normalized.max_memory, bool) or not isinstance(normalized.max_memory, Real)
-            or not isfinite(normalized.max_memory) or normalized.max_memory <= 0):
-        raise ValueError("max_memory must be a finite positive number of MB.")
+    validate_memory_mb(normalized.max_memory)
 
     return ResponseKernelOptions(
         two_electron_mode=mode,  # type: ignore[arg-type]
@@ -102,63 +105,81 @@ class _ResponseMemoryPlan(NamedTuple):
     grid_block_size: int
 
 
-def _native_direct_workspace_bytes(provider, workers, cutoff):
-    """Bound one native call's batch-independent optimizer and shell arrays.
+def _response_memory_inputs(molecule, resolved_xc, *, spin_channels=1):
+    """Count resident arrays and unavoidable complete-grid callback fields.
 
-    The pinned native ABI uses float64, int32 and 64-bit pointers. Return
-    None for dimension-only placeholders without a complete shell topology.
+    Only shapes and metadata are inspected; no array is copied to the host.
+    External network activations are not sized here; the runtime reserve
+    provides headroom rather than a guarantee for arbitrary model internals.
     """
-    topology = provider.plan.topology
-    names = ("angular_momenta", "primitive_counts", "contraction_counts",
-             "nuclear_charges", "cart")
-    if any(not hasattr(topology, name) for name in names):
-        return None
-    angular = topology.angular_momenta
-    primitive = topology.primitive_counts
-    contractions = topology.contraction_counts
-    shells = len(angular)
-    workers = min(workers, shells)
-    total_primitive = sum(primitive)
-    total_coefficients = sum(p*c for p, c in zip(primitive, contractions))
-    max_l, max_p = max(angular), max(primitive)
-    cart_dims = tuple((l+1)*(l+2)//2 for l in angular)
-    max_cart = max(f*c for f, c in zip(cart_dims, contractions))
-    max_output = max(c*(f if topology.cart else 2*l+1)
-                     for l, f, c in zip(angular, cart_dims, contractions))
-    nf, nc = max(cart_dims)**4, max_cart**4
-    g_size = (2*max_l+1)**3 * (max_l+1)**2
-    pair_scratch = (10*max_p**2 + 4*max(p*c for p, c in zip(primitive, contractions))
-                    + 8*max_p + 3*nf)
-    cache = max(6*g_size + nf + 3*nc + pair_scratch, nc + 4*nf)
-    # Retained vector capacities can exceed the current shell's logical size.
-    shapes = len(set(zip(angular, primitive, contractions)))
-    scratch = 16*(max_output**4 + cache) + 128*shapes**4
-    allowed_l = min(max_l, 6)
-    cumulative_cart = (allowed_l+1)*(allowed_l+2)*(allowed_l+3)//6
-    optimizer = (48 + 12*cumulative_cart**4 + 8*(max_l+1)*16**3
-                 + 24*shells + 12*total_primitive + 4*total_coefficients)
-    if total_primitive <= 2048:
-        optimizer += 40*total_primitive**2 + 8*shells**2
-    atoms = len(topology.nuclear_charges) + shells
-    tables = (4*(6*atoms + 8*shells + shells+1)
-              + 8*(20 + 3*atoms + total_primitive + total_coefficients))
-    bounds = 8*shells**2 if cutoff > 0 else 0
-    return optimizer + bounds + (workers+1)*tables + workers*scratch
+    import jax
+
+    names = ("ao", "ao_deriv1", "ao_laplacian", "mo_coeff", "mo_occ", "mo_energy",
+             "rdm1", "h1e", "overlap_matrix", "fock_matrix", "dipole_integrals",
+             "rep_tensor", "eri_pair_matrix", "eri_lr", "df_factors",
+             "response_df_factors_j", "response_df_factors_k", "eri_ovov", "eri_ovvo",
+             "eri_oovv", "hfx_local", "hfx_fxx", "hfx_nu", "pt2_local",
+             "pt2_fock_response", "neural_xc_grid_payload", "direct_basis", "grid_ao")
+    arrays = [getattr(molecule, name, None) for name in names]
+    grid = getattr(molecule, "grid", None)
+    arrays += [getattr(grid, "coords", None), getattr(grid, "weights", None),
+               getattr(resolved_xc, "params", None)]
+    resident = array_storage_bytes(*jax.tree_util.tree_leaves(arrays))
+    weights = getattr(grid, "weights", None)
+    ngrids = int(weights.shape[0]) if weights is not None else 0
+    dtype = getattr(weights, "dtype", np.dtype(np.float64))
+    itemsize = max(8, np.dtype(dtype).itemsize)
+    kind = str(getattr(resolved_xc, "response_feature_kind", "LDA")).upper()
+    width = {"LDA": 1, "GGA": 4, "MGGA": 5, "MGGA_LAPL": 6}.get(kind, 6)
+    from ._semilocal_response import SemilocalResponseFunctional
+    from ._unrestricted_semilocal_response import UnrestrictedSemilocalResponseFunctional
+
+    standard_hf = (isinstance(resolved_xc, SemilocalResponseFunctional)
+                   or type(resolved_xc) is UnrestrictedSemilocalResponseFunctional)
+    standard_hf = standard_hf and resolved_xc.xc_spec == "hf"
+    global_hvp = False
+    if resolved_xc is not None and not standard_hf:
+        known_spin_local = type(resolved_xc) is UnrestrictedSemilocalResponseFunctional
+        global_hvp = not known_spin_local and any(callable(getattr(resolved_xc, name, None))
+            for name in ("grid_response_hvp", "spin_grid_response_hvp", "ao_kernel_action"))
+        # Equal-spin restricted kernels can retain both spin and projected
+        # Hessians during construction. Unknown HVPs retain complete fields.
+        spin_width = 2 * width
+        resident += itemsize * ngrids * (
+            4 * spin_width if global_hvp else
+            2 * width**2 + 2 * spin_width**2 + 4 * spin_width)
+    grid_vector = (6 * spin_channels * width * ngrids * itemsize if global_hvp else 0)
+    provider = getattr(molecule, "grid_ao", None)
+    ao_workspace = 0
+    if provider is not None and resolved_xc is not None and not standard_hf:
+        from ..integrals.grids.blocks import ao_point_bytes
+
+        ao_workspace = ao_point_bytes(provider, deriv=0 if kind == "LDA" else
+                                      2 if kind == "MGGA_LAPL" else 1)
+    coefficients = getattr(molecule, "mo_coeff", None)
+    device = getattr(coefficients, "device", None)
+    if callable(device):
+        device = device()
+    return dict(resident_bytes=resident, grid_vector_bytes=grid_vector,
+                ao_point_bytes=ao_workspace, device=device)
 
 
 def plan_response_memory(nao, dim, nroots, dtype, max_memory,
                          max_subspace=None, rpa=False, *, direct_basis=None,
                          integral_cache="auto", direct_workers=8, direct_tol=0.,
-                         grid_block_size=0, spin_channels=1):
+                         grid_block_size=0, spin_channels=1, resident_bytes=0,
+                         grid_vector_bytes=0, ao_point_bytes=0, device=None):
     """Bound primary solver/AO work arrays; max_memory is decimal MB.
 
     The estimate reserves common AO state, output vectors, QR/Ritz work and
     one microbatch of densities and J/K outputs. It is not an RSS bound on
     XLA compilation, external functional internals or allocator caches.
     """
-    if (isinstance(max_memory, bool) or not isinstance(max_memory, Real)
-            or not isfinite(max_memory) or max_memory <= 0):
-        raise ValueError("max_memory must be a finite positive number of MB.")
+    validate_memory_mb(max_memory)
+    for name, value in (("resident_bytes", resident_bytes),
+                        ("grid_vector_bytes", grid_vector_bytes), ("ao_point_bytes", ao_point_bytes)):
+        if isinstance(value, bool) or not isinstance(value, Integral) or value < 0:
+            raise ValueError(f"{name} must be a nonnegative integer.")
     if (isinstance(direct_tol, bool) or not isinstance(direct_tol, Real)
             or not isfinite(direct_tol) or direct_tol < 0):
         raise ValueError("direct_tol must be finite and nonnegative.")
@@ -176,11 +197,16 @@ def plan_response_memory(nao, dim, nroots, dtype, max_memory,
     # Public eigensolvers promote float32 to float64 when x64 is enabled.
     # Eight bytes is conservative for the supported real response paths.
     itemsize = max(8, np.dtype(dtype).itemsize)
-    budget = int(max_memory * 1_000_000)
-    fixed = itemsize * (8 * spin_channels * nao**2 + 4 * dim * nroots)
     # The density transpose of native J/K concatenates the J/K cotangents.
     from ..integrals.backends.native.jk import NativeDirectBasis
     native = type(direct_basis) is NativeDirectBasis
+    if device is None and native:
+        centers = getattr(getattr(direct_basis, "parameters", None), "centers", None)
+        device = getattr(centers, "device", None)
+        if callable(device):
+            device = device()
+    budget = workspace_bytes(max_memory, resident_bytes=resident_bytes, device=device)
+    fixed = itemsize * (8 * spin_channels * nao**2 + 4 * dim * nroots)
     if isinstance(direct_workers, bool) or not isinstance(direct_workers, Integral) or direct_workers < 1:
         raise ValueError("direct_workers must be a positive integer.")
     native_fixed = 0
@@ -194,7 +220,8 @@ def plan_response_memory(nao, dim, nroots, dtype, max_memory,
             legacy_native = False
     # Keep the old conservative worker estimate for dimension-only providers.
     ao_matrices = 12 + (4*direct_workers if legacy_native else 0)
-    per_vector = itemsize * (ao_matrices * spin_channels * nao**2 + (8 if rpa else 4) * dim)
+    per_vector = (itemsize * (ao_matrices * spin_channels * nao**2 + (8 if rpa else 4) * dim)
+                  + grid_vector_bytes)
     minimum = min(dim, nroots + (2 if rpa else 3))
     default = max(8 * nroots, 128) if rpa else max(40, 4 * (nroots + 2))
     width = min(dim, default if max_subspace is None else int(max_subspace))
@@ -206,28 +233,39 @@ def plan_response_memory(nao, dim, nroots, dtype, max_memory,
     # the requested roots. The remaining budget belongs to the Ritz basis.
     # Block-local AO/MO factors and both sides of the grid projection, with
     # room for the maximum 32-vector batch and its transpose/recomputation.
-    grid_point_bytes = itemsize * spin_channels * (96*nao + 384) if grid_block_size else 0
-    action_budget = max(native_fixed + per_vector + grid_point_bytes, budget // 4)
-    grid_budget = (min(action_budget-native_fixed-per_vector,
-                       max(grid_point_bytes, action_budget // 4))
-                   if grid_block_size else 0)
-    integral_budget = action_budget - native_fixed - grid_budget
+    grid_point_bytes = (itemsize * spin_channels * (96*nao + 384) + ao_point_bytes
+                        if grid_block_size else 0)
+    action_budget = max(native_fixed + per_vector + grid_point_bytes, budget // 2)
+    action_available = action_budget - native_fixed
     cache_bytes = 0
     if integral_cache not in {"auto", "none"}:
         raise ValueError("integral_cache must be 'auto' or 'none'.")
     if native and integral_cache == "auto" and direct_tol == 0:
-        import jax
-
         # Projected providers can have a much larger primitive AO dimension;
-        # CUDA uses a different packed workspace. Keep both shell-direct.
-        if jax.default_backend() == "cpu":
+        # CUDA uses a different packed workspace. Unknown targets stay direct;
+        # never initialize an unrelated default device to choose cache policy.
+        if getattr(device, "platform", None) == "cpu":
             candidate = direct_basis.eri_cache_nbytes
             # Eight workers retain two J/K accumulators. A mixed zero-basis /
             # density JVP can have three live calls: 3*2*8 extra AO matrices.
-            cached_vector = itemsize * (60 * spin_channels * nao**2 + (8 if rpa else 4) * dim)
+            cached_vector = (itemsize * (60 * spin_channels * nao**2 + (8 if rpa else 4) * dim)
+                             + grid_vector_bytes)
             # Reserve a second packed buffer for zero-basis JVP/recomputation.
-            if 2*candidate + cached_vector <= integral_budget:
+            if 2*candidate + cached_vector + grid_point_bytes <= action_available:
                 cache_bytes, per_vector = candidate, cached_vector
+    action_available -= 2 * cache_bytes
+    if not grid_point_bytes:
+        batch_size = min(32, action_available // per_vector)
+        grid_width = 0
+    else:
+        if 32 * per_vector + grid_point_bytes <= action_available:
+            batch_size = 32
+        else:
+            grid_share = min(action_available - per_vector,
+                             max(grid_point_bytes, action_available // 2))
+            batch_size = min(32, (action_available - grid_share) // per_vector)
+        grid_width = min(grid_block_size,
+                         (action_available - batch_size * per_vector) // grid_point_bytes)
     required = fixed + action_budget + basis_bytes(minimum)
     if required > budget:
         raise ValueError(f"Response memory budget is {budget} bytes; at least {required} bytes are required.")
@@ -237,5 +275,4 @@ def plan_response_memory(nao, dim, nroots, dtype, max_memory,
     while basis_bytes(width) > available:
         width -= 1
     return _ResponseMemoryPlan(
-        width, min(32, (integral_budget-2*cache_bytes) // per_vector), cache_bytes,
-        min(grid_block_size, grid_budget // grid_point_bytes) if grid_point_bytes else 0)
+        width, batch_size, cache_bytes, grid_width)

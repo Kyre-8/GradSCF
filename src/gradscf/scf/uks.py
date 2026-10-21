@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable, Literal
 
 import jax
@@ -8,6 +8,7 @@ import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
 
+from .._memory import DEFAULT_MAX_MEMORY_MB, validate_memory_mb
 from ..tools.features import (
     MoleculeLikeState,
     _spin_density_and_gradient,
@@ -72,7 +73,14 @@ class UKSConfig:
     direct_scf_tol: float = 0.0
     direct_scf_workers: int = 1
     grid_block_size: int = 0
-    grid_max_memory: float = 256.0
+    grid_max_memory: float | None = None
+    max_memory: float = field(default=DEFAULT_MAX_MEMORY_MB, kw_only=True)
+
+    def __post_init__(self):
+        object.__setattr__(self, "max_memory", validate_memory_mb(self.max_memory))
+        if self.grid_max_memory is not None:
+            object.__setattr__(self, "grid_max_memory",
+                               validate_memory_mb(self.grid_max_memory, name="grid_max_memory"))
 
 
 @dataclass(frozen=True)

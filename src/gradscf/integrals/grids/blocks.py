@@ -22,26 +22,42 @@ def grid_slice(array, start, size: int, *, axis: int = 0):
     )
 
 
-def ao_block_size(basis, *, deriv: int, max_memory: float, requested: int = 0) -> int:
-    """Plan an AO block in decimal MB, including primitive evaluation workspace.
+def ao_point_bytes(basis_or_provider, *, deriv: int) -> int:
+    """Estimate one grid point's AO/primitive workspace from static metadata."""
+    if deriv not in (0, 1, 2):
+        raise ValueError("AO workspace requires deriv in (0,1,2).")
+    exponents = getattr(basis_or_provider, "ao_exponents_padded", None)
+    if exponents is None:
+        exponents = basis_or_provider.exponents
+    nprimitive = int(exponents.shape[1])
+    components = (1, 4, 5)[deriv]
+    # Coordinates can promote a float32 model basis to float64 AO values.
+    itemsize = max(8, np.dtype(exponents.dtype).itemsize)
+    return max(1, basis_or_provider.nao * itemsize * (12 * nprimitive + 2 * components + 8))
 
-    This is a working-array estimate, not a process/device memory limit. Other
-    consumers (SCF matrices, response vectors, XC models) have separate storage.
+
+def ao_block_size(basis, *, deriv: int, max_memory: float, requested: int = 0,
+                  device=None) -> int:
+    """Plan an AO block within its allocated workspace in decimal MB.
+
+    The caller charges resident arrays against the total calculation budget
+    before supplying this workspace. Large blocks amortize AO/XC launches;
+    CPU blocks use a practical 4096-point cap; larger GPU blocks can amortize
+    launches. Explicit requested sizes may exceed either automatic cap.
     """
     if not np.isfinite(max_memory) or max_memory <= 0:
         raise ValueError("grid_max_memory must be a finite positive number of MB.")
     if requested < 0:
         raise ValueError("An AO block size must be nonnegative.")
-    nprimitive = int(basis.ao_exponents_padded.shape[1])
-    components = (1, 4, 5)[deriv]
-    # Coordinates can promote a float32 model basis to float64 AO values.
-    itemsize = max(8, np.dtype(basis.ao_exponents_padded.dtype).itemsize)
-    per_point = max(1, basis.nao * itemsize * (12 * nprimitive + 2 * components + 8))
+    per_point = ao_point_bytes(basis, deriv=deriv)
     available = int(max_memory * 1e6)
     if available < per_point:
         raise ValueError("grid_max_memory cannot hold one AO quadrature point's workspace.")
-    limit = max(1, min(4096, available // per_point))
-    return min(requested, limit) if requested else limit
+    limit = available // per_point
+    if limit >= 64:
+        limit = limit // 64 * 64
+    automatic_cap = 16384 if getattr(device, "platform", None) == "gpu" else 4096
+    return min(requested or automatic_cap, limit)
 
 
 @jax.tree_util.register_pytree_node_class
@@ -63,17 +79,19 @@ class AOGrid:
     nprims: tuple[int, ...]
     angulars: tuple[tuple[int, int, int], ...]
     block_size: int
+    adaptive: bool = False
 
     def tree_flatten(self):
         return ((self.coords, self.weights, self.centers, self.exponents, self.coefficients),
-                (self.nprims, self.angulars, self.block_size))
+                (self.nprims, self.angulars, self.block_size, self.adaptive))
 
     @classmethod
     def tree_unflatten(cls, metadata, children):
         return cls(*children, *metadata)
 
     @classmethod
-    def from_basis(cls, basis, coords, weights, *, block_size: int = 4096):
+    def from_basis(cls, basis, coords, weights, *, block_size: int = 4096,
+                   adaptive: bool = False):
         if int(block_size) <= 0:
             raise ValueError("block_size must be positive.")
         coords, weights = _as_device_array(coords), _as_device_array(weights)
@@ -82,7 +100,8 @@ class AOGrid:
         return cls(coords, weights, _as_device_array(basis.ao_centers),
                    _as_device_array(basis.ao_exponents_padded),
                    _as_device_array(basis.ao_coefficients_padded),
-                   tuple(basis.ao_nprims_tuple), tuple(basis.ao_angulars), int(block_size))
+                   tuple(basis.ao_nprims_tuple), tuple(basis.ao_angulars), int(block_size),
+                   bool(adaptive))
 
     @property
     def nao(self) -> int:

@@ -19,7 +19,7 @@ from gradscf.tools.spectra import HARTREE_TO_EV
 jax.config.update("jax_enable_x64", True)
 
 
-def run_case(geometry, xc, output_dir, *, nroots=20, max_memory=8000.,
+def run_case(geometry, xc, output_dir, *, nroots=20, max_memory=60000.,
              workers=16, init_density=None):
     """Converge direct RKS and full TDDFT; persist progress before long stages.
 
@@ -35,8 +35,8 @@ def run_case(geometry, xc, output_dir, *, nroots=20, max_memory=8000.,
                   grids_level=3, nroots=nroots, max_memory_mb=max_memory,
                   workers=workers, direct_tol=1e-12, integral_cache="none",
                   davidson_max_subspace=160, davidson_tol=1e-6,
-                  grid_block_size=0, grid_max_memory_mb=256.,
-                  response_grid_block_size=256)
+                  grid_block_size=0, grid_max_memory_mb=None,
+                  response_grid_block_size=8192)
 
     def save(phase, **values):
         status.update(values, phase=phase, elapsed_seconds=perf_counter()-started)
@@ -53,7 +53,7 @@ def run_case(geometry, xc, output_dir, *, nroots=20, max_memory=8000.,
         phase_started = perf_counter()
         mf = dft.RKS(mol, xc=xc, integral_backend="native", jk_backend="direct",
             execution_device="cpu", grids_level=3, direct_scf_tol=1e-12,
-            grid_block_size=0, grid_max_memory=256.,
+            grid_block_size=0, grid_max_memory=None, max_memory=max_memory,
             direct_scf_workers=workers, conv_tol=1e-9, conv_tol_density=1e-8,
             conv_tol_grad=1e-6, max_cycle=100, damp=.2, level_shift=.2,
             init_guess="hcore" if init_density is None else init_density).run()
@@ -100,7 +100,7 @@ def run_case(geometry, xc, output_dir, *, nroots=20, max_memory=8000.,
         raise
 
 
-def run_response(reference, xc, output_dir, *, nroots=20, max_memory=8000.,
+def run_response(reference, xc, output_dir, *, nroots=20, max_memory=60000.,
                  workers=16, progress=None):
     """Run full TDDFT on a converged reference, including an HDF5 restart.
 
@@ -112,7 +112,7 @@ def run_response(reference, xc, output_dir, *, nroots=20, max_memory=8000.,
     started = perf_counter()
     status = dict(xc=xc, nroots=nroots, max_memory_mb=max_memory,
                   davidson_max_subspace=160, davidson_tol=1e-6,
-                  response_grid_block_size=256,
+                  response_grid_block_size=8192,
                   grid_points=int(reference.grid.weights.size),
                   nao=int(reference.mo_coeff.shape[-2]), nocc=int(reference.nocc))
 
@@ -129,7 +129,7 @@ def run_response(reference, xc, output_dir, *, nroots=20, max_memory=8000.,
         eigensolver="davidson", davidson_tol=1e-6, davidson_max_iter=512,
         davidson_max_subspace=160, max_memory=max_memory,
         response_kernel_options=dict(two_electron_mode="direct", integral_cache="none",
-            direct_tol=1e-12, direct_workers=workers, grid_block_size=256))
+            direct_tol=1e-12, direct_workers=workers))
     result = td.kernel()
     energies = np.asarray(result.excitation_energies)
     save("td", td_seconds=perf_counter()-started, td_converged=bool(result.converged),

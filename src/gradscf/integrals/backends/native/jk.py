@@ -11,6 +11,51 @@ from jax.interpreters import ad, batching, mlir
 from ..._native import register_integrals
 
 
+def native_jk_workspace_bytes(provider, workers, cutoff):
+    """Bound one native call's batch-independent optimizer and shell arrays.
+
+    The pinned native ABI uses float64, int32 and 64-bit pointers. Return
+    None for dimension-only placeholders without a complete shell topology.
+    SCF and response share this estimate; no integrals are evaluated here.
+    """
+    topology = provider.plan.topology
+    names = ("angular_momenta", "primitive_counts", "contraction_counts",
+             "nuclear_charges", "cart")
+    if any(not hasattr(topology, name) for name in names):
+        return None
+    angular = topology.angular_momenta
+    primitive = topology.primitive_counts
+    contractions = topology.contraction_counts
+    shells = len(angular)
+    workers = min(workers, shells)
+    total_primitive = sum(primitive)
+    total_coefficients = sum(p*c for p, c in zip(primitive, contractions))
+    max_l, max_p = max(angular), max(primitive)
+    cart_dims = tuple((l+1)*(l+2)//2 for l in angular)
+    max_cart = max(f*c for f, c in zip(cart_dims, contractions))
+    max_output = max(c*(f if topology.cart else 2*l+1)
+                     for l, f, c in zip(angular, cart_dims, contractions))
+    nf, nc = max(cart_dims)**4, max_cart**4
+    g_size = (2*max_l+1)**3 * (max_l+1)**2
+    pair_scratch = (10*max_p**2 + 4*max(p*c for p, c in zip(primitive, contractions))
+                    + 8*max_p + 3*nf)
+    cache = max(6*g_size + nf + 3*nc + pair_scratch, nc + 4*nf)
+    # Retained vector capacities can exceed the current shell's logical size.
+    shapes = len(set(zip(angular, primitive, contractions)))
+    scratch = 16*(max_output**4 + cache) + 128*shapes**4
+    allowed_l = min(max_l, 6)
+    cumulative_cart = (allowed_l+1)*(allowed_l+2)*(allowed_l+3)//6
+    optimizer = (48 + 12*cumulative_cart**4 + 8*(max_l+1)*16**3
+                 + 24*shells + 12*total_primitive + 4*total_coefficients)
+    if total_primitive <= 2048:
+        optimizer += 40*total_primitive**2 + 8*shells**2
+    atoms = len(topology.nuclear_charges) + shells
+    tables = (4*(6*atoms + 8*shells + shells+1)
+              + 8*(20 + 3*atoms + total_primitive + total_coefficients))
+    bounds = 8*shells**2 if cutoff > 0 else 0
+    return optimizer + bounds + (workers+1)*tables + workers*scratch
+
+
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class NativeDirectBasis:

@@ -27,7 +27,11 @@ from .response import (
     gen_tda_vind,
     gen_tdhf_vind,
 )
-from .response_options import ResponseKernelOptions, normalize_response_kernel_options, plan_response_memory
+from .response_options import (
+    ResponseKernelOptions, normalize_response_kernel_options, plan_response_memory,
+    _response_memory_inputs,
+)
+from .._memory import DEFAULT_MAX_MEMORY_MB
 from .tda import solve_tda_from_operator
 from .types import TDDFTResult, TDAResult
 
@@ -148,7 +152,9 @@ class RestrictedCasidaTDDFT:
         gaps = _restricted_delta_eps(self.molecule, self.occupation_tolerance)
         dim = int(gaps.size)
         roots = dim if nstates is None else min(int(nstates), dim)
-        options = normalize_response_kernel_options(self.response_kernel_options)
+        options = normalize_response_kernel_options(
+            self.response_kernel_options,
+            default_max_memory=getattr(self.molecule, "max_memory", DEFAULT_MAX_MEMORY_MB))
         from ._semilocal_response import SemilocalResponseFunctional
         resolved = _resolve_xc_functional(self.molecule, self.xc_functional, self.xc_params)
         with_grid = resolved is not None and not (
@@ -162,7 +168,8 @@ class RestrictedCasidaTDDFT:
                                                     else options.integral_cache),
                                     direct_workers=options.direct_workers,
                                     direct_tol=options.direct_tol,
-                                    grid_block_size=options.grid_block_size if with_grid else 0)
+                                    grid_block_size=options.grid_block_size if with_grid else 0,
+                                    **_response_memory_inputs(self.molecule, resolved))
 
     def _posthoc_correction(
         self,
