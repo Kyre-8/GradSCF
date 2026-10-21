@@ -1344,3 +1344,34 @@ requires its own explicit decision and numerical validation.
 - Completion review closes only this shared utility move. The next native
   multiple-request transformation and all-consumer ownership remain separate
   WF-03b2b/02b increments, with their own numerical and efficiency gates.
+
+
+### 2026-10-21 — WF-23a: terminal tensor targets, narrow checkpoint
+
+- Reuse the existing direct-path rank bound for canonical tensor actions.
+  W Psi_k contributes at lambda^(k+1); energy through p needs only bra degrees
+  a<=p-k-1 and hence output ranks <=2(p-k-1). Skip those contraction targets
+  before allocation. All required waves and the packed coordinate layout stay
+  intact; no integral symmetrization, tolerance or perturbation partition changes.
+- Thirteen focused checks passed, exit 0, 104.87 s pytest / 107.75 s process,
+  RSS 2,740,276 KiB: action/state JVP/VJP/HVP, structural skips, six-orbital
+  MP6 sextuples, spin/frozen spaces and extra wavefunction orders. Three old
+  moving-gap/integral response and invalid-input checks passed separately,
+  exit 0, 505.01 s pytest / 530.71 s process. The combined checkpoint also
+  exercises sextuple wave coefficients with the current shared solvers.
+- Seed2325 six-orbital/three-occupied single action, matched CPU64-71/f64:
+  old/new warm 25.520903/4.703314 ms; compiled scratch 142,740,872/12,411,144
+  bytes; requested outputs agree exactly and discarded targets are zero.
+  This is not complete MP timing or a whole-process memory claim.
+- Runtime limits remain visible: the original tensor/series whole groups
+  exceeded 600 s, and a forward-only eager shard exceeded 300 s. A real
+  six-orbital high-wave test also exceeded 600 s in eager execution; fresh
+  whole-recurrence JIT wrappers then passed the identical two cases in 31.39 s.
+  The old forward comparison is being compiled as a complete recurrence,
+  retaining every E2...E12 coefficient and wave assertion. No tolerance or
+  test case was removed. Broader/noncanonical groups are not marked passed.
+- Evidence: local `wf23-review-evidence/`; additional completed response shard
+  and running forward records in remote `wf23-green1/4`. Independent math,
+  raw-chart and focused-evidence review passed. Final source hashes begin
+  `19911d5a`/`85ad6cb7`. Completion review leaves WF-23a in progress until
+  the remaining per-order forward gate finishes; this is a local checkpoint.

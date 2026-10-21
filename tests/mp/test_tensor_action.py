@@ -152,8 +152,12 @@ def test_tensor_mp_uses_same_lifting_and_matches_series(order, unrestricted):
     h = canonical if unrestricted else canonical[0]
     old_cfg = mp.MPConfig(order=order, algorithm="series", with_coefficients=True)
     new_cfg = mp.MPConfig(order=order, algorithm="tensor", with_coefficients=True)
-    old = mp.run_mp(h,g,nocc=no,nuclear_repulsion=.7,config=old_cfg)
-    new = mp.run_mp(h,g,nocc=no,nuclear_repulsion=.7,config=new_cfg)
+    # Compile each complete recurrence rather than thousands of eager
+    # fragments; retain every order and wave coefficient in the comparison.
+    def evaluate(config):
+        return jax.jit(lambda hh, gg: mp.run_mp(hh, gg, nocc=no,
+            nuclear_repulsion=.7, config=config))(h, g)
+    old, new = evaluate(old_cfg), evaluate(new_cfg)
     assert old.valid and new.valid
     np.testing.assert_allclose(new.corrections, old.corrections, atol=2e-11, rtol=0.)
     np.testing.assert_allclose(new.total_energy, old.total_energy, atol=2e-11, rtol=0.)

@@ -232,13 +232,22 @@ class TensorAction:
     def __call__(self, vector):
         return self.apply(vector)
 
-    def apply(self, vector, *, max_input_rank=None):
+    def apply(self, vector, *, max_input_rank=None, max_output_rank=None):
+        """Apply W with exact static input/output excitation-rank projections.
+
+        Discarded output blocks are skipped before contraction, not zeroed
+        after a full dense antisymmetric tensor has already been produced.
+        The packed vector's full layout is preserved for Taylor recursion.
+        """
         tensors = self.space.expand(vector, max_rank=max_input_rank)
+        if max_input_rank is not None:
+            max_output_rank = (max_input_rank+2 if max_output_rank is None
+                               else min(max_output_rank, max_input_rank+2))
         result = [jnp.zeros(b.full_shape, vector.dtype)
-                  if max_input_rank is None or sum(b.excitation) <= max_input_rank+2 else None
+                  if max_output_rank is None or sum(b.excitation) <= max_output_rank else None
                   for b in self.space.blocks]
         for source, target, kernel, axes, order, sign, shuffles in self.plans:
-            if tensors[source] is None:
+            if tensors[source] is None or result[target] is None:
                 continue
             value = jnp.tensordot(self.kernels[kernel], tensors[source],
                                  axes=(tuple(range(self.kernels[kernel].ndim-len(axes), self.kernels[kernel].ndim)), axes))

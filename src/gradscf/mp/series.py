@@ -74,6 +74,18 @@ def _spectral_focks(focks, nocc, frozen):
     return tuple(result)
 
 
+def _action_ranks(config, maximum, degree):
+    """Exact ranks needed by the two-body recurrence and terminal energy bra."""
+    k = config.order // 2 if config.wavefunction_order is None else config.wavefunction_order
+    input_rank = min(maximum, 2*degree)
+    output_rank = min(maximum, 2*degree+2)
+    if degree == k:
+        # At energy order p, this W Psi_k node pairs only with a bra of
+        # degree at most p-k-1, hence excitation rank at most 2(p-k-1).
+        output_rank = min(output_rank, max(0, 2*(config.order-k-1)))
+    return input_rank, output_rank
+
+
 def _direct_actions(h1, eri, focks, reference_energy, nocc, frozen, space, config):
     """One physical direct operator, optionally transported to the tensor chart."""
     tensor = config.algorithm == "tensor"
@@ -115,16 +127,10 @@ def _direct_actions(h1, eri, focks, reference_energy, nocc, frozen, space, confi
         minimum = jnp.min(jnp.abs(gaps[1:]), initial=jnp.inf)
     ranks = jnp.asarray(space.ranks)
     maximum = max(space.ranks)
-    k = config.order // 2 if config.wavefunction_order is None else config.wavefunction_order
     actions = {}
 
     def fluctuation(c, degree):
-        input_rank = min(maximum, 2*degree)
-        output_rank = min(maximum, 2*degree+2)
-        if degree == k:
-            # This last node is used only by the Rayleigh quotient. At order p
-            # its bra has degree at most p-k-1 and hence rank at most 2(p-k-1).
-            output_rank = min(output_rank, max(0, 2*(config.order-k-1)))
+        input_rank, output_rank = _action_ranks(config, maximum, degree)
         key = (input_rank, output_rank)
         if key not in actions:
             build = (hamiltonian.build_fluctuation if config.orbital_basis == "noncanonical"
@@ -154,7 +160,10 @@ def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config):
         from ._tensor import build_tensor_action
         gaps = space.gaps(focks)
         action = build_tensor_action(gs if unrestricted else gs[0], focks, space)
-        fluctuation = lambda c, degree: action.apply(c, max_input_rank=2*degree)
+        maximum = max(sum(block.excitation) for block in space.blocks)
+        def fluctuation(c, degree):
+            input_rank, output_rank = _action_ranks(config, maximum, degree)
+            return action.apply(c, max_input_rank=input_rank, max_output_rank=output_rank)
         alpha_rank, beta_rank = space.spin_ranks()
         amplitudes = space.amplitudes
         fock_action = lambda c: gaps*c
