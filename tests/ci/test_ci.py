@@ -154,7 +154,7 @@ def test_nonconvergence_and_invalid_requests(h4):
 
 
 def test_mo_transform_layouts_and_derivative(h4):
-    from gradscf.integrals.molecular.ao2mo import transform_integrals
+    from gradscf.ao2mo import transform_integrals
 
     mf, h, g, _, _ = h4
     ao = mf.mol.intor("int2e")
@@ -239,7 +239,7 @@ def test_lih_cisd_and_frozen_virtuals(frozen):
 
 def test_multiroot_davidson_and_orbital_rotation(h4):
     from gradscf.ci import CIConfig, make_ci_space, solve_ci
-    from gradscf.integrals.molecular.ao2mo import transform_integrals
+    from gradscf.ao2mo import transform_integrals
 
     _, h, g, _, _ = h4
     space = make_ci_space(4, 2)

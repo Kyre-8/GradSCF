@@ -16,7 +16,7 @@ import numpy as np
 jax.config.update("jax_enable_x64", True)
 
 from gradscf import cc, gto, scf
-from gradscf.integrals.molecular.ao2mo import transform_integrals
+from gradscf.ao2mo import transform_integrals
 from gradscf.solvers import LinearSolverConfig
 from gradscf_tools.molecular_response import MolecularEnergy
 

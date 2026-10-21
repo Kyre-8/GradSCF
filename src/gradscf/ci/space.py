@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from itertools import combinations
 from math import comb
 from numbers import Integral
-from gradscf.integrals.molecular.ao2mo import frozen_indices, unrestricted_frozen_indices
+from gradscf.ao2mo import frozen_indices, unrestricted_frozen_indices
 
 
 @dataclass(frozen=True)

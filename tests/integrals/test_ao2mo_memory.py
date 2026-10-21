@@ -14,7 +14,8 @@ import numpy as np
 import pytest
 
 from gradscf._memory import DEFAULT_MAX_MEMORY_MB
-from gradscf.integrals.molecular import ao2mo
+from gradscf import ao2mo
+from gradscf.ao2mo import blocks
 
 
 def _problem(dtype=np.float64, columns=(2, 3, 2, 1)):
@@ -149,7 +150,7 @@ def test_block_memory_limit_counts_live_inputs_and_output(representation, monkey
     def forbidden(*args, **kwargs):
         pytest.fail("The memory budget must be checked before AO->MO contraction")
 
-    monkeypatch.setattr(ao2mo.jnp, "einsum", forbidden)
+    monkeypatch.setattr(blocks.jnp, "einsum", forbidden)
     with pytest.raises(ValueError, match="(?i)(memory|budget|resident|minimum)"):
         ao2mo.transform_eri_block(coefficients, max_memory=max_memory, **{keyword: source})
 
@@ -161,7 +162,7 @@ def test_block_memory_limit_rejects_invalid_values(max_memory, monkeypatch):
     def forbidden(*args, **kwargs):
         pytest.fail("An invalid budget must fail before AO->MO contraction")
 
-    monkeypatch.setattr(ao2mo.jnp, "einsum", forbidden)
+    monkeypatch.setattr(blocks.jnp, "einsum", forbidden)
     with pytest.raises(ValueError, match="max_memory"):
         ao2mo.transform_eri_block(coefficients, df_factors=factors, max_memory=max_memory)
 

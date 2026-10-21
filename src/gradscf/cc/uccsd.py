@@ -5,7 +5,7 @@ are accepted without canonicalization; no spin-adapted ROCCSD claim is made.
 """
 from typing import NamedTuple
 import jax.numpy as jnp
-from gradscf.integrals.molecular.ao2mo import spin_orbital_integrals, unrestricted_frozen_indices
+from gradscf.ao2mo import spin_orbital_integrals, unrestricted_frozen_indices
 from ..solvers.nonlinear.iterate import NonlinearConfig, solve_nonlinear
 from .types import CCConfig, CCResult
 from .ground import linear_config, METHODS

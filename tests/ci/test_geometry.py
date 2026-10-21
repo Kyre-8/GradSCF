@@ -15,7 +15,7 @@ def check_nitrogen_cisd_geometry(*, basis="sto-3g", conv_tol=1e-11,
     pytest.importorskip("pyscf")
     from pyscf import gto as pgto, scf as pscf, ci as pci
     from gradscf import gto, scf, ci, integrals
-    from gradscf.integrals.molecular.ao2mo import transform_integrals
+    from gradscf.ao2mo import transform_integrals
     from gradscf_tools.molecular_response import MolecularEnergy
 
     coordinates = np.array([[0., 0., -1.04], [0., 0., 1.04]])

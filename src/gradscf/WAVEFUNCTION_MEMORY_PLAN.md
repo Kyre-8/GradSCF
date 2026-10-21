@@ -286,6 +286,8 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
       adapters and requested blocks. Joint resident-state ownership is still open.
   - [ ] **WF-02c:** complete the native block/capability contract with WF-03/04,
     including target-device capacity when JIT tracing hides concrete devices.
+  - [x] **WF-02d:** establish the dedicated AO2MO domain package and migrate
+    existing callers without redundant forwarding files.
 - [ ] **WF-03 — Exact native partial AO2MO** (`in_progress`). Generate requested MO tiles without
   full AO-pair or full MO ERI. Reuse shell traversal and half transformations.
   Acceptance: asymmetric coefficient sets, permutation symmetry, packed/dense
@@ -300,6 +302,11 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
       shared coordinate products through order two; compact differentiated loops.
     - [ ] **WF-03b2:** shared AO-to-MO half transformations, coefficient response,
       caller integration and measured conversion workspace/time.
+
+      - [x] **WF-03b2a:** exact compact half-transform kernel and small-system
+        forward/coefficient/coordinate response on CPU and GPU7.
+      - [ ] **WF-03b2b:** consumer integration, multiple-request reuse and
+        measured conversion/scaling workspace and timing.
 - [ ] **WF-04 — Block integral JVP/VJP and HVP** (`in_progress`). Add coefficient/coordinate
   derivatives and contracted reverse accumulation. Acceptance: tangent/cotangent
   duality, dense AD, coordinate finite difference and HVP; structural/runtime
@@ -793,3 +800,47 @@ requires its own explicit decision and numerical validation.
   are WF-03b2/04 and total caller/AD ownership remains WF-29. The user-directed
   AO2MO package migration and five tiny native transform tests have an initial
   combined GREEN, but await their independent reviews and conversion measurements.
+
+### 2026-10-21 — WF-02d / WF-03b2a: verified dedicated AO2MO package
+
+- Added `gradscf.ao2mo` alongside CC/CI, with focused `blocks`, `native`,
+  `reference`, `spin`, and `response` implementations and ten public exports.
+  Existing source/examples/tests use the canonical package. Removed the former
+  molecular file; no compatibility forwarding file or extra backend engine was
+  retained. Existing integral-namespace function aliases retain their behavior.
+- Native block requests consume dynamic shell slabs. Two compact loops share
+  the partial `PQrS` transformation, performing the final r-to-MO contraction
+  once per r tile. Real ERI pair symmetries choose smaller outer coefficient
+  spaces; tail gathers preserve AO offsets. Entire contributions are recomputed
+  during AD. This is not one complete shell traversal per MO pair.
+- Specification review found projection allocation before the budget check and
+  a complex-transform cast that discarded imaginary parts. Both were reproduced
+  remotely (two RED failures), then corrected using static shape/dtype metadata
+  and an explicit real-transform guard. Quality review found omitted matmul
+  input-promotion buffers; its expansion-projection counterexample also failed
+  before the fix. The planner now counts these buffers before allocation, and
+  execution shares promoted transforms by dtype without changing matmul precision.
+- Final native source SHA256:
+  `1de5fc4294430bb31f58ec10063c1364186c6af0794d1c637562b0806cb26fce`.
+  Final CPU: 124 cases passed, exit 0, 22.17 s pytest / 24.12 s process,
+  1,651,028 KiB peak RSS (namespace, twelve native AO2MO cases, existing array/DF
+  blocks and post-HF budget propagation). One GPU7 case passed eager energy,
+  JIT coefficient/coordinate gradient and mixed HVP against the CPU dense oracle,
+  exit 0, 7.25 / 8.37 s, 2,096,316 KiB host RSS. GPU6 was never exposed.
+- Final package validation uses the staged package-only FCI import change,
+  excluding the separately developed FCI algorithm. The frozen science-file
+  overlay is `ao2mo-final-overlay.json`; remote evidence is
+  `wavefunction-memory-20261021/ao2mo-final/`. Forty-one existing MP/CI/CC caller
+  cases also passed after the import migration (146.94 / 153.80 s; before the
+  final promotion-only fix). No local numerical test or build was run.
+- Independent specification and quality re-reviews passed. Native cases cover
+  unequal coefficient spaces, Cartesian/spherical d shells, projected float32/
+  float64 inputs, empty MO output, allocation guards, geometry finite differences
+  at two steps and first/second response. Test-process peaks are not measured
+  end-to-end correlation memory savings.
+- Completion review: WF-02d and the kernel-only WF-03b2a are verified. Outer
+  WF-02/03/04 remain open for caller ownership, conversion measurements and
+  broader derivative/device gates. Existing MP/CC/CI adapters can still request
+  full AO-pair data; WF-05/06 now connects direct SCF and selected MP2 blocks,
+  reusing live converged Focks rather than reconstructing them. The overall
+  engineering plan remains unchanged beyond the requested package boundary.

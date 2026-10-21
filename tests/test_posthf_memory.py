@@ -12,7 +12,8 @@ import pytest
 
 from gradscf import cc, ci, gto, mp, scf
 from gradscf._memory import DEFAULT_MAX_MEMORY_MB
-from gradscf.integrals.molecular import ao2mo
+from gradscf import ao2mo
+from gradscf.ao2mo import reference as ao2mo_reference
 from gradscf.scf.reference import RestrictedReference, UnrestrictedReference
 
 
@@ -72,7 +73,9 @@ def test_facade_rejects_invalid_budget_without_preparing_integrals(name, budget,
     def forbidden(*args, **kwargs):
         pytest.fail("An invalid facade budget reached AO->MO allocation")
 
-    monkeypatch.setattr(ao2mo, "transform_eri_block", forbidden)
+    monkeypatch.setattr(ao2mo_reference, "transform_eri_block", forbidden)
+    monkeypatch.setattr(importlib.import_module("gradscf.mp.integrals"),
+                        "transform_eri_block", forbidden)
     with pytest.raises(ValueError, match="max_memory"):
         _method(name, source, max_memory=budget)
 
@@ -89,7 +92,7 @@ def test_full_transform_wrappers_forward_budget_to_each_block(
         seen.append(max_memory)
         return jnp.zeros(tuple(x.shape[1] for x in coefficients), dtype=c.dtype)
 
-    monkeypatch.setattr(ao2mo, "transform_eri_block", block)
+    monkeypatch.setattr(ao2mo_reference, "transform_eri_block", block)
     if unrestricted:
         ao2mo.transform_unrestricted_integrals(
             h, (c, c), eri=jnp.zeros((3,) * 4), **memory_kwargs)

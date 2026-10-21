@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from gradscf import cc, mp
-from gradscf.integrals.molecular.ao2mo import transform_integrals, transform_unrestricted_integrals
+from gradscf.ao2mo import transform_integrals, transform_unrestricted_integrals
 from gradscf.solvers import EigenResponseConfig, EigenSolverConfig, solve_hermitian
 from .molecular_response import MolecularEnergy
 

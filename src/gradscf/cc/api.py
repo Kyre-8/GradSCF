@@ -4,7 +4,7 @@ from dataclasses import fields
 from .._memory import resolve_memory_mb
 from ..scf.reference import (reference_from_source, UnrestrictedReference,
                              unrestricted_reference_from_source, is_unrestricted_source)
-from gradscf.integrals.molecular.ao2mo import frozen_indices, unrestricted_frozen_indices
+from gradscf.ao2mo import frozen_indices, unrestricted_frozen_indices
 from ..scf.reference import reference_state_signature
 from .types import CCConfig
 from .ground import run_cc

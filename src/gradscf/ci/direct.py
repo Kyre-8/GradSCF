@@ -16,7 +16,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from gradscf.integrals.molecular.ao2mo import validate_integrals, validate_unrestricted_integrals
+from gradscf.ao2mo import validate_integrals, validate_unrestricted_integrals
 from ..fci.cistring import excite
 from ..solvers import LinearOperator
 from .space import CISpace, UCISpace

@@ -10,7 +10,7 @@ from .types import CCConfig
 from .uccsd import prepare_ucc_integrals
 from .spin_amplitudes import SpinAmplitudeSpace
 from . import _spin_equations
-from gradscf.integrals.molecular.ao2mo import frozen_indices, unrestricted_frozen_indices
+from gradscf.ao2mo import frozen_indices, unrestricted_frozen_indices
 from ._spin_density import active_density_parts
 
 

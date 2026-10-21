@@ -7,7 +7,7 @@ import pytest
 
 @pytest.mark.parametrize("representation", ["dense", "packed", "df"])
 def test_selected_eri_block_and_derivatives(representation):
-    from gradscf.integrals.molecular.ao2mo import transform_eri_block
+    from gradscf.ao2mo import transform_eri_block
     rng = np.random.default_rng(9)
     b = rng.normal(size=(4, 5, 5))
     b = jnp.asarray(b + b.transpose(0, 2, 1))
@@ -29,7 +29,7 @@ def test_selected_eri_block_and_derivatives(representation):
 @pytest.mark.parametrize("with_t2", [False, True])
 def test_rhf_facade_keeps_mp2_transformation_in_selected_blocks(df, with_t2, monkeypatch):
     from gradscf import gto, scf, mp
-    from gradscf.integrals.molecular import ao2mo as mo
+    from gradscf.ao2mo import reference as mo
     from gradscf.scf.reference import reference_from_source
     mol = gto.M(atom="O 0 0 0; H 0 .75 .58; H 0 -.75 .58", basis="sto-3g")
     mf = scf.RHF(mol, conv_tol=1e-12, conv_tol_grad=1e-10)
@@ -57,7 +57,7 @@ def test_rhf_facade_keeps_mp2_transformation_in_selected_blocks(df, with_t2, mon
 @pytest.mark.parametrize("df", [False, True])
 def test_uhf_facade_keeps_spin_blocks_without_full_mo_eri(df, monkeypatch):
     from gradscf import gto, scf, mp
-    from gradscf.integrals.molecular import ao2mo as mo
+    from gradscf.ao2mo import reference as mo
     from gradscf.scf.reference import unrestricted_reference_from_source
     mol = gto.M(atom="H 0 0 0; H 0 0 .85; H 0 0 1.9", basis="sto-3g", spin=1)
     mf = scf.UHF(mol, conv_tol=1e-13, conv_tol_grad=1e-11, max_cycle=150)

@@ -20,7 +20,7 @@ def oh_rohf():
 def _pyscf_semicanonical(mf, frozen):
     """Diagonalize separate alpha/beta active oo and vv Fock blocks in NumPy."""
     from pyscf import cc, scf
-    from gradscf.integrals.molecular.ao2mo import unrestricted_frozen_indices
+    from gradscf.ao2mo import unrestricted_frozen_indices
     reference = scf.addons.convert_to_uhf(mf)
     coeff = np.asarray(reference.mo_coeff).copy()
     fock = reference.get_fock()
@@ -121,7 +121,7 @@ def test_semicanonical_orbital_rotation_invariance(oh_rohf):
 @pytest.mark.parametrize("algorithm", ["auto", "streamed"])
 def test_semicanonical_cc_response_at_exact_orbital_degeneracy(algorithm):
     from gradscf import cc
-    from gradscf.integrals.molecular.ao2mo import spin_orbital_integrals
+    from gradscf.ao2mo import spin_orbital_integrals
     rng = np.random.default_rng(52)
     b = rng.normal(size=(5, 4, 4))*.06
     b += b.transpose(0, 2, 1)

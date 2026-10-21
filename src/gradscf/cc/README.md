@@ -85,7 +85,7 @@ energy_and_gradient = jax.jit(jax.value_and_grad(total_energy, argnums=(0, 1)))
 
 MO integrals use chemists' notation `(pq|rs)` and an orthonormal orbital basis;
 occupied orbitals must precede virtual orbitals. Orbital counts, frozen indices
-and configuration are static. `integrals.molecular.ao2mo.transform_integrals` handles full
+and configuration are static. `ao2mo.transform_integrals` handles full
 AO ERIs, s4 pair matrices and density-fitting factors. This implementation
 materializes full MO integrals even for DF inputs; it is not a low-memory DF-CC
 implementation. The reference facade adapter is eager; use the functional API

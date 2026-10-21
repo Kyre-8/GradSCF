@@ -19,7 +19,7 @@ import numpy as np
 jax.config.update("jax_enable_x64", True)
 
 from gradscf import fci, gto, integrals, scf
-from gradscf.integrals.molecular.ao2mo import transform_integrals
+from gradscf.ao2mo import transform_integrals
 from gradscf.solvers import EigenResponseConfig, EigenSolverConfig, LinearSolverConfig
 from gradscf_tools.molecular_ep import NativeRHF
 

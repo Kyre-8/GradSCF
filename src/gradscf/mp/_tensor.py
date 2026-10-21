@@ -13,7 +13,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from .integrals import _active_orbitals
-from ..integrals.molecular.ao2mo import frozen_indices, unrestricted_frozen_indices
+from gradscf.ao2mo import frozen_indices, unrestricted_frozen_indices
 
 
 def _parity(order):

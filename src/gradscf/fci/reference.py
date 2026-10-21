@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from numbers import Integral
 import numpy as np
 import jax.numpy as jnp
-from gradscf.integrals.molecular.ao2mo import validate_integrals, transform_integrals
+from gradscf.ao2mo import validate_integrals, transform_integrals
 from ..scf.reference import _array_signature, reference_state_signature
 from .cistring import unpack_nelec
 

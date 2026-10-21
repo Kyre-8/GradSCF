@@ -17,7 +17,6 @@ JAX parameter arrays; they must not cache stale exponents or coefficients.
 | `molecular/jk.py` | DF, packed and dense-reference density contractions; legacy direct dispatch |
 | `molecular/density_fitting.py` | Native auxiliary 2c/3c plans, fixed metric caches, whitening and projections |
 | `molecular/factorization.py` | Spectral ERI factorization, distinct from auxiliary-basis DF |
-| `molecular/ao2mo.py` | Selected AO-to-MO blocks, response slices and post-HF reference transformations |
 | `grids/`, `periodic/` | Molecular grids/AO evaluation and periodic FFT/Coulomb/pseudopotential operations |
 | `backends/native/packing.py` | Native table construction, normalization binding and storage checks |
 | `backends/native/ffi.py` | Float64 CPU FFI value calls and shape/dtype validation |
@@ -25,6 +24,12 @@ JAX parameter arrays; they must not cache stale exponents or coefficients.
 | `backends/native/autodiff/` | Geometry, coefficient and exponent derivative products; shared batching |
 | `_native/csrc/` | C++ shell drivers, integral products and immediate tangent/cotangent reductions |
 | `_native/vendor/` | Pinned upstream sources, licenses and checksums; unchanged by this reorganization |
+
+AO-to-MO transformations belong to the sibling `gradscf.ao2mo` package:
+`blocks.py` handles selected dense, packed and DF blocks, `native.py` contracts
+native shell slabs, `reference.py` builds complete small-system MO tensors,
+and `response.py` supplies occupied/virtual response slices. Integral evaluation
+and its derivative primitives remain in `gradscf.integrals`.
 
 SCF configuration, XC/grid input assembly and RKS/UKS input payloads are owned
 by `gradscf.scf.inputs`. Its grid cache lives with the grid implementation;

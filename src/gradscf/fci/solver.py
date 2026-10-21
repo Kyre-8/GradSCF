@@ -2,7 +2,7 @@
 from typing import NamedTuple
 import jax
 import jax.numpy as jnp
-from gradscf.integrals.molecular.ao2mo import validate_integrals
+from gradscf.ao2mo import validate_integrals
 from ..solvers import EigenSolverConfig, EigenResponseConfig, LinearOperator, solve_hermitian
 from ..solvers.diagnostics import require_converged_derivative
 from .hamiltonian import DEFAULT_WORKSPACE, build_hamiltonian, coefficient_array

@@ -6,7 +6,7 @@ No determinant-pair connection table or dense FCI Hamiltonian is constructed.
 from numbers import Integral
 import jax
 import jax.numpy as jnp
-from gradscf.integrals.molecular.ao2mo import validate_integrals
+from gradscf.ao2mo import validate_integrals
 from ..solvers import LinearOperator
 from .cistring import FCISpace, _link_maps
 

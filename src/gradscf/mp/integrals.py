@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 
 from gradscf._memory import resolve_memory_mb
-from gradscf.integrals.molecular.ao2mo import validate_integrals, validate_unrestricted_integrals, frozen_indices, unrestricted_frozen_indices, transform_eri_block
+from gradscf.ao2mo import validate_integrals, validate_unrestricted_integrals, frozen_indices, unrestricted_frozen_indices, transform_eri_block
 
 
 class MPIntegrals(NamedTuple):

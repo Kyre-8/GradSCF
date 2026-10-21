@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 from gradscf import ci, gto, scf
-from gradscf.integrals.molecular.ao2mo import transform_integrals
+from gradscf.ao2mo import transform_integrals
 from gradscf.solvers import EigenResponseConfig, LinearSolverConfig
 from gradscf_tools.excited import CISGeometry
 
