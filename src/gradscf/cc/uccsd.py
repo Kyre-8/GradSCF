@@ -76,6 +76,19 @@ def run_ucc(h1, eri, *, nocc, nuclear_repulsion=0., frozen=None, config=None, t1
         raise NotImplementedError("Unrestricted models currently support CCSD and CCD")
     ints, occupied, virtual = prepare_ucc_integrals(h1, eri, nocc=nocc, frozen=frozen,
                                                    nuclear_repulsion=nuclear_repulsion)
+    return run_ucc_from_integrals(ints, occupied, virtual, config=cfg, t1=t1, t2=t2)
+
+
+def run_ucc_from_integrals(ints, occupied, virtual, *, config=None, t1=None, t2=None):
+    """Reuse the UCC equations/implicit solver with an already prepared frame.
+
+    ``occupied`` and ``virtual`` are the active alpha/beta counts returned by
+    either integral preparer. The caller owns all reference/frozen preparation.
+    Dense spin blocks, amplitudes and nonlinear/adjoint storage are unchanged.
+    """
+    cfg = CCConfig() if config is None else config
+    if cfg.method not in {"ccsd", "ccd"}:
+        raise NotImplementedError("Unrestricted models currently support CCSD and CCD")
     space = SpinAmplitudeSpace(occupied, virtual, cfg.method)
     no = sum(occupied)
     eps = jnp.diag(ints.fock)

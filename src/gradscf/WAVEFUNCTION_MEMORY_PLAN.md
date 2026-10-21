@@ -417,7 +417,9 @@ section 8 are provenance, not additional active TODO levels.
 
   - [x] **WF-12a:** assemble the six existing UCC blocks directly from spatial
     spin sectors, eliminating full total/active spin ERIs.
-  - [ ] **WF-12b:** AO-source selected blocks, byte ownership and scale evidence.
+  - [ ] **WF-12b** (`in_progress`): AO-source selected blocks, byte ownership
+    and scale evidence. The pure producer/shared solve bridge is verified;
+    spin-vvvv/residual adoption and shared method scaling remain with WF-13/32.
 - [ ] **WF-13 — UCC residual/amplitude workspace.** Reduce repeated dense
   spin-amplitude expansion using block consumers. Acceptance: UCCD/UCCSD forward,
   adjoints and geometry HVP, restricted-limit comparison; packed-coordinate
@@ -1861,3 +1863,30 @@ requires its own explicit decision and numerical validation.
 - All four WF-09 children now meet their restricted-preparation scope. Shared
   total solver/AD ownership, unknown external JIT target capacity, unrestricted
   facade migration and large-method scaling retain their existing separate gates.
+
+### 2026-10-22 — WF-12b: pure UHF source preparation accepted
+
+- A small `cc.unrestricted_integrals` module maps four C subspaces through one
+  shared AO2MO request batch into the existing six SpinCCIntegrals blocks.
+  Beta-alpha terms retain the raw gab pair-transpose chart, including arbitrary
+  nonsymmetric AO/Fock inputs. Inputs, requests, six final blocks and assembly
+  buffers share the original MB reservation. Dense spin-vvvv remains explicit.
+- `run_ucc_from_integrals` reuses the original packed-amplitude solve. The raw
+  preparer and the full space/guess/solve/result body have matching AST against
+  the committed baseline. No new nonlinear/linear solver or facade path.
+- Thirty-two new cases and thirty-two old raw/PySCF/implicit/invalid/empty cases
+  pass, exit0/no skip/timeout. Native bare/projected, unequal spins/frozen spaces,
+  dense/s4/DF, float32/64 and joint C/F/E/source/geometry JVP/VJP/HVP are covered.
+  Root and independent review checked charts, axis order, dtype and byte owners;
+  all forty-five evidence files and final source hashes match (`94051cb5`/
+  `0559d7ef`). CPU88-95 only, no local numeric/GPU/build/install.
+- Matched 4 AO/8 MO, DF6 algebraic prep, f64, seed6514, fifteen warm samples:
+  raw/selected 0.16363/0.13937 ms, XLA scratch 260,417/57,153 bytes, same
+  236,888-byte output and max difference 1.39e-17. Compile 0.493/0.712 s and
+  first execution 3.56/15.36 ms worsen; end-process RSS 1,230,444/1,242,380 KiB
+  does not decrease. Both include the same oracle/setup/compiler. This is not
+  physical molecular scaling or a total-UCC memory/AD claim.
+- Evidence: `ucc-orbitals-evidence.tar.gz` SHA `f4906e1f...b07e`, summary and
+  static proof alongside it. The fixed producer slice is accepted; no more
+  experiment branches are attached. The existing WF-13/14/15/29/32 gates retain
+  residual/consumer adoption, amplitudes, adjoints and combined measured scaling.
