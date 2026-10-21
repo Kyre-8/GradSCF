@@ -9,10 +9,16 @@ import jax.numpy as jnp
 from gradscf.ao2mo import validate_integrals
 from .._memory import DEFAULT_MAX_MEMORY_MB, array_storage_bytes, workspace_bytes
 from ..solvers import LinearOperator
+from ..solvers.memory import validate_reserved_bytes
 from .cistring import FCISpace, _link_maps
 
 
 DEFAULT_WORKSPACE = 8_000_000
+
+
+def _link_storage_bytes(space, dtype):
+    """Static source/sign/occupation storage shared by action/solver planning."""
+    return sum(space.shape) * (space.norb**2 * (4 + jnp.dtype(dtype).itemsize + 1) + space.norb)
 
 
 def _action_tiles(space, dtype, nrhs, max_workspace_elements, max_memory, *,
@@ -32,7 +38,7 @@ def _action_tiles(space, dtype, nrhs, max_workspace_elements, max_memory, *,
     pairs = space.norb**2
     itemsize = jnp.dtype(dtype).itemsize
     # Source int32, numerical signs, cached int8 signs and occupations.
-    maps = sum(space.shape) * (pairs * (4 + itemsize + 1) + space.norb)
+    maps = _link_storage_bytes(space, dtype)
     outputs = 3 * space.size * nrhs * itemsize
     device = next((getattr(a, "device", None) for a in arrays
                    if getattr(a, "device", None) is not None), None)
@@ -131,10 +137,11 @@ def contract_2e(eri, coefficients, space, *, max_workspace_elements=DEFAULT_WORK
 
 
 def _contract_ee(g, c, space, *, max_workspace_elements=DEFAULT_WORKSPACE,
-                 max_memory=DEFAULT_MAX_MEMORY_MB, resident_arrays=()):
+                 max_memory=DEFAULT_MAX_MEMORY_MB, resident_arrays=(), reserved_bytes=0):
     nrhs = c.shape[2] if c.ndim == 3 else 1
     tiles = _action_tiles(space, c.dtype, nrhs, max_workspace_elements, max_memory,
-        arrays=(g, c, *resident_arrays), extra_bytes=g.size * c.dtype.itemsize if g.dtype != c.dtype else 0)
+        arrays=(g, c, *resident_arrays), extra_bytes=reserved_bytes + (
+            g.size * c.dtype.itemsize if g.dtype != c.dtype else 0))
     return _contract_tiles(g.astype(c.dtype), c, space, tiles, two_electron=True)
 
 
@@ -238,17 +245,18 @@ def make_hdiag(h1, eri, space):
 
 
 def build_hamiltonian(h1, eri, space, *, max_workspace_elements=DEFAULT_WORKSPACE,
-                      max_memory=DEFAULT_MAX_MEMORY_MB):
+                      max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0):
     """Matrix-free action; string tiles share the decimal-MB array budget."""
     if not isinstance(space, FCISpace):
         raise TypeError("Expected an FCISpace")
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     h, g = validate_integrals(h1, eri, space.norb)
     dtype = jnp.result_type(h, g)
     itemsize = jnp.dtype(dtype).itemsize
     # Eager absorption can retain two outer products/sums and a new result.
     # Charge three extra ERIs as well as the diagonal and one input vector.
     _action_tiles(space, dtype, 1, max_workspace_elements, max_memory, arrays=(h, g),
-                  extra_bytes=(3 * g.size + 2 * space.size) * itemsize)
+                  extra_bytes=reserved_bytes + (3 * g.size + 2 * space.size) * itemsize)
     effective = absorb_h1e(h, g, space, fac=.5)
     diagonal = make_hdiag(h, g, space)
 
@@ -257,7 +265,7 @@ def build_hamiltonian(h1, eri, space, *, max_workspace_elements=DEFAULT_WORKSPAC
         c = c.astype(jnp.result_type(dtype, c))
         return _contract_ee(effective, c, space,
             max_workspace_elements=max_workspace_elements, max_memory=max_memory,
-            resident_arrays=(h, g, diagonal, input_c))
+            resident_arrays=(h, g, diagonal, input_c), reserved_bytes=reserved_bytes)
 
     def apply(v):
         return block(v.reshape(space.shape)).reshape(-1)

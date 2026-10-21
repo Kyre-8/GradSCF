@@ -12,10 +12,13 @@ from ..types import (
 )
 from .primal import solve_ritz
 from .response import attach_spectral_response, spectral_values
+from ..memory import apply_columns, plan_hermitian, validate_reserved_bytes
+from gradscf._memory import array_storage_bytes
 
 
 def solve_hermitian(
-    matrix_or_operator, *, config=None, response=None, probes=None, initial_vectors=None
+    matrix_or_operator, *, config=None, response=None, probes=None, initial_vectors=None,
+    max_memory=None, reserved_bytes=0, _batch_size=None,
 ):
     """Solve once; differentiate isolated eigenpairs or an isolated subspace.
 
@@ -24,7 +27,11 @@ def solve_hermitian(
     one available guard root; no automatic dimension expansion at a crossing.
     Legacy config AD controls remain honored when response is omitted (also
     used by RPA); combining nondefault legacy controls with response is an error.
+    Optional max_memory is a decimal-MB budget for known primal working arrays;
+    reserved_bytes declares additional resident caller data. Operator internals,
+    implicit response and actual traced-device capacity need separate planning.
     """
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     cfg = EigenSolverConfig() if config is None else config
     if response is None:
         response = EigenResponseConfig(
@@ -45,7 +52,8 @@ def solve_hermitian(
         raise ValueError("Use response controls or legacy config AD controls, not both")
     if not isinstance(response, EigenResponseConfig):
         raise TypeError("response must be an EigenResponseConfig")
-    op = as_operator(matrix_or_operator)
+    a = None if hasattr(matrix_or_operator, "matvec") else jnp.asarray(matrix_or_operator)
+    op = as_operator(matrix_or_operator if a is None else a)
     validate_real_square(op)
     n, k = op.shape[0], cfg.nroots
     if probes is not None:
@@ -59,9 +67,20 @@ def solve_hermitian(
                 "Projector probes must be real floating-point data"
             )
         probes = probes.astype(jnp.result_type(probes.dtype, op.dtype))
+    if max_memory is not None:
+        if initial_vectors is not None:
+            initial_vectors = jnp.asarray(initial_vectors)
+            if (initial_vectors.ndim != 2 or initial_vectors.shape[0] != n
+                    or initial_vectors.shape[1] < min(k+1, n)):
+                raise ValueError("initial_vectors must have shape (size, m), "
+                                 "including requested roots and the boundary root")
+        cfg, _, _batch_size = plan_hermitian(n, op.dtype, cfg, max_memory,
+            resident_bytes=reserved_bytes + array_storage_bytes(
+                a, op.diagonal, probes, initial_vectors),
+            initial_columns=0 if initial_vectors is None else initial_vectors.shape[1],
+            device=getattr(op.diagonal, "device", None))
     structure = jnp.asarray(True)
-    if not hasattr(matrix_or_operator, "matvec"):
-        a = jnp.asarray(matrix_or_operator)
+    if a is not None:
         symmetry_tol = (
             32 * jnp.finfo(a.dtype).eps * jnp.maximum(1.0, jnp.linalg.norm(a))
         )
@@ -69,7 +88,8 @@ def solve_hermitian(
             jnp.linalg.norm(a - a.T) <= symmetry_tol
         )
     roots = solve_ritz(
-        op, cfg, initial_vectors=initial_vectors, structure_valid=structure
+        op, cfg, initial_vectors=initial_vectors, structure_valid=structure,
+        batch_size=_batch_size,
     )
     x = roots.vectors[:, :k]
     if k < n:
@@ -115,7 +135,7 @@ def solve_hermitian(
     # observable. Capturing its nondifferentiable tracer inside this operator
     # bypasses closure_convert's differentiable-parameter hoisting and leaks
     # it across a nested JIT/higher derivative.
-    apply = op.apply
+    apply = lambda v: apply_columns(op, v, _batch_size)
 
     projection = trace = None
     if response.target == "subspace":

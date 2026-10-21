@@ -19,6 +19,7 @@
 # Source: PySCF 2.9.0 (Apache-2.0); see NOTICE.md and LICENSE.pyscf.
 
 from functools import partial
+from math import prod
 import jax.numpy as np
 
 einsum = partial(np.einsum, precision="highest")
@@ -115,10 +116,39 @@ def cc_Wvovo(t1, t2, eris):
     return Wakci
 
 
-def cc_Wvvvv(t1, t2, eris):
-    # Incore
+def contract_Wvvvv(t1, eris, x):
+    """Apply the restricted virtual intermediate with the smaller scratch.
+
+    ``x`` is a dense ``(..., nvir, nvir)`` array, or an internal tuple (L, R)
+    encoding ``x[i,j,c,d] = L[i,c] * R[j,d]`` with two independent matrices.
+    Large virtual spaces contract each ovvv dressing with x into
+    ``(..., nocc, nvir)`` before multiplying t1.
+    If three virtual arrays cost less than that scratch, use a transient W
+    only for this action. This static shape choice never caches a dressing;
+    the bare chemists' vvvv input remains dense.
+    """
+    nocc, nvir = t1.shape
+    factored = isinstance(x, tuple)
+    if factored:
+        left, right = map(np.asarray, x)
+        batch = left.shape[0]*right.shape[0]
+    else:
+        x = np.asarray(x)
+        batch = prod(x.shape[:-2])
     eris_ovvv = np.asarray(eris.get_ovvv())
-    Wabcd = einsum("kdac,kb->abcd", eris_ovvv, -t1)
-    Wabcd -= einsum("kcbd,ka->abcd", eris_ovvv, t1)
-    Wabcd += np.asarray(eris.vvvv).transpose(0, 2, 1, 3)
-    return Wabcd
+    eris_vvvv = np.asarray(eris.vvvv)
+    if 3*nvir**4 < batch*nocc*nvir:
+        dressed = einsum("kcbd,ka->abcd", eris_ovvv, -t1)
+        # D[b,a,d,c] is the other original dressing; no ERI symmetry is used.
+        dressed += dressed.transpose(1, 0, 3, 2)
+        dressed += eris_vvvv.transpose(0, 2, 1, 3)
+        if factored:
+            return einsum("abcd,ic,jd->ijab", dressed, left, right)
+        return einsum("abcd,...cd->...ab", dressed, x)
+    if factored:
+        x = einsum("ic,jd->ijcd", left, right)
+    result = einsum("acbd,...cd->...ab", eris_vvvv, x)
+    contracted = einsum("kdac,...cd->...ka", eris_ovvv, x)
+    result -= einsum("...ka,kb->...ab", contracted, t1)
+    contracted = einsum("kcbd,...cd->...kb", eris_ovvv, x)
+    return result - einsum("...kb,ka->...ab", contracted, t1)

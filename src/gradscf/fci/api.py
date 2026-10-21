@@ -1,12 +1,13 @@
 """Eager FCI facades and PySCF-shaped active-space solver methods."""
+from dataclasses import fields, is_dataclass
 import numpy as np
 import jax
 import jax.numpy as jnp
-from gradscf._memory import DEFAULT_MAX_MEMORY_MB, resolve_memory_mb
+from gradscf._memory import DEFAULT_MAX_MEMORY_MB, array_storage_bytes, resolve_memory_mb
 from ..solvers import EigenSolverConfig
 from ..scf.reference import _array_signature
 from .cistring import make_fci_space
-from .solver import solve_fci
+from .solver import _plan_fci_memory, solve_fci
 from .reference import FCIReference, orbital_selection, source_dimensions, source_signature, active_reference
 from . import hamiltonian, rdm
 
@@ -17,8 +18,9 @@ class FCISolver:
     kernel(h1,eri,norb,nelec,ecore=...) returns total energies and alpha-by-beta
     CI matrices. One root is scalar/matrix; multiple roots retain a leading root
     axis. spin selects 2*Ms, not a total-S projection.
-    max_memory is a decimal-MB budget for reference preparation and operator
-    actions; it does not bound the complete eigensolver or AD process peak.
+    max_memory is a decimal-MB budget shared by reference preparation, primal
+    eigensolver and operator arrays. Response/AD and allocator residency are not
+    a complete process-memory hard limit.
     """
     def __init__(self, mol=None, *, nroots=1, solver='davidson', conv_tol=1e-10,
                  max_cycle=100, max_space=40, max_dense=2048, spin=None,
@@ -57,14 +59,14 @@ class FCISolver:
                 self.max_determinants,self.max_link_elements,self.max_workspace_elements,self.max_memory,
                 *(_array_signature(a) for a in (h,g,ecore)))
 
-    def kernel(self,h1,eri,norb,nelec,ci0=None,ecore=0.):
+    def kernel(self,h1,eri,norb,nelec,ci0=None,ecore=0.,*,reserved_bytes=0):
         self._reset()
         self.space = self._space(norb,nelec)
         self._inputs = h1,eri,norb,self.space.nelec,ecore
         self.result = solve_fci(h1,eri,self.space,ecore=ecore,config=self._config(),
                                 response=self.response,ci0=ci0,
                                 max_workspace_elements=self.max_workspace_elements,
-                                max_memory=self.max_memory)
+                                max_memory=self.max_memory,reserved_bytes=reserved_bytes)
         self.e_tot,self.ci = self.result.total_energies,self.result.coefficients
         self.converged = np.asarray(self.result.converged)
         if self.e_tot is not None and self.nroots == 1:
@@ -159,6 +161,38 @@ class FCISolver:
             max_workspace_elements=self.max_workspace_elements,max_memory=self.max_memory)
 
 
+def _bound_source_arrays(source):
+    """Known arrays already held by a bound source; never build a reference."""
+    if isinstance(source, FCIReference):
+        return source.h1, source.eri, source.ecore
+    arrays, seen = [], set()
+
+    def collect(value):
+        if isinstance(value, type) or id(value) in seen:
+            return
+        seen.add(id(value))
+        if is_dataclass(value):
+            for item in fields(value):
+                collect(getattr(value, item.name))
+        else:
+            leaves = jax.tree.leaves(value)
+            if len(leaves) == 1 and leaves[0] is value:
+                arrays.append(value)
+            else:
+                for leaf in leaves:
+                    collect(leaf)
+
+    for name in ("mo_coeff", "mo_occ", "mo_energy", "params"):
+        collect(getattr(source, name, None))
+    for name in ("_scf_inputs", "scf_result", "reference"):
+        payload = getattr(source, name, None)
+        # Start at known payload fields. Recurse only through declared data,
+        # containers and registered PyTrees, never arbitrary model __dict__s.
+        for value in getattr(payload, "__dict__", {}).values():
+            collect(value)
+    return tuple(arrays)
+
+
 class _MolecularFCI(FCISolver):
     """Bind a source and share its resolved budget with preparation/actions."""
 
@@ -191,11 +225,20 @@ class _MolecularFCI(FCISolver):
             dtype = jnp.result_type(self.source._scf_inputs.hcore,self.source.mo_coeff,jnp.float64)
         hmeta = jax.ShapeDtypeStruct((space.norb,)*2,dtype)
         gmeta = jax.ShapeDtypeStruct((space.norb,)*4,dtype)
+        source_arrays = _bound_source_arrays(self.source)
+        source_bytes = array_storage_bytes(*source_arrays)
+        config,solver_bytes,_ = _plan_fci_memory(space,dtype,config,self.max_memory,
+            arrays=(hmeta,gmeta),ci0=ci0,reserved_bytes=source_bytes)
         hamiltonian._action_tiles(space,dtype,1,self.max_workspace_elements,self.max_memory,
             arrays=(hmeta,gmeta,ci0),
-            extra_bytes=(3*space.norb**4+(config.nroots+1)*space.size)*jnp.dtype(dtype).itemsize)
+            extra_bytes=source_bytes+solver_bytes+(3*space.norb**4+2*space.size)*jnp.dtype(dtype).itemsize)
         h,g,ecore = active_reference(self.source,core,active,max_memory=self.max_memory)
-        return super().kernel(h,g,len(active),active_nelec,ci0=ci0,ecore=ecore)
+        # Keep the source's full AO/MO arrays charged after producing the CAS.
+        # Shared objects are counted once if an adapter returns an input array.
+        source_bytes = (array_storage_bytes(*_bound_source_arrays(self.source),h,g,ecore)
+                        - array_storage_bytes(h,g,ecore))
+        return super().kernel(h,g,len(active),active_nelec,ci0=ci0,ecore=ecore,
+                               reserved_bytes=source_bytes)
 
 
 def FCI(source=None,**kwargs):

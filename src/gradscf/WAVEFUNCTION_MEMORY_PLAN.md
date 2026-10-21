@@ -361,10 +361,21 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   from dressing; tile tau/W consumers and release/recompute by lifetime.
   Acceptance: residual and energy term comparison, converged CCD/CCSD, JVP/VJP,
   Lambda, HVP and measured action workspace; no hidden dressed-vvvv cache.
+
+  - [x] **WF-10a:** shared restricted virtual dressing action, with a static
+    smaller-scratch choice for occupied-dominated spaces. Algebra/AD and action
+    measurements include CC2's complete singles-pair construction. Retain
+    factored inputs when expanding their outer product would cost more.
+  - [ ] **WF-10b:** remove the bare-vvvv residency through shared AO-source
+    actions, joint amplitude budgets and measured converged calculations.
 - [ ] **WF-11 — Existing approximate CC/QCI branches.** Inspect separate CCS,
   CC2/linearized/QCI pathways and migrate applicable consumers. Acceptance:
   branch-specific energy/residual/derivative regressions; explicit exceptions
   rather than asserting that CCSD migration automatically covers every branch.
+
+  - [x] **WF-11a:** restricted virtual consumers and raw first/second response
+    in CCS, CCD, LCCD, LCCSD, CC2, CCSD and QCI; their existing model equations
+    remain distinct. This does not close their AO-source or total-budget work.
 - [ ] **WF-33 — Standalone canonical MP3.** Migrate its CC-integral preparation
   and residual-JVP implementation separately from recursive MP. Acceptance:
   E2/E3, with/without-T2, frozen orbitals, JVP/VJP/HVP, series-order-three cross
@@ -449,12 +460,17 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
 
 ### Recursive MP
 
-- [ ] **WF-23 — Exact target-rank restriction.** Avoid residual target blocks
+- [ ] **WF-23 — Exact target-rank restriction** (`in_progress`). Avoid residual target blocks
   that do not enter the requested Taylor/Wigner energy coefficient. Acceptance:
   per-order E2...E12 against current recursion, signs, open-shell/frozen cases;
   record which excitation ranks each case actually exercises (a two-electron
   high-order test cannot verify triples or quadruples contraction blocks);
   do not truncate required input waves or change the perturbation partition.
+
+  - [ ] **WF-23a:** apply the existing direct-path Taylor/Wigner target bound
+    to canonical tensor actions before contraction. Retain every required
+    wave coefficient; compare projected actions/response and complete energy
+    series, including actual triples/quadruples/sextuples and frozen spins.
 - [ ] **WF-24 — Packed target-tile contractions.** Keep increasing-index packed
   states and expand only contraction tiles. Acceptance: each excitation-block
   action against the current oracle, peak live buffers, JVP/VJP/HVP and costs.
@@ -484,6 +500,14 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   workspace. Acceptance: few/multiple-root and restart equivalence, minimum-
   subspace diagnostics, caller ownership, repeated-call release; retain shared
   forward/backward algorithms rather than method-local solvers.
+
+  - [x] **WF-29a:** shared Hermitian primal planning and FCI solver/action
+    reservations, including known bound source arrays and the original MB
+    budget. Optional basis capacity must not starve useful action batches.
+  - [x] **WF-29b:** bounded numerical GMRES probe with true-residual checks,
+    finite-candidate retry and full recovery; retain the existing AD owner.
+  - [ ] **WF-29c:** non-Hermitian, DIIS, Lambda/SCF and response-state ownership,
+    phase-aware lifetimes and byte-controlled caches across all consumers.
 - [ ] **WF-30 — CPU/GPU and nested-AD audit.** Run eager and JIT public entry
   points, native dispatch, device residency and transfer accounting. Acceptance:
   same numerical cases/dtype/seed, forward/JVP/VJP/HVP separately, actual peak
@@ -1197,3 +1221,110 @@ requires its own explicit decision and numerical validation.
   and unsupported native basis derivatives retain their stated boundaries.
 - Completion review: this is only WF-31a; final capability table/examples for
   the remaining migrated wavefunction methods await those methods' gates.
+
+
+### 2026-10-21 — WF-10a / WF-11a: efficient restricted virtual actions
+
+- A single restricted action contracts virtual dressings before they become
+  a dense four-virtual tensor. A static smaller-scratch choice keeps a small
+  transient W for occupied-dominated spaces. Neither choice caches W.
+  CCSD supplies tau, QCI zero singles/T2, and CC2 its two singles factors.
+- Measuring the complete CC2 term found a real 74% low-virtual slowdown in
+  the first implementation: forming the outer product lost its rank-one
+  contraction order. The retained internal `(L,R)` input delays that product
+  until the large-virtual branch. A dot plus axis transpose reproduces both
+  small-W dressings by index relabeling, with no ERI symmetry assumption.
+- Final source: 58 focused checks and 6 named physical/core checks passed,
+  exit 0. These include seven models in both orbital ratios, independent
+  factors, raw nonsymmetric integrals, float32/64, JVP/VJP/HVP and finite
+  differences, CC2/PySCF, CCSD Lambda, QCI density/adjoint and water triples.
+  CPU80-87; pytest 107.21/60.38 s; process RSS 2,439,656/2,340,360 KiB.
+- Twelve matched independent CPU processes exited zero. Complete CC2 warm
+  times old/new: o32/v8 0.120907/0.120746 ms, o8/v32 3.712/3.212 ms,
+  o8/v64 124.031/43.918 ms. The low-virtual case is equivalent speed and has
+  identical 524,288-byte compiled scratch. Generic dense-X o8/v64 improves
+  189.239/40.748 ms, scratch 384/162 MiB. Requested results agree to 1e-15.
+- CC2's large-virtual process RSS is higher despite smaller compiled scratch;
+  no universal RSS or complete-CC speed improvement is claimed. Bare vvvv,
+  AO-source preparation, EOM/UCC and total-state budgets remain open.
+  Evidence: local `wf10a-cc2/`, with rejected policy/HLO traces, final source,
+  all commands, hashes, XML and outputs. Final helper/caller/QCI hashes start
+  `bec87a18`, `12f915f3`, `111d3d1d`. Independent algebra/AD review passed.
+- Completion review closes only WF-10a/11a. The parent tasks still require
+  bare-integral actions, AO-source consumers and complete method budgets.
+
+
+### 2026-10-21 — WF-29a: one Hermitian/FCI primal array budget
+
+- The shared planner adjusts existing Davidson capacities and column batches,
+  reserves dense/primal arrays before identity/guess/absorption allocation,
+  and passes integer solver bytes to the FCI action under the original MB
+  value. The runtime reserve is applied once; no new eigensolver is added.
+- Useful guess/trial/restart/action batches take precedence over an optional
+  larger Ritz basis. The initially larger m23/g2/b2 policy cost 8.111 ms on
+  the seed2902 six-orbital/(2,2) fixture. At the same 0.5MB, m17/g4/b6 costs
+  4.338 ms with 254,792-byte compiled scratch. The same-source 4MB control
+  costs 5.302 ms/979,272 bytes; both take 10 iterations and agree within
+  7.99e-15 Hartree. Process RSS remains dominated by the runtime baseline.
+- Known source h/g, existing SCF payloads, declared basis dataclasses and
+  parameter PyTrees remain charged after active-space preparation, with
+  object-identity deduplication. No reference builder or global cache is
+  inspected. Explicit dense matrices are normalized once and charged even
+  when supplied as lists/tuples. Independent review found the basis/list
+  omissions; four genuine RED failures preceded these minimal fixes.
+- Final frozen version: 16 affected focused checks and 87 named Hermitian/FCI
+  forward/response/HVP/nested checks passed, no skips, exit 0; CPU104-111.
+  The latter took 249.63 s pytest / 258.36 s process, RSS 4,942,484 KiB.
+  Evidence: `wf29-review-evidence/`; earlier rejected policies/measurements in
+  `wf29-evidence/`. Final FCI/eigen APIs begin `8c0e8b88`/`b347e39c`;
+  planner `4a63bf51`. Independent repair review passed.
+- Completion review closes the known-array primal increment. Preparation
+  scratch is conservatively co-reserved; phase-optimal lifetimes, full
+  response/AD, other method caches and traced-device capacity remain open.
+  This is an array planner, not a whole-process or allocator hard limit.
+
+
+### 2026-10-21 — WF-29b: true-residual GMRES work, preserving SCF behavior
+
+- Actual MP2 stationary-state profiling located the small direct-water
+  overhead in SCF work. Zero/one Newton-refinement experiments passed narrow
+  tests but regressed complete gradients; both were rejected and the original
+  three refinements restored exactly. No SCF forward policy is changed.
+- A difficult archived anchor spent 635 of 680 response actions in upstream
+  incremental GMRES despite a well-conditioned physical operator. Finite-only
+  warm retry did not fix that cost. A one-cycle probe also regressed the
+  healthy control; the retained two-cycle probe preserves its 37 actions.
+- The existing opaque numerical owner now true-checks after at most two
+  incremental cycles, then uses the existing full-budget batched retry and,
+  only if needed, full incremental recovery from the best finite candidate.
+  User tolerances, physical residual guards and the internal 0.1 margin stay
+  unchanged. Raw numerical zero-RHS handling must remain inside that AD owner.
+- Healthy default direct warm old/new: 2.02294/2.23909 s, identical work and
+  bit-identical values/gradients. Full-selected warm: 0.39702/0.17401 s. The
+  archived direct stress case improves 7.72736/1.34180 s and 680/37 actions;
+  its rejected one-refinement SCF policy is not restored. New direct/full
+  gradients agree within 1.89e-13 Hartree/Bohr on this fixed water case.
+- Verified 52 CPU and 22 GPU executions, all process exits zero and no XML
+  skips/failures/errors: accuracy21, shared24, complete MP2 geometry/HVP/Raman7,
+  then accuracy21 plus complete MP2 GPU geometry/HVP1. GPU7 was selected by
+  UUID after an idle check; every output leaf of the complete case is on GPU.
+  GPU6 was hidden. Final GMRES/test hashes begin `1fbdf181`/`444250f5`.
+  Evidence: `MP2_EFFICIENCY_AUDIT.md`, `mp2-efficiency-evidence/`.
+- Completion review closes this numerical-solve increment. It does not close
+  WF-08: a same-input aniline/full-selected rerun still failed the finite
+  native-derivative guard (exit 1, 113.87 s); direct remains under a bounded
+  run. Neither failure nor an allocation estimate is a completed scale result.
+
+
+### 2026-10-21 — Current combined numerical checkpoint
+
+- Current restricted action, Hermitian/FCI budget, GMRES and MP target code
+  were frozen together in `joint-wavefunction1`. Twelve focused integration
+  checks passed, no skips, exit 0: FCI budgeted density gradient/HVP and nested
+  guards, mixed-dtype column tails, CCSD Lambda and factored raw CC response,
+  complete direct MP2 relaxed response and sextuple MP coefficients.
+  CPU104-111; 203.01 s pytest / 209.58 s process; RSS 3,972,892 KiB.
+- The exact full source manifest and unchanged native library SHA are recorded
+  alongside commands/XML. This clears a narrow composition gate, not all
+  combinations or the final project regression. MP broad-suite total-time
+  limits and large-aniline diagnostics remain explicit open items.
