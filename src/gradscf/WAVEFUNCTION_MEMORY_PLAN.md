@@ -1721,3 +1721,35 @@ requires its own explicit decision and numerical validation.
   action SHA `042b1243`, native library `3eeaa2e5`. The remaining joint budget,
   provider consumers and performance work stays within WF-10/14/15/16/17/29;
   no new plan branch is created for these findings.
+
+### 2026-10-22 — WF-08: bounded forward/response timing diagnostics
+
+- Retain two thin test runners: whole MP2 molecular compile/first/warm/RSS
+  measurement, and component timing using the actual C/Fock cotangents and
+  existing source solvers. Inputs, units, backend/environment, exact command,
+  source hashes, incomplete phases and finite first/warm outputs are persisted.
+  Instrumentation changes neither equations nor solver options. The optional
+  captured diagnostic operator is restricted to at most ninety-six variables.
+- Forward counts wrap only the existing nonlinear minimizer's GMRES, with
+  start/action/end scalar callbacks and restoration in `finally`. They add no
+  HVP or residual evaluation. Water baseline/counted states and histories are
+  identical; three solves use 42/42/41 actions. Fixed aniline uses 84/84/43
+  actions (211 total), three unchanged polishing steps, and the same final
+  stationary norm 2.20359e-12. Its instrumented first state costs 76.608 s;
+  there is no warm sample. Solver `info=0` is not a residual certificate.
+- The source polishing history records selected-shift outer relative residuals
+  4.975e-8, 3.392e-8 and 4.930e-5 for RHS norms around 4.4...5.8e-12. This does
+  not establish inner 1e-11 relative accuracy or expose every failed shift.
+  A possible normalization/roundoff floor is only a source-informed hypothesis.
+  No inner/outer tolerance, refinement count or regularization was changed.
+- A native-direct aniline diagnostic hit its actual 600 s process cap with no
+  forward-GMRES callback. One final 120 s localization also timed out (exit124):
+  lowering 14.330 s, compilation 13.079 s, then first stationary-state execution
+  before any GMRES callback. Thus the unfinished stage is execution before
+  GMRES, not compilation. No direct stationary/MP2-gradient/warm-time success is
+  implied. An SSH255 is retained separately from recovered real process exits.
+- Root checked thirty-two evidence entries and unchanged source/native hashes;
+  the runner SHA starts `35ea7445`. Evidence: `wf08-forward-count/` and the
+  existing `wf08-aniline-forward-audit/`. All numeric work used remote CPU64-71,
+  no GPU. WF-08 remains open: this bounded diagnosis is not an additional
+  subplan, a completed direct benchmark, or a reason to repeat long jobs blindly.
