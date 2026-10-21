@@ -23,7 +23,56 @@ minimum interfragment nuclear distance is 2.561339 Angstrom.
 hashes and the remote geometry check. Regeneration is simply
 `python prepare_dimer.py` on the authorized compute node.
 
-The current electronic-structure validation is limited to one matched-orbital
-monomer response action. A 20-root spectrum and the dimer electronic-structure
-run have not completed. See the measured memory, timing and remaining limits
-in [the direct-response notes](../../../src/gradscf/tddft/DIRECT_RESPONSE.md).
+## Complete molecular TDDFT example
+
+`dft_response.py` runs a new PBE ground-state SCF followed by the lowest 20
+singlet excitations of full TDDFT. It retains Cartesian def2-SVP, the complete
+occupied/virtual orbital space, and the unchanged level-3 integration grid.
+AO values are evaluated in blocks; changing a workspace block size does not
+remove quadrature points. Native direct J/K avoids storing four-center ERIs,
+and Davidson uses response actions without constructing the complete A/B
+matrices. This example does not use density fitting or TDA.
+
+Run on the authorized compute node from the repository root:
+
+```sh
+PYTHONPATH=src python examples/tdscf/dabna2/dft_response.py
+PYTHONPATH=src python examples/tdscf/dabna2/plot_spectrum.py
+```
+
+The default output directory is `artifacts/dabna2/monomer_pbe_level3/`.
+`status.json` records the current stage and convergence status; a running stage
+is not a completed calculation. A successful run saves `spectrum.json`,
+`spectrum.npz`, and the TDDFT amplitudes. The plot displays oscillator strengths
+as sticks, without a fitted linewidth or vibrational structure.
+
+The SCF density and orbitals are saved before the response solve. A density
+checkpoint may supply `run_case(..., init_density=density)` as a compatible
+initial guess; it still requires a new SCF solve. To restart only TDDFT from
+the converged, saved AO/grid reference, use the existing cache reader:
+
+```python
+import h5py
+from gradscf import tdscf
+from gradscf.data.hdf5_cache import read_restricted_molecule
+
+with h5py.File("artifacts/dabna2/monomer_pbe_level3/scf_reference.h5") as archive:
+    reference = read_restricted_molecule(archive["reference"])
+
+td = tdscf.TDDFT(reference, xc_functional="pbe", nstates=20,
+    eigensolver="davidson", davidson_tol=1e-6, davidson_max_iter=512,
+    davidson_max_subspace=160, max_memory=8000.,
+    response_kernel_options=dict(two_electron_mode="direct", integral_cache="none",
+        direct_tol=1e-12, direct_workers=16, grid_block_size=256))
+result = td.kernel()
+```
+
+The explicit `xc_functional="pbe"` is required on reload: the cache preserves
+the numerical reference but does not serialize the XC specification. The
+response workspace budget is in decimal MB and is not a process RSS limit.
+CPU affinity, thread limits and timeouts are set by the external job runner.
+
+The complete monomer calculation and the dimer electronic-structure calculation
+must be distinguished from earlier AO-only and individual-response-action
+benchmarks. See measured memory, timing and current validation limits in
+[the direct-response notes](../../../src/gradscf/tddft/DIRECT_RESPONSE.md).
