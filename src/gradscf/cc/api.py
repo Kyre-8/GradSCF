@@ -1,6 +1,7 @@
 """PySCF-style ground-state CC facades, without solver copies."""
 
 from dataclasses import fields
+from .._memory import resolve_memory_mb
 from ..scf.reference import (reference_from_source, UnrestrictedReference,
                              unrestricted_reference_from_source, is_unrestricted_source)
 from gradscf.integrals.molecular.ao2mo import frozen_indices, unrestricted_frozen_indices
@@ -14,9 +15,15 @@ from .properties import _density_from_lambda, _rdm2_from_lambda
 
 
 class CC:
-    def __init__(self, mf, *, method="ccsd", frozen=None, **kwargs):
+    """Ground-state CC with an inherited AO->MO budget in decimal MB.
+
+    ``max_memory=None`` inherits the SCF budget or uses the shared default for
+    explicit MO references. It does not cap the downstream amplitude solver.
+    """
+    def __init__(self, mf, *, method="ccsd", frozen=None, max_memory=None, **kwargs):
         cfg = CCConfig(method=method, **kwargs)
         self.mf = mf
+        self.max_memory = resolve_memory_mb(max_memory, mf)
         self.frozen = frozen
         for f in fields(cfg):
             setattr(self, f.name, getattr(cfg, f.name))
@@ -42,8 +49,10 @@ class CC:
 
     def kernel(self, t1=None, t2=None):
         unrestricted = is_unrestricted_source(self.mf)
-        self.reference = ref = (unrestricted_reference_from_source(self.mf)
-                                if unrestricted else reference_from_source(self.mf))
+        self.reference = ref = (unrestricted_reference_from_source(
+                                    self.mf, max_memory=self.max_memory)
+                                if unrestricted else reference_from_source(
+                                    self.mf, max_memory=self.max_memory))
         self.result = (run_ucc if unrestricted else run_cc)(
             ref.h1,
             ref.eri,

@@ -17,6 +17,13 @@ def validate_memory_mb(value, *, name="max_memory") -> float:
     return float(value)
 
 
+def resolve_memory_mb(max_memory, source=None) -> float:
+    """Resolve an eager caller's override or inherited decimal-MB budget."""
+    if max_memory is None:
+        max_memory = getattr(source, "max_memory", DEFAULT_MAX_MEMORY_MB)
+    return validate_memory_mb(max_memory)
+
+
 def available_memory_bytes(device=None):
     """Return a conservative capacity estimate for the actual target device.
 

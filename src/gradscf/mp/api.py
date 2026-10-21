@@ -2,6 +2,7 @@
 from dataclasses import fields
 import numpy as np
 
+from .._memory import resolve_memory_mb
 from ..scf.reference import (reference_from_source, unrestricted_reference_from_source,
                              is_unrestricted_source, RestrictedReference, UnrestrictedReference)
 from .types import MPConfig
@@ -11,11 +12,15 @@ from ..scf.facade import RKS, UKS
 
 
 class MP:
-    """Generic order-driven MP; defaults to the residual/Taylor series engine."""
+    """Generic order-driven MP; defaults to the residual/Taylor series engine.
+
+    ``max_memory`` is an AO->MO planning budget in decimal MB. None inherits
+    the SCF source's budget, or the shared default for an explicit MO reference.
+    """
     unrestricted = None
     method_order = None
 
-    def __init__(self, mf, *, order=None, frozen=None, **kwargs):
+    def __init__(self, mf, *, order=None, frozen=None, max_memory=None, **kwargs):
         spin = is_unrestricted_source(mf)
         if self.unrestricted is not None and spin != self.unrestricted:
             raise ValueError("Reference spin does not match restricted/unrestricted MP class")
@@ -23,6 +28,7 @@ class MP:
         if self.method_order is not None and order != self.method_order:
             raise ValueError("Use MP(mf, order=...) to select a different perturbation order")
         self.mf, self.frozen = mf, frozen
+        self.max_memory = resolve_memory_mb(max_memory, mf)
         self._unrestricted = spin
         kwargs.setdefault("algorithm", "series" if self.method_order is None else "auto")
         cfg = MPConfig(order=order, **kwargs)
@@ -58,12 +64,14 @@ class MP:
                     no = (tuple(int(np.count_nonzero(x)) for x in occ) if self._unrestricted
                           else int(np.count_nonzero(occ)))
                 self.space = make_series_space(nmo, no, frozen=self.frozen, config=cfg)
-            ref = (unrestricted_reference_from_source if self._unrestricted else reference_from_source)(self.mf)
+            ref = (unrestricted_reference_from_source if self._unrestricted else reference_from_source)(
+                self.mf, max_memory=self.max_memory)
             result = run_mp(ref.h1, ref.eri, nocc=ref.nocc,
                 frozen=self.frozen, nuclear_repulsion=ref.nuclear_repulsion, config=cfg)
         else:
             result = evaluate_mp2(from_scf(self.mf, frozen=self.frozen,
-                                           frozen_gap_tol=cfg.denominator_tol), cfg)
+                                           frozen_gap_tol=cfg.denominator_tol,
+                                           max_memory=self.max_memory), cfg)
         self.result = result
         self.e_corr, self.e_tot, self.e2, self.e3 = (result.correlation_energy,
             result.total_energy, result.e2, result.e3)

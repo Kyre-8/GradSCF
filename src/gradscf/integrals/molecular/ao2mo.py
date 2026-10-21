@@ -32,12 +32,14 @@ def validate_integrals(h1, eri, nmo=None):
 
 
 def transform_integrals(
-    hcore, mo_coeff, *, eri=None, eri_pair_matrix=None, df_factors=None
+    hcore, mo_coeff, *, eri=None, eri_pair_matrix=None, df_factors=None,
+    max_memory=DEFAULT_MAX_MEMORY_MB,
 ):
     """Transform full, s4 pair, or density-fitted AO integrals using JAX.
 
     Exactly one ERI representation is required. The resulting full MO ERI tensor
     uses O(nmo**4) memory; this is a small-system reference implementation.
+    ``max_memory`` budgets each transform through the shared block planner.
     """
     c, h = jnp.asarray(mo_coeff), jnp.asarray(hcore)
     if jnp.iscomplexobj(c) or jnp.iscomplexobj(h):
@@ -46,13 +48,16 @@ def transform_integrals(
         )
     if c.ndim != 2 or h.shape != (c.shape[0], c.shape[0]):
         raise ValueError("Inconsistent AO Hamiltonian and MO coefficient dimensions")
-    g = _transform_eri(c, c, eri=eri, eri_pair_matrix=eri_pair_matrix, df_factors=df_factors)
+    g = _transform_eri(c, c, eri=eri, eri_pair_matrix=eri_pair_matrix,
+                       df_factors=df_factors, max_memory=max_memory)
     return validate_integrals(c.T @ h @ c, g)
 
 
-def _transform_eri(c, d, *, eri=None, eri_pair_matrix=None, df_factors=None):
+def _transform_eri(c, d, *, eri=None, eri_pair_matrix=None, df_factors=None,
+                   max_memory=DEFAULT_MAX_MEMORY_MB):
     return transform_eri_block((c, c, d, d), eri=eri,
-                               eri_pair_matrix=eri_pair_matrix, df_factors=df_factors)
+                               eri_pair_matrix=eri_pair_matrix, df_factors=df_factors,
+                               max_memory=max_memory)
 
 
 def transform_eri_block(

@@ -73,8 +73,9 @@ def test_cis_d_retains_mo_reference_path(water_direct_hf, monkeypatch):
     expected = ci.CIS_D(reference, solver="dense", nroots=1).run()
     calls = []
 
-    def explicit_reference(source):
+    def explicit_reference(source, *, max_memory):
         assert source is water_direct_hf
+        assert max_memory == source.max_memory
         calls.append(source)
         return reference
 

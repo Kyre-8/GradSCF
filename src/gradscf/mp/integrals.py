@@ -5,6 +5,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 
+from gradscf._memory import resolve_memory_mb
 from gradscf.integrals.molecular.ao2mo import validate_integrals, validate_unrestricted_integrals, frozen_indices, unrestricted_frozen_indices, transform_eri_block
 
 
@@ -127,11 +128,12 @@ def prepare_integrals(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., froze
                                        frozen_gap_tol=frozen_gap_tol))
 
 
-def from_scf(source, *, frozen=None, frozen_gap_tol=1e-10):
+def from_scf(source, *, frozen=None, frozen_gap_tol=1e-10, max_memory=None):
     """Reuse converged HF AO data; DF retains only Q/occupied/virtual factors.
 
     This is an eager adapter. It does not rerun SCF or transform complete MO ERIs.
     """
+    max_memory = resolve_memory_mb(max_memory, source)
     from ..scf.facade import RKS, UKS
     from ..scf.rks import _build_jk
     from gradscf.integrals.molecular.jk import build_jk_from_df
@@ -189,7 +191,9 @@ def from_scf(source, *, frozen=None, frozen_gap_tol=1e-10):
         blocks = None
         finite_data = (factors, *ov_factors)
     else:
-        blocks = tuple(transform_eri_block((*ovs[a], *ovs[b]), **kwargs) for a, b in pairs)
+        blocks = tuple(transform_eri_block((*ovs[a], *ovs[b]),
+                                           max_memory=max_memory, **kwargs)
+                       for a, b in pairs)
         ov_factors = None
         finite_data = (*kwargs.values(), *blocks)
     finite = jnp.isfinite(source.e_tot) & jnp.all(jnp.stack([

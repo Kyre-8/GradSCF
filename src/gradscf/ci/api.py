@@ -3,6 +3,7 @@ from dataclasses import replace
 
 import numpy as np
 
+from .._memory import resolve_memory_mb
 from .integrals import reference_from_source
 from .space import make_ci_space, make_uci_space, _selected_ranks
 from .spin import spin_square
@@ -24,12 +25,17 @@ class CI:
     multiple roots give an energy array and coefficient columns. result always
     retains a root axis. This facade performs eager input validation; use the
     functional solve_ci interface under jit/grad.
+
+    ``max_memory`` budgets AO->MO transforms in decimal MB. None inherits the
+    SCF budget or uses the shared default for an explicit MO reference.
     """
     def __init__(self, mf, *, max_excitation=2, frozen=None, nroots=1,
                  solver="davidson", conv_tol=1e-9, max_cycle=100, max_space=None,
                  gradient_mode="eigenvalue_only", adjoint_tol=1e-10,
-                 adjoint_max_cycle=100, max_determinants=1_000_000, excitation_ranks=None):
+                 adjoint_max_cycle=100, max_determinants=1_000_000, excitation_ranks=None,
+                 max_memory=None):
         self.mf = mf
+        self.max_memory = resolve_memory_mb(max_memory, mf)
         self.max_excitation = max_excitation
         self.excitation_ranks = _selected_ranks(max_excitation, excitation_ranks)
         self.frozen = frozen
@@ -63,7 +69,7 @@ class CI:
     def kernel(self):
         if is_unrestricted_source(self.mf):
             return UCI.kernel(self)
-        self.reference = ref = reference_from_source(self.mf)
+        self.reference = ref = reference_from_source(self.mf, max_memory=self.max_memory)
         self.space = make_ci_space(ref.h1.shape[0], ref.nocc, max_excitation=self.max_excitation,
                                    frozen=self.frozen, max_determinants=self.max_determinants,
                                    excitation_ranks=self.excitation_ranks)
@@ -141,7 +147,7 @@ class CISDTQ(CI):
 class UCI(CI):
     """Variational CI in a fixed (Nalpha,Nbeta) sector, not spin adapted."""
     def kernel(self):
-        self.reference = ref = unrestricted_reference_from_source(self.mf)
+        self.reference = ref = unrestricted_reference_from_source(self.mf, max_memory=self.max_memory)
         self.space = make_uci_space(ref.h1[0].shape[0], ref.nocc,
                                     max_excitation=self.max_excitation, frozen=self.frozen,
                                     max_determinants=self.max_determinants,
@@ -190,7 +196,7 @@ class UCIS(UCI):
     def kernel(self):
         if self.excitation_ranks is not None:
             raise ValueError("UCIS has a fixed singles space; excitation_ranks is not supported")
-        self.reference = ref = unrestricted_reference_from_source(self.mf)
+        self.reference = ref = unrestricted_reference_from_source(self.mf, max_memory=self.max_memory)
         h, g = spin_orbital_integrals(ref.h1, ref.eri)
         n = h.shape[0]//2
         occ = np.asarray(list(range(ref.nocc[0]))+list(range(n, n+ref.nocc[1])), dtype=int)
@@ -209,19 +215,19 @@ class CIS(CI):
     """Spin-adapted HF singles; e is an excitation-energy array in Hartree.
 
     Non-DF SCF sources use the shared AO response action instead of a full MO
-    ERI transformation. ``max_memory`` (decimal MB) budgets this AO path;
+    ERI transformation. ``max_memory`` (decimal MB) budgets this AO path or
+    each MO transform and defaults to the source SCF budget;
     explicit CIReference and DF inputs retain the MO-integral implementation.
     """
     _use_ao_response = True
 
-    def __init__(self, mf, *, singlet=None, max_memory=2000.0, **kwargs):
+    def __init__(self, mf, *, singlet=None, max_memory=None, **kwargs):
         if kwargs.get("excitation_ranks") is not None:
             raise ValueError("CIS has a fixed singles space; excitation_ranks is not supported")
         if is_unrestricted_source(mf) and singlet is not None:
             raise ValueError("Unrestricted CIS has no singlet/triplet selection; use UCIS")
-        super().__init__(mf, max_excitation=1, **kwargs)
+        super().__init__(mf, max_excitation=1, max_memory=max_memory, **kwargs)
         self.singlet = None if is_unrestricted_source(mf) else (True if singlet is None else singlet)
-        self.max_memory = max_memory
         self.e = self.amplitudes = None
 
     def kernel(self):
@@ -260,7 +266,7 @@ class CIS(CI):
             self.e, self.amplitudes = self.result.excitation_energies, self.result.amplitudes
             self.converged = np.asarray(self.result.converged)
             return self.e, self.amplitudes
-        self.reference = ref = reference_from_source(self.mf)
+        self.reference = ref = reference_from_source(self.mf, max_memory=self.max_memory)
         fock = np.asarray(restricted_fock(ref.h1, ref.eri, ref.nocc))
         if np.max(np.abs(fock[:ref.nocc, ref.nocc:]), initial=0.) > 1e-7:
             raise ValueError("CIS requires a stationary HF reference (occupied-virtual Fock block must vanish)")

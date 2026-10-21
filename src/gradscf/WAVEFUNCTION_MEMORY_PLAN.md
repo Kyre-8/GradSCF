@@ -280,6 +280,10 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
     auxiliary intermediates; validate nested AD and CPU/GPU7 execution.
   - [ ] **WF-02b:** wire caller budgets/resident-state ownership into the MP/CC
     consumers as WF-05/09 migrate, rather than using the block default everywhere.
+
+    - [x] **WF-02b1:** MP/CC/CI facades inherit the SCF budget, accept an
+      explicit override, and forward the current method budget to shared MO
+      adapters and requested blocks. Joint resident-state ownership is still open.
   - [ ] **WF-02c:** complete the native block/capability contract with WF-03/04,
     including target-device capacity when JIT tracing hides concrete devices.
 - [ ] **WF-03 — Exact native partial AO2MO** (`in_progress`). Generate requested MO tiles without
@@ -708,3 +712,42 @@ requires its own explicit decision and numerical validation.
   loops, avoiding one Python/JIT graph per shell pair. Outer WF-03/04 and the
   end-to-end MP2 and total-AD budget gates remain open. The full project scope
   and sequence remain valid.
+
+### 2026-10-21 — WF-02b1: verified caller budget inheritance
+
+- Added one shared `resolve_memory_mb` helper. MP/CC/CI facades inherit an SCF
+  source's decimal-MB budget unless explicitly overridden; explicit MO references
+  use the shared 60000 MB default. Kernels forward the current method field and
+  adapters revalidate it before transformation. No numerical solver/config or
+  physical-state key was changed. Restricted/unrestricted full wrappers and MP2
+  selected blocks forward this same budget; CIS retains its AO response planner.
+- RED: inheritance and full-wrapper forwarding tests failed on the frozen prior
+  source (missing field/keyword), exit 1. Final manifest `wf02b-green1.json`
+  verified 1120 files. On c20 CPU, float64, GPUs disabled: 91 new cases passed
+  (10.97 s pytest / 12.39 s process, 1,245,236 KiB peak RSS); 36 MP integral,
+  MP2 and MP3 regressions passed (107.32 / 112.92 s, 4,168,324 KiB); five focused
+  CI/CIS(D)/RCC/UCC/QCISD caller/transform cases passed (48.02 / 51.89 s,
+  2,573,608 KiB). All these groups exited 0. Evidence is in remote
+  `wavefunction-memory-20261021/wf02b-green1/`.
+- An optional broad CI group hit its 900 s timeout (exit 124); a broad CC group
+  was stopped after the relevant five-case caller group passed (exit -15).
+  Neither is reported as a completed regression suite. Broader method validation
+  belongs to its later algorithm changes and WF-32, rather than repeating
+  expensive unchanged numerical kernels for keyword propagation.
+- Specification and independent quality reviews passed. Review confirmed the
+  existing config/cache semantics and identified no duplicated budget system.
+- Completion review: WF-02b1 is verified; WF-02b remains open for simultaneous
+  correlated states, DF Qia, spin blocks, solver/AD ownership (WF-05/09/29).
+  This does not impose a hard process-RSS or VRAM ceiling. The plan remains a
+  full wavefunction project; the next shared consumer uses native AO2MO blocks.
+
+### 2026-10-21 — AO2MO package boundary: user-directed adjustment
+
+- The user requested a dedicated `gradscf.ao2mo` package alongside `cc`/`ci`.
+  Split public exports, array/DF blocks, native slab contractions, reference
+  transformations, spin utilities and response slices into focused files.
+  Integral evaluation and its native geometry primitives remain in `integrals`.
+- Migrate existing source/examples/tests to the canonical package and remove
+  obsolete forwarding locations. This is an organization change within WF-02/03,
+  not a new integral engine or an additional correlation method. Numerical and
+  module-boundary regression gates remain required before claiming completion.
