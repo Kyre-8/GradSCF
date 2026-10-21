@@ -27,15 +27,19 @@ class MolecularEnergy:
     Every call transports the AO metric and relaxes the orbitals again. The
     implicit backward follows this stationary branch, including in nested AD.
 
-    This small-system adapter uses full native ERIs for geometry AD. It does
-    not inherit DF or direct-SCF approximations from a seed. Original
-    omegaB97X-D carries full/LR ERIs and its geometry-dependent CHG energy
-    explicitly through the same solver.
+    Full native ERIs are the default geometry-AD representation. HF may opt
+    into ``jk_backend="direct"`` to use moving native J/K without AO ERIs.
+    The default requires a full-J/K seed; explicit direct accepts full or
+    direct HF seeds. Original omegaB97X-D carries full/LR ERIs and its
+    geometry-dependent CHG energy explicitly through the same solver.
     DFT grids and AO values move with R. Isolated state stability and numerical
     grid convergence must be checked for each demonstrated observable.
     """
 
-    def __init__(self, mf, *, mode="implicit", gradient_tolerance=1e-9):
+    def __init__(self, mf, *, mode="implicit", gradient_tolerance=1e-9,
+                 jk_backend="full"):
+        if jk_backend not in ("full", "direct"):
+            raise ValueError("jk_backend must be 'full' or 'direct'.")
         if not jax.config.x64_enabled:
             raise ValueError("MolecularEnergy requires JAX float64.")
         if not bool(mf.converged):
@@ -55,13 +59,17 @@ class MolecularEnergy:
                     or not np.all((occupations == 0) | (occupations == 2))):
                 raise ValueError("Restricted orbitals require integer 0/2 occupations.")
             self.occupations = np.stack([occupations / 2] * 2)
-        if not mf.mol.cart or getattr(mf, "jk_backend", "full") != "full":
-            raise NotImplementedError("Use Cartesian AOs and full J/K for this response adapter.")
+        seed_backends = ("full", "direct") if jk_backend == "direct" else ("full",)
+        if not mf.mol.cart or getattr(mf, "jk_backend", "full") not in seed_backends:
+            raise NotImplementedError("Use Cartesian AOs and full J/K, or explicitly opt into direct HF J/K.")
+        self.jk_backend = jk_backend
         self.xc = mf.xc
         self.rsh = rsh_preset(self.xc)
         self.kind = xc_type(local_xc_spec(self.xc))
         if self.kind not in ("HF", "LDA", "GGA"):
             raise NotImplementedError("This molecular adapter supports HF/LDA/GGA/global hybrids.")
+        if jk_backend == "direct" and (self.kind != "HF" or self.rsh is not None):
+            raise NotImplementedError("Direct molecular response currently supports HF only.")
         self.spec = mf.mol.to_spec()
         self.basis = mf.mol.basis
         self.coordinates = jnp.asarray(self.spec.coords_bohr)
@@ -113,7 +121,12 @@ class MolecularEnergy:
             nao = self.coefficients.shape[-2]
             overlap = self.plan.evaluate("overlap", moving)
             hcore = self.plan.evaluate("kinetic", moving) + self.plan.evaluate("nuclear", moving)
-            eri = self.plan.evaluate("eri", moving)
+            if self.jk_backend == "direct":
+                from gradscf.integrals.backends.native.jk import NativeDirectBasis
+                eri = None
+                extra = dict(direct_basis=NativeDirectBasis(self.plan, moving))
+            else:
+                eri = self.plan.evaluate("eri", moving)
             enuc = scf.nuclear_repulsion_energy(coordinates, jnp.asarray(self.spec.charges))
             ao, dao, weights = jnp.zeros((0, nao)), jnp.zeros((4, 0, nao)), jnp.zeros(0)
         else:

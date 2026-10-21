@@ -134,7 +134,8 @@ def _problem_functions(method, xc_spec, collinear, occupation_rows, *, uks_confi
                 alpha=jnp.asarray(1. if rsh_preset(xc_spec) is not None else hybrid_coeff(xc_spec),
                                   dtype=density.dtype), cfg=cfg, xc_kind=kind,
                 eri_lr=args.get('eri_lr'), dispersion_energy=args.get('dispersion_energy'),
-                compute_potential=compute_potential, grid_ao=args.get('grid_ao'))
+                compute_potential=compute_potential, direct_basis=args.get('direct_basis'),
+                grid_ao=args.get('grid_ao'))
             return total, jnp.stack([fa,fb]) if compute_potential else None
 
     def energy(angles, base, args):
@@ -145,8 +146,20 @@ def _problem_functions(method, xc_spec, collinear, occupation_rows, *, uks_confi
 def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
               grid_weights, mo_coeff, mo_occ, xc_spec, collinear, max_iterations,
               gradient_tolerance, gradient_mode, differentiation, orthonormalize_initial,
-              eri_lr=None, dispersion_energy=None, grid_ao=None):
-    rsh = validate_rsh_inputs(xc_spec, eri, eri_lr, dispersion_energy)
+              eri_lr=None, dispersion_energy=None, grid_ao=None,
+              direct_basis=None, direct_scf_tol=0.0, direct_scf_workers=1):
+    jk_backend = 'direct' if direct_basis is not None else 'full'
+    if direct_basis is not None:
+        if method == 'gks':
+            raise NotImplementedError('Direct GKS orbital minimization is not supported.')
+        if not callable(getattr(direct_basis, 'get_jk', None)) or not hasattr(direct_basis, 'nao'):
+            raise TypeError('direct_basis must provide nao and a callable get_jk.')
+        if eri is not None and jnp.size(eri):
+            raise ValueError('Direct orbital minimization requires eri=None or an empty ERI array.')
+    elif eri is None or not jnp.size(eri):
+        raise ValueError('Orbital minimization requires ERIs or a direct_basis provider.')
+    rsh = validate_rsh_inputs(xc_spec, eri, eri_lr, dispersion_energy,
+                              jk_backend=jk_backend, direct_basis=direct_basis)
     if rsh is not None and method == 'gks':
         raise NotImplementedError('Range-separated GKS orbital minimization is not supported.')
     if max_iterations < 1 or gradient_tolerance <= 0:
@@ -160,6 +173,8 @@ def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
     n = s.shape[0]
     if s.shape != (n,n):
         raise ValueError('Overlap must be square.')
+    if direct_basis is not None and direct_basis.nao != n:
+        raise ValueError('direct_basis AO dimensions must match the overlap.')
     try:
         occ = np.asarray(mo_occ)
     except jax.errors.TracerArrayConversionError as exc:
@@ -191,14 +206,19 @@ def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
         if not np.allclose(concrete, np.eye(coeff.shape[-1]), atol=1e-8, rtol=0):
             raise ValueError('Initial orbitals must be metric-orthonormal; set orthonormalize_initial=True to transport a seed.')
     topology = tuple(tuple(float(x) for x in row) for row in occ)
-    dimension, rotate, density_from, evaluate, energy = _problem_functions(method, xc_spec, collinear, topology)
-    args = dict(metric=metric, hcore=jnp.asarray(hcore), eri=jnp.asarray(eri),
+    uks_config = UKSConfig(xc_spec=xc_spec, jk_backend=jk_backend,
+                           direct_scf_tol=direct_scf_tol, direct_scf_workers=direct_scf_workers)
+    dimension, rotate, density_from, evaluate, energy = _problem_functions(
+        method, xc_spec, collinear, topology, uks_config=uks_config)
+    args = dict(metric=metric, hcore=jnp.asarray(hcore), eri=None if eri is None else jnp.asarray(eri),
         nuclear_repulsion=jnp.asarray(nuclear_repulsion), ao=jnp.asarray(ao),
-        ao_deriv1=jnp.asarray(ao_deriv1), grid_weights=jnp.asarray(grid_weights), grid_ao=grid_ao)
+        ao_deriv1=jnp.asarray(ao_deriv1), grid_weights=jnp.asarray(grid_weights),
+        grid_ao=grid_ao, direct_basis=direct_basis)
     if rsh is not None:
-        # Both arrays cross the custom implicit boundary as ordinary dynamic
-        # leaves, including their geometry/field dependence.
-        args.update(eri_lr=jnp.asarray(eri_lr), dispersion_energy=jnp.asarray(dispersion_energy))
+        # Present physical arrays cross the implicit boundary as dynamic leaves.
+        # A native direct provider supplies LR exchange without an ERI array.
+        args.update(eri_lr=None if eri_lr is None else jnp.asarray(eri_lr),
+                    dispersion_energy=None if dispersion_energy is None else jnp.asarray(dispersion_energy))
     initial = _orthonormalize(coeff, metric)
     initial_energy = evaluate(density_from(initial),args)[0]
     solve_args, solve_coeff = args, initial
@@ -252,7 +272,8 @@ def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
 def minimize_uks_from_integrals(*, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
     grid_weights, mo_coeff, mo_occ, xc_spec='hf', max_iterations=500, gradient_tolerance=1e-7,
     gradient_mode=None, differentiation=None, orthonormalize_initial=False,
-    eri_lr=None, dispersion_energy=None, grid_ao=None):
+    eri_lr=None, dispersion_energy=None, grid_ao=None,
+    direct_basis=None, direct_scf_tol=0.0, direct_scf_workers=1):
     """UHF/UKS fixed occupations; backward mode is ``implicit`` or ``explicit``.
 
     Supply static ``mo_occ`` of shape (2,nao), and float64 coefficients of shape
@@ -260,6 +281,10 @@ def minimize_uks_from_integrals(*, overlap, hcore, eri, nuclear_repulsion, ao, a
     a fixed seed. Both modes use identical forward iterations. Unrolled follows
     finite iterates, including initial-orbital dependence; implicit follows the
     stationary branch and returns nonfinite gradients if it has not converged.
+    A JAX-pytree AO J/K ``direct_basis`` replaces ERIs; pass ``eri=None``.
+    Native providers retain moving coordinates in the stationary response.
+    Geometry AD requires ``direct_scf_tol=0``; primitive exponent
+    and coefficient derivatives remain unsupported by native direct J/K.
     """
     return _minimize(method='uks', collinear='col', **locals())
 
@@ -267,7 +292,8 @@ def minimize_uks_from_integrals(*, overlap, hcore, eri, nuclear_repulsion, ao, a
 def minimize_roks_from_integrals(*, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
     grid_weights, mo_coeff, mo_occ, xc_spec='hf', max_iterations=500, gradient_tolerance=1e-7,
     gradient_mode=None, differentiation=None, orthonormalize_initial=False,
-    eri_lr=None, dispersion_energy=None, grid_ao=None):
+    eri_lr=None, dispersion_energy=None, grid_ao=None,
+    direct_basis=None, direct_scf_tol=0.0, direct_scf_workers=1):
     """ROHF/ROKS shared spatial orbitals; see ``minimize_uks_from_integrals``."""
     return _minimize(method='roks', collinear='col', **locals())
 

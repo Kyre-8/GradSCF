@@ -28,6 +28,10 @@ In scope:
   integral JVP/VJP, directional second derivatives, and supported mixed responses;
 - byte budgets, cache lifetime, CPU/GPU execution and optional disk storage.
 
+Retain existing ROHF-to-spin-reference entry points in CI/UCC and their explicit
+restrictions. The first moving-geometry slice is RHF/UHF; it does not silently
+add ROHF geometry response or relax UCIS's stationary-UHF requirement.
+
 GW/BSE, periodic correlation, OFDFT, new correlation models, selected-CI,
 local-correlation approximations and frozen virtuals are outside this project.
 Shared infrastructure may be reused by those modules later. Existing DF is a
@@ -112,6 +116,7 @@ Named branch coverage (a shared kernel pass does not imply every branch passes):
 | EOM-EE/IP/EA and left states | WF-16/17 | Sector-specific intermediates and root-response contract |
 | IP/EA Dyson orbitals/pole weights | WF-34 | Endpoint workspace, left/right columns and vector-response guard |
 | FCI and active/core folding | WF-19/21/22/27 | Fixed CAS, spin sector, RDM and derivative conventions |
+| Existing ROHF spin-reference conversion | WF-12/13/18/22 | Common spatial frame, occupation split, current UCIS/geometry restrictions |
 
 The branch inventory is rechecked against public exports before changing each
 family. Named CISD(T) and CISDT(Q) corrections are not exported at this baseline
@@ -258,7 +263,7 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   new worktree from committed code, preserve main WIP, document all methods and
   dependencies, define acceptance/evidence. Acceptance: Git/source inspection,
   plan completeness review; no numerical or performance claim.
-- [ ] **WF-01 — Direct stationary SCF input chain** (`in_progress`). Pass existing
+- [x] **WF-01 — Direct stationary SCF input chain** (`verified`). Pass existing
   native `direct_basis` through the shared orbital optimizer with no dense ERI;
   support moving RHF/UHF HF inputs in the molecular adapter. Reuse native J/K and
   existing implicit response. Acceptance: direct/full energy, density response,
@@ -322,7 +327,8 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   comparison, and byte-accounted simultaneous first/second doubles workspace.
 - [ ] **WF-12 — UCC spatial-spin integral blocks.** Remove full `(2*nmo)^4`
   construction, map allowed aa/ab/bb blocks lazily. Acceptance: signs, factors,
-  antisymmetry, unequal occupations, frozen orbitals and residual parity.
+  antisymmetry, unequal occupations, frozen orbitals, existing ROHF conversion
+  and residual parity.
 - [ ] **WF-13 — UCC residual/amplitude workspace.** Reduce repeated dense
   spin-amplitude expansion using block consumers. Acceptance: UCCD/UCCSD forward,
   adjoints and geometry HVP, restricted-limit comparison; packed-coordinate
@@ -358,6 +364,8 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   `excitation_ranks`, open-shell/frozen cases, dense oracle and no determinant
   connection-table expansion on the scalable path. Exercise noncontiguous CID
   ranks independently from contiguous CISD.
+  Retain ROHF common-frame conversion and explicitly test any branch that must
+  reject a nonstationary ROHF occupied-virtual block.
 - [ ] **WF-19 — FCI active-reference preparation.** Retain core folding and only
   necessary active ERIs; remove upstream full AO-pair materialization.
   Acceptance: h_eff/E_core/ERI equality, active/frozen mapping, coefficient and
@@ -433,9 +441,13 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
 ## 6. Validation matrix and measurement protocol
 
 Every numerical test runs on **jy_gpu_1**, never locally. GPU6 is prohibited.
-Project-wide use is at most 96 logical CPUs; use disjoint affinities when another
-owned task is active. Each task is limited to two hours. Prefer tiny CPU tests
-first; inspect live project jobs before allocating resources. Large molecule
+The latest 2026-10-21 instruction cancels the Slurm allocation workflow: run
+bounded tests directly, with **at most 64 logical CPUs** for this project.
+GPU7 is the preferred permitted GPU, subject to a live availability check;
+GPU6 is never used. The earlier 96-CPU limit and 48-hour allocation proposal
+are superseded. Keep individual tests bounded (normally at most two hours).
+Prefer tiny CPU tests first; inspect live project jobs before using resources.
+Large molecule
 calculations are not resumed as a side effect of writing this plan. Obtain the
 required authorization before new long campaigns or large dependencies.
 
@@ -516,6 +528,56 @@ requires its own explicit decision and numerical validation.
 
 ### 2026-10-21 — WF-01: started
 
-- Status: `in_progress`. Focused direct/full stationary-HF regression tests will
-  be written and observed failing remotely before the production input chain is
-  changed. Verification and review results will be appended here.
+- Initial status: `in_progress`. Focused direct/full stationary-HF regression
+  tests were written and observed failing remotely before the production input
+  chain changed. Final verification and review are recorded below.
+- RED observed on `jy_gpu_1` (`c20`), CPU affinity `80-95`, GPU disabled, timeout
+  600 s: `python -m pytest -q tests/test_scf_orbital_direct.py::test_direct_stationary_hf_matches_full_state`.
+  Exit 1, exactly 2 expected failures (RHF/UHF: unexpected `direct_basis`
+  argument), 26.02 s wall time. Both full-ERI oracle solves were stationary.
+  Baseline manifest: 1056 verified source/test files, base `1a7ee6c`; reused
+  native library SHA256 `3b0658cd5381c6c9e170f7d50c271e7521e1200581ab49b3c97b47451ac0e766`.
+  Remote evidence: `wavefunction-memory-20261021/red/{red_result.json,red.xml,red.log}`
+  under `/home/yjiao/gradscf_checks/`. Local copies are ignored artifacts, not
+  new source files. Production edits began only after this expected failure.
+- Implementation now exists in `scf/orbital_optimization.py` and
+  `gradscf_tools/molecular_response.py`; `eri=None` plus dynamic direct basis
+  replaces the full HF ERI only on the explicit new path. Existing dense defaults
+  and downstream correlation/GW consumers are unchanged. No new solver was added.
+- GREEN snapshot 1: 25 new tests passed in 152.68 s (155.55 s process wall),
+  exit 0; 20 existing orbital/geometry/UHF response regressions passed in
+  189.18 s (198.25 s process wall), exit 0. Same host, affinity and disabled GPU
+  as RED; JAX 0.10.0, PySCF 2.13.0, pytest 9.0.3. Observed test-process peak RSS:
+  1,828,548 KiB / 3,159,568 KiB respectively. These are test-suite peaks, not a
+  method scaling benchmark or evidence of a quantified memory reduction.
+- Specification and independent code-quality reviews passed. Specification
+  review requested an additional energy finite-difference check of g dot v at
+  both step sizes; this test-only change awaits a focused rerun of the two R/U
+  geometry cases. Status therefore remains unchecked until that final gate.
+- Remote evidence: `wavefunction-memory-20261021/green1/{results.json,direct.xml,regression.xml}`.
+  Both production file hashes are unchanged for the final focused rerun.
+- Final gate passed directly on c20, CPU affinity `56-71`, GPU disabled,
+  timeout 600 s: the updated R/U geometry test passed both cases, exit 0,
+  56.80 s pytest / 59.01 s process wall, peak RSS 1,557,584 KiB. At both
+  3e-4 and 1e-4 bohr it checks energy FD against g dot v and gradient FD against
+  HVP. Evidence: `green2/{geometry-direct-result.json,geometry-direct.xml,geometry-direct.log}`.
+- Completion review: WF-01 is `verified` (25 new + 20 existing unique cases;
+  two geometry cases rerun after the test-only review improvement). CPU forward,
+  density JVP/VJP and coordinate gradient/HVP passed with no-full-ERI traps.
+  GPU, basis-parameter AD, DFT/RSH direct in this adapter, and post-HF integral
+  storage are not covered by this completion. WF-02 is next; WF-03/04 are still
+  required before claiming scalable MP2 geometry. The overall plan is unchanged.
+
+### 2026-10-21 — Test allocation preparation
+
+- The user initially authorized a 48-hour allocation. CPU-only job 11786 started
+  with 64 logical CPUs; no GPU was requested. GPU0 was already assigned elsewhere,
+  while the single common GPU type did not provide a direct GPU7 request.
+- The user then explicitly cancelled the Slurm workflow. Job 11786 was verified
+  `CANCELLED`, ending 2026-10-21T17:18:58 (scheduler time); there is no continuing
+  resource hold. The unused scheduler helper was removed from this worktree.
+  Submission/script/cancellation records remain ignored execution artifacts.
+- The attempted final geometry check inside Slurm exited before numerical work
+  because its step description lacked CPU IDs. This is a runner failure, not a
+  failed geometry derivative. The focused test is rerun directly with 16 CPUs
+  and all GPUs disabled. Algorithm work continues without Slurm changes.
