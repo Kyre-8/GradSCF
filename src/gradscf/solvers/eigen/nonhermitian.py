@@ -8,10 +8,13 @@ from ..diagnostics import require_converged_derivative
 from ._nonhermitian_ritz import paired_eigenvectors
 from .nonhermitian_davidson import davidson_ritz
 from ._nonhermitian_response import attach_pair_response
+from ..memory import apply_columns, plan_nonhermitian
+from gradscf._memory import array_storage_bytes, validate_reserved_bytes
 
 
 def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
-                      vector_response=False, response_config=None):
+                      vector_response=False, response_config=None,
+                      max_memory=None, reserved_bytes=0, _batch_size=None):
     """Lowest-real-part dense eigenpairs or iterative Ritz estimates.
 
     By default only isolated real eigenvalue JVP/VJP is exposed and left/right
@@ -25,6 +28,9 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
     gaps/order are local Ritz estimates, not a global isolation certificate.
     spectrum_complete distinguishes full coverage. Exceptional or poorly
     conditioned roots invalidate energy response; no dense fallback is used.
+    Optional max_memory budgets known primal working arrays in decimal MB;
+    reserved_bytes declares caller data not visible in a generic operator.
+    Operator-specific scratch and implicit response need separate planning.
     """
     cfg = NonHermitianSolverConfig() if config is None else config
     if not isinstance(vector_response, bool):
@@ -33,12 +39,30 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
         raise TypeError("response_config must be a LinearSolverConfig")
     if response_config is not None and not vector_response:
         raise ValueError("response_config requires vector_response=True")
-    op = as_operator(matrix_or_operator)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    a = None if hasattr(matrix_or_operator, "matvec") else jnp.asarray(matrix_or_operator)
+    op = as_operator(matrix_or_operator if a is None else a)
     validate_real_square(op)
     n = op.shape[0]
     k = cfg.nroots
     if k > n:
         raise ValueError("nroots exceeds operator dimension")
+    if max_memory is not None:
+        if initial_vectors is not None:
+            if cfg.method == "dense":
+                raise ValueError("initial_vectors applies only to Davidson")
+            if jnp.iscomplexobj(initial_vectors):
+                raise NotImplementedError("Initial vectors must be real")
+            initial_vectors = jnp.asarray(initial_vectors, dtype=op.dtype)
+            if (initial_vectors.ndim != 2 or initial_vectors.shape[0] != n
+                    or not 1 <= initial_vectors.shape[1] <= min(n, cfg.max_space)):
+                raise ValueError("initial_vectors must have shape (n, 1..max_space)")
+        cfg, _, _batch_size = plan_nonhermitian(n, op.dtype, cfg, max_memory,
+            resident_bytes=reserved_bytes+array_storage_bytes(a, op.diagonal, initial_vectors),
+            initial_columns=0 if initial_vectors is None else initial_vectors.shape[1],
+            device=getattr(op.diagonal, "device", None))
+    apply = lambda v: apply_columns(op, v, _batch_size)
+    apply_transpose = lambda v: apply_columns(op.T, v, _batch_size)
     if cfg.method == "dense":
         if initial_vectors is not None:
             raise ValueError("initial_vectors applies only to Davidson")
@@ -49,7 +73,7 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
             probes = jax.nn.one_hot(
                 jnp.arange(start, min(start + cfg.block_size, n)), n, dtype=op.dtype
             ).T
-            blocks.append(op.apply(probes))
+            blocks.append(apply(probes))
         a = jax.lax.stop_gradient(jnp.concatenate(blocks, axis=1))
         wr, right, left = paired_eigenvectors(a, k)
         complete, iterations, dimension = (
@@ -60,7 +84,8 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
         guards = jnp.zeros((0,), dtype=op.dtype)
         numerical_valid = jnp.all(jnp.isfinite(a)) & jnp.all(jnp.isfinite(wr))
     else:
-        solved = davidson_ritz(op, cfg, initial_vectors)
+        solved = (davidson_ritz(op, cfg, initial_vectors) if _batch_size is None else
+                  davidson_ritz(op, cfg, initial_vectors, batch_size=_batch_size))
         wr, right, left = solved.spectrum, solved.right, solved.left
         iterations, dimension = solved.iterations, solved.dimension
         complete = dimension == n
@@ -85,11 +110,11 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
     )
     energies = wr[:k].real
     right_res = jnp.linalg.norm(
-        jax.lax.stop_gradient(op.apply(r)) - r * energies, axis=0
+        jax.lax.stop_gradient(apply(r)) - r * energies, axis=0
     )
     left_norm = jnp.linalg.norm(l, axis=0)
     left_res = jnp.linalg.norm(
-        jax.lax.stop_gradient(op.T.apply(l)) - l * energies, axis=0
+        jax.lax.stop_gradient(apply_transpose(l)) - l * energies, axis=0
     ) / jnp.maximum(left_norm, 1.0)
     bio = jnp.linalg.norm(l.T @ r - jnp.eye(k, dtype=r.dtype))
     real = jnp.abs(wr[:k].imag) <= cfg.imaginary_tol
@@ -125,7 +150,7 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
         values, r, l = attach_pair_response(op, energies, r, l,
                                             config=linear, valid=valid)
     else:
-        applied = op.apply(r)
+        applied = apply(r)
         live_zero = applied - jax.lax.stop_gradient(applied)
         values = energies + jnp.sum(l * live_zero, axis=0)
     values = require_converged_derivative(values, valid)

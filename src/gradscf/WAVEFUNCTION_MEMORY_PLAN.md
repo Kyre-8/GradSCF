@@ -552,6 +552,8 @@ section 8 are provenance, not additional active TODO levels.
     finite-candidate retry and full recovery; retain the existing AD owner.
   - [ ] **WF-29c:** non-Hermitian, DIIS, Lambda/SCF and response-state ownership,
     phase-aware lifetimes and byte-controlled caches across all consumers.
+    Shared non-Hermitian/EOM primal capacity, closures and action batches are
+    verified; implicit-response, DIIS and remaining caller ownership stay open.
 - [ ] **WF-30 — CPU/GPU and nested-AD audit.** Run eager and JIT public entry
   points, native dispatch, device residency and transfer accounting. Acceptance:
   same numerical cases/dtype/seed, forward/JVP/VJP/HVP separately, actual peak
@@ -1925,3 +1927,40 @@ requires its own explicit decision and numerical validation.
 - This finite residual-action slice is accepted within the existing WF-13.
   Dense spin-vvvv, packed-amplitude expansion and joint method/AD budgets remain
   open; there is no new TODO branch or claim that the whole parent is complete.
+
+### 2026-10-22 — WF-29c/16/17: shared non-Hermitian primal budget
+
+- The shared non-Hermitian planner retains requested/guard roots, iteration
+  limit, seed, convergence and response settings. It selects the largest legal
+  Krylov capacity within the original configuration and byte budget, preserving
+  mandatory algorithm/initial-column minima, and bounds both right and left
+  action columns. Dense real arrays/SVD and complex eigenspaces have separate
+  byte widths. The original MB budget receives its single 20% reserve once.
+- EOM keeps its public three-return operator API. A small private context
+  accounts for ground/integral payload, actual linearized/charged arrays,
+  action constants and conservative known JAX temporary sums. Raw selected
+  payload is shape-checked before eager preparation; the reviewed allocation
+  window was first reproduced and then repaired. Unknown allocator/library
+  state and implicit-response Krylov arrays are not claimed as covered.
+- The facade dynamically inherits CC's max_memory, supports explicit override
+  and reset, includes the resolved budget in freshness checks, and clears stale
+  results on failed rebuild. Low-level max_memory=None retains the original
+  mathematical path without budget traces. No eigensolver or adjoint math changed.
+- Twenty-eight new plus forty-nine existing cases pass in seven final batches,
+  all exit0/no skips/timeouts: shared dense/Davidson, mandatory root/capacity
+  guards, right/left batching, JVP/VJP and clustered-root response, EE/IP/EA roots
+  and derivatives, facade inheritance/cache and raw preflight. Four RED batches
+  retain seven expected failures. Longest final runner 213.98 s, remote CPU80-87.
+- Matched n=256 two-sided primal pair, identical input SHA/config/tolerances:
+  capacity 32->14, action width2, root max difference 1.39e-15; known solver
+  reservation 659,900->386,228 bytes. Warm medians 5.805/6.717 ms (+15.7%);
+  sampled RSS 709,533,696/709,636,096 bytes is essentially unchanged. Both fresh
+  processes exit0. This is capacity control, not a whole-EOM memory/speedup win.
+- Root and independent read-only review checked the raw preflight fix, source
+  lineage, all final seventeen source/test hashes, raw XML and actual exits.
+  Evidence: `wf29c-eom-memory/`, archive SHA `feec3d39...cbd8`, final planner/
+  EOM kernels `077edee6`/`ddb0da15`. Concurrent MP/UCC WIP is excluded from the
+  frozen baseline. No GPU, local numeric work, build or dependency installation.
+- This primal slice is accepted within the existing WF-29c/16/17; no additional
+  task branch is created. Charged Wvvvv algorithm/lifetime changes, Lambda/DIIS,
+  implicit-response storage and joint method/AD/process budgets remain open.

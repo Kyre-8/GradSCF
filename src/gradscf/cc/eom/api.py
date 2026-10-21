@@ -2,6 +2,7 @@
 
 from dataclasses import fields
 import numpy as np
+from ..._memory import resolve_memory_mb
 from ...scf.reference import _array_signature
 from .types import EOMConfig, EOMPrecisionDiagnostics
 from .amplitudes import EOMAmplitudeSpace
@@ -9,9 +10,10 @@ from .operators import run_eom, run_eom_from_integrals
 
 
 class _EOM:
-    def __init__(self, ground, *, sector, **kwargs):
+    def __init__(self, ground, *, sector, max_memory=None, **kwargs):
         cfg = EOMConfig(sector=sector, **kwargs)
         self.ground = ground
+        self.max_memory = max_memory
         self._sector = sector
         for field in fields(cfg):
             setattr(self, field.name, getattr(cfg, field.name))
@@ -20,6 +22,15 @@ class _EOM:
         )
         self.converged = None
         self._state_key = None
+
+    @property
+    def max_memory(self):
+        """Original decimal-MB budget, dynamically inherited from CC by default."""
+        return resolve_memory_mb(self._max_memory, self.ground)
+
+    @max_memory.setter
+    def max_memory(self, value):
+        self._max_memory = None if value is None else resolve_memory_mb(value)
 
     def _config(self):
         if self.sector != self._sector:
@@ -57,6 +68,7 @@ class _EOM:
             _array_signature(self.ground.result.t1),
             _array_signature(self.ground.result.t2),
             self._config(),
+            self.max_memory,
         )
 
     def check_source(self):
@@ -75,10 +87,12 @@ class _EOM:
         ref = self._source()
         if self.ground._integrals is not None:
             self.result = run_eom_from_integrals(self.ground._integrals,
-                self.ground.result, config=cfg, cc_config=self.ground._config())
+                self.ground.result, config=cfg, cc_config=self.ground._config(),
+                max_memory=self.max_memory)
         else:
             self.result = run_eom(ref.h1, ref.eri, self.ground.result, nocc=ref.nocc,
-                frozen=self.ground.frozen, config=cfg, cc_config=self.ground._config())
+                frozen=self.ground.frozen, config=cfg, cc_config=self.ground._config(),
+                max_memory=self.max_memory)
         self.e = self.result.energies
         self.right_vectors, self.left_vectors = (
             self.result.right_vectors,

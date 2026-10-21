@@ -1,8 +1,12 @@
 """Physical EOM actions built from a checked CCSD ground state."""
 
+from dataclasses import dataclass
+from math import prod
 import jax
 import jax.numpy as jnp
+from ..._memory import array_storage_bytes, validate_reserved_bytes, workspace_bytes
 from ...solvers import LinearOperator, NonHermitianSolverConfig, solve_nonhermitian
+from ...solvers.memory import plan_nonhermitian
 from ...solvers.diagnostics import require_converged_derivative
 from ..types import CCConfig
 from ..ground import METHODS
@@ -14,9 +18,37 @@ from .types import EOMConfig, EOMResult
 from ._charged import intermediates, ip_action, ea_action
 
 
+@dataclass(frozen=True)
+class _EOMMemory:
+    resident_bytes: int
+    closure_bytes: int
+    operator_min_bytes: int
+    operator_bytes_per_column: int
+    config: NonHermitianSolverConfig
+    solver_reserved_bytes: int
+    action_columns: int
+
+
+@dataclass(frozen=True)
+class _EOMContext:
+    operator: LinearOperator
+    space: EOMAmplitudeSpace
+    valid: object
+    memory: _EOMMemory | None = None
+
+
 def build_eom_operator(
-    h1, eri, ground, *, nocc, frozen=None, config=None, cc_config=None
+    h1, eri, ground, *, nocc, frozen=None, config=None, cc_config=None,
+    max_memory=None, reserved_bytes=0
 ):
+    context = _operator_context(h1, eri, ground, nocc=nocc, frozen=frozen,
+        config=config, cc_config=cc_config, max_memory=max_memory,
+        reserved_bytes=reserved_bytes)
+    return context.operator, context.space, context.valid
+
+
+def _operator_context(h1, eri, ground, *, nocc, frozen=None, config=None,
+                      cc_config=None, max_memory=None, reserved_bytes=0):
     cfg = EOMConfig() if config is None else config
     cc_cfg = CCConfig() if cc_config is None else cc_config
     if not isinstance(nocc, int) or isinstance(ground.t1, (tuple, list)):
@@ -26,17 +58,40 @@ def build_eom_operator(
     space = _checked_space(ground, cfg, cc_cfg)
     if jnp.size(eri) > cfg.max_intermediate_elements:
         raise ValueError("EOM input integrals exceed max_intermediate_elements")
+    if max_memory is not None:
+        reserved_bytes = validate_reserved_bytes(reserved_bytes)
+        h1, eri = jnp.asarray(h1), jnp.asarray(eri)
+        reserved_bytes += array_storage_bytes(h1, eri)
+        # Shape-only preparation charges the exact selected payload before
+        # eager gathers allocate it, including frozen-core/virtual selections.
+        selected = jax.eval_shape(lambda h, g: prepare_integrals(
+            h, g, nocc=nocc, frozen=frozen), h1, eri)
+        plan_nonhermitian(space.size, ground.t1.dtype, _solver_config(cfg), max_memory,
+            resident_bytes=reserved_bytes+array_storage_bytes(
+                *jax.tree.leaves(ground), *jax.tree.leaves(selected)),
+            device=getattr(h1, "device", None))
     ints = prepare_integrals(h1, eri, nocc=nocc, frozen=frozen)
-    return _build_operator(ints, ground, space, cfg, cc_cfg)
+    return _planned_operator(ints, ground, space, cfg, cc_cfg, max_memory, reserved_bytes)
 
 
-def build_eom_operator_from_integrals(ints, ground, *, config=None, cc_config=None):
+def build_eom_operator_from_integrals(ints, ground, *, config=None, cc_config=None,
+                                      max_memory=None, reserved_bytes=0):
     """EE/IP/EA operator from the same prepared restricted integral snapshot.
 
     The capacity guard counts supplied storage leaves, without a full MO ERI
     estimate. Matrix-free virtual ERIs are explicitly unsupported here: EA's
     current transformed Wvvvv remains dense and needs separate validation.
+    max_memory plans known primal arrays in decimal MB, with the shared 20%
+    runtime reserve. Compilation/allocator state and implicit-response Krylov
+    storage have separate lifetimes and are not a process memory limit.
     """
+    context = _operator_context_from_integrals(ints, ground, config=config,
+        cc_config=cc_config, max_memory=max_memory, reserved_bytes=reserved_bytes)
+    return context.operator, context.space, context.valid
+
+
+def _operator_context_from_integrals(ints, ground, *, config=None, cc_config=None,
+                                     max_memory=None, reserved_bytes=0):
     cfg = EOMConfig() if config is None else config
     cc_cfg = CCConfig() if cc_config is None else cc_config
     if isinstance(ground.t1, (tuple, list)):
@@ -46,7 +101,76 @@ def build_eom_operator_from_integrals(ints, ground, *, config=None, cc_config=No
         raise NotImplementedError("Prepared EOM currently requires dense virtual ERIs")
     if sum(jnp.size(x) for x in jax.tree.leaves(ints)) > cfg.max_intermediate_elements:
         raise ValueError("Prepared EOM integral storage exceeds max_intermediate_elements")
-    return _build_operator(ints, ground, space, cfg, cc_cfg)
+    return _planned_operator(ints, ground, space, cfg, cc_cfg, max_memory, reserved_bytes)
+
+
+def _array_bytes(variable):
+    aval = getattr(variable, "aval", None)
+    if not hasattr(aval, "shape") or not hasattr(aval, "dtype"):
+        return 0
+    return prod(aval.shape)*jnp.dtype(aval.dtype).itemsize
+
+
+def _temporary_bytes(jaxpr):
+    """Conservative sum of known JAX array temporaries, without executing it.
+
+    This deliberately does not model allocator reuse. Nested JIT/call bodies
+    are charged too; opaque numerical-library scratch uses the runtime reserve.
+    """
+    if hasattr(jaxpr, "jaxpr"):
+        jaxpr = jaxpr.jaxpr
+    total = sum(_array_bytes(v) for equation in jaxpr.eqns for v in equation.outvars)
+    for equation in jaxpr.eqns:
+        for value in equation.params.values():
+            values = value if isinstance(value, (tuple, list)) else (value,)
+            for nested in values:
+                if hasattr(nested, "eqns") or hasattr(nested, "jaxpr"):
+                    total += _temporary_bytes(nested)
+    return total
+
+
+def _planned_operator(ints, ground, space, cfg, cc_cfg, max_memory, reserved_bytes):
+    if max_memory is None:
+        op, _, valid, _, _ = _build_operator(ints, ground, space, cfg, cc_cfg)
+        return _EOMContext(op, space, valid)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    base = jax.tree.leaves((ints, ground))
+    resident = reserved_bytes+array_storage_bytes(*base)
+    device = getattr(ints.fock, "device", None)
+    solver_cfg = _solver_config(cfg)
+    # This minimum check precedes linearize/intermediates, including their
+    # abstract tracing. Every check retains the SAME original MB budget.
+    plan_nonhermitian(space.size, ground.t1.dtype, solver_cfg, max_memory,
+                       resident_bytes=resident, device=device)
+    shaped = jax.make_jaxpr(lambda i, g: _build_operator(
+        i, g, space, cfg, cc_cfg, storage_only=True))(ints, ground)
+    if _temporary_bytes(shaped) > workspace_bytes(max_memory, resident_bytes=resident,
+                                                  device=device):
+        raise ValueError("EOM operator construction exceeds the working-memory budget")
+    # Outputs are residual, diagonal, validity and precisely the arrays held by
+    # the linearized EE action or the charged-sector namespace. Input aliases
+    # are already resident; no conceptual full-MO or provider nvir**4 is added.
+    inputs = {id(v) for v in shaped.jaxpr.invars}
+    held = {id(v): v for v in shaped.jaxpr.outvars[1:] if id(v) not in inputs}
+    closure_estimate = sum(_array_bytes(v) for v in held.values())
+    plan_nonhermitian(space.size, ground.t1.dtype, solver_cfg, max_memory,
+                       resident_bytes=resident+closure_estimate, device=device)
+    op, _, valid, held, action = _build_operator(ints, ground, space, cfg, cc_cfg)
+    vector = jax.ShapeDtypeStruct((space.size,), op.dtype)
+    right = jax.make_jaxpr(action)(vector)
+    left = jax.make_jaxpr(lambda v: jax.linear_transpose(action, v)(v)[0])(vector)
+    resident = reserved_bytes+array_storage_bytes(
+        *base, *held, op.diagonal, valid, *right.consts, *left.consts)
+    closure_bytes = resident-reserved_bytes-array_storage_bytes(*base)
+    # Davidson complex Ritz vectors run through the same real operator. Charge
+    # both real/imaginary work widths, also safely covering dense real actions.
+    per_column = 2*max(_temporary_bytes(right), _temporary_bytes(left))
+    planned, solver_bytes, columns = plan_nonhermitian(space.size, op.dtype,
+        solver_cfg, max_memory, resident_bytes=resident,
+        operator_bytes_per_column=per_column, device=device)
+    memory = _EOMMemory(resident, closure_bytes, 0, per_column, planned,
+                        solver_bytes, columns)
+    return _EOMContext(op, space, valid, memory)
 
 
 def _checked_space(ground, cfg, cc_cfg):
@@ -65,7 +189,7 @@ def _checked_space(ground, cfg, cc_cfg):
     return space
 
 
-def _build_operator(ints, ground, space, cfg, cc_cfg):
+def _build_operator(ints, ground, space, cfg, cc_cfg, *, storage_only=False):
     no, nv = ground.t1.shape
     if (no, nv) != (ints.nocc, ints.nvir):
         raise ValueError("CC amplitudes and active EOM space differ")
@@ -94,8 +218,10 @@ def _build_operator(ints, ground, space, cfg, cc_cfg):
     valid &= jnp.max(jnp.abs(current), initial=0.0) <= 10 * cc_cfg.residual_tol
     if cfg.sector == "ee":
         _, action = jax.linearize(equations, t)
+        held = jax.tree.leaves(action)
     else:
         w = intermediates(t1, t2, ints, cfg.sector)
+        held = tuple(vars(w).values())
         contraction = ip_action if cfg.sector == "ip" else ea_action
 
         def action(v):
@@ -115,6 +241,8 @@ def _build_operator(ints, ground, space, cfg, cc_cfg):
         d1 = ev
         d2 = ev[None, :, None] + ev[None, None, :] - eo[:, None, None]
     diagonal = space.pack(d1, d2) / space.pack(jnp.ones_like(d1), jnp.ones_like(d2))
+    if storage_only:
+        return current, diagonal, valid, *held
 
     def checked(v):
         return require_converged_derivative(action(v), valid)
@@ -126,10 +254,11 @@ def _build_operator(ints, ground, space, cfg, cc_cfg):
         diagonal=diagonal,
         matmat=lambda v: jax.vmap(checked, in_axes=1, out_axes=1)(v),
     )
-    return op, space, valid
+    return op, space, valid, held, action
 
 
-def run_eom(h1, eri, ground, *, nocc, frozen=None, config=None, cc_config=None):
+def run_eom(h1, eri, ground, *, nocc, frozen=None, config=None, cc_config=None,
+            max_memory=None, reserved_bytes=0):
     """EE/IP/EA energies relative to the same converged CCSD ground state.
 
     EA returns E(N+1)-E(N); the conventional electron affinity is its negative.
@@ -138,41 +267,41 @@ def run_eom(h1, eri, ground, *, nocc, frozen=None, config=None, cc_config=None):
     shared isolated-real-eigenpair response needed by transition properties.
     """
     cfg = EOMConfig() if config is None else config
-    op, space, valid = build_eom_operator(
-        h1, eri, ground, nocc=nocc, frozen=frozen, config=cfg, cc_config=cc_config
+    context = _operator_context(
+        h1, eri, ground, nocc=nocc, frozen=frozen, config=cfg, cc_config=cc_config,
+        max_memory=max_memory, reserved_bytes=reserved_bytes
     )
-    return _run_operator(op, valid, cfg)
+    return _run_operator(context.operator, context.valid, cfg, context.memory)
 
 
-def run_eom_from_integrals(ints, ground, *, config=None, cc_config=None):
+def run_eom_from_integrals(ints, ground, *, config=None, cc_config=None,
+                           max_memory=None, reserved_bytes=0):
     """Prepared EE/IP/EA roots with the same solver and response contracts."""
     cfg = EOMConfig() if config is None else config
-    op, _, valid = build_eom_operator_from_integrals(
-        ints, ground, config=cfg, cc_config=cc_config)
-    return _run_operator(op, valid, cfg)
+    context = _operator_context_from_integrals(
+        ints, ground, config=cfg, cc_config=cc_config, max_memory=max_memory,
+        reserved_bytes=reserved_bytes)
+    return _run_operator(context.operator, context.valid, cfg, context.memory)
 
 
-def _run_operator(op, valid, cfg):
+def _solver_config(cfg):
+    return NonHermitianSolverConfig(
+        method=cfg.solver, maxiter=cfg.max_cycle, max_space=cfg.max_space,
+        guard_roots=cfg.guard_roots, seed=cfg.seed,
+        preconditioner_floor=cfg.preconditioner_floor, nroots=cfg.nroots,
+        atol=cfg.conv_tol, gap_atol=cfg.gap_tol, gap_rtol=cfg.gap_tol,
+        imaginary_tol=cfg.imaginary_tol, max_condition=cfg.max_condition,
+        max_dense=cfg.max_dense, block_size=cfg.block_size)
+
+
+def _run_operator(op, valid, cfg, memory=None):
+    options = {} if memory is None else {"_batch_size": memory.action_columns}
     solved = solve_nonhermitian(
         op,
         vector_response=cfg.vector_response,
         response_config=cfg.response_config,
-        config=NonHermitianSolverConfig(
-            method=cfg.solver,
-            maxiter=cfg.max_cycle,
-            max_space=cfg.max_space,
-            guard_roots=cfg.guard_roots,
-            seed=cfg.seed,
-            preconditioner_floor=cfg.preconditioner_floor,
-            nroots=cfg.nroots,
-            atol=cfg.conv_tol,
-            gap_atol=cfg.gap_tol,
-            gap_rtol=cfg.gap_tol,
-            imaginary_tol=cfg.imaginary_tol,
-            max_condition=cfg.max_condition,
-            max_dense=cfg.max_dense,
-            block_size=cfg.block_size,
-        ),
+        config=_solver_config(cfg) if memory is None else memory.config,
+        **options,
     )
     response = solved.response_valid & valid
     energy = require_converged_derivative(solved.values, response)
