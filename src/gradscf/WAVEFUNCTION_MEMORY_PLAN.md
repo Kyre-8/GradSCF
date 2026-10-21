@@ -1781,3 +1781,17 @@ requires its own explicit decision and numerical validation.
   `ao-source-summary.json`. CPU88-95 only, no local numeric tests or native build.
   This closes the common source prerequisite within WF-09d, not its remaining
   CC facade/geometry integration or joint memory ownership; no new child TODO.
+
+### 2026-10-22 — WF-10b/30: finite CUDA action component
+
+- Two native/projected virtual-action cases pass on GPU7 with joint geometry,
+  coefficient, RHS and projection value/JVP/VJP/HVP against CPU ERI oracles.
+  Every input and output response leaf is explicitly checked on its requested
+  device; full AO ERI fallback is forbidden. Production code is unchanged.
+- The UUID-selected GPU7 has 15 MiB/no compute app both before and after;
+  GPU6 is never selected. CPU104-111, preallocation disabled, exit0, 4.94 s
+  pytest / 5.59 s process, zero failures/errors/skips. Test SHA `8a89a965`,
+  actions `042b1243`, native `3eeaa2e5` match root inspection and XML. Evidence:
+  `wf10b-native-action/cuda-component-manifest.json` and companion logs/XML.
+  This is the finite action/AD device gate, not full CC CUDA/geometry scaling,
+  a total GPU budget guarantee, or closure of the open performance criterion.
