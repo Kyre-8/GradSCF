@@ -1,11 +1,13 @@
 """Real collinear UCCSD/UCCD using spin-orbital equations and shared solvers.
 
-This in-core reference path materializes spin integrals. UHF and ROHF orbitals
-are accepted without canonicalization; no spin-adapted ROCCSD claim is made.
+Only the required spin integral blocks are assembled from spatial integrals.
+UHF and ROHF orbitals are accepted without canonicalization; no spin-adapted
+ROCCSD claim is made. The integral blocks and amplitudes remain dense.
 """
 from typing import NamedTuple
 import jax.numpy as jnp
-from gradscf.ao2mo import spin_orbital_integrals, unrestricted_frozen_indices
+from gradscf.ao2mo import validate_unrestricted_integrals, unrestricted_frozen_indices
+from gradscf.ao2mo.spin import _spin_eri_block
 from ..solvers.nonlinear.iterate import NonlinearConfig, solve_nonlinear
 from .types import CCConfig, CCResult
 from .ground import linear_config, METHODS
@@ -25,23 +27,41 @@ class SpinCCIntegrals(NamedTuple):
 
 
 def prepare_ucc_integrals(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0.):
-    h, g = spin_orbital_integrals(h1, eri)
-    n = h.shape[0]//2
+    h1, eri = validate_unrestricted_integrals(h1, eri)
+    dtype = jnp.result_type(*h1, *eri)
+    ha, hb = (jnp.asarray(h, dtype=dtype) for h in h1)
+    gaa, gab, gbb = eri = tuple(jnp.asarray(g, dtype=dtype) for g in eri)
+    n = ha.shape[0]
     frozen = unrestricted_frozen_indices(n, nocc, frozen)
-    full_occ = jnp.asarray(list(range(nocc[0])) + list(range(n, n+nocc[1])), dtype=jnp.int32)
     # Core electrons contribute before the active projection.
-    f = h + jnp.sum(g[:, :, full_occ, full_occ], axis=-1) - jnp.sum(g[:, full_occ, full_occ, :], axis=1)
-    e = .5*jnp.sum((h+f)[full_occ, full_occ]) + nuclear_repulsion
-    occ = [[s*n+i for i in range(no) if i not in fr] for s, (no, fr) in enumerate(zip(nocc, frozen))]
-    vir = [[s*n+i for i in range(no, n) if i not in fr] for s, (no, fr) in enumerate(zip(nocc, frozen))]
-    active = jnp.asarray(occ[0]+occ[1]+vir[0]+vir[1], dtype=jnp.int32)
-    no = sum(map(len, occ))
+    na, nb = nocc
+    fa = (ha + jnp.einsum("pqii->pq", gaa[:, :, :na, :na])
+          + jnp.einsum("pqii->pq", gab[:, :, :nb, :nb])
+          - jnp.einsum("piiq->pq", gaa[:, :na, :na, :]))
+    fb = (hb + jnp.einsum("pqii->pq", gbb[:, :, :nb, :nb])
+          + jnp.einsum("iipq->pq", gab[:na, :na, :, :])
+          - jnp.einsum("piiq->pq", gbb[:, :nb, :nb, :]))
+    e = .5*(jnp.trace((ha+fa)[:na, :na]) + jnp.trace((hb+fb)[:nb, :nb]))
+    e += nuclear_repulsion
+    occ = tuple(tuple(i for i in range(no) if i not in fr)
+                for no, fr in zip(nocc, frozen))
+    vir = tuple(tuple(i for i in range(no, n) if i not in fr)
+                for no, fr in zip(nocc, frozen))
+    active = jnp.asarray(occ[0] + tuple(n+i for i in occ[1])
+                         + vir[0] + tuple(n+i for i in vir[1]), dtype=jnp.int32)
+    f = jnp.zeros((2*n, 2*n), dtype=dtype).at[:n, :n].set(fa).at[n:, n:].set(fb)
     f = f[jnp.ix_(active, active)]
-    g = g[jnp.ix_(active, active, active, active)]
-    g = g.transpose(0, 2, 1, 3)-g.transpose(0, 2, 3, 1)
-    o, v = slice(None, no), slice(no, None)
-    ints = SpinCCIntegrals(f, g[o, o, o, o], g[o, o, o, v], g[o, o, v, v],
-                          g[o, v, o, v], g[o, v, v, v], g[v, v, v, v], e)
+
+    def antisymmetrized(p, q, r, s):
+        first = _spin_eri_block(eri, (p, r, q, s))
+        second = first if r == s else _spin_eri_block(eri, (p, s, q, r))
+        return first.transpose(0, 2, 1, 3) - second.transpose(0, 2, 3, 1)
+
+    o, v = occ, vir
+    ints = SpinCCIntegrals(f, antisymmetrized(o, o, o, o),
+                          antisymmetrized(o, o, o, v), antisymmetrized(o, o, v, v),
+                          antisymmetrized(o, v, o, v), antisymmetrized(o, v, v, v),
+                          antisymmetrized(v, v, v, v), e)
     return ints, tuple(map(len, occ)), tuple(map(len, vir))
 
 

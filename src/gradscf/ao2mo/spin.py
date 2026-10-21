@@ -33,6 +33,35 @@ def spin_orbital_integrals(h1, eri):
     return h, g.at[n:, n:, n:, n:].set(gbb)
 
 
+def _spin_eri_block(eri, spaces):
+    """Select a chemists' spin block from validated spatial ``(aa, ab, bb)``.
+
+    Each axis in ``spaces`` contains static ``(alpha_indices, beta_indices)``;
+    its output order is alpha then beta. Only spin-conserving pair blocks are
+    gathered. The beta-alpha block uses the pair transpose of ``ab``, without
+    assuming permutation symmetry within any spatial integral tensor.
+    """
+    lengths = tuple(tuple(map(len, axis)) for axis in spaces)
+    result = jnp.zeros(tuple(sum(axis) for axis in lengths),
+                       dtype=jnp.result_type(*eri))
+    for left, right, tensor in ((0, 0, 0), (0, 1, 1), (1, 0, 1), (1, 1, 2)):
+        spins = (left, left, right, right)
+        indices = tuple(axis[spin] for axis, spin in zip(spaces, spins))
+        if any(len(index) == 0 for index in indices):
+            continue
+        indices = tuple(jnp.asarray(index, dtype=jnp.int32) for index in indices)
+        target = tuple(slice(0, sizes[0]) if spin == 0
+                       else slice(sizes[0], sum(sizes))
+                       for sizes, spin in zip(lengths, spins))
+        if left == 1 and right == 0:
+            indices = indices[2:] + indices[:2]
+            values = eri[tensor][jnp.ix_(*indices)].transpose(2, 3, 0, 1)
+        else:
+            values = eri[tensor][jnp.ix_(*indices)]
+        result = result.at[target].set(values)
+    return result
+
+
 def frozen_indices(nmo, nocc, frozen):
     if frozen is None:
         return ()

@@ -373,6 +373,10 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   construction, map allowed aa/ab/bb blocks lazily. Acceptance: signs, factors,
   antisymmetry, unequal occupations, frozen orbitals, existing ROHF conversion
   and residual parity.
+
+  - [x] **WF-12a:** assemble the six existing UCC blocks directly from spatial
+    spin sectors, eliminating full total/active spin ERIs.
+  - [ ] **WF-12b:** AO-source selected blocks, byte ownership and scale evidence.
 - [ ] **WF-13 — UCC residual/amplitude workspace.** Reduce repeated dense
   spin-amplitude expansion using block consumers. Acceptance: UCCD/UCCSD forward,
   adjoints and geometry HVP, restricted-limit comparison; packed-coordinate
@@ -976,7 +980,9 @@ requires its own explicit decision and numerical validation.
   old/new warm action 0.490625/0.407317 s; process RSS 3,536,780/928,992 KiB;
   compiled temporary bytes 2,950,649,856/199,973,792. Sigma agrees within
   6.94e-17 over nact8/10/12. A 64MB tile policy instead needs 0.598595 s and
-  766,872 KiB: lower memory with a measured 22% timing cost. Tiny nact8 has
+  853,036 KiB: lower memory with a measured 22% timing cost.
+  This is the complete /usr/bin/time peak; the runner phase snapshot was
+  766,872 KiB and must not be substituted for the process peak. Tiny nact8 has
   18.2% overhead on a 31-repeat audit; no universal speedup is claimed.
 - Reverse audit takes raw ERI and CI-vector gradients of a fixed bilinear
   probe. Old/new gradients agree within 3.56e-15. Saved numerical residuals
@@ -989,3 +995,36 @@ requires its own explicit decision and numerical validation.
   and all process exits. Thin benchmark runners call src only. These measurements
   cover one action and its first reverse derivative, not a complete FCI solve,
   RDM or relaxed geometry response. WF-21b/22/29 remain open.
+
+
+### 2026-10-21 — WF-12a: verified requested UCC spin blocks
+
+- UCC integral preparation now computes full-reference alpha/beta Focks and
+  HF energy directly from spatial aa/ab/bb ERIs, including all frozen cores.
+  A 29-line internal AO2MO spin helper gathers only requested allowed spin
+  sectors; beta-alpha uses the exact pair transpose of ab. Six existing dense
+  antisymmetrized CC blocks replace complete total-spin/active-spin ERIs and
+  the complete antisymmetrized intermediate. Packed amplitudes and equations
+  remain unchanged. The largest requested vvvv block is still dense.
+- Preserve the raw definition W[pqrs]=g[prqs]-g[psqr], even away from physical
+  spatial ERI permutation symmetry. No symmetry assumption changes integral
+  cotangents. Unequal spins, separately frozen occupied/virtual orbitals, empty
+  sectors and mixed dtypes retain the original ordering/conventions.
+- RED: one forbidden full-spin call failed while 25 independent dense-oracle
+  cases passed (16.96 / 18.55 s, exit 1). Final 26 focused cases passed,
+  exit 0, 47.33 / 50.54 s, 2,597,220 KiB RSS; twelve existing UCC/UCCD cases
+  passed, 114.50 / 120.18 s, 3,900,960 KiB RSS; nine relevant Lambda/RDM/(T)
+  and response cases passed, 248.67 / 258.07 s, 4,672,404 KiB RSS. Total 47
+  GREEN cases include OH/6-31G PySCF residual/amplitude/(T) comparisons.
+  CPU96-103, noGPU, existing dependencies; no local numerical execution.
+- Final uccsd.py SHA256:
+  `634c282f2aed26b89570812056aaa88525bf47a31ebd9eed53e056c8033c92bb`;
+  ao2mo/spin.py SHA256:
+  `8c8f5a915db9387e5c0b9a21ad6feaae771e4c9c23107fbc7c85cdfd07c9d329`.
+  Independent review passed. Commands, hashes, JUnit and result JSON are
+  retained under local `wf12a/{red,green1}` and remote corresponding snapshots.
+- Completion review closes WF-12a only. Spatial full MO integrals, returned
+  spin blocks and unpacked amplitudes remain resident. Test-process peaks
+  combine many compilation signatures and do not establish a matched single-
+  system speedup or memory saving. AO-source preparation, block-sparse residuals,
+  full geometry tests and total budget remain WF-12b/13/29/30.
