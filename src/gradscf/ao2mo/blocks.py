@@ -1,18 +1,20 @@
 """Requested AO-to-MO blocks with bounded dense, packed and DF workspaces."""
 from math import prod
+from numbers import Integral
 
 import jax
 import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
 
-from gradscf._memory import DEFAULT_MAX_MEMORY_MB, array_storage_bytes, workspace_bytes
+from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
+                             validate_memory_mb, validate_reserved_bytes, workspace_bytes)
 from gradscf.integrals.molecular.eri import _metadata_arrays
 
 
 def transform_eri_block(
     coefficients, *, eri=None, eri_pair_matrix=None, df_factors=None, direct_basis=None,
-    max_memory=DEFAULT_MAX_MEMORY_MB,
+    max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0,
 ):
     """Transform a requested (p q|r s) block, without constructing full MO ERIs.
 
@@ -28,9 +30,11 @@ def transform_eri_block(
     and s4 inputs remain small-system, resident-AO reference paths.
     Checkpointing recomputes DF intermediates for differentiation. This plans
     forward arrays, not total AD-process storage or the required input cotangent.
+    ``reserved_bytes`` additionally charges caller-owned resident arrays.
     A traced input may not expose its target device. Without an explicitly
     selected default device, only the shared helper's host-capacity cap applies.
     """
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     if len(coefficients) != 4:
         raise ValueError("Supply four orbital coefficient matrices")
     c, d, e, f = map(jnp.asarray, coefficients)
@@ -42,29 +46,16 @@ def transform_eri_block(
         raise ValueError("Supply exactly one of eri, eri_pair_matrix, df_factors, direct_basis")
     if direct_basis is not None:
         from .native import transform_eri_block as transform_native_block
-        return transform_native_block((c, d, e, f), direct_basis, max_memory=max_memory)
+        return transform_native_block((c, d, e, f), direct_basis,
+            max_memory=max_memory, reserved_bytes=reserved_bytes)
     nao = c.shape[0]
-    if eri is not None:
-        representation = "dense"
-        source = jnp.asarray(eri)
-        if source.shape != (nao,) * 4:
-            raise ValueError("AO eri must have shape (nao, nao, nao, nao)")
-    elif eri_pair_matrix is not None:
-        representation = "packed"
-        source = jnp.asarray(eri_pair_matrix)
-        npair = nao * (nao + 1) // 2
-        if source.shape != (npair, npair):
-            raise ValueError("eri_pair_matrix must be a square s4 AO pair matrix")
-    else:
-        representation = "df"
-        source = jnp.asarray(df_factors)
-        if source.ndim != 3 or source.shape[1:] != (nao, nao):
-            raise ValueError("df_factors must have shape (naux, nao, nao)")
+    representation, source = _array_source(nao, eri, eri_pair_matrix, df_factors)
 
     coefficients = (c, d, e, f)
     shape = tuple(x.shape[1] for x in coefficients)
     dtype = jnp.result_type(source, *coefficients)
-    block_size = _eri_block_size(source, coefficients, representation, max_memory)
+    block_size = _eri_block_size(source, coefficients, representation, max_memory,
+                                 reserved_bytes=reserved_bytes)
     if not prod(shape) or (representation == "df" and source.shape[0] == 0):
         return jnp.zeros(shape, dtype=dtype)
     if representation == "dense":
@@ -82,7 +73,85 @@ def transform_eri_block(
     return _transform_df_eri_block(source, coefficients, shape, dtype, block_size)
 
 
-def _eri_block_size(source, coefficients, representation, max_memory):
+def transform_eri_blocks(
+    coefficients, requests, *, eri=None, eri_pair_matrix=None, df_factors=None,
+    direct_basis=None, max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0,
+):
+    """Transform static four-space-ID requests within one shared MB budget.
+
+    ``coefficients`` contains each real AO/MO space once. ``requests`` contains
+    four static integer IDs per output, returned in the supplied order. Native
+    integrals share shell traversal and first/second/half contractions locally;
+    physical ERI symmetry is used only in that branch. Array inputs preserve
+    their raw input/AD chart and reuse only identical ordered requests.
+
+    ``reserved_bytes`` charges other caller-owned live arrays against the same
+    ``max_memory`` after its single 20% reserve. Forward outputs and scratch are
+    planned together; complete solver/AD process storage remains caller-owned.
+    """
+    max_memory = validate_memory_mb(max_memory)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    cs = tuple(map(jnp.asarray, coefficients))
+    if any(c.ndim != 2 or c.shape[0] != cs[0].shape[0] for c in cs):
+        raise ValueError('Coefficient matrices must share the AO dimension')
+    if any(jnp.iscomplexobj(c) for c in cs):
+        raise NotImplementedError('MO block transformation requires real coefficients')
+    try:
+        requests = tuple(tuple(request) for request in requests)
+    except TypeError as error:
+        raise ValueError('Requests must contain four static integer space IDs') from error
+    if any(len(r) != 4 or any(isinstance(i, bool) or not isinstance(i, Integral)
+                              or not 0 <= i < len(cs) for i in r) for r in requests):
+        raise ValueError('Each request must contain four valid static integer space IDs')
+    if sum(x is not None for x in (eri, eri_pair_matrix, df_factors, direct_basis)) != 1:
+        raise ValueError('Supply exactly one of eri, eri_pair_matrix, df_factors, direct_basis')
+    if not requests:
+        return ()
+    if direct_basis is not None:
+        from .native import transform_eri_blocks as native_blocks
+        return native_blocks(cs, requests, direct_basis, max_memory=max_memory,
+                             reserved_bytes=reserved_bytes)
+
+    representation, source = _array_source(cs[0].shape[0], eri, eri_pair_matrix, df_factors)
+    unique = tuple(dict.fromkeys(requests))
+    selected = {r: tuple(cs[i] for i in r) for r in unique}
+    sizes = {r: prod(c.shape[1] for c in selected[r]) *
+                jnp.result_type(source, *selected[r]).itemsize for r in unique}
+    output_buffers = 3 if representation == 'df' else 2
+    resident = array_storage_bytes(source, *cs)
+    reservations = {r: reserved_bytes + resident - array_storage_bytes(source, *selected[r])
+                       + output_buffers * (sum(sizes.values()) - sizes[r]) for r in unique}
+    # Preflight every request before the first contraction. Passing the original
+    # MB value plus byte reservations avoids applying the runtime reserve twice.
+    for r in unique:
+        _eri_block_size(source, selected[r], representation, max_memory,
+                        reserved_bytes=reservations[r])
+    options = {{'dense': 'eri', 'packed': 'eri_pair_matrix', 'df': 'df_factors'}[representation]: source}
+    values = {r: transform_eri_block(selected[r], **options, max_memory=max_memory,
+                                    reserved_bytes=reservations[r]) for r in unique}
+    return tuple(values[r] for r in requests)
+
+
+def _array_source(nao, eri, eri_pair_matrix, df_factors):
+    """Validate source shape before either singular or batch memory planning."""
+    if eri is not None:
+        source = jnp.asarray(eri)
+        if source.shape != (nao,) * 4:
+            raise ValueError("AO eri must have shape (nao, nao, nao, nao)")
+        return "dense", source
+    if eri_pair_matrix is not None:
+        source = jnp.asarray(eri_pair_matrix)
+        npair = nao * (nao + 1) // 2
+        if source.shape != (npair, npair):
+            raise ValueError("eri_pair_matrix must be a square s4 AO pair matrix")
+        return "packed", source
+    source = jnp.asarray(df_factors)
+    if source.ndim != 3 or source.shape[1:] != (nao, nao):
+        raise ValueError("df_factors must have shape (naux, nao, nao)")
+    return "df", source
+
+
+def _eri_block_size(source, coefficients, representation, max_memory, *, reserved_bytes=0):
     """Check static forward-array storage and choose the DF auxiliary tile."""
     arrays = (source, *coefficients)
     device = None
@@ -95,7 +164,7 @@ def _eri_block_size(source, coefficients, representation, max_memory):
     if device is None:
         device = getattr(jax.config, "jax_default_device", None)
     available = workspace_bytes(
-        max_memory, resident_bytes=array_storage_bytes(*arrays), device=device,
+        max_memory, resident_bytes=array_storage_bytes(*arrays) + reserved_bytes, device=device,
     )
     nao = coefficients[0].shape[0]
     shape = tuple(x.shape[1] for x in coefficients)

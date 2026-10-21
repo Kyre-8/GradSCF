@@ -2,6 +2,7 @@
 
 from gradscf.ao2mo.blocks import (
     transform_eri_block,
+    transform_eri_blocks,
 )
 from gradscf.ao2mo.reference import (
     validate_integrals,
@@ -21,6 +22,7 @@ from gradscf.ao2mo.response import (
 
 __all__ = [
     "transform_eri_block",
+    "transform_eri_blocks",
     "validate_integrals",
     "transform_integrals",
     "validate_unrestricted_integrals",

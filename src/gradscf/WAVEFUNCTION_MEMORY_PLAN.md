@@ -310,6 +310,12 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
         forward/coefficient/coordinate response on CPU and GPU7.
       - [ ] **WF-03b2b:** consumer integration, multiple-request reuse and
         measured conversion/scaling workspace and timing.
+
+        - [x] **WF-03b2b1:** batch native requests share one shell traversal
+          and local first/second/half transforms, with joint output/resident
+          reservations. Validate native physical symmetry separately from raw
+          dense/s4/DF inputs and retain single-request efficiency. Consumer
+          migration and converged-method measurements remain open.
 - [ ] **WF-04 — Block integral JVP/VJP and HVP** (`in_progress`). Add coefficient/coordinate
   derivatives and contracted reverse accumulation. Acceptance: tangent/cotangent
   duality, dense AD, coordinate finite difference and HVP; structural/runtime
@@ -470,7 +476,7 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   high-order test cannot verify triples or quadruples contraction blocks);
   do not truncate required input waves or change the perturbation partition.
 
-  - [ ] **WF-23a:** apply the existing direct-path Taylor/Wigner target bound
+  - [x] **WF-23a:** apply the existing direct-path Taylor/Wigner target bound
     to canonical tensor actions before contraction. Retain every required
     wave coefficient; compare projected actions/response and complete energy
     series, including actual triples/quadruples/sextuples and frozen spins.
@@ -1367,11 +1373,52 @@ requires its own explicit decision and numerical validation.
   exceeded 600 s, and a forward-only eager shard exceeded 300 s. A real
   six-orbital high-wave test also exceeded 600 s in eager execution; fresh
   whole-recurrence JIT wrappers then passed the identical two cases in 31.39 s.
-  The old forward comparison is being compiled as a complete recurrence,
+  The old forward comparison is compiled as a complete recurrence,
   retaining every E2...E12 coefficient and wave assertion. No tolerance or
-  test case was removed. Broader/noncanonical groups are not marked passed.
+  test case was removed. Its full 28-case forward shard passed separately,
+  exit 0, 543.50 s pytest / 552.28 s process, RSS 7,350,028 KiB. Together with
+  the three response cases above, this completes the original tensor-action
+  file. Separate series/noncanonical groups are not marked passed.
 - Evidence: local `wf23-review-evidence/`; additional completed response shard
-  and running forward records in remote `wf23-green1/4`. Independent math,
+  and completed forward records in remote `wf23-green1/4`. Independent math,
   raw-chart and focused-evidence review passed. Final source hashes begin
-  `19911d5a`/`85ad6cb7`. Completion review leaves WF-23a in progress until
-  the remaining per-order forward gate finishes; this is a local checkpoint.
+  `19911d5a`/`85ad6cb7`. Completion review closes WF-23a at this checkpoint;
+  complete packed-state contractions and history scheduling remain separate
+  WF-24/25 tasks. Later compilation-boundary changes need their own validation.
+
+
+### 2026-10-21 — WF-03b2b1: native multi-request reuse
+
+- Added one shared AO2MO batch entry point. Static space IDs identify orbital
+  coefficients; native physical eightfold symmetry chooses equivalent small
+  halves and restores requested output axes. One bounded q/r shell traversal
+  shares first, second and half transformations within the call. There is no
+  cross-call cache. Dense/s4/DF paths reuse only identical ordered requests,
+  preserving their off-manifold input derivatives and original dtype.
+- Batch outputs, coefficient/source residency, known caller reservations and
+  unique half workspaces share the original MB budget with one runtime reserve.
+  Shape validation precedes planning/contraction; normalized array sources are
+  forwarded once. This is a forward-array plan, not a complete AD-process cap.
+- Native/frozen/asymmetric/projected values, structure, coefficient/geometry
+  JVP/VJP/HVP, finite differences and array raw-chart checks: CPU 70 passed,
+  one explicit GPU-only skip; GPU7 four passed. A later array-normalization
+  regression first failed all six dense/s4/DF x f32/f64 cases, then final-source
+  CPU 32 and GPU7 nine passed without skips. The final narrow run does not
+  relabel the earlier native/device measurements as rerun. Native kernel SHA
+  stayed `48e52f64...7608`; final blocks/test hashes start `ff0782ab`/`97e4a108`.
+- Matched water, Cartesian bases, seed6205, f64, 60000 MB, CPU80-87 with
+  OMP4/BLAS1: seven separate requests versus one batch reduced slab calls
+  14 to 2. Warm times: 19 AO/6-31G* 97.282 to 17.554 ms; 65 AO/cc-pVTZ
+  2.09394 to 0.44779 s. Maximum block differences are 3.33e-16/1.94e-16.
+  Single-OVOV controls retain identical tiles, scratch and outputs, with warm
+  new/old ratios 0.99655/0.99285. No full-method speedup is claimed.
+- At 65 AO, sharing increases RSS 1,170,440 to 1,233,348 KiB and XLA scratch
+  165,981,040 to 228,210,144 bytes. This measured speed/workspace tradeoff is
+  explicit; it is not a universal memory reduction. Consumer reservations and
+  smaller tiles still govern whether a batch is affordable. Timing predates
+  the array-only shape/normalization fixes; the native kernel is unchanged.
+- Root reviewed the equations, ownership, source hashes, exact process exits,
+  XML and comparison records. GPU7 UUID selection and idle pre/post checks are
+  recorded; GPU6 was hidden. Evidence: local `ao2mo-batch/` manifests, logs,
+  XML and small comparison JSON. Completion review closes this batch foundation;
+  RCC/UCC consumers, bare-vvvv actions and whole-method budget gates remain open.
