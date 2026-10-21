@@ -129,9 +129,9 @@ introduced merely to fill this table.
 
 Keep the existing public dense reference arrays compatible. Do not change an
 existing `.eri` array into an opaque object without an explicit new entry point.
-Introduce only the smallest shared internal post-HF interface actually needed by
-the first consumers, preferably in `integrals/molecular/`; reuse `ao2mo.py` and
-the native integral plan. Avoid separate MP/CI/CC implementations of AO2MO,
+Maintain the shared transformations in the dedicated `gradscf.ao2mo` package;
+its block, native, reference, spin and response modules own distinct operations.
+Reuse the native integral plan for integral generation. Avoid separate MP/CI/CC implementations of AO2MO,
 byte accounting, response solvers or integral derivatives.
 
 Every input representation must identify:
@@ -295,6 +295,11 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
     fill driver, without a full AO tensor or a new integral engine.
   - [ ] **WF-03b:** bounded half transformations consuming slabs; no quadratic
     Python-unrolled graph or separate full integral traversal per MO pair.
+
+    - [x] **WF-03b1:** dynamic shell endpoints with static padded storage and
+      shared coordinate products through order two; compact differentiated loops.
+    - [ ] **WF-03b2:** shared AO-to-MO half transformations, coefficient response,
+      caller integration and measured conversion workspace/time.
 - [ ] **WF-04 — Block integral JVP/VJP and HVP** (`in_progress`). Add coefficient/coordinate
   derivatives and contracted reverse accumulation. Acceptance: tangent/cotangent
   duality, dense AD, coordinate finite difference and HVP; structural/runtime
@@ -751,3 +756,40 @@ requires its own explicit decision and numerical validation.
   obsolete forwarding locations. This is an organization change within WF-02/03,
   not a new integral engine or an additional correlation method. Numerical and
   module-boundary regression gates remain required before claiming completion.
+
+### 2026-10-21 — WF-03b1: verified compact dynamic shell slabs
+
+- Added five additive native FFI targets using dynamic int32 shell endpoints and
+  static padded storage. Actual AO bounds and storage strides share the existing
+  window/traversal code. Forward holds one actual window plus the padded result;
+  first/second coordinate products use the same native contraction family and
+  ignore finite cotangents outside the actual window. No vendor source changed.
+- RED: missing dynamic entry, exit 1, 2.33 s. Incremental native build passed in
+  4.80 s with existing compiler/BLAS; native SHA256
+  `3eeaa2e5118bd2ecf140d0d1228b0ee0e17e5c1276da9d45c8f35b7c08cd41b9`.
+- First numerical run found a nested AD defect: 52 passed, one failed. HVP
+  through a differentiated loop reached its retained raw primal without a JVP.
+  Added an internal bounded-primal JVP reusing the existing linear geometry
+  product. The public unsupported-basis guard is preserved. Final geometry.py
+  SHA256: `6a89e14995a4f5f7b0ad0782a65b3650a098bbf85b9eb2f83f622e79ff14f656`.
+- Final CPU: 30 dynamic plus 23 static cases passed, exit 0, 15.24 s pytest /
+  16.46 s process, 1,049,600 KiB peak RSS. Static and dynamic-padded GPU7 cases
+  both passed eager/JIT primal, JVP, VJP and nonlinear HVP, exit 0, 7.68 / 8.86 s,
+  1,971,960 KiB host RSS. All 112 original native value/geometry/Hessian/higher/
+  direct-response regressions passed again, exit 0, 213.53 / 222.65 s,
+  7,840,684 KiB RSS. These are test-process observations, not method benchmarks.
+- Evidence: remote `wavefunction-memory-20261021/wf03-native/` slab-cpu1/2,
+  slab-gpu2 and slab-legacy2 logs/XML/result JSON; local frozen overlays and
+  manifests `wf03-slab-green1/2`. CPU affinities `56-71` and `72-87`, at most
+  32 CPUs concurrently, GPU7 selected by UUID; GPU6 remained invisible.
+- Independent specification and quality reviews passed after the JVP fix.
+  Tests include trace reuse, graph size for 3 versus 300 loop iterations,
+  changing windows/tails, padding and local cotangents, finite differences,
+  and first/second coordinate products. Raw-ENV entry remains CPU value-only;
+  the differentiable entry uses a bounded CPU shell callback on CUDA.
+- Completion review: WF-03b1 is verified. Compact JAXPR is not a measured bound
+  on all reverse residuals. The consumer must budget padded/actual buffers,
+  transfers, optimizer and half transforms and verify rematerialization. Those
+  are WF-03b2/04 and total caller/AD ownership remains WF-29. The user-directed
+  AO2MO package migration and five tiny native transform tests have an initial
+  combined GREEN, but await their independent reviews and conversion measurements.

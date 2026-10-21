@@ -17,6 +17,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from gradscf import integrals
+from gradscf.integrals.backends.native.autodiff.geometry import evaluate_eri_slab
 
 
 def _responses(value, coords, direction, cotangent):
@@ -33,7 +34,8 @@ def _responses(value, coords, direction, cotangent):
     return primal, tangent, gradient, hvp
 
 
-def test_native_shell_slice_cuda_value_and_coordinate_response():
+@pytest.mark.parametrize('dynamic', [False, True], ids=['static', 'dynamic-padded'])
+def test_native_shell_slice_cuda_value_and_coordinate_response(dynamic):
     cpu = jax.devices("cpu")[0]
     gpu = jax.devices("gpu")[0]
     shell_slice = (1, 3, 2, 4, 1, 2, 3, 4)
@@ -49,11 +51,13 @@ def test_native_shell_slice_cuda_value_and_coordinate_response():
         coords = jnp.concatenate((params.nuclear_coords, centers))
         rng = np.random.default_rng(20261022)
         direction = jnp.asarray(rng.normal(scale=.15, size=coords.shape))
-        cotangent = jnp.asarray(rng.normal(size=(2, 2, 1, 1)))
+        shape = (3, 3, 2, 2) if dynamic else (2, 2, 1, 1)
+        cotangent = jnp.asarray(rng.normal(size=shape))
 
         def reference(r):
             p = replace(params, nuclear_coords=r[:2], centers=r[2:])
-            return plan.evaluate("eri", p)[ao_slices]
+            block = plan.evaluate("eri", p)[ao_slices]
+            return jnp.pad(block, ((0, 1),)*4) if dynamic else block
 
         expected = _responses(reference, coords, direction, cotangent)
         for result in expected:
@@ -68,6 +72,12 @@ def test_native_shell_slice_cuda_value_and_coordinate_response():
 
         def value(r):
             p = replace(gpu_params, nuclear_coords=r[:2], centers=r[2:])
+            if dynamic:
+                fixed = replace(p, nuclear_coords=jnp.zeros_like(p.nuclear_coords),
+                                centers=jnp.zeros_like(p.centers))
+                atm, bas, env = plan.pack(fixed)
+                return evaluate_eri_slab(atm, bas, env, r,
+                    jnp.asarray(shell_slice, dtype=jnp.int32), shape, cart=True)
             return plan.evaluate("eri", p, shell_slice=shell_slice)
 
         eager = value(gpu_coords)

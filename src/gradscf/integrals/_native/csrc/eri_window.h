@@ -6,6 +6,7 @@ struct ERIWindow {
   static constexpr size_t outside=std::numeric_limits<size_t>::max();
   std::array<int,8> shells;
   std::array<int,4> starts,shape;
+  std::array<int64_t,4> storage;
 
   ERIWindow(const IntegralTables& t,const int32_t* slice=nullptr,size_t count=0) {
     const int nshell=int(t.ao.size())-1;
@@ -16,6 +17,7 @@ struct ERIWindow {
         throw std::invalid_argument("shell_slice requires 0 <= start < stop <= nshell");
       shells[2*a]=first;shells[2*a+1]=last;
       starts[a]=t.ao[first];shape[a]=t.ao[last]-starts[a];
+      storage[a]=shape[a];
     }
     // The vendor s1 fill computes each pair product in signed int first.
     if (slice && (int64_t(shape[0])*shape[1]>std::numeric_limits<int>::max() ||
@@ -30,13 +32,23 @@ struct ERIWindow {
       throw std::invalid_argument("ERI shell_slice AO dimensions do not match basis table");
   }
 
+  void pad_to(const ffi::Buffer<ffi::F64>& buffer) {
+    if (buffer.dimensions().size()!=4)
+      throw std::invalid_argument("Invalid ERI slab tensor rank");
+    for (int a=0;a<4;++a) {
+      storage[a]=buffer.dimensions()[a];
+      if (storage[a]<shape[a])
+        throw std::invalid_argument("ERI slab storage shape is smaller than selected AO dimensions");
+    }
+  }
+
   size_t index(int i,int j,int k,int l) const {
     const int ao[]={i,j,k,l};
     size_t result=0;
     for (int a=0;a<4;++a) {
       int local=ao[a]-starts[a];
       if (local<0 || local>=shape[a]) return outside;
-      result=result*shape[a]+local;
+      result=result*size_t(storage[a])+local;
     }
     return result;
   }

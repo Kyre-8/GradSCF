@@ -9,12 +9,17 @@ static ffi::Error GeometryImpl(ffi::BufferR2<ffi::S32> atoms,
                            ffi::Buffer<ffi::F64> vector,
                            ffi::ResultBuffer<ffi::F64> result,
                            int32_t op, int32_t cart,
-                           const int32_t* slice=nullptr,size_t count=0) {
+                           const int32_t* slice=nullptr,size_t count=0,bool padded=false) {
   try {
+    if (padded && count!=8) throw std::invalid_argument("ERI slab bounds must have eight endpoints");
     IntegralTables t(atoms,basis,environment,op,cart,true);
     ERIWindow window(t,slice,count);
     if (slice && op!=4) throw std::invalid_argument("shell_slice applies only to ERI");
+    if (padded) {
+      if constexpr (transpose) window.pad_to(vector); else window.pad_to(*result);
+    }
     auto check_shape=[&](const ffi::Buffer<ffi::F64>& buffer) {
+      if (padded) return;
       if (slice) window.check_shape(buffer); else t.check_shape(buffer,op);
     };
     if constexpr (transpose) {
@@ -110,6 +115,15 @@ static ffi::Error ERISliceGeometry(ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<f
   return GeometryImpl<transpose>(atoms,basis,env,vector,result,op,cart,slice.begin(),slice.size());
 }
 
+template<bool transpose>
+static ffi::Error ERISlabGeometry(ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<ffi::S32> basis,
+                                  ffi::BufferR1<ffi::F64> env,ffi::Buffer<ffi::F64> vector,
+                                  ffi::BufferR1<ffi::S32> bounds,
+                                  ffi::ResultBuffer<ffi::F64> result,int32_t op,int32_t cart) {
+  return GeometryImpl<transpose>(atoms,basis,env,vector,result,op,cart,
+                                  bounds.typed_data(),bounds.element_count(),true);
+}
+
 extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFGeometryJVP(XLA_FFI_CallFrame*);
 extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFGeometryVJP(XLA_FFI_CallFrame*);
 #define GEOMETRY_BIND ffi::Ffi::Bind().Arg<ffi::BufferR2<ffi::S32>>() \
@@ -124,3 +138,11 @@ XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFERISliceGeometryJVP, ERISliceGeometry<false
                               GEOMETRY_BIND.Attr<ffi::Span<const int32_t>>("shell_slice"));
 XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFERISliceGeometryVJP, ERISliceGeometry<true>,
                               GEOMETRY_BIND.Attr<ffi::Span<const int32_t>>("shell_slice"));
+extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFERISlabGeometryJVP(XLA_FFI_CallFrame*);
+extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFERISlabGeometryVJP(XLA_FFI_CallFrame*);
+#define ERI_SLAB_GEOMETRY_BIND ffi::Ffi::Bind().Arg<ffi::BufferR2<ffi::S32>>() \
+    .Arg<ffi::BufferR2<ffi::S32>>().Arg<ffi::BufferR1<ffi::F64>>() \
+    .Arg<ffi::Buffer<ffi::F64>>().Arg<ffi::BufferR1<ffi::S32>>() \
+    .Ret<ffi::Buffer<ffi::F64>>().Attr<int32_t>("operator").Attr<int32_t>("cart")
+XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFERISlabGeometryJVP, ERISlabGeometry<false>, ERI_SLAB_GEOMETRY_BIND);
+XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFERISlabGeometryVJP, ERISlabGeometry<true>, ERI_SLAB_GEOMETRY_BIND);

@@ -95,15 +95,16 @@ XLA_FFI_DEFINE_HANDLER_SYMBOL(
         .Ret<ffi::Buffer<ffi::F64>>().Attr<int32_t>("operator")
         .Attr<int32_t>("cart"));
 
-static ffi::Error ERISlice(ffi::BufferR2<ffi::S32> atoms,
+static ffi::Error ERISliceImpl(ffi::BufferR2<ffi::S32> atoms,
                            ffi::BufferR2<ffi::S32> basis,
                            ffi::BufferR1<ffi::F64> environment,
                            ffi::ResultBuffer<ffi::F64> result,
-                           int32_t cart,ffi::Span<const int32_t> shell_slice) {
+                           int32_t cart,const int32_t* slice,size_t count,bool padded=false) {
   try {
+    if (padded && count!=8) throw std::invalid_argument("ERI slab bounds must have eight endpoints");
     IntegralTables t(atoms,basis,environment,4,cart,true);
-    ERIWindow window(t,shell_slice.begin(),shell_slice.size());
-    window.check_shape(*result);
+    ERIWindow window(t,slice,count);
+    if (padded) window.pad_to(*result); else window.check_shape(*result);
     Intor intor=cart ? int2e_cart : int2e_sph;
     LocalOptimizer optimizer(t,4);
     int maxcache=0;
@@ -132,17 +133,48 @@ static ffi::Error ERISlice(ffi::BufferR2<ffi::S32> atoms,
     std::vector<double> scratch(size_t(maxblock)+maxcache);
     double* output=result->typed_data();
     std::fill(output,output+result->element_count(),0.);
+    // The vendor driver uses actual local AO strides. A dynamic slab owns at
+    // most one additional actual-sized buffer before copying into its padding.
+    std::vector<double> actual;
+    if (padded) {
+      size_t size=1;
+      for (int dimension:window.shape) size*=dimension;
+      actual.assign(size,0.);
+    }
+    double* values=padded ? actual.data() : output;
     for (int i=0;i<window.shells[1]-window.shells[0];++i)
       for (int j=0;j<window.shells[3]-window.shells[2];++j)
         GTOnr2e_fill_s1(reinterpret_cast<LegacyIntor>(intor),NoPrescreen,
-                        output,scratch.data(),1,i,j,window.shells.data(),t.ao.data(),
+                        values,scratch.data(),1,i,j,window.shells.data(),t.ao.data(),
                         optimizer.value,t.atm.data(),t.natm,t.bas.data(),t.nbas,t.env.data());
+    if (padded) {
+      const auto& shape=window.shape;
+      const auto& storage=window.storage;
+      for (int i=0;i<shape[0];++i) for (int j=0;j<shape[1];++j)
+        for (int k=0;k<shape[2];++k) {
+          const size_t source=((size_t(i)*shape[1]+j)*shape[2]+k)*shape[3];
+          const size_t destination=((size_t(i)*storage[1]+j)*storage[2]+k)*storage[3];
+          std::copy_n(values+source,shape[3],output+destination);
+        }
+    }
     return ffi::Error::Success();
   } catch (const std::invalid_argument& error) {
     return ffi::Error::InvalidArgument(error.what());
   } catch (const std::exception& error) {
     return ffi::Error::Internal(error.what());
   }
+}
+
+static ffi::Error ERISlice(ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<ffi::S32> basis,
+                           ffi::BufferR1<ffi::F64> env,ffi::ResultBuffer<ffi::F64> result,
+                           int32_t cart,ffi::Span<const int32_t> slice) {
+  return ERISliceImpl(atoms,basis,env,result,cart,slice.begin(),slice.size());
+}
+
+static ffi::Error ERISlab(ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<ffi::S32> basis,
+                          ffi::BufferR1<ffi::F64> env,ffi::BufferR1<ffi::S32> bounds,
+                          ffi::ResultBuffer<ffi::F64> result,int32_t cart) {
+  return ERISliceImpl(atoms,basis,env,result,cart,bounds.typed_data(),bounds.element_count(),true);
 }
 
 extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFERISlice(XLA_FFI_CallFrame*);
@@ -152,3 +184,10 @@ XLA_FFI_DEFINE_HANDLER_SYMBOL(
         .Arg<ffi::BufferR2<ffi::S32>>().Arg<ffi::BufferR1<ffi::F64>>()
         .Ret<ffi::Buffer<ffi::F64>>().Attr<int32_t>("cart")
         .Attr<ffi::Span<const int32_t>>("shell_slice"));
+
+extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFERISlab(XLA_FFI_CallFrame*);
+XLA_FFI_DEFINE_HANDLER_SYMBOL(
+    GradSCFERISlab, ERISlab,
+    ffi::Ffi::Bind().Arg<ffi::BufferR2<ffi::S32>>()
+        .Arg<ffi::BufferR2<ffi::S32>>().Arg<ffi::BufferR1<ffi::F64>>()
+        .Arg<ffi::BufferR1<ffi::S32>>().Ret<ffi::Buffer<ffi::F64>>().Attr<int32_t>("cart"));

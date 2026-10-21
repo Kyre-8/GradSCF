@@ -71,6 +71,65 @@ def _eri_shell_slice(basis, cart, shell_slice):
     return tuple(values), shape
 
 
+def _eri_slab_inputs(atm, bas, env, bounds, shape, cart):
+    """Check static slab metadata without inspecting dynamic shell endpoints."""
+    if not isinstance(cart, (bool, np.bool_)):
+        raise TypeError("cart must be a static bool")
+    tables = []
+    for name, value, width in (("atm", atm, 6), ("bas", bas, 8)):
+        try:
+            array = np.asarray(value)
+        except (jax.errors.TracerArrayConversionError, TypeError) as exc:
+            raise TypeError(f"{name} must be a static int32 array") from exc
+        if array.dtype != np.int32 or array.ndim != 2 or array.shape[1] != width or not len(array):
+            raise ValueError(f"{name} must be a nonempty int32 array with shape (n, {width})")
+        tables.append(np.ascontiguousarray(array))
+    env, bounds = jnp.asarray(env), jnp.asarray(bounds)
+    if env.dtype != jnp.float64 or env.ndim != 1 or env.size < 20:
+        raise ValueError("env must be a float64 vector of at least 20 entries; enable JAX x64")
+    if bounds.dtype != jnp.int32 or bounds.shape != (8,):
+        raise ValueError("ERI slab bounds must be an int32 vector with shape (8,)")
+    if isinstance(shape, jax.core.Tracer):
+        raise TypeError("ERI slab shape must be static under JIT")
+    try:
+        dimensions = tuple(shape)
+    except TypeError as exc:
+        raise TypeError("ERI slab shape must contain four static positive integers") from exc
+    if len(dimensions) != 4:
+        raise ValueError("ERI slab shape must contain four dimensions")
+    result, size = [], 1
+    for dimension in dimensions:
+        if isinstance(dimension, (jax.core.Tracer, bool, np.bool_)):
+            raise TypeError("ERI slab shape dimensions must be static positive integers")
+        try:
+            dimension = operator_module.index(dimension)
+        except TypeError as exc:
+            raise TypeError("ERI slab shape dimensions must be static positive integers") from exc
+        if dimension <= 0:
+            raise ValueError("ERI slab shape dimensions must be positive")
+        if dimension > np.iinfo(np.intp).max // 8 // size:
+            raise ValueError("ERI slab shape exceeds addressable float64 storage")
+        size *= dimension
+        result.append(dimension)
+    return tables[0], tables[1], env, bounds, tuple(result)
+
+
+def evaluate_eri_slab(atm, bas, env, bounds, shape, cart=True):
+    """Evaluate a dynamic shell window into a static, zero-padded AO slab.
+
+    ``bounds`` is an int32 vector of eight half-open shell endpoints. The four
+    actual AO dimensions must fit ``shape``; native code validates them at run
+    time. This raw-ENV entry is value-only; geometry AD uses the matching
+    ``autodiff.geometry.evaluate_eri_slab`` entry.
+    """
+    atoms, basis, env, bounds, shape = _eri_slab_inputs(atm, bas, env, bounds, shape, cart)
+    register_integrals()
+    call = jax.ffi.ffi_call("gradscf_eri_slab_cpu_v1",
+                            jax.ShapeDtypeStruct(shape, jnp.float64),
+                            vmap_method="sequential")
+    return call(jnp.asarray(atoms), jnp.asarray(basis), env, bounds, cart=np.int32(cart))
+
+
 def evaluate(operator, atm, bas, env, nao, cart=True, *, shell_slice=None):
     """Evaluate full Cartesian/spherical AO integrals, eagerly or inside JIT.
 
