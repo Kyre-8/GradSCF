@@ -7,6 +7,9 @@ No FCI product space, dense Hamiltonian or eigensolve is constructed here.
 Retained state coefficients still grow combinatorially; this is a bounded
 in-core generic engine, not the streaming DF-MP2 algorithm.
 """
+from dataclasses import replace
+from functools import partial
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -15,6 +18,8 @@ from jax.experimental.jet import jet
 from ..ci.space import make_ci_space, make_uci_space
 from ..ci import hamiltonian
 from ..fci.cistring import excite
+from ..ao2mo import (validate_integrals, validate_unrestricted_integrals,
+                     frozen_indices, unrestricted_frozen_indices)
 from ..solvers import LinearOperator, LinearSolverConfig, solve_linear
 from .types import MPResult
 from .integrals import _reference_data, canonical_error, reference_error, _active_orbitals
@@ -149,9 +154,31 @@ def _direct_actions(h1, eri, focks, reference_energy, nocc, frozen, space, confi
 
 
 def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config):
+    """Validate static metadata and reuse a graph with live physical inputs."""
     nuclear_repulsion = jnp.asarray(nuclear_repulsion)
     if nuclear_repulsion.shape != () or jnp.iscomplexobj(nuclear_repulsion):
         raise ValueError("nuclear_repulsion must be a real scalar")
+    if isinstance(nocc, tuple):
+        h1, eri = validate_unrestricted_integrals(h1, eri)
+        frozen = unrestricted_frozen_indices(h1[0].shape[0], nocc, frozen)
+        nocc = tuple(map(int, nocc))
+    else:
+        h1, eri = validate_integrals(h1, eri)
+        if isinstance(nocc, bool) or not isinstance(nocc, int) or not 0 <= nocc <= h1.shape[0]:
+            raise ValueError("nocc must be an integer between 0 and nmo")
+        frozen = frozen_indices(h1.shape[0], nocc, frozen)
+    # Tolerances are numeric inputs: preserving their weak/strong dtype matters
+    # at float32 boundaries. Only topology and output controls enter the key.
+    topology = replace(config, denominator_tol=1e-10, canonical_tol=1e-8,
+                       with_t2=bool(config.with_t2),
+                       with_coefficients=bool(config.with_coefficients))
+    return _run_series(h1, eri, config.denominator_tol, config.canonical_tol,
+        nocc=nocc, frozen=frozen, nuclear_repulsion=nuclear_repulsion, config=topology)
+
+
+@partial(jax.jit, static_argnames=("nocc", "frozen", "config"))
+def _run_series(h1, eri, denominator_tol, canonical_tol, *, nocc, frozen,
+                nuclear_repulsion, config):
     hs, gs, focks, reference_energy = _reference_data(h1, eri, nocc)
     unrestricted = isinstance(nocc, tuple)
     space = make_series_space(hs[0].shape[0], nocc, frozen=frozen, config=config)
@@ -196,7 +223,7 @@ def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config):
         state = jnp.concatenate((jnp.zeros(1, y.dtype), y[:-1]))
         return jnp.concatenate((fock_action(state)[1:], -y[-1:]))
     jacdiag = jnp.concatenate((gaps[1:], -jnp.ones(1, zero.dtype)))
-    safe = jnp.where(jnp.abs(jacdiag) > config.denominator_tol, jacdiag, 1.)
+    safe = jnp.where(jnp.abs(jacdiag) > denominator_tol, jacdiag, 1.)
     operator = LinearOperator((space.size, space.size), zero.dtype, jacobian, diagonal=jacdiag)
     linear = LinearSolverConfig(method="direct" if space.size <= 128 else "gmres",
         max_dense=128, rtol=1e-11, atol=1e-13, maxiter=100, restart=min(40, space.size))
@@ -236,10 +263,10 @@ def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config):
     os = channel((alpha_rank == 1) & (beta_rank == 1))
     error = canonical_error(focks)
     stationary_error = reference_error(focks, nocc, frozen=frozen,
-        orbital_basis=config.orbital_basis, frozen_gap_tol=config.denominator_tol)
+        orbital_basis=config.orbital_basis, frozen_gap_tol=denominator_tol)
     finite = jnp.all(jnp.stack([jnp.all(jnp.isfinite(x)) for x in (*hs, *gs, *focks)]))
-    valid = (finite & jnp.isfinite(nuclear_repulsion) & (stationary_error < config.canonical_tol)
-             & (minimum > config.denominator_tol) & solved & jnp.all(jnp.isfinite(corrections)))
+    valid = (finite & jnp.isfinite(nuclear_repulsion) & (stationary_error < canonical_tol)
+             & (minimum > denominator_tol) & solved & jnp.all(jnp.isfinite(corrections)))
     # Multiplicative guard rejects invalid JVP and VJP as well as primal values.
     mask = lambda x: x*jnp.where(valid, jnp.ones_like(x), jnp.full_like(x, jnp.nan))
     corr = jnp.sum(corrections)

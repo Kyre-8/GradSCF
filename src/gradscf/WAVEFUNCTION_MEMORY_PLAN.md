@@ -514,7 +514,7 @@ section 8 are provenance, not additional active TODO levels.
   False, no illegal removal of history required by later orders; measured time/
   memory tradeoff. Reuse `solvers/nonlinear/taylor.py`, do not add a second engine.
 
-  - [ ] **WF-25a** (`in_progress`): stable whole-recurrence compilation at the
+  - [x] **WF-25a** (`verified`): stable whole-recurrence compilation at the
     public series entry, with physical inputs and tolerance dtypes left live.
     Measure cold and warm costs separately; preserve old coefficient, raw-input
     and nested-response gates. This removes eager dispatch fragmentation, not
@@ -1643,3 +1643,40 @@ requires its own explicit decision and numerical validation.
   Prepared triples/EOM/RDM2 consumers remain; facade/relaxed geometry and
   complete CC/Lambda/AD memory ownership remain WF-09d/15/29. No new child
   plan or broader geometry/performance completion is implied.
+
+### 2026-10-22 — WF-25a: stable MP recurrence compilation
+
+- The public series entry validates and canonicalizes static occupation/frozen
+  metadata, then reuses one private compiled recurrence. Physical h/g/nuclear
+  inputs and both numerical tolerances stay live, including weak/strong float32
+  comparison semantics. Defaults, required waves, Taylor coefficients and the
+  existing shared implicit linear solve are unchanged. Only thirty-five
+  production lines change; no second Taylor engine or method-local solver.
+- Fifteen focused CPU cases, six target/oracle cases and four GPU7 cases pass.
+  Device assertions cover every MP result/T2/wave and JVP/VJP/HVP output leaf.
+  All thirteen original noncanonical cases pass, including MP4/MP6 strictly
+  degenerate internal orbital spaces, first/second response and invalid poles.
+  The original UHF MP test and water HF/MP2...MP8 public example also pass.
+- Original series coverage maps all sixty-four cases: fifty-three have direct
+  JUnit passes; eleven are completed sequential progress points in a saved
+  aggregate process that later hit its 600 s cap. Their IDs are inferred from
+  the recorded serial collection order, not synthesized into passing XML.
+  Remaining cases were run separately. An actual missing-fixture failure was
+  retained, then passed after copying the unchanged shared fixture. Three SSH
+  255 events are transport failures; recovered process records establish exits.
+- The unchanged final H6 cached-response case timed out at 600 s, then passed
+  its single 1200 s gate: 859.90 s pytest / 887.14 s process, RSS 10,876,072 KiB.
+  Compile logs show that cold cost remains substantial. No timing improvement
+  is inferred from that validation run.
+- Matched synthetic three-orbital/one-occupied MP6, float64, default T2 retained,
+  CPU88-95, OMP4/BLAS1: public series warm 175.615 -> 0.659 ms and tensor warm
+  171.810 -> 0.396 ms; first calls 15.981 -> 13.467 s and 11.738 -> 1.455 s.
+  These measure small-input eager-dispatch elimination, not molecular scaling
+  or removal of combinatorial coefficient/history storage. Outer-JIT cold
+  times remain comparable. No tolerance, excitation space or output was reduced.
+- Root reviewed code, raw XML/process exits and the explicit coverage mapping;
+  all ninety-nine evidence files and current source hashes match. Production
+  `series.py` SHA starts `899bc6ce`; evidence is
+  `mp-series-staging-evidence/` and `mp-series-staging-summary.json`. All numerical
+  work was remote; GPU6 was hidden. This closes WF-25a only: packed contractions,
+  history scheduling and full molecular block/AD integration remain WF-24/25/26.

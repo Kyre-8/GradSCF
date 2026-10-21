@@ -21,6 +21,14 @@ def system(request):
     return mf, jnp.asarray(h), jnp.asarray(g), no
 
 
+@pytest.fixture
+def cold_series_kernel():
+    from gradscf.mp.series import _run_series
+    _run_series.clear_cache()
+    yield _run_series
+    _run_series.clear_cache()
+
+
 def reference_series(h, g, eps, no, order, frozen=()):
     """Full PySCF FCI actions + textbook RS recurrence, independent of jet/CI."""
     from pyscf import fci
@@ -80,7 +88,7 @@ def test_low_orders_preserve_amplitudes_and_spin_components(system):
     np.testing.assert_allclose(series.opposite_spin_energy, direct.opposite_spin_energy, atol=1e-10)
 
 
-def test_linear_hamiltonian_nodes_are_shared_outside_taylor(system, monkeypatch):
+def test_linear_hamiltonian_nodes_are_shared_outside_taylor(system, monkeypatch, cold_series_kernel):
     from gradscf.mp import MPConfig, run_mp
     from gradscf.ci import hamiltonian
     _, h, g, no = system

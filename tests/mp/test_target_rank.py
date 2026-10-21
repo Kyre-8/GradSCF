@@ -10,6 +10,14 @@ from gradscf.mp.integrals import _reference_data
 from test_tensor_action import model
 
 
+@pytest.fixture
+def cold_series_kernel():
+    from gradscf.mp.series import _run_series
+    _run_series.clear_cache()
+    yield _run_series
+    _run_series.clear_cache()
+
+
 @pytest.mark.parametrize("unrestricted", [False, True])
 @pytest.mark.parametrize("target", [0, 1, 2])
 def test_target_projection_matches_full_action_and_state_response(unrestricted, target):
@@ -62,7 +70,8 @@ def test_target_limit_skips_high_rank_contraction_before_allocation(monkeypatch)
 
 
 @pytest.mark.parametrize("order,unrestricted,target", [(2, False, 0), (4, False, 2), (4, True, 2)])
-def test_taylor_terminal_action_receives_exact_bra_rank(monkeypatch, order, unrestricted, target):
+def test_taylor_terminal_action_receives_exact_bra_rank(
+        monkeypatch, order, unrestricted, target, cold_series_kernel):
     h, g, nocc = model(unrestricted)
     hs, _, fs, _ = _reference_data(h, g, nocc)
     canonical = tuple(a-(f-jnp.diag(jnp.diag(f))) for a, f in zip(hs, fs))
@@ -86,7 +95,7 @@ def test_taylor_terminal_action_receives_exact_bra_rank(monkeypatch, order, unre
     (6, 3, None, 6, None), (6, (3, 2), ([0], [5]), 5, None), (4, 2, None, 3, 2),
 ], ids=["sextuples", "open-shell-frozen", "extra-waves"])
 def test_required_high_rank_waves_and_coefficients_are_unchanged(
-        monkeypatch, nmo, nocc, frozen, order, wave_order):
+        monkeypatch, nmo, nocc, frozen, order, wave_order, cold_series_kernel):
     rng = np.random.default_rng(2324)
     factors = rng.normal(size=(3, nmo, nmo))*.015
     factors += factors.transpose(0, 2, 1)
@@ -100,8 +109,8 @@ def test_required_high_rank_waves_and_coefficients_are_unchanged(
     cfg = mp.MPConfig(order=order, algorithm="tensor", with_coefficients=True,
                       wavefunction_order=wave_order)
     def evaluate():
-        # Fresh wrappers trace the production and oracle actions separately;
-        # JIT avoids compiling thousands of eager contraction fragments.
+        # Trace the private kernel afresh for each physical/oracle action.
+        cold_series_kernel.clear_cache()
         return jax.jit(lambda hh, gg: mp.run_mp(hh, gg, nocc=nocc,
             frozen=frozen, config=cfg))(h, gs)
     actual = evaluate()
