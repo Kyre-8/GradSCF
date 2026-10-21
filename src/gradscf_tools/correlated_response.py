@@ -6,6 +6,7 @@ import numpy as np
 from gradscf import cc, mp
 from gradscf._memory import resolve_memory_mb
 from gradscf.ao2mo import transform_integrals, transform_unrestricted_integrals
+from gradscf.ao2mo.reference import transform_fock
 from gradscf.mp.integrals import from_orbitals
 from gradscf.mp.mp2 import evaluate_mp2
 from gradscf.solvers import EigenResponseConfig, EigenSolverConfig, solve_hermitian
@@ -85,7 +86,7 @@ class CorrelatedEnergy:
         if self._selected_mp2:
             cs = tuple(coefficients) if self.reference.unrestricted else (coefficients,)
             fs = tuple(state.fock_matrix) if self.reference.unrestricted else (state.fock_matrix.mean(axis=0),)
-            focks = tuple(c.T @ f @ c for c, f in zip(cs, fs))
+            focks = tuple(transform_fock(f, c) for c, f in zip(cs, fs))
             data = from_orbitals(coefficients, focks, self.nocc, state.total_energy,
                 eri=inputs["eri"], direct_basis=inputs.get("direct_basis"),
                 frozen_gap_tol=self.config.denominator_tol, max_memory=self.max_memory)

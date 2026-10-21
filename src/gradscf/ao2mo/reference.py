@@ -5,6 +5,13 @@ from gradscf._memory import DEFAULT_MAX_MEMORY_MB
 from gradscf.ao2mo.blocks import transform_eri_block
 
 
+def transform_fock(fock, mo_coeff):
+    """Transport a real Hermitian SCF Fock, retaining its physical response."""
+    c, f = jnp.asarray(mo_coeff), jnp.asarray(fock)
+    transformed = c.T @ f @ c
+    return .5*(transformed+transformed.T)
+
+
 def validate_integrals(h1, eri, nmo=None):
     h1, eri = jnp.asarray(h1), jnp.asarray(eri)
     if jnp.iscomplexobj(h1) or jnp.iscomplexobj(eri):

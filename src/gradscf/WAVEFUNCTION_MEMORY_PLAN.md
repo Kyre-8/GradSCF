@@ -357,6 +357,11 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   failure. Record warm-time cost, and investigate >20% regression before enabling
   a default unless the measured memory/time tradeoff is explicitly justified.
 
+  - [x] **WF-08a:** repair the physical SCF-to-MO Fock transport exposed by
+    aniline, preserving noncanonical response and explicit invalid-input guards.
+    Small-system geometry/HVP checks close this correctness prerequisite;
+    measured full-gradient/scaling performance and larger oracles remain open.
+
 ### Coupled cluster, perturbative corrections and EOM
 
 - [ ] **WF-09 — RCC integral preparation.** Request only required blocks; make
@@ -366,6 +371,12 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   - [x] **WF-09a:** remove the extra full active-space ERI copy in the
     existing MO-array path; derive virtual counts from the Fock dimension.
   - [ ] **WF-09b:** prepare requested AO-source blocks and share consumers.
+
+    - [ ] **WF-09b1** (`in_progress`): pure live-C/Fock/reference-energy
+      preparation into the existing seven-block container, one shared batch,
+      and one numerical ground-state body reused by the old MO entry. Keep
+      bare-vvvv storage explicit; facade and post-CC migration follow only
+      after their own state/frozen/property compatibility gates.
 - [ ] **WF-10 — RCC vvvv and intermediate actions.** Factor bare-vvvv contraction
   from dressing; tile tau/W consumers and release/recompute by lifetime.
   Acceptance: residual and energy term comparison, converged CCD/CCSD, JVP/VJP,
@@ -447,6 +458,11 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   batches with byte planning and bound numerical/RDM caches by bytes.
   Acceptance: direct action/matmat parity, Davidson forward/response, no all-pairs
   connection build; repeated-call cache release and blockwise JVP/VJP.
+
+  - [ ] **WF-20a** (`in_progress`): replace Python-expanded multi-RHS batches
+    with the existing shared compact column loop; preserve empty/small batches
+    and validate values, coefficient/integral response and measured warm-time/
+    workspace tradeoff. Byte-selected widths and cache ownership remain open.
 - [ ] **WF-21 — FCI Hamiltonian action tiles.** Tile gather -> contraction ->
   transpose scatter instead of full E_pq*C stacks, rematerializing reverse tiles.
   Acceptance: alpha/beta signs, rectangular spin sectors, multiple RHS, transpose
@@ -488,6 +504,12 @@ plus a plan review entry. A narrower completed subtask cannot close a larger tas
   Acceptance: all Taylor coefficients and derivatives, with_coefficients True/
   False, no illegal removal of history required by later orders; measured time/
   memory tradeoff. Reuse `solvers/nonlinear/taylor.py`, do not add a second engine.
+
+  - [ ] **WF-25a** (`in_progress`): stable whole-recurrence compilation at the
+    public series entry, with physical inputs and tolerance dtypes left live.
+    Measure cold and warm costs separately; preserve old coefficient, raw-input
+    and nested-response gates. This removes eager dispatch fragmentation, not
+    combinatorial state storage or the subsequent history-lifetime work.
 - [ ] **WF-26 — MPn geometry integration.** Connect blocks and lifetime policy to
   moving noncanonical R/U references. Acceptance: order-specific first/second
   responses and internal-orbital-degeneracy cases, justified capacity errors;
@@ -1422,3 +1444,41 @@ requires its own explicit decision and numerical validation.
   recorded; GPU6 was hidden. Evidence: local `ao2mo-batch/` manifests, logs,
   XML and small comparison JSON. Completion review closes this batch foundation;
   RCC/UCC consumers, bare-vvvv actions and whole-method budget gates remain open.
+
+
+### 2026-10-22 — WF-08a: physical Fock transport at the SCF boundary
+
+- Aniline's invalid MP2 forward state was traced to a virtual-Fock skew norm
+  of 1.40e-12, above the unchanged 1.49e-13 Hermitian-solver threshold. The
+  candidate inverse was otherwise finite with a 2.09e-14 true residual, and
+  the SCF orbital gradient was 2.20e-12. Relaxing either guard would address
+  the wrong layer. Actual raw AO/MO skew measurements after the fix are
+  6.26e-14/1.43e-12, consistent with transport roundoff.
+- The shared physical SCF adapter now computes sym(C.T F C). The full
+  off-diagonal occupied/virtual Fock response remains live. For physical
+  F=F.T and its physical perturbations this preserves the first and second
+  derivative. Generic Hamiltonian transformations and explicitly supplied
+  from_orbitals Focks are unchanged: invalid nonsymmetric inputs still fail.
+  No SCF refinement, equation, tolerance or solver diagnostic was modified.
+- TDD: eight failures/three passes before the fix; eleven focused checks pass
+  after it, 40.49 s pytest / 43.85 s process, RSS 2,315,260 KiB. Twelve existing
+  R/U/direct/full/N2 geometry, PySCF, finite-difference, HVP and nested tensor
+  diagnostics pass separately, four deselected, 229.12 s pytest / 233.51 s
+  process, RSS 2,472,412 KiB. CPU64-71, f64, GPU hidden; no local numerical
+  tests. Raw logs, commands, exact exits and frozen source manifests were
+  reviewed; these runs did not request JUnit XML.
+- Same fixed aniline input, Cartesian 6-31G*, 119 AO/25 occupied/94 virtual,
+  gives valid MP2 with correlation -0.9546311957491757 Eh and a 7.00e-15
+  true inverse residual against 1.74e-10. Three SCF refinements remain enabled.
+  A first complete finite gradient returned in 259.53 s, with 23,480,720 KiB
+  RSS; its original three-warm process was deliberately stopped before it
+  could meet its 600 s cap. The runner is being corrected to save each finite
+  result immediately and request one warm repeat. This partial run is not a
+  completed warm benchmark or medium-system PySCF gradient comparison.
+- Final production hashes start `77d84747`/`8027ccad`/`7b6e0063`; only the three
+  physical adapter sources changed in the frozen validation stage. Its older
+  AO2MO/scheduling base is identified explicitly in the manifests; current
+  combined-branch validation is still required. Evidence:
+  `wf08-aniline-forward-audit/`. Completion review closes the correctness
+  prerequisite only; WF-08 performance, direct scaling and total-memory
+  acceptance remain open.

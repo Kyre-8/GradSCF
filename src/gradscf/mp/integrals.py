@@ -9,6 +9,7 @@ import jax.numpy as jnp
 from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
                              resolve_memory_mb, workspace_bytes)
 from gradscf.ao2mo import validate_integrals, validate_unrestricted_integrals, frozen_indices, unrestricted_frozen_indices, transform_eri_block
+from gradscf.ao2mo.reference import transform_fock
 
 
 class MPIntegrals(NamedTuple):
@@ -239,14 +240,14 @@ def from_scf(source, *, frozen=None, frozen_gap_tol=1e-10, max_memory=None):
             raise RuntimeError("Solved UHF Fock data is missing; run SCF again before MP")
         ns = (ref.nocc_alpha, ref.nocc_beta)
         cs = tuple(coeff)
-        focks = tuple(c.T @ f @ c for c, f in zip(cs, ref.fock_matrix))
+        focks = tuple(transform_fock(f, c) for c, f in zip(cs, ref.fock_matrix))
         factors, direct, eri, pair = ref.df_factors, ref.direct_basis, ref.rep_tensor, None
     else:
         inputs = source._scf_inputs
         if inputs.nelectron % 2:
             raise ValueError("RMP requires an even electron count")
         ns, cs = (inputs.nelectron // 2,), (coeff,)
-        focks = (coeff.T @ source.scf_result.fock_matrix @ coeff,)
+        focks = (transform_fock(source.scf_result.fock_matrix, coeff),)
         factors, direct = inputs.df_factors, inputs.direct_basis
         eri, pair = inputs.eri, inputs.eri_pair_matrix
     expected = tuple((np.arange(c.shape[1]) < no).astype(int) for c, no in zip(cs, ns))
