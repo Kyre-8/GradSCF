@@ -5,7 +5,7 @@ Independent increasing-index coefficients are orthonormal. Dense antisymmetric
 blocks are expanded only under an explicit capacity bound. No determinant
 connection table, dense Hamiltonian or bespoke numerical solver is constructed.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from itertools import combinations, permutations, product
 from math import comb, factorial, prod
 
@@ -145,6 +145,20 @@ def _antisymmetry_map(n, rank):
             pos = tuple(chosen[i] for i in order)
             indices[pos], signs[pos] = index, _parity(order)
     return indices, signs
+
+
+def _with_dense_maps(space):
+    """Fill only missing maps, preserving the existing packed space and data."""
+    dimensions = tuple(map(len, space.orbitals))
+    cache = {(n, r): table for block, tables in zip(space.blocks, space.maps)
+             for n, r, table in zip(dimensions, block.counts, tables) if table is not None}
+    maps = []
+    for block in space.blocks:
+        for key in zip(dimensions, block.counts):
+            if key not in cache:
+                cache[key] = _antisymmetry_map(*key)
+        maps.append(tuple(cache[key] for key in zip(dimensions, block.counts)))
+    return replace(space, maps=tuple(maps))
 
 
 def make_tensor_space(nmo, nocc, *, max_excitation, frozen=None,

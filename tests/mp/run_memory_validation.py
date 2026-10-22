@@ -36,14 +36,19 @@ def main():
         JAX_ENABLE_X64='true', OMP_NUM_THREADS='4', OPENBLAS_NUM_THREADS='1',
         MKL_NUM_THREADS='1', PYTHONPYCACHEPREFIX=str(stage/'pycache'),
         GRADSCF_VALIDATION_METADATA=str(stage/(args.name+'-backend.json')))
-    code = ("import jax,jaxlib,numpy,json,os; from pathlib import Path; "
+    code = ("import jax,jaxlib,numpy,json,os,platform; from pathlib import Path; "
             "m=dict(backend=jax.default_backend(),devices=[str(d) for d in jax.devices()],"
             "jax=jax.__version__,jaxlib=jaxlib.__version__,numpy=numpy.__version__,"
-            "x64=jax.config.x64_enabled,affinity=sorted(os.sched_getaffinity(0))); "
+            "x64=jax.config.x64_enabled,affinity=sorted(os.sched_getaffinity(0)),"
+            "hostname=platform.node(),exclusive_node=False,"
+            "cpu_model=next((s.split(':',1)[1].strip() for s in "
+            "Path('/proc/cpuinfo').read_text().splitlines() if s.startswith('model name')),None),"
+            "compilation_cache_dir=jax.config.jax_compilation_cache_dir); "
             "Path(os.environ['GRADSCF_VALIDATION_METADATA']).write_text(json.dumps(m,indent=2)); "
             "print(json.dumps(m),flush=True); ")
     code += ("import runpy,sys; sys.argv="+repr(args.nodes)+
-             "; runpy.run_path(sys.argv[0],run_name='__main__')" if args.script else
+             "; sys.path.insert(0,str(Path(sys.argv[0]).resolve().parent)); "
+             "runpy.run_path(sys.argv[0],run_name='__main__')" if args.script else
              "import pytest; raise SystemExit(pytest.main("+
              repr(['-vv', '-s', *args.nodes, '--junitxml='+args.name+'.xml'])+"))")
     command = [sys.executable, '-c', code]

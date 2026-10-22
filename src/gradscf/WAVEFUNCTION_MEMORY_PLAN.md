@@ -2435,3 +2435,38 @@ requires its own explicit decision and numerical validation.
   cc-spin-virtual-root-verification.json. CorrelatedEnergy's production keyword
   forwarding, packed residual amplitude lifetime, caller/solver phase budgets
   and method scale family remain open. No parent/child is closed by this slice.
+
+### 2026-10-22 — WF-23/24/25/26: Taylor history and shared-array budget
+
+- Pure `run_series` now validates static max_memory=60000 decimal MB. Its
+  finite y/Psi/W-Psi histories are mandatory even when final coefficients are
+  not requested. Requested wave/T2 copies, rank-view kernels/maps and the
+  original linear solver's full direct-column or GMRES workspace are charged
+  under the same MB budget. Existing exact-diagonal and implicit solve owners
+  retain full off-diagonal response; no coefficient/rank/physical threshold is
+  dropped. Dense actions may checkpoint only their internal AD intermediates.
+- Actual REDs caught early dense-map construction before budget planning and
+  mixed-spin dtype undercount. The minimal fix first plans packed metadata,
+  forecasts each missing int32-index/int8-sign dense map, then materializes it
+  only when affordable, reusing existing blocks/maps. The common physical
+  result dtype covers all spin Focks. The public metadata helper's default
+  result stays compatible; this slice does not yet forward eager MP overrides.
+- Nine unique passing nodes, plus the original nested HVP repeated on final
+  hashes, are verified from raw XML/JSON. Seven initial cases exit0 in564.072s;
+  two allocation/dtype cases exit0 in62.183s; final same-case HVP exits0 in
+  433.904s. All use Delta103505/n002, CPU40–55, x64; source maps are unchanged.
+  Earlier six initial nodes retain their exact earlier frontier rather than
+  being described as a new all-nine aggregate on final source. Root compared
+  seven current files and six Taylor/Jacobian/energy definitions against true
+  4a5276c ASTs. The final nested-response model/tolerances were not reduced.
+- Same existing nmo3/nocc1/order4/f64/canonical-tensor outer-JIT forward point,
+  true4a5276c -> final source: compile0.54372 ->0.55800s, seven-warm median
+  0.14788 ->0.14419ms, XLA temporary6112B unchanged, terminal-child peaks
+  766492 ->761544KiB. Input/config/flags match and E2–E4 differ by zero. The
+  node is nonexclusive. This only checks small default forward overhead, not
+  full response scaling or a process-memory ceiling.
+- Evidence delta-series-memory-r1/evidence.tar SHA256
+  f04a5d20386b19e7acfd790f044dbce12e00a57b52cb498e15b8195d806e42bf,
+  HANDOFF.json and root-verification.json. Eager run_mp/MP-budget forwarding,
+  selected AO-source R/U geometry, standalone MP3 and final cache/size/device
+  audits remain open. The same35 parents/37 children are retained.

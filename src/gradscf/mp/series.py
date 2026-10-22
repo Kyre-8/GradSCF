@@ -21,22 +21,24 @@ from ..fci.cistring import excite
 from ..ao2mo import (validate_integrals, validate_unrestricted_integrals,
                      frozen_indices, unrestricted_frozen_indices)
 from ..solvers import LinearOperator, LinearSolverConfig, solve_linear
+from .._memory import DEFAULT_MAX_MEMORY_MB, validate_memory_mb
 from .types import MPResult
 from .integrals import _reference_data, canonical_error, reference_error, _active_orbitals
 
 
-def make_series_space(nmo, nocc, *, frozen=None, config):
+def make_series_space(nmo, nocc, *, frozen=None, config, packed_only=False):
     k = config.order // 2 if config.wavefunction_order is None else config.wavefunction_order
     if config.algorithm == "tensor":
-        from ._tensor import make_tensor_space
+        from ._tensor import _with_dense_maps, make_tensor_space
         options = dict(max_excitation=2*k, frozen=frozen,
             max_determinants=config.max_determinants, max_tensor_elements=config.max_tensor_elements,
             packed_only=True)
         space = make_tensor_space(nmo, nocc, **options)
-        if config.orbital_basis == "canonical" and space.dense_elements <= config.max_tensor_elements:
+        if (not packed_only and config.orbital_basis == "canonical"
+                and space.dense_elements <= config.max_tensor_elements):
             # Preserve the faster dense contractions when their full expansion
             # fits; otherwise retain the identical packed excitation space.
-            space = make_tensor_space(nmo, nocc, **{**options, "packed_only": False})
+            space = _with_dense_maps(space)
         return space
     build = make_uci_space if isinstance(nocc, tuple) else make_ci_space
     return build(nmo, nocc, max_excitation=2*k, frozen=frozen,
@@ -97,7 +99,8 @@ def _action_ranks(config, maximum, degree):
     return input_rank, output_rank
 
 
-def _direct_actions(h1, eri, focks, reference_energy, nocc, frozen, space, config):
+def _direct_actions(h1, eri, focks, reference_energy, nocc, frozen, space, config,
+                    max_memory, memory):
     """One physical direct operator, optionally transported to the tensor chart."""
     tensor = config.algorithm == "tensor"
     unrestricted = isinstance(nocc, tuple)
@@ -138,16 +141,20 @@ def _direct_actions(h1, eri, focks, reference_energy, nocc, frozen, space, confi
         minimum = jnp.min(jnp.abs(gaps[1:]), initial=jnp.inf)
     ranks = jnp.asarray(space.ranks)
     maximum = max(space.ranks)
-    actions = {}
+    # Construct the finite set outside any rematerialized action. Storing a
+    # nested checkpoint tracer in a lazy Python cache would leak its AD scope.
+    k = config.order // 2 if config.wavefunction_order is None else config.wavefunction_order
+    keys = {_action_ranks(config, maximum, degree) for degree in range(k + 1)}
+    keys.add(_action_ranks(config, maximum, 1))
+    build = (hamiltonian.build_fluctuation if config.orbital_basis == "noncanonical"
+             else hamiltonian.build_direct_hamiltonian)
+    actions = {key: build(h1, eri, determinants, max_input_rank=key[0],
+        max_output_rank=key[1], max_memory=max_memory,
+        reserved_bytes=memory.action_reserved_bytes) for key in sorted(keys)}
 
     def fluctuation(c, degree):
         input_rank, output_rank = _action_ranks(config, maximum, degree)
         key = (input_rank, output_rank)
-        if key not in actions:
-            build = (hamiltonian.build_fluctuation if config.orbital_basis == "noncanonical"
-                     else hamiltonian.build_direct_hamiltonian)
-            actions[key] = build(h1, eri, determinants,
-                max_input_rank=input_rank, max_output_rank=output_rank)
         state = jnp.where(ranks <= input_rank, c, 0.)
         value = from_physical(actions[key].apply(to_physical(state)))
         if config.orbital_basis == "canonical":
@@ -159,8 +166,10 @@ def _direct_actions(h1, eri, focks, reference_energy, nocc, frozen, space, confi
     return gaps, fock_action, fluctuation, minimum, determinants
 
 
-def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config):
+def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config,
+               max_memory=DEFAULT_MAX_MEMORY_MB):
     """Validate static metadata and reuse a graph with live physical inputs."""
+    max_memory = validate_memory_mb(max_memory)
     nuclear_repulsion = jnp.asarray(nuclear_repulsion)
     if nuclear_repulsion.shape != () or jnp.iscomplexobj(nuclear_repulsion):
         raise ValueError("nuclear_repulsion must be a real scalar")
@@ -179,15 +188,22 @@ def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config):
                        with_t2=bool(config.with_t2),
                        with_coefficients=bool(config.with_coefficients))
     return _run_series(h1, eri, config.denominator_tol, config.canonical_tol,
-        nocc=nocc, frozen=frozen, nuclear_repulsion=nuclear_repulsion, config=topology)
+        nocc=nocc, frozen=frozen, nuclear_repulsion=nuclear_repulsion, config=topology,
+        max_memory=max_memory)
 
 
-@partial(jax.jit, static_argnames=("nocc", "frozen", "config"))
+@partial(jax.jit, static_argnames=("nocc", "frozen", "config", "max_memory"))
 def _run_series(h1, eri, denominator_tol, canonical_tol, *, nocc, frozen,
-                nuclear_repulsion, config):
+                nuclear_repulsion, config, max_memory):
     hs, gs, focks, reference_energy = _reference_data(h1, eri, nocc)
     unrestricted = isinstance(nocc, tuple)
-    space = make_series_space(hs[0].shape[0], nocc, frozen=frozen, config=config)
+    space = make_series_space(hs[0].shape[0], nocc, frozen=frozen, config=config,
+                              packed_only=True)
+    from ._series_memory import plan_series
+    memory = plan_series(hs, gs, focks, space, nocc, frozen, config, max_memory)
+    if config.algorithm == "tensor" and not memory.packed and config.orbital_basis == "canonical":
+        from ._tensor import _with_dense_maps
+        space = _with_dense_maps(space)
     n = space.nmo
     if config.algorithm == "tensor" and config.orbital_basis == "canonical":
         from ._tensor import build_tensor_action
@@ -196,9 +212,9 @@ def _run_series(h1, eri, denominator_tol, canonical_tol, *, nocc, frozen,
         maximum = max(sum(block.excitation) for block in space.blocks)
         def fluctuation(c, degree):
             input_rank, output_rank = _action_ranks(config, maximum, degree)
-            if space.dense_elements > config.max_tensor_elements:
+            if memory.packed:
                 return action.apply_packed(c, max_input_rank=input_rank,
-                    max_output_rank=output_rank, max_tile_elements=config.max_tensor_elements)
+                    max_output_rank=output_rank, max_tile_elements=memory.tile_elements)
             return action.apply(c, max_input_rank=input_rank, max_output_rank=output_rank)
         alpha_rank, beta_rank = space.spin_ranks()
         amplitudes = space.amplitudes
@@ -206,7 +222,7 @@ def _run_series(h1, eri, denominator_tol, canonical_tol, *, nocc, frozen,
         minimum = jnp.min(jnp.abs(gaps[1:]), initial=jnp.inf)
     else:
         gaps, fock_action, fluctuation, minimum, determinant_space = _direct_actions(
-            h1, eri, focks, reference_energy, nocc, frozen, space, config)
+            h1, eri, focks, reference_energy, nocc, frozen, space, config, max_memory, memory)
         if config.algorithm == "tensor":
             alpha_rank, beta_rank = space.spin_ranks()
             amplitudes = space.amplitudes
@@ -217,6 +233,8 @@ def _run_series(h1, eri, denominator_tol, canonical_tol, *, nocc, frozen,
             beta_rank = np.array([((d ^ reference_bits) >> n).bit_count()//2
                                   for d in determinant_space.determinants])
             amplitudes = lambda first: _amplitudes(first, determinant_space, unrestricted)
+    if memory.checkpoint:
+        fluctuation = jax.checkpoint(fluctuation, static_argnums=(1,))
     h0 = fock_action  # A lambda-independent E_HF shift cannot enter E2..En.
     phi = jnp.zeros(space.size, reference_energy.dtype).at[0].set(1.)
     # W is linear in the state: share W Psi_j across all subsequent degrees.
@@ -247,7 +265,9 @@ def _run_series(h1, eri, denominator_tol, canonical_tol, *, nocc, frozen,
         # its linear F_N term vanishes. Keep the direct operator outside jet.
         _, terms = _jet(nonlinear, (zero, lam0, ws[0]), inputs)
         response = solve_linear(operator, -terms[-1], config=linear,
-            preconditioner=lambda v: v/safe, transpose_preconditioner=lambda v: v/safe)
+            preconditioner=lambda v: v/safe, transpose_preconditioner=lambda v: v/safe,
+            max_memory=max_memory, reserved_bytes=memory.resident_bytes,
+            operator_min_bytes=memory.operator_min_bytes)
         ys.append(response.solution)
         waves.append(jnp.concatenate((jnp.zeros(1, zero.dtype), response.solution[:-1])))
         ws.append(fluctuation(waves[-1], degree))
