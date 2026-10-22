@@ -2665,3 +2665,24 @@ requires its own explicit decision and numerical validation.
   eom-native-root-verification.json and eom-caller-root-verification.json.
   These seven unique component/boundary gates do not close a total-process
   budget, GPU or whole-method size gate. The fixed TODO hierarchy is retained.
+
+### 2026-10-22 — WF-05/06/29: shared tensor resolvent budget entry
+
+- The existing tensor-sum inverse accepts optional max_memory/reserved_bytes.
+  It checks original inputs, possible common-dtype copies, individual-axis
+  eigensystems, complete spectrum and transform/residual working arrays before
+  diagonalization. It never constructs a full Kronecker matrix. The current
+  custom-linear-solve, true-residual and singular/degenerate response bodies
+  remain exactly unchanged; caller/AD/allocator/library scratch is not silently
+  relabeled a complete process cap.
+- Three actual missing-interface REDs precede nine passing cases on Delta
+  CPU0-15/x64 (exit0/11.618s): early exhaustion, mixed promotions, budgeted
+  repeated-eigenvalue second response and the six existing numerical/shape/
+  singular/nested-response gates. Source maps are unchanged and no nodes skip.
+  Independent review confirms the input-promotion accounting and preserved
+  numerical body; root also proves that body AST equals the original.
+- Evidence tensor-budget-evidence.tar.gz SHA256
+  da6f23eb984f7fed4ec5d590a504838f3aead944056110ef08b84de7edffaf92
+  and tensor-budget-root-verification.json; all16 payloads and exact final
+  source/test bytes were checked. Method callers still need their joint spin/
+  T2/source reservations; this prerequisite alone closes no parent task.
