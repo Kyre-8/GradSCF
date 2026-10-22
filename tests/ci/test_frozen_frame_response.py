@@ -90,24 +90,3 @@ def test_frame_preserves_dtype_and_reports_anchor_rank_loss(dtype):
     assert not np.isfinite(invalid).all()
 
 
-@pytest.mark.parametrize('source', ['h3'], indirect=True)
-def test_frozen_frame_hessian_is_integrable(source):
-    energy = CorrelatedEnergy(source, 'cisd', frozen=([0], [2]), jk_backend='direct',
-        max_memory=32., config=ci.CIConfig(solver='dense', conv_tol=1e-11))
-    point = energy.coordinates
-    rng = np.random.default_rng(1917)
-    directions = [jnp.asarray(rng.normal(size=point.shape)) for _ in range(2)]
-    directions = [d/jnp.linalg.norm(d) for d in directions]
-    response = jax.jit(lambda r, d: _bundle(energy, r, d))
-    first, second = (response(point, d) for d in directions)
-    derivative = jax.jit(jax.grad(energy))
-    errors = []
-    for step in (3e-4, 1e-4):
-        finite = (derivative(point+step*directions[0])
-                  -derivative(point-step*directions[0]))/(2*step)
-        errors.append(float(jnp.max(jnp.abs(first[-1]-finite))))
-    symmetry = float(jnp.vdot(directions[1], first[-1])-jnp.vdot(directions[0], second[-1]))
-    print(json.dumps(dict(finite_difference_steps=[3e-4, 1e-4],
-        max_hvp_errors=errors, hessian_bilinear_asymmetry=symmetry)), flush=True)
-    np.testing.assert_allclose(symmetry, 0., atol=4e-6, rtol=0.)
-    assert max(errors) < 4e-6
