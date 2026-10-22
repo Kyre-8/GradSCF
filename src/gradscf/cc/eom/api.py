@@ -2,7 +2,7 @@
 
 from dataclasses import fields
 import numpy as np
-from ..._memory import resolve_memory_mb
+from ..._memory import resolve_memory_mb, tree_storage_bytes
 from ...scf.reference import _array_signature
 from .types import EOMConfig, EOMPrecisionDiagnostics
 from .amplitudes import EOMAmplitudeSpace
@@ -85,14 +85,18 @@ class _EOM:
         self.converged = None
         cfg = self._config()
         ref = self._source()
+        owned = ((self.ground._integrals, self.ground.result) if self.ground._integrals is not None
+                 else (ref.h1, ref.eri, self.ground.result))
+        reserved = tree_storage_bytes(self.ground.mf, ref,
+            getattr(self.ground, 'lambda_result', None), exclude=owned)
         if self.ground._integrals is not None:
             self.result = run_eom_from_integrals(self.ground._integrals,
                 self.ground.result, config=cfg, cc_config=self.ground._config(),
-                max_memory=self.max_memory)
+                max_memory=self.max_memory, reserved_bytes=reserved)
         else:
             self.result = run_eom(ref.h1, ref.eri, self.ground.result, nocc=ref.nocc,
                 frozen=self.ground.frozen, config=cfg, cc_config=self.ground._config(),
-                max_memory=self.max_memory)
+                max_memory=self.max_memory, reserved_bytes=reserved)
         self.e = self.result.energies
         self.right_vectors, self.left_vectors = (
             self.result.right_vectors,
@@ -151,7 +155,6 @@ class _EOM:
         if self.sector not in {"ip", "ea"}:
             raise ValueError("Dyson orbitals require the IP or EA sector")
         self.ground.solve_lambda()
-        from ..._memory import tree_storage_bytes
         reserved = tree_storage_bytes(self.ground.reference, self.ground._integrals,
             self.ground.mf,
             exclude=(self.ground.result, self.ground.lambda_result, self.result))

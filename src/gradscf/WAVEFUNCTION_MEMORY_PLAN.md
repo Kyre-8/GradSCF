@@ -2634,3 +2634,34 @@ requires its own explicit decision and numerical validation.
   root-geometry-frame-verification.json and root-late-frontiers-verification.json.
   Existing small-point geometry success is not a large-CI performance or
   process-memory guarantee. The fixed TODO hierarchy remains unchanged.
+
+### 2026-10-22 — WF-16/17/29: native prepared EOM and eager owner propagation
+
+- The already checked VirtualERI provider now passes the prepared restricted
+  EOM boundary. Unknown nonarray providers remain rejected; original spin,
+  model, root, response and capacity guards stay in place. The existing EE
+  residual and IP/EA actions consume it without a second eigen/AD solver.
+- Three actual RED nodes hit only the former dense-vvvv interface rejection
+  (exit1/87.003s). On exact8b1a689 plus the declared guard/test overlay, four
+  nodes pass (exit0/131.080s): each EE/IP/EA right and transpose action and root
+  matches dense, and EA coefficient response includes ground CC response plus
+  an independent finite difference. This uses the existing supplied H2/3-21G
+  algebraic frame, x64, CPU0-15, Delta103505; dense solving is only the tiny
+  reference gate, not a claim about large EOM matrix-free scaling.
+- Two eager-boundary REDs reveal missing retained SCF/reference/Lambda owners.
+  The facade now forwards those declared arrays with the same inherited MB
+  budget, excluding only child-owned ground/integral leaves. Both metadata
+  cases and the original cache-invalidation/failure-cleanup regression pass
+  (exit0/29.539s). No result or settings are silently reused after failure.
+- Root verified41 payload hashes, original equations and before/after maps,
+  exact final API/tests and raw XML/exits. A final operator doc-only edit
+  explicitly retains the native provider's separate forward scratch budget;
+  physical native-phase and implicit-vector-response budgets remain open.
+  Independent review found no changed formula or broadened unknown provider.
+- Evidence eom-native-evidence.tar.gz SHA256
+  7983f129a6130f29c7ca7ffc918b2113a5623dc7d4746a775d6b106c6f83da70
+  and eom-caller-evidence.tar.gz SHA256
+  ac30a7cae3ecaba42773ef7d636ac00d187e72877dce27cd538d5f86b856d08c,
+  eom-native-root-verification.json and eom-caller-root-verification.json.
+  These seven unique component/boundary gates do not close a total-process
+  budget, GPU or whole-method size gate. The fixed TODO hierarchy is retained.

@@ -5,6 +5,7 @@ from math import prod
 import jax
 import jax.numpy as jnp
 from ..._memory import array_storage_bytes, validate_reserved_bytes, workspace_bytes
+from ...ao2mo import VirtualERI
 from ...solvers import LinearOperator, NonHermitianSolverConfig, solve_nonhermitian
 from ...solvers.memory import plan_nonhermitian
 from ...solvers.diagnostics import require_converged_derivative
@@ -79,11 +80,12 @@ def build_eom_operator_from_integrals(ints, ground, *, config=None, cc_config=No
     """EE/IP/EA operator from the same prepared restricted integral snapshot.
 
     The capacity guard counts supplied storage leaves, without a full MO ERI
-    estimate. Matrix-free virtual ERIs are explicitly unsupported here: EA's
-    current transformed Wvvvv remains dense and needs separate validation.
+    estimate. Native VirtualERI supplies the same bare virtual action to
+    EE/IP/EA; charged dressing is applied without a cached dense Wvvvv.
     max_memory plans known primal arrays in decimal MB, with the shared 20%
     runtime reserve. Compilation/allocator state and implicit-response Krylov
     storage have separate lifetimes and are not a process memory limit.
+    Native action scratch still follows the supplied provider's own budget.
     """
     context = _operator_context_from_integrals(ints, ground, config=config,
         cc_config=cc_config, max_memory=max_memory, reserved_bytes=reserved_bytes)
@@ -97,8 +99,8 @@ def _operator_context_from_integrals(ints, ground, *, config=None, cc_config=Non
     if isinstance(ground.t1, (tuple, list)):
         raise NotImplementedError("Initial EOM-CCSD requires a real restricted reference")
     space = _checked_space(ground, cfg, cc_cfg)
-    if not hasattr(ints.vvvv, "shape"):
-        raise NotImplementedError("Prepared EOM currently requires dense virtual ERIs")
+    if not hasattr(ints.vvvv, "shape") and not isinstance(ints.vvvv, VirtualERI):
+        raise NotImplementedError("Prepared EOM requires dense or native virtual ERIs")
     if sum(jnp.size(x) for x in jax.tree.leaves(ints)) > cfg.max_intermediate_elements:
         raise ValueError("Prepared EOM integral storage exceeds max_intermediate_elements")
     return _planned_operator(ints, ground, space, cfg, cc_cfg, max_memory, reserved_bytes)
