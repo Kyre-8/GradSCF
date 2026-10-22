@@ -30,6 +30,10 @@ def solve_lambda(h1, eri, result, *, nocc, frozen=None, config=None):
     if cfg.method not in {"ccsd", "ccd"}:
         raise NotImplementedError("Unrestricted Lambda supports CCSD and CCD")
     ints, occupied, virtual = prepare_ucc_integrals(h1, eri, nocc=nocc, frozen=frozen)
+    return _solve_ucc_lambda(ints, result, occupied, virtual, cfg)
+
+
+def _solve_ucc_lambda(ints, result, occupied, virtual, cfg):
     space = SpinAmplitudeSpace(occupied, virtual, cfg.method)
     x = space.pack(*space.from_blocks(result.t1, result.t2, ints.fock.dtype))
     r = lambda t: space.pack(*_spin_equations.residual(*space.unpack(t), ints))
@@ -38,13 +42,19 @@ def solve_lambda(h1, eri, result, *, nocc, frozen=None, config=None):
 
 
 def solve_lambda_from_integrals(ints, result, *, config=None):
-    """Restricted Lambda from prepared blocks, using the shared VJP solve.
+    """Restricted or UCC Lambda from prepared blocks and the shared VJP solve.
 
     The caller supplies the same active-space integral snapshot and model used
     for the right state. No integral preparation, symmetrization or copy is
     performed; derivatives follow the supplied integral chart.
     """
     cfg = CCConfig() if config is None else config
+    if isinstance(result.t1, (tuple, list)):
+        if cfg.method not in {"ccsd", "ccd"}:
+            raise NotImplementedError("Unrestricted Lambda supports CCSD and CCD")
+        occupied = tuple(t.shape[0] for t in result.t1)
+        virtual = tuple(t.shape[1] for t in result.t1)
+        return _solve_ucc_lambda(ints, result, occupied, virtual, cfg)
     space = AmplitudeSpace(ints.nocc, ints.nvir, cfg.method)
     x = space.pack(result.t1, result.t2)
     r = lambda t: space.pack(*residual(*space.unpack(t), ints, model=cfg.method))

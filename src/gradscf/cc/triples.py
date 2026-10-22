@@ -128,7 +128,7 @@ def evaluate_triples_from_integrals(
     orbital_basis="canonical", max_triples_elements=2_000_000,
     algorithm="auto", max_workspace_elements=2_000_000,
 ):
-    """Restricted triples from prepared blocks with the original kernel choice.
+    """Restricted or UCC triples from the matching prepared integral snapshot.
 
     Canonical auto uses the spatial streaming formula. Semicanonical auto
     retains the bounded six-index tensor reference, using only the existing
@@ -139,6 +139,13 @@ def evaluate_triples_from_integrals(
     Hamiltonian API's alpha/beta responses off that physical manifold.
     """
     _check_options(orbital_basis, algorithm, max_workspace_elements, variant)
+    if isinstance(result.t1, (tuple, list)):
+        from ._spin_triples import evaluate_ucc_triples_from_integrals
+        return evaluate_ucc_triples_from_integrals(ints, result,
+            denominator_tol=denominator_tol, max_virtual_triples=max_virtual_triples,
+            variant=variant, residual_tol=residual_tol, canonical_tol=canonical_tol,
+            orbital_basis=orbital_basis, max_triples_elements=max_triples_elements,
+            algorithm=algorithm, max_workspace_elements=max_workspace_elements)
     variants = ("ccsd+t(ccsd)", "ccsd(t)", "qcisd(t)")
     model = _restricted_model(variant, denominator_tol, residual_tol, canonical_tol,
         max_virtual_triples, orbital_basis, algorithm, max_triples_elements)

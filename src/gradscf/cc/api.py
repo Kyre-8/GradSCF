@@ -10,11 +10,13 @@ from ..scf.reference import reference_state_signature
 from .types import CCConfig
 from .ground import run_cc, run_cc_from_integrals
 from .integrals import from_orbitals
-from .uccsd import run_ucc
+from .uccsd import run_ucc, run_ucc_from_integrals
+from .unrestricted_integrals import from_orbitals as ucc_from_orbitals
 from .lambda_equations import solve_lambda, solve_lambda_from_integrals
 from .triples import evaluate_triples, evaluate_triples_from_integrals
 from .properties import (_density_from_lambda, _rdm2_from_lambda,
-                         _density_from_integrals, _rdm2_from_states)
+                         _density_from_integrals, _density_ucc_from_integrals,
+                         _rdm2_from_states)
 
 
 class CC:
@@ -22,8 +24,8 @@ class CC:
 
     ``max_memory=None`` inherits the SCF budget or uses the shared default for
     explicit MO references. Restricted SCF sources retain selected integral
-    blocks and orbital/AO metadata for posthoc consumers. Explicit MO and
-    unrestricted references retain their original reference representation.
+    blocks and orbital/AO metadata for posthoc consumers, as do UHF SCF sources.
+    Explicit MO and ROHF references retain their original representation.
     The transformation budget does not cap the downstream amplitude solver.
     """
     def __init__(self, mf, *, method="ccsd", frozen=None, max_memory=None, **kwargs):
@@ -43,7 +45,7 @@ class CC:
     def _physical_state_key(self):
         ref = self.reference
         frozen = (unrestricted_frozen_indices(self._nmo, ref.nocc, self.frozen)
-                  if isinstance(ref, UnrestrictedReference)
+                  if isinstance(ref.nocc, (tuple, list))
                   else frozen_indices(self._nmo, ref.nocc, self.frozen))
         return (
             self.method,
@@ -64,15 +66,23 @@ class CC:
         self._state_key = None
         cfg = self._config()
         unrestricted = is_unrestricted_source(self.mf)
-        from ..scf.facade import RKS
-        if not unrestricted and isinstance(self.mf, RKS):
+        from ..scf.facade import RKS, UKS
+        if isinstance(self.mf, (RKS, UKS)):
             from ..ao2mo.scf import prepare_scf_source
             self.reference = ref = prepare_scf_source(self.mf, max_memory=self.max_memory)
-            self._nmo = ref.coefficients.shape[1]
-            self._integrals = from_orbitals(
-                ref.coefficients, ref.focks[0], ref.nocc, ref.reference_energy,
-                frozen=self.frozen, max_memory=self.max_memory, **ref.ao_kwargs)
-            self.result = run_cc_from_integrals(self._integrals, config=cfg, t1=t1, t2=t2)
+            if unrestricted:
+                self._nmo = ref.coefficients[0].shape[1]
+                self._integrals, occupied, virtual = ucc_from_orbitals(
+                    ref.coefficients, ref.focks, ref.nocc, ref.reference_energy,
+                    frozen=self.frozen, max_memory=self.max_memory, **ref.ao_kwargs)
+                self.result = run_ucc_from_integrals(self._integrals, occupied, virtual,
+                                                      config=cfg, t1=t1, t2=t2)
+            else:
+                self._nmo = ref.coefficients.shape[1]
+                self._integrals = from_orbitals(
+                    ref.coefficients, ref.focks[0], ref.nocc, ref.reference_energy,
+                    frozen=self.frozen, max_memory=self.max_memory, **ref.ao_kwargs)
+                self.result = run_cc_from_integrals(self._integrals, config=cfg, t1=t1, t2=t2)
         else:
             self.reference = ref = (unrestricted_reference_from_source(
                                         self.mf, max_memory=self.max_memory)
@@ -190,6 +200,10 @@ class CC:
         if not self.converged_lambda:
             raise RuntimeError("Converge Lambda before evaluating the CC density")
         if self._integrals is not None:
+            if isinstance(ref.nocc, (tuple, list)):
+                return _density_ucc_from_integrals(self._integrals, self.result,
+                    self.lambda_result, nmo=self._nmo, nocc=ref.nocc,
+                    frozen=self.frozen, config=self._config())
             density = _density_from_integrals(self._integrals, self.result,
                 self.lambda_result, nmo=self._nmo, nocc=ref.nocc,
                 frozen=self.frozen, config=self._config())
@@ -210,9 +224,11 @@ class CC:
         if not self.converged_lambda:
             raise RuntimeError("Converge Lambda before evaluating the CC density")
         if self._integrals is not None:
+            coefficients = (ref.coefficients if isinstance(ref.nocc, (tuple, list))
+                            else (ref.coefficients,))
             return _rdm2_from_states(self.result, self.lambda_result, nmo=self._nmo,
                 nocc=ref.nocc, frozen=self.frozen,
-                dtype=jnp.result_type(ref.coefficients, ref.hcore), config=self._config())
+                dtype=jnp.result_type(*coefficients, ref.hcore), config=self._config())
         return _rdm2_from_lambda(ref.h1, ref.eri, self.result, self.lambda_result,
                                  nocc=ref.nocc, frozen=self.frozen, config=self._config())
 

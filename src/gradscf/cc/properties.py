@@ -16,19 +16,11 @@ from ._spin_density import active_density_parts
 
 def _density_from_lambda(h1, eri, result, left, *, nocc, frozen, config):
     if isinstance(nocc, (tuple, list)):
-        _, occupied, virtual = prepare_ucc_integrals(h1, eri, nocc=nocc, frozen=frozen)
-        space = SpinAmplitudeSpace(occupied, virtual, config.method)
-        t1, t2 = space.from_blocks(result.t1, result.t2, jnp.asarray(h1[0]).dtype)
-
-        def lagrangian(raw_h):
-            h = tuple(.5*(a+a.T) for a in raw_h)
-            ints, _, _ = prepare_ucc_integrals(h, eri, nocc=nocc, frozen=frozen)
-            r = space.pack(*_spin_equations.residual(t1, t2, ints))
-            e = ints.reference_energy + _spin_equations.correlation_energy(t1, t2, ints)
-            return e + jnp.vdot(left.adjoint, r).real
-
-        densities = jax.grad(lagrangian)(tuple(map(jnp.asarray, h1)))
-        return tuple(jnp.where(result.converged & left.converged, d, jnp.nan) for d in densities)
+        h = tuple(map(jnp.asarray, h1))
+        ints, _, _ = prepare_ucc_integrals(tuple(.5*(a+a.T) for a in h), eri,
+                                          nocc=nocc, frozen=frozen)
+        return _density_ucc_from_integrals(ints, result, left, nmo=h[0].shape[0],
+            nocc=nocc, frozen=frozen, config=config, dtypes=tuple(a.dtype for a in h))
     h = jnp.asarray(h1)
     # Preserve the raw API's Hermitian partial even for off-manifold inputs;
     # the outer right/left states still depend on the original raw Hamiltonian.
@@ -72,6 +64,48 @@ def _density_from_integrals(ints, result, left, *, nmo, nocc, frozen=None, confi
 
     density = jax.grad(lagrangian)(jnp.zeros((nmo, nmo), dtype=ints.fock.dtype))
     return jnp.where(result.converged & left.converged, density, jnp.nan)
+
+
+def _density_ucc_from_integrals(ints, result, left, *, nmo, nocc, frozen=None,
+                                 config=None, dtypes=None):
+    """UHF local Hermitian one-body partial in the supplied full MO frame.
+
+    The snapshot Fock is unchanged at the base point. Delta enters only its
+    selected alpha/beta blocks and each full occupied reference trace; all ERIs
+    remain the supplied objects. Right/left states remain live outer AD inputs.
+    Private dtypes preserve the raw API's separate h-alpha/h-beta coordinates.
+    """
+    cfg = CCConfig() if config is None else config
+    frozen = unrestricted_frozen_indices(nmo, nocc, frozen)
+    occupied = tuple(tuple(i for i in range(no) if i not in fr)
+                     for no, fr in zip(nocc, frozen))
+    virtual = tuple(tuple(i for i in range(no, nmo) if i not in fr)
+                    for no, fr in zip(nocc, frozen))
+    sizes = tuple(tuple(map(len, group)) for group in (occupied, virtual))
+    no, nv = map(sum, sizes)
+    if ints.fock.shape != (no+nv, no+nv) or ints.oovv.shape != (no, no, nv, nv):
+        raise ValueError("Full orbital metadata does not match prepared UCC active space")
+    space = SpinAmplitudeSpace(*sizes, cfg.method)
+    dtypes = (ints.fock.dtype,)*2 if dtypes is None else dtypes
+    t1, t2 = space.from_blocks(result.t1, result.t2, dtypes[0])
+    active = tuple(jnp.asarray(o+v, dtype=jnp.int32) for o, v in zip(occupied, virtual))
+    targets = tuple(jnp.asarray(tuple(range(sum(sizes[0][:s]), sum(sizes[0][:s+1])))
+                    +tuple(range(no+sum(sizes[1][:s]), no+sum(sizes[1][:s+1]))),
+                    dtype=jnp.int32) for s in range(2))
+
+    def lagrangian(raw_delta):
+        fock, reference = ints.fock, ints.reference_energy
+        for delta, selection, target, count in zip(raw_delta, active, targets, nocc):
+            delta = .5*(delta+delta.T)
+            fock = fock.at[jnp.ix_(target, target)].add(delta[jnp.ix_(selection, selection)])
+            reference = reference+jnp.trace(delta[:count, :count])
+        perturbed = ints._replace(fock=fock, reference_energy=reference)
+        r = space.pack(*_spin_equations.residual(t1, t2, perturbed))
+        e = reference+_spin_equations.correlation_energy(t1, t2, perturbed)
+        return e+jnp.vdot(left.adjoint, r).real
+
+    densities = jax.grad(lagrangian)(tuple(jnp.zeros((nmo, nmo), dtype) for dtype in dtypes))
+    return tuple(jnp.where(result.converged & left.converged, d, jnp.nan) for d in densities)
 
 
 def make_rdm1(h1, eri, result, *, nocc, frozen=None, config=None):

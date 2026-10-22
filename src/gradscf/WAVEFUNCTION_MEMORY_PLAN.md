@@ -418,8 +418,9 @@ section 8 are provenance, not additional active TODO levels.
   - [x] **WF-12a:** assemble the six existing UCC blocks directly from spatial
     spin sectors, eliminating full total/active spin ERIs.
   - [ ] **WF-12b** (`in_progress`): AO-source selected blocks, byte ownership
-    and scale evidence. The pure producer/shared solve bridge is verified;
-    spin-vvvv/residual adoption and shared method scaling remain with WF-13/32.
+    and scale evidence. The pure producer, UHF facade and relaxed CCSD/(T)
+    integration are verified; spin-vvvv/amplitude work, whole-phase byte ownership
+    and shared method scaling remain with WF-13/14/15/29/32.
 - [ ] **WF-13 — UCC residual/amplitude workspace** (`in_progress`). Reduce repeated dense
   spin-amplitude expansion using block consumers. Acceptance: UCCD/UCCSD forward,
   adjoints and geometry HVP, restricted-limit comparison; packed-coordinate
@@ -2040,3 +2041,36 @@ requires its own explicit decision and numerical validation.
 - This closes the common phase-planning implementation, not the remaining
   per-method physical-state/closure integration or arbitrary outer AD-tape and
   allocator bounds. Those remain in their original method and final-audit TODOs.
+
+### 2026-10-22 — WF-12/14/15: selected UHF consumers and relaxed response
+
+- UHF SCF CC reuses the shared source adapter, selected six-spin-block producer
+  and existing packed UCC solve; Lambda, local one-RDM and triples share that
+  snapshot. Explicit MO/ROHF references retain the original raw path and guards.
+  The raw UCC right solve/residual, left equation and triples numerical tail are
+  AST-identical. RDM local Hermitian h-alpha/h-beta partials preserve their old
+  separate dtype chart, full occupied traces, active/frozen map and dual factors.
+- CorrelatedEnergy now prepares UHF CCSD/(T) directly from live C, saved Focks
+  and total HF energy, including native direct inputs. It no longer requires a
+  complete moving MO ERI for UCC. Its MP2 branch is AST-identical to the baseline.
+  Native block AD, stationary SCF and the original CC/(T) response owners remain.
+- Ten new plus twelve old cases pass in six final groups, all actual exit0 and
+  no skip. LiH+/STO-3G tests enforce a nonzero triples correction, native direct
+  no-full-AO/MO traps, complete gradient/JVP/HVP and two finite-difference steps.
+  Fixed-frame Lambda/density includes arbitrary raw h/g joint first/second
+  response; frozen, UCCD and original R/U/ROHF/triples guards are covered.
+- Root and independent review found no remaining correctness issue in these
+  seven source files. All seventy-three archived entries and local frozen
+  source hashes match; executed-group JSON/source snapshots and raw XML are
+  preserved. Evidence: ucc-scf-prepared-correctness.tar.gz SHA82911a97...d88f,
+  source-manifest and correctness-summary. Geometry processes take 87.23/107.90
+  seconds; these are validation runtimes, not converged-method warm benchmarks.
+- The matched pipeline pair is unfinished: raw exit0 was observed, while
+  selected never produced a completed result before node reboot/SSH loss.
+  Recovery found no selected result/process; later authentication/I/O errors
+  prevented a reliable retry. No matched performance, final RSS or scalability
+  claim is made. All tests were remote CPU80-95 with GPU disabled.
+- This accepted integration uses the existing WF-12/14/15 tasks; bare spin-vvvv,
+  packed amplitude lifetime, contracted two-body properties and the later common
+  solver-budget snapshot remain open. Unrun CCS/spin-block tests are excluded
+  from this correctness checkpoint. No new TODO or subplan is introduced.

@@ -57,11 +57,9 @@ def _general_correction(ints, t1, t2, *, denominator_tol):
             solved.min_abs_denominator, solved.converged)
 
 
-def evaluate_ucc_triples(h1, eri, result, *, nocc, frozen=None,
-                         denominator_tol=1e-10, max_virtual_triples=20000,
-                         variant="ccsd(t)", residual_tol=1e-8, canonical_tol=1e-7,
-                         orbital_basis="canonical", max_triples_elements=2_000_000,
-                         algorithm="auto", max_workspace_elements=2_000_000):
+def _check_options(variant, denominator_tol, residual_tol, canonical_tol,
+                   max_virtual_triples, orbital_basis, max_triples_elements,
+                   algorithm, max_workspace_elements):
     if variant != "ccsd(t)":
         raise NotImplementedError("Unrestricted triples currently implement only CCSD(T)")
     if any(not isfinite(x) or x <= 0 for x in (denominator_tol, residual_tol, canonical_tol)):
@@ -76,7 +74,43 @@ def evaluate_ucc_triples(h1, eri, result, *, nocc, frozen=None,
         raise ValueError("algorithm must be 'auto' or 'streamed'")
     if not isinstance(max_workspace_elements, int) or max_workspace_elements < 1:
         raise ValueError("max_workspace_elements must be a positive integer")
+
+
+def evaluate_ucc_triples(h1, eri, result, *, nocc, frozen=None,
+                         denominator_tol=1e-10, max_virtual_triples=20000,
+                         variant="ccsd(t)", residual_tol=1e-8, canonical_tol=1e-7,
+                         orbital_basis="canonical", max_triples_elements=2_000_000,
+                         algorithm="auto", max_workspace_elements=2_000_000):
+    _check_options(variant, denominator_tol, residual_tol, canonical_tol,
+        max_virtual_triples, orbital_basis, max_triples_elements, algorithm,
+        max_workspace_elements)
     ints, occupied, virtual = prepare_ucc_integrals(h1, eri, nocc=nocc, frozen=frozen)
+    return evaluate_ucc_triples_from_integrals(ints, result,
+        occupied=occupied, virtual=virtual, denominator_tol=denominator_tol,
+        max_virtual_triples=max_virtual_triples, variant=variant,
+        residual_tol=residual_tol, canonical_tol=canonical_tol,
+        orbital_basis=orbital_basis, max_triples_elements=max_triples_elements,
+        algorithm=algorithm, max_workspace_elements=max_workspace_elements)
+
+
+def evaluate_ucc_triples_from_integrals(ints, result, *, occupied=None, virtual=None,
+                         denominator_tol=1e-10, max_virtual_triples=20000,
+                         variant="ccsd(t)", residual_tol=1e-8, canonical_tol=1e-7,
+                         orbital_basis="canonical", max_triples_elements=2_000_000,
+                         algorithm="auto", max_workspace_elements=2_000_000):
+    """Existing UCC triples kernels in the same supplied selected spin frame.
+
+    Explicit counts retain the raw preparer's shape checks. Prepared callers
+    may infer the active spin counts from their matching right-state blocks.
+    No projection, symmetrization, canonicalization or integral copy is added.
+    """
+    _check_options(variant, denominator_tol, residual_tol, canonical_tol,
+        max_virtual_triples, orbital_basis, max_triples_elements, algorithm,
+        max_workspace_elements)
+    if occupied is None:
+        occupied = tuple(a.shape[0] for a in result.t1)
+    if virtual is None:
+        virtual = tuple(a.shape[1] for a in result.t1)
     space = SpinAmplitudeSpace(occupied, virtual)
     t1, t2 = space.from_blocks(result.t1, result.t2, ints.fock.dtype)
     symmetry_error = jnp.asarray(0., dtype=t1.dtype)
