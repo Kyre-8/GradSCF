@@ -20,6 +20,7 @@ from gradscf.ao2mo import validate_integrals, validate_unrestricted_integrals
 from ..fci.cistring import excite
 from ..solvers import LinearOperator
 from ..solvers.memory import apply_columns
+from .._memory import array_storage_bytes, validate_reserved_bytes, workspace_bytes
 from .space import CISpace, UCISpace
 
 
@@ -150,7 +151,7 @@ def _compressed_kernel(tensor, types, m, l, axes, groups):
 
 
 def _kernels(focks, gs, topology, block_diagonal=False, max_input_rank=None,
-             max_output_rank=None, cross_only=False):
+             max_output_rank=None, cross_only=False, block_source=None):
     groups = topology.orbitals
     kernels = {}
     for degree in ((2, 4) if gs is not None else (2,)):
@@ -175,7 +176,11 @@ def _kernels(focks, gs, topology, block_diagonal=False, max_input_rank=None,
             if (any(r > len(groups[g % 4]) for g, r in enumerate(m+l)) or
                     not _needed(topology, m, l, max_input_rank, max_output_rank)):
                 continue
-            value = factor*phase*_compressed_kernel(tensor, types, m, l, axes, groups)
+            selected_groups = groups
+            if degree == 4 and block_source is not None:
+                tensor = block_source(types)
+                selected_groups = tuple(tuple(range(len(group))) for group in groups)
+            value = factor*phase*_compressed_kernel(tensor, types, m, l, axes, selected_groups)
             key = (m, l)
             kernels[key] = kernels.get(key, 0.) + value
     return kernels
@@ -195,7 +200,8 @@ def _map_indices(maps, rows, spectators, strides):
     return indices, signs
 
 
-def _contract(kernel, coefficients, source, target, m, l, dimensions, block_size):
+def _contract(kernel, coefficients, source, target, m, l, dimensions, block_size,
+               rematerialize=False):
     remaining = tuple(r-a for r, a in zip(source.counts, l))
     left = tuple(comb(n, r) for n, r in zip(dimensions, l))
     right = tuple(comb(n, r) for n, r in zip(dimensions, m))
@@ -223,10 +229,12 @@ def _contract(kernel, coefficients, source, target, m, l, dimensions, block_size
             mask = (created < nr)[:, None] & (columns < nt)[None, :]
             return current.at[index].add(values*(cross_phase*sign*mask)[:, :, None])
 
-        return jax.lax.fori_loop(0, (nr+rc-1)//rc, created_block, result)
+        body = jax.checkpoint(created_block) if rematerialize else created_block
+        return jax.lax.fori_loop(0, (nr+rc-1)//rc, body, result)
 
     initial = jnp.zeros((prod(target.shape), width), dtype=coefficients.dtype)
-    return jax.lax.fori_loop(0, (nt+tc-1)//tc, spectator_block, initial)
+    body = jax.checkpoint(spectator_block) if rematerialize else spectator_block
+    return jax.lax.fori_loop(0, (nt+tc-1)//tc, body, initial)
 
 
 def _reference(hs, gs, nocc):
@@ -246,7 +254,8 @@ def _reference(hs, gs, nocc):
     return tuple(focks), constant
 
 
-def _diagonal(focks, gs, constant, topology, size, max_input_rank=None, max_output_rank=None):
+def _diagonal(focks, gs, constant, topology, size, max_input_rank=None, max_output_rank=None,
+              interactions=None):
     result = jnp.zeros(size, dtype=jnp.result_type(*focks))
     groups = topology.orbitals
     for block in topology.blocks:
@@ -263,11 +272,15 @@ def _diagonal(focks, gs, constant, topology, size, max_input_rank=None, max_outp
         if gs is not None:
             for g in range(4):
                 for h in range(g, 4):
-                    tensor = gs[g % 2][h % 2]
-                    interaction = jnp.einsum("ppqq->pq", tensor)
-                    if g % 2 == h % 2:
-                        interaction -= jnp.einsum("pqqp->pq", tensor)
-                    p, q = orbitals[g], orbitals[h]
+                    if interactions is None:
+                        tensor = gs[g % 2][h % 2]
+                        interaction = jnp.einsum("ppqq->pq", tensor)
+                        if g % 2 == h % 2:
+                            interaction -= jnp.einsum("pqqp->pq", tensor)
+                        p, q = orbitals[g], orbitals[h]
+                    else:
+                        interaction = interactions[g, h]
+                        p, q = choices[g], choices[h]
                     if g == h:
                         term = .5*jnp.sum(interaction[p[:, :, None], p[:, None, :]], axis=(1, 2))
                         shape = [1]*4
@@ -283,7 +296,8 @@ def _diagonal(focks, gs, constant, topology, size, max_input_rank=None, max_outp
 
 
 @lru_cache(maxsize=16)
-def _action(space, block_size, keys, max_input_rank, max_output_rank):
+def _action(space, block_size, keys, max_input_rank, max_output_rank,
+             rematerialize=False):
     """Share the numerical sigma graph across Hamiltonians on one topology."""
     topology = _topology(space)
     lookup = {b.counts: i for i, b in enumerate(topology.blocks)}
@@ -310,7 +324,8 @@ def _action(space, block_size, keys, max_input_rank, max_output_rank):
                 outputs[i] += constant*state
         for source, target, m, l, index in plans:
             outputs[target] += _contract(kernels[index], states[source], topology.blocks[source],
-                                         topology.blocks[target], m, l, dimensions, block_size)
+                                         topology.blocks[target], m, l, dimensions, block_size,
+                                         rematerialize)
         result = jnp.zeros_like(vectors)
         for b, value in zip(topology.blocks, outputs):
             if value is None:
@@ -321,11 +336,95 @@ def _action(space, block_size, keys, max_input_rank, max_output_rank):
     return columns
 
 
+def _kernel_bytes(topology, two_body, dtype, max_input_rank, max_output_rank):
+    """Static compressed-kernel payload, before any numerical contraction."""
+    groups, sizes, keys = topology.orbitals, tuple(map(len, topology.orbitals)), set()
+    for degree in ((2, 4) if two_body else (2,)):
+        for types in product(range(4), repeat=degree):
+            if any(not groups[g] for g in types) or any(types[i] % 2 != types[i+1] % 2 for i in range(0,degree,2)):
+                continue
+            order, daggers = ((0,1),(True,False)) if degree == 2 else ((0,2,3,1),(True,False,True,False))
+            m,l,_,_ = _normal_order(types,order,daggers)
+            if any(r > sizes[g % 4] for g,r in enumerate(m+l)) or not _needed(topology,m,l,max_input_rank,max_output_rank):
+                continue
+            keys.add((m,l))
+    sizes = [prod(comb(sizes[g % 4],r) for g,r in enumerate(m+l)) for m,l in keys]
+    return (sum(sizes)+3*max(sizes,default=0))*jnp.dtype(dtype).itemsize
+
+
+def _action_layout(space, keys, max_input_rank=None, max_output_rank=None):
+    """Static maxima and distinct map constants for the existing sigma graph."""
+    topology = _topology(space)
+    dimensions = tuple(map(len, topology.orbitals))
+    counts = {b.counts for b in topology.blocks}
+    maximum_left = maximum_spectators = maximum_created = 1
+    tables = set()
+    for block in topology.blocks:
+        if not _within(block.counts,max_input_rank):
+            continue
+        for m,l in keys:
+            remaining = tuple(r-a for r,a in zip(block.counts,l))
+            target = tuple(r+a for r,a in zip(remaining,m))
+            if min(remaining) < 0 or target not in counts or not _within(target,max_output_rank):
+                continue
+            maximum_left = max(maximum_left,prod(comb(n,a) for n,a in zip(dimensions,l)))
+            maximum_created = max(maximum_created,prod(comb(n,a) for n,a in zip(dimensions,m)))
+            maximum_spectators = max(maximum_spectators,prod(comb(n,a) for n,a in zip(dimensions,remaining)))
+            tables.update((n,r,a) for n,r,a in zip(dimensions,block.counts,l))
+            tables.update((n,r,a) for n,r,a in zip(dimensions,target,m))
+    maps = 10*sum(comb(n,a)*comb(n,r-a) for n,r,a in tables)+10*space.size
+    return maximum_left,maximum_spectators,maximum_created,maps
+
+
+def _budgeted_columns(space, kernels, constant, vectors, block_size, max_memory,
+                       reserved_bytes, max_input_rank=None, max_output_rank=None):
+    """Select creator/spectator and RHS widths from one forward-array budget."""
+    if vectors.shape[1] == 0:
+        return jnp.zeros_like(vectors)
+    maximum_left,maximum_spectators,maximum_created,maps = _action_layout(
+        space,tuple(kernels),max_input_rank,max_output_rank)
+    dtype = jnp.result_type(vectors,constant,*kernels.values())
+    item = dtype.itemsize
+    resident = reserved_bytes+maps+array_storage_bytes(vectors,constant,*kernels.values())
+    resident += 6*space.size*vectors.shape[1]*item
+    available = workspace_bytes(max_memory,resident_bytes=resident,device=getattr(vectors,'device',None))
+    best = None
+    widths = [1]
+    while widths[-1] < block_size:
+        widths.append(min(block_size,2*widths[-1]))
+    for width in widths:
+        tc,rc = min(width,maximum_spectators),min(width,maximum_created)
+        fixed = (maximum_left*tc+rc*tc)*24+rc*maximum_left*item
+        per_rhs = item*(2*maximum_left*tc+3*rc*tc)
+        batch = min(vectors.shape[1],(available-fixed)//max(1,per_rhs))
+        if batch >= 1:
+            score = ((maximum_spectators+tc-1)//tc*(maximum_created+rc-1)//rc
+                     *((vectors.shape[1]+batch-1)//batch),-batch,-width)
+            if best is None or score < best[0]:
+                best = score,width,int(batch)
+    if best is None:
+        raise ValueError('Minimum direct CI string/RHS tile exceeds the working-memory budget')
+    _,width,batch = best
+    columns = _action(space,width,tuple(kernels),max_input_rank,max_output_rank,True)
+    values = tuple(kernels.values())
+    op = LinearOperator((space.size,)*2,dtype,
+        lambda x: columns(values,constant,x[:,None])[:,0],
+        matmat=lambda x: columns(values,constant,x))
+    return apply_columns(op,vectors,batch)
+
+
 def _operator(hs, gs, space, block_size, block_diagonal=False,
-              max_input_rank=None, max_output_rank=None, fluctuation=False):
+              max_input_rank=None, max_output_rank=None, fluctuation=False,
+              max_memory=None, reserved_bytes=0):
     if not isinstance(block_size, Integral) or isinstance(block_size, bool) or block_size < 1:
         raise ValueError("block_size must be a positive integer")
     topology = _topology(space)
+    if max_memory is not None:
+        reserved_bytes = validate_reserved_bytes(reserved_bytes)
+        reserved_bytes += array_storage_bytes(*hs,*jax.tree.leaves(gs))
+        workspace_bytes(max_memory,resident_bytes=reserved_bytes+
+            _kernel_bytes(topology,gs is not None,jnp.result_type(*hs,*jax.tree.leaves(gs)),
+                          max_input_rank,max_output_rank)+32*space.nmo**2+64*space.size)
     focks, constant = _reference(hs, gs, topology.nocc)
     if fluctuation:
         cross = []
@@ -339,9 +438,15 @@ def _operator(hs, gs, space, block_size, block_diagonal=False,
     values = tuple(kernels.values())
 
     def matvec(vector):
+        if max_memory is not None:
+            return _budgeted_columns(space,kernels,constant,vector[:,None],block_size,
+                max_memory,reserved_bytes,max_input_rank,max_output_rank)[:,0]
         return columns(values, constant, vector[:, None])[:, 0]
 
     def matmat(vectors):
+        if max_memory is not None:
+            return _budgeted_columns(space,kernels,constant,vectors,block_size,
+                max_memory,reserved_bytes,max_input_rank,max_output_rank)
         if vectors.shape[1] == 0:
             return jnp.zeros_like(vectors)
         return apply_columns(unbatched, vectors, 4)
@@ -354,8 +459,60 @@ def _operator(hs, gs, space, block_size, block_diagonal=False,
                            max_input_rank, max_output_rank))
 
 
+def from_prepared(integrals, space, *, block_size=128,max_memory=None,reserved_bytes=0,
+                   part='hamiltonian',max_input_rank=None,max_output_rank=None):
+    """Apply H, normal-ordered W or block-diagonal F_N from shared kernels.
+
+    Rank projectors and transposes use the original compact sigma action. W
+    drops the reference constant and same-group one-body F_N kernels; it keeps
+    every quartic and occupied/virtual cross-Fock term. No new normal-ordering
+    or perturbative partition is introduced.
+    """
+    if not isinstance(block_size, Integral) or isinstance(block_size, bool) or block_size < 1:
+        raise ValueError('block_size must be a positive integer')
+    if integrals.diagonal.shape != (space.size,):
+        raise ValueError('Prepared CI diagonal does not match the determinant space')
+    if part not in ('hamiltonian','fluctuation','fock'):
+        raise ValueError('part must be hamiltonian, fluctuation or fock')
+    for value in (max_input_rank,max_output_rank):
+        if value is not None and (not isinstance(value,Integral) or isinstance(value,bool) or value < 0):
+            raise ValueError('Rank limits must be nonnegative integers or None')
+    kernels = integrals.kernels
+    constant,diagonal = integrals.constant,integrals.diagonal
+    if part != 'hamiltonian':
+        fock = lambda key: sum(key[0])+sum(key[1]) == 2 and key[0] == key[1]
+        kernels = {key:value for key,value in kernels.items() if fock(key) == (part == 'fock')}
+        constant = jnp.zeros_like(constant)
+        diagonal = (integrals.fock_diagonal if part == 'fock' else
+                    integrals.diagonal-integrals.constant-integrals.fock_diagonal)
+    if max_input_rank is not None or max_output_rank is not None:
+        ranks = jnp.asarray(space.ranks)
+        keep = ((ranks <= max_input_rank) if max_input_rank is not None else True)
+        keep = keep & ((ranks <= max_output_rank) if max_output_rank is not None else True)
+        diagonal = jnp.where(keep,diagonal,0.)
+    columns = _action(space,int(block_size),tuple(kernels),max_input_rank,max_output_rank)
+    values = tuple(kernels.values())
+    dtype = jnp.result_type(constant, *values)
+    def apply(x):
+        if max_memory is not None:
+            return _budgeted_columns(space,kernels,constant,x,block_size,
+                max_memory,reserved_bytes,max_input_rank,max_output_rank)
+        return columns(values,constant,x)
+    matvec = lambda x: apply(x[:,None])[:,0]
+    unbatched = LinearOperator((space.size,)*2, dtype, matvec,
+        diagonal=diagonal, matmat=lambda x: columns(values, constant, x),
+        transpose_matvec=matvec)
+    operator = replace(unbatched, matmat=apply if max_memory is not None else
+                       lambda x: apply_columns(unbatched, x, 4))
+    if max_input_rank is not None or max_output_rank is not None:
+        return replace(operator,transpose_matvec=lambda x: from_prepared(integrals,space,
+            block_size=block_size,max_memory=max_memory,reserved_bytes=reserved_bytes,part=part,
+            max_input_rank=max_output_rank,max_output_rank=max_input_rank).matvec(x))
+    return operator
+
+
 def _from_integrals(h1, eri, space, block_size, max_input_rank, max_output_rank,
-                    *, fluctuation=False):
+                    *, fluctuation=False, max_memory=None, reserved_bytes=0):
     """Shared validation and transpose assembly for H and its fluctuation."""
     if isinstance(space, UCISpace):
         hs, (aa, ab, bb) = validate_unrestricted_integrals(h1, eri)
@@ -372,17 +529,20 @@ def _from_integrals(h1, eri, space, block_size, max_input_rank, max_output_rank,
         limits.append(None if value is None else int(value))
     max_input_rank, max_output_rank = limits
     operator = _operator(hs, gs, space, block_size, max_input_rank=max_input_rank,
-                          max_output_rank=max_output_rank, fluctuation=fluctuation)
+                          max_output_rank=max_output_rank, fluctuation=fluctuation,
+                          max_memory=max_memory,reserved_bytes=reserved_bytes)
     if max_input_rank is None and max_output_rank is None:
         return operator
     def transpose(vector):
         return _operator(hs, gs, space, block_size, max_input_rank=max_output_rank,
-                         max_output_rank=max_input_rank, fluctuation=fluctuation).matvec(vector)
+                         max_output_rank=max_input_rank, fluctuation=fluctuation,
+                         max_memory=max_memory,reserved_bytes=reserved_bytes).matvec(vector)
     return replace(operator, transpose_matvec=transpose)
 
 
 def build_direct_hamiltonian(h1, eri, space, *, block_size=128,
-                             max_input_rank=None, max_output_rank=None):
+                             max_input_rank=None, max_output_rank=None,
+                             max_memory=None, reserved_bytes=0):
     """Physical real CI Hamiltonian without determinant-pair connections.
 
     Frozen electrons enter the reference constant and Fock matrix. ``block_size``
@@ -391,11 +551,13 @@ def build_direct_hamiltonian(h1, eri, space, *, block_size=128,
     Optional static rank limits return P_out H P_in in the same vector layout.
     Its transpose exchanges these projectors. No amplitude threshold is used.
     """
-    return _from_integrals(h1, eri, space, block_size, max_input_rank, max_output_rank)
+    return _from_integrals(h1, eri, space, block_size, max_input_rank, max_output_rank,
+                          max_memory=max_memory,reserved_bytes=reserved_bytes)
 
 
 def build_fluctuation(h1, eri, space, *, block_size=128,
-                      max_input_rank=None, max_output_rank=None):
+                      max_input_rank=None, max_output_rank=None,
+                      max_memory=None, reserved_bytes=0):
     """Normal-ordered W = H - E_ref - blockdiag(F)_N, in the same CI space.
 
     Retains cross occupied/virtual Fock terms and normal-ordered quartic terms.
@@ -405,7 +567,7 @@ def build_fluctuation(h1, eri, space, *, block_size=128,
     transposes use the same shared direct contraction graph as physical H.
     """
     return _from_integrals(h1, eri, space, block_size, max_input_rank, max_output_rank,
-                           fluctuation=True)
+                           fluctuation=True,max_memory=max_memory,reserved_bytes=reserved_bytes)
 
 
 def build_one_body(h1, space, *, block_size=128, block_diagonal=False):

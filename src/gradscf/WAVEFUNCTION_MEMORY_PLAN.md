@@ -2270,3 +2270,21 @@ requires its own explicit decision and numerical validation.
   residual storage, compact bare-vvvv supply, joint solver/AD phase accounting
   and whole-method measurements remain open. No new TODO/sublevel, merge or
   push is introduced.
+
+### 2026-10-22 — WF-18/23: shared direct-action dependency isolated
+
+- The optional checkpointed creator/spectator action and existing sigma's
+  byte-planned RHS entry are a prerequisite of the packed MP candidate. They
+  remain in CI's shared direct action; no separate MP normal-ordering engine
+  or eigensolver is introduced. Existing default calls retain their numerical
+  action and raw nonsymmetric integral chart.
+- A true clean archive of HEAD96b6a804 was tested with only `ci/direct.py` and
+  `tests/ci/test_action_budget.py` overlaid. All1158 Python source/test hashes
+  matched that exact baseline plus the two overlays, before and after. Root
+  rechecked the original JSON exit0 and JUnit4/4, with no skips/errors.
+  Delta103505/n002, CPU40–55, x64, process122.171s, child peak1918332KiB;
+  physical H and normal-ordered W joint JVP/VJP/HVP and early budgets pass.
+  This is dependency acceptance, not a whole-method memory-cap claim.
+- Evidence: delta-packed-mp-factory-r1/clean-ci-dependency, archive SHA256
+  c3cc534f44a378ab0362423b4c8ec3ab8da99fc2fa114f7ec9f932ed19134aa3.
+  No parent/child TODO is added or marked complete by this prerequisite.
