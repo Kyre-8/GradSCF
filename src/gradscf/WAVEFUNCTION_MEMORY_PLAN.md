@@ -2576,3 +2576,28 @@ requires its own explicit decision and numerical validation.
   root-late-frontiers-verification.json. This is a static array-cache boundary,
   not an entire-method or process limit. No parent closes and the existing
   fixed TODO hierarchy is unchanged.
+
+### 2026-10-22 — WF-19/22: FCI caller/property and active-preparation ledger
+
+- FCI property methods pass one original MB budget and the declared retained
+  source/input/result arrays to the existing determinant-tile reducer. The
+  shared tree-storage helper replaces a duplicate source walker. Normalized
+  properties keep their original coefficient input charged during reduction;
+  no new RDM/link-map numerical body or eigensolver is introduced.
+- Active preparation keeps the parent's overlap/parameters/reference arrays
+  reserved while only excluding identical numerical leaves owned by the
+  callee. NumPy/sequence inputs conservatively forecast a possible backend
+  copy; existing JAX/abstract/traced arrays do not pay that extra copy.
+- Five property-ledger real RED cases lead to14 passing ledger/block nodes
+  (exit0/9.143s); six unchanged RDM numerical/raw-AD cases exit0/12.353s.
+  Two active-parent metadata REDs lead to five passing allocation/core-fold
+  cases (exit0/6.432s). All use Delta103505 and source maps remain unchanged.
+  Root checked exact four checkpoint source/test files and all relevant raw
+  XML/exits. Earlier successful frontiers are retained separately.
+- Evidence review-property-final-20261022.tar.gz SHA256
+  fc7bb21367e2b45b9d6f7035f0728e43832ce1a1e032821e5969d6d0f383380d
+  and review-frame-active-final-20261022.tar.gz SHA256
+  9cdfda0488d967d5f01631e0b756a0e38ccd0dc61c2bed8168050176472ea7c0,
+  root-late-frontiers-verification.json. These are known-array phase budgets;
+  full process/XLA residency and size/device acceptance remain separate.
+  The same fixed TODO hierarchy remains open.

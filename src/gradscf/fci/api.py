@@ -1,9 +1,8 @@
 """Eager FCI facades and PySCF-shaped active-space solver methods."""
-from dataclasses import fields, is_dataclass
 import numpy as np
 import jax
 import jax.numpy as jnp
-from gradscf._memory import DEFAULT_MAX_MEMORY_MB, array_storage_bytes, resolve_memory_mb
+from gradscf._memory import DEFAULT_MAX_MEMORY_MB, resolve_memory_mb, tree_storage_bytes
 from ..solvers import EigenSolverConfig
 from ..scf.reference import _array_signature
 from .cistring import make_fci_space
@@ -100,23 +99,19 @@ class FCISolver:
 
     def make_rdm1(self,ci=None,norb=None,nelec=None,*,root=0):
         c,space = self._property_inputs(ci,norb,nelec,root)
-        return rdm.make_rdm1(c,space,max_workspace_elements=self.max_workspace_elements,
-            max_memory=self.max_memory)
+        return rdm.make_rdm1(c,space,**self._property_options(c))
 
     def make_rdm1s(self,ci=None,norb=None,nelec=None,*,root=0):
         c,space = self._property_inputs(ci,norb,nelec,root)
-        return rdm.make_rdm1s(c,space,max_workspace_elements=self.max_workspace_elements,
-            max_memory=self.max_memory)
+        return rdm.make_rdm1s(c,space,**self._property_options(c))
 
     def make_rdm12(self,ci=None,norb=None,nelec=None,*,root=0):
         c,space = self._property_inputs(ci,norb,nelec,root)
-        return rdm.make_rdm12(c,space,max_workspace_elements=self.max_workspace_elements,
-            max_memory=self.max_memory)
+        return rdm.make_rdm12(c,space,**self._property_options(c))
 
     def make_rdm12s(self,ci=None,norb=None,nelec=None,*,root=0):
         c,space = self._property_inputs(ci,norb,nelec,root)
-        return rdm.make_rdm12s(c,space,max_workspace_elements=self.max_workspace_elements,
-            max_memory=self.max_memory)
+        return rdm.make_rdm12s(c,space,**self._property_options(c))
 
     def make_rdm2(self,ci=None,norb=None,nelec=None,*,root=0):
         return self.make_rdm12(ci,norb,nelec,root=root)[1]
@@ -125,28 +120,28 @@ class FCISolver:
         """Requested spatial output only, inheriting the existing state budget."""
         c,space = self._property_inputs(ci,norb,nelec,root)
         return rdm.make_rdm2_block(c,space,indices,spin_resolved=spin_resolved,
-            max_workspace_elements=self.max_workspace_elements,max_memory=self.max_memory)
+            **self._property_options(c))
+
+    def _property_options(self,*vectors):
+        return dict(max_workspace_elements=self.max_workspace_elements,max_memory=self.max_memory,
+            reserved_bytes=tree_storage_bytes(getattr(self,'source',None),self.mol,
+                self._inputs,self.result,exclude=vectors))
 
     def trans_rdm1(self,bra,ket,norb,nelec):
-        return rdm.trans_rdm1(bra,ket,self._space(norb,nelec),max_workspace_elements=self.max_workspace_elements,
-            max_memory=self.max_memory)
+        return rdm.trans_rdm1(bra,ket,self._space(norb,nelec),**self._property_options(bra,ket))
 
     def trans_rdm12(self,bra,ket,norb,nelec):
-        return rdm.trans_rdm12(bra,ket,self._space(norb,nelec),max_workspace_elements=self.max_workspace_elements,
-            max_memory=self.max_memory)
+        return rdm.trans_rdm12(bra,ket,self._space(norb,nelec),**self._property_options(bra,ket))
 
     def trans_rdm1s(self,bra,ket,norb,nelec):
-        return rdm.trans_rdm1s(bra,ket,self._space(norb,nelec),max_workspace_elements=self.max_workspace_elements,
-            max_memory=self.max_memory)
+        return rdm.trans_rdm1s(bra,ket,self._space(norb,nelec),**self._property_options(bra,ket))
 
     def trans_rdm12s(self,bra,ket,norb,nelec):
-        return rdm.trans_rdm12s(bra,ket,self._space(norb,nelec),max_workspace_elements=self.max_workspace_elements,
-            max_memory=self.max_memory)
+        return rdm.trans_rdm12s(bra,ket,self._space(norb,nelec),**self._property_options(bra,ket))
 
     def spin_square(self,ci=None,norb=None,nelec=None,*,root=0):
         c,space = self._property_inputs(ci,norb,nelec,root)
-        return rdm.spin_square(c,space,max_workspace_elements=self.max_workspace_elements,
-            max_memory=self.max_memory)
+        return rdm.spin_square(c,space,**self._property_options(c))
 
     def absorb_h1e(self,h1,eri,norb,nelec,fac=1.):
         return hamiltonian.absorb_h1e(h1,eri,self._space(norb,nelec),fac)
@@ -165,38 +160,6 @@ class FCISolver:
     def energy(self,h1,eri,ci,norb,nelec,*,ecore=0.):
         return hamiltonian.energy(h1,eri,ci,self._space(norb,nelec),ecore=ecore,
             max_workspace_elements=self.max_workspace_elements,max_memory=self.max_memory)
-
-
-def _bound_source_arrays(source):
-    """Known arrays already held by a bound source; never build a reference."""
-    if isinstance(source, FCIReference):
-        return source.h1, source.eri, source.ecore
-    arrays, seen = [], set()
-
-    def collect(value):
-        if isinstance(value, type) or id(value) in seen:
-            return
-        seen.add(id(value))
-        if is_dataclass(value):
-            for item in fields(value):
-                collect(getattr(value, item.name))
-        else:
-            leaves = jax.tree.leaves(value)
-            if len(leaves) == 1 and leaves[0] is value:
-                arrays.append(value)
-            else:
-                for leaf in leaves:
-                    collect(leaf)
-
-    for name in ("mo_coeff", "mo_occ", "mo_energy", "params"):
-        collect(getattr(source, name, None))
-    for name in ("_scf_inputs", "scf_result", "reference"):
-        payload = getattr(source, name, None)
-        # Start at known payload fields. Recurse only through declared data,
-        # containers and registered PyTrees, never arbitrary model __dict__s.
-        for value in getattr(payload, "__dict__", {}).values():
-            collect(value)
-    return tuple(arrays)
 
 
 class _MolecularFCI(FCISolver):
@@ -231,8 +194,7 @@ class _MolecularFCI(FCISolver):
             dtype = jnp.result_type(self.source._scf_inputs.hcore,self.source.mo_coeff,jnp.float64)
         hmeta = jax.ShapeDtypeStruct((space.norb,)*2,dtype)
         gmeta = jax.ShapeDtypeStruct((space.norb,)*4,dtype)
-        source_arrays = _bound_source_arrays(self.source)
-        source_bytes = array_storage_bytes(*source_arrays)
+        source_bytes = tree_storage_bytes(self.source)
         config,solver_bytes,_ = _plan_fci_memory(space,dtype,config,self.max_memory,
             arrays=(hmeta,gmeta),ci0=ci0,reserved_bytes=source_bytes)
         hamiltonian._action_tiles(space,dtype,1,self.max_workspace_elements,self.max_memory,
@@ -241,8 +203,7 @@ class _MolecularFCI(FCISolver):
         h,g,ecore = active_reference(self.source,core,active,max_memory=self.max_memory)
         # Keep the source's full AO/MO arrays charged after producing the CAS.
         # Shared objects are counted once if an adapter returns an input array.
-        source_bytes = (array_storage_bytes(*_bound_source_arrays(self.source),h,g,ecore)
-                        - array_storage_bytes(h,g,ecore))
+        source_bytes = tree_storage_bytes(self.source,exclude=(h,g,ecore))
         return super().kernel(h,g,len(active),active_nelec,ci0=ci0,ecore=ecore,
                                reserved_bytes=source_bytes)
 

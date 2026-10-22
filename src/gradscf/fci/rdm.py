@@ -10,7 +10,7 @@ from numbers import Integral
 from .hamiltonian import (
     DEFAULT_WORKSPACE, _action_tiles, coefficient_array,
 )
-from .._memory import DEFAULT_MAX_MEMORY_MB
+from .._memory import DEFAULT_MAX_MEMORY_MB, tree_storage_bytes, validate_reserved_bytes
 from .cistring import FCISpace, _link_maps
 
 
@@ -21,12 +21,20 @@ def _normalized(c, space):
     return jnp.where((norm > 0) & jnp.isfinite(norm), c, jnp.nan)
 
 
-def _moments(bra, ket, space, max_workspace_elements, max_memory, *, kind, indices=None):
+def _normalized_property(c, space, options):
+    options['reserved_bytes'] = (validate_reserved_bytes(options.get('reserved_bytes', 0))
+                                 +tree_storage_bytes(c))
+    return _normalized(c, space)
+
+
+def _moments(bra, ket, space, max_workspace_elements, max_memory, *, kind, indices=None,
+              reserved_bytes=0):
     """Reduce determinant tiles into one-/two-body moments or spin exchange.
 
     Only the requested RDM outputs are dense. The whole additive body is
     recomputed in reverse AD; no tile history of full CI states is retained.
     """
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     if not isinstance(space, FCISpace):
         raise TypeError("Expected an FCISpace")
     same = bra is ket
@@ -42,7 +50,7 @@ def _moments(bra, ket, space, max_workspace_elements, max_memory, *, kind, indic
     promotion = sum(x.size for x in (left, right) if x.dtype != dtype)
     aw, bw, _ = _action_tiles(space, dtype, 1, max_workspace_elements, max_memory,
         arrays=(bra, ket, left, right),
-        extra_bytes=(output_elements+promotion)*dtype.itemsize)
+        extra_bytes=reserved_bytes+(output_elements+promotion)*dtype.itemsize)
     left, right = left.astype(dtype), right.astype(dtype)
     one = (jnp.zeros(pairs, dtype), jnp.zeros(pairs, dtype))
     if kind == 'two':
@@ -104,8 +112,9 @@ def _moments(bra, ket, space, max_workspace_elements, max_memory, *, kind, indic
 
 
 def trans_rdm1s(bra, ket, space, *, max_workspace_elements=DEFAULT_WORKSPACE,
-                max_memory=DEFAULT_MAX_MEMORY_MB):
-    one = _moments(bra, ket, space, max_workspace_elements, max_memory, kind='one')
+                max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0):
+    one = _moments(bra, ket, space, max_workspace_elements, max_memory, kind='one',
+                   reserved_bytes=reserved_bytes)
     return tuple(x.reshape(space.norb, space.norb).T for x in one)
 
 
@@ -115,9 +124,9 @@ def trans_rdm1(bra, ket, space, **kwargs):
 
 
 def trans_rdm12s(bra, ket, space, *, max_workspace_elements=DEFAULT_WORKSPACE,
-                 max_memory=DEFAULT_MAX_MEMORY_MB):
+                 max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0):
     a,b,aa,ab,bb = _moments(bra, ket, space, max_workspace_elements, max_memory,
-                            kind='two')
+                            kind='two', reserved_bytes=reserved_bytes)
     n = space.norb
     a,b = a.reshape(n,n),b.reshape(n,n)
     aa,ab,bb = (x.reshape((n,)*4) for x in (aa,ab,bb))
@@ -133,7 +142,7 @@ def trans_rdm12(bra, ket, space, **kwargs):
 
 
 def make_rdm1s(c, space, **kwargs):
-    c = _normalized(c, space)
+    c = _normalized_property(c, space, kwargs)
     return trans_rdm1s(c, c, space, **kwargs)
 
 
@@ -143,13 +152,13 @@ def make_rdm1(c, space, **kwargs):
 
 
 def make_rdm12s(c, space, **kwargs):
-    c = _normalized(c, space)
+    c = _normalized_property(c, space, kwargs)
     one,(aa,ab,_,bb) = trans_rdm12s(c, c, space, **kwargs)
     return one,(aa,ab,bb)
 
 
 def make_rdm12(c, space, **kwargs):
-    c = _normalized(c, space)
+    c = _normalized_property(c, space, kwargs)
     return trans_rdm12(c, c, space, **kwargs)
 
 
@@ -159,7 +168,7 @@ def make_rdm2(c, space, **kwargs):
 
 def trans_rdm2_block(bra, ket, space, indices, *, spin_resolved=False,
                      max_workspace_elements=DEFAULT_WORKSPACE,
-                     max_memory=DEFAULT_MAX_MEMORY_MB):
+                     max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0):
     """Export only dm2[p,q,r,s] for four static ordered orbital selections.
 
     No complete spatial or spin n**4 density is created. Transition spin blocks
@@ -176,7 +185,7 @@ def trans_rdm2_block(bra, ket, space, indices, *, spin_resolved=False,
     if not isinstance(spin_resolved, bool):
         raise TypeError('spin_resolved must be a static bool')
     a,b,*blocks = _moments(bra, ket, space, max_workspace_elements, max_memory,
-                          kind='block', indices=indices)
+                          kind='block', indices=indices, reserved_bytes=reserved_bytes)
     p,q,r,s = (jnp.asarray(axis, dtype=jnp.int32) for axis in indices)
     shape = tuple(map(len, indices))
     aa,ab,ba,bb = (x.reshape(shape) for x in blocks)
@@ -188,15 +197,17 @@ def trans_rdm2_block(bra, ket, space, indices, *, spin_resolved=False,
 
 def make_rdm2_block(c, space, indices, **kwargs):
     """Normalized counterpart of trans_rdm2_block; all state AD stays live."""
-    c = _normalized(c, space)
+    c = _normalized_property(c, space, kwargs)
     return trans_rdm2_block(c, c, space, indices, **kwargs)
 
 
 def spin_square(c, space, *, max_workspace_elements=DEFAULT_WORKSPACE,
-                max_memory=DEFAULT_MAX_MEMORY_MB):
+                max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0):
     """Return (<S^2>, effective multiplicity) without orbital-pair CI stacks."""
-    c = _normalized(c, space)
-    exchange = _moments(c, c, space, max_workspace_elements, max_memory, kind='spin')
+    options = dict(reserved_bytes=reserved_bytes)
+    c = _normalized_property(c, space, options)
+    exchange = _moments(c, c, space, max_workspace_elements, max_memory, kind='spin',
+                        **options)
     na, nb = space.nelec
     ss = .25*(na-nb)**2 + .5*(na+nb) - exchange
     ss = jnp.where(jnp.all(jnp.isfinite(c)),ss,jnp.nan)

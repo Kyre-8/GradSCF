@@ -4,7 +4,8 @@ from numbers import Integral
 import numpy as np
 import jax
 import jax.numpy as jnp
-from gradscf._memory import DEFAULT_MAX_MEMORY_MB, array_storage_bytes, resolve_memory_mb, workspace_bytes
+from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
+    resolve_memory_mb, tree_storage_bytes, validate_reserved_bytes, workspace_bytes)
 from gradscf.ao2mo import validate_integrals, transform_integrals
 from ..scf.reference import _array_signature, reference_state_signature
 from .cistring import unpack_nelec
@@ -101,10 +102,13 @@ def active_reference(source, core, active, *, max_memory=None):
         arrays = (source.h1,source.eri,source.ecore)
         itemsize = max(8,*(np.dtype(getattr(a,'dtype',np.float64)).itemsize for a in arrays))
         resident = array_storage_bytes(*arrays)
-        # Sequence inputs have not yet allocated their numerical MO arrays.
-        if not hasattr(source.h1,'shape'):
+        # NumPy/sequences may require a backend copy. This is a conservative
+        # forecast: CPU jnp.asarray can alias NumPy storage. Existing JAX and
+        # abstract/traced inputs require no additional full-array copy here.
+        numerical = (jax.Array,jax.core.Tracer,jax.ShapeDtypeStruct)
+        if not isinstance(source.h1,numerical):
             resident += shape[0]**2*itemsize
-        if not hasattr(source.eri,'shape'):
+        if not isinstance(source.eri,numerical):
             resident += shape[0]**4*itemsize
         device = getattr(source.h1,'device',None)
         device = device() if callable(device) else device
@@ -141,9 +145,7 @@ def active_reference(source, core, active, *, max_memory=None):
                 nao = coefficients.shape[0]
                 npair = nao*(nao+1)//2
                 itemsize = max(8,np.dtype(jnp.result_type(coefficients,inputs.hcore)).itemsize)
-                resident = array_storage_bytes(coefficients,inputs.overlap,inputs.hcore,
-                    *(getattr(inputs,name,None) for name in
-                      ('ao','ao_deriv1','ao_laplacian','coords','grid_weights')))
+                resident = tree_storage_bytes(source,coefficients)
                 device = getattr(coefficients,'device',None)
                 device = device() if callable(device) else device
                 available = workspace_bytes(max_memory,resident_bytes=resident,device=device)
@@ -155,11 +157,15 @@ def active_reference(source, core, active, *, max_memory=None):
             if pair is None:
                 raise ValueError("SCF source supplies no transformable two-electron integrals")
             representation = dict(eri_pair_matrix=pair)
+    numerical = (jax.Array,jax.core.Tracer,jax.ShapeDtypeStruct)
+    child = (inputs.hcore,coefficients,inputs.nuclear_repulsion,*jax.tree.leaves(representation))
+    reserved = tree_storage_bytes(source,exclude=tuple(x for x in child if isinstance(x,numerical)))
     return _active_from_orbitals(inputs.hcore,coefficients,core=core,active=active,
-        ecore=inputs.nuclear_repulsion,max_memory=max_memory,**representation)
+        ecore=inputs.nuclear_repulsion,max_memory=max_memory,reserved_bytes=reserved,**representation)
 
 
-def _check_native_active_memory(hcore, coefficients, constant, basis, ncore, nactive, max_memory):
+def _check_native_active_memory(hcore, coefficients, constant, basis, ncore, nactive,
+                                max_memory, reserved_bytes=0):
     """Check known CAS/core arrays before native J/K or shell evaluation.
 
     The block transformer additionally checks its minimum shell tile. These
@@ -190,14 +196,16 @@ def _check_native_active_memory(hcore, coefficients, constant, basis, ncore, nac
         device = device()
     if device is None:
         device = getattr(jax.config,'jax_default_device',None)
-    available = workspace_bytes(max_memory,resident_bytes=array_storage_bytes(*arrays),device=device)
+    available = workspace_bytes(max_memory,
+        resident_bytes=reserved_bytes+array_storage_bytes(*arrays),device=device)
     if required > available:
         raise ValueError("Native FCI active/core arrays exceed the working-memory budget")
 
 
 def _active_from_orbitals(hcore, coefficients, *, core=0, active=None, ecore=0.,
                           max_memory=DEFAULT_MAX_MEMORY_MB, eri=None,
-                          eri_pair_matrix=None, df_factors=None, direct_basis=None):
+                          eri_pair_matrix=None, df_factors=None, direct_basis=None,
+                          reserved_bytes=0):
     """Prepare a fixed real spatial frame without eager SCF validation.
 
     Return (h_active, eri_active, Ecore), preserving supplied active order.
@@ -207,6 +215,7 @@ def _active_from_orbitals(hcore, coefficients, *, core=0, active=None, ecore=0.,
     boundary. Only the necessary nactive**4 MO ERI output is produced.
     """
     max_memory = resolve_memory_mb(max_memory)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     hcore,coefficients,constant = map(jnp.asarray,(hcore,coefficients,ecore))
     if coefficients.ndim != 2 or hcore.shape != (coefficients.shape[0],)*2:
         raise ValueError("Inconsistent AO Hamiltonian and MO coefficient dimensions")
@@ -222,11 +231,18 @@ def _active_from_orbitals(hcore, coefficients, *, core=0, active=None, ecore=0.,
         raise ValueError("Supply exactly one of eri, eri_pair_matrix, df_factors, direct_basis")
     if direct_basis is not None:
         _check_native_active_memory(hcore,coefficients,constant,direct_basis,
-                                    len(core),len(active),max_memory)
+                                    len(core),len(active),max_memory,reserved_bytes)
     ca = coefficients[:,jnp.asarray(active,dtype=jnp.int32)]
+
+    def transform(effective, *retained):
+        reserved = reserved_bytes+tree_storage_bytes(hcore, coefficients, ecore, constant, *retained,
+                                                     exclude=(effective, ca))
+        return transform_integrals(effective, ca, max_memory=max_memory,
+                                    reserved_bytes=reserved, **representation)
+
     if direct_basis is not None:
         # The block planner's minimum shell-tile check precedes core J/K.
-        h,g = transform_integrals(hcore,ca,max_memory=max_memory,**representation)
+        h,g = transform(hcore)
     effective = hcore
     if core:
         cc = coefficients[:,jnp.asarray(core,dtype=jnp.int32)]
@@ -252,5 +268,5 @@ def _active_from_orbitals(hcore, coefficients, *, core=0, active=None, ecore=0.,
     # Core folding stays in AO space. Only nactive^4 MO ERIs are produced,
     # even if many core orbitals are frozen.
     if direct_basis is None:
-        h,g = transform_integrals(effective,ca,max_memory=max_memory,**representation)
+        h,g = transform(effective, cc, density, potential) if core else transform(effective)
     return h,g,constant
