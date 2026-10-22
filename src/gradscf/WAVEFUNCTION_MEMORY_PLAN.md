@@ -267,6 +267,30 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
+Current acceptance snapshot (2026-10-22): four of the thirty-five parent tasks
+are fully accepted (WF-00/01/07/09); twenty-six of the thirty-seven existing
+children are checked. These are acceptance counts, not a percentage estimate of
+engineering effort. Keep all other parent checkboxes open. In particular,
+successful component derivatives do not establish a whole-method memory bound.
+
+| Existing scope | Accepted frontier | Remaining acceptance boundary |
+| --- | --- | --- |
+| WF-02/03/04/05/06/08 | Shared AO2MO, native block response, selected R/U MP2, fixed-aniline full-input gradient | Joint spin/T2/resolvent/AD ownership, direct-input performance, measured size family, traced target-device capacity |
+| WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1 and nonzero streamed-(T) geometry | Efficient bare-vvvv policy, packed amplitude/residual lifetime, model-specific CCS preparation, phase budgets and contracted two-body properties |
+| WF-16/17/34 | Shared EOM primal planner; streamed Dyson and known retained-state accounting with molecular regressions | Charged intermediates, response workspaces and matched endpoint/method measurements |
+| WF-18/19/20/21/22/27 | Component selected-CI, action and property tests; FCI requested-block RDM tests | Latest joint-ledger changes, selected CIS(D) GREEN and facade, UCIS/ROHF guards, native relaxed geometry and public end-to-end measurements |
+| WF-23/24/25/26/33 | Exact target bounds and canonical Jacobian; stable Taylor compilation; earlier packed forward checks | Current packed factory and true sextuple response, history/byte integration, moving R/U MPn and selected standalone MP3 |
+| WF-29 | Hermitian/non-Hermitian primal and common linear/nonlinear phase planners | Spectral response propagation, physical caller/closure ownership and whole-method reconciliation |
+| WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
+
+The damaged jy_gpu_1 stages remain paused. The user subsequently authorized
+testing on jy_gpu_2 after reading its live manual: one V100, 64 logical CPUs,
+256G memory, 48 hours. Allocation 103505 on n002 runs from 2026-10-22 11:53:40
+to 2026-10-24 11:53:40 Asia/Shanghai. Actual CPU binding and separate CPU/CUDA
+float64 JIT/AD environment probes pass; these are readiness checks, not method
+regressions. Keep pending implementations separate from accepted evidence.
+Do not reuse damaged stages, c20 credentials or its compiled native library.
+
 ### Foundation and first complete geometry slice
 
 - [x] **WF-00 — Isolated baseline, inventory and engineering plan.** Create the
@@ -574,16 +598,23 @@ section 8 are provenance, not additional active TODO levels.
 
 ## 6. Validation matrix and measurement protocol
 
-Every numerical test runs on **jy_gpu_1**, never locally. GPU6 is prohibited.
-The latest 2026-10-21 instruction cancels the Slurm allocation workflow: run
-bounded tests directly, with **at most 64 logical CPUs** for this project.
-GPU7 is the preferred permitted GPU, subject to a live availability check;
-GPU6 is never used. The earlier 96-CPU limit and 48-hour allocation proposal
-are superseded. Keep individual tests bounded (normally at most two hours).
-Prefer tiny CPU tests first; inspect live project jobs before using resources.
-Large molecule
-calculations are not resumed as a side effect of writing this plan. Obtain the
-required authorization before new long campaigns or large dependencies.
+Every numerical test runs remotely, never locally. The current 2026-10-22 user
+instruction authorizes **jy_gpu_2 / Delta** via Slurm: one V100, 64 logical CPUs,
+256G memory and 48 hours. Read the latest `lwcluster manual` before operating;
+submit from `~/private/homefile/` to `home` with typed `gpu:V100:1`. Execute all
+tests/builds inside allocation 103505 and its checked srun steps, not on the
+login node. Use only its assigned GPU0; GPU6 remains prohibited. The observed
+CPU set is 0-31,40-71. Four CPU lanes may use 0-15,16-31,40-55,56-71; a GPU
+test consumes a released CPU lane rather than adding host threads beyond 64.
+CPU srun steps explicitly use `--gres=none --mem=60G --immediate=15`; otherwise
+they inherit the allocation's sole GPU and unnecessarily serialize. This
+behavior was observed and the CPU-only metadata step verified before use.
+Do not initialize unrelated GPUs or import c20 device/credential assumptions.
+Keep individual tests bounded (normally at most 600 seconds for this campaign).
+Existing jy_gpu_1 evidence remains valid only at its documented source version;
+do not access its broken storage. No large-molecule campaign or dependency
+installation follows automatically from this allocation. Record target-built
+native provenance separately; never treat the old node's binary as portable.
 
 | Gate | Inputs | Required checks |
 | --- | --- | --- |
@@ -2074,3 +2105,129 @@ requires its own explicit decision and numerical validation.
   packed amplitude lifetime, contracted two-body properties and the later common
   solver-budget snapshot remain open. Unrun CCS/spin-block tests are excluded
   from this correctness checkpoint. No new TODO or subplan is introduced.
+
+### 2026-10-22 — Local recovery checkpoint; remote validation still unavailable
+
+- The engineering branch remains at ec194bf. The user's pause and subsequent
+  resume preserve all uncommitted work and the existing accepted evidence.
+  A unified read-only probe returned c20, uptime114.11 seconds, a readable
+  project directory and the existing native library. This established neither
+  stable storage nor readiness for numerical work: the first CC stage copy
+  failed with `Structure needs cleaning` and `Input/output error`; subsequent
+  root/CI/MP transfers returned SSH authentication exit255. No numerical job
+  started in this recovery attempt. The user then explicitly selected local
+  preparation until they notify a stable repair. No further remote probes,
+  transfers or test retries are scheduled meanwhile.
+- The two old CI/FCI groups without result JSON/XML and the old compact-MP AD
+  group remain reboot-interrupted, not passing or numerically failing. The
+  partially created packed-MP green4 and CC staging directories must not be
+  reused without a new verified source snapshot after repair. No deletion,
+  filesystem repair, credential change or native rebuild was attempted.
+- WF-34 retains its earlier seven-case preliminary Dyson GREEN evidence, but
+  the complete task remains open. Independent review identified missing
+  resident owners: the separate packed Lambda adjoint, additional EOM arrays,
+  ordinary reference dataclasses and known SCF payload/cache/parameter arrays.
+  Five new parameterized cases are prepared for structured shape-only accounting,
+  retained-state early rejection and facade deduplication. They have not run;
+  the proposed common structured-accounting helper has not been implemented.
+  Original H2/FCI residues, physical response/guard regressions and matched
+  endpoint lifetime measurements still require execution.
+- WF-23/24's current shared-CI-action packed factory is not the earlier
+  six-forward-case snapshot. Current forward/dtype, actual rank-six target,
+  joint AD, complete-series and matched performance gates remain unverified.
+  WF-25's history/budget tests, WF-26's selected noncanonical R/U orbital-entry
+  tests and WF-33's selected canonical RHF MP3 tests are prepared but unrun;
+  those three production bridges/budget changes have not been implemented.
+  There is no unchanged H6 rerun or claimed remedy for its previous timeout.
+- WF-10/11/13's CCS lifetime and packed-spin-coordinate tests likewise remain
+  unrun. The proposed model-specific CCS preparation/early return, elimination
+  of per-action dense spin amplitudes, bare-vvvv efficiency policy and whole
+  CC/Lambda/triples phase accounting are not implied by ec194bf's correctness
+  checkpoint. WF-18/19/20/21/22/27 similarly retain their component evidence
+  while newest joint ledgers, selected CIS(D), public/native geometry and
+  matched whole-method measurements remain open.
+- Local-only verification parses changed Python files with the standard
+  library AST and checks `git diff --check`; it imports no numerical package
+  and is not a numerical/AD test. The plan still contains exactly35 parents,
+  thirty-seven children, one child level and at most four children per parent;
+  no acceptance checkbox changes. A source snapshot, binary diff and SHA256
+  manifest are preserved under the local wavefunction-memory artifact root.
+  No merge, push or new software installation is performed.
+
+### 2026-10-22 — Authorized Delta V100 allocation and target admission
+
+- User explicitly moved the testing campaign to jy_gpu_2 and authorized one
+  V100, 64 CPU threads, 256 GB host memory and two days after reading the manual.
+  The latest available lwcluster/0.8.0 manual was read in full before submission;
+  live queue, nodes, budget and storage were inspected. No c20 credential or
+  compiled library was transferred. Slurm job 103505 passed the site's checks
+  and runs in home on n002, from 2026-10-22 11:53:40 to 2026-10-24 11:53:40
+  Asia/Shanghai. Requested memory 256G is 262144 MiB. CPU binding is exactly
+  64 logical CPUs (0-31,40-71), not a claim of 64 physical cores.
+- Only the assigned device 0 is used: Tesla V100-SXM2-32GB, UUID
+  GPU-b720fb52-9628-c12c-2a38-bee0ad7a3cfe, driver 550.127.05. Separate CPU
+  and CUDA float64 JIT/value-and-grad checks pass with zero gradient error
+  and outputs on the intended devices. Existing environment: Python 3.11.15,
+  JAX/jaxlib 0.10.0, NumPy 2.4.4, SciPy 1.17.1, PySCF 2.13.0, pytest 9.0.3,
+  jax-xc 0.0.9 and CUDA 12 plugin/PJRT 0.10.0. No dependency installation occurred.
+- All 1719 source/test/package-data files were SHA-verified from ec194bf plus
+  the recorded WIP overlay. Initial archive SHA 7653bbf3...54d948. The old target
+  native library SHA bdbf4a3a...e248f lacks ERI slice/slab symbols. An isolated
+  offline build of the pinned current sources with installed CMake/GCC/BLAS
+  exits 0 in 10.934 s; new library SHA eb9b1f1a...15193ed7. The original library
+  remains intact. Upstream-header return warnings and NFS clock-skew warnings
+  are retained, not described as a warning-free build.
+- Target admission is verified by seven CPU cases (actual exit 0, process
+  13.990 s) and two V100 cases (exit 0, 12.391 s): values/JIT, coordinate JVP/VJP,
+  nonlinear HVP, static/dynamic padded slabs and GPU output residency. Raw XML
+  confirms 9 passes/no skips, and source hashes are unchanged within each group.
+  These gates validate the rebuilt target interface, not whole-method memory,
+  performance or all of WF-30. Root verified the 28-entry admission archive
+  SHA 670e8d81...0f0ff6 and wrote admission-verification.json under the local
+  delta-v100-20261022 artifact directory.
+- The initial srun invoked outside homefile was rejected before computation;
+  the first build wrapper exited 127 before Python because /usr/bin/time is
+  absent. Both are retained as runner failures. Use stdlib wall timing instead.
+  Observed CPU steps inherited the sole GPU and queued unnecessarily; lost
+  SSH connections did not terminate their pending launchers. Exact owned PIDs
+  were verified/cancelled before replacement. An explicit no-GPU step with
+  gres=none, mem=60G, immediate15s succeeds immediately inside the same allocation.
+  Subsequent CPU groups use four disjoint 16-thread masks and ten-minute step
+  caps, without increasing the 64-CPU/256G allocation. GPU tests are serial.
+- The existing method owners resumed their finite unverified gates in private
+  snapshots; they do not mutate the shared initial input. Old accepted source
+  evidence is retained rather than rerunning entire suites. The damaged
+  jy_gpu_1 stages remain untouched. No method parent checkbox is closed by
+  this infrastructure/admission slice, and no merge or push is performed.
+
+### 2026-10-22 — WF-29/34: structured ownership and streamed Dyson correctness
+
+- The common shape-only tree_storage_bytes visits declared dataclasses,
+  mappings, tuples/lists and namespaces without array values, host copies or
+  arbitrary object reflection. It deduplicates aliases, protects cycles and
+  recursively excludes already charged array descendants. Distinct view objects
+  remain conservative charges, not measured allocator storage.
+- Dyson's low-level owner now charges complete ground/Lambda/EOM state arrays,
+  including the separately retained packed Lambda adjoint and guard arrays.
+  The facade charges its reference, prepared integrals and declared SCF owner,
+  excluding the low-level states. This includes ordinary reference dataclasses,
+  AO/grid/SCF caches and external parameter arrays. The existing row-tile planner
+  receives the same original budget; no physical or response equation changes.
+- Five expected RED cases were observed first (exit 1, 8.191 s): two missing
+  structured-accounting APIs, two retained-state omissions, and facade aliases
+  plus distinct source arrays. The final group has 36 passes, exit 0, no skips,
+  process 292.048 s: 15 common budget cases, 10 streamed/retained Dyson cases
+  and 11 original endpoint/H2/FCI residue/response/guard regressions. Raw-input
+  endpoint tests cover float32/64, independent PySCF values and joint T/Lambda/
+  left/right-vector first/second response with two finite-difference steps.
+- Root verified raw XML, all five executed source/test files against the local
+  frontier, immutable per-run hashes and actual exits. Independent peer review
+  found no remaining correctness/alias-accounting issue. All numerical work
+  ran on n002 within job 103505, CPU0-15 and no GPU. Evidence archive SHA
+  ad6a5710...5073a59 and retained-state-verification.json are stored beside
+  the admission evidence; RED is retained in the earlier admission archive.
+- This accepts the finite correctness/known-state slice within WF-29/34. The
+  fixed 32-row ceiling has not yet received matched warm/RSS/compiler-workspace
+  measurement; arbitrary outer AD tape/allocator state and whole-EOM scaling
+  are not bounded by this helper. The parent checkboxes remain open, with no
+  new TODO level or claim that the complete project is finished.

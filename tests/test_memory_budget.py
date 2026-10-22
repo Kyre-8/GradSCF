@@ -55,3 +55,38 @@ def test_shape_only_abstract_arrays_are_charged_without_materialization():
     from gradscf._memory import array_storage_bytes
     abstract = SimpleNamespace(shape=(3, 5), dtype=np.dtype("float64"))
     assert array_storage_bytes(abstract, abstract) == 120
+
+
+def test_structured_residency_counts_dataclasses_aliases_and_exclusions():
+    from dataclasses import dataclass
+    from gradscf import _memory
+
+    @dataclass
+    class Reference:
+        h: object
+        eri: object
+
+    a = SimpleNamespace(shape=(3, 5), dtype=np.dtype("float64"))
+    b = SimpleNamespace(shape=(7,), dtype=np.dtype("float32"))
+    reference = Reference(a, {"block": b})
+    cycle = [reference, a]
+    cycle.append(cycle)
+    count = getattr(_memory, "tree_storage_bytes", None)
+    assert callable(count), "Missing structured resident-array accounting"
+    assert count(reference, cycle, SimpleNamespace(result=b)) == 148
+    assert count(reference, cycle, exclude=(a,)) == 28
+    assert count(reference, exclude=(reference,)) == 0
+
+
+def test_structured_residency_preserves_abstract_jax_tracers():
+    import jax
+    import jax.numpy as jnp
+    from gradscf import _memory
+
+    count = getattr(_memory, "tree_storage_bytes", None)
+    assert callable(count), "Missing structured resident-array accounting"
+    @jax.jit
+    def function(x):
+        assert count({"live": (x, x)}) == 6*8
+        return x*x
+    np.testing.assert_allclose(function(jnp.ones((2, 3))), 1.)

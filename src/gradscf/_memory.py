@@ -1,8 +1,11 @@
 """Shared working-array budgets in decimal MB, without allocator changes."""
 from math import isfinite, prod
 from numbers import Integral, Real
+from collections.abc import Mapping
+from dataclasses import fields, is_dataclass
 import os
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -115,3 +118,35 @@ def array_storage_bytes(*arrays) -> int:
                 size = prod(array.shape) * np.dtype(array.dtype).itemsize
             total += int(size or 0)
     return total
+
+
+def tree_storage_bytes(*trees, exclude=()) -> int:
+    """Count known array owners, including ordinary reference dataclasses.
+
+    Traverse declared dataclass fields, mappings, tuples/lists and namespaces;
+    do not inspect arbitrary objects, evaluate array values or transfer devices.
+    Aliases and cycles are visited once. Exclusions apply recursively to arrays
+    inside the supplied containers. Distinct views remain conservative charges,
+    just as in ``array_storage_bytes``; this is not allocator introspection.
+    """
+    def arrays(roots):
+        pending, seen = list(roots), set()
+        while pending:
+            value = pending.pop()
+            if id(value) in seen:
+                continue
+            seen.add(id(value))
+            if hasattr(value, "shape") and hasattr(value, "dtype"):
+                yield value
+            elif is_dataclass(value) and not isinstance(value, type):
+                pending.extend(getattr(value, field.name) for field in fields(value))
+            elif isinstance(value, Mapping):
+                pending.extend(value.values())
+            elif isinstance(value, (tuple, list)):
+                pending.extend(value)
+            elif isinstance(value, SimpleNamespace):
+                pending.extend(vars(value).values())
+
+    excluded = {id(value) for value in arrays(exclude)}
+    return sum(array_storage_bytes(value) for value in arrays(trees)
+               if id(value) not in excluded)

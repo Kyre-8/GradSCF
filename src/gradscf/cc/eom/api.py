@@ -143,7 +143,7 @@ class _EOM:
             raise ValueError("Invalid EOM root")
         return self.space.unpack(self.right_vectors[:, root])
 
-    def dyson(self, *, max_elements=20_000_000):
+    def dyson(self, *, max_elements=20_000_000, max_memory=None):
         """One-spin IP/EA Dyson amplitudes and biorthogonal spectral weights."""
         from .properties import dyson_orbitals
 
@@ -151,8 +151,14 @@ class _EOM:
         if self.sector not in {"ip", "ea"}:
             raise ValueError("Dyson orbitals require the IP or EA sector")
         self.ground.solve_lambda()
+        from ..._memory import tree_storage_bytes
+        reserved = tree_storage_bytes(self.ground.reference, self.ground._integrals,
+            self.ground.mf,
+            exclude=(self.ground.result, self.ground.lambda_result, self.result))
         return dyson_orbitals(self.ground.result, self.ground.lambda_result,
-                              self.result, max_elements=max_elements)
+            self.result, max_elements=max_elements,
+            max_memory=self.max_memory if max_memory is None else max_memory,
+            reserved_bytes=reserved)
 
 
 class EOMEE(_EOM):
