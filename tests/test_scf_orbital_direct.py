@@ -162,6 +162,27 @@ def test_molecular_energy_direct_does_not_assemble_eri(native_problem, monkeypat
     np.testing.assert_allclose(observed_gradient, expected_gradient, atol=3e-8, rtol=2e-7)
 
 
+def test_molecular_energy_retains_seed_direct_workers(native_problem, monkeypatch):
+    reference = copy(native_problem[0])
+    reference.direct_scf_workers = 3
+    energy = MolecularEnergy(reference, jk_backend="direct")
+    supplied = {"eri": None, "direct_basis": object()}
+    monkeypatch.setattr(energy, "inputs", lambda *args, **kwargs: supplied)
+    captured = {}
+    state = object()
+
+    def minimize(**kwargs):
+        captured.update(kwargs)
+        return state
+
+    name = "minimize_uks_from_integrals" if energy.unrestricted else "minimize_roks_from_integrals"
+    monkeypatch.setattr(scf, name, minimize)
+    observed, inputs = energy.solve_with_inputs(energy.coordinates)
+    assert observed is state and inputs is supplied
+    assert captured.get("direct_scf_workers") == 3
+    assert captured.get("direct_scf_tol", 0.) == 0.
+
+
 def test_molecular_energy_default_keeps_full_eri_inputs(native_problem):
     reference, coordinates, _, _, _, _ = native_problem
     inputs = MolecularEnergy(reference).inputs(coordinates)

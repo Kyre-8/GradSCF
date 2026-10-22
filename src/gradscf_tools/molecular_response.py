@@ -29,6 +29,7 @@ class MolecularEnergy:
 
     Full native ERIs are the default geometry-AD representation. HF may opt
     into ``jk_backend="direct"`` to use moving native J/K without AO ERIs.
+    Direct calls inherit the seed's J/K worker count and retain zero screening.
     The default requires a full-J/K seed; explicit direct accepts full or
     direct HF seeds. Original omegaB97X-D carries full/LR ERIs and its
     geometry-dependent CHG energy explicitly through the same solver.
@@ -63,6 +64,7 @@ class MolecularEnergy:
         if not mf.mol.cart or getattr(mf, "jk_backend", "full") not in seed_backends:
             raise NotImplementedError("Use Cartesian AOs and full J/K, or explicitly opt into direct HF J/K.")
         self.jk_backend = jk_backend
+        self.direct_scf_workers = getattr(mf, "direct_scf_workers", 1)
         self.xc = mf.xc
         self.rsh = rsh_preset(self.xc)
         self.kind = xc_type(local_xc_spec(self.xc))
@@ -158,11 +160,12 @@ class MolecularEnergy:
         """Return ``(state, inputs)`` from one assembly for downstream response."""
         inputs = self.inputs(coordinates, field, potential=potential)
         minimize = scf.minimize_uks_from_integrals if self.unrestricted else scf.minimize_roks_from_integrals
+        options = dict(direct_scf_workers=self.direct_scf_workers) if self.jk_backend == "direct" else {}
         state = minimize(
             **inputs, xc_spec=self.xc,
             mo_coeff=self.coefficients, mo_occ=self.occupations,
             orthonormalize_initial=True, max_iterations=300,
-            gradient_tolerance=self.gradient_tolerance, differentiation=self.differentiation)
+            gradient_tolerance=self.gradient_tolerance, differentiation=self.differentiation, **options)
         return state, inputs
 
     def __call__(self, coordinates, field=None, *, potential=None):

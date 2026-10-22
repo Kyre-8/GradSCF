@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-22): six of the thirty-five parent tasks
-are fully accepted (WF-00/01/07/09/19/34); twenty-seven of the thirty-seven existing
+Current acceptance snapshot (2026-10-22): seven of the thirty-five parent tasks
+are fully accepted (WF-00/01/07/09/19/26/34); twenty-seven of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -277,10 +277,10 @@ successful component derivatives do not establish a whole-method memory bound.
 | --- | --- | --- |
 | WF-02/03/04/05/06/08 | Shared AO2MO, native block response, selected R/U MP2, fixed-aniline full-input gradient | Joint spin/T2/resolvent/AD ownership, direct-input performance, measured size family, traced target-device capacity |
 | WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, phase budgets and contracted two-body properties |
-| WF-16/17/34 | Shared EOM primal planner, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and original-source matched component measurements | Native phase/spectral-response workspaces and whole-method measurements |
-| WF-18/19/20/21/22/27 | Selected CI/UCIS/CIS(D), ROHF guards, FCI active/caller budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Explicit raw CI solver/correction budget propagation, complete phase/AD ownership, GPU and large-method measurements |
-| WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history budgets and selected pure-frame R/U MPn second response | Moving native R/U MPn, eager budget/source integration, selected standalone MP3 and method-level size/performance acceptance |
-| WF-29 | Hermitian/non-Hermitian primal and common linear/nonlinear phase planners | Spectral response propagation, physical caller/closure ownership and whole-method reconciliation |
+| WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Remaining native phase budgets and whole-method measurements |
+| WF-18/19/20/21/22/27 | Selected and explicit-MO CI/UCIS/CIS(D) budgets, ROHF guards, FCI active/caller budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Complete phase/AD ownership, GPU and large-method measurements |
+| WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history budgets, pure-frame R/U MPn and moving native MP4 geometry second response | Eager budget/source integration, standalone MP3 mixed-dtype review and method-level size/performance acceptance |
+| WF-29 | Hermitian/non-Hermitian primal, isolated-pair response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining SCF/other spectral/physical caller ownership and whole-method reconciliation |
 | WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
 
 The damaged jy_gpu_1 stages remain paused. The user subsequently authorized
@@ -551,10 +551,14 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     Measure cold and warm costs separately; preserve old coefficient, raw-input
     and nested-response gates. This removes eager dispatch fragmentation, not
     combinatorial state storage or the subsequent history-lifetime work.
-- [ ] **WF-26 — MPn geometry integration.** Connect blocks and lifetime policy to
+- [x] **WF-26 — MPn geometry integration.** Connect blocks and lifetime policy to
   moving noncanonical R/U references. Acceptance: order-specific first/second
   responses and internal-orbital-degeneracy cases, justified capacity errors;
   mathematical divergence of an MP series must not be hidden by this optimization.
+  Verified frontier: selected pure R/U frames with internal degeneracy and
+  native relaxed RHF-series/UHF-tensor MP4, including two-step HVP FD checks
+  and early capacity rejection (checkpoint6f8d70e). This is not a claim of
+  convergence of arbitrary MP orders or the separate WF-08/32 size/time gates.
 
 ### Properties, storage, public integration and release gates
 
@@ -2949,3 +2953,28 @@ requires its own explicit decision and numerical validation.
   eom-response-evidence.tar.gz SHA256
   e3ef41bb3040235ce8a968bd085f5a7f4d625c64b33f1beb0a00d79deb2dffb2,
   summary.json/static-proofs.json and mp3-eom-root-verification.json.
+
+### 2026-10-22 — WF-01/08/30: preserve direct workers and verify moving MP2 on V100
+
+- MolecularEnergy dropped mf.direct_scf_workers and implicitly selected the
+  optimizer's one-worker default. Two real R/U metadata failures reproduce it.
+  The adapter now forwards the seed's worker count for direct J/K, retaining
+  zero screening; full-ERI calls and every physical equation are unchanged.
+  This restores requested parallelism, not a measured explanation of the
+  complete aniline runtime. No integral cache is introduced for moving geometry.
+- Final CPU group exits0/95.427s, five tests: R/U forwarding, existing R/U
+  native HF value/density/geometry-gradient oracles and existing H2/3-21G
+  MP2 joint geometry/AO-potential gradient/HVP with two FD steps. Source maps
+  are unchanged; terminal-child RSS1588508KiB. No new warm timing is inferred.
+- The same frozen source passes all five existing GPU cases in67.844s:
+  complete native-direct H2/3-21G MP2 value/gradient/HVP plus overlap/kinetic/
+  nuclear/dipole geometry products. CPU dense outputs are the oracle and
+  every returned actual leaf is checked on CUDA0. Full AO materialization is
+  forbidden for direct MP2. Job103505/n002 uses only its allocated V1000;
+  GPU6 is not visible. CPU-child RSS2178360KiB does not measure peak VRAM.
+- Root verifies30 payload hashes, RED2/CPU-GREEN5/GPU-GREEN5 raw exits/XML,
+  before/after source maps, two exact current files and explicit CUDA runner
+  environment. Evidence molecular-workers-evidence.tar.gz SHA256
+  2a042281cfdaef1c95afa5ffe628483d368022d5c57dd7db190ea1c0216ba70e,
+  molecular-workers-root-verification.json. GPU size/transfer/VRAM and the
+  direct-input warm scaling campaign remain the original open gates.
