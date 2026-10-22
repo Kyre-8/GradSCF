@@ -2490,3 +2490,32 @@ requires its own explicit decision and numerical validation.
   helpers. It is checkpointed independently so MP can reuse that data without
   depending on uncommitted public CI/property/workflow edits. It does not
   close CI's public, full-phase property or frozen-geometry acceptance gates.
+
+### 2026-10-22 — WF-10/11: measured native workers and dense-first policy
+
+- The exact native virtual action selects four workers only when their actual
+  native workspace plus one RHS fits, otherwise retaining the one-worker
+  minimum. Both worker and RHS capacity come from the same original MB budget.
+  Restricted preparation keeps dense by default; explicit auto first preflights
+  dense and only native budget failures select six blocks plus the existing
+  exact exchange action. Invalid input/unsupported-source errors are retained.
+  CCS continues to omit its unused oooo/vvvv blocks.
+- Six new budget/policy nodes and eight existing geometry/coefficient/RHS/
+  projection JVP/VJP/HVP, tail and CC-model nodes pass (actual exits0 in12.860
+  and56.064s). Root verified49 payload hashes, three final source/test files,
+  fourteen unique XML cases, source-before/after equality, and unchanged raw
+  preparation/denominator/integral-type ASTs. The real RED and cwd-filter setup
+  rejection remain distinct from successful numerical records.
+- One prepatch worker-causality probe uses the same65AO water/cc-pVTZ RHF
+  frame with60 virtuals, f64, CPU56–71 on n002 at512MB. Setup and dense/w1/w4
+  child exits are all0. Warm dense20.108ms, native1 489.147ms, native4 279.938ms;
+  four workers improve native latency1.75x yet remain13.9x slower than dense.
+  XLA temporary103.68MB dense versus1.083MB native; primary peaks1167144KiB
+  versus681004/685000KiB. Native workspaces4233792/10621224B and maximum action
+  difference6.52e-12 are recorded. This is a memory fallback component, not a
+  full CC speedup. Other logical CPU groups may be active concurrently.
+- The512MB causality timings do not establish the new tight-budget policy;
+  its separate six-node gate does. Evidence rcc-action-evidence.tar.gz SHA256
+  9e2b81c22c9c1b690051d2308490e68051bd1123581484c8207606f1f29ded64 and
+  rcc-action-root-verification.json. Public auto and coupled caller/solver/AD
+  ownership remain separate gates; no parent or new TODO is closed here.

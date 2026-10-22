@@ -88,14 +88,16 @@ def from_orbitals(coefficients, fock, nocc, reference_energy, *, frozen=None,
     selected Fock/energy and caller ``reserved_bytes``. ``vvvv='dense'`` retains
     seven blocks. Explicit ``vvvv='direct'`` keeps six blocks and a native
     exchange action for bare vvvv, using the same budget for each RHS batch.
+    ``vvvv='auto'`` keeps the faster dense path when its preparation fits;
+    a native budget preflight failure selects that exact action instead.
     The optional ``model='ccs'`` hint omits unused oooo/vvvv blocks (``None``);
     all other models and the default retain the original block selection.
     Amplitudes, solver workspaces and complete AD storage remain caller-owned.
     """
     max_memory = resolve_memory_mb(max_memory)
     reserved_bytes = validate_reserved_bytes(reserved_bytes)
-    if vvvv not in ('dense', 'direct'):
-        raise ValueError("vvvv must be 'dense' or 'direct'")
+    if vvvv not in ('dense', 'direct', 'auto'):
+        raise ValueError("vvvv must be 'dense', 'direct' or 'auto'")
     if vvvv == 'direct' and direct_basis is None:
         raise ValueError("vvvv='direct' requires a native direct_basis")
     if vvvv == 'direct':
@@ -147,10 +149,22 @@ def from_orbitals(coefficients, fock, nocc, reference_energy, *, frozen=None,
     selected_energy = energy.astype(jnp.float64) if direct_basis is not None else energy
     resident = array_storage_bytes(c, f, energy, selected_fock, energies, selected_energy, o, v, active)
     requests = (_BLOCK_SPACES[1:-1] if model == 'ccs' else
-                _BLOCK_SPACES if vvvv == 'dense' else _BLOCK_SPACES[:-1])
+                _BLOCK_SPACES if vvvv != 'direct' else _BLOCK_SPACES[:-1])
     co, cv = c[:, o], c[:, v]
-    blocks = transform_eri_blocks((co, cv), requests, **options,
-        max_memory=max_memory, reserved_bytes=reserved_bytes+resident)
+    try:
+        blocks = transform_eri_blocks((co, cv), requests, **options,
+            max_memory=max_memory, reserved_bytes=reserved_bytes+resident)
+    except ValueError as error:
+        # Native AO2MO preflights every output and its minimum slab before
+        # allocating those tensors. Other input/representation errors retain
+        # their original exception; no dense result is silently discarded.
+        if (vvvv != 'auto' or direct_basis is None or model == 'ccs'
+                or 'budget' not in str(error)):
+            raise
+        _native_action_basis(direct_basis)
+        vvvv = 'direct'
+        blocks = transform_eri_blocks((co, cv), _BLOCK_SPACES[:-1], **options,
+            max_memory=max_memory, reserved_bytes=reserved_bytes+resident)
     if model == 'ccs':
         blocks = (None, *blocks, None)
     elif vvvv == 'direct':

@@ -91,6 +91,13 @@ class VirtualERI:
         per_rhs = 8*(6*nao**2+2*nao*nvir+3*nvir**2)
         if isinstance(basis, ProjectedNativeDirectBasis):
             per_rhs += 8*(6*primitive.nao**2+4*primitive.nao*nao)
+        # The measured four-worker exchange reduces native action latency.
+        # Keep the one-worker minimum for tight budgets, and charge the actual
+        # optimizer/shell workspace before selecting a simultaneous RHS batch.
+        workers = 1
+        parallel_workspace = native_jk_workspace_bytes(primitive, 4, 0.)
+        if parallel_workspace is not None and parallel_workspace+per_rhs <= available:
+            workers, native_workspace = 4, parallel_workspace
         block = min(count, (available-native_workspace)//per_rhs)
         if block < 1:
             raise ValueError('Minimum native virtual-action RHS exceeds the working-memory budget')
@@ -103,7 +110,7 @@ class VirtualERI:
             rhs = jax.lax.dynamic_slice_in_dim(flat, start, block)
             density = jnp.einsum('pc,bcd,qd->bpq', c, rhs, c, precision='highest')
             _, exchange = basis.get_jk(density, with_j=False, with_k=True,
-                                       screening_threshold=0., workers=1)
+                                       screening_threshold=0., workers=workers)
             value = jnp.einsum('pa,bpq,qc->bac', c, exchange, c, precision='highest')
             return jax.lax.dynamic_update_slice_in_dim(result, value, start, axis=0)
 
