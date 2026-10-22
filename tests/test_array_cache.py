@@ -65,11 +65,13 @@ def test_ci_fci_array_owners_and_cached_action_have_finite_payload_caps():
     direct = importlib.import_module('gradscf.ci.direct')
     hamiltonian = importlib.import_module('gradscf.ci.hamiltonian')
     strings = importlib.import_module('gradscf.fci.cistring')
+    density = importlib.import_module('gradscf.ci._rdm')
     from gradscf import ci
     from gradscf._memory import tree_storage_bytes
     functions = (direct._choices, direct._topology, direct._annihilation_map,
-                 direct._action, hamiltonian._connections, strings._link_maps)
-    assert sum(f.cache_parameters()['max_bytes'] for f in functions) <= 256_000_000
+                 direct._action, hamiltonian._connections, strings._link_maps,
+                 density._density_connections)
+    assert sum(f.cache_parameters()['max_bytes'] for f in functions) <= 288_000_000
     for function in functions:
         function.cache_clear()
     space = ci.make_ci_space(3, 1)

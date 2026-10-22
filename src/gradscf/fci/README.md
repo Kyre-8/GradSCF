@@ -165,6 +165,12 @@ charged before contraction. Public facade preparation/action checks and density
 contractions use the same tile policy. Requested full two-RDMs retain their explicit nact^4 output
 capacity check.
 
+`make_rdm2_block(c, space, (p,q,r,s))` exports only four ordered orbital-index
+selections. Transition blocks preserve independent `(aa,ab,ba,bb)` outputs for
+unequal axes; no full spin-orbital two-RDM is built to extract a spatial block.
+Bound property methods reserve their source, integrals and other root vectors;
+functional density/transition calls accept additional `reserved_bytes`.
+
 Native molecular active-reference preparation transforms only active MO ERIs
 and folds doubly occupied cores with existing AO J/K. `FCI(source,
 max_memory=...)` shares the source-inherited/overridden budget across
@@ -172,6 +178,9 @@ preparation, Hamiltonian actions and densities. A requested nact^4 active ERI
 is still necessary storage.
 These are **array planning checks, not a total process RSS or solver-memory
 ceiling**. Dense solves retain shared `max_dense` (2048 by default).
+Static link arrays share the finite CI/FCI array-cache policy documented in
+[CI properties](../ci/README.md#reduced-density-matrices). Python string keys and
+JAX executable caches are outside that declared array-payload limit.
 
 FCI guesses emphasize the lowest diagonal determinants, with small deterministic
 full-support perturbations plus additional random columns. This keeps the

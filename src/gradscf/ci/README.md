@@ -231,10 +231,29 @@ derivatives. Their trace and contraction are `Tr(dm1)=N` and
 Use `gradient_mode="implicit_eigenvector"` for integral derivatives of a density;
 the default energy-only mode intentionally stops CI coefficient response.
 
-The implementation stores static operator connections (up to 4,000,000 per
-density rank) and full MO density arrays. It remains a small-system reference
-implementation; transition densities, AO output and automatic total-spin selection
-are future work. See [forward parity and remaining gaps](../cc/FORWARD_PARITY.md).
+An affordable small spatial export uses the original fermionic connection and
+scatter formula. A conservative connection-count bound checks its construction,
+array-cache and output storage before building the table. Otherwise the shared
+physical sigma action supplies these coefficients, including its raw-integral
+normal-ordering correction, without a density connection table. Neither route
+builds a full spin-orbital 2-RDM. Requested spatial outputs retain their explicit
+quadratic/quartic size.
+`max_memory` (decimal MB) is shared with the action's creator/spectator/RHS
+tiles; a bound facade also reserves its source, integral payload and other roots.
+Functional calls accept `reserved_bytes` for additional caller-owned arrays.
+
+When only an observable is needed, `expectation_value(c, space, h1, eri)`
+contracts it directly without exporting either density. Its real unrestricted
+input conventions and half/unity/half spin weights match those above.
+Transition CI densities, AO output and automatic total-spin selection remain
+future work. See [forward parity and remaining gaps](../cc/FORWARD_PARITY.md).
+
+The array-bearing static CI/FCI caches have finite entry and byte limits (a
+combined 288,000,000-byte payload envelope). The direct sigma factory is charged
+for its known topology/map arrays even if another cache releases them. These
+limits cover declared array payload, not Python integer keys/headers or JAX
+compiled executables. Numerical integrals, amplitudes and CI vectors are not
+cached. Computation budgets do not constitute a process-RSS or complete AD cap.
 
 ## Reproduce the checks
 

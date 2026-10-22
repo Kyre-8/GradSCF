@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-22): five of the thirty-five parent tasks
-are fully accepted (WF-00/01/07/09/34); twenty-six of the thirty-seven existing
+Current acceptance snapshot (2026-10-22): six of the thirty-five parent tasks
+are fully accepted (WF-00/01/07/09/19/34); twenty-seven of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -277,9 +277,9 @@ successful component derivatives do not establish a whole-method memory bound.
 | --- | --- | --- |
 | WF-02/03/04/05/06/08 | Shared AO2MO, native block response, selected R/U MP2, fixed-aniline full-input gradient | Joint spin/T2/resolvent/AD ownership, direct-input performance, measured size family, traced target-device capacity |
 | WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, phase budgets and contracted two-body properties |
-| WF-16/17/34 | Shared EOM primal planner; streamed Dyson and known retained-state accounting, molecular regressions and original-source matched endpoint measurements | WF-16/17 charged intermediates, response workspaces and whole-method measurements |
-| WF-18/19/20/21/22/27 | Component selected-CI, action and property tests; FCI requested-block RDM tests | Latest joint-ledger changes, selected CIS(D) GREEN and facade, UCIS/ROHF guards, native relaxed geometry and public end-to-end measurements |
-| WF-23/24/25/26/33 | Exact target bounds and canonical Jacobian; stable Taylor compilation; earlier packed forward checks | Current packed factory and true sextuple response, history/byte integration, moving R/U MPn and selected standalone MP3 |
+| WF-16/17/34 | Shared EOM primal planner, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and original-source matched component measurements | Native phase/spectral-response workspaces and whole-method measurements |
+| WF-18/19/20/21/22/27 | Selected CI/UCIS/CIS(D), ROHF guards, FCI active/caller budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Explicit raw CI solver/correction budget propagation, complete phase/AD ownership, GPU and large-method measurements |
+| WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history budgets and selected pure-frame R/U MPn second response | Moving native R/U MPn, eager budget/source integration, selected standalone MP3 and method-level size/performance acceptance |
 | WF-29 | Hermitian/non-Hermitian primal and common linear/nonlinear phase planners | Spectral response propagation, physical caller/closure ownership and whole-method reconciliation |
 | WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
 
@@ -482,7 +482,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   ranks independently from contiguous CISD.
   Retain ROHF common-frame conversion and explicitly test any branch that must
   reject a nonstationary ROHF occupied-virtual block.
-- [ ] **WF-19 — FCI active-reference preparation.** Retain core folding and only
+- [x] **WF-19 — FCI active-reference preparation.** Retain core folding and only
   necessary active ERIs; remove upstream full AO-pair materialization.
   Acceptance: h_eff/E_core/ERI equality, active/frozen mapping, coefficient and
   geometry derivatives. A dense nact^4 input can remain a budgeted small-CAS
@@ -490,7 +490,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 
   - [x] **WF-19a:** native/projected CAS ERIs and AO core folding, fixed-frame
     coefficient/geometry products through two and allocation preflights.
-  - [ ] **WF-19b:** all reference representations and joint consumer budgets.
+  - [x] **WF-19b:** all reference representations and joint consumer budgets,\n    verified for the stated real common-spatial CPU/known-array contract.\n    Reuse representation/core-fold layers and the native relaxed closure;\n    CUDA geometry and large-CAS scaling remain WF-30/32.
 - [ ] **WF-20 — CI action/cache budget.** Replace fixed creator/spectator/RHS
   batches with byte planning and bound numerical/RDM caches by bytes.
   Acceptance: direct action/matmat parity, Davidson forward/response, no all-pairs
@@ -2686,3 +2686,63 @@ requires its own explicit decision and numerical validation.
   and tensor-budget-root-verification.json; all16 payloads and exact final
   source/test bytes were checked. Method callers still need their joint spin/
   T2/source reservations; this prerequisite alone closes no parent task.
+
+### 2026-10-22 — WF-18/20/22/27: selected public CI and affordable spatial densities
+
+- SCF-backed variational R/U CI and UCIS now consume the shared selected
+  kernels. Common-frame ROHF is explicitly opt-in and retains its saved two
+  spin Focks; UCIS still rejects a nonstationary occupied-virtual spin block.
+  Pure/explicit-reference numerical conventions and existing rank/frozen
+  definitions are retained. Explicit raw solver budget forwarding remains an
+  identified WF-20 integration boundary rather than a claimed completion.
+- SCF CIS(D) prepares four selected spatial integral blocks for the existing
+  shared correction. Original singlet normalization, denominators, amplitude
+  response and complete energy-body AST are unchanged. Common dtype forecasts
+  include both amplitudes and excitation energies before spin workspace exists.
+  Actual selected/API/old-CIS(D) and joint raw-chart HVP frontiers retain their
+  own before/after source maps; the final energy-dtype RED1->GREEN2 is separate.
+- Spatial densities use the original fermionic connection/scatter formula
+  only after a shape-based table/construction/output budget preflight. The
+  affordable path remains fast; otherwise the shared sigma derivative and
+  raw-integral normal-ordering correction avoid the density connection table.
+  Direct observable contraction exports no RDM. All caller/root arrays share
+  the same MB budget. The seventh32MB cache raises the combined declared
+  array-payload ceiling to288,000,000B, excluding Python/XLA/allocator state.
+- Ten finite density/cache gates have valid passing frontiers. The first
+  aggregate exits1 with9 passes and one newly added coarse-step HVP failure;
+  the unchanged production source then passes that same failed case using
+  steps3e-5/1e-5 and unchanged tolerances (exit0/5.829s). Errors2.199e-5/
+  2.442e-6 scale9.006 with the squared step ratio9, supporting the retained
+  coarse1e-4 error2.443e-4 as finite-difference truncation. No production fix
+  or tolerance relaxation was used to resolve that diagnostic.
+- Original ec194bf versus final affordable path, same nmo6/nocc2/93det/seed771
+  point, x64/CPU16-31/n002: lower0.1042->0.1052s, compile0.1377->0.1313s,
+  XLA scratch131080B unchanged, terminal-child RSS638148->637596KiB,
+  seven-warm median0.125989->0.056637ms, output difference0.0. The node is
+  nonexclusive and the old formula is identical; no universal speedup is
+  claimed. The earlier sigma-only regression remains archived and is not
+  advertised as a performance benefit. FCI requested-block comparison stays
+  a same-source functional comparison, with possible compiler output pruning.
+- Root verified final source matches, original connection/norm/scatter/spin
+  and CIS(D) energy ASTs, raw exits/XML and all51 density-final payloads.
+  Evidence review-density-first-20261022.tar.gz SHA256
+  ecaa6a38a64a1e2bc784bf055f559395bc8e64e0f2df830fa5ba78b8309b30eb,
+  root-ci-density-final-verification.json and root-ci-final-source-matches.json.
+  Earlier selected16/UCIS10, property/NaN/stale/raw-HVP and budget frontiers are
+  in their previously verified archives. No raw datasets or executables enter
+  the checkpoint; fixed TODO depth/count constraints remain unchanged.
+
+### 2026-10-22 — WF-19 acceptance review
+
+- WF-19a's original32 native/projected fixed-frame CPU cases retain their
+  actual exit0/XML/source maps; they are not described as Delta reruns. Recent
+  Delta dense/s4/DF core folding, NumPy/backend-copy and bound-source budgets,
+  shared solver/action ownership and wrapper second response complete WF-19b.
+  The native H2 full-FCI/LiH core-FCI relaxed closures add full gradient/HVP
+  and two finite differences without a pre-full-AO/MO preparation.
+- The acceptance is layered over the shared transformation/core-fold contract,
+  not a repeated Cartesian product of every representation and geometry.
+  The real common-spatial CPU/known-array WF-19 scope is accepted. CUDA FCI
+  geometry, large-CAS scaling and complete compiled/AD process residency remain
+  the explicit WF-30/32 gates. Acceptance counts become6/35 parents and27/37
+  children; they are not engineering-effort percentages or a new TODO tree.

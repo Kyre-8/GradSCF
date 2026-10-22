@@ -17,7 +17,7 @@ class SCFSource(NamedTuple):
     ao_kwargs: dict
 
 
-def prepare_scf_source(source, *, max_memory=None):
+def prepare_scf_source(source, *, max_memory=None, allow_rohf=False):
     """Read current RHF/UHF orbitals, solved Focks and one AO representation.
 
     No J/K or complete MO ERI is constructed. Native direct providers remain
@@ -26,17 +26,32 @@ def prepare_scf_source(source, *, max_memory=None):
     ``hcore`` is existing AO metadata, without a full MO one-body transform.
     """
     from gradscf.scf.facade import RKS, UKS
+    from gradscf.scf.roks import ROKS
     from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
 
     max_memory = resolve_memory_mb(max_memory, source)
-    if not isinstance(source, (RKS, UKS)) or str(source.xc).strip().lower() != "hf":
+    if not isinstance(allow_rohf, bool):
+        raise TypeError('allow_rohf must be a static bool')
+    rohf = allow_rohf and isinstance(source, ROKS)
+    if (not isinstance(source, (RKS, UKS)) and not rohf) or str(source.xc).strip().lower() != "hf":
         raise NotImplementedError("Post-HF source preparation requires RHF/UHF; ROHF and DFT are not supported")
     source._check_reference_source()
     coeff = jnp.asarray(source.mo_coeff)
     if jnp.iscomplexobj(coeff):
         raise NotImplementedError("Post-HF source preparation requires real orbitals")
-    unrestricted = isinstance(source, UKS)
-    if unrestricted:
+    unrestricted = isinstance(source, UKS) or rohf
+    if rohf:
+        inputs, result = source._scf_inputs, source.scf_result
+        if inputs is None or result is None:
+            raise RuntimeError('Solved ROHF spin Focks are missing; run SCF again before post-HF preparation')
+        ns, cs = (inputs.nalpha, inputs.nbeta), (coeff, coeff)
+        focks = tuple(transform_fock(f, coeff) for f in
+                      (result.fock_matrix_alpha, result.fock_matrix_beta))
+        reference_energy = result.total_energy
+        hcore = inputs.hcore
+        factors, direct = inputs.df_factors, getattr(inputs,'direct_basis',None)
+        eri, pair = inputs.eri, getattr(inputs,'eri_pair_matrix',None)
+    elif unrestricted:
         ref = source.reference
         if ref is None or ref.fock_matrix is None:
             raise RuntimeError("Solved UHF Fock data is missing; run SCF again before post-HF preparation")
@@ -59,7 +74,7 @@ def prepare_scf_source(source, *, max_memory=None):
     if reference_energy is None:
         raise RuntimeError("Solved HF energy data is missing; run SCF again before post-HF preparation")
     expected = tuple((np.arange(c.shape[1]) < no).astype(int) for c, no in zip(cs, ns))
-    expected = np.stack(expected) if unrestricted else 2 * expected[0]
+    expected = sum(expected) if rohf else np.stack(expected) if unrestricted else 2 * expected[0]
     if not np.array_equal(np.asarray(source.mo_occ), expected):
         raise ValueError("Post-HF source preparation requires integer occupations and occupied orbitals first")
     if factors is not None:

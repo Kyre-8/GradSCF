@@ -88,5 +88,3 @@ def test_frame_preserves_dtype_and_reports_anchor_rank_loss(dtype):
     np.testing.assert_allclose(frame, anchor, atol=0., rtol=0.)
     invalid = project_frame(anchor[:,::-1], anchor, anchor, 1)
     assert not np.isfinite(invalid).all()
-
-

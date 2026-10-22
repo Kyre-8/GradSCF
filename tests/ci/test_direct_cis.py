@@ -65,25 +65,27 @@ def test_direct_cis_matches_explicit_without_materializing_mo_eri(
     assert actual.reference.direct_basis is not None
 
 
-def test_cis_d_retains_mo_reference_path(water_direct_hf, monkeypatch):
+@pytest.mark.parametrize("frozen", [None, [0, 6]])
+def test_direct_cis_d_uses_selected_blocks(water_direct_hf, monkeypatch, frozen):
     from gradscf import ci
     import gradscf.ci.api as api
 
     reference = _explicit_reference(water_direct_hf)
-    expected = ci.CIS_D(reference, solver="dense", nroots=1).run()
-    calls = []
+    expected = ci.CIS_D(reference, frozen=frozen, solver="dense", nroots=1).run()
 
-    def explicit_reference(source, *, max_memory):
-        assert source is water_direct_hf
-        assert max_memory == source.max_memory
-        calls.append(source)
-        return reference
+    def forbidden(*args, **kwargs):
+        pytest.fail("SCF CIS(D) materialized a complete AO/MO ERI tensor")
 
-    monkeypatch.setattr(api, "reference_from_source", explicit_reference)
-    actual = ci.CIS_D(water_direct_hf, solver="dense", nroots=1).run()
-    assert calls == [water_direct_hf]
+    monkeypatch.setattr(api, "reference_from_source", forbidden)
+    monkeypatch.setattr(api, "cis_d_correction", forbidden)
+    monkeypatch.setattr(type(water_direct_hf._scf_inputs), "response_eri_pair_matrix", forbidden)
+    actual = ci.CIS_D(water_direct_hf, frozen=frozen, solver="dense", nroots=1).run()
+    assert np.all(actual.converged)
+    np.testing.assert_allclose(actual.e_cis, expected.e_cis, atol=2e-11, rtol=0)
+    np.testing.assert_allclose(actual.correction, expected.correction, atol=2e-11, rtol=0)
     np.testing.assert_allclose(actual.e, expected.e, atol=2e-11, rtol=0)
-    assert actual.reference is reference
+    assert actual.reference.direct_basis is not None
+    assert actual.reference.eri_pair_matrix is None
 
 
 @pytest.mark.parametrize("singlet", [True, False])

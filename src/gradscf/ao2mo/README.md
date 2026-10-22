@@ -9,6 +9,7 @@ remain in `gradscf.integrals`.
 | `blocks` | Requested dense, packed, DF or native-direct MO blocks |
 | `native` | Bounded shell slabs and two-stage half transformations |
 | `reference` | Explicit full MO reference tensors and validation |
+| `frame` | Pure-JAX occupied/virtual projector frame for fixed orbital selections |
 | `spin` | Frozen orbital selections and reference spin conversion |
 | `response` | Existing occupied/virtual response slices |
 
@@ -42,3 +43,14 @@ Native integrals use float64. MO-coefficient and first/second coordinate product
 remain live; unsupported primitive basis-parameter and third coordinate products
 raise explicitly. On CUDA, native slabs use bounded CPU callbacks and return
 device-resident results. This is a compatibility path, not a GPU integral kernel.
+
+`frame.project_frame(C, A0, S, nocc)` projects each fixed initial occupied and
+virtual anchor block into the current stationary subspace, then orthonormalizes
+it with Cholesky. It defines a local, differentiable frame for the new molecular
+CI/FCI frozen/core/active geometry adapter. It preserves the occupied density,
+without differentiating arbitrary optimizer recentering rotations. This chosen
+gauge need not equal that arbitrary frame away from the anchor geometry; a
+rank-losing projection remains nonfinite instead of switching gauges. No SCF,
+eigenvalue or orbital-optimization solver is added by this utility.
+Selected orbitals follow this anchor convention, not an automatically
+recanonicalized core or virtual energy window.
