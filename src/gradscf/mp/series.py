@@ -29,9 +29,15 @@ def make_series_space(nmo, nocc, *, frozen=None, config):
     k = config.order // 2 if config.wavefunction_order is None else config.wavefunction_order
     if config.algorithm == "tensor":
         from ._tensor import make_tensor_space
-        return make_tensor_space(nmo, nocc, max_excitation=2*k, frozen=frozen,
+        options = dict(max_excitation=2*k, frozen=frozen,
             max_determinants=config.max_determinants, max_tensor_elements=config.max_tensor_elements,
-            packed_only=config.orbital_basis == "noncanonical")
+            packed_only=True)
+        space = make_tensor_space(nmo, nocc, **options)
+        if config.orbital_basis == "canonical" and space.dense_elements <= config.max_tensor_elements:
+            # Preserve the faster dense contractions when their full expansion
+            # fits; otherwise retain the identical packed excitation space.
+            space = make_tensor_space(nmo, nocc, **{**options, "packed_only": False})
+        return space
     build = make_uci_space if isinstance(nocc, tuple) else make_ci_space
     return build(nmo, nocc, max_excitation=2*k, frozen=frozen,
                  max_determinants=config.max_determinants)
@@ -190,6 +196,9 @@ def _run_series(h1, eri, denominator_tol, canonical_tol, *, nocc, frozen,
         maximum = max(sum(block.excitation) for block in space.blocks)
         def fluctuation(c, degree):
             input_rank, output_rank = _action_ranks(config, maximum, degree)
+            if space.dense_elements > config.max_tensor_elements:
+                return action.apply_packed(c, max_input_rank=input_rank,
+                    max_output_rank=output_rank, max_tile_elements=config.max_tensor_elements)
             return action.apply(c, max_input_rank=input_rank, max_output_rank=output_rank)
         alpha_rank, beta_rank = space.spin_ranks()
         amplitudes = space.amplitudes

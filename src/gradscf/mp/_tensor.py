@@ -232,6 +232,13 @@ class TensorAction:
     def __call__(self, vector):
         return self.apply(vector)
 
+    def apply_packed(self, vector, *, max_input_rank=None, max_output_rank=None,
+                     max_tile_elements=4096):
+        """Contract increasing-index target tiles without dense expansion."""
+        from ._tensor_packed import apply_packed
+        return apply_packed(self, vector, max_input_rank=max_input_rank,
+            max_output_rank=max_output_rank, max_tile_elements=max_tile_elements)
+
     def apply(self, vector, *, max_input_rank=None, max_output_rank=None):
         """Apply W with exact static input/output excitation-rank projections.
 

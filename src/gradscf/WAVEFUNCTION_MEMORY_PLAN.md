@@ -2320,3 +2320,30 @@ requires its own explicit decision and numerical validation.
   in delta-v100-20261022: static-group archive3c4a8355...bd834 and true-baseline
   archive642de76b...9c192, with root verification JSONs. WF-34 closes without
   a new TODO; WF-16/17 charged intermediates and solver response remain open.
+
+### 2026-10-22 — WF-23/24: packed MP capacity fallback verified
+
+- Packed tensor actions reuse the committed CI creator/spectator action, the
+  original MP normal-ordered kernels and determinant-map phases. Only contracted
+  kernel axes are antisymmetrized. Live integral/kernel/vector arguments and
+  exact input/output rank bounds remain; there is no new excitation threshold,
+  perturbative formula or normal-ordering engine. Canonical cases whose dense
+  maps fit keep the old dense path; otherwise the identical packed space is
+  available without first expanding all antisymmetric slots.
+- Root verified the13 distinct raw JUnit cases, JSON exits0, unchanged source
+  manifests, seven exact current source/test files and an independent peer
+  review. Four immutable groups on Delta103505/n002 CPU40–55 cover full T6->T6
+  action, R/U raw joint integral/vector JVP/VJP/HVP and canonical series. Their
+  process times were159.556,330.865,58.725 and425.425s. Mixed-float32 summation
+  tolerance is explicit; strict float64 comparisons remain at2e-13.
+- Same no3/nmo6/full-rank6/400 coefficients/f64/seed2423 component benchmark:
+  dense->packed warm22.664->7.341ms and XLA temporary142740872->1015656B.
+  However compile3.360->75.454s and child peak918324->3011128KiB worsen.
+  The original default dense path is retained. This is a capacity fallback,
+  not a general cold-start or peak-RSS improvement, and does not resolve the
+  earlier H6 timeout. Recurrence history/AD budget integration and moving-frame
+  molecular MPn acceptance remain in the existing open parents.
+- Evidence delta-packed-mp-factory-r1/evidence.tar SHA256
+  678a9b72f1b77f3de2f70eabb1120c43fd8bbc72c4a0d3afd8d88aa1edd2cfc0.
+  Minimal shared CI dependency is separately accepted in9395b23. No parent
+  checkbox or new child is introduced by this finite slice.
