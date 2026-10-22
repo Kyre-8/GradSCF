@@ -12,6 +12,7 @@ from gradscf.cc.integrals import from_orbitals as cc_from_orbitals
 from gradscf.cc.unrestricted_integrals import from_orbitals as ucc_from_orbitals
 from gradscf.mp.integrals import from_orbitals
 from gradscf.mp.mp2 import evaluate_mp2
+from gradscf.mp.series import run_from_orbitals as series_from_orbitals
 from gradscf.ci.integrals import from_orbitals as ci_from_orbitals
 from gradscf.ci.solver import solve_ci_from_integrals
 from gradscf.fci.reference import _active_from_orbitals, orbital_selection
@@ -35,8 +36,9 @@ class CorrelatedEnergy:
     MP2 and CC transform only their required occupied/virtual blocks.
     Explicit ``jk_backend='direct'`` also removes full moving AO ERIs through
     the native shell/direct operators. MP2's noncanonical resolvent still owns
-    O(o**2*v**2) state; CC retains its bare virtual block. Higher MP still uses
-    full MO reference integrals in this adapter.
+    O(o**2*v**2) state; CC retains its bare virtual block. Higher noncanonical
+    MP transforms selected normal-order kernels for the same Taylor residual;
+    its finite wavefunction histories still grow with the excitation space.
     CID/CISD/CISDT/CISDTQ use the same selected-kernel CI producer and support
     fixed ``frozen`` selections. FCI requires a common spatial frame and uses
     explicit ``core``/``active`` selections; its active-space four-index output
@@ -91,10 +93,14 @@ class CorrelatedEnergy:
         self.config = config
         self._selected_mp2 = (self.method in {"mp", "mp2"} and config.order == 2
                               and not config._use_series(self.reference.unrestricted))
+        self._selected_mp_series = (self.method == "mp" and config.order > 2
+            and config.orbital_basis == "noncanonical"
+            and config._use_series(self.reference.unrestricted))
         self._selected_cc = self.method in {"ccsd", "ccsd(t)"}
-        if jk_backend == "direct" and not (self._selected_mp2 or self._selected_cc):
+        if jk_backend == "direct" and not (self._selected_mp2 or self._selected_cc
+                                          or self._selected_mp_series):
             raise NotImplementedError(
-                "Direct correlated inputs require order-2 MP or CCSD/(T).")
+                "Direct correlated inputs require MP2, noncanonical MP series or CCSD/(T).")
 
     def __call__(self, coordinates, field=None, *, potential=None):
         if self.method in _CI_RANKS or self.method == "fci":
@@ -115,7 +121,7 @@ class CorrelatedEnergy:
             else:
                 coefficients, canonical_valid = canonicalize(coefficients, state.fock_matrix.mean(axis=0))
                 valid &= canonical_valid
-        if self._selected_mp2 or self._selected_cc:
+        if self._selected_mp2 or self._selected_cc or self._selected_mp_series:
             cs = tuple(coefficients) if self.reference.unrestricted else (coefficients,)
             fs = tuple(state.fock_matrix) if self.reference.unrestricted else (state.fock_matrix.mean(axis=0),)
             focks = tuple(transform_fock(f, c) for c, f in zip(cs, fs))
@@ -125,6 +131,16 @@ class CorrelatedEnergy:
                 data = from_orbitals(coefficients, focks, self.nocc, state.total_energy,
                     frozen_gap_tol=self.config.denominator_tol, **options)
                 result = evaluate_mp2(data, self.config)
+            elif not self._selected_cc:
+                direct = inputs.get("direct_basis")
+                ao = {"direct_basis": direct} if direct is not None else {
+                    "eri" if inputs["eri"].ndim == 4 else "eri_pair_matrix": inputs["eri"]}
+                source = (state, inputs, self.reference.parameters, self.reference.coefficients,
+                    self.reference.coordinates, self.reference.occupations, self.reference.plan.topology)
+                reserved = tree_storage_bytes(*source, fs,
+                    exclude=(cs, focks, state.total_energy, *jax.tree.leaves(ao)))
+                result = series_from_orbitals(coefficients, focks, self.nocc, state.total_energy,
+                    config=self.config, max_memory=self.max_memory, reserved_bytes=reserved, **ao)
             elif self.reference.unrestricted:
                 data, occupied, virtual = ucc_from_orbitals(coefficients, focks,
                     self.nocc, state.total_energy, vvvv='blocks', **options)

@@ -2777,3 +2777,48 @@ requires its own explicit decision and numerical validation.
   mp2-graph-budget-root-verification.json. Eager/raw source forwarding, joint
   preparation and full method/GPU/process measurements remain explicit gates;
   the same parent/child TODO hierarchy is unchanged.
+
+### 2026-10-22 — WF-23/25/26: selected normal-order kernels and moving MPn
+
+- A pure noncanonical C/F/total-HF-energy/AO entry prepares the shared selected
+  CI kernels once and reuses them at every needed Taylor rank. Prepared F_N is
+  already reference-subtracted; its HF trace is not subtracted twice. Signed
+  tensor/determinant coordinates, full frozen-electron reference contributions,
+  target-rank bounds, finite histories and requested coefficients are retained.
+  Both raw and selected entries call the same extracted residual/Taylor tail;
+  root proves six original mathematical definitions equal69a4369.
+- Five original pure-frame gates have passing evidence: early capacity,
+  explicit canonical-chart rejection, separate frozen-spin forward, plus R/DF
+  and U/s4 joint C/F/E/AO value/JVP/VJP/HVP with all original result/coefficients/
+  output-flag assertions. Three have pytest XML; the two expensive original
+  response tests run unchanged closures in separate bounded raw/selected
+  processes. Raw/selected source/fixture signatures match. No combined pytest
+  GREEN is invented. The initial missing-asset collection exit2 and actual
+  five missing-interface REDs are distinct.
+- The retained original combined R case times out at570.590s. In separate
+  processes R raw/selected complete286.830/483.505s, peaks7663328/11625212KiB;
+  U completes164.261/229.540s, peaks4998484/6150208KiB. These cold second-response
+  cases show no performance or RSS gain. Their total cold cost and simultaneous
+  executable holding matter; no unmeasured unique timeout cause is asserted.
+- CorrelatedEnergy uses this entry for higher-order noncanonical MP series/
+  tensor methods. Existing MP2, canonical, CC, CI/FCI, dipole and MP/CC frozen/
+  core/active rejection branches remain unchanged. Two real direct-workflow
+  REDs precede the same H2/6-31G RHF MP4-series and H3/STO-3G UHF MP4-tensor
+  native geometry gates. Each raw/selected phase exits0 under570s and final
+  comparison_complete is true: full value/gradient/JVP/HVP, zero net force,
+  JVP pairing and HVP finite differences at3e-4/1e-4Bohr with original tolerances.
+  Complete AO/MO materialization traps are enabled on the selected path.
+- H2 raw/selected lower26.132/26.137s, compile45.676/55.894s, one warm12.208/
+  59.028ms, terminal-child peaks2663840/3023760KiB. H3 lower26.687/28.502s,
+  compile49.772/64.145s, one warm14.653/66.320ms, peaks2776696/2869540KiB.
+  These are single observations and distinct input representations, not
+  a matched production scalability/speedup claim.
+- Root verifies all six archive hashes/payload records, raw exits/XML, source
+  before/after maps, three final production bytes and unchanged Taylor/legacy
+  definitions. Evidence phase-ru-evidence.tar SHA256
+  61707993952f57447699a801add589ad927f93c119c64f692b4b4454ae717f82 and
+  geometry-evidence.tar SHA256
+  fc3a6c0f4ee7d2c2cd9589829386b1d8d014d2e8a8078ccb6202b9926f5a9d33,
+  both HANDOFF.json and delta-series-geometry-r1/root-verification.json.
+  Eager/raw override forwarding, standalone canonical MP3, size/scaling and
+  GPU/native phase budgets remain their existing tasks; no TODO is added.

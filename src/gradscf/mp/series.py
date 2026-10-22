@@ -21,7 +21,8 @@ from ..fci.cistring import excite
 from ..ao2mo import (validate_integrals, validate_unrestricted_integrals,
                      frozen_indices, unrestricted_frozen_indices)
 from ..solvers import LinearOperator, LinearSolverConfig, solve_linear
-from .._memory import DEFAULT_MAX_MEMORY_MB, validate_memory_mb
+from .._memory import (DEFAULT_MAX_MEMORY_MB, tree_storage_bytes,
+                      validate_memory_mb, validate_reserved_bytes, workspace_bytes)
 from .types import MPResult
 from .integrals import _reference_data, canonical_error, reference_error, _active_orbitals
 
@@ -87,6 +88,37 @@ def _spectral_focks(focks, nocc, frozen):
     return tuple(result)
 
 
+def _minimum_gap(focks, nocc, determinants):
+    ns = nocc if isinstance(nocc, tuple) else (nocc,)
+    spectra = _spectral_focks(focks, nocc, determinants.frozen)
+    spectral = hamiltonian.build_one_body(spectra if isinstance(nocc, tuple) else spectra[0],
+                                         determinants, block_diagonal=True)
+    constant = sum(jnp.trace(f[:no, :no]) for f, no in zip(spectra, ns)) * (1 if isinstance(nocc, tuple) else 2)
+    return jnp.min(jnp.abs((spectral.diagonal - constant)[1:]), initial=jnp.inf)
+
+
+def _coefficient_chart(space, config):
+    if config.algorithm == "tensor":
+        from ._tensor_packed import _physical_space
+        determinants, indices, signs, inverse = _physical_space(space)
+        return (determinants, indices, lambda c: (c * signs)[inverse],
+                lambda c: c[indices] * signs)
+    return space, None, lambda c: c, lambda c: c
+
+
+def _state_outputs(space, determinants, config, unrestricted):
+    if config.algorithm == "tensor":
+        alpha, beta = space.spin_ranks()
+        return space.amplitudes, alpha, beta
+    reference_bits = determinants.determinants[0]
+    n = space.nmo
+    alpha = np.array([((d ^ reference_bits) & ((1 << n) - 1)).bit_count() // 2
+                      for d in determinants.determinants])
+    beta = np.array([((d ^ reference_bits) >> n).bit_count() // 2
+                     for d in determinants.determinants])
+    return lambda first: _amplitudes(first, determinants, unrestricted), alpha, beta
+
+
 def _action_ranks(config, maximum, degree):
     """Exact ranks needed by the two-body recurrence and terminal energy bra."""
     k = config.order // 2 if config.wavefunction_order is None else config.wavefunction_order
@@ -105,18 +137,7 @@ def _direct_actions(h1, eri, focks, reference_energy, nocc, frozen, space, confi
     tensor = config.algorithm == "tensor"
     unrestricted = isinstance(nocc, tuple)
     ns = nocc if unrestricted else (nocc,)
-    if tensor:
-        build = make_uci_space if unrestricted else make_ci_space
-        determinants = build(space.nmo, nocc, max_excitation=max(space.ranks), frozen=frozen,
-                             max_determinants=config.max_determinants)
-        permutation, phases = space.determinant_map(determinants.determinants)
-        indices, signs = jnp.asarray(permutation), jnp.asarray(phases)
-        inverse = jnp.asarray(np.argsort(permutation))
-        to_physical = lambda c: (c*signs)[inverse]
-        from_physical = lambda c: c[indices]*signs
-    else:
-        determinants = space
-        to_physical = from_physical = lambda c: c
+    determinants, indices, to_physical, from_physical = _coefficient_chart(space, config)
     # H0 contains the complete occupied/virtual blocks. Its cross block is
     # excluded even for approximately stationary input, and checked below.
     blocks = []
@@ -130,12 +151,7 @@ def _direct_actions(h1, eri, focks, reference_energy, nocc, frozen, space, confi
     gaps = (one_body.diagonal-f0)[indices] if tensor else one_body.diagonal-f0
     if config.orbital_basis == "noncanonical":
         fock_action = lambda c: from_physical(one_body.apply(to_physical(c)))-f0*c
-        spectra = _spectral_focks(focks, nocc, determinants.frozen)
-        spectral = hamiltonian.build_one_body(spectra if unrestricted else spectra[0],
-                                             determinants, block_diagonal=True)
-        spectral_constant = sum(jnp.trace(f[:no, :no]) for f, no in zip(spectra, ns))*(1 if unrestricted else 2)
-        spectral_gaps = spectral.diagonal-spectral_constant
-        minimum = jnp.min(jnp.abs(spectral_gaps[1:]), initial=jnp.inf)
+        minimum = _minimum_gap(focks, nocc, determinants)
     else:
         fock_action = lambda c: gaps*c
         minimum = jnp.min(jnp.abs(gaps[1:]), initial=jnp.inf)
@@ -166,6 +182,11 @@ def _direct_actions(h1, eri, focks, reference_energy, nocc, frozen, space, confi
     return gaps, fock_action, fluctuation, minimum, determinants
 
 
+def _compiled_config(config):
+    return replace(config, denominator_tol=1e-10, canonical_tol=1e-8,
+                   with_t2=bool(config.with_t2), with_coefficients=bool(config.with_coefficients))
+
+
 def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config,
                max_memory=DEFAULT_MAX_MEMORY_MB):
     """Validate static metadata and reuse a graph with live physical inputs."""
@@ -184,12 +205,107 @@ def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config,
         frozen = frozen_indices(h1.shape[0], nocc, frozen)
     # Tolerances are numeric inputs: preserving their weak/strong dtype matters
     # at float32 boundaries. Only topology and output controls enter the key.
-    topology = replace(config, denominator_tol=1e-10, canonical_tol=1e-8,
-                       with_t2=bool(config.with_t2),
-                       with_coefficients=bool(config.with_coefficients))
+    topology = _compiled_config(config)
     return _run_series(h1, eri, config.denominator_tol, config.canonical_tol,
         nocc=nocc, frozen=frozen, nuclear_repulsion=nuclear_repulsion, config=topology,
         max_memory=max_memory)
+
+
+def run_from_orbitals(coefficients, focks, nocc, reference_energy, *, frozen=None,
+                      config, eri=None, eri_pair_matrix=None, df_factors=None,
+                      direct_basis=None, max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0):
+    """Noncanonical finite-order MP from live C/F/total-HF-energy/AO inputs.
+
+    The Fock tuple contains the complete occupied and virtual blocks before
+    freezing. One selected CI preparation supplies all normal-order kernels;
+    no complete MO or spin ERI is formed. The existing Taylor residual and its
+    implicit linear response own every order. Native parameters remain dynamic
+    pytree inputs. The static MB budget covers known arrays, not compiler RSS.
+    """
+    if config.orbital_basis != "noncanonical":
+        raise ValueError("Selected MP series requires orbital_basis='noncanonical'")
+    maximum = validate_memory_mb(max_memory)
+    reserved = validate_reserved_bytes(reserved_bytes)
+    unrestricted = isinstance(nocc, tuple)
+    cs = tuple(map(jnp.asarray, coefficients)) if unrestricted else (jnp.asarray(coefficients),)
+    fs, energy = tuple(map(jnp.asarray, focks)), jnp.asarray(reference_energy)
+    if (len(cs) != (2 if unrestricted else 1) or any(c.ndim != 2 for c in cs)
+            or any(c.shape != cs[0].shape for c in cs) or len(fs) != len(cs)
+            or any(f.shape != (cs[0].shape[1],) * 2 for f in fs) or energy.shape != ()):
+        raise ValueError("Supply complete AO/MO frames, one Fock per spin and scalar HF energy")
+    if any(jnp.iscomplexobj(x) for x in (*cs, *fs, energy)):
+        raise NotImplementedError("Selected MP requires real orbitals, Focks and HF energy")
+    if any(not jnp.issubdtype(x.dtype, jnp.floating) for x in (*cs, *fs, energy)):
+        raise ValueError("Selected MP frames, Focks and HF energy must be floating point")
+    if unrestricted:
+        frozen = unrestricted_frozen_indices(cs[0].shape[1], nocc, frozen)
+        nocc = tuple(map(int, nocc))
+    else:
+        if isinstance(nocc, bool) or not isinstance(nocc, int) or not 0 <= nocc <= cs[0].shape[1]:
+            raise ValueError("nocc must be an integer between 0 and nmo")
+        frozen = frozen_indices(cs[0].shape[1], nocc, frozen)
+    if sum(x is not None for x in (eri, eri_pair_matrix, df_factors, direct_basis)) != 1:
+        raise ValueError("Supply exactly one AO ERI representation")
+    eri, eri_pair_matrix, df_factors = (None if x is None else jnp.asarray(x)
+                                      for x in (eri, eri_pair_matrix, df_factors))
+    return _run_from_orbitals(cs, fs, energy, config.denominator_tol, config.canonical_tol,
+        eri=eri, eri_pair_matrix=eri_pair_matrix, df_factors=df_factors,
+        direct_basis=direct_basis, nocc=nocc, frozen=frozen, config=_compiled_config(config),
+        max_memory=maximum, reserved_bytes=reserved)
+
+
+@partial(jax.jit, static_argnames=("nocc", "frozen", "config", "max_memory", "reserved_bytes"))
+def _run_from_orbitals(cs, focks, energy, denominator_tol, canonical_tol, *, nocc, frozen,
+                       config, eri, eri_pair_matrix, df_factors, direct_basis,
+                       max_memory, reserved_bytes):
+    from ..ci.integrals import from_orbitals
+    from ._series_memory import history_bytes, plan_series
+    unrestricted = isinstance(nocc, tuple)
+    space = make_series_space(cs[0].shape[1], nocc, frozen=frozen, config=config, packed_only=True)
+    determinants, indices, to_physical, from_physical = _coefficient_chart(space, config)
+    source = dict(eri=eri, eri_pair_matrix=eri_pair_matrix, df_factors=df_factors,
+                  direct_basis=direct_basis)
+    dtype = (jnp.dtype(jnp.float64) if direct_basis is not None else
+             jnp.result_type(*cs, *focks, energy, *jax.tree.leaves((eri, eri_pair_matrix, df_factors))))
+    energy = energy.astype(dtype)
+    focks = tuple(f.astype(dtype) for f in focks)
+    history = reserved_bytes + history_bytes(space, config, dtype) + tree_storage_bytes(space)
+    workspace_bytes(max_memory, resident_bytes=history + tree_storage_bytes(cs, focks, energy, source))
+    data = from_orbitals(cs if unrestricted else cs[0], focks if unrestricted else focks[0],
+        energy, determinants, max_memory=max_memory, reserved_bytes=history, **source)
+    memory = plan_series((cs, energy, source), (), focks, space, nocc, frozen,
+        config, max_memory, prepared=data, reserved_bytes=reserved_bytes)
+    from ..ci.direct import from_prepared
+    def build(part, limits=None):
+        is_fock = lambda key: sum(key[0]) + sum(key[1]) == 2 and key[0] == key[1]
+        kernels = {key: value for key, value in data.kernels.items()
+                   if is_fock(key) == (part == 'fock')}
+        reservation = memory.resident_bytes - tree_storage_bytes(kernels)
+        kwargs = {} if limits is None else dict(max_input_rank=limits[0], max_output_rank=limits[1])
+        return from_prepared(data, determinants, part=part, max_memory=max_memory,
+            reserved_bytes=reservation, **kwargs)
+    one_body = build('fock')
+    gaps = one_body.diagonal[indices] if config.algorithm == "tensor" else one_body.diagonal
+    fock_action = lambda c: from_physical(one_body.apply(to_physical(c)))
+    k = config.order // 2 if config.wavefunction_order is None else config.wavefunction_order
+    maximum = max(space.ranks)
+    limits = {_action_ranks(config, maximum, degree) for degree in range(k + 1)}
+    limits.add(_action_ranks(config, maximum, 1))
+    operators = {key: build('fluctuation', key) for key in sorted(limits)}
+    ranks = jnp.asarray(space.ranks)
+    def fluctuation(c, degree):
+        left, right = _action_ranks(config, maximum, degree)
+        state = jnp.where(ranks <= left, c, 0.)
+        value = from_physical(operators[left, right].apply(to_physical(state)))
+        return jnp.where(ranks <= right, value, 0.)
+    minimum = _minimum_gap(focks, nocc, determinants)
+    amplitudes, alpha, beta = _state_outputs(space, determinants, config, unrestricted)
+    integrals = tuple(x for x in jax.tree.leaves((cs, energy, source, data))
+                      if hasattr(x, 'dtype'))
+    return _solve_series(space, focks, energy, nocc=nocc, frozen=frozen,
+        nuclear_repulsion=jnp.zeros((), dtype), config=config, denominator_tol=denominator_tol,
+        canonical_tol=canonical_tol, memory=memory, max_memory=max_memory,
+        actions=(gaps, fock_action, fluctuation, minimum, amplitudes, alpha, beta), integrals=integrals)
 
 
 @partial(jax.jit, static_argnames=("nocc", "frozen", "config", "max_memory"))
@@ -223,16 +339,20 @@ def _run_series(h1, eri, denominator_tol, canonical_tol, *, nocc, frozen,
     else:
         gaps, fock_action, fluctuation, minimum, determinant_space = _direct_actions(
             h1, eri, focks, reference_energy, nocc, frozen, space, config, max_memory, memory)
-        if config.algorithm == "tensor":
-            alpha_rank, beta_rank = space.spin_ranks()
-            amplitudes = space.amplitudes
-        else:
-            reference_bits = determinant_space.determinants[0]
-            alpha_rank = np.array([((d ^ reference_bits) & ((1 << n)-1)).bit_count()//2
-                                   for d in determinant_space.determinants])
-            beta_rank = np.array([((d ^ reference_bits) >> n).bit_count()//2
-                                  for d in determinant_space.determinants])
-            amplitudes = lambda first: _amplitudes(first, determinant_space, unrestricted)
+        amplitudes, alpha_rank, beta_rank = _state_outputs(
+            space, determinant_space, config, unrestricted)
+    actions = (gaps, fock_action, fluctuation, minimum, amplitudes, alpha_rank, beta_rank)
+    return _solve_series(space, focks, reference_energy, nocc=nocc, frozen=frozen,
+        nuclear_repulsion=nuclear_repulsion, config=config, denominator_tol=denominator_tol,
+        canonical_tol=canonical_tol, memory=memory, max_memory=max_memory,
+        actions=actions, integrals=(*hs, *gs))
+
+
+def _solve_series(space, focks, reference_energy, *, nocc, frozen, nuclear_repulsion,
+                  config, denominator_tol, canonical_tol, memory, max_memory,
+                  actions, integrals):
+    """The one residual/Taylor implementation shared by raw and selected inputs."""
+    gaps, fock_action, fluctuation, minimum, amplitudes, alpha_rank, beta_rank = actions
     if memory.checkpoint:
         fluctuation = jax.checkpoint(fluctuation, static_argnums=(1,))
     h0 = fock_action  # A lambda-independent E_HF shift cannot enter E2..En.
@@ -294,7 +414,7 @@ def _run_series(h1, eri, denominator_tol, canonical_tol, *, nocc, frozen,
     error = canonical_error(focks)
     stationary_error = reference_error(focks, nocc, frozen=frozen,
         orbital_basis=config.orbital_basis, frozen_gap_tol=denominator_tol)
-    finite = jnp.all(jnp.stack([jnp.all(jnp.isfinite(x)) for x in (*hs, *gs, *focks)]))
+    finite = jnp.all(jnp.stack([jnp.all(jnp.isfinite(x)) for x in (*integrals, *focks)]))
     valid = (finite & jnp.isfinite(nuclear_repulsion) & (stationary_error < canonical_tol)
              & (minimum > denominator_tol) & solved & jnp.all(jnp.isfinite(corrections)))
     # Multiplicative guard rejects invalid JVP and VJP as well as primal values.

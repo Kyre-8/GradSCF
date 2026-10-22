@@ -23,7 +23,23 @@ class SeriesMemory(NamedTuple):
     checkpoint: bool
 
 
-def plan_series(hs, gs, focks, space, nocc, frozen, config, max_memory):
+def history_bytes(space, config, dtype):
+    """Mandatory state and requested output bytes, before integral preparation."""
+    dimensions = (tuple(map(len, space.orbitals)) if config.algorithm == "tensor"
+                  else tuple(map(len, _topology(space).orbitals)))
+    va, vb, oa, ob = dimensions
+    k = config.order // 2 if config.wavefunction_order is None else config.wavefunction_order
+    output = (k + 1) * space.size if config.with_coefficients else 0
+    if config.with_t2:
+        output += oa * ob * va * vb
+        unrestricted = space.unrestricted if config.algorithm == "tensor" else isinstance(space.nocc, tuple)
+        if unrestricted:
+            output += oa * oa * va * va + ob * ob * vb * vb
+    return np.dtype(dtype).itemsize * ((3 * k + 2 * config.order + 14) * space.size + output)
+
+
+def plan_series(hs, gs, focks, space, nocc, frozen, config, max_memory, *,
+                prepared=None, reserved_bytes=0):
     """Reserve full histories once and share the same MB budget with actions.
 
     Raw rank views retain separate numerical kernels. Their existing CI kernel
@@ -44,22 +60,20 @@ def plan_series(hs, gs, focks, space, nocc, frozen, config, max_memory):
         determinants = space
     topology = _topology(determinants)
     dimensions = tuple(map(len, topology.orbitals))
-    va, vb, oa, ob = dimensions
-    output = (k + 1) * space.size if config.with_coefficients else 0
-    if config.with_t2:
-        output += oa * ob * va * vb
-        if unrestricted:
-            output += oa * oa * va * va + ob * ob * vb * vb
     # y_j, Psi_j and W Psi_j, the two Taylor input histories, current source,
     # channels, immutable updates and explicitly requested output copies.
-    history = item * ((3 * k + 2 * config.order + 14) * space.size + output)
+    history = history_bytes(space, config, dtype)
     inputs = tree_storage_bytes(hs, gs)
-    base = tree_storage_bytes(hs, gs, focks, space) + history
+    base = reserved_bytes + tree_storage_bytes(hs, gs, focks, space, prepared) + history
     workspace_bytes(max_memory, resident_bytes=base)
     tables = {(n, r, a) for block in topology.blocks
               for n, r in zip(dimensions, block.counts) for a in range(min(2, r) + 1)}
     maps = 10 * sum(comb(n, a) * comb(n, r - a) for n, r, a in tables) + 10 * space.size
-    if canonical_tensor:
+    if prepared is not None:
+        # Prepared rank views share these same live arrays; they do not retain
+        # separate numerical kernels for each Taylor degree.
+        kernel = kernels = 0
+    elif canonical_tensor:
         # A spin/group partition cannot exceed the uncompressed (2N)^4
         # four-index payload. Include the one-body kernels and construction.
         kernel = item * (16 * space.nmo**4 + 8 * space.nmo**2)
@@ -98,5 +112,6 @@ def plan_series(hs, gs, focks, space, nocc, frozen, config, max_memory):
     columns = space.size if space.size <= 128 else 1
     scratch = (item * (6 + 5 * rank) * space.size * columns + 48 * rank * space.size
                + item * space.nmo**2) if config.orbital_basis == "noncanonical" else 0
-    return SeriesMemory(resident, resident - inputs - kernel, scratch, packed,
+    action_reserved = resident if prepared is not None else resident - inputs - kernel
+    return SeriesMemory(resident, action_reserved, scratch, packed,
                         max(1, tile), canonical_tensor and not packed and k * dense > available)
