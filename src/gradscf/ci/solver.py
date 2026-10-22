@@ -10,9 +10,13 @@ from .space import frozen_indices
 from .types import CIConfig, CIResult, CISResult, UCISResult
 from .space import make_uci_space
 from ..fci.cistring import excite
+from .._memory import array_storage_bytes
+from .direct import from_prepared, _action_layout
+from ..solvers.memory import plan_hermitian
 
 
-def _eigenpairs(apply, diagonal, config, response=None, reference_index=None):
+def _eigenpairs(apply, diagonal, config, response=None, reference_index=None,
+                max_memory=None, reserved_bytes=0, solver_config=None):
     dim = diagonal.size
     if config.nroots > dim:
         raise ValueError("nroots exceeds operator dimension")
@@ -32,6 +36,9 @@ def _eigenpairs(apply, diagonal, config, response=None, reference_index=None):
         maxiter=config.max_cycle,
         max_subspace=capacity,
     )
+    if solver_config is not None:
+        shared = solver_config
+        capacity = min(dim,shared.max_subspace) if shared.max_subspace is not None else dim
     initial = None
     if config.solver == "davidson":
         count = min(config.nroots+1, dim)
@@ -41,7 +48,7 @@ def _eigenpairs(apply, diagonal, config, response=None, reference_index=None):
             order = jnp.argsort(jnp.where(jnp.arange(dim) == reference_index, jnp.inf, diagonal))
             indices = jnp.concatenate((jnp.asarray([reference_index]), order[:count-1]))
         units = jax.nn.one_hot(indices, dim, dtype=diagonal.dtype).T
-        width = min(capacity, 2*count)
+        width = min(capacity, 2*count if shared.initial_guess_count is None else shared.initial_guess_count)
         extra = jax.random.normal(jax.random.PRNGKey(0), (dim, max(0, width-count)),
                                   dtype=diagonal.dtype) / jnp.sqrt(float(dim))
         # Keep reference/low-diagonal vectors exact. Separate full-support
@@ -66,7 +73,8 @@ def _eigenpairs(apply, diagonal, config, response=None, reference_index=None):
             raise ValueError("Use response controls or legacy CI config AD controls, not both")
         if response.target == "subspace":
             raise ValueError("CI individual-root results do not support a subspace response")
-    result = solve_hermitian(operator, config=shared, response=response, initial_vectors=initial)
+    result = solve_hermitian(operator, config=shared, response=response, initial_vectors=initial,
+                             max_memory=max_memory,reserved_bytes=reserved_bytes)
     return result.values, result.vectors, result.residual_norms, result.converged
 
 
@@ -82,6 +90,31 @@ def solve_ci(h1, eri, space, *, nuclear_repulsion=0.0, config=None):
     reference = op.diagonal[0]
     return CIResult(energies + nuclear_repulsion, energies - reference,
                     reference + nuclear_repulsion, vectors, residuals, converged)
+
+
+def solve_ci_from_integrals(integrals, space, *, config=None, max_memory=None,
+                             reserved_bytes=0, reference_index=0):
+    """Selected-kernel CI with the same eigensolver and spectral AD owner."""
+    config = CIConfig() if config is None else config
+    resident = reserved_bytes+array_storage_bytes(*jax.tree.leaves(integrals))
+    solver_config,solver_bytes = None,0
+    if max_memory is not None:
+        capacity = min(space.size,max(40,4*(config.nroots+1)) if config.max_space is None else config.max_space)
+        shared = EigenSolverConfig(method=config.solver,nroots=config.nroots,
+            atol=config.conv_tol,maxiter=config.max_cycle,max_subspace=capacity)
+        left,_,_,maps = _action_layout(space,tuple(integrals.kernels))
+        item = integrals.diagonal.dtype.itemsize
+        solver_config,solver_bytes,_ = plan_hermitian(space.size,integrals.diagonal.dtype,
+            shared,max_memory,resident_bytes=resident,
+            operator_min_bytes=maps+(left+1)*24+left*item,
+            operator_bytes_per_column=(7*space.size+2*left+3)*item)
+    operator = from_prepared(integrals,space,max_memory=max_memory,
+                             reserved_bytes=reserved_bytes+solver_bytes)
+    energies,vectors,residuals,converged = _eigenpairs(operator.apply,operator.diagonal,
+        config,reference_index=reference_index,max_memory=max_memory,reserved_bytes=resident,
+        solver_config=solver_config)
+    reference = operator.diagonal[0]
+    return CIResult(energies,energies-reference,reference,vectors,residuals,converged)
 
 
 def restricted_fock(h1, eri, nocc):
@@ -106,8 +139,31 @@ def solve_ucis(h1, eri, *, nocc, frozen=None, config=None, max_determinants=1_00
     space = replace(full, determinants=full.determinants[1:], ranks=full.ranks[1:])
     op = build_direct_hamiltonian(h1, eri, space)
     energies, vectors, norms, converged = _eigenpairs(op.apply, op.diagonal, config)
+    return UCISResult(energies-full_op.diagonal[0], _ucis_amplitudes(full, vectors), norms, converged,
+                       config.gradient_mode == "implicit_eigenvector")
+
+
+def solve_ucis_from_integrals(integrals, full, *, config=None, max_memory=None,
+                              reserved_bytes=0):
+    """Project the same prepared CI action onto its singles determinant block."""
+    config = CIConfig() if config is None else config
+    if full.size == 1:
+        raise ValueError("UCIS has no active single excitations")
+    space = replace(full, determinants=full.determinants[1:], ranks=full.ranks[1:])
+    selected = integrals._replace(diagonal=integrals.diagonal[1:],
+                                  fock_diagonal=integrals.fock_diagonal[1:])
+    reserved = reserved_bytes+array_storage_bytes(integrals.diagonal, integrals.fock_diagonal)
+    solved = solve_ci_from_integrals(selected, space, config=config, max_memory=max_memory,
+                                     reserved_bytes=reserved, reference_index=None)
+    return UCISResult(solved.total_energies-integrals.constant,
+        _ucis_amplitudes(full, solved.coefficients), solved.residual_norms, solved.converged,
+        config.gradient_mode == "implicit_eigenvector")
+
+
+def _ucis_amplitudes(full, vectors):
+    n, nocc, nroots = full.nmo, full.nocc, vectors.shape[1]
     amplitudes = []
-    lookup = {d: k for k, d in enumerate(space.determinants)}
+    lookup = {d: k for k, d in enumerate(full.determinants[1:])}
     for spin, (no, fr) in enumerate(zip(nocc, full.frozen)):
         occ = [p for p in range(no) if p not in fr]
         vir = [p for p in range(no, n) if p not in fr]
@@ -115,9 +171,8 @@ def solve_ucis(h1, eri, *, nocc, frozen=None, config=None, max_determinants=1_00
                  for i in occ for a in vir]
         indices = np.asarray([lookup[d] for d, _ in links], dtype=np.int32)
         signs = jnp.asarray([s for _, s in links], dtype=vectors.dtype)
-        amplitudes.append((vectors[indices]*signs[:, None]).T.reshape(config.nroots, len(occ), len(vir)))
-    return UCISResult(energies-full_op.diagonal[0], tuple(amplitudes), norms, converged,
-                       config.gradient_mode == "implicit_eigenvector")
+        amplitudes.append((vectors[indices]*signs[:, None]).T.reshape(nroots, len(occ), len(vir)))
+    return tuple(amplitudes)
 
 
 def solve_cis(h1, eri, *, nocc, singlet=True, frozen=None, config=None, response=None):

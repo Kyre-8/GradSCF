@@ -2601,3 +2601,36 @@ requires its own explicit decision and numerical validation.
   root-late-frontiers-verification.json. These are known-array phase budgets;
   full process/XLA residency and size/device acceptance remain separate.
   The same fixed TODO hierarchy remains open.
+
+### 2026-10-22 — WF-18/22: selected CI/FCI relaxed geometry and explicit frame
+
+- CorrelatedEnergy now composes the existing stationary HF solve with the
+  shared selected CI producer/sigma solver or required FCI active-space tensor.
+  AO overlap/integrals, transported Focks, orbitals and reference energy remain
+  live. No second SCF/eigen derivative engine or full-MO pre-adapter is added.
+  CID and higher existing CI ranks keep their original retained-space meanings.
+- Six fixed native geometry points initially pass5 and fail1: H2/6-31G
+  restricted full/frozen CISD, H3/STO-3G unrestricted full/frozen CISD, H2 full
+  FCI and LiH/STO-3G one-core FCI. The unequal-frozen H3 HVP differed from two
+  gradient finite differences by5.918e-5/5.920e-5, despite full-MO/selected AD
+  agreeing. The scalar AD Hessian remained bilinearly symmetric1.38e-16.
+- A fixed initial-HF occupied/virtual anchor projected into the current
+  stationary subspaces, followed by Cholesky orthonormalization, defines an
+  integrable local orbital frame for selected CI/FCI models. On the same H3
+  point the two HVP errors fall to1.680e-8/1.865e-9. Density/SCF energy remain
+  unchanged at1e-12. This explicitly defines a local frozen-orbital model; it
+  does not identify different arbitrary recentered frames away from the anchor.
+  Rank loss stays nonfinite, with no clipping/canonicalization fallback.
+- Production frame/UCC forwarding/dtype/rank-loss four cases exit0/311.617s;
+  original restricted-frozen and FCI-core points on the final frame each pass
+  (346.056s/53.908s). Unfrozen branches do not use this frame. MP/CC frozen/
+  core/active workflow rejection is retained. Only the already verified UCC
+  bare-block keyword changes the old MP/CC call body; root verified exact AST
+  equality after removing that keyword and the new guarded CI/FCI branch.
+- Source freshness RED2->GREEN2 precedes moving integral preparation. Root
+  checked109 earlier payloads plus the37 final frame/active payloads, exact
+  five source/test files and raw XML/exits. Evidence review-geometry-frontier,
+  review-frame-causal-ucc and review-frame-active-final-20261022 archives,
+  root-geometry-frame-verification.json and root-late-frontiers-verification.json.
+  Existing small-point geometry success is not a large-CI performance or
+  process-memory guarantee. The fixed TODO hierarchy remains unchanged.
