@@ -68,7 +68,7 @@ def test_scf_ucis_uses_selected_integrals(source, frozen, monkeypatch):
         pytest.fail('SCF UCIS materialized a complete MO/spin Hamiltonian')
 
     monkeypatch.setattr(module, 'unrestricted_reference_from_source', forbidden)
-    monkeypatch.setattr(module, 'spin_orbital_integrals', forbidden)
+    monkeypatch.setattr(module, 'spin_orbital_integrals', forbidden, raising=False)
     actual = ci.UCIS(mf, frozen=frozen, solver='dense').run()
     assert np.all(actual.converged)
     np.testing.assert_allclose(actual.e, expected.e, atol=3e-10)

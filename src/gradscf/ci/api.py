@@ -4,13 +4,12 @@ from dataclasses import replace
 import jax
 import numpy as np
 
-from .._memory import resolve_memory_mb, tree_storage_bytes
+from .._memory import resolve_memory_mb, tree_storage_bytes, workspace_bytes
 from .integrals import reference_from_source, from_orbitals
 from .space import make_ci_space, make_uci_space, _selected_ranks
 from .spin import spin_square
 from .solver import (solve_ci, solve_ci_from_integrals, solve_cis, solve_cis_response,
                      solve_ucis, solve_ucis_from_integrals)
-from gradscf.ao2mo import spin_orbital_integrals
 from .solver import restricted_fock
 from .corrections import cis_d_correction, cis_d_from_orbitals
 from .types import CIConfig
@@ -28,8 +27,9 @@ class CI:
     retains a root axis. This facade performs eager input validation; use the
     functional solve_ci interface under jit/grad.
 
-    ``max_memory`` budgets AO->MO transforms in decimal MB. None inherits the
-    SCF budget or uses the shared default for an explicit MO reference.
+    ``max_memory`` budgets known source, preparation, action and solver arrays
+    in decimal MB. None inherits the SCF budget or uses the shared default for
+    an explicit MO reference; it is not a total process RSS limit.
     """
     def __init__(self, mf, *, max_excitation=2, frozen=None, nroots=1,
                  solver="davidson", conv_tol=1e-9, max_cycle=100, max_space=None,
@@ -101,7 +101,10 @@ class CI:
             build = make_uci_space if unrestricted else make_ci_space
             self.space = build(self._nmo,ref.nocc,max_excitation=self.max_excitation,
                 frozen=self.frozen,max_determinants=self.max_determinants,excitation_ranks=self.excitation_ranks)
-            self.result = solve_ci(ref.h1,ref.eri,self.space,nuclear_repulsion=ref.nuclear_repulsion,config=self._config())
+            self.result = solve_ci(ref.h1,ref.eri,self.space,nuclear_repulsion=ref.nuclear_repulsion,
+                config=self._config(),max_memory=self.max_memory,
+                reserved_bytes=tree_storage_bytes(self.mf,ref,
+                    exclude=(ref.h1,ref.eri,ref.nuclear_repulsion)))
         self._state_key = self._physical_state_key()
         self.e_tot = self.result.total_energies
         self.e_corr = self.result.correlation_energies
@@ -244,15 +247,21 @@ class UCIS(UCI):
             self.converged = np.asarray(self.result.converged)
             return self.e, self.amplitudes
         self.reference = ref = unrestricted_reference_from_source(self.mf, max_memory=self.max_memory)
-        h, g = spin_orbital_integrals(ref.h1, ref.eri)
-        n = h.shape[0]//2
-        occ = np.asarray(list(range(ref.nocc[0]))+list(range(n, n+ref.nocc[1])), dtype=int)
-        f = h+g[:, :, occ, occ].sum(-1)-g[:, occ, occ, :].sum(1)
-        for spin, no in enumerate(ref.nocc):
-            if np.max(np.abs(np.asarray(f)[spin*n:spin*n+no, spin*n+no:(spin+1)*n]), initial=0.) > 1e-7:
+        from .direct import _reference
+        n = ref.h1[0].shape[0]
+        item = max(a.dtype.itemsize for a in (*ref.h1, *ref.eri))
+        workspace_bytes(self.max_memory,
+            resident_bytes=tree_storage_bytes(self.mf,ref)+ref.eri[1].nbytes+6*n*n*item,
+            device=getattr(ref.h1[0],'device',None))
+        aa,ab,bb = ref.eri
+        focks,energy = _reference(ref.h1,((aa,ab),(ab.transpose(2,3,0,1),bb)),ref.nocc)
+        for fock,no in zip(focks,ref.nocc):
+            if np.max(np.abs(np.asarray(fock)[:no,no:]), initial=0.) > 1e-7:
                 raise ValueError("UCIS requires a stationary UHF reference; ROHF orbitals need not satisfy this condition")
         self.result = solve_ucis(ref.h1, ref.eri, nocc=ref.nocc, frozen=self.frozen,
-                                 config=self._config(), max_determinants=self.max_determinants)
+            config=self._config(), max_determinants=self.max_determinants,
+            max_memory=self.max_memory,reserved_bytes=tree_storage_bytes(self.mf,ref,focks,energy,
+                exclude=(ref.h1,ref.eri)))
         self.e, self.amplitudes = self.result.excitation_energies, self.result.amplitudes
         self.converged = np.asarray(self.result.converged)
         return self.e, self.amplitudes
@@ -312,16 +321,21 @@ class CIS(CI):
                 raise ValueError("CIS requires a stationary HF reference (occupied-virtual Fock block must vanish)")
             self.result = solve_cis_response(
                 ref, singlet=self.singlet, frozen=self.frozen,
-                config=self._config(), max_memory=self.max_memory)
+                config=self._config(), max_memory=self.max_memory,
+                reserved_bytes=tree_storage_bytes(self.mf,exclude=(ref,)))
             self.e, self.amplitudes = self.result.excitation_energies, self.result.amplitudes
             self.converged = np.asarray(self.result.converged)
             return self.e, self.amplitudes
         self.reference = ref = reference_from_source(self.mf, max_memory=self.max_memory)
+        workspace_bytes(self.max_memory,resident_bytes=tree_storage_bytes(self.mf,ref)
+            +3*ref.h1.size*max(ref.h1.dtype.itemsize,ref.eri.dtype.itemsize),
+            device=getattr(ref.h1,'device',None))
         fock = np.asarray(restricted_fock(ref.h1, ref.eri, ref.nocc))
         if np.max(np.abs(fock[:ref.nocc, ref.nocc:]), initial=0.) > 1e-7:
             raise ValueError("CIS requires a stationary HF reference (occupied-virtual Fock block must vanish)")
         self.result = solve_cis(ref.h1, ref.eri, nocc=ref.nocc, singlet=self.singlet,
-                                frozen=self.frozen, config=self._config())
+            frozen=self.frozen, config=self._config(), max_memory=self.max_memory,
+            reserved_bytes=tree_storage_bytes(self.mf,ref,fock,exclude=(ref.h1,ref.eri)))
         self.e, self.amplitudes = self.result.excitation_energies, self.result.amplitudes
         self.converged = np.asarray(self.result.converged)
         return self.e, self.amplitudes
@@ -363,7 +377,9 @@ class CIS_D(CIS):
             raise ValueError("CIS(D) requires canonical HF orbitals and consistent mo_energy")
         if source is None:
             self.result = cis_d_correction(ref.eri, ref.mo_energy, self.cis_result,
-                nocc=ref.nocc, frozen=self.frozen, denominator_tol=self.denominator_tol)
+                nocc=ref.nocc, frozen=self.frozen, denominator_tol=self.denominator_tol,
+                max_memory=self.max_memory,reserved_bytes=tree_storage_bytes(self.mf,ref,fock,eps,
+                    exclude=(ref.eri,ref.mo_energy,self.cis_result)))
         else:
             self.result = cis_d_from_orbitals(source.coefficients, self.mf.mo_energy,
                 self.cis_result, nocc=source.nocc, frozen=self.frozen,

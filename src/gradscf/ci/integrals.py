@@ -6,13 +6,15 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 
-from gradscf.ao2mo import validate_integrals, transform_eri_blocks
+from gradscf.ao2mo import validate_integrals, validate_unrestricted_integrals, transform_eri_blocks
 from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
-                             resolve_memory_mb, validate_reserved_bytes, workspace_bytes)
+                             resolve_memory_mb, tree_storage_bytes,
+                             validate_reserved_bytes, workspace_bytes)
 from ..scf.reference import reference_from_source as prepare_reference
 from .types import CIReference
 from .space import UCISpace
-from .direct import _topology, _normal_order, _needed, _kernels, _diagonal
+from .direct import (_topology, _normal_order, _needed, _kernels, _diagonal,
+                     _reference, _kernel_bytes)
 
 
 class CIIntegrals(NamedTuple):
@@ -21,6 +23,42 @@ class CIIntegrals(NamedTuple):
     constant: object
     diagonal: object
     fock_diagonal: object
+
+
+def _raw_integrals(h1, eri, space, *, max_memory, reserved_bytes=0):
+    """Adapt supplied MO arrays using the original direct normal-ordering.
+
+    The second return value counts retained source arrays, including possible
+    host/backend copies. No orbital transformation or spin tensor is built.
+    """
+    maximum = resolve_memory_mb(max_memory)
+    reserved = validate_reserved_bytes(reserved_bytes)
+    if isinstance(space, UCISpace):
+        hs, blocks = validate_unrestricted_integrals(h1, eri)
+        if hs[0].shape != (space.nmo,)*2:
+            raise ValueError('MO integral dimensions do not match the MO space')
+        # Forecast the existing BA pair transpose before constructing it.
+        source = tree_storage_bytes(h1, eri, hs, blocks)+blocks[1].nbytes
+    else:
+        h, g = validate_integrals(h1, eri, space.nmo)
+        hs, blocks = (h, h), (g,)
+        source = tree_storage_bytes(h1, eri, hs, blocks)
+    topology = _topology(space)
+    dtype = jnp.result_type(*hs, *blocks)
+    working = (_kernel_bytes(topology, True, dtype, None, None)
+               +(6*space.nmo**2+4*space.size)*dtype.itemsize)
+    workspace_bytes(maximum, resident_bytes=reserved+source+working,
+                    device=getattr(hs[0], 'device', None))
+    if isinstance(space, UCISpace):
+        aa,ab,bb = blocks
+        gs = ((aa,ab),(ab.transpose(2,3,0,1),bb))
+    else:
+        gs = ((g,g),(g,g))
+    focks, constant = _reference(hs, gs, topology.nocc)
+    kernels = _kernels(focks, gs, topology)
+    diagonal = _diagonal(focks, gs, constant, topology, space.size)
+    fock_diagonal = _diagonal(focks, None, jnp.zeros_like(constant), topology, space.size)
+    return CIIntegrals(kernels, constant, diagonal, fock_diagonal), source
 
 
 def from_orbitals(coefficients, focks, reference_energy, space, *, eri=None,

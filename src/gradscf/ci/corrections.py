@@ -5,7 +5,8 @@ import jax.numpy as jnp
 import jax
 from gradscf.ao2mo import transform_eri_blocks
 from gradscf._memory import (DEFAULT_MAX_MEMORY_MB,array_storage_bytes,
-                             resolve_memory_mb,validate_reserved_bytes,workspace_bytes)
+                             resolve_memory_mb,tree_storage_bytes,
+                             validate_reserved_bytes,workspace_bytes)
 
 from ..tddft.cisd import restricted_cisd_second_order_correction
 from ..tddft.types import TDAResult
@@ -14,7 +15,8 @@ from .types import CISDCorrectionResult
 from ..solvers.diagnostics import require_converged_derivative
 
 
-def cis_d_correction(eri, mo_energy, singles, *, nocc, frozen=None, denominator_tol=1e-10):
+def cis_d_correction(eri, mo_energy, singles, *, nocc, frozen=None, denominator_tol=1e-10,
+                      max_memory=None,reserved_bytes=0):
     """Return unscaled singlet CIS(D) corrections, in Hartree.
 
     Inputs must describe canonical RHF orbitals and singlet CIS roots. Spatial
@@ -31,6 +33,7 @@ def cis_d_correction(eri, mo_energy, singles, *, nocc, frozen=None, denominator_
     """
     if isinstance(singles.singlet, bool) and not singles.singlet:
         raise NotImplementedError("CIS(D) currently requires singlet CIS roots")
+    raw = (eri,mo_energy) if max_memory is not None else None
     eri, eps = jnp.asarray(eri), jnp.asarray(mo_energy)
     if jnp.iscomplexobj(eri) or jnp.iscomplexobj(eps):
         raise NotImplementedError("CIS(D) requires real integrals and orbital energies")
@@ -47,6 +50,15 @@ def cis_d_correction(eri, mo_energy, singles, *, nocc, frozen=None, denominator_
         raise ValueError("CIS(D) requires active occupied and virtual orbitals")
     if singles.amplitudes.shape != (singles.excitation_energies.size, len(occ), len(vir)):
         raise ValueError("CIS amplitudes do not match the active orbital space")
+    if max_memory is not None:
+        dtype = jnp.result_type(eri,eps,singles.amplitudes,singles.excitation_energies)
+        nm = len(occ)+len(vir)
+        resident = (validate_reserved_bytes(reserved_bytes)
+            +tree_storage_bytes(raw,eri,eps,singles)
+            +_correction_workspace(len(occ),len(vir),singles.excitation_energies.size,dtype)
+            +(nm**4+4*nm**2+2*nm)*dtype.itemsize)
+        workspace_bytes(resolve_memory_mb(max_memory),resident_bytes=resident,
+                        device=getattr(eri,'device',None))
     active = jnp.asarray(occ + vir, dtype=jnp.int32)
     eps = eps[active]
     g = eri[jnp.ix_(active, active, active, active)]
@@ -55,6 +67,12 @@ def cis_d_correction(eri, mo_energy, singles, *, nocc, frozen=None, denominator_
                                 mo_occ=jnp.concatenate([jnp.full((no,), 2.), jnp.zeros((nm-no,))]),
                                 mo_eri=g, nocc=no)
     return _evaluate(reference,singles,no,eps,denominator_tol)
+
+
+def _correction_workspace(no,nv,nroots,dtype):
+    spin = 16*(4*no**2*nv**2+no*nv**3+no**3*nv)
+    roots = nroots*80*no**2*nv**2
+    return (3*spin+roots)*jnp.dtype(dtype).itemsize
 
 
 def _evaluate(reference,singles,no,eps,denominator_tol,blocks=None):
@@ -102,12 +120,10 @@ def cis_d_from_orbitals(coefficients,mo_energy,singles,*,nocc,frozen=None,
     dtype=jnp.result_type(c,eps,singles.amplitudes,singles.excitation_energies,
                           *jax.tree.leaves((eri,eri_pair_matrix,df_factors)),
                           jnp.float64 if direct_basis is not None else c)
-    spin_buffers=16*(4*no**2*nv**2+no*nv**3+no**3*nv)*dtype.itemsize
     # The unchanged shared helper vmaps roots; account for that root-dependent
     # moment/denominator workspace in addition to the root-independent blocks.
-    root_buffers=singles.excitation_energies.size*80*no**2*nv**2*dtype.itemsize
     resident=(reserved_bytes+array_storage_bytes(c,eps,*jax.tree.leaves(singles))
-              +3*spin_buffers+root_buffers)
+              +_correction_workspace(no,nv,singles.excitation_energies.size,dtype))
     workspace_bytes(maximum,resident_bytes=resident,device=getattr(c,'device',None))
     co,cv=c[:,jnp.asarray(occupied)],c[:,jnp.asarray(virtual)]
     requests=((0,1,0,1),(1,1,1,0),(1,0,1,1),(0,0,1,0))

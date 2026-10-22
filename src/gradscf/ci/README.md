@@ -100,7 +100,16 @@ action with TD response, avoiding a complete MO-ERI transformation. Native
 direct references retain their J/K provider without constructing an AO-pair
 matrix. `CIS(..., max_memory=1024.)` budgets this path in decimal MB; frozen
 spaces, singlet/triplet selection and unit-norm CIS amplitudes are preserved.
-DF, explicit-integral inputs, UCIS and CIS(D) retain their existing routes.
+Explicit-integral CI, CIS, UCIS and CIS(D) facades pass the same budget through
+their source arrays, preparation, action and common solver. The pure
+`solve_ci`, `solve_cis`, `solve_ucis` and `cis_d_correction` functions accept
+`max_memory` and `reserved_bytes`; their default `max_memory=None` preserves the
+original unplanned call. Supply a budget explicitly when using these functions
+inside a larger workflow. Existing MO tensors remain part of that budget;
+passing them does not provide an out-of-core integral representation.
+AO-CIS reserves the existing TD action's planned share during its eigensolve.
+These are known-array estimates, with runtime headroom, rather than a bound on
+XLA compilation, arbitrary external AD state or total process RSS.
 See [direct response and validation](../tddft/DIRECT_RESPONSE.md) for its
 fixed-basis AD contract, cache format, device behavior and measured limits.
 For AO inputs, `ao2mo.transform_integrals` supports full ERIs, an s4
@@ -202,8 +211,12 @@ the Fock matrix is diagonal and consistent with the supplied orbital energies.
   diagonal unit vectors and add separate full-support random columns. The old
   Slater–Condon connection implementation remains a small
   independent oracle, with its 1,000,000-connection bound; dense verification
-  remains limited to 2048 determinants. Density matrices still use their
-  separate connection implementation and capacity guard.
+  remains limited to 2048 determinants. These exported
+  `hamiltonian_action`/`hamiltonian_matrix` oracle functions retain their static
+  connection/dimension guards and do not accept a caller memory budget.
+  `spin_square` currently uses the density exporter with its default budget;
+  it does not forward a facade's custom budget. The iterative solver and
+  explicit density/expectation interfaces have the budget controls above.
 - GHF, complex orbitals, periodic CI, and automatic
   spin selection for general CI roots are not implemented.
 - Named `CISD(T)` / `CISDT(Q)` corrections are not exported. They need a specific

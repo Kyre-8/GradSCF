@@ -103,6 +103,8 @@ class _ResponseMemoryPlan(NamedTuple):
     batch_size: int
     eri_cache_bytes: int
     grid_block_size: int
+    # Existing planner share, including fixed arrays; not a measured peak.
+    action_bytes: int = 0
 
 
 def _response_memory_inputs(molecule, resolved_xc, *, spin_channels=1):
@@ -275,4 +277,4 @@ def plan_response_memory(nao, dim, nroots, dtype, max_memory,
     while basis_bytes(width) > available:
         width -= 1
     return _ResponseMemoryPlan(
-        width, batch_size, cache_bytes, grid_width)
+        width, batch_size, cache_bytes, grid_width, fixed+action_budget)

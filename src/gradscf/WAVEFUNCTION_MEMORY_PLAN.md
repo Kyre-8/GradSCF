@@ -490,7 +490,10 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 
   - [x] **WF-19a:** native/projected CAS ERIs and AO core folding, fixed-frame
     coefficient/geometry products through two and allocation preflights.
-  - [x] **WF-19b:** all reference representations and joint consumer budgets,\n    verified for the stated real common-spatial CPU/known-array contract.\n    Reuse representation/core-fold layers and the native relaxed closure;\n    CUDA geometry and large-CAS scaling remain WF-30/32.
+  - [x] **WF-19b:** all reference representations and joint consumer budgets,
+    verified for the stated real common-spatial CPU/known-array contract.
+    Reuse representation/core-fold layers and the native relaxed closure;
+    CUDA geometry and large-CAS scaling remain WF-30/32.
 - [ ] **WF-20 — CI action/cache budget.** Replace fixed creator/spectator/RHS
   batches with byte planning and bound numerical/RDM caches by bytes.
   Acceptance: direct action/matmat parity, Davidson forward/response, no all-pairs
@@ -2867,3 +2870,53 @@ requires its own explicit decision and numerical validation.
   and cc-caller-budget-root-verification.json. Compiler/library/allocator/
   external AD storage, spatial two-RDM/contracted two-body work and complete
   method/device/size reconciliation remain their existing acceptance gates.
+
+### 2026-10-22 — WF-18/20/22/29: explicit-MO CI budget handoff
+
+- Raw CI/CIS/UCIS/CIS(D) accept the original optional MB budget and known
+  caller reservations. None retains the original raw mathematical path. The
+  existing normal-order/Fock/kernel/diagonal functions adapt raw MO tensors
+  without identity AO2MO or a full spin ERI. UCIS stationarity uses spatial
+  spin Focks, checked against the old independent full-spin formula with
+  unequal occupations and nonsymmetric raw ab input. Both retained CI
+  diagonals are charged in the shared action reservation.
+- Facades retain visible SCF/reference/source owners and potential backend/BA
+  transpose copies. AO-CIS passes the existing TD action's planned share to
+  the common Hermitian solver. Adding that internal metadata changes none of
+  the TD planner's four existing capacity/cache/grid decisions. CIS(D) shares
+  its existing spin/root forecast; its physical correction formula is unchanged.
+- Five final-source groups have actual exit0, unchanged before/after maps and
+  no skips: metadata11/5.580s; raw CI/UCI value and joint first response2/
+  437.206s; CIS/UCIS response2/68.399s; existing physical/TD4/37.084s;
+  water native direct-CIS energy/amplitude response and FD1/32.933s. These20
+  unique cases run on Delta job103505/n002, CPU16-31, x64. They are not warm
+  or large-system scaling measurements. The extra four-method HVP diagnostic
+  times out at570.502s with child-9/launcher124; its source/logs are retained
+  and do not establish general raw CI second-response acceptance.
+- Root verifies all131 archived payloads, five raw terminal/XML groups and
+  nine exact final files. Evidence ci-owner-checkpoint/review-ci-raw-budget-
+  20261022.tar.gz SHA256
+  aea37ae57e4fa1e4df4191ea8fa6da744c6648033eddd1126d9710b6ac9bf707,
+  RAW_BUDGET_REVIEW.md and current-checkpoint-root-verification.json. Static
+  Hamiltonian-oracle guards and spin_square's default density budget remain
+  documented boundaries. Compiler/allocator/external AD storage, GPU, complete
+  method scaling and remaining parent acceptance gates stay open.
+
+### 2026-10-22 — WF-30: native virtual action on the allocated V100
+
+- The two existing native/projected VirtualERI CUDA gates exit0/7.183s on
+  job103505/n002, physical GPU0, Tesla V100-SXM2-32GB. They compare value,
+  JVP/VJP/HVP jointly in nuclear coordinates, coefficients, RHS and projection
+  against the CPU dense oracle, prohibit full AO materialization and check
+  every actual output leaf resides on CUDA0. GPU6 is not exposed.
+- Root verifies11 archived payloads, actual terminal result, two-case JUnit
+  XML, unchanged source maps and the explicit CUDA runner environment. The
+  admitted native library SHA remains
+  eb9b1f1ae3fd0f79b9c20708a9c1dae2fc18d8f69e2249a24badf07b15193ed7.
+  Terminal-child CPU RSS1231068KiB is not a VRAM measurement. No whole-method
+  GPU performance/scaling claim follows. The subsequent shared bare-worker
+  metadata extraction is separately CPU-verified, not a new CUDA method run.
+- Evidence native-action-v100-evidence.tar.gz SHA256
+  28045804383faa10ab30dc78ec9d5d64ed5d47145e640312e3163735a2c388fb,
+  current-checkpoint-root-verification.json. WF-30 remains open for its full
+  method/device/transfer/peak-memory matrix; no new TODO is added.
