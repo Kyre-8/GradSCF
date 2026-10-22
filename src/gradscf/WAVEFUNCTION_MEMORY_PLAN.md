@@ -2978,3 +2978,38 @@ requires its own explicit decision and numerical validation.
   2a042281cfdaef1c95afa5ffe628483d368022d5c57dd7db190ea1c0216ba70e,
   molecular-workers-root-verification.json. GPU size/transfer/VRAM and the
   direct-input warm scaling campaign remain the original open gates.
+
+### 2026-10-22 — WF-33: selected standalone canonical MP3 kernel
+
+- One selected CC preparation supplies the seven existing blocks; MP2 borrows
+  its ovov/Fock/energies without a second transformation. The original zero-
+  amplitude CCD residual JVP and E3 contraction remain one unchanged tail.
+  Raw None preparation order is preserved. Optional planning forecasts source,
+  selected blocks, simultaneous first/second doubles and declared graph arrays
+  before actual transforms. Full-frame canonical/frozen guards remain live.
+- The original seven gates have passing frontiers: four guards in20.022s and
+  three complete raw/selected C/F/E/AO value/JVP/HVP comparisons, in bounded
+  separate processes, covering array/no-frozen/T2, s4/frozen1/no-T2 and DF/
+  frozen[0,3]/T2. Signatures and all original assertions match; no combined
+  seven-case pytest GREEN is invented. Independent Taylor order-three and two
+  existing default/JIT/PySCF cases pass3/81.559s on the same frozen kernel.
+- Independent review reproduces two further REDs: strong64 reference energy
+  incorrectly promoted32 interaction/T2, and Fock casts preceded the first
+  capacity check. Interaction precision now depends only on C/F/AO; reference
+  energy retains its separate dtype (native remains64). ShapeDtypeStruct
+  forecasts casts before allocation. New2 pass15.153s; affected original
+  reservation/full-Fock/Taylor3 pass44.488s. Old float64 tolerances and the
+  original seven test bodies are unchanged. All batches use job103505/x64 CPU.
+- Root checks both owner archives, six phase terminals/signatures, guard XML,
+  three default/cross-oracle XML, the two-RED/five-GREEN review records and
+  exact final bytes. The final energy tail equals26ab61e AST; raw/plan/view
+  definitions equal the tested initial candidate. Evidence delta-mp3-orbitals-r1/
+  HANDOFF.json; mp3-final-oracle-evidence.tar.gz SHA256
+  0801d4d2035b3a77c67f12b96219dc0b5c4a8e8cfaea6f839827e52ef801122e;
+  mp3-review-fixes-evidence.tar.gz SHA256
+  61c2f9527039e7062c61d4410362e74570dfaaaaeb01cf6bfc8ad5dffc00787e.
+  mp3-eom-root-verification.json and mp3-review-fixes/root-verification.json
+  retain the actual boundaries. These are small pure-frame cold-response
+  gates, not native/GPU, warm speed or whole-method memory gains. Eager source
+  dispatch and caller ownership remain the existing integration work; WF-33
+  is not yet closed solely by adding this kernel.
