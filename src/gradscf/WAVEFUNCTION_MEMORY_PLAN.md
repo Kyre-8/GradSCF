@@ -582,7 +582,8 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     phase-aware lifetimes and byte-controlled caches across all consumers.
     Shared non-Hermitian/EOM primal capacity, closures and action batches are
     verified. Shared packed DIIS and checked linear/root phase planning are
-    verified; spectral-response and remaining method caller ownership stay open.
+    verified. Isolated non-Hermitian pair-response phases are verified;
+    remaining method/SCF/other spectral-response ownership stays open.
 - [ ] **WF-30 — CPU/GPU and nested-AD audit.** Run eager and JIT public entry
   points, native dispatch, device residency and transfer accounting. Acceptance:
   same numerical cases/dtype/seed, forward/JVP/VJP/HVP separately, actual peak
@@ -2920,3 +2921,31 @@ requires its own explicit decision and numerical validation.
   28045804383faa10ab30dc78ec9d5d64ed5d47145e640312e3163735a2c388fb,
   current-checkpoint-root-verification.json. WF-30 remains open for its full
   method/device/transfer/peak-memory matrix; no new TODO is added.
+
+### 2026-10-22 — WF-29c: isolated non-Hermitian pair-response budgets
+
+- EOM relays the original MB/resident/action plan into the existing shared
+  pair-response owner, without a second primal plan or larger action batch.
+  Generic non-Hermitian solves retain their input owners before dense local
+  rebinding. Right(n+1) and left(n) response phases are planned independently;
+  budgeted root columns run sequential checked linear solves. None retains
+  the old vmap. Normalization, cluster/complex-root and direct n+1 guards,
+  root equations and primal pairing are unchanged; no EOM matrix is added.
+- Declared forward/transpose graph arrays reuse the shared estimator; known
+  opaque fixed action scratch is added rather than swallowed by max. The
+  original3x3 two-root family checks direct/GMRES values, first/second response
+  and two FD steps. Existing tiny prepared H2/STO-3G IP/EA residue responses
+  retain ground/Lambda/vector dependencies. A frozen-vector counterexample
+  initially used a symmetry-blind trace weight (two real failures retained);
+  the complete residue resolves that test blind spot with unchanged physics.
+- Nineteen unique nodes have actual passing frontiers on job103505/n002,
+  CPU56-71/x64, with raw results/source maps/XML. Final integration2 passes
+  in142.740s; final metadata5 in14.279s; strengthened physical-minimum1 in
+  11.330s. Initial missing-interface RED5, trace-observable failures and fixed-
+  scratch RED1 remain archived. These are response/component gates, not a
+  large-method RSS or speed benchmark; WF-29c remains open for other consumers.
+- Root verifies264 payloads,16 exact final source/test/dependency hashes,
+  all nine batch exits/XML and unchanged-math AST proofs. Evidence
+  eom-response-evidence.tar.gz SHA256
+  e3ef41bb3040235ce8a968bd085f5a7f4d625c64b33f1beb0a00d79deb2dffb2,
+  summary.json/static-proofs.json and mp3-eom-root-verification.json.

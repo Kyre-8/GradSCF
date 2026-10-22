@@ -9,12 +9,13 @@ from ._nonhermitian_ritz import paired_eigenvectors
 from .nonhermitian_davidson import davidson_ritz
 from ._nonhermitian_response import attach_pair_response
 from ..memory import apply_columns, plan_nonhermitian
-from gradscf._memory import array_storage_bytes, validate_reserved_bytes
+from gradscf._memory import array_storage_bytes, tree_storage_bytes, validate_reserved_bytes
 
 
 def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
                       vector_response=False, response_config=None,
-                      max_memory=None, reserved_bytes=0, _batch_size=None):
+                      max_memory=None, reserved_bytes=0, _batch_size=None,
+                      _response_budget=None):
     """Lowest-real-part dense eigenpairs or iterative Ritz estimates.
 
     By default only isolated real eigenvalue JVP/VJP is exposed and left/right
@@ -28,9 +29,11 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
     gaps/order are local Ritz estimates, not a global isolation certificate.
     spectrum_complete distinguishes full coverage. Exceptional or poorly
     conditioned roots invalidate energy response; no dense fallback is used.
-    Optional max_memory budgets known primal working arrays in decimal MB;
+    Optional max_memory budgets known primal and pair-response arrays in decimal MB;
     reserved_bytes declares caller data not visible in a generic operator.
-    Operator-specific scratch and implicit response need separate planning.
+    The two phases share the original budget, without retaining the primal
+    Krylov workspace in the response phase. Opaque operator/library scratch
+    remains caller-owned. A private EOM relay preserves its existing primal plan.
     """
     cfg = NonHermitianSolverConfig() if config is None else config
     if not isinstance(vector_response, bool):
@@ -47,7 +50,12 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
     k = cfg.nroots
     if k > n:
         raise ValueError("nroots exceeds operator dimension")
+    response_budget = None if _response_budget is None else dict(_response_budget)
+    source_arrays = ()
     if max_memory is not None:
+        # Preserve caller arrays before dtype promotion and before dense `a`
+        # is rebound to the stopped numerical assembly below.
+        source_arrays = (a, op.diagonal, initial_vectors)
         if initial_vectors is not None:
             if cfg.method == "dense":
                 raise ValueError("initial_vectors applies only to Davidson")
@@ -57,10 +65,13 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
             if (initial_vectors.ndim != 2 or initial_vectors.shape[0] != n
                     or not 1 <= initial_vectors.shape[1] <= min(n, cfg.max_space)):
                 raise ValueError("initial_vectors must have shape (n, 1..max_space)")
+        source_bytes = reserved_bytes+array_storage_bytes(*source_arrays, initial_vectors)
         cfg, _, _batch_size = plan_nonhermitian(n, op.dtype, cfg, max_memory,
-            resident_bytes=reserved_bytes+array_storage_bytes(a, op.diagonal, initial_vectors),
+            resident_bytes=source_bytes,
             initial_columns=0 if initial_vectors is None else initial_vectors.shape[1],
             device=getattr(op.diagonal, "device", None))
+        response_budget = dict(max_memory=max_memory, reserved_bytes=source_bytes,
+            operator_min_bytes=0, operator_bytes_per_column=0, action_columns=_batch_size)
     apply = lambda v: apply_columns(op, v, _batch_size)
     apply_transpose = lambda v: apply_columns(op.T, v, _batch_size)
     if cfg.method == "dense":
@@ -147,8 +158,15 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
     if vector_response:
         linear = (LinearSolverConfig(rtol=1e-10, restart=40)
                   if response_config is None else response_config)
+        if response_budget is not None:
+            # Only retained arrays survive the primal phase, not its Arnoldi
+            # capacities, eigensolver workspaces or complete trajectory.
+            response_budget['reserved_bytes'] += tree_storage_bytes((
+                a, wr, right, left, l0, gram, singular,
+                right_res, left_norm, left_res, bio, real, conv, condition,
+                present, distances, margin, valid, guards), exclude=source_arrays)
         values, r, l = attach_pair_response(op, energies, r, l,
-                                            config=linear, valid=valid)
+            config=linear, valid=valid, **({} if response_budget is None else response_budget))
     else:
         applied = apply(r)
         live_zero = applied - jax.lax.stop_gradient(applied)

@@ -29,6 +29,7 @@ class _EOMMemory:
     config: NonHermitianSolverConfig
     solver_reserved_bytes: int
     action_columns: int
+    max_memory: float
 
 
 @dataclass(frozen=True)
@@ -83,9 +84,10 @@ def build_eom_operator_from_integrals(ints, ground, *, config=None, cc_config=No
     The capacity guard counts supplied storage leaves, without a full MO ERI
     estimate. Native VirtualERI supplies the same bare virtual action to
     EE/IP/EA; charged dressing is applied without a cached dense Wvvvv.
-    max_memory plans known primal arrays in decimal MB, with the shared 20%
-    runtime reserve. Compilation/allocator state and implicit-response Krylov
-    storage have separate lifetimes and are not a process memory limit.
+    max_memory plans known primal and isolated-pair response arrays in decimal
+    MB, with the shared 20% runtime reserve and independent phase lifetimes.
+    The array plans exclude compilation/allocator state and external AD storage;
+    they are not a process memory limit.
     Native action scratch still follows the supplied provider's own budget.
     """
     context = _operator_context_from_integrals(ints, ground, config=config,
@@ -154,7 +156,7 @@ def _planned_operator(ints, ground, space, cfg, cc_cfg, max_memory, reserved_byt
         solver_cfg, max_memory, resident_bytes=resident,
         operator_bytes_per_column=per_column, device=device)
     memory = _EOMMemory(resident, closure_bytes, 0, per_column, planned,
-                        solver_bytes, columns)
+                        solver_bytes, columns, max_memory)
     return _EOMContext(op, space, valid, memory)
 
 
@@ -280,7 +282,11 @@ def _solver_config(cfg):
 
 
 def _run_operator(op, valid, cfg, memory=None):
-    options = {} if memory is None else {"_batch_size": memory.action_columns}
+    options = {} if memory is None else dict(_batch_size=memory.action_columns,
+        _response_budget=dict(max_memory=memory.max_memory,
+            reserved_bytes=memory.resident_bytes, operator_min_bytes=memory.operator_min_bytes,
+            operator_bytes_per_column=memory.operator_bytes_per_column,
+            action_columns=memory.action_columns))
     solved = solve_nonhermitian(
         op,
         vector_response=cfg.vector_response,
