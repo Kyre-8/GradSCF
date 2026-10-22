@@ -3,8 +3,18 @@
 # Adapted from PySCF 2.9.0 pyscf/cc/eom_rccsd.py. See ../NOTICE.md.
 """Restricted IP/EA-CCSD actions; no partition approximation or solver code."""
 from types import SimpleNamespace
+from typing import NamedTuple
 import jax.numpy as jnp
 from . import _intermediates as imd
+
+
+class _VirtualBlocks(NamedTuple):
+    ovov: object
+    ovvv: object
+    vvvv: object
+
+    def get_ovvv(self):
+        return self.ovvv
 
 
 def intermediates(t1, t2, ints, sector):
@@ -24,11 +34,10 @@ def intermediates(t1, t2, ints, sector):
             Wovoo=imd.Wovoo(t1, t2, ints),
         )
     else:
-        wvvvv = imd.Wvvvv(t1, t2, ints)
         common.update(
             Wvovv=imd.Wvovv(t1, t2, ints),
-            Wvvvv=wvvvv,
-            Wvvvo=imd.Wvvvo(t1, t2, ints, wvvvv),
+            Wvvvo=imd.Wvvvo(t1, t2, ints, include_vvvv=False),
+            virtual=(t1, t2, _VirtualBlocks(ints.ovov, ints.ovvv, ints.vvvv)),
         )
     return SimpleNamespace(**common)
 
@@ -76,7 +85,14 @@ def ea_action(r1, r2, w):
     )
     s2 += einsum("lbdj,lad->jab", 2 * w.Wovvo - w.Wovov.transpose(0, 1, 3, 2), r2)
     s2 -= einsum("lajc,lcb->jab", w.Wovov, r2) + einsum("lbcj,lca->jab", w.Wovvo, r2)
-    s2 += einsum("abcd,jcd->jab", w.Wvvvv, r2)
+    if hasattr(w, "virtual"):
+        t1, t2, ints = w.virtual
+        # Wvvvo's omitted W*t1 term shares this same virtual action. Keeping
+        # t1 in the live RHS also retains its derivative when t1 is zero.
+        s2 += imd.contract_Wvvvv(t1, t2, ints, r2+einsum("jd,c->jcd", t1, r1))
+    else:
+        # Explicit small-system namespace retained as the dense oracle.
+        s2 += einsum("abcd,jcd->jab", w.Wvvvv, r2)
     tmp = einsum("klcd,lcd->k", 2 * w.Woovv - w.Woovv.transpose(0, 1, 3, 2), r2)
     s2 -= einsum("k,kjab->jab", tmp, w.t2)
     return s1, s2

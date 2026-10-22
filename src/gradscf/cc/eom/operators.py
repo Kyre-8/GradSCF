@@ -221,7 +221,7 @@ def _build_operator(ints, ground, space, cfg, cc_cfg, *, storage_only=False):
         held = jax.tree.leaves(action)
     else:
         w = intermediates(t1, t2, ints, cfg.sector)
-        held = tuple(vars(w).values())
+        held = jax.tree.leaves(vars(w))
         contraction = ip_action if cfg.sector == "ip" else ea_action
 
         def action(v):

@@ -2519,3 +2519,39 @@ requires its own explicit decision and numerical validation.
   9e2b81c22c9c1b690051d2308490e68051bd1123581484c8207606f1f29ded64 and
   rcc-action-root-verification.json. Public auto and coupled caller/solver/AD
   ownership remain separate gates; no parent or new TODO is closed here.
+
+### 2026-10-22 — WF-17: one EA virtual action for both original consumers
+
+- The charged virtual dressing reuses the ground virtual action. With
+  A[...,k,l]=sum_cd ovov[k,c,l,d]*X[...,c,d], the remaining charged terms are
+  A*t2+A*t1*t1. Removing W*t1 from cached Wvvvo allows its contribution and
+  W*r2 to share X[j,c,d]=r2[j,c,d]+t1[j,d]*r1[c]. This is exact on the original
+  nonsymmetric raw chart; t1=0 still retains its parameter derivative. The
+  original explicit Wvvvv/Wvvvo are kept as the small-system reference.
+- The action retains only its three needed bare blocks through a small tuple;
+  it does not capture the complete ground integral snapshot. Shared closure
+  accounting flattens those actual payload leaves. Existing root/primal/AD
+  owners remain unchanged. Native prepared EOM is still explicitly gated;
+  enabling it and complete caller/response ownership are separate acceptance.
+- Two no-cache REDs precede20/20 actual GREEN cases (process482.960s): raw
+  float32/64, joint T1/T2/G/right-vector JVP/VJP/HVP at zero/nonzero singles,
+  and the original EE/IP/EA memory/roots/response regressions. A separate
+  unused-owner RED leads to six final-source passing cases (process33.094s),
+  including that owner check, the four raw numeric cases and EA closure-budget
+  tracing. There are21 unique passing nodes overall, with source frontiers
+  preserved. Root verified57 payload hashes, five final source/test bytes and
+  the executed benchmark; peer review and original-intermediate AST proofs
+  preserve all untouched equations. Local PySCF2.9.0 rintermediates/eom_rccsd
+  were inspected (SHA256c7f3311b...c903666 /9dd17a37...98ef9a).
+- Matched original69a4369 charged module versus new action on identical
+  supplied o8/v64/f64/seed6562 fields, CPU0–15/n002: prepare including its JIT
+  first call1.0875 ->0.4294s; seven warm action median32.960 ->32.674ms;
+  complete validation-child peaks2214932 ->1220056KiB. Action-only XLA scratch
+  increases160433152 ->196346880B; the lifecycle gain comes from removing the
+  retained dressed tensor and its preparation. Maximum output difference is
+  2.78e-17. This is a seeded component, not a converged EOM calculation or an
+  exclusive-node scaling result. Both child exits0 and exact old bytes were
+  verified; no rewritten surrogate is called a baseline.
+- Evidence delta-v100-20261022/eom-virtual-evidence.tar.gz SHAa8e0581f...165d024
+  and eom-virtual-benchmark-evidence.tar.gz SHA2c2a8fb4...d3b979f, with root
+  verification/static-proof JSONs. WF-17 and the same fixed TODO tree stay open.
