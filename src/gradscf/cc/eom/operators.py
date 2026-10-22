@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from math import prod
 import jax
 import jax.numpy as jnp
-from ..._memory import array_storage_bytes, validate_reserved_bytes, workspace_bytes
+from ..._memory import (array_storage_bytes, jaxpr_temporary_bytes,
+                        validate_reserved_bytes, workspace_bytes)
 from ...ao2mo import VirtualERI
 from ...solvers import LinearOperator, NonHermitianSolverConfig, solve_nonhermitian
 from ...solvers.memory import plan_nonhermitian
@@ -113,24 +114,6 @@ def _array_bytes(variable):
     return prod(aval.shape)*jnp.dtype(aval.dtype).itemsize
 
 
-def _temporary_bytes(jaxpr):
-    """Conservative sum of known JAX array temporaries, without executing it.
-
-    This deliberately does not model allocator reuse. Nested JIT/call bodies
-    are charged too; opaque numerical-library scratch uses the runtime reserve.
-    """
-    if hasattr(jaxpr, "jaxpr"):
-        jaxpr = jaxpr.jaxpr
-    total = sum(_array_bytes(v) for equation in jaxpr.eqns for v in equation.outvars)
-    for equation in jaxpr.eqns:
-        for value in equation.params.values():
-            values = value if isinstance(value, (tuple, list)) else (value,)
-            for nested in values:
-                if hasattr(nested, "eqns") or hasattr(nested, "jaxpr"):
-                    total += _temporary_bytes(nested)
-    return total
-
-
 def _planned_operator(ints, ground, space, cfg, cc_cfg, max_memory, reserved_bytes):
     if max_memory is None:
         op, _, valid, _, _ = _build_operator(ints, ground, space, cfg, cc_cfg)
@@ -146,7 +129,7 @@ def _planned_operator(ints, ground, space, cfg, cc_cfg, max_memory, reserved_byt
                        resident_bytes=resident, device=device)
     shaped = jax.make_jaxpr(lambda i, g: _build_operator(
         i, g, space, cfg, cc_cfg, storage_only=True))(ints, ground)
-    if _temporary_bytes(shaped) > workspace_bytes(max_memory, resident_bytes=resident,
+    if jaxpr_temporary_bytes(shaped) > workspace_bytes(max_memory, resident_bytes=resident,
                                                   device=device):
         raise ValueError("EOM operator construction exceeds the working-memory budget")
     # Outputs are residual, diagonal, validity and precisely the arrays held by
@@ -166,7 +149,7 @@ def _planned_operator(ints, ground, space, cfg, cc_cfg, max_memory, reserved_byt
     closure_bytes = resident-reserved_bytes-array_storage_bytes(*base)
     # Davidson complex Ritz vectors run through the same real operator. Charge
     # both real/imaginary work widths, also safely covering dense real actions.
-    per_column = 2*max(_temporary_bytes(right), _temporary_bytes(left))
+    per_column = 2*max(jaxpr_temporary_bytes(right), jaxpr_temporary_bytes(left))
     planned, solver_bytes, columns = plan_nonhermitian(space.size, op.dtype,
         solver_cfg, max_memory, resident_bytes=resident,
         operator_bytes_per_column=per_column, device=device)

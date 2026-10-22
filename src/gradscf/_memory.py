@@ -150,3 +150,27 @@ def tree_storage_bytes(*trees, exclude=()) -> int:
     excluded = {id(value) for value in arrays(exclude)}
     return sum(array_storage_bytes(value) for value in arrays(trees)
                if id(value) not in excluded)
+
+
+def jaxpr_temporary_bytes(jaxpr) -> int:
+    """Conservative sum of declared primitive output arrays, without execution.
+
+    Nested call bodies are included. This intentionally assumes no allocator
+    reuse or view aliasing; opaque library scratch and compiler/allocator state
+    are outside this static array estimate. Inspecting a graph initializes no
+    device and imports no solver or numerical backend.
+    """
+    if hasattr(jaxpr, 'jaxpr'):
+        jaxpr = jaxpr.jaxpr
+    total = 0
+    for equation in jaxpr.eqns:
+        for variable in equation.outvars:
+            aval = getattr(variable, 'aval', None)
+            if hasattr(aval, 'shape') and hasattr(aval, 'dtype'):
+                total += prod(aval.shape)*np.dtype(aval.dtype).itemsize
+        for value in equation.params.values():
+            values = value if isinstance(value, (tuple, list)) else (value,)
+            for nested in values:
+                if hasattr(nested, 'eqns') or hasattr(nested, 'jaxpr'):
+                    total += jaxpr_temporary_bytes(nested)
+    return total

@@ -5,6 +5,8 @@ import jax.numpy as jnp
 from .types import MPConfig, MPResult
 from .integrals import prepare_integrals
 from ..solvers import solve_tensor_sum
+from .._memory import resolve_memory_mb, tree_storage_bytes
+from ._memory import plan_mp2
 
 
 def _channel(left_energy, right_energy, no, nj, *, block=None, factors=None,
@@ -43,7 +45,8 @@ def _channel(left_energy, right_energy, no, nj, *, block=None, factors=None,
 
 
 def _noncanonical_channel(left_fock, right_fock, no, nj, *, block=None, factors=None,
-                          same_spin=False, restricted=False, config):
+                          same_spin=False, restricted=False, config,
+                          max_memory=None, reserved_bytes=0):
     """Solve the physical four-axis Fock equation, differentiating its residual."""
     nv, nb = left_fock.shape[0]-no, right_fock.shape[0]-nj
     shape = (no, nj, nv, nb)
@@ -55,9 +58,11 @@ def _noncanonical_channel(left_fock, right_fock, no, nj, *, block=None, factors=
     direct = (block.transpose(0, 2, 1, 3) if block is not None else
               jnp.einsum("Qia,Qjb->ijab", *factors, precision="highest"))
     numerator = direct-direct.swapaxes(2, 3) if same_spin else direct
+    options = ({} if max_memory is None else dict(max_memory=max_memory,
+        reserved_bytes=reserved_bytes+tree_storage_bytes(direct, exclude=(numerator,))))
     solved = solve_tensor_sum((left_fock[:no, :no], right_fock[:nj, :nj],
                                -left_fock[no:, no:], -right_fock[nj:, nj:]),
-                              numerator, denominator_tol=config.denominator_tol)
+                              numerator, denominator_tol=config.denominator_tol, **options)
     t = solved.solution
     if restricted:
         ss, os = jnp.sum(t*(direct-direct.swapaxes(2, 3))), jnp.sum(t*direct)
@@ -68,18 +73,27 @@ def _noncanonical_channel(left_fock, right_fock, no, nj, *, block=None, factors=
     return ss, os, solved.min_abs_denominator, t if config.with_t2 else None, solved.converged
 
 
-def evaluate_mp2(ints, config):
+def evaluate_mp2(ints, config, *, max_memory=None, reserved_bytes=0):
+    """MP2 in the supplied frame with optional joint known-array planning.
+
+    The original MB budget covers all retained spin-channel T2 outputs and
+    one channel's workspace. The noncanonical inverse shares that budget;
+    arbitrary outer AD/compilation/process residency is not bounded here.
+    """
+    maximum = None if max_memory is None else resolve_memory_mb(max_memory)
+    resident = plan_mp2(ints, config, maximum, reserved_bytes)
     restricted = len(ints.nocc) == 1
     pairs = ((0, 0),) if restricted else ((0, 0), (0, 1), (1, 1))
     channels = []
     noncanonical = config.orbital_basis == "noncanonical"
+    options = dict(max_memory=maximum, reserved_bytes=resident) if noncanonical else {}
     for k, (a, b) in enumerate(pairs):
         channel = _noncanonical_channel if noncanonical else _channel
         data = ints.focks if noncanonical else ints.energies
         channels.append(channel(data[a], data[b], ints.nocc[a], ints.nocc[b],
             block=ints.blocks[k] if ints.blocks is not None else None,
             factors=(ints.factors[a], ints.factors[b]) if ints.factors is not None else None,
-            same_spin=not restricted and a == b, restricted=restricted, config=config))
+            same_spin=not restricted and a == b, restricted=restricted, config=config, **options))
     ss = sum(row[0] for row in channels)
     os = sum(row[1] for row in channels)
     minimum = jnp.min(jnp.stack([row[2] for row in channels]))

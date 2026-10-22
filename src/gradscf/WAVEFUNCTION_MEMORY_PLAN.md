@@ -2746,3 +2746,34 @@ requires its own explicit decision and numerical validation.
   geometry, large-CAS scaling and complete compiled/AD process residency remain
   the explicit WF-30/32 gates. Acceptance counts become6/35 parents and27/37
   children; they are not engineering-effort percentages or a new TODO tree.
+
+### 2026-10-22 — WF-05/06/29: joint MP2 channel arrays and shared graph estimate
+
+- Prepared MP2 accepts optional max_memory/reserved_bytes. One known-array
+  plan retains all aa/ab/bb outputs together and budgets the largest current
+  channel; canonical row work and the unchanged noncanonical complete tensor
+  inverse remain distinct. The latter forwards the same original MB budget
+  and visible caller data to the shared tensor-sum solver. Raw direct/RHS
+  aliases are excluded only by object identity.
+- Review finds that unmasked channel T2 arrays survive while masked return
+  arrays are made. A new actual metadata RED (296B counted versus592B needed)
+  is fixed by charging both copies. This changes only static accounting; no
+  energy, denominator, amplitude or validity formula changes.
+- EOM's existing recursive primitive-output estimate moves to one shared
+  metadata helper for EOM/CC reuse. It counts nested declared array outputs
+  conservatively, without assuming view/allocator reuse or initializing any
+  device. It is no second solver, and opaque runtime/library/AD state is not
+  silently claimed as fully modeled.
+- Initial five missing-interface REDs precede11 passing MP2 budget/rotation/
+  degeneracy cases (exit0/14.230s). The separate T2-owner RED and missing
+  shared-helper RED remain recorded. Final five MP2 cases plus the nested
+  helper and three existing EOM closure-budget cases pass9/9 (exit0/40.949s),
+  Delta CPU0-15/x64, unchanged source maps. Fifteen unique nodes have passing
+  frontiers; this is not one all-fifteen aggregate on a single final test file.
+- Root verifies37 payloads, six exact final source/test files and original MP2
+  numerical/public-dispatch ASTs. Independent review checks promotion, spin
+  residency and alias handling. Evidence mp2-graph-budget-evidence.tar.gz SHA256
+  1dccd653c5555ebf5c561f726f28e1e62ded30ad6df4b8fb3161da6a0d1fe8ab,
+  mp2-graph-budget-root-verification.json. Eager/raw source forwarding, joint
+  preparation and full method/GPU/process measurements remain explicit gates;
+  the same parent/child TODO hierarchy is unchanged.
