@@ -1,7 +1,8 @@
 """Complete real MO integral tensors for small-system reference calculations."""
 import jax.numpy as jnp
 
-from gradscf._memory import DEFAULT_MAX_MEMORY_MB
+from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, tree_storage_bytes,
+    validate_memory_mb, validate_reserved_bytes, workspace_bytes)
 from gradscf.ao2mo.blocks import transform_eri_block
 
 
@@ -35,14 +36,18 @@ def validate_integrals(h1, eri, nmo=None):
 
 def transform_integrals(
     hcore, mo_coeff, *, eri=None, eri_pair_matrix=None, df_factors=None, direct_basis=None,
-    max_memory=DEFAULT_MAX_MEMORY_MB,
+    max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0,
 ):
     """Transform full, packed, density-fitted or native-direct AO integrals.
 
     Exactly one ERI representation is required. The resulting full MO ERI tensor
     uses O(nmo**4) memory; this is a small-system reference implementation.
-    ``max_memory`` budgets each transform through the shared block planner.
+    ``max_memory`` budgets each transform through the shared block planner;
+    caller-owned ``reserved_bytes`` and the one-body input/output/workspace
+    remain charged while that child constructs the MO ERIs.
     """
+    max_memory = validate_memory_mb(max_memory)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     c, h = jnp.asarray(mo_coeff), jnp.asarray(hcore)
     if jnp.iscomplexobj(c) or jnp.iscomplexobj(h):
         raise NotImplementedError(
@@ -50,16 +55,25 @@ def transform_integrals(
         )
     if c.ndim != 2 or h.shape != (c.shape[0], c.shape[0]):
         raise ValueError("Inconsistent AO Hamiltonian and MO coefficient dimensions")
+    dtype = jnp.result_type(c, h)
+    one_body = (c.shape[1]*(c.shape[0]+c.shape[1])
+                +sum(a.size for a in (c, h) if a.dtype != dtype))*dtype.itemsize
+    resident = tree_storage_bytes(h, exclude=(c, eri, eri_pair_matrix, df_factors))
+    reservation = reserved_bytes+resident+one_body
+    device = getattr(c, "device", None)
+    workspace_bytes(max_memory, resident_bytes=reservation,
+                    device=device() if callable(device) else device)
     g = _transform_eri(c, c, eri=eri, eri_pair_matrix=eri_pair_matrix,
-                       df_factors=df_factors, direct_basis=direct_basis, max_memory=max_memory)
+                       df_factors=df_factors, direct_basis=direct_basis, max_memory=max_memory,
+                       reserved_bytes=reservation)
     return validate_integrals(c.T @ h @ c, g)
 
 
 def _transform_eri(c, d, *, eri=None, eri_pair_matrix=None, df_factors=None, direct_basis=None,
-                   max_memory=DEFAULT_MAX_MEMORY_MB):
+                   max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0):
     return transform_eri_block((c, c, d, d), eri=eri,
                                eri_pair_matrix=eri_pair_matrix, df_factors=df_factors, direct_basis=direct_basis,
-                               max_memory=max_memory)
+                               max_memory=max_memory, reserved_bytes=reserved_bytes)
 
 
 def validate_unrestricted_integrals(h1, eri):

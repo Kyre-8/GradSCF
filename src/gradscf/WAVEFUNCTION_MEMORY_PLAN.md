@@ -2347,3 +2347,22 @@ requires its own explicit decision and numerical validation.
   678a9b72f1b77f3de2f70eabb1120c43fd8bbc72c4a0d3afd8d88aa1edd2cfc0.
   Minimal shared CI dependency is separately accepted in9395b23. No parent
   checkbox or new child is introduced by this finite slice.
+
+### 2026-10-22 — WF-02/19: reference transform reservation forwarding
+
+- The existing small-system full-MO reference wrapper now forwards the caller
+  reservation to its block transform, including the live one-body input,
+  output, matmul intermediate and necessary dtype-promotion buffers. The raw
+  C.T h C and ERI numerical contractions are unchanged. The shared validators
+  reject an invalid reservation or unaffordable one-body minimum before ERIs.
+- Missing forwarding was reproduced as six actual TypeError failures. The
+  same finite fix plus old native active-space/core-budget cases gives12/12,
+  exit0, no skips; joint nonsymmetric C/h/G first/second AD is included.
+  Delta103505, CPU16–31, x64, process15.220s, peak1259652KiB. Root verified
+  all13 archive payloads, original exits/XML, before/after source equality and
+  the exact current wrapper/new test bytes. Independent peer identified the
+  original missing keyword before the geometry tests proceeded.
+- Evidence ci-owner-checkpoint/review-reference-reservation-20261022.tar.gz,
+  SHA2560d2d1490b1307dd8d5879fe63ebd7d6a16ad265dce704ffbee8453932341cca3.
+  The separate simultaneous lifetime of three unrestricted full reference
+  transforms is not claimed solved. Parent/child checkboxes are unchanged.
