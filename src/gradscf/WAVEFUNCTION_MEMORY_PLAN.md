@@ -2470,3 +2470,23 @@ requires its own explicit decision and numerical validation.
   HANDOFF.json and root-verification.json. Eager run_mp/MP-budget forwarding,
   selected AO-source R/U geometry, standalone MP3 and final cache/size/device
   audits remain open. The same35 parents/37 children are retained.
+
+### 2026-10-22 — WF-18/23: selected CI producer checkpoint for shared MP use
+
+- The pure C/F/reference-energy/AO producer returns compressed kernels and
+  diagonal data in CIIntegrals. It requests only group blocks needed by the
+  existing retained-rank sigma action and diagonal, preserving all occupied
+  electrons in the supplied Focks/reference energy. Frozen indices restrict
+  correlation only. Rank-one spaces skip unused virtual-pair diagonal blocks.
+- This exact producer and selected-integral test file are frozen in
+  review-ucis-supply-20261022 (archive62e88d5c...83bf12b). Sixteen focused
+  cases exit0/process304.782s on Delta CPU16–31: R/U all existing ranks,
+  noncontiguous CID/frozen selections, normal-ordered parts/transposes,
+  nonsymmetric raw charts and joint C/F/E/AO second response. Root already
+  verified the archive's raw XML/JSON, file hashes and unchanged source maps;
+  both files still match those executed bytes. Independent review found no
+  new sigma/normal-ordering formula or spin-phase change.
+- The producer's imports use the committed shared direct kernel and memory
+  helpers. It is checkpointed independently so MP can reuse that data without
+  depending on uncommitted public CI/property/workflow edits. It does not
+  close CI's public, full-phase property or frozen-geometry acceptance gates.
