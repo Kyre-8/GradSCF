@@ -24,6 +24,76 @@ def _largest_fitting(lower, upper, fits):
     return lower
 
 
+def plan_linear(size, dtype, config, max_memory, *, resident_bytes=0,
+                operator_min_bytes=0, nrhs=1, structure=None, device=None):
+    """Budget the existing solve; only optional GMRES restart may shrink.
+
+    Inputs belong in resident_bytes. Returned bytes cover known working arrays,
+    including simultaneous block outputs and true-residual checks. A structured
+    numerical factor uses the original implicit operator and its AD rules.
+    operator_min_bytes declares the caller's complete action scratch, including
+    its largest simultaneous column batch (n columns for generic direct solves).
+    Library/allocator scratch uses the same one 20% reserve as other planners.
+    """
+    n = validate_reserved_bytes(size, name="size")
+    nrhs = validate_reserved_bytes(nrhs, name="nrhs")
+    resident_bytes = validate_reserved_bytes(resident_bytes, name="resident_bytes")
+    operator_min_bytes = validate_reserved_bytes(operator_min_bytes, name="operator_min_bytes")
+    if structure not in {None, "diagonal", "cholesky"}:
+        raise ValueError("Unknown linear factor structure")
+    available = workspace_bytes(max_memory, resident_bytes=resident_bytes, device=device)
+    item = jnp.dtype(dtype).itemsize
+    if not n or not nrhs:
+        return config, 0
+
+    def storage(restart):
+        if structure == "diagonal":
+            elements = n*(10+4*nrhs)
+        elif structure == "cholesky":
+            elements = 3*n*n+n*(12+4*nrhs)
+        elif config.method == "direct":
+            elements = 8*n*n+n*(8+4*nrhs)
+        else:
+            # Old/new Arnoldi arrays, QR/Hessenberg/least-squares buffers,
+            # scaled RHS, retries, preconditioned candidates and residuals.
+            elements = n*(4*restart+32+2*nrhs)+12*(restart+1)**2+8*restart
+        return item*elements+operator_min_bytes
+
+    if structure is None and config.method == "direct" and n > config.max_dense:
+        raise ValueError("Direct solve exceeds max_dense; use GMRES")
+    if storage(1) > available:
+        raise ValueError(f"Linear solver minimum exceeds the memory budget: "
+                         f"{storage(1)} working bytes required, {available} available")
+    if structure is not None or config.method == "direct":
+        return config, storage(1)
+    restart = _largest_fitting(1, min(n, config.restart), lambda m: storage(m) <= available)
+    return replace(config, restart=restart), storage(restart)
+
+
+def plan_nonlinear(size, dtype, config, max_memory, *, resident_bytes=0,
+                   operator_min_bytes=0, device=None):
+    """Budget packed DIIS iteration; response is a later linear-solve phase."""
+    n = validate_reserved_bytes(size, name="size")
+    resident_bytes = validate_reserved_bytes(resident_bytes, name="resident_bytes")
+    operator_min_bytes = validate_reserved_bytes(operator_min_bytes, name="operator_min_bytes")
+    available = workspace_bytes(max_memory, resident_bytes=resident_bytes, device=device)
+    item = jnp.dtype(dtype).itemsize
+    if not n:
+        return config, 0
+
+    def storage(history):
+        # Old/new vector and residual rings, trial/observable/residual arrays,
+        # normalized Gram matrices, bordered solve and DIIS coefficients.
+        return item*((4*history+18)*n+6*(history+1)**2+6*history+12)+operator_min_bytes
+
+    minimum = min(2, config.diis_space)
+    if storage(minimum) > available:
+        raise ValueError(f"Nonlinear solver minimum exceeds the memory budget: "
+                         f"{storage(minimum)} working bytes required, {available} available")
+    history = _largest_fitting(minimum, config.diis_space, lambda m: storage(m) <= available)
+    return replace(config, diis_space=history), storage(history)
+
+
 def plan_hermitian(size, dtype, config, max_memory, *, resident_bytes=0,
                    operator_min_bytes=0, operator_bytes_per_column=0,
                    initial_columns=0, device=None):

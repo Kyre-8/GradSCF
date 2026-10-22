@@ -8,16 +8,28 @@ from ..operators import as_operator, validate_real_square
 from ..types import LinearSolverConfig, LinearResult
 from .direct import direct_solve
 from .gmres import gmres_solve
+from gradscf._memory import array_storage_bytes, validate_reserved_bytes
 
 
 def checked_linear_solve(matvec, rhs, *, config, converged=True,
                          preconditioner=None, transpose_preconditioner=None,
-                         cholesky=None, diagonal_factor=None):
+                         cholesky=None, diagonal_factor=None,
+                         max_memory=None, reserved_bytes=0, operator_min_bytes=0):
     """Internal vector/block kernel; validity is checked inside the opaque solve.
 
     Placing a nonlinear residual predicate in a linear tangent map would break
     transposition. Both primal and transposed numerical solves are checked here.
     """
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    if max_memory is not None:
+        from ..memory import plan_linear
+        structure = ("diagonal" if diagonal_factor is not None else
+                     "cholesky" if cholesky is not None else None)
+        config, _ = plan_linear(rhs.shape[0], rhs.dtype, config, max_memory,
+            resident_bytes=reserved_bytes+array_storage_bytes(rhs, diagonal_factor, cholesky),
+            operator_min_bytes=operator_min_bytes,
+            nrhs=1 if rhs.ndim == 1 else rhs.shape[1], structure=structure,
+            device=getattr(rhs, "device", None))
     if diagonal_factor is not None:
         if cholesky is not None:
             raise ValueError("Supply either an exact diagonal or Cholesky factor")
@@ -119,7 +131,8 @@ def checked_linear_solve(matvec, rhs, *, config, converged=True,
 
 
 def solve_linear(matrix_or_operator, rhs, *, config=None, preconditioner=None,
-                 transpose_preconditioner=None, cholesky=None):
+                 transpose_preconditioner=None, cholesky=None,
+                 max_memory=None, reserved_bytes=0, operator_min_bytes=0):
     """Solve a real square system for a vector or (n,nrhs) block.
 
     maxiter counts GMRES restart cycles. True residuals certify convergence;
@@ -130,7 +143,9 @@ def solve_linear(matrix_or_operator, rhs, *, config=None, preconditioner=None,
     the same true-residual checks and implicit response through the live action.
     """
     config = LinearSolverConfig() if config is None else config
-    op = as_operator(matrix_or_operator)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    array = None if hasattr(matrix_or_operator, "matvec") else jnp.asarray(matrix_or_operator)
+    op = as_operator(matrix_or_operator if array is None else array)
     validate_real_square(op)
     rhs = jnp.asarray(rhs)
     if not (rhs.shape == (op.shape[0],) or
@@ -139,9 +154,13 @@ def solve_linear(matrix_or_operator, rhs, *, config=None, preconditioner=None,
     if not jnp.issubdtype(rhs.dtype, jnp.floating):
         raise ValueError("rhs must have real floating-point dtype")
     rhs = rhs.astype(jnp.result_type(rhs.dtype, op.dtype))
+    if max_memory is not None:
+        reserved_bytes += array_storage_bytes(array, None if op.exact_diagonal else op.diagonal)
     solution, (norm, valid) = checked_linear_solve(op.apply, rhs, config=config,
         preconditioner=preconditioner, transpose_preconditioner=transpose_preconditioner,
-        cholesky=cholesky, diagonal_factor=op.diagonal if op.exact_diagonal else None)
+        cholesky=cholesky, diagonal_factor=op.diagonal if op.exact_diagonal else None,
+        max_memory=max_memory, reserved_bytes=reserved_bytes,
+        operator_min_bytes=operator_min_bytes)
     return LinearResult(solution, norm, valid, jnp.where(valid, 0, 1))
 
 

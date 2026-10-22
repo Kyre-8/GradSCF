@@ -553,7 +553,8 @@ section 8 are provenance, not additional active TODO levels.
   - [ ] **WF-29c:** non-Hermitian, DIIS, Lambda/SCF and response-state ownership,
     phase-aware lifetimes and byte-controlled caches across all consumers.
     Shared non-Hermitian/EOM primal capacity, closures and action batches are
-    verified; implicit-response, DIIS and remaining caller ownership stay open.
+    verified. Shared packed DIIS and checked linear/root phase planning are
+    verified; spectral-response and remaining method caller ownership stay open.
 - [ ] **WF-30 — CPU/GPU and nested-AD audit.** Run eager and JIT public entry
   points, native dispatch, device residency and transfer accounting. Acceptance:
   same numerical cases/dtype/seed, forward/JVP/VJP/HVP separately, actual peak
@@ -2009,3 +2010,33 @@ requires its own explicit decision and numerical validation.
   SHA `94b37c66...d26a`, summary and static proofs alongside it; final common
   operator/solve/MP kernels `b5936aed`/`1d168384`/`2a5696d1`. The fixed workflow
   ended with no active owned runner or reserved CPU, without merging/pushing.
+
+### 2026-10-22 — WF-29: shared linear and packed nonlinear phase budgets
+
+- Shared plan_linear/plan_nonlinear keep the original MB budget and one 20%
+  reserve. Only optional GMRES restart and DIIS history shrink; solver method,
+  tolerances, iteration limits, damping and physical convergence are unchanged.
+  Mandatory DIIS history is two, except an explicitly requested original one.
+  Exact diagonal/Cholesky factors do not pay for unnecessary generic work.
+- solve_linear/checked_linear_solve/solve_nonlinear/attach_root accept optional
+  max_memory/reserved_bytes/operator_min_bytes. Known visible inputs are charged
+  locally; callers declare physical closure/residual workspace. DIIS rings end
+  before implicit root response, which uses the same budget in its linear phase.
+  Custom tangent solvers keep their own structure and ownership.
+- Nine new budget/early-allocation/AD cases and fifty-five existing numerical
+  cases pass. The original architecture check exposed a pre-existing private
+  JAX import in the eager solver. A guard-only repair keeps old public API support
+  or uses the JAX extension trace-state API, rejecting JIT/grad before physical
+  map evaluation even for closed constant seeds. Its eight eager cases and the
+  architecture check pass. The failed original batch is retained, not reported
+  as all passing. Older JAX behavior is branch-simulated; no old runtime installed.
+- Root/independent review checked the phase lifetimes, minima, original AD
+  owner, guarded eager compatibility and unchanged numerical map/DIIS. All
+  thirty-two archived entries and final seven source/test ASTs match. A local
+  documentation-only clarification describes complete declared action scratch,
+  including generic direct-solve column batches; no numerical change followed.
+  Evidence: response-memory/common-evidence.tar.gz SHA 82f242cc...da02 and
+  common-root-verification.json. All numeric work remote CPU64-79, no GPU/build.
+- This closes the common phase-planning implementation, not the remaining
+  per-method physical-state/closure integration or arbitrary outer AD-tape and
+  allocator bounds. Those remain in their original method and final-audit TODOs.
