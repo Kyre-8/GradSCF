@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-22): four of the thirty-five parent tasks
-are fully accepted (WF-00/01/07/09); twenty-six of the thirty-seven existing
+Current acceptance snapshot (2026-10-22): five of the thirty-five parent tasks
+are fully accepted (WF-00/01/07/09/34); twenty-six of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -277,7 +277,7 @@ successful component derivatives do not establish a whole-method memory bound.
 | --- | --- | --- |
 | WF-02/03/04/05/06/08 | Shared AO2MO, native block response, selected R/U MP2, fixed-aniline full-input gradient | Joint spin/T2/resolvent/AD ownership, direct-input performance, measured size family, traced target-device capacity |
 | WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, phase budgets and contracted two-body properties |
-| WF-16/17/34 | Shared EOM primal planner; streamed Dyson and known retained-state accounting with molecular regressions | Charged intermediates, response workspaces and matched endpoint/method measurements |
+| WF-16/17/34 | Shared EOM primal planner; streamed Dyson and known retained-state accounting, molecular regressions and original-source matched endpoint measurements | WF-16/17 charged intermediates, response workspaces and whole-method measurements |
 | WF-18/19/20/21/22/27 | Component selected-CI, action and property tests; FCI requested-block RDM tests | Latest joint-ledger changes, selected CIS(D) GREEN and facade, UCIS/ROHF guards, native relaxed geometry and public end-to-end measurements |
 | WF-23/24/25/26/33 | Exact target bounds and canonical Jacobian; stable Taylor compilation; earlier packed forward checks | Current packed factory and true sextuple response, history/byte integration, moving R/U MPn and selected standalone MP3 |
 | WF-29 | Hermitian/non-Hermitian primal and common linear/nonlinear phase planners | Spectral response propagation, physical caller/closure ownership and whole-method reconciliation |
@@ -467,7 +467,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 - [ ] **WF-17 — EOM-IP/EA intermediates.** Audit Wvvvv*r2 and Wvvvv*t1/Wvvvo
   consumers together. Acceptance: each charged sector's right/left roots,
   residuals and gradients; batching and restart memory under the same budget.
-- [ ] **WF-34 — EOM Dyson properties.** Contract orbital/root tiles without
+- [x] **WF-34 — EOM Dyson properties.** Contract orbital/root tiles without
   stacking all `(o+v)*EOM-space` endpoints. Acceptance: IP/EA left/right Dyson
   columns, signed pole weights, norms and existing enabled/disabled vector-
   response guards; measured endpoint lifetime and common byte-budget coverage.
@@ -2288,3 +2288,35 @@ requires its own explicit decision and numerical validation.
 - Evidence: delta-packed-mp-factory-r1/clean-ci-dependency, archive SHA256
   c3cc534f44a378ab0362423b4c8ec3ab8da99fc2fa114f7ec9f932ed19134aa3.
   No parent/child TODO is added or marked complete by this prerequisite.
+
+### 2026-10-22 — WF-34 accepted: static Dyson groups and real baseline
+
+- Batched occupied and virtual endpoint rows use separate static branches of
+  the same endpoint equations. This removes full-T2/Lambda broadcasts from
+  `vmap(cond)` without duplicating the physics. The block budget charges the
+  larger actual slice panels as well as packed endpoints. Tail overwrites
+  cover the same rows; checkpointing and response-validity guards remain.
+- Actual Delta CPU0–15 exit0, process280.218s:38/38 pass with no skips, covering
+  PySCF IP/EA endpoints in float32/64, joint T/Lambda/right/left JVP/VJP/HVP,
+  two finite-difference steps, molecular FCI residues/moments, vector-response
+  rejection, retained state/facade ownership, and the new no-broadcast lower.
+  Root verified ten payload hashes and six exact current source/test files;
+  an independent peer reviewed static grouping and unchanged equations.
+- Earlier explicit-vmap diagnostic timings were not the original production
+  baseline. They remain diagnostic only and do not support an old-version
+  speed or memory claim. The matched benchmark instead loads the exact
+  ec194bf properties.py (SHA256 f606220a...0abf0b) in fresh processes, raising
+  only its max_elements allocation guard. The current and old methods use the
+  same complete seeded no16/nv128/two-root float64 inputs, CPU0–15 on n002
+  (Xeon Gold6230), JAX0.10.0; no SCF or converged EOM is timed.
+- Original -> static-streamed IP warm median45.088 ->40.965ms; XLA temporary
+  184604612 ->109070792B; process peak1018084 ->843796KiB. EA warm median
+  250.040 ->154.325ms; XLA temporary977714244 ->167879560B; process peak
+  1973628 ->924760KiB. Compile IP1.038 ->0.146s, EA1.833 ->0.149s. All four
+  processes exit0; nine warm samples each. Maximum output differences are
+  4.93e-16/IP and9.44e-16/EA. These are endpoint components, not complete CC
+  timings or whole-process budget guarantees for arbitrary shapes.
+- Exact JSON/XML/commands, before/after source hashes and frozen old code are
+  in delta-v100-20261022: static-group archive3c4a8355...bd834 and true-baseline
+  archive642de76b...9c192, with root verification JSONs. WF-34 closes without
+  a new TODO; WF-16/17 charged intermediates and solver response remain open.

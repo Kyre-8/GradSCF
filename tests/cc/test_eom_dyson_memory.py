@@ -107,6 +107,39 @@ def test_dyson_minimum_checks_precede_endpoint_work(monkeypatch):
         _evaluate(values, "ip", max_elements=1)
 
 
+def test_dyson_keeps_occupied_and_virtual_row_branches_static(monkeypatch):
+    module = importlib.import_module("gradscf.cc.eom.properties")
+    no, nv = 4, 16
+    dimension = EOMAmplitudeSpace(no, nv, "ip").size
+    values = tuple(jnp.full(shape, .01) for shape in (
+        (no, nv), (no, no, nv, nv), (no, nv), (no, no, nv, nv),
+        (dimension, 2), (dimension, 2)))
+    original = module._endpoint
+    kinds = set()
+    def checked(t1, t2, l1, l2, sector, p, kind=None):
+        assert kind in {"occupied", "virtual"}, "Dyson vmapped a dynamic row branch"
+        kinds.add(kind)
+        return original(t1, t2, l1, l2, sector, p, kind)
+    monkeypatch.setattr(module, "_endpoint", checked)
+    result = jax.jit(lambda x: _evaluate(x, "ip", max_memory=1.))(values)
+    assert kinds == {"occupied", "virtual"}
+    assert np.all(np.isfinite(result.weights))
+    # A panel also fits this smaller budget; no full broadcast is needed.
+    small = _evaluate(values, "ip", max_memory=.2)
+    np.testing.assert_allclose(small.weights, result.weights, atol=3e-12)
+
+
+def test_dyson_lowering_does_not_broadcast_full_amplitudes_over_rows():
+    no, nv = 16, 128
+    dimension = EOMAmplitudeSpace(no, nv, "ea").size
+    shapes = ((no, nv), (no, no, nv, nv))*2+((dimension, 2),)*2
+    abstract = tuple(jax.ShapeDtypeStruct(shape, jnp.float64) for shape in shapes)
+    lowered = jax.jit(lambda x: _evaluate(x, "ea")).lower(abstract).as_text()
+    for width in (16, 32):
+        assert f"{width}x16x16x128x128xf64" not in lowered, (
+            "Dyson replicated full T2/Lambda for each orbital row")
+
+
 @pytest.mark.parametrize("owner", ["lambda", "eom"])
 def test_dyson_charges_retained_response_arrays_before_endpoint_work(owner, monkeypatch):
     module = importlib.import_module("gradscf.cc.eom.properties")

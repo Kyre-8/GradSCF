@@ -13,7 +13,7 @@ from .types import DysonResult
 from ..._memory import tree_storage_bytes, resolve_memory_mb, validate_reserved_bytes, workspace_bytes
 
 
-def _endpoint(t1, t2, l1, l2, sector, p):
+def _endpoint(t1, t2, l1, l2, sector, p, kind=None):
     """One physical bra/ket row, with no orbital identity or endpoint stack."""
     no, nv = t1.shape
     space = EOMAmplitudeSpace(no, nv, sector)
@@ -52,6 +52,10 @@ def _endpoint(t1, t2, l1, l2, sector, p):
                 space.pack(b1, b2).astype(jnp.result_type(t1, t2)))
 
     # Particle-moment signs are already included in b1/b2 above.
+    if kind == "occupied":
+        return occupied(p)
+    if kind == "virtual":
+        return virtual(p)
     return jax.lax.cond(p < no, occupied, virtual, p)
 
 
@@ -107,8 +111,8 @@ def dyson_orbitals(ground, left, result, *, sector=None, max_elements=20_000_000
     resident = tree_storage_bytes(ground, left, result, t1, t2, l1, l2)
     available = workspace_bytes(resolve_memory_mb(max_memory),
         resident_bytes=reserved_bytes+resident+3*output_bytes, device=getattr(t1, "device", None))
-    # Include the occupied/virtual slices of T2 entering each endpoint: these
-    # panels can exceed the packed IP dimension when nv is much larger than no.
+    # Static occupied/virtual groups avoid vmap(cond)'s full-T2 broadcasts.
+    # Their panels can still exceed the packed IP dimension when nv >> no.
     item = max(dtype_left.itemsize, dtype_right.itemsize)
     per_row = item*(12*space.size+4*max(no*nv*nv, no*no*nv)
                     +8*result.energies.size+2*(no+nv))
@@ -122,17 +126,22 @@ def dyson_orbitals(ground, left, result, *, sector=None, max_elements=20_000_000
     response = valid & result.response_valid & result.vector_response
     # A live zero makes even a purely stopped EOM-state contribution reject AD
     # when vector response was not requested. T/Lambda partials are not enough.
-    def contract(index, outputs):
-        start = jnp.minimum(index*block, no+nv-block)
-        bra, ket = jax.vmap(lambda p: _endpoint(t1, t2, l1, l2, sector, p))(
-            start+jnp.arange(block))
-        rows = bra@result.right_vectors, ket@result.left_vectors
-        return tuple(jax.lax.dynamic_update_slice_in_dim(out, row, start, axis=0)
-                     for out, row in zip(outputs, rows))
+    def contract_group(offset, count, kind, outputs):
+        width = min(block, count)
+        def contract(index, outputs):
+            start = offset+jnp.minimum(index*width, count-width)
+            bra, ket = jax.vmap(lambda p: _endpoint(t1, t2, l1, l2, sector, p, kind))(
+                start+jnp.arange(width))
+            rows = bra@result.right_vectors, ket@result.left_vectors
+            return tuple(jax.lax.dynamic_update_slice_in_dim(out, row, start, axis=0)
+                         for out, row in zip(outputs, rows))
+        return jax.lax.fori_loop(0, (count+width-1)//width,
+                                jax.checkpoint(contract), outputs)
 
-    dl, dr = jax.lax.fori_loop(0, (no+nv+block-1)//block, jax.checkpoint(contract),
-        (jnp.zeros((no+nv, result.energies.size), dtype_left),
-         jnp.zeros((no+nv, result.energies.size), dtype_right)))
+    outputs = (jnp.zeros((no+nv, result.energies.size), dtype_left),
+               jnp.zeros((no+nv, result.energies.size), dtype_right))
+    outputs = contract_group(0, no, "occupied", outputs)
+    dl, dr = contract_group(no, nv, "virtual", outputs)
     if not result.vector_response:
         sentinel = require_converged_derivative(result.energies, False)
         zero = sentinel-jax.lax.stop_gradient(sentinel)
