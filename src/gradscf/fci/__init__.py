@@ -7,6 +7,7 @@ from .hamiltonian import (
 from .rdm import (
     make_rdm1, make_rdm2, make_rdm12, make_rdm1s, make_rdm12s,
     trans_rdm1, trans_rdm12, trans_rdm1s, trans_rdm12s, spin_square,
+    make_rdm2_block, trans_rdm2_block,
 )
 from .solver import FCIResult, solve_fci
 from .overlap import overlap
@@ -16,6 +17,7 @@ __all__ = [
     'absorb_h1e','contract_hamiltonian','make_hdiag','build_hamiltonian','energy',
     'make_rdm1','make_rdm2','make_rdm12','make_rdm1s','make_rdm12s',
     'trans_rdm1','trans_rdm12','trans_rdm1s','trans_rdm12s','spin_square',
+    'make_rdm2_block','trans_rdm2_block',
     'FCIResult','solve_fci','overlap',
 ]
 from .reference import FCIReference, fold_core

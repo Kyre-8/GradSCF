@@ -145,8 +145,13 @@ def solve_fci(h1, eri, space, *, ecore=0., config=None, response=None,
             initial = jax.random.normal(jax.random.PRNGKey(cfg.seed),(space.size,width),dtype=op.dtype) / jnp.sqrt(float(space.size))
             initial = initial.at[:,:c.shape[0]].set(
                 c.reshape(c.shape[0],space.size).T + 1e-3*initial[:,:c.shape[0]])
+    # The action retains h/g, absorbed ERIs and string links throughout both
+    # primal and implicit response. Forward the original budget to that owner.
+    shared_resident = (reserved_bytes+array_storage_bytes(h,g,core,ci0,probes)
+                       +g.nbytes+_link_storage_bytes(space,op.dtype))
     solved = solve_hermitian(op, config=cfg, response=policy, probes=probes,
-                             initial_vectors=initial, _batch_size=batch_size)
+        initial_vectors=initial, _batch_size=batch_size,
+        max_memory=max_memory,reserved_bytes=shared_resident)
     valid = solved.response_valid & physical
     solved = solved._replace(converged=solved.converged & physical, response_valid=valid)
     energies = coefficients = total_sum = None

@@ -5,6 +5,8 @@ entries are bilinear <bra|O|ket>, without normalization or phase matching.
 """
 import jax
 import jax.numpy as jnp
+from math import prod
+from numbers import Integral
 from .hamiltonian import (
     DEFAULT_WORKSPACE, _action_tiles, coefficient_array,
 )
@@ -19,7 +21,7 @@ def _normalized(c, space):
     return jnp.where((norm > 0) & jnp.isfinite(norm), c, jnp.nan)
 
 
-def _moments(bra, ket, space, max_workspace_elements, max_memory, *, kind):
+def _moments(bra, ket, space, max_workspace_elements, max_memory, *, kind, indices=None):
     """Reduce determinant tiles into one-/two-body moments or spin exchange.
 
     Only the requested RDM outputs are dense. The whole additive body is
@@ -33,9 +35,10 @@ def _moments(bra, ket, space, max_workspace_elements, max_memory, *, kind):
     dtype = jnp.result_type(left, right)
     n = space.norb
     pairs = n*n
-    if kind == 'two' and n**4 > max_workspace_elements:
+    output_size = n**4 if indices is None else prod(map(len, indices))
+    if kind in ('two', 'block') and output_size > max_workspace_elements:
         raise ValueError("FCI density tensor exceeds max_workspace_elements")
-    output_elements = 12*n**4+6*pairs if kind == 'two' else 6*pairs
+    output_elements = (16 if kind == 'block' else 12)*output_size+6*pairs if kind in ('two', 'block') else 6*pairs
     promotion = sum(x.size for x in (left, right) if x.dtype != dtype)
     aw, bw, _ = _action_tiles(space, dtype, 1, max_workspace_elements, max_memory,
         arrays=(bra, ket, left, right),
@@ -44,6 +47,11 @@ def _moments(bra, ket, space, max_workspace_elements, max_memory, *, kind):
     one = (jnp.zeros(pairs, dtype), jnp.zeros(pairs, dtype))
     if kind == 'two':
         initial = one + tuple(jnp.zeros((pairs, pairs), dtype) for _ in range(3))
+    elif kind == 'block':
+        left_pairs, right_pairs = len(indices[0])*len(indices[1]), len(indices[2])*len(indices[3])
+        initial = one+tuple(jnp.zeros((left_pairs, right_pairs), dtype) for _ in range(4))
+        left_indices = jnp.asarray([p*n+q for p in indices[0] for q in indices[1]], dtype=jnp.int32)
+        right_indices = jnp.asarray([r*n+s for r in indices[2] for s in indices[3]], dtype=jnp.int32)
     elif kind == 'spin':
         initial = jnp.zeros((), dtype)
     else:
@@ -84,7 +92,12 @@ def _moments(bra, ket, space, max_workspace_elements, max_memory, *, kind):
         a, b = (x.reshape(n, n, aw*bw).swapaxes(0, 1).reshape(pairs, aw*bw)
                 for x in (la, lb))
         ra, rb = ra.reshape(pairs, aw*bw), rb.reshape(pairs, aw*bw)
-        updates = one+(a@ra.T, a@rb.T, b@rb.T)
+        if kind == 'block':
+            a, b = a[left_indices], b[left_indices]
+            ra, rb = ra[right_indices], rb[right_indices]
+            updates = one+(a@ra.T, a@rb.T, b@ra.T, b@rb.T)
+        else:
+            updates = one+(a@ra.T, a@rb.T, b@rb.T)
         return tuple(x+y for x, y in zip(state, updates))
 
     return jax.lax.fori_loop(0, (na+aw-1)//aw*n_beta, body, initial)
@@ -142,6 +155,41 @@ def make_rdm12(c, space, **kwargs):
 
 def make_rdm2(c, space, **kwargs):
     return make_rdm12(c, space, **kwargs)[1]
+
+
+def trans_rdm2_block(bra, ket, space, indices, *, spin_resolved=False,
+                     max_workspace_elements=DEFAULT_WORKSPACE,
+                     max_memory=DEFAULT_MAX_MEMORY_MB):
+    """Export only dm2[p,q,r,s] for four static ordered orbital selections.
+
+    No complete spatial or spin n**4 density is created. Transition spin blocks
+    are (aa,ab,ba,bb), including independent ba for unequal requested axes.
+    Repeated orbital indices are allowed; bra/ket remain unnormalized.
+    """
+    try:
+        indices = tuple(tuple(axis) for axis in indices)
+    except TypeError as error:
+        raise ValueError('indices must contain four orbital index sequences') from error
+    if len(indices) != 4 or any(not isinstance(i, Integral) or isinstance(i, bool)
+            or not 0 <= i < space.norb for axis in indices for i in axis):
+        raise ValueError('indices must contain four valid orbital index sequences')
+    if not isinstance(spin_resolved, bool):
+        raise TypeError('spin_resolved must be a static bool')
+    a,b,*blocks = _moments(bra, ket, space, max_workspace_elements, max_memory,
+                          kind='block', indices=indices)
+    p,q,r,s = (jnp.asarray(axis, dtype=jnp.int32) for axis in indices)
+    shape = tuple(map(len, indices))
+    aa,ab,ba,bb = (x.reshape(shape) for x in blocks)
+    delta = (q[:,None] == r[None,:])[None,:,:,None]
+    aa -= delta*a.reshape(space.norb,space.norb)[jnp.ix_(p,s)][:,None,None,:]
+    bb -= delta*b.reshape(space.norb,space.norb)[jnp.ix_(p,s)][:,None,None,:]
+    return (aa,ab,ba,bb) if spin_resolved else aa+ab+ba+bb
+
+
+def make_rdm2_block(c, space, indices, **kwargs):
+    """Normalized counterpart of trans_rdm2_block; all state AD stays live."""
+    c = _normalized(c, space)
+    return trans_rdm2_block(c, c, space, indices, **kwargs)
 
 
 def spin_square(c, space, *, max_workspace_elements=DEFAULT_WORKSPACE,

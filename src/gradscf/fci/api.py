@@ -121,6 +121,12 @@ class FCISolver:
     def make_rdm2(self,ci=None,norb=None,nelec=None,*,root=0):
         return self.make_rdm12(ci,norb,nelec,root=root)[1]
 
+    def make_rdm2_block(self,indices,ci=None,norb=None,nelec=None,*,root=0,spin_resolved=False):
+        """Requested spatial output only, inheriting the existing state budget."""
+        c,space = self._property_inputs(ci,norb,nelec,root)
+        return rdm.make_rdm2_block(c,space,indices,spin_resolved=spin_resolved,
+            max_workspace_elements=self.max_workspace_elements,max_memory=self.max_memory)
+
     def trans_rdm1(self,bra,ket,norb,nelec):
         return rdm.trans_rdm1(bra,ket,self._space(norb,nelec),max_workspace_elements=self.max_workspace_elements,
             max_memory=self.max_memory)

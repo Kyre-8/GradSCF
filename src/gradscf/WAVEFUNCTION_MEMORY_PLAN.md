@@ -2316,6 +2316,8 @@ requires its own explicit decision and numerical validation.
   processes exit0; nine warm samples each. Maximum output differences are
   4.93e-16/IP and9.44e-16/EA. These are endpoint components, not complete CC
   timings or whole-process budget guarantees for arbitrary shapes.
+  Other project tests may run concurrently on disjoint logical CPU masks;
+  these timings are one paired observation, not exclusive-node performance.
 - Exact JSON/XML/commands, before/after source hashes and frozen old code are
   in delta-v100-20261022: static-group archive3c4a8355...bd834 and true-baseline
   archive642de76b...9c192, with root verification JSONs. WF-34 closes without
@@ -2372,3 +2374,29 @@ requires its own explicit decision and numerical validation.
   SHA2560d2d1490b1307dd8d5879fe63ebd7d6a16ad265dce704ffbee8453932341cca3.
   The separate simultaneous lifetime of three unrestricted full reference
   transforms is not claimed solved. Parent/child checkboxes are unchanged.
+
+### 2026-10-22 — WF-21/22: FCI response ledger and requested density blocks
+
+- The FCI solve forwards the original MB budget and its actual retained
+  Hamiltonian/string-link arrays to the existing Hermitian response owner.
+  The focused new forwarding case and nine existing joint-ledger cases have
+  actual Delta exit0/XML evidence in review-cisd-ledgers-20261022. The old
+  Hamiltonian, eigensolver and density numerical bodies are retained.
+- Requested 2-RDM and transition blocks reuse the existing determinant tiles
+  and reductions. Only selected pair rows/columns are accumulated; aa, ab, ba
+  and bb stay independent for rectangular transition outputs. The same-spin
+  delta correction, coefficient normalization and AD owner remain unchanged.
+  A full nact**4 density is not made just to return a small requested block.
+- The missing old c20 raw evidence was recovered by a new immutable Delta
+  group:4/4 pass, actual exit0/process8.536s, peak890616KiB, CPU0–15 and source
+  unchanged. Irregular rectangular axes, independent transitions, empty-spin
+  sectors and joint first/second response match slices of the original full
+  density. An independent peer reviewed the index and spin conventions.
+- Root verified all26 payload hashes of property-frontier-evidence.tar.gz
+  (SHA25648228351df15313e04c4c23226b07ead39c1258b996fba5bd9e17d41794a170f),
+  including raw4-case FCI and16-case CI XML, exact exits and source maps. The
+  CI16 correctness result belongs to its unchanged0def5804 properties source;
+  CI property sigma/facade reservations and mixed-amplitude CIS(D) buffers are
+  separately identified open budget fixes. They are not accepted by those16
+  numerical cases. Complete property/AD residency and whole-method performance
+  remain open in the existing parents; no new TODO or checkbox is introduced.

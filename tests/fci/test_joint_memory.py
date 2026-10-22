@@ -13,6 +13,18 @@ from gradscf.solvers import EigenResponseConfig, EigenSolverConfig
 from gradscf.solvers.eigen import primal
 
 
+def test_fci_forwards_actual_operator_ledger_to_shared_response(monkeypatch):
+    space,h,g = _problem()
+    original = solver.solve_hermitian
+    def shared(op,**kwargs):
+        assert kwargs.get('max_memory') == 1., 'FCI lost the original response budget'
+        assert kwargs.get('reserved_bytes',0) >= h.nbytes+g.nbytes, 'FCI lost operator/source residency'
+        return original(op,**kwargs)
+    monkeypatch.setattr(solver,'solve_hermitian',shared)
+    answer=solver.solve_fci(h,g,space,config=EigenSolverConfig(method='dense'),max_memory=1.)
+    assert jnp.all(answer.converged)
+
+
 def _problem():
     space = fci.make_fci_space(4, (2, 1))
     rng = np.random.default_rng(2901)
