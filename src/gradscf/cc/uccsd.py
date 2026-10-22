@@ -93,15 +93,22 @@ def run_ucc_from_integrals(ints, occupied, virtual, *, config=None, t1=None, t2=
     no = sum(occupied)
     eps = jnp.diag(ints.fock)
     d1 = eps[:no, None]-eps[None, no:]-cfg.level_shift
-    d2 = d1[:, None, :, None]+d1[None, :, None, :]
-    guess1 = jnp.zeros_like(d1)
-    guess2 = ints.oovv/jnp.where(jnp.abs(d2) > cfg.denominator_tol, d2, 1.)
-    blocks1, blocks2 = space.to_blocks(guess1, guess2)
-    guess1, guess2 = space.from_blocks(blocks1 if t1 is None else t1,
-                                       blocks2 if t2 is None else t2, ints.fock.dtype)
-    initial = space.pack(guess1, guess2)
+    oa, va = occupied[0], virtual[0]
+    singles_d = (d1[:oa, :va], d1[oa:, va:])
+    if t1 is None:
+        t1 = tuple(jnp.zeros_like(d) for d in singles_d)
+    if t2 is None:
+        o, v = (slice(None, oa), slice(oa, None)), (slice(None, va), slice(va, None))
+        guesses = []
+        for a, b in ((0, 0), (0, 1), (1, 1)):
+            d = singles_d[a][:, None, :, None]+singles_d[b][None, :, None, :]
+            guesses.append(ints.oovv[o[a], o[b], v[a], v[b]] /
+                           jnp.where(jnp.abs(d) > cfg.denominator_tol, d, 1.))
+        t2 = tuple(guesses)
+    initial = space.pack_blocks(t1, t2, ints.fock.dtype)
     si, di = space.indices
-    diagonal = jnp.concatenate((d1[tuple(si)], d2[tuple(di)]))
+    i, j, a, b = di
+    diagonal = jnp.concatenate((d1[tuple(si)], d1[i, a]+d1[j, b]))
     minimum = jnp.min(jnp.abs(diagonal), initial=jnp.inf)
     valid = (minimum > cfg.denominator_tol) & jnp.isfinite(ints.reference_energy) & jnp.all(jnp.isfinite(ints.fock))
     safe = jnp.where(jnp.abs(diagonal) > cfg.denominator_tol, diagonal, 1.)
@@ -112,7 +119,7 @@ def run_ucc_from_integrals(ints, occupied, virtual, *, config=None, t1=None, t2=
             energy_tol=cfg.conv_tol, diis_space=cfg.diis_space,
             diis_start=cfg.diis_start_cycle, damping=cfg.damping),
         linear_config=linear_config(cfg), valid_inputs=valid)
-    ta, tb = space.to_blocks(*space.unpack(solved.solution))
+    ta, tb = space.unpack_blocks(solved.solution)
     ecorr = e(solved.solution)
     return CCResult(ints.reference_energy+ecorr, ecorr, ints.reference_energy, ta, tb,
                     solved.residual_norm, solved.energy_change, solved.iterations,

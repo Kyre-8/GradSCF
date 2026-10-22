@@ -32,7 +32,7 @@ class CCIntegrals(NamedTuple):
 
     @property
     def nocc(self):
-        return self.oooo.shape[0]
+        return self.ovov.shape[0]
 
     @property
     def nvir(self):
@@ -74,7 +74,8 @@ def prepare_integrals(h1, eri, *, nocc, nuclear_repulsion=0.0, frozen=None):
 
 def from_orbitals(coefficients, fock, nocc, reference_energy, *, frozen=None,
                   eri=None, eri_pair_matrix=None, df_factors=None, direct_basis=None,
-                  max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0, vvvv='dense'):
+                  max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0, vvvv='dense',
+                  model=None):
     """Prepare seven restricted CC blocks from a supplied real orbital frame.
 
     ``fock`` is the complete MO-frame Fock before freezing; ``reference_energy``
@@ -87,6 +88,8 @@ def from_orbitals(coefficients, fock, nocc, reference_energy, *, frozen=None,
     selected Fock/energy and caller ``reserved_bytes``. ``vvvv='dense'`` retains
     seven blocks. Explicit ``vvvv='direct'`` keeps six blocks and a native
     exchange action for bare vvvv, using the same budget for each RHS batch.
+    The optional ``model='ccs'`` hint omits unused oooo/vvvv blocks (``None``);
+    all other models and the default retain the original block selection.
     Amplitudes, solver workspaces and complete AD storage remain caller-owned.
     """
     max_memory = resolve_memory_mb(max_memory)
@@ -143,11 +146,14 @@ def from_orbitals(coefficients, fock, nocc, reference_energy, *, frozen=None,
     energies = jnp.diag(selected_fock)
     selected_energy = energy.astype(jnp.float64) if direct_basis is not None else energy
     resident = array_storage_bytes(c, f, energy, selected_fock, energies, selected_energy, o, v, active)
-    requests = _BLOCK_SPACES if vvvv == 'dense' else _BLOCK_SPACES[:-1]
+    requests = (_BLOCK_SPACES[1:-1] if model == 'ccs' else
+                _BLOCK_SPACES if vvvv == 'dense' else _BLOCK_SPACES[:-1])
     co, cv = c[:, o], c[:, v]
     blocks = transform_eri_blocks((co, cv), requests, **options,
         max_memory=max_memory, reserved_bytes=reserved_bytes+resident)
-    if vvvv == 'direct':
+    if model == 'ccs':
+        blocks = (None, *blocks, None)
+    elif vvvv == 'direct':
         reservation = reserved_bytes+array_storage_bytes(c, f, energy, selected_fock,
             energies, selected_energy, co, o, v, active, *blocks)
         blocks += (VirtualERI(cv, direct_basis, max_memory, reservation),)

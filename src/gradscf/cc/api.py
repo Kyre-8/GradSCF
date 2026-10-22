@@ -81,7 +81,8 @@ class CC:
                 self._nmo = ref.coefficients.shape[1]
                 self._integrals = from_orbitals(
                     ref.coefficients, ref.focks[0], ref.nocc, ref.reference_energy,
-                    frozen=self.frozen, max_memory=self.max_memory, **ref.ao_kwargs)
+                    frozen=self.frozen, max_memory=self.max_memory, model=cfg.method,
+                    **ref.ao_kwargs)
                 self.result = run_cc_from_integrals(self._integrals, config=cfg, t1=t1, t2=t2)
         else:
             self.reference = ref = (unrestricted_reference_from_source(

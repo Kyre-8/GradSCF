@@ -35,7 +35,7 @@ def solve_lambda(h1, eri, result, *, nocc, frozen=None, config=None):
 
 def _solve_ucc_lambda(ints, result, occupied, virtual, cfg):
     space = SpinAmplitudeSpace(occupied, virtual, cfg.method)
-    x = space.pack(*space.from_blocks(result.t1, result.t2, ints.fock.dtype))
+    x = space.pack_blocks(result.t1, result.t2, ints.fock.dtype)
     r = lambda t: space.pack(*_spin_equations.residual(*space.unpack(t), ints))
     e = lambda t: _spin_equations.correlation_energy(*space.unpack(t), ints)
     return _solve_left(space, x, r, e, result, cfg, unrestricted=True)
@@ -72,11 +72,12 @@ def _solve_left(space, x, r, e, result, cfg, *, unrestricted=False):
     rhs = jnp.where(valid, -jax.grad(e)(x), jnp.nan)
     op = LinearOperator((x.size, x.size), x.dtype, lambda v: pullback(v)[0])
     solved = solve_linear(op, rhs, config=linear_config(cfg))
-    dual1, dual2 = space.unpack(solved.solution)
     if unrestricted:
         # x2=2*t2(independent), while <Lambda,R>=l1.R1 + .25*l2.R2.
-        l1, l2 = space.to_blocks(dual1, 4*dual2)
+        l1, dual2 = space.unpack_blocks(solved.solution)
+        l2 = tuple(4*block for block in dual2)
     else:
+        dual1, dual2 = space.unpack(solved.solution)
         l1 = dual1 / 2
         l2 = (2 * dual2 + dual2.swapaxes(2, 3)) / 3
     return LambdaResult(

@@ -276,7 +276,7 @@ successful component derivatives do not establish a whole-method memory bound.
 | Existing scope | Accepted frontier | Remaining acceptance boundary |
 | --- | --- | --- |
 | WF-02/03/04/05/06/08 | Shared AO2MO, native block response, selected R/U MP2, fixed-aniline full-input gradient | Joint spin/T2/resolvent/AD ownership, direct-input performance, measured size family, traced target-device capacity |
-| WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1 and nonzero streamed-(T) geometry | Efficient bare-vvvv policy, packed amplitude/residual lifetime, model-specific CCS preparation, phase budgets and contracted two-body properties |
+| WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, phase budgets and contracted two-body properties |
 | WF-16/17/34 | Shared EOM primal planner; streamed Dyson and known retained-state accounting with molecular regressions | Charged intermediates, response workspaces and matched endpoint/method measurements |
 | WF-18/19/20/21/22/27 | Component selected-CI, action and property tests; FCI requested-block RDM tests | Latest joint-ledger changes, selected CIS(D) GREEN and facade, UCIS/ROHF guards, native relaxed geometry and public end-to-end measurements |
 | WF-23/24/25/26/33 | Exact target bounds and canonical Jacobian; stable Taylor compilation; earlier packed forward checks | Current packed factory and true sextuple response, history/byte integration, moving R/U MPn and selected standalone MP3 |
@@ -2231,3 +2231,42 @@ requires its own explicit decision and numerical validation.
   measurement; arbitrary outer AD tape/allocator state and whole-EOM scaling
   are not bounded by this helper. The parent checkboxes remain open, with no
   new TODO level or claim that the complete project is finished.
+
+### 2026-10-22 — WF-11/13/15: model-aware CCS and physical spin boundaries
+
+- CCS reuses the unchanged restricted R1 body and returns before the discarded
+  doubles equation. The SCF producer requests five blocks and retains None for
+  unused oooo/vvvv; nocc comes from ovov. Other models retain their seven-block
+  selection and full numerical equation. Removing the static CCS early return
+  leaves the original restricted equation AST unchanged.
+- SpinAmplitudeSpace reuses the original independent-index ordering and packed
+  metric while packing/unpacking physical alpha/beta blocks directly. Init,
+  restart, result and Lambda boundaries no longer create a full spin-amplitude
+  tensor just to select physical blocks. Same-spin projection, mixed dtype,
+  empty/unequal sectors, level-shift denominators and Lambda's dual factor4
+  are preserved. The residual still expands into the original full-spin chart;
+  no claim that its working tensors or spin-vvvv storage are removed follows.
+- Thirty-nine distinct cases pass in four final groups, all exit0/no skips:
+  24 CCS/coordinate cases, two CCSD/CCD left/right joint JVP/VJP/HVP cases and
+  13 directly affected original model/property/restart/frozen cases. Required
+  RED groups were observed first. An initial integration test accidentally
+  reused its outer JIT executable and falsely passed its allocation trap;
+  that record is excluded. A forced fresh trace then produced the expected
+  RED before the boundary connections changed. Two independent reviews found
+  no remaining correctness issue.
+- Matched coordinate-only benchmark, seed6551, occupations(8,7), virtuals(80,79),
+  float64, Xeon Gold6230/n002, CPU56-71: old/direct-block warm medians
+  20.827/4.061ms, XLA temporary95,068,488/5,472,488 bytes, maximum output
+  difference0. Primary process peak RSS before the independent oracle was
+  825,532/741,404KiB, while current RSS increased by8,552KiB. These measurements
+  belong to the coordinate boundary, not a complete CC residual or solve.
+- Root verified all75 payload hashes, ten final source/test hashes, raw XML
+  and39 unique passing cases. Twelve static proofs preserve the original spin
+  index/pack/unpack, residual/intermediate/property/triples and ground bodies.
+  Archive412aaee6...af8248 and cc-delta-root-verification.json preserve exits,
+  exact commands, source-before/after maps and the excluded cache-test record.
+  All calculations ran inside allocation103505 on CPU56-71 without GPU.
+- This finite slice stays within the existing WF-11/13/15 parents. Full spin
+  residual storage, compact bare-vvvv supply, joint solver/AD phase accounting
+  and whole-method measurements remain open. No new TODO/sublevel, merge or
+  push is introduced.

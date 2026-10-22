@@ -27,7 +27,7 @@ from . import _intermediates as imd
 einsum = partial(np.einsum, precision="highest")
 
 
-def residual_full(t1, t2, eris, *, cc2=False):
+def residual_full(t1, t2, eris, *, cc2=False, doubles=True):
     # Ref: Hirata et al., J. Chem. Phys. 120, 2581 (2004) Eqs.(35)-(36)
     nocc, nvir = t1.shape
     fock = eris.fock
@@ -66,6 +66,10 @@ def residual_full(t1, t2, eris, *, cc2=False):
     t1new += einsum("kcli,klac->ia", eris_ovoo, t2)
     t1new += -2 * einsum("lcki,lc,ka->ia", eris_ovoo, t1, t1)
     t1new += einsum("kcli,lc,ka->ia", eris_ovoo, t1, t1)
+
+    if not doubles:
+        eia = mo_e_o[:, None] - mo_e_v
+        return t1new - eia * t1, np.zeros_like(t2)
 
     # T2 equation
     tmp2 = einsum("kibc,ka->abic", eris.oovv, -t1)
