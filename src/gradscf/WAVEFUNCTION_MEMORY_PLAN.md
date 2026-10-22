@@ -586,8 +586,8 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     phase-aware lifetimes and byte-controlled caches across all consumers.
     Shared non-Hermitian/EOM primal capacity, closures and action batches are
     verified. Shared packed DIIS and checked linear/root phase planning are
-    verified. Isolated non-Hermitian pair-response phases are verified;
-    remaining method/SCF/other spectral-response ownership stays open.
+    verified. Isolated non-Hermitian and isolated/cluster Hermitian response
+    phases are verified; remaining method/SCF ownership stays open.
 - [ ] **WF-30 — CPU/GPU and nested-AD audit.** Run eager and JIT public entry
   points, native dispatch, device residency and transfer accounting. Acceptance:
   same numerical cases/dtype/seed, forward/JVP/VJP/HVP separately, actual peak
@@ -3013,3 +3013,31 @@ requires its own explicit decision and numerical validation.
   gates, not native/GPU, warm speed or whole-method memory gains. Eager source
   dispatch and caller ownership remain the existing integration work; WF-33
   is not yet closed solely by adding this kernel.
+
+### 2026-10-22 — WF-29c: Hermitian isolated/cluster response ownership
+
+- The original MB/resident plan follows a static hashable carrier through the
+  existing closure-converted custom JVP and single root. Only retained source/
+  Ritz/diagnostic/parameter arrays survive into the response budget; numerical
+  Davidson capacities are not charged again. Response planning is lazy: a
+  stationary first energy derivative and full-span projector/trace retain their
+  original paths. None retains the old vmap and exact mathematical chart.
+- Isolated roots retain n-dimensional checked solves, reused sequentially
+  inside the original root tangent solve. Complete degenerate clusters retain
+  the full n*k projected equation, with no internal-gap division or separated
+  cluster solves. The shared graph counter and plan_linear account for actual
+  direct assembly/transpose arrays and normalization. Only optional GMRES
+  restart changes; tolerances, maxiter, validity and direct-capacity guards stay.
+- Actual RED4fail/1pass precedes final metadata5/15.170s, isolated2/41.025s
+  and exact-degenerate cluster1/27.872s, all exit0/no skips on CPU56-71,
+  job103505/n002/x64. The eight unique accepted nodes include the original
+  batched/inner-JIT third-response oracle, joint JVP/VJP/HVP and FD, cluster
+  projector/trace, gap/NaN and full-span guards. No performance gain is asserted.
+- Root verifies41 archived payloads, all four exits/XML/source maps,17 current
+  source/test/dependency bytes and13 unchanged-math/None/guard proofs; independent
+  review finds no blocker. Evidence hermitian-response-evidence.tar.gz SHA256
+  6528fd645d486aa214a2d08ff2f8768dc54629f2f08878ca2c2485c5b76e15b2,
+  HANDOFF.json/static-proofs.json and mp-callers-hermitian-root-verification.json.
+  RPA wrappers do not yet relay these optional controls; arbitrary outer AD,
+  opaque callbacks and process/allocator peaks remain outside an array cap.
+  No new TODO is added and WF-29c retains its remaining caller/SCF gates.

@@ -11,9 +11,9 @@ from ..types import (
     EigenResult,
 )
 from .primal import solve_ritz
-from .response import attach_spectral_response, spectral_values
+from .response import _ResponseBudget, attach_spectral_response, spectral_values
 from ..memory import apply_columns, plan_hermitian
-from gradscf._memory import array_storage_bytes, validate_reserved_bytes
+from gradscf._memory import array_storage_bytes, tree_storage_bytes, validate_reserved_bytes
 
 
 def solve_hermitian(
@@ -27,9 +27,11 @@ def solve_hermitian(
     one available guard root; no automatic dimension expansion at a crossing.
     Legacy config AD controls remain honored when response is omitted (also
     used by RPA); combining nondefault legacy controls with response is an error.
-    Optional max_memory is a decimal-MB budget for known primal working arrays;
-    reserved_bytes declares additional resident caller data. Operator internals,
-    implicit response and actual traced-device capacity need separate planning.
+    Optional max_memory budgets known primal and implicit-response arrays in
+    decimal MB. The phases share the original budget, with one runtime reserve;
+    a response retains returned Ritz data, not the primal Krylov workspace.
+    reserved_bytes declares caller data and opaque operator scratch. Compilation,
+    library scratch and arbitrary outer derivative storage are not a cap.
     """
     reserved_bytes = validate_reserved_bytes(reserved_bytes)
     cfg = EigenSolverConfig() if config is None else config
@@ -56,6 +58,7 @@ def solve_hermitian(
     op = as_operator(matrix_or_operator if a is None else a)
     validate_real_square(op)
     n, k = op.shape[0], cfg.nroots
+    source_arrays = () if max_memory is None else (a, op.diagonal, probes, initial_vectors)
     if probes is not None:
         if response.target != "subspace":
             raise ValueError("probes require a subspace response")
@@ -76,7 +79,7 @@ def solve_hermitian(
                                  "including requested roots and the boundary root")
         cfg, _, _batch_size = plan_hermitian(n, op.dtype, cfg, max_memory,
             resident_bytes=reserved_bytes + array_storage_bytes(
-                a, op.diagonal, probes, initial_vectors),
+                *source_arrays, probes, initial_vectors),
             initial_columns=0 if initial_vectors is None else initial_vectors.shape[1],
             device=getattr(op.diagonal, "device", None))
     structure = jnp.asarray(True)
@@ -136,6 +139,13 @@ def solve_hermitian(
     # bypasses closure_convert's differentiable-parameter hoisting and leaks
     # it across a nested JIT/higher derivative.
     apply = lambda v: apply_columns(op, v, _batch_size)
+    budget = None
+    if max_memory is not None:
+        held = (source_arrays, probes, initial_vectors, roots, gap, valid,
+                structure, guard_valid, all_converged, separated)
+        if response.target != 'subspace':
+            held += (distance, scale, threshold)
+        budget = _ResponseBudget(float(max_memory), reserved_bytes+tree_storage_bytes(held))
 
     projection = trace = None
     if response.target == "subspace":
@@ -143,11 +153,13 @@ def solve_hermitian(
             if k == n:
                 projection = probes
             else:
-                y = attach_spectral_response(apply, x, config=response.linear_config, valid=valid)
+                y = attach_spectral_response(apply, x, config=response.linear_config,
+                                             valid=valid, _budget=budget)
                 projection = y @ (y.T @ probes)
             projection = require_converged_derivative(projection, valid)
         trace = (jnp.sum(x*apply(x)) if k == n else
-                 jnp.sum(spectral_values(apply, x, config=response.linear_config, valid=valid)))
+                 jnp.sum(spectral_values(apply, x, config=response.linear_config,
+                                          valid=valid, _budget=budget)))
         trace = require_converged_derivative(trace, valid)
         values = vectors = None
         converged = all_converged
@@ -158,11 +170,11 @@ def solve_hermitian(
         # on JAX 0.10; a scan also drops higher terms. Columnwise checked linear
         # solves stay inside the single implicit root instead.
         values = spectral_values(
-            apply, x, config=response.linear_config, valid=valid, isolated=True)
+            apply, x, config=response.linear_config, valid=valid, isolated=True, _budget=budget)
         values = require_converged_derivative(values, valid)
         if response.target == "eigenpairs":
             vectors = attach_spectral_response(
-                apply, x, config=response.linear_config, valid=valid, isolated=True)
+                apply, x, config=response.linear_config, valid=valid, isolated=True, _budget=budget)
             vectors = require_converged_derivative(vectors, valid)
         else:
             vectors = x
