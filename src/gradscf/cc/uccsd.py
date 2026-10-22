@@ -13,6 +13,7 @@ from .types import CCConfig, CCResult
 from .ground import linear_config, METHODS
 from .spin_amplitudes import SpinAmplitudeSpace
 from ._spin_equations import residual, correlation_energy
+from ._memory import ground_budget, preparation_reservation
 
 
 class SpinCCIntegrals(NamedTuple):
@@ -65,7 +66,8 @@ def prepare_ucc_integrals(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0.):
     return ints, tuple(map(len, occ)), tuple(map(len, vir))
 
 
-def run_ucc(h1, eri, *, nocc, nuclear_repulsion=0., frozen=None, config=None, t1=None, t2=None):
+def run_ucc(h1, eri, *, nocc, nuclear_repulsion=0., frozen=None, config=None, t1=None, t2=None,
+            max_memory=None, reserved_bytes=0):
     """Solve UCCSD or UCCD; return t1=(ta,tb), t2=(taa,tab,tbb).
 
     Differentiation includes amplitude response at a converged isolated root.
@@ -74,12 +76,17 @@ def run_ucc(h1, eri, *, nocc, nuclear_repulsion=0., frozen=None, config=None, t1
     cfg = CCConfig() if config is None else config
     if cfg.method not in {"ccsd", "ccd"}:
         raise NotImplementedError("Unrestricted models currently support CCSD and CCD")
+    reserved_bytes = preparation_reservation(lambda a, b: prepare_ucc_integrals(a, b,
+        nocc=nocc, frozen=frozen, nuclear_repulsion=nuclear_repulsion),
+        (h1, eri), max_memory, reserved_bytes, owners=(nuclear_repulsion,), consumer_owned=(t1, t2))
     ints, occupied, virtual = prepare_ucc_integrals(h1, eri, nocc=nocc, frozen=frozen,
                                                    nuclear_repulsion=nuclear_repulsion)
-    return run_ucc_from_integrals(ints, occupied, virtual, config=cfg, t1=t1, t2=t2)
+    return run_ucc_from_integrals(ints, occupied, virtual, config=cfg, t1=t1, t2=t2,
+                                 max_memory=max_memory, reserved_bytes=reserved_bytes)
 
 
-def run_ucc_from_integrals(ints, occupied, virtual, *, config=None, t1=None, t2=None):
+def run_ucc_from_integrals(ints, occupied, virtual, *, config=None, t1=None, t2=None,
+                           max_memory=None, reserved_bytes=0):
     """Reuse the UCC equations/implicit solver with an already prepared frame.
 
     ``occupied`` and ``virtual`` are the active alpha/beta counts returned by
@@ -87,6 +94,7 @@ def run_ucc_from_integrals(ints, occupied, virtual, *, config=None, t1=None, t2=
     Dense spin blocks, amplitudes and nonlinear/adjoint storage are unchanged.
     """
     cfg = CCConfig() if config is None else config
+    provided = (t1, t2) if max_memory is not None else ()
     if cfg.method not in {"ccsd", "ccd"}:
         raise NotImplementedError("Unrestricted models currently support CCSD and CCD")
     space = SpinAmplitudeSpace(occupied, virtual, cfg.method)
@@ -112,13 +120,16 @@ def run_ucc_from_integrals(ints, occupied, virtual, *, config=None, t1=None, t2=
     minimum = jnp.min(jnp.abs(diagonal), initial=jnp.inf)
     valid = (minimum > cfg.denominator_tol) & jnp.isfinite(ints.reference_energy) & jnp.all(jnp.isfinite(ints.fock))
     safe = jnp.where(jnp.abs(diagonal) > cfg.denominator_tol, diagonal, 1.)
+    numerical = NonlinearConfig(maxiter=cfg.max_cycle, residual_tol=cfg.residual_tol,
+        energy_tol=cfg.conv_tol, diis_space=cfg.diis_space,
+        diis_start=cfg.diis_start_cycle, damping=cfg.damping)
+    ints, numerical, response, budget = ground_budget(ints, initial,
+        (provided, t1, t2, eps, d1, diagonal, safe), numerical, linear_config(cfg),
+        max_memory, reserved_bytes, no, sum(virtual), cfg.method, spin=True)
     r = lambda x: space.pack(*residual(*space.unpack(x), ints))
     e = lambda x: correlation_energy(*space.unpack(x), ints)
     solved = solve_nonlinear(r, initial, update=lambda x, rx: x+rx/safe, observable=e,
-        config=NonlinearConfig(maxiter=cfg.max_cycle, residual_tol=cfg.residual_tol,
-            energy_tol=cfg.conv_tol, diis_space=cfg.diis_space,
-            diis_start=cfg.diis_start_cycle, damping=cfg.damping),
-        linear_config=linear_config(cfg), valid_inputs=valid)
+        config=numerical, linear_config=response, valid_inputs=valid, **budget)
     ta, tb = space.unpack_blocks(solved.solution)
     ecorr = e(solved.solution)
     return CCResult(ints.reference_energy+ecorr, ecorr, ints.reference_energy, ta, tb,

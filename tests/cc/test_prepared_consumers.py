@@ -61,6 +61,12 @@ def test_prepared_triples_values_and_diagnostics(variant, frame, algorithm):
         old = _old_semicanonical(h, g, state)
         for a, e in zip(actual, old):
             np.testing.assert_allclose(a, e, atol=2e-11, rtol=2e-9)
+        if algorithm == 'auto':
+            budgeted = cc.evaluate_triples(h, g, state, nocc=2, **options,
+                                           max_memory=32., reserved_bytes=37)
+            for a, e in zip(budgeted, expected):
+                assert a.dtype == e.dtype
+                np.testing.assert_allclose(a, e, atol=2e-11, rtol=2e-9)
 
 
 @pytest.mark.parametrize('sector', ['ee', 'ip', 'ea'])

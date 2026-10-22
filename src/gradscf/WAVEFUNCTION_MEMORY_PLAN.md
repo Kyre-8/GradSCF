@@ -2822,3 +2822,48 @@ requires its own explicit decision and numerical validation.
   both HANDOFF.json and delta-series-geometry-r1/root-verification.json.
   Eager/raw override forwarding, standalone canonical MP3, size/scaling and
   GPU/native phase budgets remain their existing tasks; no TODO is added.
+
+### 2026-10-22 — WF-10/12/14/15/29: CC caller and physical-action phase budgets
+
+- Raw/prepared RCC/UCC ground, Lambda, triples and one-RDM consumers accept
+  the same optional MB budget and known parent reservations. Public facades
+  retain visible SCF/reference/state owners. Preparation checks promoted full
+  raw UCC copies, selected payloads and held initial/right/left states before
+  their allocation. Native tiles use the maximum of actual planned primal/
+  response phases, not their sum or requested-but-reduced solver capacities.
+  Opaque producer reservations remain conservative rather than inferred aliases.
+- Residual estimates use the real integral operand dtype. The same existing
+  numerical DIIS/linear/root owners select optional capacities; models, physical
+  coordinates, tolerances and maxiter are unchanged. Bare native action worker
+  metadata is shared, not reimplemented. Public restricted preparation keeps
+  the dense-first auto policy; no whole-method performance claim follows.
+- A matched44-MO/8-occupied Lambda point exposes a real undercount: the old
+  39,782,400B hand envelope allowed123.521238MB although compiled scratch was
+  172,720,752B. The shared graph estimator now charges actual declared forward/
+  transpose output arrays, including layout/pack intermediates. That original
+  budget is rejected before GMRES. Actual saved VJP arrays stay charged by
+  their declared PyTree leaves; no new AD owner is added.
+- Seventeen unique original caller nodes have actual passing frontiers across
+  the documented shards. Historical aggregate exit1 with seven passes/two
+  metadata-spy failures remains; fixing only the spy's accumulated abstract
+  VJPs gives five final-source passes (including two reselected numeric nodes).
+  A further raw restricted semicanonical/auto (T) bridge preflight precedes
+  its complete same-spin T2 allocation: metadata RED1->GREEN2, including the
+  original all-diagnostics numeric oracle (30.587s). None math is unchanged.
+  There are18 unique caller gates plus that existing physical regression.
+- Final same-input Lambda baseline/budgeted children both exit0, x64 CPU56-71,
+  n002,41904 physical coordinates, rtol1e-10/maxiter100. The legal342.198168MB
+  plan keeps214,723,944B declared action scratch and chooses restart40->12.
+  Five-warm medians605.727->618.124ms; XLA scratch182132144->172720752B;
+  terminal peaks1428460->1420280KiB; maximum solution difference4.29e-13.
+  The node is nonexclusive, this is a component on a fixed right state, and
+  neither a speedup nor meaningful whole-process RSS gain is claimed.
+- Root verifies274 delivery payloads, raw XML/exits,12 final source/test maps
+  and the unchanged core residual/amplitude equations. Evidence
+  cc-caller-budget-evidence.tar.gz SHA256
+  3acc85f4958b887c8b77b66e5a34e6d86d7e7b16f01527d14d20732d2a7a103c,
+  cc-caller-budget-raw-bridge.tar.gz SHA256
+  4c6cadb1ac6a5e549fcd89c64e68f921410b4ab4cd34f4cff48bb9ce4036c33f,
+  and cc-caller-budget-root-verification.json. Compiler/library/allocator/
+  external AD storage, spatial two-RDM/contracted two-body work and complete
+  method/device/size reconciliation remain their existing acceptance gates.

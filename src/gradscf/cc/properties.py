@@ -12,26 +12,36 @@ from .spin_amplitudes import SpinAmplitudeSpace
 from . import _spin_equations
 from gradscf.ao2mo import frozen_indices, unrestricted_frozen_indices
 from ._spin_density import active_density_parts
+from ._memory import check_payload, preparation_reservation
 
 
-def _density_from_lambda(h1, eri, result, left, *, nocc, frozen, config):
+def _density_from_lambda(h1, eri, result, left, *, nocc, frozen, config,
+                          max_memory=None, reserved_bytes=0):
     if isinstance(nocc, (tuple, list)):
         h = tuple(map(jnp.asarray, h1))
+        reserved_bytes = preparation_reservation(lambda a, b: prepare_ucc_integrals(
+            tuple(.5*(x+x.T) for x in a), b, nocc=nocc, frozen=frozen),
+            (h, eri), max_memory, reserved_bytes, consumer_owned=(result, left))
         ints, _, _ = prepare_ucc_integrals(tuple(.5*(a+a.T) for a in h), eri,
                                           nocc=nocc, frozen=frozen)
         return _density_ucc_from_integrals(ints, result, left, nmo=h[0].shape[0],
-            nocc=nocc, frozen=frozen, config=config, dtypes=tuple(a.dtype for a in h))
+            nocc=nocc, frozen=frozen, config=config, dtypes=tuple(a.dtype for a in h),
+            max_memory=max_memory, reserved_bytes=reserved_bytes)
     h = jnp.asarray(h1)
     # Preserve the raw API's Hermitian partial even for off-manifold inputs;
     # the outer right/left states still depend on the original raw Hamiltonian.
+    reserved_bytes = preparation_reservation(lambda a, b: prepare_integrals(.5*(a+a.T), b,
+        nocc=nocc, frozen=frozen), (h, eri), max_memory, reserved_bytes, consumer_owned=(result, left))
     ints = prepare_integrals(.5*(h+h.T), eri, nocc=nocc, frozen=frozen)
     density = _density_from_integrals(
-        ints, result, left, nmo=h.shape[0], nocc=nocc, frozen=frozen, config=config
+        ints, result, left, nmo=h.shape[0], nocc=nocc, frozen=frozen, config=config,
+        max_memory=max_memory, reserved_bytes=reserved_bytes
     )
     return density.astype(h.dtype)
 
 
-def _density_from_integrals(ints, result, left, *, nmo, nocc, frozen=None, config=None):
+def _density_from_integrals(ints, result, left, *, nmo, nocc, frozen=None, config=None,
+                             max_memory=None, reserved_bytes=0):
     """Restricted MO 1-RDM from the local Hermitian one-body partial.
 
     ``nmo/nocc/frozen`` describe the full supplied orbital frame. Only active
@@ -46,6 +56,10 @@ def _density_from_integrals(ints, result, left, *, nmo, nocc, frozen=None, confi
     virtual = [i for i in range(nocc, nmo) if i not in frozen]
     if (len(occupied), len(virtual)) != (ints.nocc, ints.nvir):
         raise ValueError("Full orbital metadata does not match prepared CC active space")
+    if max_memory is not None:
+        output = jax.ShapeDtypeStruct((8*nmo*nmo,), jnp.result_type(ints.fock, result.t1, left.adjoint))
+        check_payload(ints, (result, left, output), max_memory, reserved_bytes,
+                       ints.nocc, ints.nvir, cfg.method)
     active = jnp.asarray(occupied+virtual, dtype=jnp.int32)
     space = AmplitudeSpace(ints.nocc, ints.nvir, cfg.method)
 
@@ -67,7 +81,7 @@ def _density_from_integrals(ints, result, left, *, nmo, nocc, frozen=None, confi
 
 
 def _density_ucc_from_integrals(ints, result, left, *, nmo, nocc, frozen=None,
-                                 config=None, dtypes=None):
+                                 config=None, dtypes=None, max_memory=None, reserved_bytes=0):
     """UHF local Hermitian one-body partial in the supplied full MO frame.
 
     The snapshot Fock is unchanged at the base point. Delta enters only its
@@ -85,6 +99,13 @@ def _density_ucc_from_integrals(ints, result, left, *, nmo, nocc, frozen=None,
     no, nv = map(sum, sizes)
     if ints.fock.shape != (no+nv, no+nv) or ints.oovv.shape != (no, no, nv, nv):
         raise ValueError("Full orbital metadata does not match prepared UCC active space")
+    if max_memory is not None:
+        dtype = jnp.result_type(ints.fock, left.adjoint, *jax.tree.leaves((result.t1, result.t2)))
+        buffers = (jax.ShapeDtypeStruct((16*nmo*nmo,), dtype),
+                   jax.ShapeDtypeStruct((no, nv), dtype),
+                   jax.ShapeDtypeStruct((no, no, nv, nv), dtype))
+        check_payload(ints, (result, left, buffers), max_memory, reserved_bytes,
+                       no, nv, cfg.method, spin=True)
     space = SpinAmplitudeSpace(*sizes, cfg.method)
     dtypes = (ints.fock.dtype,)*2 if dtypes is None else dtypes
     t1, t2 = space.from_blocks(result.t1, result.t2, dtypes[0])
@@ -108,7 +129,8 @@ def _density_ucc_from_integrals(ints, result, left, *, nmo, nocc, frozen=None,
     return tuple(jnp.where(result.converged & left.converged, d, jnp.nan) for d in densities)
 
 
-def make_rdm1(h1, eri, result, *, nocc, frozen=None, config=None):
+def make_rdm1(h1, eri, result, *, nocc, frozen=None, config=None,
+               max_memory=None, reserved_bytes=0):
     """Real symmetric MO 1-RDM, including frozen occupied electrons.
 
     Restricted output is spin summed; unrestricted output is (alpha, beta).
@@ -116,9 +138,11 @@ def make_rdm1(h1, eri, result, *, nocc, frozen=None, config=None):
     orbitals. It is a CC-model density, not a CCSD(T)-corrected density.
     """
     cfg = CCConfig() if config is None else config
-    left = solve_lambda(h1, eri, result, nocc=nocc, frozen=frozen, config=cfg)
+    left = solve_lambda(h1, eri, result, nocc=nocc, frozen=frozen, config=cfg,
+                         max_memory=max_memory, reserved_bytes=reserved_bytes)
     return _density_from_lambda(
-        h1, eri, result, left, nocc=nocc, frozen=frozen, config=cfg
+        h1, eri, result, left, nocc=nocc, frozen=frozen, config=cfg,
+        max_memory=max_memory, reserved_bytes=reserved_bytes
     )
 
 

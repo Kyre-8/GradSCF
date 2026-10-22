@@ -7,6 +7,7 @@ from .types import CCConfig, CCResult
 from .amplitudes import AmplitudeSpace
 from .integrals import prepare_integrals, denominators
 from .rccsd import residual, correlation_energy
+from ._memory import ground_budget, preparation_reservation
 
 METHODS = ("ccs", "ccd", "ccsd", "cc2", "lccd", "lccsd", "qcisd")
 
@@ -20,7 +21,8 @@ def linear_config(config):
 
 
 def run_cc(
-    h1, eri, *, nocc, nuclear_repulsion=0.0, frozen=None, config=None, t1=None, t2=None
+    h1, eri, *, nocc, nuclear_repulsion=0.0, frozen=None, config=None, t1=None, t2=None,
+    max_memory=None, reserved_bytes=0
 ):
     """Solve a restricted model in static active space, with implicit response.
 
@@ -28,13 +30,18 @@ def run_cc(
     the conventional (T) correction separately requires a canonical reference.
     Zero/small denominators are diagnosed rather than silently regularized.
     """
+    reserved_bytes = preparation_reservation(lambda a, b: prepare_integrals(a, b,
+        nocc=nocc, nuclear_repulsion=nuclear_repulsion, frozen=frozen),
+        (h1, eri), max_memory, reserved_bytes, owners=(nuclear_repulsion,), consumer_owned=(t1, t2))
     ints = prepare_integrals(
         h1, eri, nocc=nocc, nuclear_repulsion=nuclear_repulsion, frozen=frozen
     )
-    return run_cc_from_integrals(ints, config=config, t1=t1, t2=t2)
+    return run_cc_from_integrals(ints, config=config, t1=t1, t2=t2,
+                                max_memory=max_memory, reserved_bytes=reserved_bytes)
 
 
-def run_cc_from_integrals(ints, *, config=None, t1=None, t2=None):
+def run_cc_from_integrals(ints, *, config=None, t1=None, t2=None,
+                          max_memory=None, reserved_bytes=0):
     """Solve a restricted model from prepared blocks using the shared CC body.
 
     The caller owns the integral snapshot and all reference/frozen-space
@@ -42,6 +49,7 @@ def run_cc_from_integrals(ints, *, config=None, t1=None, t2=None):
     ``run_cc``; this entry does not prepare or copy the integral tensors.
     """
     cfg = CCConfig() if config is None else config
+    provided = (t1, t2) if max_memory is not None else ()
     no, nv = ints.nocc, ints.nvir
     space = AmplitudeSpace(no, nv, cfg.method)
     d1, d2 = denominators(ints)
@@ -73,6 +81,13 @@ def run_cc_from_integrals(ints, *, config=None, t1=None, t2=None):
         & jnp.isfinite(ints.reference_energy)
     )
     safe_diagonal = jnp.where(jnp.abs(diagonal) > cfg.denominator_tol, diagonal, 1.0)
+    numerical = NonlinearConfig(
+        maxiter=cfg.max_cycle, residual_tol=cfg.residual_tol,
+        energy_tol=cfg.conv_tol, diis_space=cfg.diis_space,
+        diis_start=cfg.diis_start_cycle, damping=cfg.damping)
+    ints, numerical, response, budget = ground_budget(ints, initial,
+        (provided, t1, t2, d1, d2, ones, diagonal, safe_diagonal), numerical, linear_config(cfg),
+        max_memory, reserved_bytes, no, nv, cfg.method)
     r = lambda vector: space.pack(
         *residual(*space.unpack(vector), ints, model=cfg.method)
     )
@@ -82,16 +97,10 @@ def run_cc_from_integrals(ints, *, config=None, t1=None, t2=None):
         initial,
         update=lambda x, rx: x + rx / safe_diagonal,
         observable=e,
-        config=NonlinearConfig(
-            maxiter=cfg.max_cycle,
-            residual_tol=cfg.residual_tol,
-            energy_tol=cfg.conv_tol,
-            diis_space=cfg.diis_space,
-            diis_start=cfg.diis_start_cycle,
-            damping=cfg.damping,
-        ),
-        linear_config=linear_config(cfg),
+        config=numerical,
+        linear_config=response,
         valid_inputs=valid,
+        **budget,
     )
     t1, t2 = space.unpack(solved.solution)
     ecorr = e(solved.solution)

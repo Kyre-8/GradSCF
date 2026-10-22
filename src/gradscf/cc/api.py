@@ -1,8 +1,9 @@
 """PySCF-style ground-state CC facades, without solver copies."""
 
 from dataclasses import fields
+import jax
 import jax.numpy as jnp
-from .._memory import resolve_memory_mb
+from .._memory import resolve_memory_mb, tree_storage_bytes
 from ..scf.reference import (reference_from_source, UnrestrictedReference,
                              unrestricted_reference_from_source, is_unrestricted_source)
 from gradscf.ao2mo import frozen_indices, unrestricted_frozen_indices
@@ -26,7 +27,8 @@ class CC:
     explicit MO references. Restricted SCF sources retain selected integral
     blocks and orbital/AO metadata for posthoc consumers, as do UHF SCF sources.
     Explicit MO and ROHF references retain their original representation.
-    The transformation budget does not cap the downstream amplitude solver.
+    Known source, integral and solver arrays share that budget. Runtime,
+    compilation and arbitrary external AD tapes remain outside this array plan.
     """
     def __init__(self, mf, *, method="ccsd", frozen=None, max_memory=None, **kwargs):
         cfg = CCConfig(method=method, **kwargs)
@@ -56,6 +58,10 @@ class CC:
     def _config(self):
         return CCConfig(**{f.name: getattr(self, f.name) for f in fields(CCConfig)})
 
+    def _held_bytes(self, *exclude, extra=()):
+        return tree_storage_bytes(getattr(self.mf, '__dict__', {}), vars(self), extra,
+                                  exclude=exclude)
+
     def kernel(self, t1=None, t2=None):
         # A failed rebuild cannot leave a previous snapshot available to
         # Lambda/properties/EOM, including when source validation raises.
@@ -70,21 +76,28 @@ class CC:
         if isinstance(self.mf, (RKS, UKS)):
             from ..ao2mo.scf import prepare_scf_source
             self.reference = ref = prepare_scf_source(self.mf, max_memory=self.max_memory)
+            paid = jax.tree.leaves((ref.coefficients, ref.focks, ref.reference_energy, ref.ao_kwargs))
+            reservation = self._held_bytes(*paid, extra=(t1, t2))
             if unrestricted:
                 self._nmo = ref.coefficients[0].shape[1]
                 self._integrals, occupied, virtual = ucc_from_orbitals(
                     ref.coefficients, ref.focks, ref.nocc, ref.reference_energy,
                     frozen=self.frozen, max_memory=self.max_memory, vvvv='blocks',
+                    reserved_bytes=reservation,
                     **ref.ao_kwargs)
                 self.result = run_ucc_from_integrals(self._integrals, occupied, virtual,
-                                                      config=cfg, t1=t1, t2=t2)
+                    config=cfg, t1=t1, t2=t2, max_memory=self.max_memory,
+                    reserved_bytes=self._held_bytes(self._integrals, t1, t2))
             else:
                 self._nmo = ref.coefficients.shape[1]
                 self._integrals = from_orbitals(
                     ref.coefficients, ref.focks[0], ref.nocc, ref.reference_energy,
                     frozen=self.frozen, max_memory=self.max_memory, model=cfg.method,
+                    vvvv='auto', reserved_bytes=reservation,
                     **ref.ao_kwargs)
-                self.result = run_cc_from_integrals(self._integrals, config=cfg, t1=t1, t2=t2)
+                self.result = run_cc_from_integrals(self._integrals, config=cfg, t1=t1, t2=t2,
+                    max_memory=self.max_memory,
+                    reserved_bytes=self._held_bytes(self._integrals, t1, t2))
         else:
             self.reference = ref = (unrestricted_reference_from_source(
                                         self.mf, max_memory=self.max_memory)
@@ -94,7 +107,8 @@ class CC:
             self.result = (run_ucc if unrestricted else run_cc)(
                 ref.h1, ref.eri, nocc=ref.nocc,
                 nuclear_repulsion=ref.nuclear_repulsion, frozen=self.frozen,
-                config=cfg, t1=t1, t2=t2)
+                config=cfg, t1=t1, t2=t2, max_memory=self.max_memory,
+                reserved_bytes=self._held_bytes(ref.h1, ref.eri, ref.nuclear_repulsion, t1, t2))
         self.e_corr, self.e_tot = (
             self.result.correlation_energy,
             self.result.total_energy,
@@ -145,10 +159,12 @@ class CC:
     def solve_lambda(self):
         ref = self._ready()
         self.lambda_result = (solve_lambda_from_integrals(
-            self._integrals, self.result, config=self._config())
+            self._integrals, self.result, config=self._config(), max_memory=self.max_memory,
+            reserved_bytes=self._held_bytes(self._integrals, self.result))
             if self._integrals is not None else solve_lambda(
                 ref.h1, ref.eri, self.result, nocc=ref.nocc,
-                frozen=self.frozen, config=self._config()))
+                frozen=self.frozen, config=self._config(), max_memory=self.max_memory,
+                reserved_bytes=self._held_bytes(ref.h1, ref.eri, self.result)))
         self.l1, self.l2 = self.lambda_result.l1, self.lambda_result.l2
         self.converged_lambda = bool(self.lambda_result.converged)
         return self.l1, self.l2
@@ -175,6 +191,9 @@ class CC:
             max_triples_elements=max_triples_elements,
             algorithm=algorithm,
             max_workspace_elements=max_workspace_elements,
+            max_memory=self.max_memory,
+            reserved_bytes=self._held_bytes(self._integrals, self.result)
+                if self._integrals is not None else self._held_bytes(ref.h1, ref.eri, self.result),
         )
         result = (evaluate_triples_from_integrals(self._integrals, self.result, **options)
             if self._integrals is not None else evaluate_triples(
@@ -205,10 +224,12 @@ class CC:
             if isinstance(ref.nocc, (tuple, list)):
                 return _density_ucc_from_integrals(self._integrals, self.result,
                     self.lambda_result, nmo=self._nmo, nocc=ref.nocc,
-                    frozen=self.frozen, config=self._config())
+                    frozen=self.frozen, config=self._config(), max_memory=self.max_memory,
+                    reserved_bytes=self._held_bytes(self._integrals, self.result, self.lambda_result))
             density = _density_from_integrals(self._integrals, self.result,
                 self.lambda_result, nmo=self._nmo, nocc=ref.nocc,
-                frozen=self.frozen, config=self._config())
+                frozen=self.frozen, config=self._config(), max_memory=self.max_memory,
+                reserved_bytes=self._held_bytes(self._integrals, self.result, self.lambda_result))
             return density.astype(jnp.result_type(ref.coefficients, ref.hcore))
         return _density_from_lambda(
             ref.h1,
@@ -218,6 +239,8 @@ class CC:
             nocc=ref.nocc,
             frozen=self.frozen,
             config=self._config(),
+            max_memory=self.max_memory,
+            reserved_bytes=self._held_bytes(ref.h1, ref.eri, self.result, self.lambda_result),
         )
 
     def make_rdm2(self):

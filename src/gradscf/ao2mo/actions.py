@@ -21,6 +21,17 @@ def _native_action_basis(basis):
     return primitive
 
 
+def _native_action_workspace(basis, nvir, workers=1):
+    """Known native optimizer bytes and one complete action RHS scratch."""
+    primitive = _native_action_basis(basis)
+    native = native_jk_workspace_bytes(primitive, workers, 0.)
+    nao = basis.nao
+    per_rhs = 8*(6*nao**2+2*nao*nvir+3*nvir**2)
+    if isinstance(basis, ProjectedNativeDirectBasis):
+        per_rhs += 8*(6*primitive.nao**2+4*primitive.nao*nao)
+    return native, per_rhs
+
+
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class VirtualERI:
@@ -81,16 +92,13 @@ class VirtualERI:
         count = prod(x.shape[:-2])
         if not count or not nvir:
             return jnp.zeros(x.shape, dtype=jnp.float64)
-        native_workspace = native_jk_workspace_bytes(primitive, 1, 0.)
+        native_workspace, per_rhs = _native_action_workspace(basis, nvir)
         if native_workspace is None:
             raise TypeError('VirtualERI requires a complete native shell topology')
         # One density/K pair plus four CPU/CUDA transfer/staging buffers.
         # direct_jk.cc writes disjoint rows directly into K, without batch
         # partials; shell/optimizer storage is charged above. Counting host
         # NumPy and CPU-device buffers separately also covers non-aliasing.
-        per_rhs = 8*(6*nao**2+2*nao*nvir+3*nvir**2)
-        if isinstance(basis, ProjectedNativeDirectBasis):
-            per_rhs += 8*(6*primitive.nao**2+4*primitive.nao*nao)
         # The measured four-worker exchange reduces native action latency.
         # Keep the one-worker minimum for tight budgets, and charge the actual
         # optimizer/shell workspace before selecting a simultaneous RHS batch.

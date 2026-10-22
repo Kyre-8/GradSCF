@@ -26,6 +26,7 @@ from .uccsd import prepare_ucc_integrals
 from .spin_amplitudes import SpinAmplitudeSpace
 from ._spin_equations import residual
 from .ground import METHODS
+from ._memory import preparation_reservation, triples_budget
 from .types import TriplesResult
 from ..solvers import solve_tensor_sum
 from ._streamed_triples import _streamed_general_correction
@@ -80,24 +81,29 @@ def evaluate_ucc_triples(h1, eri, result, *, nocc, frozen=None,
                          denominator_tol=1e-10, max_virtual_triples=20000,
                          variant="ccsd(t)", residual_tol=1e-8, canonical_tol=1e-7,
                          orbital_basis="canonical", max_triples_elements=2_000_000,
-                         algorithm="auto", max_workspace_elements=2_000_000):
+                         algorithm="auto", max_workspace_elements=2_000_000,
+                         max_memory=None, reserved_bytes=0):
     _check_options(variant, denominator_tol, residual_tol, canonical_tol,
         max_virtual_triples, orbital_basis, max_triples_elements, algorithm,
         max_workspace_elements)
+    reserved_bytes = preparation_reservation(lambda a, b: prepare_ucc_integrals(a, b,
+        nocc=nocc, frozen=frozen), (h1, eri), max_memory, reserved_bytes, consumer_owned=(result,))
     ints, occupied, virtual = prepare_ucc_integrals(h1, eri, nocc=nocc, frozen=frozen)
     return evaluate_ucc_triples_from_integrals(ints, result,
         occupied=occupied, virtual=virtual, denominator_tol=denominator_tol,
         max_virtual_triples=max_virtual_triples, variant=variant,
         residual_tol=residual_tol, canonical_tol=canonical_tol,
         orbital_basis=orbital_basis, max_triples_elements=max_triples_elements,
-        algorithm=algorithm, max_workspace_elements=max_workspace_elements)
+        algorithm=algorithm, max_workspace_elements=max_workspace_elements,
+        max_memory=max_memory, reserved_bytes=reserved_bytes)
 
 
 def evaluate_ucc_triples_from_integrals(ints, result, *, occupied=None, virtual=None,
                          denominator_tol=1e-10, max_virtual_triples=20000,
                          variant="ccsd(t)", residual_tol=1e-8, canonical_tol=1e-7,
                          orbital_basis="canonical", max_triples_elements=2_000_000,
-                         algorithm="auto", max_workspace_elements=2_000_000):
+                         algorithm="auto", max_workspace_elements=2_000_000,
+                         max_memory=None, reserved_bytes=0):
     """Existing UCC triples kernels in the same supplied selected spin frame.
 
     Explicit counts retain the raw preparer's shape checks. Prepared callers
@@ -111,6 +117,8 @@ def evaluate_ucc_triples_from_integrals(ints, result, *, occupied=None, virtual=
         occupied = tuple(a.shape[0] for a in result.t1)
     if virtual is None:
         virtual = tuple(a.shape[1] for a in result.t1)
+    ints = triples_budget(ints, result, max_memory, reserved_bytes,
+        sum(occupied), sum(virtual), 'ccsd', orbital_basis, algorithm, spin=True)
     space = SpinAmplitudeSpace(occupied, virtual)
     t1, t2 = space.from_blocks(result.t1, result.t2, ints.fock.dtype)
     symmetry_error = jnp.asarray(0., dtype=t1.dtype)

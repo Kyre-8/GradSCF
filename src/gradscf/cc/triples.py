@@ -15,11 +15,13 @@ from itertools import permutations
 import numpy as np
 import jax
 import jax.numpy as jnp
+from .._memory import tree_storage_bytes, validate_reserved_bytes, workspace_bytes
 from .integrals import prepare_integrals
 from .ground import METHODS
 from .amplitudes import AmplitudeSpace
 from .rccsd import residual
 from .types import TriplesResult
+from ._memory import preparation_reservation, triples_budget
 
 
 def _r3(w):
@@ -78,6 +80,8 @@ def evaluate_triples(
     max_triples_elements=2_000_000,
     algorithm="auto",
     max_workspace_elements=2_000_000,
+    max_memory=None,
+    reserved_bytes=0,
 ):
     """CCSD(T), restricted Urban +T(CCSD), or canonical restricted QCISD(T).
 
@@ -99,6 +103,12 @@ def evaluate_triples(
     _check_options(orbital_basis, algorithm, max_workspace_elements, variant)
     if (orbital_basis == "semicanonical" and algorithm == "auto"
             and not isinstance(nocc, (tuple, list))):
+        if max_memory is not None:
+            # The legacy chart constructs one complete same-spin T2 bridge
+            # before UCC preparation; reject its known minimum before doing so.
+            bridge = jax.ShapeDtypeStruct(result.t2.shape, result.t2.dtype)
+            workspace_bytes(max_memory, resident_bytes=validate_reserved_bytes(reserved_bytes)
+                +tree_storage_bytes(h1, eri, result, bridge))
         # Preserve the legacy raw Hamiltonian chart, including independent
         # alpha/beta Fock responses off the spatial ERI permutation manifold.
         same_spin = result.t2-result.t2.swapaxes(2, 3)
@@ -111,15 +121,19 @@ def evaluate_triples(
             denominator_tol=denominator_tol, max_virtual_triples=max_virtual_triples,
             variant=variant, residual_tol=residual_tol, canonical_tol=canonical_tol,
             orbital_basis=orbital_basis, max_triples_elements=max_triples_elements,
-            algorithm=algorithm, max_workspace_elements=max_workspace_elements)
+            algorithm=algorithm, max_workspace_elements=max_workspace_elements,
+            max_memory=max_memory, reserved_bytes=reserved_bytes)
     _restricted_model(variant, denominator_tol, residual_tol, canonical_tol,
                       max_virtual_triples, orbital_basis, algorithm, max_triples_elements)
+    reserved_bytes = preparation_reservation(lambda a, b: prepare_integrals(a, b,
+        nocc=nocc, frozen=frozen), (h1, eri), max_memory, reserved_bytes, consumer_owned=(result,))
     ints = prepare_integrals(h1, eri, nocc=nocc, frozen=frozen)
     return evaluate_triples_from_integrals(ints, result,
         denominator_tol=denominator_tol, max_virtual_triples=max_virtual_triples,
         variant=variant, residual_tol=residual_tol, canonical_tol=canonical_tol,
         orbital_basis=orbital_basis, max_triples_elements=max_triples_elements,
-        algorithm=algorithm, max_workspace_elements=max_workspace_elements)
+        algorithm=algorithm, max_workspace_elements=max_workspace_elements,
+        max_memory=max_memory, reserved_bytes=reserved_bytes)
 
 
 def evaluate_triples_from_integrals(
@@ -127,6 +141,7 @@ def evaluate_triples_from_integrals(
     variant="ccsd(t)", residual_tol=1e-8, canonical_tol=1e-7,
     orbital_basis="canonical", max_triples_elements=2_000_000,
     algorithm="auto", max_workspace_elements=2_000_000,
+    max_memory=None, reserved_bytes=0,
 ):
     """Restricted or UCC triples from the matching prepared integral snapshot.
 
@@ -145,11 +160,14 @@ def evaluate_triples_from_integrals(
             denominator_tol=denominator_tol, max_virtual_triples=max_virtual_triples,
             variant=variant, residual_tol=residual_tol, canonical_tol=canonical_tol,
             orbital_basis=orbital_basis, max_triples_elements=max_triples_elements,
-            algorithm=algorithm, max_workspace_elements=max_workspace_elements)
+            algorithm=algorithm, max_workspace_elements=max_workspace_elements,
+            max_memory=max_memory, reserved_bytes=reserved_bytes)
     variants = ("ccsd+t(ccsd)", "ccsd(t)", "qcisd(t)")
     model = _restricted_model(variant, denominator_tol, residual_tol, canonical_tol,
         max_virtual_triples, orbital_basis, algorithm, max_triples_elements)
     no, nv = ints.nocc, ints.nvir
+    ints = triples_budget(ints, result, max_memory, reserved_bytes, no, nv,
+                          model, orbital_basis, algorithm)
     space = AmplitudeSpace(no, nv)
     space.pack(result.t1, result.t2)  # Validate before any empty-space shortcut.
     r1, r2 = residual(result.t1, result.t2, ints, model=model)
@@ -312,6 +330,8 @@ def triples_correction(
     max_triples_elements=2_000_000,
     algorithm="auto",
     max_workspace_elements=2_000_000,
+    max_memory=None,
+    reserved_bytes=0,
 ):
     """Scalar correction; use evaluate_triples for decomposition and diagnostics."""
     return evaluate_triples(
@@ -329,6 +349,8 @@ def triples_correction(
         max_triples_elements=max_triples_elements,
         algorithm=algorithm,
         max_workspace_elements=max_workspace_elements,
+        max_memory=max_memory,
+        reserved_bytes=reserved_bytes,
     ).energy
 
 
