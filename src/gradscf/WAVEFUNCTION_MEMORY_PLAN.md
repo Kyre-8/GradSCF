@@ -2555,3 +2555,24 @@ requires its own explicit decision and numerical validation.
 - Evidence delta-v100-20261022/eom-virtual-evidence.tar.gz SHAa8e0581f...165d024
   and eom-virtual-benchmark-evidence.tar.gz SHA2c2a8fb4...d3b979f, with root
   verification/static-proof JSONs. WF-17 and the same fixed TODO tree stay open.
+
+### 2026-10-22 — WF-06/20/21: bounded declared static array caches
+
+- A small private LRU retains only declared topology/connection/map array
+  payloads, with both entry and byte limits. Oversized results are returned
+  without retention and do not flush small entries. Six CI/FCI factories now
+  have a combined 256,000,000-byte payload ceiling; known action closure maps
+  receive an explicit weight. Python keys/headers, construction temporaries,
+  compiled executables and allocator state are outside this cache ceiling.
+- The original sigma/link-map mathematical bodies are unchanged. The existing
+  one-body operator also forwards the caller's same MB/reservation to primal
+  and transpose actions; it introduces no new derivative solver.
+- Actual four-node cache RED exits1, followed by four metadata GREEN cases
+  (exit0/2.221s) and four existing raw-ERI/one-body/FCI H/G/C second-response
+  cases (exit0/71.951s), Delta103505 CPU16-31/x64. Root checked all30 payload
+  hashes, exact five final files, unchanged before/after maps and raw XML.
+- Evidence review-array-cache-20261022.tar.gz SHA256
+  6d163eccd01e6893ad0e011d794e8a10b5893864023e47da9db9b540d86e6c23,
+  root-late-frontiers-verification.json. This is a static array-cache boundary,
+  not an entire-method or process limit. No parent closes and the existing
+  fixed TODO hierarchy is unchanged.

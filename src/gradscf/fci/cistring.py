@@ -1,6 +1,7 @@
 """Static alpha/beta occupation strings and shared fermionic phases."""
 from dataclasses import dataclass
 from functools import lru_cache
+from .._cache import array_cache
 from itertools import combinations
 from math import comb
 from numbers import Integral
@@ -100,7 +101,7 @@ def make_strings(norb, nelec):
     return tuple(sorted(sum(1 << p for p in occ) for occ in combinations(range(norb), nelec)))
 
 
-@lru_cache(maxsize=16)
+@array_cache(maxsize=16, max_bytes=64_000_000)
 def _link_maps(norb, nelec):
     strings = make_strings(norb, nelec)
     lookup = {s: i for i, s in enumerate(strings)}

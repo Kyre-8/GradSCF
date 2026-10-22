@@ -7,7 +7,6 @@ maps and integral contractions. Projection applies to the complete operator;
 no projected single-excitation operator is multiplied by another one.
 """
 from dataclasses import dataclass, replace
-from functools import lru_cache
 from itertools import combinations, permutations, product
 from math import comb, prod
 from numbers import Integral
@@ -21,6 +20,7 @@ from ..fci.cistring import excite
 from ..solvers import LinearOperator
 from ..solvers.memory import apply_columns
 from .._memory import array_storage_bytes, validate_reserved_bytes, workspace_bytes
+from .._cache import array_cache
 from .space import CISpace, UCISpace
 
 
@@ -28,7 +28,7 @@ def _parity(order):
     return (-1)**sum(a > b for i, a in enumerate(order) for b in order[i+1:])
 
 
-@lru_cache(maxsize=128)
+@array_cache(maxsize=128, max_bytes=16_000_000)
 def _choices(n, rank):
     return np.asarray(list(combinations(range(n), rank)), dtype=np.int32).reshape(comb(n, rank), rank)
 
@@ -48,7 +48,7 @@ class _Topology:
     nocc: tuple
 
 
-@lru_cache(maxsize=8)
+@array_cache(maxsize=8, max_bytes=16_000_000)
 def _topology(space):
     if not isinstance(space, (CISpace, UCISpace)):
         raise TypeError("Direct CI requires a CISpace or UCISpace")
@@ -86,7 +86,7 @@ def _topology(space):
     return _Topology(groups, tuple(blocks), tuple(ns))
 
 
-@lru_cache(maxsize=256)
+@array_cache(maxsize=256, max_bytes=64_000_000)
 def _annihilation_map(n, rank, removed):
     """(removed string, spectator string) -> source string and fermion sign."""
     holes, spectators = _choices(n, removed), _choices(n, rank-removed)
@@ -295,7 +295,14 @@ def _diagonal(focks, gs, constant, topology, size, max_input_rank=None, max_outp
     return result
 
 
-@lru_cache(maxsize=16)
+def _action_payload(_function, space, block_size, keys, max_input_rank,
+                     max_output_rank, rematerialize=False):
+    # The factory itself retains topology and later traced map constants.
+    # Charge their known array envelope even if another cache evicts them.
+    return _action_layout(space, keys, max_input_rank, max_output_rank)[3]
+
+
+@array_cache(maxsize=16, max_bytes=64_000_000, payload_bytes=_action_payload)
 def _action(space, block_size, keys, max_input_rank, max_output_rank,
              rematerialize=False):
     """Share the numerical sigma graph across Hamiltonians on one topology."""
@@ -570,7 +577,8 @@ def build_fluctuation(h1, eri, space, *, block_size=128,
                            fluctuation=True,max_memory=max_memory,reserved_bytes=reserved_bytes)
 
 
-def build_one_body(h1, space, *, block_size=128, block_diagonal=False):
+def build_one_body(h1, space, *, block_size=128, block_diagonal=False,
+                   max_memory=None, reserved_bytes=0):
     """Physical sum h[pq] a_p^dagger a_q in the same retained CI coordinates.
 
     Includes the occupied reference constant. Subtract that constant when a
@@ -588,7 +596,9 @@ def build_one_body(h1, space, *, block_size=128, block_diagonal=False):
         raise ValueError("One-body matrices must have floating-point dtype")
     if not isinstance(block_diagonal, (bool, np.bool_)):
         raise TypeError("block_diagonal must be a static boolean")
-    operator = _operator(hs, None, space, block_size, block_diagonal)
+    operator = _operator(hs, None, space, block_size, block_diagonal,
+                         max_memory=max_memory, reserved_bytes=reserved_bytes)
     def transpose(vector):
-        return _operator(tuple(h.T for h in hs), None, space, block_size, block_diagonal).matvec(vector)
+        return _operator(tuple(h.T for h in hs), None, space, block_size, block_diagonal,
+                         max_memory=max_memory, reserved_bytes=reserved_bytes).matvec(vector)
     return replace(operator, transpose_matvec=transpose)
