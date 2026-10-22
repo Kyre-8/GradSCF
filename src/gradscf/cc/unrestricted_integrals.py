@@ -9,6 +9,7 @@ from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
 from gradscf.ao2mo import transform_eri_blocks, unrestricted_frozen_indices
 from gradscf.ao2mo.blocks import _array_source
 from .uccsd import SpinCCIntegrals
+from ._spin_virtual import _SpinVirtualERI
 
 
 _SPACES = ((0, 0, 0, 0), (0, 0, 0, 1), (0, 0, 1, 1),
@@ -42,7 +43,7 @@ def _spin_terms(sizes):
 
 def from_orbitals(coefficients, focks, nocc, reference_energy, *, frozen=None,
                   eri=None, eri_pair_matrix=None, df_factors=None, direct_basis=None,
-                  max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0):
+                  max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0, vvvv='dense'):
     """Prepare the existing (SpinCCIntegrals, nocc, nvir) UCC payload.
 
     Inputs are two AO/MO coefficient matrices, two full MO Focks and a supplied
@@ -52,11 +53,15 @@ def from_orbitals(coefficients, focks, nocc, reference_energy, *, frozen=None,
 
     One AO2MO request batch shares ``max_memory`` (decimal MB) with known inputs,
     final six spin blocks, assembly scratch and caller ``reserved_bytes``.
-    Complete spatial/spin ERIs are not formed. The spin vvvv block remains
-    dense; downstream amplitudes, solver workspace and AD state are not capped.
+    Complete spatial/spin ERIs are not formed. The default vvvv remains dense;
+    ``vvvv='blocks'`` instead retains its three nonzero spatial blocks and an
+    exact bare action, with no spin zero padding. Downstream amplitudes, solver
+    workspace and AD state are not capped.
     """
     max_memory = resolve_memory_mb(max_memory)
     reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    if vvvv not in ('dense', 'blocks'):
+        raise ValueError("vvvv must be 'dense' or 'blocks'")
     if len(coefficients) != 2 or len(focks) != 2:
         raise ValueError('Supply two unrestricted coefficient and full MO Fock matrices')
     cs, fs = tuple(map(jnp.asarray, coefficients)), tuple(map(jnp.asarray, focks))
@@ -90,9 +95,15 @@ def from_orbitals(coefficients, focks, nocc, reference_energy, *, frozen=None,
     sizes = tuple(tuple(map(len, space)) for space in (occ, vir))
     dtype = jnp.dtype(jnp.float64) if direct_basis is not None else jnp.result_type(*cs, *fs, source)
     shapes = tuple(tuple(sum(sizes[space]) for space in block) for block in _SPACES)
-    spin_bytes = sum(prod(shape) for shape in shapes)*dtype.itemsize
+    dense_shapes = shapes if vvvv == 'dense' else shapes[:-1]
+    spin_bytes = sum(prod(shape) for shape in dense_shapes)*dtype.itemsize
     # Keep the final blocks plus old/new scatter buffers in the shared budget.
-    assembly_bytes = spin_bytes+2*max(map(prod, shapes))*dtype.itemsize
+    assembly_bytes = spin_bytes+2*max(map(prod, dense_shapes))*dtype.itemsize
+    if vvvv == 'blocks' and direct_basis is None:
+        va, vb = sizes[1]
+        for left, right, elements in ((0, 0, va**4), (0, 1, va**2*vb**2), (1, 1, vb**4)):
+            if jnp.result_type(cs[left], cs[right], source) != dtype:
+                assembly_bytes += elements*dtype.itemsize
     nactive = sum(map(sum, sizes))
     planned = (jax.ShapeDtypeStruct((nactive, nactive), dtype),
                jax.ShapeDtypeStruct((nactive, nactive), dtype),
@@ -123,7 +134,11 @@ def from_orbitals(coefficients, focks, nocc, reference_energy, *, frozen=None,
     blocks = transform_eri_blocks(spaces, requests, **options, max_memory=max_memory,
         reserved_bytes=reserved_bytes+resident+assembly_bytes+2*nactive*nactive*dtype.itemsize)
     values = dict(zip(requests, blocks))
-    result = [jnp.zeros(shape, dtype) for shape in shapes]
+    result = [jnp.zeros(shape, dtype) for shape in dense_shapes]
     for block, request, permutation, target, sign in terms:
-        result[block] = result[block].at[target].add(sign*values[request].transpose(permutation))
+        if block < len(result):
+            result[block] = result[block].at[target].add(sign*values[request].transpose(permutation))
+    if vvvv == 'blocks':
+        result.append(_SpinVirtualERI.from_terms(values, tuple(t for t in terms if t[0] == 5),
+                                                sizes[1], dtype))
     return SpinCCIntegrals(fock, *result, selected_energy), sizes[0], sizes[1]

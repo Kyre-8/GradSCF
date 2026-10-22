@@ -74,7 +74,8 @@ class CC:
                 self._nmo = ref.coefficients[0].shape[1]
                 self._integrals, occupied, virtual = ucc_from_orbitals(
                     ref.coefficients, ref.focks, ref.nocc, ref.reference_energy,
-                    frozen=self.frozen, max_memory=self.max_memory, **ref.ao_kwargs)
+                    frozen=self.frozen, max_memory=self.max_memory, vvvv='blocks',
+                    **ref.ao_kwargs)
                 self.result = run_ucc_from_integrals(self._integrals, occupied, virtual,
                                                       config=cfg, t1=t1, t2=t2)
             else:

@@ -2400,3 +2400,38 @@ requires its own explicit decision and numerical validation.
   separately identified open budget fixes. They are not accepted by those16
   numerical cases. Complete property/AD residency and whole-method performance
   remain open in the existing parents; no new TODO or checkbox is introduced.
+
+### 2026-10-22 — WF-12/13/14/15: compact bare spin-virtual consumers
+
+- UHF selected preparation may retain only the existing AA/AB/BB spatial
+  virtual blocks, with the original spin assembly's permutations and signs
+  applied on contraction. No zero-padded full spin vvvv or dressed spin W is
+  built on this path. The public UHF facade now selects it; explicit low-level
+  dense input remains a reference. The same residual, dual-coordinate Lambda,
+  density and streamed-triples equations are reused without a new solver.
+- Twenty distinct nodes pass across the immutable groups: float32/64 raw
+  charts, unequal/frozen/empty sectors, joint C/AO/RHS HVP, mixed per-request
+  dtype storage, public CCD/CCSD, Lambda/density outer AD, triples diagnostics
+  and both relaxed CCSD/(T) native geometry with two Hessian FD steps. Root
+  checked raw XML/JSON, all165 payloads and seven final source/test hashes.
+  Original spin terms, five numerical modules and six intermediate functions
+  were independently compared with96b6a80; nineteen stored static proofs and
+  peer review preserve the remaining equations and benchmark frontier.
+- Retain the real history: spin-consumers-basic exits1 with six passing nodes
+  and a2.5MB pressure test rejected by the existing AO planner. The corrected
+  test window3MB is above its compact minimum (~2.61MB), below dense-spin need
+  (>6MB), and passes with the density regression (exit0/process82.888s).
+  Production code, physical input and tolerances were not changed to repair
+  that test window. CCSD geometry exits0/process112.348s; (T)137.716s.
+- Same fixed25AO, nocc(3,2), nvir(22,23), f64/seed6555 residual component on
+  n002/CPU56–71: dense/blocks warm14.652/6.599ms; actual integral payload
+  37330008/10686072B; XLA temporary49497800/33516929B. Complete validation-child
+  peaks1252980/1200116KiB, maximum action difference8.67e-19. Other logical CPU
+  groups may run concurrently; this is one component pair, not whole-CC scaling.
+  Benchmark and final source differ only in static per-request promotion
+  accounting; the original same-dtype numerical kernels are unchanged.
+- Evidence cc-spin-virtual-evidence.tar.gz SHA256
+  089a77f30486dec00b60512b0dc4086ba32ce8d6291ec4f7ccc9dc36d2b704f6 and
+  cc-spin-virtual-root-verification.json. CorrelatedEnergy's production keyword
+  forwarding, packed residual amplitude lifetime, caller/solver phase budgets
+  and method scale family remain open. No parent/child is closed by this slice.

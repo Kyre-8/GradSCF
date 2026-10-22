@@ -6,6 +6,7 @@ from math import prod
 
 import jax.numpy as np
 from jax.numpy import einsum
+from ._spin_virtual import _SpinVirtualERI
 
 def make_tau(t2, t1a, t1b, fac=1, out=None):
     t1t1 = einsum('ia,jb->ijab', fac*0.5*t1a, t1b)
@@ -49,6 +50,8 @@ def cc_Woooo(t1, t2, eris):
     return Wmnij
 
 def cc_Wvvvv(t1, t2, eris, *, tau=None):
+    if isinstance(eris.vvvv, _SpinVirtualERI):
+        raise NotImplementedError('A dense spin Wvvvv requires a dense bare virtual input')
     if tau is None:
         tau = make_tau(t2, t1, t1)
     eris_ovvv = np.asarray(eris.ovvv)
@@ -62,18 +65,20 @@ def contract_Wvvvv(t1, t2, eris, x, *, tau=None):
     """Apply W to (..., v, v) without its large dressed-vvvv intermediate.
 
     The ovvv/oovv dressings contract with x first; their workspace scales as
-    batch*o*v and batch*o**2. Bare vvvv remains an existing dense input. For
+    batch*o*v and batch*o**2. Bare vvvv is dense or a physical-block action. For
     occupied-dominated spaces, the original transient W can be smaller.
     Neither path assumes permutation symmetry of raw integrals or amplitudes.
     """
     nocc, nvir = t1.shape
     x = np.asarray(x)
     batch = prod(x.shape[:-2])
-    if 3*nvir**4 < batch*(2*nocc*nvir+nocc**2):
+    compact = isinstance(eris.vvvv, _SpinVirtualERI)
+    if not compact and 3*nvir**4 < batch*(2*nocc*nvir+nocc**2):
         return einsum('abef,...ef->...ab', cc_Wvvvv(t1, t2, eris, tau=tau), x)
     if tau is None:
         tau = make_tau(t2, t1, t1)
-    result = einsum('abef,...ef->...ab', eris.vvvv, x)
+    result = (eris.vvvv.contract(x, dtype=eris.fock.dtype) if compact else
+              einsum('abef,...ef->...ab', eris.vvvv, x))
     contracted = einsum('mbef,...ef->...mb', eris.ovvv, x)
     result -= einsum('ma,...mb->...ab', t1, contracted)
     result += einsum('mb,...ma->...ab', t1, contracted)
