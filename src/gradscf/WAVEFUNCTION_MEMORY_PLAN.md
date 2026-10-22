@@ -2320,6 +2320,12 @@ requires its own explicit decision and numerical validation.
   in delta-v100-20261022: static-group archive3c4a8355...bd834 and true-baseline
   archive642de76b...9c192, with root verification JSONs. WF-34 closes without
   a new TODO; WF-16/17 charged intermediates and solver response remain open.
+- The same unchanged static-group source additionally passes six selected
+  endpoint cases on the allocated V100, actual exit0/process12.807s, no skips:
+  float32/64 IP/EA PySCF values and both sectors' joint amplitude/vector HVP
+  finite differences. Runtime metadata verifies backend gpu/cuda:0. Root
+  checked XML and three exact source hashes; archive4bb63d30...a3e1d.
+  This does not replace whole-method GPU scaling or a device-capacity audit.
 
 ### 2026-10-22 — WF-23/24: packed MP capacity fallback verified
 
