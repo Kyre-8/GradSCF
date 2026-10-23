@@ -108,24 +108,31 @@ class CorrelatedEnergy:
             return self._configuration_energy(coordinates, field, potential)
         state, inputs = self.reference.solve_with_inputs(coordinates, field, potential=potential)
         coefficients, valid = state.mo_coeff, state.stationary
-        if self.method in {"mp", "mp2"} and self.config.orbital_basis == "canonical":
-            def canonicalize(coeff, fock):
-                fock_mo = coeff.T @ fock @ coeff
-                orbitals = solve_hermitian(.5*(fock_mo+fock_mo.T),
-                    config=EigenSolverConfig(method="dense", nroots=self.nmo, atol=1e-10),
-                    response=EigenResponseConfig(target="eigenpairs"))
-                return coeff @ orbitals.vectors, jnp.all(orbitals.response_valid)
-            if self.reference.unrestricted:
-                alpha, alpha_valid = canonicalize(coefficients[0], state.fock_matrix[0])
-                beta, beta_valid = canonicalize(coefficients[1], state.fock_matrix[1])
-                coefficients, valid = (alpha, beta), valid & alpha_valid & beta_valid
-            else:
-                coefficients, canonical_valid = canonicalize(coefficients, state.fock_matrix.mean(axis=0))
-                valid &= canonical_valid
         source = (state, inputs, coefficients, *(getattr(self.reference, name, None)
             for name in ('parameters', 'coefficients', 'coordinates', 'occupations')),
             getattr(getattr(self.reference, 'plan', None), 'topology', None),
             getattr(self.reference, 'spec', None))
+        if self.method in {"mp", "mp2"} and self.config.orbital_basis == "canonical":
+            def canonicalize(coeff, fock, retained=()):
+                fock_mo = coeff.T @ fock @ coeff
+                matrix = .5*(fock_mo+fock_mo.T)
+                output = jax.ShapeDtypeStruct(coeff.shape, jnp.result_type(coeff, fock))
+                orbitals = solve_hermitian(matrix,
+                    config=EigenSolverConfig(method="dense", nroots=self.nmo, atol=1e-10),
+                    response=EigenResponseConfig(target="eigenpairs"),
+                    max_memory=self.max_memory,
+                    reserved_bytes=tree_storage_bytes(*source, coeff, fock,
+                        fock_mo, output, retained, exclude=(matrix,)))
+                return coeff @ orbitals.vectors, jnp.all(orbitals.response_valid)
+            if self.reference.unrestricted:
+                alpha, alpha_valid = canonicalize(coefficients[0], state.fock_matrix[0])
+                beta, beta_valid = canonicalize(coefficients[1], state.fock_matrix[1],
+                                                retained=(alpha, alpha_valid))
+                coefficients, valid = (alpha, beta), valid & alpha_valid & beta_valid
+            else:
+                coefficients, canonical_valid = canonicalize(coefficients, state.fock_matrix.mean(axis=0))
+                valid &= canonical_valid
+            source = (*source, coefficients)
         if self._selected_mp2 or self._selected_cc or self._selected_mp_series:
             cs = tuple(coefficients) if self.reference.unrestricted else (coefficients,)
             fs = tuple(state.fock_matrix) if self.reference.unrestricted else (state.fock_matrix.mean(axis=0),)

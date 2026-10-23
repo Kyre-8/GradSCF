@@ -268,7 +268,7 @@ implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
 Current acceptance snapshot (2026-10-23): eighteen of the thirty-five parent tasks
-are fully accepted (WF-00/01/03/04/05/07/08/09/19/20/21/23/24/25/26/27/33/34); thirty of the thirty-seven existing
+are fully accepted (WF-00/01/03/04/05/07/08/09/19/20/21/23/24/25/26/27/33/34); thirty-one of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -315,10 +315,12 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 
   - [x] **WF-02a:** budget the existing array-block entry point and bound DF
     auxiliary intermediates; validate nested AD and CPU/GPU7 execution.
-  - [ ] **WF-02b:** wire caller budgets/resident-state ownership into the MP/CC
+  - [x] **WF-02b:** wire caller budgets/resident-state ownership into the MP/CC
     consumers as WF-05/09 migrate, rather than using the block default everywhere.
-    Facade inheritance/overrides and forwarding are verified; joint ownership
-    remains open. Historical checkpoint: WF-02b1.
+    Facade inheritance/overrides, known caller ownership and the explicit
+    canonical orbital-solve relay are verified. Cross-channel saved AD state
+    and downstream phase integration remain with their specific consumer gates.
+    Historical checkpoint: WF-02b1.
   - [ ] **WF-02c:** complete the native block/capability contract with WF-03/04,
     including target-device capacity when JIT tracing hides concrete devices.
     Concrete default-device inheritance and ambiguous accelerator-label guards
@@ -3650,3 +3652,29 @@ requires its own explicit decision and numerical validation.
   Acceptance becomes 18/35 parents and 30/37 children. WF-02b's canonical
   eigensolve caller relay still awaits its running test's terminal evidence;
   WF-02c, WF-06b and the remaining shared/release gates stay open.
+
+### 2026-10-24 — WF-02b/29c: canonical orbital-solve budget relay
+
+- The explicit canonical MP branch in `CorrelatedEnergy` previously called the
+  shared Hermitian solver without its caller's budget. Forward the original MB
+  value and retain parent state/inputs/reference owners, current Fock transforms
+  and the future rotated coefficient output. UHF beta additionally retains the
+  completed alpha output and validity scalar. Preserve both original and
+  canonical coefficient owners in subsequent correlation preparation.
+- The physical matrix, dense all-root settings, tolerances, eigenpair validity
+  guards and default noncanonical path are unchanged. No solver is added.
+  Four actual RED failures identify missing propagation and too-small budgets
+  reaching diagonalization; root and peer source/AST reviews pass after repair.
+- The single GREEN run completes nine cases with zero failures/errors/skips,
+  actual child/srun exits 0, 43.462071 s and 1550048 KiB whole-test-process peak.
+  Six new R/U cases cover early rejection, caller/prior-spin ownership and
+  separated canonical H2/6-31G plus asymmetric H3/STO-3G value/gradient parity;
+  three existing workflow-budget cases also pass. No new HVP coverage is claimed.
+- An SSH timeout hid the result temporarily; recovery retrieves the original
+  controller 1937150 / srun 1937175 terminal files without resubmission. Root
+  verifies the 25-payload archive, XML, original exits, all 1782 runtime entries
+  and current source/test hashes. Evidence `canonical-eigh-budget/HANDOFF.json`
+  and `green/download-verification.json`, archive SHA256
+  `38fa256d46a145dbef568171aac9d1846bba5c4bddb186f1b2554eaa97ad23f9`.
+  **Accept WF-02b.** Parents remain 18/35; children become 31/37. WF-02c and
+  the known MP2 saved-response-state and remaining EOM phase gates stay open.
