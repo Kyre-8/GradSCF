@@ -87,16 +87,17 @@ def test_direct_mp2_matches_full_scf_and_selected_amplitudes(
     assert expected.valid and full.converged
     _forbid_reference_materialization(source, data["provider"], monkeypatch)
     integrals = importlib.import_module("gradscf.mp.integrals")
-    transform = integrals.transform_eri_block
+    transform = integrals.transform_eri_blocks
     seen = []
 
-    def selected(coefficients, **kwargs):
+    def selected(coefficients, requests, **kwargs):
         assert kwargs.get("direct_basis") is data["provider"]
         assert all(kwargs.get(key) is None for key in ("eri", "eri_pair_matrix", "df_factors"))
-        seen.append((tuple(c.shape[1] for c in coefficients), kwargs.get("max_memory")))
-        return transform(coefficients, **kwargs)
+        seen.extend((tuple(coefficients[i].shape[1] for i in request), kwargs.get("max_memory"))
+                    for request in requests)
+        return transform(coefficients, requests, **kwargs)
 
-    monkeypatch.setattr(integrals, "transform_eri_block", selected)
+    monkeypatch.setattr(integrals, "transform_eri_blocks", selected)
     budget = 23.5 if with_t2 else None
     actual = mp.MP2(source, frozen=frozen, with_t2=with_t2, max_memory=budget).run()
     assert actual.converged

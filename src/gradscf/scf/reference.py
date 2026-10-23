@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import hashlib
 import numpy as np
 import jax.numpy as jnp
-from gradscf._memory import resolve_memory_mb
+from gradscf._memory import resolve_memory_mb, validate_reserved_bytes
 from gradscf.ao2mo import transform_integrals, validate_integrals, validate_unrestricted_integrals, unrestricted_frozen_indices, transform_unrestricted_integrals
 
 
@@ -31,8 +31,9 @@ class UnrestrictedReference:
     mo_energy: object = None
 
 
-def unrestricted_reference_from_source(source, *, max_memory=None):
+def unrestricted_reference_from_source(source, *, max_memory=None, reserved_bytes=0):
     max_memory = resolve_memory_mb(max_memory, source)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     if isinstance(source, UnrestrictedReference):
         h, g = validate_unrestricted_integrals(source.h1, source.eri)
         unrestricted_frozen_indices(h[0].shape[0], source.nocc)
@@ -72,7 +73,8 @@ def unrestricted_reference_from_source(source, *, max_memory=None):
         kwargs = {"eri" if jnp.ndim(eri) == 4 else "eri_pair_matrix": eri}
     else:
         raise ValueError("HF reference does not supply post-HF two-electron integrals")
-    h, g = transform_unrestricted_integrals(hcore, coeff, max_memory=max_memory, **kwargs)
+    h, g = transform_unrestricted_integrals(hcore, coeff, max_memory=max_memory,
+                                           reserved_bytes=reserved_bytes, **kwargs)
     return UnrestrictedReference(h, g, nocc, enuc, source.mo_energy)
 
 
@@ -82,8 +84,9 @@ def is_unrestricted_source(source):
     return isinstance(source, (UnrestrictedReference, UKS, ROKS))
 
 
-def reference_from_source(source, *, max_memory=None):
+def reference_from_source(source, *, max_memory=None, reserved_bytes=0):
     max_memory = resolve_memory_mb(max_memory, source)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     if isinstance(source, RestrictedReference):
         h, g = validate_integrals(source.h1, source.eri)
         if not isinstance(source.nocc, int) or not 0 <= source.nocc <= h.shape[0]:
@@ -124,7 +127,8 @@ def reference_from_source(source, *, max_memory=None):
                 "SCF reference does not supply post-HF two-electron integrals"
             )
         kwargs = {"eri_pair_matrix": pair}
-    h, g = transform_integrals(inputs.hcore, c, max_memory=max_memory, **kwargs)
+    h, g = transform_integrals(inputs.hcore, c, max_memory=max_memory,
+                                reserved_bytes=reserved_bytes, **kwargs)
     return RestrictedReference(h, g, nocc, inputs.nuclear_repulsion, source.mo_energy)
 
 

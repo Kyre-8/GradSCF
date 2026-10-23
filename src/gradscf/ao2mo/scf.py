@@ -4,7 +4,8 @@ from typing import NamedTuple
 import jax.numpy as jnp
 import numpy as np
 
-from gradscf._memory import array_storage_bytes, resolve_memory_mb, workspace_bytes
+from gradscf._memory import (array_storage_bytes, resolve_memory_mb,
+                             validate_reserved_bytes, workspace_bytes)
 from gradscf.ao2mo.reference import transform_fock
 
 
@@ -17,7 +18,7 @@ class SCFSource(NamedTuple):
     ao_kwargs: dict
 
 
-def prepare_scf_source(source, *, max_memory=None, allow_rohf=False):
+def prepare_scf_source(source, *, max_memory=None, allow_rohf=False, reserved_bytes=0):
     """Read current RHF/UHF orbitals, solved Focks and one AO representation.
 
     No J/K or complete MO ERI is constructed. Native direct providers remain
@@ -30,6 +31,7 @@ def prepare_scf_source(source, *, max_memory=None, allow_rohf=False):
     from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
 
     max_memory = resolve_memory_mb(max_memory, source)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     if not isinstance(allow_rohf, bool):
         raise TypeError('allow_rohf must be a static bool')
     rohf = allow_rohf and isinstance(source, ROKS)
@@ -92,7 +94,7 @@ def prepare_scf_source(source, *, max_memory=None, allow_rohf=False):
             inputs.ao, inputs.ao_deriv1, inputs.ao_laplacian, inputs.coords, inputs.grid_weights)
         device = getattr(coeff, "device", None)
         device = device() if callable(device) else device
-        available = workspace_bytes(max_memory, resident_bytes=resident, device=device)
+        available = workspace_bytes(max_memory, resident_bytes=resident+reserved_bytes, device=device)
         # Packed JAX construction can retain an accumulator, a chunk result
         # and their sum; scan accumulators also carry a sentinel AO-pair row.
         required = 3 * (npair + 1)**2 * itemsize

@@ -5,8 +5,8 @@ import jax.numpy as jnp
 from .types import MPConfig, MPResult
 from .integrals import prepare_integrals
 from ..solvers import solve_tensor_sum
-from .._memory import resolve_memory_mb, tree_storage_bytes
-from ._memory import plan_mp2
+from .._memory import resolve_memory_mb, tree_storage_bytes, validate_reserved_bytes
+from ._memory import plan_mp2, preparation_bytes
 
 
 def _channel(left_energy, right_energy, no, nj, *, block=None, factors=None,
@@ -111,21 +111,34 @@ def evaluate_mp2(ints, config, *, max_memory=None, reserved_bytes=0):
                     minimum, ints.canonical_error, valid, jnp.stack([mask(e2)]))
 
 
-def run_mp(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config=None):
+def run_mp(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config=None,
+            max_memory=None, reserved_bytes=0):
     """Pure MO-array entry, differentiable in h1, ERIs and nuclear repulsion.
 
     nocc is a static integer (RHF) or (nalpha, nbeta) tuple (UHF).
     Eager facades additionally verify source convergence and freshness.
     """
     cfg = MPConfig() if config is None else config
+    reserved = validate_reserved_bytes(reserved_bytes)
+    maximum = None if max_memory is None else resolve_memory_mb(max_memory)
     if cfg._use_series(isinstance(nocc, tuple)):
         from .series import run_series
         return run_series(h1, eri, nocc=nocc, frozen=frozen,
-                          nuclear_repulsion=nuclear_repulsion, config=cfg)
+            nuclear_repulsion=nuclear_repulsion, config=cfg, reserved_bytes=reserved,
+            **({} if maximum is None else dict(max_memory=maximum)))
     if cfg.order == 3:
         from .mp3 import evaluate_mp3
         return evaluate_mp3(h1, eri, nocc=nocc, frozen=frozen,
-                            nuclear_repulsion=nuclear_repulsion, config=cfg)
+            nuclear_repulsion=nuclear_repulsion, config=cfg, max_memory=maximum,
+            reserved_bytes=reserved)
+    future = 0
+    if maximum is not None:
+        h1, eri = jax.tree.map(jnp.asarray, (h1, eri))
+        nmo = (h1[0] if isinstance(nocc, tuple) else h1).shape[0]
+        future = preparation_bytes(nmo, nocc, frozen, cfg,
+                                    jnp.result_type(*jax.tree.leaves((h1, eri))))
     ints = prepare_integrals(h1, eri, nocc=nocc, frozen=frozen,
-                             nuclear_repulsion=nuclear_repulsion, frozen_gap_tol=cfg.denominator_tol)
-    return evaluate_mp2(ints, cfg)
+        nuclear_repulsion=nuclear_repulsion, frozen_gap_tol=cfg.denominator_tol,
+        max_memory=maximum, reserved_bytes=reserved+future)
+    return evaluate_mp2(ints, cfg, max_memory=maximum,
+        reserved_bytes=reserved+tree_storage_bytes(h1, eri, nuclear_repulsion, exclude=(ints,)))

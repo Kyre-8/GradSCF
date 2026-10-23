@@ -188,9 +188,10 @@ def _compiled_config(config):
 
 
 def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config,
-               max_memory=DEFAULT_MAX_MEMORY_MB):
+               max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0):
     """Validate static metadata and reuse a graph with live physical inputs."""
     max_memory = validate_memory_mb(max_memory)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     nuclear_repulsion = jnp.asarray(nuclear_repulsion)
     if nuclear_repulsion.shape != () or jnp.iscomplexobj(nuclear_repulsion):
         raise ValueError("nuclear_repulsion must be a real scalar")
@@ -208,7 +209,7 @@ def run_series(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., config,
     topology = _compiled_config(config)
     return _run_series(h1, eri, config.denominator_tol, config.canonical_tol,
         nocc=nocc, frozen=frozen, nuclear_repulsion=nuclear_repulsion, config=topology,
-        max_memory=max_memory)
+        max_memory=max_memory, reserved_bytes=reserved_bytes)
 
 
 def run_from_orbitals(coefficients, focks, nocc, reference_energy, *, frozen=None,
@@ -266,13 +267,15 @@ def _run_from_orbitals(cs, focks, energy, denominator_tol, canonical_tol, *, noc
     source = dict(eri=eri, eri_pair_matrix=eri_pair_matrix, df_factors=df_factors,
                   direct_basis=direct_basis)
     dtype = (jnp.dtype(jnp.float64) if direct_basis is not None else
-             jnp.result_type(*cs, *focks, energy, *jax.tree.leaves((eri, eri_pair_matrix, df_factors))))
-    energy = energy.astype(dtype)
+             jnp.result_type(*cs, *focks, *jax.tree.leaves((eri, eri_pair_matrix, df_factors))))
+    # Total HF energy is a lambda-independent shift, outside the interaction
+    # chart. Its precision must not change the wavefunction or MP corrections.
+    reference = jnp.zeros((), dtype)
     focks = tuple(f.astype(dtype) for f in focks)
     history = reserved_bytes + history_bytes(space, config, dtype) + tree_storage_bytes(space)
     workspace_bytes(max_memory, resident_bytes=history + tree_storage_bytes(cs, focks, energy, source))
     data = from_orbitals(cs if unrestricted else cs[0], focks if unrestricted else focks[0],
-        energy, determinants, max_memory=max_memory, reserved_bytes=history, **source)
+        reference, determinants, max_memory=max_memory, reserved_bytes=history, **source)
     memory = plan_series((cs, energy, source), (), focks, space, nocc, frozen,
         config, max_memory, prepared=data, reserved_bytes=reserved_bytes)
     from ..ci.direct import from_prepared
@@ -302,21 +305,22 @@ def _run_from_orbitals(cs, focks, energy, denominator_tol, canonical_tol, *, noc
     amplitudes, alpha, beta = _state_outputs(space, determinants, config, unrestricted)
     integrals = tuple(x for x in jax.tree.leaves((cs, energy, source, data))
                       if hasattr(x, 'dtype'))
-    return _solve_series(space, focks, energy, nocc=nocc, frozen=frozen,
-        nuclear_repulsion=jnp.zeros((), dtype), config=config, denominator_tol=denominator_tol,
+    return _solve_series(space, focks, reference, nocc=nocc, frozen=frozen,
+        nuclear_repulsion=energy, config=config, denominator_tol=denominator_tol,
         canonical_tol=canonical_tol, memory=memory, max_memory=max_memory,
         actions=(gaps, fock_action, fluctuation, minimum, amplitudes, alpha, beta), integrals=integrals)
 
 
-@partial(jax.jit, static_argnames=("nocc", "frozen", "config", "max_memory"))
+@partial(jax.jit, static_argnames=("nocc", "frozen", "config", "max_memory", "reserved_bytes"))
 def _run_series(h1, eri, denominator_tol, canonical_tol, *, nocc, frozen,
-                nuclear_repulsion, config, max_memory):
+                nuclear_repulsion, config, max_memory, reserved_bytes):
     hs, gs, focks, reference_energy = _reference_data(h1, eri, nocc)
     unrestricted = isinstance(nocc, tuple)
     space = make_series_space(hs[0].shape[0], nocc, frozen=frozen, config=config,
                               packed_only=True)
     from ._series_memory import plan_series
-    memory = plan_series(hs, gs, focks, space, nocc, frozen, config, max_memory)
+    memory = plan_series(hs, gs, focks, space, nocc, frozen, config, max_memory,
+                         reserved_bytes=reserved_bytes)
     if config.algorithm == "tensor" and not memory.packed and config.orbital_basis == "canonical":
         from ._tensor import _with_dense_maps
         space = _with_dense_maps(space)

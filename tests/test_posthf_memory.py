@@ -14,6 +14,7 @@ from gradscf import cc, ci, gto, mp, scf
 from gradscf._memory import DEFAULT_MAX_MEMORY_MB
 from gradscf import ao2mo
 from gradscf.ao2mo import reference as ao2mo_reference
+from gradscf.ao2mo import blocks as ao2mo_blocks
 from gradscf.scf.reference import RestrictedReference, UnrestrictedReference
 
 
@@ -75,7 +76,7 @@ def test_facade_rejects_invalid_budget_without_preparing_integrals(name, budget,
 
     monkeypatch.setattr(ao2mo_reference, "transform_eri_block", forbidden)
     monkeypatch.setattr(importlib.import_module("gradscf.mp.integrals"),
-                        "transform_eri_block", forbidden)
+                        "transform_eri_blocks", forbidden)
     with pytest.raises(ValueError, match="max_memory"):
         _method(name, source, max_memory=budget)
 
@@ -93,6 +94,7 @@ def test_full_transform_wrappers_forward_budget_to_each_block(
         return jnp.zeros(tuple(x.shape[1] for x in coefficients), dtype=c.dtype)
 
     monkeypatch.setattr(ao2mo_reference, "transform_eri_block", block)
+    monkeypatch.setattr(ao2mo_blocks, "transform_eri_block", block)
     if unrestricted:
         ao2mo.transform_unrestricted_integrals(
             h, (c, c), eri=jnp.zeros((3,) * 4), **memory_kwargs)
@@ -116,10 +118,16 @@ def test_budgeted_full_transform_matches_small_dense_oracle(representation, unre
               "packed": {"eri_pair_matrix": jnp.asarray(eri[rows, columns][:, rows, columns])},
               "df": {"df_factors": jnp.asarray(factors)}}[representation]
     cs = tuple(jnp.asarray(c, dtype=jnp.float64) for c in coefficients)
-    # Five decimal kB fit these resident arrays and outputs. The 17-row DF
-    # auxiliary axis must be tiled by the existing shared block planner.
+    # The 17-row DF axis must be tiled by the shared block planner.
     if unrestricted:
-        hs, gs = ao2mo.transform_unrestricted_integrals(h, cs, max_memory=.005, **inputs)
+        budget = .005
+        if representation == "packed":
+            # Joint inputs/output buffers/scratch need 4060 working bytes:
+            # 0.005 MB leaves 4000; 0.0051 MB leaves 4080 after the reserve.
+            with pytest.raises(ValueError, match="memory|budget|resident"):
+                ao2mo.transform_unrestricted_integrals(h, cs, max_memory=budget, **inputs)
+            budget = .0051
+        hs, gs = ao2mo.transform_unrestricted_integrals(h, cs, max_memory=budget, **inputs)
         pairs = ((0, 0), (0, 1), (1, 1))
     else:
         transformed_h, transformed_g = ao2mo.transform_integrals(
@@ -176,14 +184,14 @@ def test_ci_mo_adapter_forwards_override_to_shared_reference(monkeypatch):
 @pytest.mark.parametrize("override", [None, 23.5], ids=["inherit", "override"])
 def test_mp2_adapter_forwards_budget_to_selected_spin_blocks(solved_hf, override, monkeypatch):
     integrals = importlib.import_module("gradscf.mp.integrals")
-    original = integrals.transform_eri_block
+    original = integrals.transform_eri_blocks
     seen = []
 
-    def capture(*args, **kwargs):
-        seen.append(kwargs.get("max_memory"))
-        return original(*args, **kwargs)
+    def capture(coefficients, requests, **kwargs):
+        seen.extend([kwargs.get("max_memory")] * len(requests))
+        return original(coefficients, requests, **kwargs)
 
-    monkeypatch.setattr(integrals, "transform_eri_block", capture)
+    monkeypatch.setattr(integrals, "transform_eri_blocks", capture)
     result = integrals.from_scf(solved_hf, max_memory=override)
     count = 3 if isinstance(solved_hf, scf.UHF) else 1
     assert seen == [solved_hf.max_memory if override is None else override] * count
@@ -197,8 +205,8 @@ def test_facade_kernel_forwards_current_method_budget(name, solved_hf, monkeypat
     family = "mp" if name in {"mp2", "mp3", "series"} else "cc" if name == "ccsd" else "ci"
     api = importlib.import_module(f"gradscf.{family}.api")
     boundary = ("unrestricted_reference_from_source" if unrestricted else "reference_from_source")
-    if name == "mp2":
-        boundary = "from_scf"
+    if name == "mp2" or (name == "mp3" and not unrestricted):
+        boundary = "prepare_scf_source"
     elif name == "ccsd" and not unrestricted:
         boundary = "from_orbitals"
     elif name == "cis" and not unrestricted:
@@ -229,7 +237,7 @@ def test_adapter_revalidates_mutated_source_budget_before_transform(
         boundary = "transform_unrestricted_integrals" if unrestricted else "transform_integrals"
     else:
         owner = importlib.import_module("gradscf.mp.integrals")
-        adapter, boundary = owner.from_scf, "transform_eri_block"
+        adapter, boundary = owner.from_scf, "transform_eri_blocks"
 
     def forbidden(*args, **kwargs):
         pytest.fail("A mutated invalid source budget reached AO->MO allocation")

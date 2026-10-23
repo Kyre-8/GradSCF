@@ -1,6 +1,7 @@
 """AO-to-MO transformations and shared post-HF integral-space utilities."""
 
 from gradscf.ao2mo.actions import VirtualERI
+from gradscf.ao2mo.df import transform_df_factors
 
 from gradscf.ao2mo.blocks import (
     transform_eri_block,
@@ -24,6 +25,7 @@ from gradscf.ao2mo.response import (
 
 __all__ = [
     "VirtualERI",
+    "transform_df_factors",
     "transform_eri_block",
     "transform_eri_blocks",
     "validate_integrals",

@@ -12,6 +12,7 @@ from gradscf.cc.integrals import from_orbitals as cc_from_orbitals
 from gradscf.cc.unrestricted_integrals import from_orbitals as ucc_from_orbitals
 from gradscf.mp.integrals import from_orbitals
 from gradscf.mp.mp2 import evaluate_mp2
+from gradscf.mp._memory import preparation_bytes
 from gradscf.mp.series import run_from_orbitals as series_from_orbitals
 from gradscf.ci.integrals import from_orbitals as ci_from_orbitals
 from gradscf.ci.solver import solve_ci_from_integrals
@@ -121,47 +122,61 @@ class CorrelatedEnergy:
             else:
                 coefficients, canonical_valid = canonicalize(coefficients, state.fock_matrix.mean(axis=0))
                 valid &= canonical_valid
+        source = (state, inputs, coefficients, *(getattr(self.reference, name, None)
+            for name in ('parameters', 'coefficients', 'coordinates', 'occupations')),
+            getattr(getattr(self.reference, 'plan', None), 'topology', None))
         if self._selected_mp2 or self._selected_cc or self._selected_mp_series:
             cs = tuple(coefficients) if self.reference.unrestricted else (coefficients,)
             fs = tuple(state.fock_matrix) if self.reference.unrestricted else (state.fock_matrix.mean(axis=0),)
             focks = tuple(transform_fock(f, c) for c, f in zip(cs, fs))
-            options = dict(eri=inputs["eri"], direct_basis=inputs.get("direct_basis"),
-                           max_memory=self.max_memory)
+            direct = inputs.get("direct_basis")
+            ao = {"direct_basis": direct} if direct is not None else {
+                "eri" if inputs["eri"].ndim == 4 else "eri_pair_matrix": inputs["eri"]}
+            caller = tree_storage_bytes(*source, fs,
+                exclude=(cs, focks, state.total_energy, *jax.tree.leaves(ao)))
+            options = dict(**ao, max_memory=self.max_memory, reserved_bytes=caller)
             if self._selected_mp2:
+                dtype = (jnp.float64 if direct is not None else
+                         jnp.result_type(*cs, *focks, *jax.tree.leaves(ao)))
+                future = preparation_bytes(cs[0].shape[1], self.nocc, None, self.config, dtype)
+                options['reserved_bytes'] += future
                 data = from_orbitals(coefficients, focks, self.nocc, state.total_energy,
                     frozen_gap_tol=self.config.denominator_tol, **options)
-                result = evaluate_mp2(data, self.config)
+                result = evaluate_mp2(data, self.config, max_memory=self.max_memory,
+                    reserved_bytes=tree_storage_bytes(*source, fs, focks, exclude=(data,)))
             elif not self._selected_cc:
-                direct = inputs.get("direct_basis")
-                ao = {"direct_basis": direct} if direct is not None else {
-                    "eri" if inputs["eri"].ndim == 4 else "eri_pair_matrix": inputs["eri"]}
-                source = (state, inputs, self.reference.parameters, self.reference.coefficients,
-                    self.reference.coordinates, self.reference.occupations, self.reference.plan.topology)
-                reserved = tree_storage_bytes(*source, fs,
-                    exclude=(cs, focks, state.total_energy, *jax.tree.leaves(ao)))
                 result = series_from_orbitals(coefficients, focks, self.nocc, state.total_energy,
-                    config=self.config, max_memory=self.max_memory, reserved_bytes=reserved, **ao)
+                    config=self.config, **options)
             elif self.reference.unrestricted:
                 data, occupied, virtual = ucc_from_orbitals(coefficients, focks,
                     self.nocc, state.total_energy, vvvv='blocks', **options)
-                result = cc.run_ucc_from_integrals(data, occupied, virtual, config=self.config)
+                result = cc.run_ucc_from_integrals(data, occupied, virtual, config=self.config,
+                    max_memory=self.max_memory,
+                    reserved_bytes=tree_storage_bytes(*source, fs, focks, exclude=(data,)))
             else:
                 data = cc_from_orbitals(coefficients, focks[0], self.nocc,
                                        state.total_energy, **options)
-                result = cc.run_cc_from_integrals(data, config=self.config)
+                result = cc.run_cc_from_integrals(data, config=self.config, max_memory=self.max_memory,
+                    reserved_bytes=tree_storage_bytes(*source, fs, focks, exclude=(data,)))
         else:
             transform = transform_unrestricted_integrals if self.reference.unrestricted else transform_integrals
             h1, eri = transform(inputs["hcore"], coefficients, eri=inputs["eri"],
-                                max_memory=self.max_memory)
+                max_memory=self.max_memory,
+                reserved_bytes=tree_storage_bytes(*source,
+                    exclude=(inputs['hcore'], coefficients, inputs['eri'])))
             solve = (mp.run_mp if self.method in {"mp", "mp2"} else
                      cc.run_ucc if self.reference.unrestricted else cc.run_cc)
             result = solve(h1, eri, nocc=self.nocc, nuclear_repulsion=inputs["nuclear_repulsion"],
-                           config=self.config)
+                config=self.config, max_memory=self.max_memory,
+                reserved_bytes=tree_storage_bytes(*source, exclude=(h1, eri, inputs['nuclear_repulsion'])))
         valid &= result.valid if self.method in {"mp", "mp2"} else result.converged
         total = result.total_energy
         if self.method == "ccsd(t)":
             options = dict(orbital_basis="semicanonical", algorithm="streamed",
-                denominator_tol=self.config.denominator_tol, residual_tol=self.config.residual_tol)
+                denominator_tol=self.config.denominator_tol, residual_tol=self.config.residual_tol,
+                max_memory=self.max_memory,
+                reserved_bytes=tree_storage_bytes(*source, fs, focks, exclude=(data, result)) if self._selected_cc
+                    else tree_storage_bytes(*source, exclude=(h1, eri, result)))
             correction = (cc.evaluate_triples_from_integrals(data, result, **options)
                 if self._selected_cc else cc.evaluate_triples(
                     h1, eri, result, nocc=self.nocc, **options))

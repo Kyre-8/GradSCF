@@ -57,9 +57,11 @@ Within-block MO degeneracy is allowed when the physical excitation resolvent
 and HF response remain nonsingular. MP2 requests selected occupied/virtual
 blocks, and explicit `jk_backend="direct"` also removes full moving AO ERIs.
 See the [direct N2 gradient/HVP example](../../../examples/mp/direct_geometry.py)
-and [SERIES.md](SERIES.md). Higher-order geometry still uses the full-MO
-reference adapter. `max_memory` inherits the source for integral planning;
-complete solver/AD state requires separate accounting.
+and [SERIES.md](SERIES.md). Noncanonical higher-order geometry uses selected
+normal-order kernels with the same Taylor residual. Canonical series retain
+the full-MO raw chart. `max_memory` inherits the source and plans known
+integral/state/work arrays; compilation, allocator and arbitrary outer AD
+storage require separate measurement.
 
 ## Results and validity
 
@@ -112,14 +114,14 @@ All shared transformations are maintained in `gradscf.ao2mo`.
 Noncanonical MP2 solves a four-axis tensor equation and keeps its internal
 amplitude tensor even when `with_t2=False`; its storage is O(nocc^2 nvir^2).
 
-The specialized RMP3 kernel is an **in-core reference implementation**. It reuses the
-existing full-MO post-HF adapter and restricted CC integral blocks; DF input
-is expanded to full MO ERIs on this path. `with_t2=False` suppresses the output
-but MP3 still needs first-order doubles internally. Streaming MP3 is a future
-extension, not implied by MP2 DF support.
+The specialized RMP3 kernel uses seven selected restricted CC integral blocks
+from SCF sources; it retains the bare virtual block and necessary doubles.
+`with_t2=False` suppresses the output but MP3 still needs first-order doubles
+internally. Explicit MO inputs preserve the original raw chart.
 
-The generic engine also transforms full MO integrals and stores only retained
-determinants. CI and MP share compact particle/hole string contractions for
+Noncanonical SCF inputs use selected CI kernels; canonical series and explicit
+MO Hamiltonians retain the full-MO chart and store retained state coefficients.
+CI and MP share compact particle/hole string contractions for
 Hamiltonian actions, without a determinant-pair connection table. The engine
 reuses shared linear solves instead of diagonalization. Its storage is excitation-rank limited but
 still combinatorial; declared capacity bounds can reject a high-order request.

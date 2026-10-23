@@ -267,7 +267,7 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-22): seven of the thirty-five parent tasks
+Current acceptance snapshot (2026-10-23): seven of the thirty-five parent tasks
 are fully accepted (WF-00/01/07/09/19/26/34); twenty-seven of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
@@ -275,20 +275,21 @@ successful component derivatives do not establish a whole-method memory bound.
 
 | Existing scope | Accepted frontier | Remaining acceptance boundary |
 | --- | --- | --- |
-| WF-02/03/04/05/06/08 | Shared AO2MO, native block response, selected R/U MP2, fixed-aniline full-input gradient | Joint spin/T2/resolvent/AD ownership, direct-input performance, measured size family, traced target-device capacity |
+| WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response, selected R/U MP2 with joint preparation/channel/caller budgets, fixed-aniline full-input gradient | Complete outer-AD ownership, direct-input performance, measured size family, traced target-device capacity |
 | WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, phase budgets and contracted two-body properties |
 | WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Remaining native phase budgets and whole-method measurements |
 | WF-18/19/20/21/22/27 | Selected and explicit-MO CI/UCIS/CIS(D) budgets, ROHF guards, FCI active/caller budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Complete phase/AD ownership, GPU and large-method measurements |
-| WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history budgets, pure-frame R/U MPn and moving native MP4 geometry second response | Eager budget/source integration, standalone MP3 mixed-dtype review and method-level size/performance acceptance |
+| WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 mixed precision, pure-frame R/U MPn and moving native MP4 geometry second response | Complete cross-caller AD ownership and method-level size/performance acceptance |
 | WF-29 | Hermitian/non-Hermitian primal, isolated-pair response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining SCF/other spectral/physical caller ownership and whole-method reconciliation |
 | WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
 
-The damaged jy_gpu_1 stages remain paused. The user subsequently authorized
-testing on jy_gpu_2 after reading its live manual: one V100, 64 logical CPUs,
-256G memory, 48 hours. Allocation 103505 on n002 runs from 2026-10-22 11:53:40
-to 2026-10-24 11:53:40 Asia/Shanghai. Actual CPU binding and separate CPU/CUDA
-float64 JIT/AD environment probes pass; these are readiness checks, not method
-regressions. Keep pending implementations separate from accepted evidence.
+The damaged jy_gpu_1 stages remain paused. Allocation 103505/n002 is no longer
+active. On 2026-10-23 the user renewed jy_gpu_2 authorization for one 5090/V100,
+64 logical CPUs and 512 GiB, retaining the previously authorized 48 hours. After
+refreshing lwcluster 0.8.0/manual and live capacity/budget, allocation 104081 runs
+on n006 with RTX 5090 physical GPU0. The actual 64-CPU affinity is 0-31,192-223;
+the real float64 CUDA/JIT probe exits 0. This is readiness, not a method gate.
+Keep pending implementations separate from accepted evidence.
 Do not reuse damaged stages, c20 credentials or its compiled native library.
 
 ### Foundation and first complete geometry slice
@@ -606,17 +607,22 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 
 ## 6. Validation matrix and measurement protocol
 
-Every numerical test runs remotely, never locally. The current 2026-10-22 user
-instruction authorizes **jy_gpu_2 / Delta** via Slurm: one V100, 64 logical CPUs,
-256G memory and 48 hours. Read the latest `lwcluster manual` before operating;
-submit from `~/private/homefile/` to `home` with typed `gpu:V100:1`. Execute all
-tests/builds inside allocation 103505 and its checked srun steps, not on the
-login node. Use only its assigned GPU0; GPU6 remains prohibited. The observed
-CPU set is 0-31,40-71. Four CPU lanes may use 0-15,16-31,40-55,56-71; a GPU
+Every numerical test runs remotely, never locally. The current 2026-10-23 user
+instruction authorizes **jy_gpu_2 / Delta** via Slurm: one 5090/V100, 64 logical
+CPUs, 512 GiB and 48 hours. The V100 nodes cannot supply 512 GiB; the admitted job is
+104081/n006 with typed `gpu:NV5090:1`. Read the latest `lwcluster manual` before
+operating; submit from `~/private/homefile/` to `home`. Execute all tests/builds
+inside the allocation's checked srun steps, not on the login node. Use only
+assigned physical GPU0; GPU6 remains prohibited. The observed CPU set is
+0-31,192-223. Four CPU lanes may use 0-15,16-31,192-207,208-223; a GPU
 test consumes a released CPU lane rather than adding host threads beyond 64.
-CPU srun steps explicitly use `--gres=none --mem=60G --immediate=15`; otherwise
+CPU srun steps explicitly use `--gres=none --mem=120G --immediate=15`; otherwise
 they inherit the allocation's sole GPU and unnecessarily serialize. This
 behavior was observed and the CPU-only metadata step verified before use.
+The resource-holder step reserves only 1 GiB and no GPU, leaving the remaining
+allocation available to test steps. `--overlap` does not remove step-memory
+reservations. Prior startup attempts104075/104078/104079 did not run numerical
+tests; their scheduler/device-isolation failures are not physics failures.
 Do not initialize unrelated GPUs or import c20 device/credential assumptions.
 Keep individual tests bounded (normally at most 600 seconds for this campaign).
 Existing jy_gpu_1 evidence remains valid only at its documented source version;
@@ -3041,3 +3047,51 @@ requires its own explicit decision and numerical validation.
   RPA wrappers do not yet relay these optional controls; arbitrary outer AD,
   opaque callbacks and process/allocator peaks remain outside an array cap.
   No new TODO is added and WF-29c retains its remaining caller/SCF gates.
+
+### 2026-10-23 — WF-05/06/26/29/33: shared MP preparation and caller ownership
+
+- The shared AO2MO DF-factor helper tiles auxiliary scratch while retaining the
+  requested Qia output. MP2 preparation and consumption retain source, all
+  three UHF outputs, Fock, T2 and resolvent owners under the original MB budget.
+  Raw-array, SCF and moving-molecule callers relay that budget and reservation.
+  Eager noncanonical series and canonical MP3 use the already tested selected
+  orbital kernels. Canonical higher-order series retain their original chart;
+  small dense maps are restored only after the existing byte preflight.
+- Selected series keep the lambda-independent HF energy outside the interaction
+  dtype, preserving float32 corrections with a float64 total-energy shift.
+  Shared full-UHF transformation preflights aa/ab/bb together. Selected triples
+  retain the still-live AO/MO Focks. No MP, CI, CC or triples formula is replaced.
+- The original 23-node campaign has actual passing frontiers in five bounded
+  shards. Review fixes have 15 unique passing affected nodes across a first
+  14-pass/1-fail batch and one successful targeted rerun; no aggregate 15-pass
+  XML is invented. Joint U-packed planning requires 4060 working bytes: the old
+  0.005 MB case now asserts rejection, then tests the same physical oracle at
+  0.0051 MB. Other budgets and original float64 tolerances remain unchanged.
+  Four legacy observation spies first fail on removed entry-point names and
+  then pass in 9.656116 s, without weakening their assertion ASTs or adding
+  deprecated aliases. All production manifests remain unchanged within runs.
+- These are CPU/x64 gates on the previous allocation 103505, not new 5090 tests
+  or method scaling. Root and independent review verify the final 19 files
+  against HANDOFF and archived bytes. Final P2/spies archive SHA256:
+  143ae3f9faa3cffc84fa4b8972a4426a413aeaf0f9a89433aa21e3c329e6a839;
+  original archive 7c06fd94c60f8004b5de872afcc6a4303b645bf3e854b1c1b3bde82b1344aca6.
+  Original failures, mixed-dtype checks and caller lineage remain recorded in
+  delta-mp-callers-r1/HANDOFF.json and review-p2/HANDOFF.json. Complete outer-AD,
+  GPU, warm scaling and process-memory gates stay open. No TODO is added.
+
+### 2026-10-23 — Remote resource renewal
+
+- The refreshed Delta manual is lwcluster 0.8.0, updated 2026-09-29. V100 nodes
+  have less than the newly requested 512 GiB; n006 supports the requested
+  single RTX 5090, 64 logical CPUs and 512 GiB. Allocation 104081 runs from
+  2026-10-23 09:54:40 to 2026-10-25 09:54:40 Asia/Shanghai, physical GPU0 only.
+- The actual CPU affinity is 0-31,192-223. CUDA/JAX 0.10.0 float64 JIT produces
+  the expected scalar 14.0 on CUDA0, exit 0, in 52.137341 s including first
+  runtime initialization. This is a readiness check, not a method benchmark.
+  GPU6 is never initialized. Metadata and scripts are preserved in
+  artifacts/wavefunction-memory-20261021/delta-nv5090-20261023/.
+- Earlier holder attempts are retained as resource-orchestration failures:
+  104075 held the GPU, 104078 could not query a GPU from a CPU-only step, and
+  104079 held all step memory. None ran a numerical test. The accepted holder
+  uses no GPU and 1 GiB; scientific steps stay within the same allocation.
+  Source/library provenance and existing acceptance gates are unchanged.

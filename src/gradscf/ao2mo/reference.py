@@ -3,7 +3,7 @@ import jax.numpy as jnp
 
 from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, tree_storage_bytes,
     validate_memory_mb, validate_reserved_bytes, workspace_bytes)
-from gradscf.ao2mo.blocks import transform_eri_block
+from gradscf.ao2mo.blocks import transform_eri_block, transform_eri_blocks
 
 
 def transform_fock(fock, mo_coeff):
@@ -55,9 +55,7 @@ def transform_integrals(
         )
     if c.ndim != 2 or h.shape != (c.shape[0], c.shape[0]):
         raise ValueError("Inconsistent AO Hamiltonian and MO coefficient dimensions")
-    dtype = jnp.result_type(c, h)
-    one_body = (c.shape[1]*(c.shape[0]+c.shape[1])
-                +sum(a.size for a in (c, h) if a.dtype != dtype))*dtype.itemsize
+    one_body = _one_body_bytes(c, h)
     resident = tree_storage_bytes(h, exclude=(c, eri, eri_pair_matrix, df_factors))
     reservation = reserved_bytes+resident+one_body
     device = getattr(c, "device", None)
@@ -67,6 +65,12 @@ def transform_integrals(
                        df_factors=df_factors, direct_basis=direct_basis, max_memory=max_memory,
                        reserved_bytes=reservation)
     return validate_integrals(c.T @ h @ c, g)
+
+
+def _one_body_bytes(c, h):
+    dtype = jnp.result_type(c, h)
+    return (c.shape[1]*(c.shape[0]+c.shape[1])
+            +sum(a.size for a in (c, h) if a.dtype != dtype))*dtype.itemsize
 
 
 def _transform_eri(c, d, *, eri=None, eri_pair_matrix=None, df_factors=None, direct_basis=None,
@@ -87,13 +91,24 @@ def validate_unrestricted_integrals(h1, eri):
 
 
 def transform_unrestricted_integrals(hcore, mo_coeff, **kwargs):
-    """Real alpha/beta MO transform from full, s4 or density-fitted AO ERIs."""
+    """Real alpha/beta MO integrals with all three spin outputs budgeted jointly."""
     if len(mo_coeff) != 2:
         raise ValueError("Supply alpha and beta MO coefficients")
     ca, cb = map(jnp.asarray, mo_coeff)
     if ca.shape != cb.shape:
         raise ValueError("Alpha and beta MO spaces must have equal dimensions")
-    ha, gaa = transform_integrals(hcore, ca, **kwargs)
-    hb, gbb = transform_integrals(hcore, cb, **kwargs)
-    gab = _transform_eri(ca, cb, **kwargs)
-    return validate_unrestricted_integrals((ha, hb), (gaa, gab, gbb))
+    h = jnp.asarray(hcore)
+    if any(jnp.iscomplexobj(x) for x in (ca, cb, h)):
+        raise NotImplementedError(
+            "Post-HF transformation currently requires real orbitals and integrals")
+    if ca.ndim != 2 or h.shape != (ca.shape[0], ca.shape[0]):
+        raise ValueError("Inconsistent AO Hamiltonian and MO coefficient dimensions")
+    max_memory = validate_memory_mb(kwargs.pop('max_memory', DEFAULT_MAX_MEMORY_MB))
+    reserved = validate_reserved_bytes(kwargs.pop('reserved_bytes', 0))
+    resident = tree_storage_bytes(h, exclude=(ca, cb, *(kwargs.get(name)
+        for name in ('eri', 'eri_pair_matrix', 'df_factors'))))
+    reservation = reserved + resident + sum(_one_body_bytes(c, h) for c in (ca, cb))
+    gaa, gab, gbb = transform_eri_blocks((ca, cb),
+        ((0, 0, 0, 0), (0, 0, 1, 1), (1, 1, 1, 1)),
+        max_memory=max_memory, reserved_bytes=reservation, **kwargs)
+    return validate_unrestricted_integrals((ca.T @ h @ ca, cb.T @ h @ cb), (gaa, gab, gbb))

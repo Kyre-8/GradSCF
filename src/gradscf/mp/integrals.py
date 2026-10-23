@@ -5,8 +5,11 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 
-from gradscf._memory import DEFAULT_MAX_MEMORY_MB, resolve_memory_mb
-from gradscf.ao2mo import validate_integrals, validate_unrestricted_integrals, frozen_indices, unrestricted_frozen_indices, transform_eri_block
+from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, resolve_memory_mb, tree_storage_bytes,
+                             validate_reserved_bytes, workspace_bytes)
+from gradscf.ao2mo import (validate_integrals, validate_unrestricted_integrals, frozen_indices,
+                          unrestricted_frozen_indices, transform_eri_blocks, transform_df_factors)
+from gradscf.ao2mo.df import _factor_block_size
 from gradscf.ao2mo.scf import prepare_scf_source
 
 
@@ -102,7 +105,23 @@ def _reference_data(h1, eri, nocc):
         return (h,), (g,), (f,), energy
 
 
-def prepare_integrals(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., frozen_gap_tol=1e-10):
+def prepare_integrals(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., frozen_gap_tol=1e-10,
+                      max_memory=None, reserved_bytes=0):
+    reserved = validate_reserved_bytes(reserved_bytes)
+    if max_memory is not None:
+        maximum = resolve_memory_mb(max_memory)
+        hs, gs = (validate_unrestricted_integrals(h1, eri) if isinstance(nocc, tuple)
+                  else tuple((x,) for x in validate_integrals(h1, eri)))
+        ns = nocc if isinstance(nocc, tuple) else (nocc,)
+        n = hs[0].shape[0]
+        fr = (unrestricted_frozen_indices(n, nocc, frozen) if isinstance(nocc, tuple)
+              else (frozen_indices(n, nocc, frozen),))
+        counts = tuple(tuple(map(len, _active_orbitals(n, no, f))) for no, f in zip(ns, fr))
+        pairs = ((0, 0),) if len(ns) == 1 else ((0, 0), (0, 1), (1, 1))
+        blocks = sum(counts[a][0]*counts[a][1]*counts[b][0]*counts[b][1] for a, b in pairs)
+        frames = sum(n*n+sum(c)**2+sum(c) for c in counts)
+        workspace_bytes(maximum, resident_bytes=reserved+tree_storage_bytes(hs, gs, nuclear_repulsion)
+            +(blocks+frames)*jnp.result_type(*hs, *gs).itemsize)
     hs, gs, focks, energy = _reference_data(h1, eri, nocc)
     energy = energy + nuclear_repulsion
     if isinstance(nocc, tuple):
@@ -131,7 +150,8 @@ def prepare_integrals(h1, eri, *, nocc, frozen=None, nuclear_repulsion=0., froze
 
 def from_orbitals(coefficients, focks, nocc, reference_energy, *, frozen=None,
                   frozen_gap_tol=1e-10, max_memory=DEFAULT_MAX_MEMORY_MB,
-                  eri=None, eri_pair_matrix=None, df_factors=None, direct_basis=None):
+                  eri=None, eri_pair_matrix=None, df_factors=None, direct_basis=None,
+                  reserved_bytes=0):
     """Prepare MP2 occupied/virtual data from a real, supplied HF orbital frame.
 
     ``focks`` contains one restricted or two unrestricted full MO-frame Focks;
@@ -142,9 +162,12 @@ def from_orbitals(coefficients, focks, nocc, reference_energy, *, frozen=None,
 
     Exactly one AO ERI representation is required. Native direct inputs retain
     only selected ovov blocks; DF keeps the existing Qia factors. ``max_memory``
-    budgets each block transform, not all spin blocks, MP amplitudes or AD state.
+    plans all spin outputs and shared transform scratch. Caller-owned future
+    amplitudes/resolvent arrays use ``reserved_bytes``; arbitrary outer AD
+    and allocator residency remain separate from this known-array plan.
     """
     max_memory = resolve_memory_mb(max_memory)
+    reserved = validate_reserved_bytes(reserved_bytes)
     unrestricted = isinstance(nocc, tuple)
     cs = tuple(map(jnp.asarray, coefficients)) if unrestricted else (jnp.asarray(coefficients),)
     if len(cs) != (2 if unrestricted else 1) or any(c.ndim != 2 for c in cs):
@@ -171,6 +194,8 @@ def from_orbitals(coefficients, focks, nocc, reference_energy, *, frozen=None,
         fr = (frozen_indices(nmo, nocc, frozen),)
     if sum(x is not None for x in (eri, eri_pair_matrix, df_factors, direct_basis)) != 1:
         raise ValueError("Supply exactly one of eri, eri_pair_matrix, df_factors, direct_basis")
+    eri, eri_pair_matrix, df_factors = (None if x is None else jnp.asarray(x)
+                                      for x in (eri, eri_pair_matrix, df_factors))
     integral_dtype = (jnp.float64 if direct_basis is not None else
                       jnp.asarray(next(x for x in (eri, eri_pair_matrix, df_factors)
                                        if x is not None)).dtype)
@@ -179,39 +204,56 @@ def from_orbitals(coefficients, focks, nocc, reference_energy, *, frozen=None,
         raise NotImplementedError("MP requires real integral data")
     # Denominators, accumulators and optional amplitudes must share the dtype
     # of the transformed interaction; native direct integrals are float64.
+    original_focks = focks
+    counts = tuple(tuple(map(len, _active_orbitals(nmo, no, f))) for no, f in zip(ns, fr))
+    source = (eri, eri_pair_matrix, df_factors, direct_basis)
+    frames = sum(c.shape[0]*(o+v)+(o+v)**2+(o+v) for c, (o, v) in zip(cs, counts))
+    promotions = sum(f.size for f in focks if f.dtype != dtype)
+    workspace_bytes(max_memory, resident_bytes=reserved+tree_storage_bytes(cs, focks, reference_energy, source)
+                    +(frames+promotions)*dtype.itemsize)
     focks = tuple(f.astype(dtype) for f in focks)
     selections = tuple(active_indices(nmo, no, f) for no, f in zip(ns, fr))
     ovs = tuple((c[:, o], c[:, v]) for c, (o, v) in zip(cs, selections))
     energies = tuple(jnp.diag(f)[jnp.concatenate((o, v))]
                      for f, (o, v) in zip(focks, selections))
     pairs = ((0, 0), (0, 1), (1, 1)) if unrestricted else ((0, 0),)
+    active_focks = _active_focks(focks, selections)
+    frame_bytes = reserved+tree_storage_bytes(cs, original_focks, focks, reference_energy,
+                                             selections, ovs, energies, active_focks)
     if df_factors is not None:
         factors = jnp.asarray(df_factors)
         if factors.ndim != 3 or factors.shape[1:] != (cs[0].shape[0],) * 2:
             raise ValueError("df_factors must have shape (naux, nao, nao)")
         if jnp.iscomplexobj(factors):
             raise NotImplementedError("MP requires real DF factors")
-        ov_factors = tuple(jnp.einsum("Qpq,pi,qa->Qia", factors, o, v, precision="highest")
-                           for o, v in ovs)
+        sizes = tuple(factors.shape[0]*o.shape[1]*v.shape[1]*jnp.result_type(factors, o, v).itemsize
+                      for o, v in ovs)
+        reservations = tuple(frame_bytes-tree_storage_bytes(ov)+2*(sum(sizes)-size)
+                             for ov, size in zip(ovs, sizes))
+        for (o, v), other in zip(ovs, reservations):
+            _factor_block_size(factors, o, v, max_memory, other)
+        ov_factors = tuple(transform_df_factors(factors, o, v, max_memory=max_memory,
+            reserved_bytes=other) for (o, v), other in zip(ovs, reservations))
         blocks = None
         finite_data = (factors, *ov_factors)
     else:
-        blocks = tuple(transform_eri_block((*ovs[a], *ovs[b]),
-                                           eri=eri, eri_pair_matrix=eri_pair_matrix,
-                                           direct_basis=direct_basis, max_memory=max_memory)
-                       for a, b in pairs)
+        spaces = tuple(c for ov in ovs for c in ov)
+        requests = tuple((2*a, 2*a+1, 2*b, 2*b+1) for a, b in pairs)
+        blocks = transform_eri_blocks(spaces, requests, eri=eri, eri_pair_matrix=eri_pair_matrix,
+            direct_basis=direct_basis, max_memory=max_memory,
+            reserved_bytes=frame_bytes-tree_storage_bytes(spaces))
         ov_factors = None
         finite_data = (*blocks, *jax.tree.leaves(direct_basis))
     finite = jnp.all(jnp.stack([jnp.all(jnp.isfinite(x))
                               for x in (reference_energy, *cs, *focks, *finite_data)]))
     return MPIntegrals(energies, tuple(len(o) for o, _ in selections), blocks,
                        ov_factors, reference_energy, canonical_error(focks), finite,
-                       _active_focks(focks, selections), reference_error(
+                       active_focks, reference_error(
                            focks, nocc, frozen=frozen,
                            orbital_basis="noncanonical", frozen_gap_tol=frozen_gap_tol))
 
 
-def from_scf(source, *, frozen=None, frozen_gap_tol=1e-10, max_memory=None):
+def from_scf(source, *, frozen=None, frozen_gap_tol=1e-10, max_memory=None, reserved_bytes=0):
     """Reuse current converged HF Focks and AO data without rebuilding J/K.
 
     This eager adapter validates the SCF source and occupations. The pure
@@ -222,7 +264,10 @@ def from_scf(source, *, frozen=None, frozen_gap_tol=1e-10, max_memory=None):
     their small-system packed AO reference path after a construction preflight.
     """
     max_memory = resolve_memory_mb(max_memory, source)
-    data = prepare_scf_source(source, max_memory=max_memory)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    data = prepare_scf_source(source, max_memory=max_memory, reserved_bytes=reserved_bytes)
+    caller = reserved_bytes+tree_storage_bytes(source, exclude=(data.coefficients, data.focks,
+                                                               data.reference_energy, data.ao_kwargs))
     return from_orbitals(data.coefficients, data.focks, data.nocc, data.reference_energy,
                          frozen=frozen, frozen_gap_tol=frozen_gap_tol,
-                         max_memory=max_memory, **data.ao_kwargs)
+                         max_memory=max_memory, reserved_bytes=caller, **data.ao_kwargs)
