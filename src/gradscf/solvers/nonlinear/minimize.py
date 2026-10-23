@@ -131,7 +131,8 @@ def solve_orbitals(args, coeff, *, energy, rotate, dimension, max_iterations, gr
             active = carry[-1] & (carry[4] < max_iterations)
             return jax.lax.cond(active, update, lambda c: c, carry), None
 
-        initial_active = allowed & (jnp.linalg.norm(grad)*.5 > gradient_tolerance*.1)
+        # Stationary seeds still receive the original Newton refinements below.
+        initial_active = allowed & (jnp.linalg.norm(grad)*.5 > gradient_tolerance)
         carry, _ = jax.lax.scan(jax.checkpoint(body),
             (origin, value, grad, state, iterations, evaluations+1, initial_active),
             None, length=max_iterations)

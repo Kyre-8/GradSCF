@@ -3248,3 +3248,39 @@ requires its own explicit decision and numerical validation.
   share intermediates. The reference-BLAS link does not justify blaming BLAS:
   external dgemm_ is used by ECP, not this all-electron shell path. A bounded
   diagnostic probe belongs to the existing WF-08, not a new TODO branch.
+
+### 2026-10-23 — WF-08/29: stationary seeds enter the existing Newton refinements
+
+- A temporary native probe and the existing state/count runner localize the
+  initial aniline delay. In the 180 s caller-level prefix, stage0 starts with
+  half-gradient norm5.90616372548961e-11, below the requested1e-10, but the
+  initial L-BFGS gate uses1e-11. The scan has not ended at timeout; GMRES has
+  not started. Native target timings alone could not establish that attribution.
+  Root verifies all28 indexed caller-probe payloads and the original mathematical
+  AST after removing the two scalar observers. Archive SHA256
+  d6eee49f3f0c2f285492c1ca42f8e22a076216d4688d3171738b3b6266538d7a.
+- Change only the initial L-BFGS gate to the declared gradient tolerance.
+  Already stationary seeds retain the original three actual Newton refinements;
+  nonstationary scan controls, inner0.1-tolerance rule, backtracking, shifts,
+  iteration limits, final stationarity and implicit AD owner are unchanged.
+  The finite explicit trajectory follows the new entrance decision. A shifted
+  scalar quadratic verifies its analytic finite response7/8, while a separate
+  well-conditioned case approaches the full stationary response. Both retain
+  nonzero JVP/VJP and directional second response.
+- Actual RED is3 expected assertion failures/2 passes, exit1/8.788978 s.
+  After the single-line fix,18 unique CPU cases pass: five new entrance/response
+  cases, five existing metric/implicit/finite-explicit controls, six native
+  RHF/UHF state/density/geometry cases and two relaxed direct MP2 mixed-response
+  cases. The final test's same-branch FD step is separately rerun:5 passes,
+  exit0/8.286340 s. The existing complete CUDA MP2 gradient/HVP case passes,
+  exit0/163.753526 s, with every actual output leaf on assigned GPU0. No native
+  kernel or library is changed. Tests run only on104081/n006, CPU0-15 or GPU0
+  with host192-207; GPU6 is never exposed.
+- Root and independent spec/quality review verify the sole mathematical AST
+  delta, final source/test hashes,75 indexed GREEN payloads, six original
+  exits/XML/source maps and GPU UUID. Evidence stationary-seed-green/HANDOFF.json
+  and root-verification.json; archive SHA256
+  c0f1c6bfad663985fad3a22f5cd18a18a6592593bb07414d3942e668ba3e761b.
+  This accepts a finite WF-08 prerequisite. A separately bounded postfix
+  aniline state/count run remains diagnostic; the full direct gradient, warm
+  timing and scale gate stay open. No parent or child is added or closed here.
