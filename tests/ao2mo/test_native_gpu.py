@@ -62,3 +62,43 @@ def test_native_ao2mo_cuda_coefficient_and_coordinate_hvp():
                         jax.tree.leaves((expected, expected_hvp))):
             assert a.devices() == {gpu}
             np.testing.assert_allclose(a, e, atol=3e-10, rtol=3e-9)
+
+
+def test_cuda_traced_capacity_is_shared_by_blocks_and_solver(monkeypatch):
+    from gradscf import _memory
+    from gradscf.solvers import solve_tensor_sum
+
+    cpu, gpu = jax.devices('cpu')[0], jax.devices('gpu')[0]
+    rng = np.random.default_rng(225)
+    with jax.default_device(cpu):
+        factors = jnp.asarray(rng.normal(scale=.1, size=(17, 4, 4)))
+        coefficients = tuple(jnp.asarray(rng.normal(scale=.2, size=(4, n)))
+                             for n in (2, 3, 2, 1))
+        expected = jnp.einsum('Qpq,Qrs,pi,qj,rk,sl->ijkl', factors, factors,
+                              *coefficients, precision='highest')
+        expected = expected / 4.
+
+    capacity = _memory.available_memory_bytes(gpu)
+    assert capacity is not None and capacity > 4500
+    observed = []
+
+    def limited_capacity(device=None):
+        observed.append(device)
+        assert device is gpu, 'A traced planner fell back to host capacity'
+        return 4500
+
+    monkeypatch.setattr(_memory, 'available_memory_bytes', limited_capacity)
+
+    @jax.jit
+    def action(b, cs):
+        block = ao2mo.transform_eri_block(cs, df_factors=b, max_memory=60.)
+        return solve_tensor_sum(tuple(jnp.eye(n) for n in block.shape), block,
+                                max_memory=60.).solution
+
+    with jax.default_device(gpu):
+        inputs = jax.tree.map(lambda x: jax.device_put(x, gpu), (factors, coefficients))
+        actual = action(*inputs)
+        assert actual.devices() == {gpu}
+        assert bool(jnp.all(jnp.isfinite(actual)))
+        np.testing.assert_allclose(actual, expected, atol=2e-12, rtol=2e-11)
+    assert len(observed) >= 2 and all(device is gpu for device in observed)

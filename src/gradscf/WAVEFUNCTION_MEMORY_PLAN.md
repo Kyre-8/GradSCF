@@ -321,6 +321,9 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     remains open. Historical checkpoint: WF-02b1.
   - [ ] **WF-02c:** complete the native block/capability contract with WF-03/04,
     including target-device capacity when JIT tracing hides concrete devices.
+    Concrete default-device inheritance and ambiguous accelerator-label guards
+    are verified. General outer-JIT target inference with captured CPU arrays
+    is still unsupported; do not count a context-only test as that capability.
   - [x] **WF-02d:** establish the dedicated AO2MO domain package and migrate
     existing callers without redundant forwarding files; share byte-reservation
     validation in `_memory` without an integral-to-solver dependency or a second
@@ -3578,3 +3581,42 @@ requires its own explicit decision and numerical validation.
   `2d39b6ccc00cc4cc9574f09729fbaa5f1d0ccd32c376dd5c93b20fcd77c3c621`.
   Snapshot `134efc2` plus the three CC files and narrow test excludes concurrent
   AO2MO/device changes. Accept this component only; WF-13 remains open.
+
+### 2026-10-23 — WF-02c: shared target-capacity checks
+
+- Consolidate six AO2MO device-selection sites in `_memory.array_device`.
+  Preserve a known eager array device, including legacy callable accessors;
+  otherwise inherit the concrete `jax.default_device`. Shared budget calls
+  without an explicit device now inherit that context too. Accelerator strings
+  such as `"gpu"` cannot silently fall through to host capacity: require a
+  concrete device and reject invalid objects. Do not enumerate/init other GPUs,
+  alter allocators or introduce a new budget parameter.
+- Independent review caught and removed an intermediate context-first rule
+  that could override a committed eager array's real device, plus a missing
+  callable normalization at the shared boundary. Both failures were reproduced
+  on the earlier implementation before their guards passed. Existing CPU
+  behavior is retained. An outer `jit(device=...)` or captured CPU constants do
+  not reliably reveal the executable's target to Python planners. The supported
+  traced GPU contract uses concrete target placement and default-device context;
+  capacity checks occur during planning, not each cached executable invocation.
+- Final remote validation yields 80 targeted CPU passes, 64 native CPU passes
+  and two real CUDA passes, with actual child/srun exits 0 and unchanged runtime
+  manifests. The CPU native group skips one separate GPU opt-in batch case;
+  the two CUDA cases run without skips. They cover native coefficient/coordinate
+  HVP against a CPU oracle and shared traced DF AO2MO/tensor-sum planning. The
+  latter first queries real device capacity, then injects 4500 B to exercise a
+  deterministic small cap. This is not a peak-VRAM or whole-process RSS bound.
+- Preserve the failed test history. An incomplete legacy SCF routing mock did
+  not accept the already-existing caller reservation; update its interface and
+  assert forwarded ownership explicitly. The Cartesian-d accuracy fixture's
+  2 MB budget also fails on the immutable baseline: its minimum declared budget
+  is about 2.195475 MB with native scratch included. Raise only that fixture's
+  workspace to 3 MB, retaining geometry, basis, original numerical tolerances
+  and separate insufficient-budget tests. No production threshold is relaxed.
+- Evidence: `device-budget/green/HANDOFF.json`, final CPU/CUDA download checks,
+  preserved RED records, and independent source review. Run on 104443/n006,
+  CPU 288-303; CUDA uses only UUID GPU-7aa3e8aa-431b-da04-7ba3-5c37ae5479d0.
+  Final CPU/CUDA manifests are `d5057bcc...` / `38e91c3b...`; native SO is
+  unchanged. A subsequent three-line AO2MO docstring change is AST-equivalent
+  and recorded separately. The generic captured-constant/outer-JIT target
+  boundary remains open under WF-02c; no parent or child closes here.

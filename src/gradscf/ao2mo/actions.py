@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 
 from gradscf._memory import (
-    DEFAULT_MAX_MEMORY_MB, array_storage_bytes, resolve_memory_mb,
+    DEFAULT_MAX_MEMORY_MB, array_device, array_storage_bytes, resolve_memory_mb,
     validate_reserved_bytes, workspace_bytes,
 )
 from gradscf.integrals.backends.native.jk import (
@@ -83,12 +83,8 @@ class VirtualERI:
         promotions = tuple(jax.ShapeDtypeStruct(value.shape, jnp.float64)
                            for value in (c, x) if value.dtype != jnp.float64)
         resident = array_storage_bytes(c, x, *jax.tree.leaves(basis), *promotions)
-        device = getattr(x, 'device', None)
-        device = device() if callable(device) else device
-        if device is None:
-            device = getattr(jax.config, 'jax_default_device', None)
         available = workspace_bytes(max_memory, resident_bytes=reserved+resident+3*prod(output.shape)*8,
-                                    device=device)
+                                    device=array_device(x, c))
         count = prod(x.shape[:-2])
         if not count or not nvir:
             return jnp.zeros(x.shape, dtype=jnp.float64)

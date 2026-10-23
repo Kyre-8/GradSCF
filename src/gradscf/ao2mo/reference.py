@@ -1,7 +1,7 @@
 """Complete real MO integral tensors for small-system reference calculations."""
 import jax.numpy as jnp
 
-from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, tree_storage_bytes,
+from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_device, tree_storage_bytes,
     validate_memory_mb, validate_reserved_bytes, workspace_bytes)
 from gradscf.ao2mo.blocks import transform_eri_block, transform_eri_blocks
 
@@ -58,9 +58,8 @@ def transform_integrals(
     one_body = _one_body_bytes(c, h)
     resident = tree_storage_bytes(h, exclude=(c, eri, eri_pair_matrix, df_factors))
     reservation = reserved_bytes+resident+one_body
-    device = getattr(c, "device", None)
     workspace_bytes(max_memory, resident_bytes=reservation,
-                    device=device() if callable(device) else device)
+                    device=array_device(c, h))
     g = _transform_eri(c, c, eri=eri, eri_pair_matrix=eri_pair_matrix,
                        df_factors=df_factors, direct_basis=direct_basis, max_memory=max_memory,
                        reserved_bytes=reservation)

@@ -2,7 +2,7 @@
 import jax
 import jax.numpy as jnp
 
-from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
+from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_device, array_storage_bytes,
                              validate_memory_mb, validate_reserved_bytes, workspace_bytes)
 
 
@@ -11,11 +11,8 @@ def _factor_block_size(factors, left, right, max_memory, reserved_bytes):
     q, nao, _ = factors.shape
     nl, nr = left.shape[1], right.shape[1]
     resident = reserved_bytes+array_storage_bytes(factors, left, right)+2*q*nl*nr*dtype.itemsize
-    device = getattr(factors, 'device', None)
-    device = device() if callable(device) else device
-    if device is None:
-        device = getattr(jax.config, 'jax_default_device', None)
-    available = workspace_bytes(max_memory, resident_bytes=resident, device=device)
+    available = workspace_bytes(max_memory, resident_bytes=resident,
+                                device=array_device(factors, left, right))
     if not q or not nl or not nr:
         return 0
     # Promoted auxiliary slice, both possible half-transform layouts and

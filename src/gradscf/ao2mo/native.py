@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from gradscf._memory import array_storage_bytes, workspace_bytes
+from gradscf._memory import array_device, array_storage_bytes, workspace_bytes
 from gradscf.integrals.backends.native.jk import (
     NativeDirectBasis, ProjectedNativeDirectBasis, native_jk_workspace_bytes,
 )
@@ -40,20 +40,10 @@ def _slab_plan(basis, coefficients, arrays, env, coords, max_memory, requests,
     topology = basis.plan.topology
     counts = tuple(nc * ((l + 1)*(l + 2)//2 if topology.cart else 2*l + 1)
                    for l, nc in zip(topology.angular_momenta, topology.contraction_counts))
-    device = None
-    for array in (*coefficients, *arrays):
-        if not isinstance(array, jax.core.Tracer):
-            device = getattr(array, 'device', None)
-            if callable(device):
-                device = device()
-            if device is not None:
-                break
-    if device is None:
-        device = getattr(jax.config, 'jax_default_device', None)
     resident = array_storage_bytes(*arrays, *coefficients, env, coords,
                                    *jax.tree.leaves(basis.parameters))
     available = workspace_bytes(max_memory, resident_bytes=resident + reserved_bytes,
-                                device=device)
+                                device=array_device(*coefficients, *arrays))
     sizes = tuple(c.shape[1] for c in coefficients)
     available -= 3 * sum(prod(sizes[i] for i in request) for request in requests) * 8
     if available < 0:

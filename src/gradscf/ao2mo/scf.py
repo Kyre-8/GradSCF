@@ -4,7 +4,7 @@ from typing import NamedTuple
 import jax.numpy as jnp
 import numpy as np
 
-from gradscf._memory import (array_storage_bytes, resolve_memory_mb,
+from gradscf._memory import (array_device, array_storage_bytes, resolve_memory_mb,
                              validate_reserved_bytes, workspace_bytes)
 from gradscf.ao2mo.reference import transform_fock
 
@@ -92,9 +92,8 @@ def prepare_scf_source(source, *, max_memory=None, allow_rohf=False, reserved_by
         itemsize = max(8, np.dtype(jnp.result_type(coeff, inputs.hcore)).itemsize)
         resident = array_storage_bytes(coeff, *focks, inputs.overlap, inputs.hcore,
             inputs.ao, inputs.ao_deriv1, inputs.ao_laplacian, inputs.coords, inputs.grid_weights)
-        device = getattr(coeff, "device", None)
-        device = device() if callable(device) else device
-        available = workspace_bytes(max_memory, resident_bytes=resident+reserved_bytes, device=device)
+        available = workspace_bytes(max_memory, resident_bytes=resident+reserved_bytes,
+                                    device=array_device(coeff))
         # Packed JAX construction can retain an accumulator, a chunk result
         # and their sum; scan accumulators also carry a sentinel AO-pair row.
         required = 3 * (npair + 1)**2 * itemsize

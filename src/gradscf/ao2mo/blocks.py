@@ -7,7 +7,7 @@ import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
 
-from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
+from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_device, array_storage_bytes,
                              validate_memory_mb, validate_reserved_bytes, workspace_bytes)
 from gradscf.integrals.molecular.eri import _metadata_arrays
 
@@ -31,8 +31,12 @@ def transform_eri_block(
     Checkpointing recomputes DF intermediates for differentiation. This plans
     forward arrays, not total AD-process storage or the required input cotangent.
     ``reserved_bytes`` additionally charges caller-owned resident arrays.
-    A traced input may not expose its target device. Without an explicitly
-    selected default device, only the shared helper's host-capacity cap applies.
+    For traced accelerator calculations, declare the concrete target using
+    ``jax.default_device(device)`` around tracing and execution. An outer
+    ``jit(device=...)`` alone cannot expose device capacity to Python planners.
+    Concrete arrays captured by the function must also reside on that target;
+    a saved CPU array's device does not describe an outer GPU compilation.
+    Capacity is checked while planning, not on every cached executable call.
     """
     reserved_bytes = validate_reserved_bytes(reserved_bytes)
     if len(coefficients) != 4:
@@ -154,17 +158,9 @@ def _array_source(nao, eri, eri_pair_matrix, df_factors):
 def _eri_block_size(source, coefficients, representation, max_memory, *, reserved_bytes=0):
     """Check static forward-array storage and choose the DF auxiliary tile."""
     arrays = (source, *coefficients)
-    device = None
-    for array in arrays:
-        device = getattr(array, "device", None)
-        if callable(device):
-            device = device()
-        if device is not None:
-            break
-    if device is None:
-        device = getattr(jax.config, "jax_default_device", None)
     available = workspace_bytes(
-        max_memory, resident_bytes=array_storage_bytes(*arrays) + reserved_bytes, device=device,
+        max_memory, resident_bytes=array_storage_bytes(*arrays) + reserved_bytes,
+        device=array_device(*arrays),
     )
     nao = coefficients[0].shape[0]
     shape = tuple(x.shape[1] for x in coefficients)

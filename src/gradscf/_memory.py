@@ -8,6 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
+import jax
 
 
 DEFAULT_MAX_MEMORY_MB = 60000.0
@@ -34,6 +35,24 @@ def resolve_memory_mb(max_memory, source=None) -> float:
     return validate_memory_mb(max_memory)
 
 
+def array_device(*arrays):
+    """Read an eager array device or the default context without initializing it.
+
+    A concrete ``jax.default_device`` context is required to identify a GPU
+    capacity while tracing. An outer ``jit(device=...)`` does not expose its
+    target to Python planners; abstract arrays alone cannot establish it.
+    Known eager inputs retain priority because committed arrays can execute on
+    their own device even inside a different default-device context. Captured
+    constants alone do not establish an outer JIT's execution target either.
+    """
+    for array in arrays:
+        device = getattr(array, "device", None)
+        device = device() if callable(device) else device
+        if device is not None:
+            return device
+    return jax.config.jax_default_device
+
+
 def available_memory_bytes(device=None):
     """Return a conservative capacity estimate for the actual target device.
 
@@ -41,7 +60,17 @@ def available_memory_bytes(device=None):
     process limit. Querying only the supplied device avoids initializing other
     GPUs. Unsupported device statistics leave the caller's budget unchanged.
     """
-    if device is not None and getattr(device, "platform", "cpu") != "cpu":
+    device = array_device() if device is None else device
+    device = device() if callable(device) else device
+    if isinstance(device, str):
+        if device != "cpu":
+            raise ValueError("Memory planning requires a concrete accelerator device, not a platform label.")
+        platform = "cpu"
+    else:
+        platform = "cpu" if device is None else getattr(device, "platform", None)
+        if platform is None:
+            raise TypeError("Memory planning requires a device with a known platform.")
+    if platform != "cpu":
         try:
             statistics = device.memory_stats()
         except (AttributeError, RuntimeError, NotImplementedError):
@@ -83,7 +112,7 @@ def available_memory_bytes(device=None):
 def effective_memory_mb(max_memory, device=None) -> float:
     """Cap a requested budget by detected capacity; never alter its owner."""
     requested = validate_memory_mb(max_memory)
-    available = available_memory_bytes(device)
+    available = available_memory_bytes(array_device() if device is None else device)
     if available is not None:
         if available <= 0:
             raise ValueError("No memory is available for the requested calculation.")

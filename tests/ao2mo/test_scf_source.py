@@ -101,21 +101,32 @@ def test_mp_from_scf_uses_shared_source_and_existing_orbital_preparation(unrestr
         hcore=data.hcore, ao_kwargs={key: value})
     calls = []
 
-    def prepare(current, *, max_memory):
-        calls.append((current, max_memory))
+    def prepare(current, *, max_memory, reserved_bytes):
+        calls.append((current, max_memory, reserved_bytes))
         return payload
 
     def from_orbitals(*args, **kwargs):
         assert args[0] is payload.coefficients and args[1] is payload.focks
         assert args[2] == payload.nocc and args[3] is payload.reference_energy
         assert kwargs.pop(key) is value
-        assert kwargs == dict(frozen=[0], frozen_gap_tol=2e-9, max_memory=17.5)
+        assert kwargs == dict(frozen=[0], frozen_gap_tol=2e-9, max_memory=17.5,
+                              reserved_bytes=4096)
         return "prepared"
+
+    def storage(current, *, exclude):
+        # This routing fixture deliberately constructs only the solved HF
+        # fields. Full reference ownership is exercised by preparation tests.
+        assert current is source
+        expected = (payload.coefficients, payload.focks,
+                    payload.reference_energy, payload.ao_kwargs)
+        assert all(a is b for a, b in zip(exclude, expected))
+        return 4096
 
     monkeypatch.setattr(integrals, "prepare_scf_source", prepare, raising=False)
     monkeypatch.setattr(integrals, "from_orbitals", from_orbitals)
+    monkeypatch.setattr(integrals, "tree_storage_bytes", storage)
     assert integrals.from_scf(source, frozen=[0], frozen_gap_tol=2e-9, max_memory=17.5) == "prepared"
-    assert calls == [(source, 17.5)]
+    assert calls == [(source, 17.5, 0)]
 
 
 @pytest.mark.parametrize("failure", ["freshness", "occupations", "odd", "dft", "complex", "missing-fock"])

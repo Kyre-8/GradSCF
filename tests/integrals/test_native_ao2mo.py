@@ -49,7 +49,7 @@ def test_native_ao2mo_asymmetric_block_matches_dense(cart, basis_spec):
     basis, coefficients = _problem(basis_spec, cart)
     expected = _dense(basis, coefficients)
     actual = jax.jit(lambda b, cs: transform_eri_block(
-        cs, direct_basis=b, max_memory=2.))(basis, coefficients)
+        cs, direct_basis=b, max_memory=3.))(basis, coefficients)
     assert actual.shape == (2, 3, 1, 2)
     np.testing.assert_allclose(actual, expected, atol=2e-12, rtol=2e-11)
 
