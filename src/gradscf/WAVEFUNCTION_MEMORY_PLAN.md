@@ -3408,3 +3408,55 @@ requires its own explicit decision and numerical validation.
   WF-25's finite shared-primitive/history/policy/AD and measured-cost contract
   is accepted. Its small-point result is not a scaling or RSS-improvement claim;
   WF-32's method-level size/performance gate remains open.
+
+### 2026-10-23 — WF-08/29: right-preconditioned primal HF corrections
+
+- The unchanged aniline state diagnostic reached polishing after the entrance
+  fix, but its first unpreconditioned GMRES needed84 actions. Read the installed
+  JAX0.10.0 and PySCF2.13.0 sources before choosing a numerical change. JAX's
+  left-preconditioner stopping norm differs from the physical residual, and
+  info0 alone does not certify convergence. Retain the existing shifted operator
+  A=H+sigma*I; solve A(D^-1*y)=-g and recover step=D^-1*y with M=None.
+- A shared frozen-Fock gap helper supplies RHF4*gap, unrestricted2*occupation-
+  difference*gap and common-orbital spin sums in the existing pair order.
+  Stability reuses that helper. Only HF roks/uks with more than32 angles enable
+  the new primal callback. Physical arrays remain live arguments; the cached
+  callback identity contains static topology/functions only. Numerical D is
+  stopped for AD and sign-floored at1e-8; the physical Hessian and original
+  shift sequence, tolerances, true-residual/finite/descent/step checks, three
+  refinements and implicit-backward equations remain unchanged. Preflight adds
+  the callback graph and four real angle vectors under the original budget.
+- Preserve the actual test history:11 expected missing-interface RED failures;
+  first GREEN14 passes/2 cost-test failures. The latter incorrectly treated the
+  old tiny-RHS GMRES as an exact oracle despite its absolute-epsilon cutoff.
+  Keep both old physical guards, require the new solution's strict analytic
+  trajectory and residual, and rerun only those two cases: both pass. The48D
+  actions drop129/211 to12, with new physical residuals below2.58e-16; this is
+  a controlled action-count result, not molecular wall-time speedup.
+- Final acceptance comprises25 unique CPU cases and one CUDA case. Native
+  water/6-31G and NH/6-31G spin2 actually exercise40/54 angles, full/direct
+  state, density response and geometry gradient/HVP/FD with128 MB planning.
+  The two geometry cases are additionally rerun with explicit finite checks.
+  Three original stability nodes cover the helper's existing callers. The
+  CUDA water MP2 energy/full gradient/directional HVP passes the CPU oracle,
+  all finite/device checks and the real40-angle callback spy on physical GPU0.
+  Its2615940 KiB complete host peak is not a VRAM measurement.
+- The same14-atom/119-AO aniline input, all25 occupied/94 virtual orbitals,
+  zero screening, eight direct workers and60000 MB budget now completes the
+  state-plus-MP2-forward diagnostic. HF energy is-285.7279603824555 Eh,
+  orbital gradient norm2.7521621007544088e-12, and correlation energy
+  -0.9546311957491811 Eh. All three refinements are accepted with25 GMRES
+  actions each and true relative residuals3.70646e-12/3.69774e-12/3.33905e-12.
+  The325.220868 s child includes seed and MP2 work; measured SCF lowering,
+  compile-only and first execution are13.130359/10.938037/249.377475 s.
+  The earlier300 s run timed out after the same three solves; the final run
+  changed only its cap to600 s and returned valid state/integrals/MP2 flags.
+- Root verifies nine archives/228 payloads, original exits/XML, source/input
+  maps, final source files, actual GPU UUID, unit counts and physical residuals;
+  independent source/spec review passes. Evidence
+  scf-orbital-preconditioner/root-verification.json and per-group HANDOFF files;
+  final forward archive SHA256
+  a45c621b82c96726078e83350bfe79f024ffc943d3edf3f72834d54ccabda79c.
+  This is a primal efficiency prerequisite. Full aniline geometry gradient,
+  matched warm/RSS comparison and increasing-size acceptance remain WF-08/32;
+  no additional parent/child is closed by this change.

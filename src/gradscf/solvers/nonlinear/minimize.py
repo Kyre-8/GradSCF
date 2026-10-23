@@ -53,7 +53,8 @@ def _backtrack(value_grad, x, value, gradient, direction, *, correction=False, g
                         jnp.arange(24))[0]
 
 
-def _check_orbital_memory(args, coeff, energy, rotate, dimension, maximum, reserved, physical):
+def _check_orbital_memory(args, coeff, energy, rotate, dimension, maximum, reserved, physical,
+                          hessian_diagonal):
     """Preflight the fixed algorithm; no L-BFGS or primal GMRES capacity changes."""
     resident = reserved+tree_storage_bytes(args, coeff)
     workspace_bytes(maximum, resident_bytes=resident)
@@ -63,16 +64,21 @@ def _check_orbital_memory(args, coeff, energy, rotate, dimension, maximum, reser
     # Old/new secant state, angle/gradient/search vectors, and the two stage /
     # ten polishing diagnostics remain mandatory in the original algorithm.
     resident += 2*tree_storage_bytes(state)+8*dimension*vector.dtype.itemsize+128*8
+    with_diagonal = dimension > 32 and hessian_diagonal is not None
+    if with_diagonal:
+        # Gap, shifted denominator, right variable and recovered physical step.
+        resident += 4*dimension*vector.dtype.itemsize
     workspace_bytes(maximum, resident_bytes=resident)
     value_grad = jax.value_and_grad(energy)
     value, gradient = jax.eval_shape(value_grad, vector, coeff, args)
     objective = lambda x: value_grad(x, coeff, args)
     graph = lambda f, *a: jaxpr_temporary_bytes(jax.make_jaxpr(f)(*a))
+    diagonal_scratch = graph(hessian_diagonal, coeff, args) if with_diagonal else 0
     scratch = (graph(value_grad, vector, coeff, args)
                +graph(transform.update, vector, state, vector)
                +graph(lambda x, v, g, d: _backtrack(objective, x, v, g, d),
                       vector, value, gradient, vector)
-               +graph(rotate, vector, coeff))
+               +graph(rotate, vector, coeff)+diagonal_scratch)
     workspace_bytes(maximum, resident_bytes=resident+physical+scratch)
     if dimension:
         gradient = lambda x: value_grad(x, coeff, args)[1]
@@ -85,20 +91,24 @@ def _check_orbital_memory(args, coeff, energy, rotate, dimension, maximum, reser
             config = LinearSolverConfig(restart=min(dimension, 40), maxiter=10, rtol=1e-11, atol=0.)
             fixed = physical
         planned, _ = plan_linear(dimension, vector.dtype, config, maximum,
-            resident_bytes=resident, operator_min_bytes=fixed+action)
+            resident_bytes=resident, operator_min_bytes=fixed+action+diagonal_scratch)
         if config.method == 'gmres' and planned.restart != config.restart:
             raise ValueError('Forward memory budget must retain the fixed primal GMRES restart')
 
 
 @partial(jax.jit, static_argnames=('energy', 'rotate', 'dimension', 'max_iterations',
-    'gradient_tolerance', 'max_memory', 'reserved_bytes', 'operator_min_bytes'))
+    'gradient_tolerance', 'max_memory', 'reserved_bytes', 'operator_min_bytes', 'hessian_diagonal'))
 def solve_orbitals(args, coeff, *, energy, rotate, dimension, max_iterations, gradient_tolerance,
-                   max_memory=None, reserved_bytes=0, operator_min_bytes=0):
-    """Bounded scans retain a genuine reverse-mode path through finite iterates."""
+                   max_memory=None, reserved_bytes=0, operator_min_bytes=0, hessian_diagonal=None):
+    """Bounded scans retain a genuine reverse-mode path through finite iterates.
+
+    An optional approximate Hessian diagonal scales the large primal Newton
+    solves on the right; their physical operator and residual checks stay live.
+    """
     if max_memory is not None:
         _check_orbital_memory(args, coeff, energy, rotate, dimension,
             validate_memory_mb(max_memory), validate_reserved_bytes(reserved_bytes),
-            validate_reserved_bytes(operator_min_bytes))
+            validate_reserved_bytes(operator_min_bytes), hessian_diagonal)
     origin = jnp.zeros(dimension, dtype=coeff.real.dtype)
     value_grad = jax.value_and_grad(energy)
     iterations, evaluations = jnp.asarray(0), jnp.asarray(0)
@@ -161,6 +171,8 @@ def solve_orbitals(args, coeff, *, energy, rotate, dimension, max_iterations, gr
                 else:
                     def hvp(vector):
                         return jax.jvp(lambda x: value_grad(x, base, args)[1], (origin,), (vector,))[1]
+                    diagonal = (None if hessian_diagonal is None else jax.lax.stop_gradient(
+                        jnp.asarray(hessian_diagonal(base, args), dtype=origin.dtype)))
 
                 def try_shift(carry, shift):
                     def solve(_):
@@ -168,8 +180,18 @@ def solve_orbitals(args, coeff, *, energy, rotate, dimension, max_iterations, gr
                         if dimension <= 32:
                             step = jnp.linalg.solve(hessian+shift*jnp.eye(dimension), -gradient)
                         else:
-                            step, _ = gmres(operator, -gradient, tol=1e-11, atol=0.,
+                            scaled = operator
+                            if diagonal is not None:
+                                # This floor changes only the numerical scaling,
+                                # never the physical Hessian or its shift.
+                                d = diagonal+shift
+                                floor = jnp.asarray(1e-8, dtype=origin.dtype)
+                                d = jnp.where(jnp.abs(d) >= floor, d, jnp.where(d < 0., -floor, floor))
+                                scaled = lambda vector: operator(vector/d)
+                            step, _ = gmres(scaled, -gradient, tol=1e-11, atol=0.,
                                 restart=min(dimension, 40), maxiter=10, solve_method='incremental')
+                            if diagonal is not None:
+                                step = step/d
                         residual = jnp.linalg.norm(operator(step)+gradient)/jnp.maximum(
                             jnp.linalg.norm(gradient), jnp.finfo(origin.dtype).tiny)
                         descent = jnp.vdot(gradient, step).real

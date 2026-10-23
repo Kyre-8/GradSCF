@@ -84,6 +84,43 @@ def _native_workspace(provider, workers, cutoff=0.):
     return 3*size
 
 
+def _rotation_pairs(method, occupation_rows):
+    """Static unequal-occupation pairs in the orbital-angle packing order."""
+    occupations = np.asarray(occupation_rows)
+    pairs = []
+    for occ in ([occupations] if method == 'roks' else occupations):
+        different = occ[..., :, None] != occ[..., None, :]
+        if different.ndim == 3:
+            different = np.any(different, axis=0)
+        pairs.append(np.where(np.triu(different, 1)))
+    return tuple(pairs)
+
+
+def _orbital_gap_diagonal(method, occupation_rows, coeff, fock):
+    """Frozen-Fock part of the full energy-angle Hessian, in Hartree."""
+    occupations = jnp.asarray(occupation_rows)
+    pairs = _rotation_pairs(method, occupation_rows)
+    blocks = jnp.broadcast_to(coeff, fock.shape) if method == 'roks' else coeff
+    eps = jnp.einsum('spi,spq,sqi->si', blocks.conj(), fock, blocks).real
+    if method == 'roks':
+        i, a = pairs[0]
+        return 2*jnp.sum((occupations[:, i]-occupations[:, a])*(eps[:, a]-eps[:, i]), axis=0)
+    gaps = []
+    for spin, (i, a) in enumerate(pairs):
+        gap = 2*(occupations[spin, i]-occupations[spin, a])*(eps[spin, a]-eps[spin, i])
+        gaps.extend((gap, gap) if method == 'gks' else (gap,))
+    return jnp.concatenate(gaps)
+
+
+@lru_cache(maxsize=64)
+def _gap_function(method, occupation_rows, density_from, evaluate):
+    """Cache only the callback identity; physical arrays remain arguments."""
+    def diagonal(coeff, args):
+        _, fock = evaluate(density_from(coeff), args)
+        return _orbital_gap_diagonal(method, occupation_rows, coeff, fock)
+    return diagonal
+
+
 @lru_cache(maxsize=64)
 def _rotation_functions(method, occupation_rows):
     """Shared occupation topology, Cayley rotations and density construction."""
@@ -91,12 +128,7 @@ def _rotation_functions(method, occupation_rows):
     common = method == 'roks'
     generalized = method == 'gks'
     n = occupations.shape[-1]
-    pairs = []
-    for occ in ([occupations] if common else occupations):
-        different = occ[..., :, None] != occ[..., None, :]
-        if different.ndim == 3:
-            different = np.any(different, axis=0)
-        pairs.append(np.where(np.triu(different, 1)))
+    pairs = _rotation_pairs(method, occupation_rows)
     sizes = [len(i) for i, _ in pairs]
     dimension = sum(sizes)*(2 if generalized else 1)
 
@@ -245,6 +277,9 @@ def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
                            direct_scf_tol=direct_scf_tol, direct_scf_workers=direct_scf_workers)
     dimension, rotate, density_from, evaluate, energy = _problem_functions(
         method, xc_spec, collinear, topology, uks_config=uks_config)
+    diagonal = (_gap_function(method, topology, density_from, evaluate)
+        if dimension > 32 and method in {'uks', 'roks'}
+        and xc_type(local_xc_spec(xc_spec)) == 'HF' else None)
     args = dict(metric=metric, hcore=jnp.asarray(hcore), eri=None if eri is None else jnp.asarray(eri),
         nuclear_repulsion=jnp.asarray(nuclear_repulsion), ao=jnp.asarray(ao),
         ao_deriv1=jnp.asarray(ao_deriv1), grid_weights=jnp.asarray(grid_weights),
@@ -266,7 +301,7 @@ def _minimize(*, method, overlap, hcore, eri, nuclear_repulsion, ao, ao_deriv1,
                 exclude=(args, initial)), operator_min_bytes=native))
         forward = solve_orbitals(solve_args, solve_coeff, energy=energy, rotate=rotate,
             dimension=dimension, max_iterations=max_iterations, gradient_tolerance=gradient_tolerance,
-            **memory)
+            hessian_diagonal=diagonal, **memory)
         final, norm = forward.coeff, forward.gradient_norm
         iterations, evaluations, stages, history = forward.iterations, forward.evaluations, forward.stages, forward.polishing
     else:

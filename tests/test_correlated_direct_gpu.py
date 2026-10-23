@@ -11,21 +11,34 @@ import jax.numpy as jnp
 import numpy as np
 
 
-def test_native_direct_mp2_gpu_relaxed_gradient_and_hvp(monkeypatch):
+def _native_direct_mp2_gpu_case(monkeypatch, *, atom, basis, direction,
+                                max_memory, expected_angles=None):
     from gradscf import gto, scf
     from gradscf.integrals.plan import IntegralPlan
+    from gradscf.scf import orbital_optimization
     from gradscf_tools.correlated_response import CorrelatedEnergy
+
+    seen = set()
+    if expected_angles is not None:
+        original_solve = orbital_optimization.solve_orbitals
+
+        def solve(args, coeff, **kwargs):
+            assert kwargs['dimension'] == expected_angles > 32
+            assert callable(kwargs.get('hessian_diagonal'))
+            seen.add(args['direct_basis'] is not None)
+            return original_solve(args, coeff, **kwargs)
+
+        monkeypatch.setattr(orbital_optimization, 'solve_orbitals', solve)
 
     gpu, = jax.devices('gpu')
     cpu = jax.devices('cpu')[0]
     with jax.default_device(cpu):
-        molecule = gto.M(atom='H 0 0 -.75; H 0 0 .75', basis='3-21g',
-                         unit='Bohr', cart=True)
+        molecule = gto.M(atom=atom, basis=basis, unit='Bohr', cart=True)
         source = scf.RHF(molecule, integral_backend='native', execution_device='cpu',
             conv_tol=1e-12, conv_tol_density=1e-11, conv_tol_grad=1e-10).run()
         assert source.converged
         dense = CorrelatedEnergy(source, 'mp2')
-        direction = jnp.array([[.1, 0., -.5], [-.1, 0., .5]])
+        direction = jnp.array(direction)
         expected = jax.jit(jax.value_and_grad(dense))(dense.coordinates)
         expected_hvp = jax.jit(lambda r: jax.jvp(jax.grad(dense),
             (r,), (direction,))[1])(dense.coordinates)
@@ -39,7 +52,7 @@ def test_native_direct_mp2_gpu_relaxed_gradient_and_hvp(monkeypatch):
 
     monkeypatch.setattr(IntegralPlan, 'evaluate', checked)
     with jax.default_device(gpu):
-        direct = CorrelatedEnergy(source, 'mp2', jk_backend='direct', max_memory=32.)
+        direct = CorrelatedEnergy(source, 'mp2', jk_backend='direct', max_memory=max_memory)
         direction_gpu = jax.device_put(direction, gpu)
         actual = jax.jit(jax.value_and_grad(direct))(direct.coordinates)
         actual_hvp = jax.jit(lambda r: jax.jvp(jax.grad(direct),
@@ -48,7 +61,28 @@ def test_native_direct_mp2_gpu_relaxed_gradient_and_hvp(monkeypatch):
     for a, b in zip(jax.tree.leaves((actual, actual_hvp)),
                     jax.tree.leaves((expected, expected_hvp))):
         assert a.devices() == {gpu}
+        assert np.all(np.isfinite(a))
+        assert np.all(np.isfinite(b))
         np.testing.assert_allclose(a, b, atol=3e-7, rtol=2e-6)
+    if expected_angles is not None:
+        assert seen == {False, True}, 'Both full-ERI and direct solves must be observed'
+
+
+def test_native_direct_mp2_gpu_relaxed_gradient_and_hvp(monkeypatch):
+    _native_direct_mp2_gpu_case(monkeypatch,
+        atom='H 0 0 -.75; H 0 0 .75', basis='3-21g',
+        direction=[[.1, 0., -.5], [-.1, 0., .5]], max_memory=32.)
+
+
+def test_native_direct_mp2_gpu_preconditioned_relaxed_gradient_and_hvp(monkeypatch):
+    from gradscf.data.molecule import ANGSTROM_TO_BOHR
+
+    # Same water geometry as the CPU gate, converted from Angstrom to bohr.
+    y, z = .757 * ANGSTROM_TO_BOHR, .587 * ANGSTROM_TO_BOHR
+    _native_direct_mp2_gpu_case(monkeypatch,
+        atom=[('O', (0., 0., 0.)), ('H', (0., -y, z)), ('H', (0., y, z))],
+        basis='6-31g', direction=[[.1, 0., -.5], [-.1, 0., .5], [0., 0., 0.]],
+        max_memory=128., expected_angles=40)
 
 
 @pytest.mark.parametrize('operator', ['overlap', 'kinetic', 'nuclear', 'dipole'])

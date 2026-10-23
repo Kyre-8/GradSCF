@@ -18,13 +18,21 @@ from gradscf.integrals.plan import IntegralPlan
 from gradscf_tools.molecular_response import MolecularEnergy
 
 
+_NATIVE_CASES = {
+    "rhf": ("H 0 0 0; H 0 0 1.4", "3-21g", 0, "Bohr"),
+    "uhf": ("N 0 0 0; H 0 0 1.95", "sto-3g", 2, "Bohr"),
+    # Water geometry also used in tests/comparisons/compare_qp_solvers.py.
+    "water_631g": ("O 0 0 0; H 0 -.757 .587; H 0 .757 .587",
+                   "6-31g", 0, "Angstrom"),
+    "nh_631g": ("N 0 0 0; H 0 0 1.95", "6-31g", 2, "Bohr"),
+}
+
+
 @pytest.fixture(scope="module", params=["rhf", "uhf"])
-def native_problem(request):
-    unrestricted = request.param == "uhf"
-    atom = "N 0 0 0; H 0 0 1.95" if unrestricted else "H 0 0 0; H 0 0 1.4"
-    basis = "sto-3g" if unrestricted else "3-21g"
-    mol = gto.M(atom=atom, basis=basis, spin=2 if unrestricted else 0,
-                unit="Bohr", cart=True)
+def native_problem(request, *, max_memory=None):
+    atom, basis, spin, unit = _NATIVE_CASES[request.param]
+    unrestricted = spin != 0
+    mol = gto.M(atom=atom, basis=basis, spin=spin, unit=unit, cart=True)
     driver = scf.UHF if unrestricted else scf.RHF
     reference = driver(mol, integral_backend="native", max_cycle=200,
                        conv_tol=1e-12, conv_tol_density=1e-11,
@@ -59,7 +67,8 @@ def native_problem(request):
             ao=jnp.zeros((0, nao)), ao_deriv1=jnp.zeros((4, 0, nao)),
             grid_weights=jnp.zeros(0), mo_coeff=coefficients, mo_occ=occupations,
             xc_spec="hf", max_iterations=300, gradient_tolerance=1e-9,
-            orthonormalize_initial=True, differentiation=differentiation, **options)
+            orthonormalize_initial=True, differentiation=differentiation,
+            max_memory=max_memory, **options)
 
     return reference, coordinates, plan, parameters, owners, calculate
 
@@ -118,7 +127,7 @@ def test_direct_density_observable_retains_implicit_response(native_problem, mon
 
 def test_direct_geometry_gradient_and_hvp_match_full(native_problem, monkeypatch):
     _, coordinates, _, _, _, calculate = native_problem
-    direction = jnp.array([[0., 0., -.5], [0., 0., .5]])
+    direction = jnp.zeros_like(coordinates).at[0, 2].set(-.5).at[1, 2].set(.5)
     full_energy = lambda r: calculate(r, direct=False).total_energy
     full_gradient = jax.jit(jax.grad(full_energy))
     expected_gradient = full_gradient(coordinates)
@@ -131,6 +140,8 @@ def test_direct_geometry_gradient_and_hvp_match_full(native_problem, monkeypatch
     observed_gradient = gradient(coordinates)
     observed_hvp = jax.jit(lambda r: jax.jvp(
         gradient, (r,), (direction,))[1])(coordinates)
+    for response in (expected_gradient, expected_hvp, observed_gradient, observed_hvp):
+        assert np.isfinite(np.asarray(response)).all()
     np.testing.assert_allclose(observed_gradient, expected_gradient, atol=3e-8, rtol=2e-7)
     np.testing.assert_allclose(observed_gradient.sum(axis=0), 0., atol=2e-9, rtol=0)
     np.testing.assert_allclose(observed_hvp, expected_hvp, atol=3e-7, rtol=2e-6)

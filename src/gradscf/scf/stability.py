@@ -12,7 +12,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from .orbital_optimization import _problem_functions, _rotation_functions
+from .orbital_optimization import _orbital_gap_diagonal, _problem_functions, _rotation_functions
 from ..solvers import LinearOperator, EigenSolverConfig, solve_hermitian
 from .uhf import UHFResult, run_uhf_from_integrals
 from .uks import UKSConfig, UKSResult, run_uks_from_integrals
@@ -114,9 +114,8 @@ def stabilize_df_rhf(result, *, max_restarts=4, stability_tol=1e-5,
 
     def analyze(current):
         gradient,apply = jax.linearize(jax.grad(lambda x:energy(x,current.mo_coeff)),origin)
-        i,a = np.where(np.triu(np.asarray(occ)[:,None] != np.asarray(occ)[None,:],1))
-        eps = jnp.diag(current.mo_coeff.T @ current.fock_matrix @ current.mo_coeff)
-        diagonal = 4*(eps[a]-eps[i])
+        diagonal = _orbital_gap_diagonal('roks', (tuple(2*x for x in occ),),
+            current.mo_coeff[None], current.fock_matrix[None])
         operator = LinearOperator((dimension,dimension),s.dtype,apply,diagonal=diagonal,
                                   matmat=jax.vmap(apply,in_axes=1,out_axes=1))
         solved = solve_hermitian(operator,config=EigenSolverConfig(
@@ -275,12 +274,8 @@ def _unrestricted_problem(
     )
     if fock is None:
         _, fock = evaluate(density_from(coeff), args)
-    eps = jnp.einsum("spi,spq,sqi->si", coeff, fock, coeff)
-    gaps = []
-    for spin in range(2):
-        i, a = np.where(np.triu(occ[spin, :, None] != occ[spin, None, :], 1))
-        gaps.append(2 * (occ[spin, i] - occ[spin, a]) * (eps[spin, a] - eps[spin, i]))
-    return dimension, rotate, energy, args, jnp.concatenate(gaps)
+    diagonal = _orbital_gap_diagonal('uks', tuple(map(tuple, occ)), coeff, fock)
+    return dimension, rotate, energy, args, diagonal
 
 
 def uks_stability(
@@ -472,9 +467,7 @@ def restricted_stability(
         )[0]
 
     c = result.mo_coeff
-    eps = jnp.diag(c.T @ result.fock_matrix @ c)
-    i, a = np.where(np.triu(occ[:, None] != occ[None, :], 1))
-    diagonal = 2 * (occ[i] - occ[a]) * (eps[a] - eps[i])
+    diagonal = _orbital_gap_diagonal('roks', (tuple(occ),), c[None], result.fock_matrix[None])
     check = _curvature_check(
         coeff=c[None],
         dimension=dimension,
