@@ -4,7 +4,8 @@
 
 template<class Accumulate>
 void for_each_eri_geometry_entry(IntegralTables& t, int cart, Accumulate&& add,
-                                 const ERIWindow* window=nullptr) {
+                                 const ERIWindow* window=nullptr,
+                                 int first_shell=0,int last_shell=-1) {
   const int n=t.n;
   auto index=[&](int i,int j,int k,int l) {
     return window ? window->index(i,j,k,l) : ((size_t(i)*n+j)*n+k)*n+l;
@@ -26,5 +27,5 @@ void for_each_eri_geometry_entry(IntegralTables& t, int cart, Accumulate&& add,
           add(index(a,b,c,d),coordinate,value);add(index(b,a,c,d),coordinate,value);
           add(index(c,d,a,b),coordinate,value);add(index(c,d,b,a),coordinate,value);
         }
-    });
+    },first_shell,last_shell);
 }

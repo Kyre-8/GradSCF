@@ -1,14 +1,17 @@
 // Coordinate products of J/K, contracted before leaving each ERI shell block.
 #include "eri_geometry_entries.h"
 #include "geometry_contraction.h"
+#include <atomic>
+#include <memory>
+#include <string>
 
-template<bool transpose>
-static ffi::Error DirectJKGeometry(ffi::BufferR2<ffi::S32> atoms,
+template<bool transpose,class Output>
+static void DirectJKGeometryCompute(ffi::BufferR2<ffi::S32> atoms,
     ffi::BufferR2<ffi::S32> basis,ffi::BufferR1<ffi::F64> environment,
     ffi::BufferR3<ffi::F64> density,ffi::BufferR1<ffi::F64> direction,
-    ffi::Buffer<ffi::F64> vector,ffi::ResultBuffer<ffi::F64> result,
-    int32_t order,int32_t cart,int32_t with_j,int32_t with_k) {
-  try {
+    ffi::Buffer<ffi::F64> vector,Output result,
+    int32_t order,int32_t cart,int32_t with_j,int32_t with_k,
+    int first_shell=0,int last_shell=-1) {
     if ((order!=1 && order!=2) || (with_j!=0 && with_j!=1) ||
         (with_k!=0 && with_k!=1) || !(with_j || with_k))
       throw std::invalid_argument("Invalid direct J/K geometry product");
@@ -58,7 +61,7 @@ static ffi::Error DirectJKGeometry(ffi::BufferR2<ffi::S32> atoms,
     }
     // Numerical zero directions also arise from custom_root closure constants.
     // This shortcut is inside the native linear operation, not a nonlinear AD rule.
-    if (!active) return ffi::Error::Success();
+    if (!active) return;
     const double* dm=density.typed_data();
     const double* u=direction.typed_data();
     const double* input=vector.typed_data();
@@ -83,7 +86,7 @@ static ffi::Error DirectJKGeometry(ffi::BufferR2<ffi::S32> atoms,
       auto add=[&](size_t index,int coordinate,double value) {
         consume(index,coordinate,transpose ? value:value*u[coordinate]);
       };
-      for_each_eri_geometry_entry(t,cart,add);
+      for_each_eri_geometry_entry(t,cart,add,nullptr,first_shell,last_shell);
     } else {
       auto evaluate=[&](Intor kernel,int* shells,size_t size,
                         std::vector<double>& block,std::vector<double>& cache,int) {
@@ -92,14 +95,90 @@ static ffi::Error DirectJKGeometry(ffi::BufferR2<ffi::S32> atoms,
       auto add=[&](size_t index,int a,int b,double value) {
         consume(index,a,transpose ? value*u[b]:value*u[a]*input[b]);
       };
-      for_each_geometry_hessian_entry(t,4,cart,evaluate,add);
+      for_each_geometry_hessian_entry(t,4,cart,evaluate,add,nullptr,first_shell,last_shell);
     }
+}
+
+// Retain the original v1 ABI and serial behavior for existing binaries/callers.
+template<bool transpose>
+static ffi::Error DirectJKGeometry(ffi::BufferR2<ffi::S32> atoms,
+    ffi::BufferR2<ffi::S32> basis,ffi::BufferR1<ffi::F64> environment,
+    ffi::BufferR3<ffi::F64> density,ffi::BufferR1<ffi::F64> direction,
+    ffi::Buffer<ffi::F64> vector,ffi::ResultBuffer<ffi::F64> result,
+    int32_t order,int32_t cart,int32_t with_j,int32_t with_k) {
+  try {
+    DirectJKGeometryCompute<transpose>(atoms,basis,environment,density,direction,
+        vector,result,order,cart,with_j,with_k);
     return ffi::Error::Success();
   } catch(const std::invalid_argument& error) {
     return ffi::Error::InvalidArgument(error.what());
   } catch(const std::exception& error) {
     return ffi::Error::Internal(error.what());
   }
+}
+
+// A coordinate VJP returns only ENV, so worker-private reductions stay linear
+// in the basis metadata. No worker owns a full J/K matrix or an AO ERI tensor.
+static ffi::Future ParallelDirectJKGeometryVJP(ffi::ThreadPool pool,
+    ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<ffi::S32> basis,
+    ffi::BufferR1<ffi::F64> environment,ffi::BufferR3<ffi::F64> density,
+    ffi::BufferR1<ffi::F64> direction,ffi::Buffer<ffi::F64> vector,
+    ffi::ResultBuffer<ffi::F64> result,int32_t order,int32_t cart,
+    int32_t with_j,int32_t with_k,int32_t requested_workers) {
+  ffi::Promise promise;
+  ffi::Future future(promise);
+  try {
+    if (requested_workers<1)
+      throw std::invalid_argument("Direct J/K geometry workers must be positive");
+    const int shells=basis.dimensions()[0];
+    const int workers=int(std::max<int64_t>(1,std::min<int64_t>(
+        requested_workers,std::min<int64_t>(pool.num_threads(),shells))));
+    const size_t size=result->element_count();
+    auto partials=std::make_shared<std::vector<std::vector<double>>>(
+        workers,std::vector<double>(size));
+    struct Failure {bool invalid=false;std::string message;};
+    auto errors=std::make_shared<std::vector<Failure>>(workers);
+    auto remaining=std::make_shared<std::atomic<int>>(workers);
+    for (int worker=0;worker<workers;++worker) {
+      auto task=[=]() mutable {
+        try {
+          struct LocalOutput {
+            ffi::Buffer<ffi::F64> layout;
+            double* data;
+            auto dimensions() const {return layout.dimensions();}
+            auto element_count() const {return layout.element_count();}
+            double* typed_data() const {return data;}
+          } local{*result,(*partials)[worker].data()};
+          DirectJKGeometryCompute<true>(atoms,basis,environment,density,direction,
+              vector,&local,order,cart,with_j,with_k,
+              worker*shells/workers,(worker+1)*shells/workers);
+        } catch(const std::invalid_argument& error) {
+          (*errors)[worker]={true,error.what()};
+        } catch(const std::exception& error) {
+          (*errors)[worker]={false,error.what()};
+        }
+        if (remaining->fetch_sub(1,std::memory_order_acq_rel)==1) {
+          for (const auto& error:*errors) if (!error.message.empty()) {
+            promise.SetError(error.invalid ? ffi::Error::InvalidArgument(error.message)
+                                           : ffi::Error::Internal(error.message));
+            return;
+          }
+          double* output=result->typed_data();
+          std::fill(output,output+size,0.);
+          // Fixed partition/reduction order makes each worker count repeatable.
+          for (const auto& part:*partials)
+            for (size_t i=0;i<size;++i) output[i]+=part[i];
+          promise.SetAvailable();
+        }
+      };
+      if (workers==1) task(); else pool.Schedule(std::move(task));
+    }
+  } catch(const std::invalid_argument& error) {
+    promise.SetError(ffi::Error::InvalidArgument(error.what()));
+  } catch(const std::exception& error) {
+    promise.SetError(ffi::Error::Internal(error.what()));
+  }
+  return future;
 }
 
 extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFDirectJKGeometryJVP(XLA_FFI_CallFrame*);
@@ -112,3 +191,11 @@ extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFDirectJK
     .Attr<int32_t>("with_j").Attr<int32_t>("with_k")
 XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFDirectJKGeometryJVP,DirectJKGeometry<false>,DIRECT_GEOMETRY_BIND);
 XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFDirectJKGeometryVJP,DirectJKGeometry<true>,DIRECT_GEOMETRY_BIND);
+extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFDirectJKGeometryVJPParallel(XLA_FFI_CallFrame*);
+XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFDirectJKGeometryVJPParallel,ParallelDirectJKGeometryVJP,
+    ffi::Ffi::Bind().Ctx<ffi::ThreadPool>().Arg<ffi::BufferR2<ffi::S32>>()
+      .Arg<ffi::BufferR2<ffi::S32>>().Arg<ffi::BufferR1<ffi::F64>>()
+      .Arg<ffi::BufferR3<ffi::F64>>().Arg<ffi::BufferR1<ffi::F64>>()
+      .Arg<ffi::Buffer<ffi::F64>>().Ret<ffi::Buffer<ffi::F64>>()
+      .Attr<int32_t>("order").Attr<int32_t>("cart")
+      .Attr<int32_t>("with_j").Attr<int32_t>("with_k").Attr<int32_t>("workers"));

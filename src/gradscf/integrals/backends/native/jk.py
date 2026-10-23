@@ -43,6 +43,16 @@ def native_jk_workspace_bytes(provider, workers, cutoff):
     # Retained vector capacities can exceed the current shell's logical size.
     shapes = len(set(zip(angular, primitive, contractions)))
     scratch = 16*(max_output**4 + cache) + 128*shapes**4
+    # The shared geometry family has up to nine output components. Derivative
+    # angular increments total two: either +2 on one leg or +1 on two legs.
+    # Include that shell/cache envelope as well as the ordinary value kernel.
+    cart0 = max(cart_dims)
+    cart1, cart2 = (max_l+2)*(max_l+3)//2, (max_l+3)*(max_l+4)//2
+    derivative_nf = max(cart2*cart0**3, cart1**2*cart0**2)
+    derivative_g = (2*max_l+3)**3*(max_l+2)**2
+    derivative_cache = max(6*derivative_g+9*derivative_nf+3*nc+pair_scratch,
+                           nc+4*derivative_nf)
+    scratch = max(scratch, 16*(9*max_output**4+derivative_cache)+128*shapes**4)
     allowed_l = min(max_l, 6)
     cumulative_cart = (allowed_l+1)*(allowed_l+2)*(allowed_l+3)//6
     optimizer = (48 + 12*cumulative_cart**4 + 8*(max_l+1)*16**3
@@ -53,7 +63,9 @@ def native_jk_workspace_bytes(provider, workers, cutoff):
     tables = (4*(6*atoms + 8*shells + shells+1)
               + 8*(20 + 3*atoms + total_primitive + total_coefficients))
     bounds = 8*shells**2 if cutoff > 0 else 0
-    return optimizer + bounds + (workers+1)*tables + workers*scratch
+    # Coordinate VJPs reduce one ENV-sized vector per worker. Charging another
+    # table bounds those vectors without introducing worker-sized J/K copies.
+    return optimizer + bounds + (2*workers+1)*tables + workers*scratch
 
 
 @jax.tree_util.register_pytree_node_class
@@ -330,7 +342,7 @@ def _direct_geometry_value(atoms_key, basis_key, cart, cutoff, workers, with_j, 
     atoms = np.asarray(atoms_key, dtype=np.int32)
     offsets = atoms[:, 1, None] + np.arange(3)[None, :]
     operator = _direct_operator(atoms_key, basis_key, cart, cutoff, workers, with_j, with_k)
-    geometry = geometry_products(atoms_key, basis_key, cart, with_j, with_k)
+    geometry = geometry_products(atoms_key, basis_key, cart, with_j, with_k, workers=workers)
 
     def pack(env, coordinates):
         return env.at[offsets].set(coordinates, unique_indices=True)

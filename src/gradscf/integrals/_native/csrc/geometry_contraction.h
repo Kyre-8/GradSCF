@@ -6,7 +6,8 @@
 template<class Evaluate, class Accumulate>
 void for_each_geometry_hessian_entry(IntegralTables& t, int op, int cart,
                                      Evaluate&& evaluate, Accumulate&& add,
-                                     const ERIWindow* window=nullptr) {
+                                     const ERIWindow* window=nullptr,
+                                     int first_shell=0,int last_shell=-1) {
   // Shadow shells may have been appended, but never enter the physical loop.
   const int nshell=int(t.ao.size())-1;
   // Each call contributes one ordered Hessian entry. Cross-slot entries
@@ -51,7 +52,7 @@ void for_each_geometry_hessian_entry(IntegralTables& t, int op, int cart,
                 }
               }
         }
-      });
+      },first_shell,last_shell);
   } else {
     Intor same_cart[]={int1e_ipipovlp_cart,int1e_ipipkin_cart,int1e_ipiprinv_cart,int1e_ipipr_cart};
     Intor same_sph[]={int1e_ipipovlp_sph,int1e_ipipkin_sph,int1e_ipiprinv_sph,int1e_ipipr_sph};

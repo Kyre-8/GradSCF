@@ -27,3 +27,4 @@ _GradSCFERISlabGeometryJVP
 _GradSCFERISlabGeometryVJP
 _GradSCFERISlabGeometryHessianJVP
 _GradSCFERISlabGeometryHessianVJP
+_GradSCFDirectJKGeometryVJPParallel

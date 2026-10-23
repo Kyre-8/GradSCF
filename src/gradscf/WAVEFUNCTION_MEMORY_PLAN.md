@@ -3131,3 +3131,39 @@ requires its own explicit decision and numerical validation.
   988ea4e2f34e1e358322436abeb9f08ffc92dc240c45f610d56a849958ac3113.
   This closes the finite correctness/known-array slice inside the existing
   tasks, without adding TODO branches or closing the full project.
+
+### 2026-10-23 — WF-01/04/08/30: parallel native coordinate pullbacks
+
+- Geometry construction now retains the requested direct-J/K worker count.
+  The original serial v1 ABI and equations remain. A new VJP v2 target splits
+  the first shell index across the existing FFI thread pool; each worker owns
+  only its integral scratch and ENV-sized coordinate accumulator. Fixed-order
+  reduction retains all first/second-coordinate terms. No worker-sized J/K or
+  ERI copy is introduced. JVP remains serial; unsupported higher/basis
+  derivatives retain explicit errors. CPU-backed CUDA dispatch is unchanged.
+- The shared native scratch estimate now also bounds nine-component Hessian
+  blocks and ENV partials. A metadata-only 64-contraction counterexample first
+  fails, then passes after this fee correction; no huge numerical array is
+  allocated by that test. Independent C++ review checks partition coverage,
+  asynchronous buffer lifetimes, deterministic reduction and exception paths.
+- On the previous n002 allocation, the same fixed-density aniline/119-AO
+  Cartesian6-31G* input (seed807, rank25 density, x64, zero screening) has warm
+  coordinate-gradient medians 110.053092 s at old one worker, 108.492497 s at
+  old eight workers and 19.622632 s at new eight workers. All 42 components
+  are identical. The approximately 5.53x improvement is this native J/K VJP
+  component only, not complete SCF/MP2. Child RSS changes from 736648 to
+  742536 KiB for old/new eight workers; XLA temporaries remain 457280 B.
+  Existing CPU23, CPU end-to-end5 and CUDA5 gates pass; the original two
+  worker-forwarding failures remain archived. Root and independent review
+  verify the 99-payload archive eaaa24bf9e0fa2f8a2f2102fc322d5fbbbf1c9201481fc1093d9e158f1fe4ff4
+  and the separate scratch-budget archive d13cdf774e3db527efbdbfb75227ea540cd6302e2661bf642542ce66fe2949b8.
+- The new n006 target independently rebuilds the final source in 9.529163 s,
+  then passes CPU24 in 10.033081 s and actual CUDA5 in 99.314905 s, all exit0,
+  unchanged source, no skips. CUDA0 output leaves are checked; GPU6 is absent.
+  These concurrent admission runs are correctness gates, not timing comparisons.
+  The new build produces library SHA1e63dc2b2a12f55adb3401679e42c75cf2761720faffd99c7a77c4b78a625c01;
+  upstream compiler/clock-skew warnings remain in the log. Root verifies all
+  32 admission payloads, the exact12 current source/test files, exits and XML.
+  Evidence: delta-nv5090-20261023/native-admission-evidence.tar.gz, SHA256
+  4a601571c8d9b7af9561c4140ee07bd287e79b613feec2975be809bedb0a916d.
+  Whole-method warm scaling and peak-memory gates remain open; no TODO is added.

@@ -88,9 +88,18 @@ struct ERIWindow {
 };
 
 template<class Consume>
-void for_each_eri_shell(const IntegralTables& t,const ERIWindow* window,Consume&& consume) {
-  if (window) return window->for_each_shell(consume);
+void for_each_eri_shell(const IntegralTables& t,const ERIWindow* window,Consume&& consume,
+                        int first_shell=0,int last_shell=-1) {
   const int nshell=int(t.ao.size())-1;
-  for (int i=0;i<nshell;++i) for (int j=0;j<nshell;++j)
+  if (last_shell<0) last_shell=nshell;
+  if (first_shell<0 || first_shell>last_shell || last_shell>nshell)
+    throw std::invalid_argument("Invalid ERI first-shell range");
+  if (window) {
+    if (first_shell==0 && last_shell==nshell) return window->for_each_shell(consume);
+    return window->for_each_shell([&](int i,int j,int k,int l) {
+      if (first_shell<=i && i<last_shell) consume(i,j,k,l);
+    });
+  }
+  for (int i=first_shell;i<last_shell;++i) for (int j=0;j<nshell;++j)
     for (int k=0;k<nshell;++k) for (int l=0;l<nshell;++l) consume(i,j,k,l);
 }

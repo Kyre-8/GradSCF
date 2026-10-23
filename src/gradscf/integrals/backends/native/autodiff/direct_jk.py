@@ -12,7 +12,7 @@ from .common import batch_product
 
 
 @lru_cache(maxsize=32)
-def geometry_products(atoms_key, basis_key, cart, with_j, with_k):
+def geometry_products(atoms_key, basis_key, cart, with_j, with_k, *, workers=1):
     from ..jk import _density_transpose, _zero_basis_tangent
 
     atoms = np.asarray(atoms_key, dtype=np.int32)
@@ -48,12 +48,13 @@ def geometry_products(atoms_key, basis_key, cart, with_j, with_k):
             direction = vectors[0] if (order == 2 or not transpose) else empty
             vector = vectors[-1] if (order == 2 or transpose) else empty
             shape = env.shape if transpose else (nops, *density.shape)
-            target = "gradscf_direct_jk_geometry_vjp_cpu_v1" if transpose else "gradscf_direct_jk_geometry_jvp_cpu_v1"
+            target = "gradscf_direct_jk_geometry_vjp_cpu_v2" if transpose else "gradscf_direct_jk_geometry_jvp_cpu_v1"
             function = jax.ffi.ffi_call(target, jax.ShapeDtypeStruct(shape, jnp.float64),
                                          vmap_method="sequential")
+            options = dict(workers=np.int32(workers)) if transpose else {}
             return function(jnp.asarray(atoms), jnp.asarray(basis), env, density, direction, vector,
                             order=np.int32(order), cart=np.int32(cart),
-                            with_j=np.int32(with_j), with_k=np.int32(with_k))
+                            with_j=np.int32(with_j), with_k=np.int32(with_k), **options)
 
         register(push, partial(call, False, order), lambda env, density, *vectors: (nops, *density.shape))
         register(pull, partial(call, True, order), lambda env, density, *vectors: env.shape)

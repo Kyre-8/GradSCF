@@ -97,6 +97,28 @@ def test_direct_geometry_translation_sum_rule(problem):
         np.testing.assert_allclose(matrix, 0., atol=3e-11)
 
 
+def test_direct_geometry_retains_requested_workers(problem, monkeypatch):
+    from gradscf.integrals.backends.native import jk
+    from gradscf.integrals.backends.native.autodiff import direct_jk as geometry
+    plan, _, coords, density, _, at, _, _ = problem
+    original = geometry.geometry_products
+    observed = []
+
+    def products(*args, **kwargs):
+        observed.append(kwargs.get("workers"))
+        return original(*args, **kwargs)
+
+    jk._direct_geometry_value.cache_clear()
+    monkeypatch.setattr(geometry, "geometry_products", products)
+
+    def energy(r):
+        coulomb, exchange = plan.get_jk(at(r), density, workers=3)
+        return jnp.sum(coulomb**2)+jnp.sum(exchange**2)
+
+    assert np.isfinite(jax.jit(jax.grad(energy))(coords)).all()
+    assert observed and all(worker == 3 for worker in observed)
+
+
 def test_traced_geometry_cache_factory_uses_direct_response(problem, monkeypatch):
     plan, _, coords, density, direction, at, _, oracle = problem
     expected = jax.jvp(lambda r: oracle(r, density), (coords,), (direction,))[1]
