@@ -96,8 +96,13 @@ def test_joint_budget_preserves_fci_values_density_gradient_and_hvp():
         density = fci.make_rdm1(solved.coefficients[0], space, max_memory=budget)
         return solved.total_energies[0] + .03 * jnp.sum(probe * density)
 
+    # The 55 kB forward point cannot also hold the declared response graph.
+    with pytest.raises(ValueError, match='Linear solver minimum.*memory budget'):
+        jax.value_and_grad(lambda hh: energy_and_density(hh, .055))(h)
+
+    # The first/second-response ledger needs 272643 bytes before the reserve.
     outputs = []
-    for budget in (.055, 1.):
+    for budget in (.5, 1.):
         objective = lambda hh: energy_and_density(hh, budget)
         solved = solver.solve_fci(h, g, space, config=cfg, max_memory=budget)
         assert bool(jnp.all(solved.converged))

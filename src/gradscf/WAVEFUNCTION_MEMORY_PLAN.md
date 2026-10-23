@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-23): ten of the thirty-five parent tasks
-are fully accepted (WF-00/01/04/07/09/19/26/27/33/34); twenty-seven of the thirty-seven existing
+Current acceptance snapshot (2026-10-23): eleven of the thirty-five parent tasks
+are fully accepted (WF-00/01/04/07/09/19/21/26/27/33/34); twenty-eight of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -278,7 +278,7 @@ successful component derivatives do not establish a whole-method memory bound.
 | WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response, selected R/U MP2 with joint preparation/channel/caller budgets, fixed-aniline full-input gradient | Complete outer-AD ownership, direct-input performance, measured size family, traced target-device capacity |
 | WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, complete phase budgets and nuclear two-body-property response |
 | WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Remaining native phase budgets and whole-method measurements |
-| WF-18/19/20/21/22/27 | Selected and explicit-MO CI/UCIS/CIS(D) budgets, ROHF guards, FCI active/caller budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Complete phase/AD ownership, GPU and large-method measurements |
+| WF-18/19/20/21/22/27 | Selected and explicit-MO CI/UCIS/CIS(D) budgets, ROHF guards, FCI active/caller and joint action/solver response budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Remaining CI/property/outer-AD ownership, GPU and large-method measurements |
 | WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 math/API/warm gates, pure-frame R/U MPn and moving native MP4 geometry second response | Complete cross-caller AD ownership and higher-order method-level size/performance acceptance |
 | WF-29 | Hermitian/non-Hermitian primal, isolated-pair response, SCF implicit response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining cross-consumer ownership and whole-method reconciliation |
 | WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
@@ -504,7 +504,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     with the existing shared compact column loop; preserve empty/small batches
     and validate values, coefficient/integral response and measured warm-time/
     workspace tradeoff. Byte-selected widths and cache ownership remain open.
-- [ ] **WF-21 — FCI Hamiltonian action tiles.** Tile gather -> contraction ->
+- [x] **WF-21 — FCI Hamiltonian action tiles** (`verified`). Tile gather -> contraction ->
   transpose scatter instead of full E_pq*C stacks, rematerializing reverse tiles.
   Acceptance: alpha/beta signs, rectangular spin sectors, multiple RHS, transpose
   action and HVP; extra workspace scales with tile size, while input/output CI
@@ -514,7 +514,9 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     measured action/reverse-residual memory and warm-time tradeoff.
   - [x] **WF-21b:** public facade preparation/action budgets and tiled
     capacity checks.
-  - [ ] **WF-21c:** joint solver state, operator workspace and AD budget.
+  - [x] **WF-21c:** joint solver state, operator workspace and AD budget.
+    Current shared-owner gradient/HVP and insufficient-response-budget gates
+    complete the known-array contract; compilation/allocator residency is separate.
     The prior WF-21b1/WF-21b2 labels remain only in their evidence records.
 - [ ] **WF-22 — CI/FCI properties and geometry integration.** Stream bra/ket
   contractions and existing perturbative-CI corrections where applicable.
@@ -3284,3 +3286,30 @@ requires its own explicit decision and numerical validation.
   This accepts a finite WF-08 prerequisite. A separately bounded postfix
   aniline state/count run remains diagnostic; the full direct gradient, warm
   timing and scale gate stay open. No parent or child is added or closed here.
+
+### 2026-10-23 — WF-21: current FCI action/solver response budget accepted
+
+- Reuse the original four-orbital, nelec(2,1), seed2901 joint-ledger fixture.
+  The original0.055 MB window still passes its forward capacity/useful-batch
+  checks, but correctly rejects AD under the current shared response planner:
+  minimum working182496 B exceeds available32605 B. The older nine passing
+  nodes used an earlier shared response source and did not close this frontier.
+- One bounded1 MB diagnostic observes the existing gradient and HVP planner
+  calls without changing the numerical equations. The largest declared phase
+  is11395 resident+261248 working=272643 B. At0.5 MB, one20% reserve leaves
+  388605 B after resident storage, enough for that phase. Preserve the0.055 MB
+  AD rejection explicitly, and compare the original value/density/gradient/HVP
+  loop at0.5/1 MB with its unchanged physical inputs and tolerances. No FCI or
+  shared-solver production source is changed.
+- The actual three-node closure passes, exit0/52.637213 s, no errors/skips,
+  on104081/n006/CPU16-31 with unchanged source maps. Root verifies27 archived
+  payloads, current six production sources and test, original XML/exits,24
+  diagnostic planner records and the preserved scientific test AST. Evidence
+  fci-current-response-7753/FINAL_VERIFIED.json and root-verification.json;
+  archive SHA256f35bad31794ae9391bbd485074203932587647ddcb1c786497543946739b05f5.
+- Independent spec/quality review combines these current-owner gates with
+  WF-21a's sign/rectangular/RHS/transpose/AD and measured action/reverse tiles,
+  and WF-21b's public preflight/state reservations. WF-21c and WF-21 are accepted
+  for the declared-array/action/shared-solver contract. Nuclear properties,
+  CPU/GPU whole-method scaling and an operating-system RSS cap are separate
+  WF-22/30/32 concerns. The0.5 MB planner window is not a process-memory claim.
