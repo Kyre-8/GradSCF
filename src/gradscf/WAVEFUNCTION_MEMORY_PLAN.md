@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-24): nineteen of the thirty-five parent tasks
-are fully accepted (WF-00/01/03/04/05/07/08/09/18/19/20/21/23/24/25/26/27/33/34); thirty-one of the thirty-seven existing
+Current acceptance snapshot (2026-10-24): twenty of the thirty-five parent tasks
+are fully accepted (WF-00/01/03/04/05/07/08/09/18/19/20/21/22/23/24/25/26/27/33/34); thirty-two of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -278,7 +278,7 @@ successful component derivatives do not establish a whole-method memory bound.
 | WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response and measured consumer conversions, restricted MP2 integral/energy budgets, R/U full/direct gradient family and aniline oracle | Unrestricted saved response-state accounting, cross-caller ownership and traced target-device capacity; direct remains opt-in |
 | WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, complete phase budgets and nuclear two-body-property response |
 | WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Remaining native phase budgets and whole-method measurements |
-| WF-18/19/20/21/22/27 | Selected and explicit-MO CI/UCIS/CIS(D) budgets, ROHF guards, FCI active/caller and joint action/solver response budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Remaining CI/property/outer-AD ownership, GPU and large-method measurements |
+| WF-18/19/20/21/22/27 | Selected CI through genuine U quadruples, UCIS/CIS(D) budgets and ROHF guards, joint FCI action/response budgets, scalar spin/spatial properties and relaxed CI/FCI/CIS(D) nuclear response | Final GPU and large-method measurements; arbitrary outer-AD/allocator bounds remain outside the known-array contract |
 | WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 math/API/warm gates, pure-frame R/U MPn and moving native MP4 geometry second response | Complete cross-caller AD ownership and higher-order method-level size/performance acceptance |
 | WF-29 | Hermitian/non-Hermitian primal, isolated-pair response, SCF implicit response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining cross-consumer ownership and whole-method reconciliation |
 | WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
@@ -528,14 +528,14 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     Current shared-owner gradient/HVP and insufficient-response-budget gates
     complete the known-array contract; compilation/allocator residency is separate.
     The prior WF-21b1/WF-21b2 labels remain only in their evidence records.
-- [ ] **WF-22 — CI/FCI properties and geometry integration.** Stream bra/ket
+- [x] **WF-22 — CI/FCI properties and geometry integration** (`verified`). Stream bra/ket
   contractions and existing perturbative-CI corrections where applicable.
   Acceptance: energy/RDM identities and observable contractions, geometry
   gradient/HVP, root-cluster guards; necessary full-CI state size reported early.
 
   - [x] **WF-22a:** tiled FCI one-/two-RDM, transition and spin contractions,
     public budget propagation and measured first-reverse lifetime.
-  - [ ] **WF-22b:** CI perturbative properties and relaxed geometry integration.
+  - [x] **WF-22b:** CI perturbative properties and relaxed geometry integration.
 
 ### Recursive MP
 
@@ -3712,3 +3712,38 @@ requires its own explicit decision and numerical validation.
   raw-chart derivative gates, **accept WF-18**. Parents become 19/35; children
   remain 31/37. The spin scalar slice advances WF-22; its CIS(D) complete nuclear
   response gate remains separate until that test's evidence is reviewed.
+
+### 2026-10-24 — WF-22b/22: complete supported CIS(D) nuclear response
+
+- Add one test composing the existing native moving RHF, canonical Hermitian
+  eigenpair response, AO CIS eigenpair response and four selected correction
+  blocks. No production implementation, solver, public API or theory is added.
+  The observable is the current API's CIS(D) excitation energy Omega in Eh;
+  it is not an absolute excited-state energy. All SCF, C, epsilon and CIS
+  amplitude dependencies remain in the differentiated map with their guards.
+- At fixed water/STO-3G, Cartesian basis, singlet, the excitation energy is
+  0.4720525303722449 Eh and the nonzero correction -0.012531607810343764 Eh.
+  The minimum orbital gap, CIS-root gap and denominator are respectively
+  0.06187906347, 0.07169424118 and 1.43654198042 Eh. Point values match the
+  existing CIS_D facade. All nine gradient and HVP components are finite and
+  the translation sum passes; no stationary-orbital or eigenvector response
+  has been omitted to make the derivative work.
+- Two central-difference steps, 3e-4 and 1e-4 Bohr along a fixed normalized
+  nuclear direction (seed749), give directional gradient errors
+  1.55964e-9/2.11825e-10 Eh/bohr and maximum HVP errors
+  1.74123e-8/1.85488e-9 Eh/bohr^2. Keep the declared finite-difference
+  tolerances and validity checks. The two original tests retain triplet
+  rejection, singular-denominator invalidation and disabled-amplitude-response
+  derivative rejection; no new spin/cluster support is inferred.
+- Geometry 1 pass and original guards 2 passes, actual child/srun exits 0,
+  zero failures/errors/skips/timeouts, on 104443/n006 CPU112-127, no GPU.
+  Geometry child time is 36.897883 s and peak 2046192 KiB, distinct from the
+  256 MB method array budget. Numerical source is `7a767af`; the test-only
+  snapshot's documentation head is `6ad8227`. Root verifies current test SHA,
+  all 69 payloads, XML, runtime maps and terminal exits. Evidence:
+  `cisd-geometry/HANDOFF.json` and `root-verification.json`; geometry archive
+  SHA256 `5d8785fd581f4ab9d11959e2f71a1f2eeead649fa799a8a40b5ead5682a1c475`.
+- Together with the verified CI/FCI relaxed-frame, RDM/observable and scalar
+  spin gates, **accept WF-22b and WF-22** for the existing supported branches.
+  Acceptance becomes 20/35 parents and 32/37 children. Larger-method and final
+  GPU acceptance remain WF-30/32; this one small point does not close them.
