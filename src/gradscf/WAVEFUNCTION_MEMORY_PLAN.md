@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-23): eighteen of the thirty-five parent tasks
-are fully accepted (WF-00/01/03/04/05/07/08/09/19/20/21/23/24/25/26/27/33/34); thirty-one of the thirty-seven existing
+Current acceptance snapshot (2026-10-24): nineteen of the thirty-five parent tasks
+are fully accepted (WF-00/01/03/04/05/07/08/09/18/19/20/21/23/24/25/26/27/33/34); thirty-one of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -484,7 +484,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 
 ### CI and FCI
 
-- [ ] **WF-18 — Truncated-CI integral preparation.** Supply needed blocks through
+- [x] **WF-18 — Truncated-CI integral preparation** (`verified`). Supply needed blocks through
   the shared layer and retain compressed excitation/string topology.
   Acceptance: CIS/CID/CISD/CISDT/CISDTQ, unrestricted counterparts, generic
   `excitation_ranks`, open-shell/frozen cases, dense oracle and no determinant
@@ -3678,3 +3678,37 @@ requires its own explicit decision and numerical validation.
   `38fa256d46a145dbef568171aac9d1846bba5c4bddb186f1b2554eaa97ad23f9`.
   **Accept WF-02b.** Parents remain 18/35; children become 31/37. WF-02c and
   the known MP2 saved-response-state and remaining EOM phase gates stay open.
+
+### 2026-10-24 — WF-18/22: genuine U quadruples and budgeted CI spin
+
+- Close the final preparation-coverage gap with four spatial orbitals, U(2,2)
+  and 36 determinants. The test explicitly applies a nonzero rank-4 column,
+  compares selected action/diagonal with the original raw oracle, and rejects
+  complete-MO requests or determinant-connection construction. Earlier
+  three-electron tests labelled rank4 could not exercise actual quadruples.
+  This is one new test, with no preparation algorithm change.
+- CI `spin_square` previously built a complete two-body density for one scalar
+  and missed the facade's budget. Supply the factorized alpha/beta overlap
+  exchange to the existing compressed normal-order kernels, then use the shared
+  budgeted sigma contraction. Forward the original MB budget and retained
+  source/result owners. Preserve normalization, frozen electrons, distinct UHF
+  frames, overlap guards and differentiable CI coefficients. Compressed kernels
+  may still contain quartic-sized pieces; no quadratic-storage claim is made.
+- Actual verification: rank4 1 pass; old-source spin RED 6 expected failures;
+  new spin 6 passes; unchanged CID/spin/PySCF regressions 13 passes. All GREEN
+  child/srun exits are 0, with zero errors/skips/timeouts. New gates include
+  float32 coefficients/float64 overlap, no-full-RDM traps, budget rejection and
+  facade ownership, finite joint coefficient/overlap gradient/HVP and two-step
+  differences. Existing tests include UHF/ROHF, frozen and multiroot cases,
+  known spin states, integral response and invalid/polarized limits.
+- Run on 104443/n006, CPU112-127, 120 GiB, no GPU, JAX/JAXlib0.10.0 and
+  PySCF2.13.0. The separately inspected upstream source was PySCF2.9.0; do not
+  conflate those versions. Source/runtime maps are unchanged within each run.
+  Root verifies current owned-file hashes, all 119 indexed payloads, XML and
+  actual terminal exits. Evidence: `ci-spin-budget/HANDOFF.json` and
+  `root-verification.json`. A metadata-only archive count error was corrected
+  with original archives retained; no computation was rerun for that correction.
+- Together with the accepted selected R/U/CID/frozen/ROHF guards and existing
+  raw-chart derivative gates, **accept WF-18**. Parents become 19/35; children
+  remain 31/37. The spin scalar slice advances WF-22; its CIS(D) complete nuclear
+  response gate remains separate until that test's evidence is reviewed.

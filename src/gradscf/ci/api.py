@@ -160,7 +160,9 @@ class CI:
                 overlap_ab = np.eye(coeff.shape[1])
             else:
                 overlap_ab = coeff[0].T @ np.asarray(self.mf.reference.overlap_matrix) @ coeff[1]
-        return spin_square(vector, self.space, overlap_ab=overlap_ab)
+        return spin_square(vector, self.space, overlap_ab=overlap_ab,
+                           max_memory=self.max_memory,
+                           reserved_bytes=self._density_reservation(vector))
 
 
 class CID(CI):

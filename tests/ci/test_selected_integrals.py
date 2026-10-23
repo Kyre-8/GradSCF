@@ -19,7 +19,7 @@ def _entry():
     return function, build
 
 
-def _problem(unrestricted, rank=2, selected=None, frozen=None):
+def _problem(unrestricted, rank=2, selected=None, frozen=None, nocc=None):
     rng = np.random.default_rng(741)
     c = jnp.asarray(np.eye(4)+rng.normal(scale=.02, size=(4, 4)))
     coefficients = (c, .9*c) if unrestricted else c
@@ -27,7 +27,7 @@ def _problem(unrestricted, rank=2, selected=None, frozen=None):
     g = jnp.asarray(rng.normal(scale=.01, size=(4,)*4))
     transform = transform_unrestricted_integrals if unrestricted else transform_integrals
     hs, gs = transform(h, coefficients, eri=g)
-    no = (2, 1) if unrestricted else 2
+    no = ((2, 1) if unrestricted else 2) if nocc is None else nocc
     spin_g = ((gs[0], gs[1]), (gs[1].transpose(2, 3, 0, 1), gs[2])) if unrestricted else ((gs, gs), (gs, gs))
     fs, energy = _reference(hs if unrestricted else (hs, hs), spin_g, no if unrestricted else (no, no))
     build_space = ci.make_uci_space if unrestricted else ci.make_ci_space
@@ -63,6 +63,36 @@ def test_selected_preparation_never_requests_full_mo(monkeypatch):
     monkeypatch.setattr(module, 'transform_eri_blocks', requested)
     prepared = prepare(c, fs, energy, space, eri=ao, max_memory=32.)
     assert seen and np.isfinite(build(prepared, space).diagonal).all()
+
+
+def test_selected_uci_nonempty_quadruples_match_raw_action_without_full_mo(monkeypatch):
+    prepare, build = _entry()
+    c, fs, energy, h, g, ao, space = _problem(True, 4, nocc=(2, 2))
+    ranks = np.asarray(space.ranks)
+    assert 4 in ranks and space.size == 36
+    expected = build_direct_hamiltonian(h, g, space)
+    random = np.random.default_rng(746).normal(size=(space.size, 2))
+    probe = jnp.asarray(np.column_stack((ranks == 4, random)))
+    reference = expected.apply(probe)
+    assert np.linalg.norm(np.asarray(reference[:, 0])) > 1e-5
+    module = importlib.import_module('gradscf.ci.integrals')
+    original, requests_seen = module.transform_eri_blocks, []
+
+    def selected(coefficients, requests, **kwargs):
+        shapes = [tuple(coefficients[i].shape[1] for i in request) for request in requests]
+        assert all(shape != (space.nmo,)*4 for shape in shapes)
+        requests_seen.extend(shapes)
+        return original(coefficients, requests, **kwargs)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail('Selected UCISDTQ expanded a determinant connection table')
+
+    monkeypatch.setattr(module, 'transform_eri_blocks', selected)
+    monkeypatch.setattr(importlib.import_module('gradscf.ci.hamiltonian'), '_connections', forbidden)
+    actual = build(prepare(c, fs, energy, space, eri=ao, max_memory=32.), space)
+    assert requests_seen
+    np.testing.assert_allclose(actual.apply(probe), reference, atol=2e-11, rtol=2e-10)
+    np.testing.assert_allclose(actual.diagonal, expected.diagonal, atol=2e-11)
 
 
 @pytest.mark.parametrize('unrestricted', [False, True])
