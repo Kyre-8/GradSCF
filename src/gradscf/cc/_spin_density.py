@@ -47,7 +47,8 @@ def _gamma1( t1, t2, l1, l2):
 # When computing intermediates, the convention
 # dm2[q,p,s,r] = <p^\dagger r^\dagger s q> is assumed in this function.
 # It changes to dm2[p,q,r,s] = <p^\dagger r^\dagger s q> in _make_rdm2
-def _gamma2( t1, t2, l1, l2):
+def _gamma2(t1, t2, l1, l2, *, _einsum=None):
+    einsum = jnp.einsum if _einsum is None else _einsum
     tau = t2 + einsum('ia,jb->ijab', t1, t1) * 2
     miajb = einsum('ikac,kjcb->iajb', l2, t2)
 
@@ -58,9 +59,9 @@ def _gamma2( t1, t2, l1, l2):
     goovv += einsum('cb,ijca->ijab', tmp, t2) * .5
     tmp = einsum('kc,jc->kj', l1, t1)
     goovv += einsum('kiab,kj->ijab', tau, tmp) * .5
-    tmp = jnp.einsum('ldjd->lj', miajb)
+    tmp = einsum('ldjd->lj', miajb)
     goovv -= einsum('lj,liba->ijab', tmp, tau) * .25
-    tmp = jnp.einsum('ldlb->db', miajb)
+    tmp = einsum('ldlb->db', miajb)
     goovv -= einsum('db,jida->ijab', tmp, tau) * .25
     goovv -= einsum('ldia,ljbd->ijab', miajb, tau) * .5
     tmp = einsum('klcd,ijcd->ijkl', l2, tau) * .25**2
@@ -72,19 +73,19 @@ def _gamma2( t1, t2, l1, l2):
 
     gooov  = einsum('jkba,ib->jkia', tau, l1) * -0.25
     gooov += einsum('iljk,la->jkia', goooo, t1)
-    tmp = jnp.einsum('icjc->ij', miajb) * .25
+    tmp = einsum('icjc->ij', miajb) * .25
     gooov -= einsum('ij,ka->jkia', tmp, t1)
     gooov += einsum('icja,kc->jkia', miajb, t1) * .5
     gooov = gooov.conj()
     gooov += einsum('jkab,ib->jkia', l2, t1) * .25
 
     govvo  = einsum('ia,jb->ibaj', l1, t1)
-    govvo += jnp.einsum('iajb->ibaj', miajb)
+    govvo += einsum('iajb->ibaj', miajb)
     govvo -= einsum('ikac,jc,kb->ibaj', l2, t1, t1)
 
     govvv  = einsum('ja,ijcb->iacb', l1, tau) * .25
     govvv += einsum('bcad,id->iabc', gvvvv, t1)
-    tmp = jnp.einsum('kakb->ab', miajb) * .25
+    tmp = einsum('kakb->ab', miajb) * .25
     govvv += einsum('ab,ic->iacb', tmp, t1)
     govvv += einsum('kaib,kc->iabc', miajb, t1) * .5
     govvv = govvv.conj()
@@ -105,16 +106,15 @@ def _gamma2( t1, t2, l1, l2):
     return (dovov, dvvvv, doooo, doovv, dovvo, dvvov, dovvv, dooov)
 
 
-def active_density_parts(t1, t2, l1, l2):
-    """Active correlation 1-RDM and 2-RDM part excluding reference/1-RDM terms."""
-    doo, dov, dvo, dvv = _gamma1(t1, t2, l1, l2)
-    no, nv = t1.shape
+def _assemble_density_parts(one, two, dtype, *, zeros2=jnp.zeros):
+    doo, dov, dvo, dvv = one
+    no, nv = dov.shape
     o, v = slice(None, no), slice(no, None)
-    dm1 = jnp.zeros((no+nv, no+nv), t1.dtype)
+    dm1 = jnp.zeros((no+nv, no+nv), dtype)
     dm1 = dm1.at[o, o].set(doo+doo.T).at[o, v].set(dov+dvo.T)
     dm1 = dm1.at[v, o].set(dov.T+dvo).at[v, v].set(dvv+dvv.T) * .5
-    dovov, dvvvv, doooo, _, dovvo, _, dovvv, dooov = _gamma2(t1, t2, l1, l2)
-    dm2 = jnp.zeros((no+nv,)*4, t1.dtype)
+    dovov, dvvvv, doooo, _, dovvo, _, dovvv, dooov = two
+    dm2 = zeros2((no+nv,)*4, dtype)
     dm2 = dm2.at[o, v, o, v].set(dovov)
     dm2 = dm2.at[v, o, v, o].set(dovov.transpose(1, 0, 3, 2))
     dm2 = dm2.at[o, o, v, v].set(-dovvo.transpose(0, 3, 2, 1))
@@ -131,3 +131,23 @@ def active_density_parts(t1, t2, l1, l2):
     dm2 = dm2.at[o, o, v, o].set(dooov.transpose(1, 0, 3, 2))
     dm2 = dm2.at[v, o, o, o].set(dooov.transpose(3, 2, 1, 0))
     return dm1, dm2.transpose(1, 0, 3, 2)
+
+
+def active_density_parts(t1, t2, l1, l2):
+    """Original dense active density; retained as a small-system oracle."""
+    return _assemble_density_parts(_gamma1(t1,t2,l1,l2),
+        _gamma2(t1,t2,l1,l2),t1.dtype)
+
+
+def indexed_density_parts(t1,t2,l1,l2):
+    """The same density equations and O/V assignments with indexed outputs."""
+    from ._density_index import Tensor,Buffer,einsum as indexed_einsum
+    two = _gamma2(*map(Tensor,(t1,t2,l1,l2)),_einsum=indexed_einsum)
+    return _assemble_density_parts(_gamma1(t1,t2,l1,l2),two,t1.dtype,zeros2=Buffer)
+
+
+def reference_density_terms(p,dc,*,contract=jnp.einsum):
+    """Original full-frame reference and core-active restoration terms."""
+    return (contract('pq,rs->pqrs',p,dc)+contract('pq,rs->pqrs',dc,p)
+            -contract('ps,rq->pqrs',p,dc)-contract('ps,rq->pqrs',dc,p)
+            +contract('pq,rs->pqrs',p,p)-contract('ps,rq->pqrs',p,p))

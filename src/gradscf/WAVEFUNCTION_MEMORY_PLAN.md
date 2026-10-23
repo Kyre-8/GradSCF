@@ -276,7 +276,7 @@ successful component derivatives do not establish a whole-method memory bound.
 | Existing scope | Accepted frontier | Remaining acceptance boundary |
 | --- | --- | --- |
 | WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response, selected R/U MP2 with joint preparation/channel/caller budgets, fixed-aniline full-input gradient | Complete outer-AD ownership, direct-input performance, measured size family, traced target-device capacity |
-| WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, phase budgets and contracted two-body properties |
+| WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, complete phase budgets and nuclear two-body-property response |
 | WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Remaining native phase budgets and whole-method measurements |
 | WF-18/19/20/21/22/27 | Selected and explicit-MO CI/UCIS/CIS(D) budgets, ROHF guards, FCI active/caller budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Complete phase/AD ownership, GPU and large-method measurements |
 | WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 mixed precision, pure-frame R/U MPn and moving native MP4 geometry second response | Complete cross-caller AD ownership and method-level size/performance acceptance |
@@ -3095,3 +3095,39 @@ requires its own explicit decision and numerical validation.
   104079 held all step memory. None ran a numerical test. The accepted holder
   uses no GPU and 1 GiB; scientific steps stay within the same allocation.
   Source/library provenance and existing acceptance gates are unchanged.
+
+### 2026-10-23 — WF-15/27/29: requested CC density and observable boxes
+
+- Keep one original Gamma2 equation source and the original sixteen O/V
+  assembly segments. A small index-expression adapter propagates requested
+  free-axis selections; contracted indices remain complete. Four-axis boxes
+  serve full spatial export, static unequal/duplicate/empty selections, spin
+  aa/ab/ba/bb and direct observable contraction. There is no full spin 2-RDM
+  extraction, second density formula, numerical cache or new solver. The
+  necessary O^2 V^2 spin T/Lambda bridge is retained and budgeted.
+- The public CC methods accept make_rdm2(indices=None, spin=None) and
+  expectation_value(h1=None, eri=None). The original MB budget and known
+  source/state/output/operator copies remain in their respective Lambda and
+  density phases. Impossible exports fail before Lambda/spin expansion.
+  One-body dispatch and other original CC methods retain their mathematical
+  ASTs. Source attribution remains in cc/NOTICE.md.
+- Actual accepted frontiers comprise 14 selection/caller/joint-state AD cases,
+  five original R/U full/frozen PySCF density/trace/energy oracles and three
+  final scalar-budget/implicit-chain cases. All groups exit 0 on the previous
+  allocation 103505/n002/CPU16-31; 22 distinct cases are not 22 full workflows.
+  Final three cases alone use the corrected scalar-dtype byte fee. Their
+  CC -> Lambda -> observable HVP perturbs fixed-MO one-body integrals, not
+  nuclear coordinates. Original tolerances, true REDs and invalid orchestration
+  records remain preserved. Root and independent review verify 173 payloads,
+  the raw exits/XML/source maps and the exact four source/four test files.
+- At the single fixed nmo=4/nocc=2/seed713 component point, historical/new full
+  XLA temporaries are 176641/65537 B, warm medians 0.233/0.262 ms and compile
+  times 0.350/2.707 s. Complete child RSS increases. The earlier 0.194/0.397 ms
+  result is also retained: this demonstrates reduced declared temporary arrays,
+  not overall speed or process-memory improvement. No GPU, size scaling or
+  nuclear-property response is inferred. Those original gates remain open.
+- Evidence: ci-owner-checkpoint/CC_RDM2_REVIEW.md and
+  review-cc-rdm2-20261022.tar.gz, SHA256
+  988ea4e2f34e1e358322436abeb9f08ffc92dc240c45f610d56a849958ac3113.
+  This closes the finite correctness/known-array slice inside the existing
+  tasks, without adding TODO branches or closing the full project.

@@ -17,7 +17,8 @@ from .lambda_equations import solve_lambda, solve_lambda_from_integrals
 from .triples import evaluate_triples, evaluate_triples_from_integrals
 from .properties import (_density_from_lambda, _rdm2_from_lambda,
                          _density_from_integrals, _density_ucc_from_integrals,
-                         _rdm2_from_states)
+                         _rdm2_from_states, _density_preflight,
+                         _contract_rdm2_from_states)
 
 
 class CC:
@@ -156,15 +157,15 @@ class CC:
     def eaccsd(self, **kwargs):
         return self.EOMEA(**kwargs).kernel()
 
-    def solve_lambda(self):
+    def solve_lambda(self, *, _extra=()):
         ref = self._ready()
         self.lambda_result = (solve_lambda_from_integrals(
             self._integrals, self.result, config=self._config(), max_memory=self.max_memory,
-            reserved_bytes=self._held_bytes(self._integrals, self.result))
+            reserved_bytes=self._held_bytes(self._integrals, self.result, extra=_extra))
             if self._integrals is not None else solve_lambda(
                 ref.h1, ref.eri, self.result, nocc=ref.nocc,
                 frozen=self.frozen, config=self._config(), max_memory=self.max_memory,
-                reserved_bytes=self._held_bytes(ref.h1, ref.eri, self.result)))
+                reserved_bytes=self._held_bytes(ref.h1, ref.eri, self.result, extra=_extra)))
         self.l1, self.l2 = self.lambda_result.l1, self.lambda_result.l2
         self.converged_lambda = bool(self.lambda_result.converged)
         return self.l1, self.l2
@@ -220,16 +221,19 @@ class CC:
         self.solve_lambda()
         if not self.converged_lambda:
             raise RuntimeError("Converge Lambda before evaluating the CC density")
+        return self._rdm1_with_left(ref)
+
+    def _rdm1_with_left(self, ref, *, extra=()):
         if self._integrals is not None:
             if isinstance(ref.nocc, (tuple, list)):
                 return _density_ucc_from_integrals(self._integrals, self.result,
                     self.lambda_result, nmo=self._nmo, nocc=ref.nocc,
                     frozen=self.frozen, config=self._config(), max_memory=self.max_memory,
-                    reserved_bytes=self._held_bytes(self._integrals, self.result, self.lambda_result))
+                    reserved_bytes=self._held_bytes(self._integrals, self.result, self.lambda_result, extra=extra))
             density = _density_from_integrals(self._integrals, self.result,
                 self.lambda_result, nmo=self._nmo, nocc=ref.nocc,
                 frozen=self.frozen, config=self._config(), max_memory=self.max_memory,
-                reserved_bytes=self._held_bytes(self._integrals, self.result, self.lambda_result))
+                reserved_bytes=self._held_bytes(self._integrals, self.result, self.lambda_result, extra=extra))
             return density.astype(jnp.result_type(ref.coefficients, ref.hcore))
         return _density_from_lambda(
             ref.h1,
@@ -240,22 +244,71 @@ class CC:
             frozen=self.frozen,
             config=self._config(),
             max_memory=self.max_memory,
-            reserved_bytes=self._held_bytes(ref.h1, ref.eri, self.result, self.lambda_result),
+            reserved_bytes=self._held_bytes(ref.h1, ref.eri, self.result, self.lambda_result, extra=extra),
         )
 
-    def make_rdm2(self):
+    def _density_metadata(self, ref):
+        if self._integrals is None:
+            h = ref.h1[0] if isinstance(ref.nocc,(tuple,list)) else ref.h1
+            return h.shape[0],h.dtype
+        coefficients = ref.coefficients if isinstance(ref.nocc,(tuple,list)) else (ref.coefficients,)
+        return self._nmo,jnp.result_type(*coefficients,ref.hcore)
+
+    def make_rdm2(self, *, indices=None, spin=None):
+        """Full spatial density or four requested MO axes and a spin block."""
         ref = self._ready()
+        nmo,dtype = self._density_metadata(ref)
+        _density_preflight(self.result,nmo=nmo,nocc=ref.nocc,dtype=dtype,
+            indices=indices,spin=spin,max_memory=self.max_memory,
+            reserved_bytes=self._held_bytes())
         self.solve_lambda()
         if not self.converged_lambda:
             raise RuntimeError("Converge Lambda before evaluating the CC density")
         if self._integrals is not None:
-            coefficients = (ref.coefficients if isinstance(ref.nocc, (tuple, list))
-                            else (ref.coefficients,))
-            return _rdm2_from_states(self.result, self.lambda_result, nmo=self._nmo,
-                nocc=ref.nocc, frozen=self.frozen,
-                dtype=jnp.result_type(*coefficients, ref.hcore), config=self._config())
+            return _rdm2_from_states(self.result, self.lambda_result, nmo=nmo,
+                nocc=ref.nocc, frozen=self.frozen,dtype=dtype,config=self._config(),
+                indices=indices,spin=spin,max_memory=self.max_memory,
+                reserved_bytes=self._held_bytes(self.result,self.lambda_result))
         return _rdm2_from_lambda(ref.h1, ref.eri, self.result, self.lambda_result,
-                                 nocc=ref.nocc, frozen=self.frozen, config=self._config())
+            nocc=ref.nocc,frozen=self.frozen,config=self._config(),indices=indices,spin=spin,
+            max_memory=self.max_memory,
+            reserved_bytes=self._held_bytes(ref.h1,ref.eri,self.result,self.lambda_result))
+
+    def expectation_value(self, h1=None, eri=None):
+        """Contract real MO observables without exporting a full two-body density.
+
+        Unrestricted inputs are (h_alpha,h_beta) and (eri_aa,eri_ab,eri_bb).
+        Both observables and the original stationary T/Lambda remain live AD
+        dependencies. The reference orbitals are held fixed by this property.
+        """
+        ref = self._ready()
+        nmo,dtype = self._density_metadata(ref)
+        unrestricted = isinstance(ref.nocc,(tuple,list))
+        if h1 is None and eri is None:
+            raise ValueError('Supply a one- or two-body observable')
+        one = () if h1 is None else tuple(map(jnp.asarray,h1)) if unrestricted else (jnp.asarray(h1),)
+        two = () if eri is None else tuple(map(jnp.asarray,eri)) if unrestricted else (jnp.asarray(eri),)
+        if one and (len(one) != (2 if unrestricted else 1) or any(x.shape != (nmo,nmo) for x in one)):
+            raise ValueError('One-body observable must have full spatial MO shape (nmo,nmo)')
+        if two and (len(two) != (3 if unrestricted else 1) or any(x.shape != (nmo,)*4 for x in two)):
+            raise ValueError('Two-body observable must have full spatial MO shape (nmo,)*4')
+        # NumPy observables may own a distinct backend copy after conversion.
+        extra = h1,eri,one,two
+        self.solve_lambda(_extra=extra)
+        if not self.converged_lambda:
+            raise RuntimeError('Converge Lambda before evaluating the CC density')
+        value = jnp.asarray(0.,jnp.result_type(dtype,*one,*two))
+        if one:
+            dm1 = self._rdm1_with_left(ref,extra=extra)
+            densities = dm1 if unrestricted else (dm1,)
+            value = sum((jnp.einsum('pq,qp->',op,dm) for op,dm in zip(one,densities)),value)
+            del dm1,densities
+        if two:
+            value = value+_contract_rdm2_from_states(two if unrestricted else two[0],self.result,self.lambda_result,
+                nmo=nmo,nocc=ref.nocc,dtype=dtype,frozen=self.frozen,config=self._config(),
+                max_memory=self.max_memory,reserved_bytes=self._held_bytes(
+                    self.result,self.lambda_result,*two,extra=(extra,one,two,value)))
+        return value
 
 
 class CCSD(CC):
