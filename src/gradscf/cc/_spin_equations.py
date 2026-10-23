@@ -58,3 +58,24 @@ def correlation_energy(t1, t2, eris):
     return (einsum('ia,ia', eris.fock[:no, no:], t1)
             + .25*einsum('ijab,ijab', t2, eris.oovv)
             + .5*einsum('ia,jb,ijab', t1, t1, eris.oovv))
+
+
+def packed_correlation_energy(vector, space, eris):
+    """Contract x2=2*t2(independent) without expanding the dense T2 tensor.
+
+    Keep all four signed integral entries: raw integral derivatives need not
+    obey the physical antisymmetries. Promote each gather before subtraction,
+    matching the dense contraction when amplitudes and integrals differ in dtype.
+    """
+    no, nv = sum(space.nocc), sum(space.nvir)
+    singles, doubles = space.indices
+    ns = singles.shape[1]
+    t1 = np.zeros((no, nv), vector.dtype).at[tuple(singles)].set(vector[:ns])
+    i, j, a, b = doubles
+    dtype = np.result_type(vector, eris.oovv)
+    g = eris.oovv
+    selected = (g[i, j, a, b].astype(dtype)-g[j, i, a, b].astype(dtype)
+                -g[i, j, b, a].astype(dtype)+g[j, i, b, a].astype(dtype))
+    return (einsum('ia,ia', eris.fock[:no, no:], t1)
+            + .25*einsum('p,p', vector[ns:]/2, selected)
+            + .5*einsum('ia,jb,ijab', t1, t1, eris.oovv))

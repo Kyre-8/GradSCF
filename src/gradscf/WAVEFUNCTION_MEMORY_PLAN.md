@@ -452,6 +452,8 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   spin-amplitude expansion using block consumers. Acceptance: UCCD/UCCSD forward,
   adjoints and geometry HVP, restricted-limit comparison; packed-coordinate
   normalization and dual factors preserved.
+  The packed energy callback is verified and shared with Lambda; the residual
+  still expands spin T2, so its existing budget and this parent remain open.
 - [ ] **WF-14 — Triples total budget and AD integration.** Retain streamed (T)
   first/second derivatives; charge upstream integrals/T2/panels/adjoints and
   choose panels accordingly. Acceptance: canonical/semicanonical, off-diagonal
@@ -3542,3 +3544,37 @@ requires its own explicit decision and numerical validation.
   was not uploaded. Evidence: `size-family/root-family-verification.json` and
   each point's download verification, plus the previous aniline pair review.
   **Accept WF-08 only.** Parent acceptance becomes 16/35; children remain 28/37.
+
+### 2026-10-23 — WF-13: direct packed-coordinate UCC energy
+
+- Share one 21-line energy contraction between UCC and Lambda. With the existing
+  norm-preserving coordinates x2=2*t2, contract each independent double against
+  `(g_ijab-g_jiab-g_ijba+g_jiba)/8`. Promote the four gathered values before
+  subtraction. This preserves derivatives with respect to raw nonsymmetric
+  integrals and mixed dtypes; assuming physical ERI symmetry here would change
+  that input chart. Singles and T1*T1 terms retain the original formula.
+- The residual, amplitude coordinates, Lambda dual factor and residual-memory
+  envelope are unchanged. This avoids dense T2 only in energy/energy-gradient
+  evaluation; it does not turn the whole UCC residual into a block algorithm.
+  The removed unused import is the only other production cleanup.
+- Final validation on 104443/n006, CPU 112-127, no GPU, yields 48 unique passes,
+  zero failures/errors/skips, actual child/srun exits 0. The 47-case group covers
+  raw energy JVP/VJP/HVP, float32/float64/mixed, empty/frozen CCD/CCSD, Lambda,
+  restricted limits and existing UCC tests. A separate LiH+/STO-3G relaxed CCSD
+  gradient/HVP case passes the original finite-difference checks. Preserve the
+  29 expected missing-helper RED failures and earlier GREEN as provenance.
+- The fixed synthetic energy component uses occupied (8,7), virtual (80,79),
+  seed 13157, raw nonantisymmetric ERIs, JAX 0.10/float64 and seven warm samples.
+  Dense/packed warm medians are 28.210126/9.022251 ms, compiler temporaries
+  144688584/53667336 B, and primary pre-oracle RSS 907548/814100 KiB. Energy
+  differs by 2.42862e-17 Eh. The compiled dense path has four full-T2 scatters;
+  the packed path has none. Final packed whole-child RSS is 946340 KiB because
+  it subsequently evaluates the opposite-mode oracle; do not substitute that
+  value for primary-phase RSS or infer a complete-method speedup.
+- Root reviews the exact formula and source changes and verifies final source
+  hashes, archive SHA and original final exits. Evidence:
+  `wf13-packed-energy/HANDOFF.json`, `local-verification.json` and
+  `implementation-review.json`; 138 indexed payloads, archive SHA256
+  `2d39b6ccc00cc4cc9574f09729fbaa5f1d0ccd32c376dd5c93b20fcd77c3c621`.
+  Snapshot `134efc2` plus the three CC files and narrow test excludes concurrent
+  AO2MO/device changes. Accept this component only; WF-13 remains open.

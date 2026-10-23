@@ -78,7 +78,7 @@ def _solve_left(space, x, ints, result, cfg, *, unrestricted=False,
     def functions(data):
         if unrestricted:
             return (lambda t: space.pack(*_spin_equations.residual(*space.unpack(t), data)),
-                    lambda t: _spin_equations.correlation_energy(*space.unpack(t), data))
+                    lambda t: _spin_equations.packed_correlation_energy(t, space, data))
         return (lambda t: space.pack(*residual(*space.unpack(t), data, model=cfg.method)),
                 lambda t: correlation_energy(*space.unpack(t), data, model=cfg.method))
     r, e = functions(ints)

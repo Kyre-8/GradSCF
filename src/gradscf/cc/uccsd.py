@@ -12,7 +12,7 @@ from ..solvers.nonlinear.iterate import NonlinearConfig, solve_nonlinear
 from .types import CCConfig, CCResult
 from .ground import linear_config, METHODS
 from .spin_amplitudes import SpinAmplitudeSpace
-from ._spin_equations import residual, correlation_energy
+from ._spin_equations import residual, packed_correlation_energy
 from ._memory import ground_budget, preparation_reservation
 
 
@@ -127,7 +127,7 @@ def run_ucc_from_integrals(ints, occupied, virtual, *, config=None, t1=None, t2=
         (provided, t1, t2, eps, d1, diagonal, safe), numerical, linear_config(cfg),
         max_memory, reserved_bytes, no, sum(virtual), cfg.method, spin=True)
     r = lambda x: space.pack(*residual(*space.unpack(x), ints))
-    e = lambda x: correlation_energy(*space.unpack(x), ints)
+    e = lambda x: packed_correlation_energy(x, space, ints)
     solved = solve_nonlinear(r, initial, update=lambda x, rx: x+rx/safe, observable=e,
         config=numerical, linear_config=response, valid_inputs=valid, **budget)
     ta, tb = space.unpack_blocks(solved.solution)
