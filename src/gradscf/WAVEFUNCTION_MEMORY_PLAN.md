@@ -283,12 +283,14 @@ successful component derivatives do not establish a whole-method memory bound.
 | WF-29 | Hermitian/non-Hermitian primal, isolated-pair response, SCF implicit response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining cross-consumer ownership and whole-method reconciliation |
 | WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
 
-The damaged jy_gpu_1 stages remain paused. Allocation 103505/n002 is no longer
-active. On 2026-10-23 the user renewed jy_gpu_2 authorization for one 5090/V100,
-64 logical CPUs and 512 GiB, retaining the previously authorized 48 hours. After
-refreshing lwcluster 0.8.0/manual and live capacity/budget, allocation 104081 runs
-on n006 with RTX 5090 physical GPU0. The actual 64-CPU affinity is 0-31,192-223;
-the real float64 CUDA/JIT probe exits 0. This is readiness, not a method gate.
+The damaged jy_gpu_1 stages remain paused. Allocations103505/n002 and104081/n006
+are no longer active. The latest renewal is104443/n006: one RTX5090,64 logical
+CPUs,512 GiB and48 hours, ending2026-10-25 21:29:47 Asia/Shanghai. The actual
+affinity is96-127,288-319. Slurm assigns GPU1, remapped to process-visible GPU0,
+UUID GPU-7aa3e8aa-431b-da04-7ba3-5c37ae5479d0; GPU6 remains forbidden.
+The float64 CUDA/JIT/AD assertions completed and were read back from their JSON.
+The SSH control connection exited255, so its exact srun exit was not independently
+captured. This establishes readiness, not a numerical-method acceptance gate.
 Keep pending implementations separate from accepted evidence.
 Do not reuse damaged stages, c20 credentials or its compiled native library.
 
@@ -618,11 +620,12 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 Every numerical test runs remotely, never locally. The current 2026-10-23 user
 instruction authorizes **jy_gpu_2 / Delta** via Slurm: one 5090/V100, 64 logical
 CPUs, 512 GiB and 48 hours. The V100 nodes cannot supply 512 GiB; the admitted job is
-104081/n006 with typed `gpu:NV5090:1`. Read the latest `lwcluster manual` before
+104443/n006 with typed `gpu:NV5090:1`. Read the latest `lwcluster manual` before
 operating; submit from `~/private/homefile/` to `home`. Execute all tests/builds
 inside the allocation's checked srun steps, not on the login node. Use only
-assigned physical GPU0; GPU6 remains prohibited. The observed CPU set is
-0-31,192-223. Four CPU lanes may use 0-15,16-31,192-207,208-223; a GPU
+assigned Slurm GPU1/process-visible GPU0 by its recorded UUID; GPU6 remains
+prohibited. The observed CPU set is96-127,288-319. Four CPU lanes may use
+96-111,112-127,288-303,304-319; a GPU
 test consumes a released CPU lane rather than adding host threads beyond 64.
 CPU srun steps explicitly use `--gres=none --mem=120G --immediate=15`; otherwise
 they inherit the allocation's sole GPU and unnecessarily serialize. This
@@ -631,6 +634,9 @@ The resource-holder step reserves only 1 GiB and no GPU, leaving the remaining
 allocation available to test steps. `--overlap` does not remove step-memory
 reservations. Prior startup attempts104075/104078/104079 did not run numerical
 tests; their scheduler/device-isolation failures are not physics failures.
+Renewal attempts104434/104437 failed before computation because the global GPU
+index was used after process remapping;104440 used an unsupported query field.
+104443 uses the allocated process-visible index and records both numbering scopes.
 Do not initialize unrelated GPUs or import c20 device/credential assumptions.
 Keep individual tests bounded (normally at most 600 seconds for this campaign).
 Existing jy_gpu_1 evidence remains valid only at its documented source version;
@@ -3460,3 +3466,31 @@ requires its own explicit decision and numerical validation.
   This is a primal efficiency prerequisite. Full aniline geometry gradient,
   matched warm/RSS comparison and increasing-size acceptance remain WF-08/32;
   no additional parent/child is closed by this change.
+
+### 2026-10-23 — WF-08: completed fixed-aniline direct/full gradient pair
+
+- At dde6f9a, the fixed14-atom/119-AO Cartesian6-31G* aniline MP2 pair completes
+  sequentially on104081/n006, CPU0-15/JAX0.10/float64. Preserve all25 occupied/
+  94 virtual orbitals, zero screening,60000 MB planning, original32 GiB XLA
+  guard, input67e2 and the frozen PySCF2.13 oracle. Actual child/srun/oracle/pair
+  exits are0; both modes finish first and one warm value/gradient execution.
+- Both pass the original absolute energy3e-9 Eh and per-component gradient
+  3e-7 Eh/bohr tolerances. Direct/full energy differs by2.2737367544323206e-13 Eh;
+  the maximum difference among42 gradient components is3.545367558560608e-12
+  Eh/bohr. Each mode's maximum PySCF gradient error is about4.5533e-8 Eh/bohr.
+- Direct/full first times are603.337557/178.270864 s, warm1 times
+  605.247343/178.587012 s, and complete child peaks5963260/23529724 KiB.
+  XLA temporary estimates are3020471992/22467944224 B. Direct uses25.34% of
+  the full process peak but takes3.389x the warm time on this point. This is
+  a measured memory/time tradeoff; it does not justify a universal faster
+  default or establish scaling. The explicit full path remains available.
+- The full first finite gate and timing exist, but a separate first snapshot
+  was not captured; do not claim full first/final bitwise equality. Final NPZ
+  and accuracy comparisons are complete, and the direct artifacts remain intact.
+  Independent stdlib review verifies60/46 full/direct archive payloads,1072
+  committed source files, identical1774-entry runtime maps, eight unchanged
+  direct-reference files and nonoverlapping execution. Evidence
+  wf08-aniline-full-gradient-dde6f9a/root-pair-verification.json;
+  full archive SHA25610f93ba3e737a6ab2abc8263864a514c580cd1a0e6dadb9728dade239db1f6f6.
+  WF-08 remains open for the finite R/U size family and remaining joint-budget
+  boundaries; no parent or child is added or closed by this single-point pair.
