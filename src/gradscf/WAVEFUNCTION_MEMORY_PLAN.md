@@ -267,15 +267,15 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-23): fifteen of the thirty-five parent tasks
-are fully accepted (WF-00/01/04/07/09/19/20/21/23/24/25/26/27/33/34); twenty-eight of the thirty-seven existing
+Current acceptance snapshot (2026-10-23): sixteen of the thirty-five parent tasks
+are fully accepted (WF-00/01/04/07/08/09/19/20/21/23/24/25/26/27/33/34); twenty-eight of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
 
 | Existing scope | Accepted frontier | Remaining acceptance boundary |
 | --- | --- | --- |
-| WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response, selected R/U MP2 with joint preparation/channel/caller budgets, fixed-aniline full-input gradient | Complete outer-AD ownership, direct-input performance, measured size family, traced target-device capacity |
+| WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response, selected R/U MP2 with joint preparation/channel/caller budgets, measured full/direct gradient family and aniline oracle | Complete outer-AD ownership, consumer conversion measurements and traced target-device capacity; direct remains opt-in |
 | WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, complete phase budgets and nuclear two-body-property response |
 | WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Remaining native phase budgets and whole-method measurements |
 | WF-18/19/20/21/22/27 | Selected and explicit-MO CI/UCIS/CIS(D) budgets, ROHF guards, FCI active/caller and joint action/solver response budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Remaining CI/property/outer-AD ownership, GPU and large-method measurements |
@@ -374,7 +374,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   correlation response. Acceptance: energy, full gradient, HVP and one small
   mixed perturbation against dense AD/finite differences; N2 pi-degeneracy test;
   direct geometry input must never call full ERI evaluation.
-- [ ] **WF-08 — First measured memory/scaling gate.** Fixed water/aniline input
+- [x] **WF-08 — First measured memory/scaling gate** (`verified`). Fixed water/aniline input
   and a modest increasing-size family, same basis/orbital space/tolerances.
   Acceptance: compiler estimates and observed RSS separated, compile/warm/full
   timing, byte accounting reconciled, no regression hidden by a changed model.
@@ -3494,3 +3494,51 @@ requires its own explicit decision and numerical validation.
   full archive SHA25610f93ba3e737a6ab2abc8263864a514c580cd1a0e6dadb9728dade239db1f6f6.
   WF-08 remains open for the finite R/U size family and remaining joint-budget
   boundaries; no parent or child is added or closed by this single-point pair.
+
+### 2026-10-23 — WF-08: finite CPU MP2 measurement gate accepted
+
+- Complete five additional fixed full/direct Cartesian 6-31G* gradient pairs
+  on 104443/n006, CPU 96-111, JAX 0.10, float64, without GPU use. Numerical
+  sources remain `dde6f9a`; frozen HEAD `134efc2` differs only in documentation.
+  Keep all orbitals, original tolerances, zero screening, eight direct workers,
+  60000 MB planning and the 32 GiB compiler guard. The restricted size sequence
+  is water/ethane/aniline at 19/42/119 AO; the unrestricted points are H3 doublet,
+  NH triplet and O2 triplet at 6/17/30 AO. These are fixed geometries, not new
+  optimizations or orbital-stability certifications.
+- All ten new numerical children and their srun controls exit 0; all five
+  allocation-side comparison steps exit 0 with 29 checks per pair. Every point
+  has finite energy/full gradient and one first plus one warm execution. The
+  maximum full/direct differences are 5.68435e-14 Eh and 2.95445e-13 Eh/bohr,
+  within the unchanged absolute 3e-9 Eh / 3e-7 Eh/bohr tolerances, rtol=0.
+  No new PySCF oracle was computed for these five points; aniline retains its
+  independent frozen oracle. No first/final bitwise-identity claim is made.
+
+  | Point | Full/direct warm time (s) | Full/direct complete child RSS (KiB) |
+  | --- | ---: | ---: |
+  | Water | 0.097220 / 0.665399 | 1304432 / 1395408 |
+  | Ethane | 2.027117 / 12.008879 | 1444224 / 1736840 |
+  | H3 doublet | 0.005206 / 0.033660 | 1314860 / 1380780 |
+  | NH triplet | 0.075015 / 0.459878 | 1473944 / 1542720 |
+  | O2 triplet | 0.385470 / 2.387316 | 1519752 / 1685472 |
+  | Aniline (previous allocation) | 178.587012 / 605.247343 | 23529724 / 5963260 |
+
+- Small systems pay additional direct-mode time and process memory. Aniline's
+  measured peak falls by about 3.95x, meeting the original >=2x target, with a
+  3.389x warm-time cost. Direct remains explicit opt-in; the full reference path
+  stays available. The result is a finite size-family tradeoff, not an
+  asymptotic scaling fit, universal speedup or repeated-sample timing estimate.
+  Compilation, first/warm/full-child times, internal RSS and compiler temporary
+  estimates are stored separately in `size-family/completed-family-summary.json`.
+- Known-array accounting reuses the verified channel/T2/solver ledger
+  `delta-v100-20261022/mp2-graph-budget-root-verification.json`, joint preparation
+  and caller reservations in `delta-mp-callers-r1/review-p2/HANDOFF.json`, and
+  `scf-ownership/phase-ledger.json` / `root-verification.json`. WF-04/07 retain
+  the no-full-ERI/cotangent structural gates. Independent review accepts this
+  evidence mapping; arbitrary outer-AD ownership and compiler/allocator hard
+  bounds remain with WF-02/05/06/29/30/32, as specified by the original plan.
+- Root verifies all five downloaded archive hashes/bytes, saved energy/gradient
+  differences and sequential execution using only local standard-library code.
+  Remote runtime manifests are unchanged; concurrent local implementation work
+  was not uploaded. Evidence: `size-family/root-family-verification.json` and
+  each point's download verification, plus the previous aniline pair review.
+  **Accept WF-08 only.** Parent acceptance becomes 16/35; children remain 28/37.
