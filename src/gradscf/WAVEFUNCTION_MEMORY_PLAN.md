@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-23): eleven of the thirty-five parent tasks
-are fully accepted (WF-00/01/04/07/09/19/21/26/27/33/34); twenty-eight of the thirty-seven existing
+Current acceptance snapshot (2026-10-23): twelve of the thirty-five parent tasks
+are fully accepted (WF-00/01/04/07/09/19/20/21/26/27/33/34); twenty-eight of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -495,7 +495,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     verified for the stated real common-spatial CPU/known-array contract.
     Reuse representation/core-fold layers and the native relaxed closure;
     CUDA geometry and large-CAS scaling remain WF-30/32.
-- [ ] **WF-20 — CI action/cache budget.** Replace fixed creator/spectator/RHS
+- [x] **WF-20 — CI action/cache budget** (`verified`). Replace fixed creator/spectator/RHS
   batches with byte planning and bound numerical/RDM caches by bytes.
   Acceptance: direct action/matmat parity, Davidson forward/response, no all-pairs
   connection build; repeated-call cache release and blockwise JVP/VJP.
@@ -503,7 +503,8 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   - [x] **WF-20a** (`verified`): replace Python-expanded multi-RHS batches
     with the existing shared compact column loop; preserve empty/small batches
     and validate values, coefficient/integral response and measured warm-time/
-    workspace tradeoff. Byte-selected widths and cache ownership remain open.
+    workspace tradeoff. The later WF-20 closure verifies byte-selected widths
+    and static-cache ownership; whole-method scaling remains separate.
 - [x] **WF-21 — FCI Hamiltonian action tiles** (`verified`). Tile gather -> contraction ->
   transpose scatter instead of full E_pq*C stacks, rematerializing reverse tiles.
   Acceptance: alpha/beta signs, rectangular spin sectors, multiple RHS, transpose
@@ -3313,3 +3314,32 @@ requires its own explicit decision and numerical validation.
   for the declared-array/action/shared-solver contract. Nuclear properties,
   CPU/GPU whole-method scaling and an operating-system RSS cap are separate
   WF-22/30/32 concerns. The0.5 MB planner window is not a process-memory claim.
+
+### 2026-10-23 — WF-20: existing CI action/cache contract accepted
+
+- Inspect the existing implementation before adding another optimization.
+  Creator/spectator/RHS widths already use the shared byte budget and compact
+  column loop. The action closure contains static topology/plans; physical
+  kernels, constants and CI vectors remain explicit arguments. Seven bounded
+  static array caches total288000000 B of declared payload capacity. Dynamic
+  method/prepared/result arrays remain in caller, solver and property ledgers.
+- Preserve the original block-AD, compact-matmat, Davidson/PySCF, allocation
+  guard and cache-release gates. CI direct/solver/API and the raw response test
+  are byte-identical to their earlier accepted source. Complete the current
+  shared-Hermitian-owner frontier with the four original CI/UCI/CIS/UCIS
+  fixed-MO/integral response nodes, with32 MB versus the original unbudgeted
+  reference. All four pass, actual exit0, no errors/skips, on104081/n006/CPU16-31.
+  Three sequential child durations are136.408998/169.449148/42.782153 s.
+- Keep the initial110 s timeout: no node or complete XML had finished, and the
+  earlier accepted CI cold case itself took180.701 s on another node. That
+  attempt established an insufficient test cap, not a numerical or performance
+  regression. The later bounded shards complete the same inputs and assertions.
+- Root verifies35 archived payloads, raw XML/exits, current eight production
+  files and test,584 tracked-Python before/after entries including545 production
+  Python files matching the frozen input. Independent spec/quality review closes
+  the original finite WF-20 criteria. Evidence fci-current-response-7753/HANDOFF.md,
+  CI_FINAL_VERIFIED.json and root-ci-verification.json; archive SHA256
+  7beb2a7be2c111c44a2ddea80c4094783c55c39ae8ad2041da14d39bbb1836be.
+  This is an evidence closure with no additional CI production change. Nuclear
+  properties, outer-AD/full-method residency and scaling retain their separate
+  WF-22/29/30/32 gates. No speedup or operating-system memory cap is asserted.
