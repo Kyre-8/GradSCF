@@ -267,15 +267,15 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-23): sixteen of the thirty-five parent tasks
-are fully accepted (WF-00/01/04/07/08/09/19/20/21/23/24/25/26/27/33/34); twenty-eight of the thirty-seven existing
+Current acceptance snapshot (2026-10-23): eighteen of the thirty-five parent tasks
+are fully accepted (WF-00/01/03/04/05/07/08/09/19/20/21/23/24/25/26/27/33/34); thirty of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
 
 | Existing scope | Accepted frontier | Remaining acceptance boundary |
 | --- | --- | --- |
-| WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response, selected R/U MP2 with joint preparation/channel/caller budgets, measured full/direct gradient family and aniline oracle | Complete outer-AD ownership, consumer conversion measurements and traced target-device capacity; direct remains opt-in |
+| WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response and measured consumer conversions, restricted MP2 integral/energy budgets, R/U full/direct gradient family and aniline oracle | Unrestricted saved response-state accounting, cross-caller ownership and traced target-device capacity; direct remains opt-in |
 | WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, complete phase budgets and nuclear two-body-property response |
 | WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Remaining native phase budgets and whole-method measurements |
 | WF-18/19/20/21/22/27 | Selected and explicit-MO CI/UCIS/CIS(D) budgets, ROHF guards, FCI active/caller and joint action/solver response budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Remaining CI/property/outer-AD ownership, GPU and large-method measurements |
@@ -328,7 +328,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     existing callers without redundant forwarding files; share byte-reservation
     validation in `_memory` without an integral-to-solver dependency or a second
     validator. Includes the verified historical WF-02e checkpoint.
-- [ ] **WF-03 — Exact native partial AO2MO** (`in_progress`). Generate requested MO tiles without
+- [x] **WF-03 — Exact native partial AO2MO** (`verified`). Generate requested MO tiles without
   full AO-pair or full MO ERI. Reuse shell traversal and half transformations.
   Acceptance: asymmetric coefficient sets, permutation symmetry, packed/dense
   oracle, frozen/core indexing, measured conversion time and tile workspace.
@@ -342,7 +342,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     transformations; joint output/resident reservations, physical/native versus
     raw array charts, and single-request/multiple-request efficiency verified.
     Includes historical WF-03b2b1.
-  - [ ] **WF-03d:** integrate the shared transformations with the method
+  - [x] **WF-03d:** integrate the shared transformations with the method
     consumers and measure conversion/scaling workspace and time. Reuse the
     corresponding WF-05/06/09/12/18/19 integration evidence; do not create a
     separate migration or benchmark campaign for the same consumer.
@@ -354,14 +354,14 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   - [x] **WF-04a:** local slab cotangents and coordinate products through order
     two, reusing the existing geometry primitive family; CPU and bounded GPU
     bridge verification. Preserve the existing full-integral higher products.
-- [ ] **WF-05 — Restricted MP2 integral/energy path.** Connect the shared provider
+- [x] **WF-05 — Restricted MP2 integral/energy path** (`verified`). Connect the shared provider
   to OVOV/OV-factor consumption, preserving with/without-T2 behavior and public
   conventions. Acceptance: PySCF and dense GradSCF energy/T2, no full AO/MO
   materialization, non-DF and existing DF tests; byte-accounted resident T2.
 
   - [x] **WF-05a:** native direct SCF-to-OVOV and pure orbital preparation,
     existing dense/s4/DF compatibility and construction preflight.
-  - [ ] **WF-05b:** joint block/T2/solver ownership and measured method scaling.
+  - [x] **WF-05b:** joint block/T2/solver ownership and measured method scaling.
 - [ ] **WF-06 — Unrestricted and noncanonical MP2.** Supply aa/ab/bb channels
   without spin ERI, retaining the shared tensor-sum resolvent. Acceptance:
   closed/open-shell equality as appropriate, occupied/virtual rotation covariance,
@@ -3620,3 +3620,33 @@ requires its own explicit decision and numerical validation.
   unchanged. A subsequent three-line AO2MO docstring change is AST-equivalent
   and recorded separately. The generic captured-constant/outer-JIT target
   boundary remains open under WF-02c; no parent or child closes here.
+
+### 2026-10-23 — WF-03/05: consolidate existing finite acceptance evidence
+
+- Independent review maps the original requirements to already completed
+  gates, without rerunning a separate migration or enlarging the TODO tree.
+  WF-03a/b/c provide native slabs, asymmetric/permuted/frozen requests, shared
+  half transformations and coefficient/coordinate response. Existing MP, CC,
+  CI and FCI producer integrations establish consumer use. The missing ledger
+  link for WF-03d is the actual matched conversion measurement in
+  `rcc-prepared/rcc-prepared-profile1/comparisons.json`, not whole-gradient time.
+- The earlier jy_gpu_1 CPU80-87 runs compare full MO conversion plus selection
+  with shared selected preparation on fixed water frames. All six setup/full/
+  selected process exits are 0. For 19/65 AO, full/selected warm times are
+  21.017/17.731 ms and 0.477329/0.554637 s; compiler temporaries and observed RSS
+  are separately recorded. The 65-AO selected conversion is 16.2% slower,
+  with RSS 1314344/1251212 KiB. These are historical conversion measurements,
+  not new Delta timings, a 2x saving or a universal speedup. Later validation
+  changes preserve the numerical transform and its already verified responses.
+- WF-05 combines its selected restricted OV blocks, dense/s4/DF/PySCF and
+  with/without-T2 tests with the shared output/solver/caller reservations from
+  `033657e`. Evidence remains `delta-mp-callers-r1/HANDOFF.json` and
+  `review-p2/HANDOFF.json`; the original failures and targeted reruns remain
+  visible. WF-08 now supplies the finite same-model method measurements.
+  This satisfies the restricted integral/energy gate. It does not close the
+  separate unrestricted cross-channel saved-AD owner question in WF-06b.
+- Root rereads the conversion comparisons, actual process exits and previously
+  verified integration records. **Accept WF-03d/WF-03 and WF-05b/WF-05.**
+  Acceptance becomes 18/35 parents and 30/37 children. WF-02b's canonical
+  eigensolve caller relay still awaits its running test's terminal evidence;
+  WF-02c, WF-06b and the remaining shared/release gates stay open.
