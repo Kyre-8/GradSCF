@@ -6,6 +6,10 @@ import jax
 import jax.numpy as jnp
 from jax.scipy.sparse.linalg import gmres
 import optax
+from ..memory import plan_linear
+from ..types import LinearSolverConfig
+from gradscf._memory import (jaxpr_temporary_bytes, tree_storage_bytes,
+    validate_memory_mb, validate_reserved_bytes, workspace_bytes)
 
 
 class OrbitalIterates(NamedTuple):
@@ -49,9 +53,52 @@ def _backtrack(value_grad, x, value, gradient, direction, *, correction=False, g
                         jnp.arange(24))[0]
 
 
-@partial(jax.jit, static_argnames=('energy', 'rotate', 'dimension', 'max_iterations', 'gradient_tolerance'))
-def solve_orbitals(args, coeff, *, energy, rotate, dimension, max_iterations, gradient_tolerance):
+def _check_orbital_memory(args, coeff, energy, rotate, dimension, maximum, reserved, physical):
+    """Preflight the fixed algorithm; no L-BFGS or primal GMRES capacity changes."""
+    resident = reserved+tree_storage_bytes(args, coeff)
+    workspace_bytes(maximum, resident_bytes=resident)
+    vector = jax.ShapeDtypeStruct((dimension,), coeff.real.dtype)
+    transform = optax.scale_by_lbfgs(memory_size=20, scale_init_precond=False)
+    state = jax.eval_shape(lambda x, g: _safe_lbfgs_state(transform, x, g), vector, vector)
+    # Old/new secant state, angle/gradient/search vectors, and the two stage /
+    # ten polishing diagnostics remain mandatory in the original algorithm.
+    resident += 2*tree_storage_bytes(state)+8*dimension*vector.dtype.itemsize+128*8
+    workspace_bytes(maximum, resident_bytes=resident)
+    value_grad = jax.value_and_grad(energy)
+    value, gradient = jax.eval_shape(value_grad, vector, coeff, args)
+    objective = lambda x: value_grad(x, coeff, args)
+    graph = lambda f, *a: jaxpr_temporary_bytes(jax.make_jaxpr(f)(*a))
+    scratch = (graph(value_grad, vector, coeff, args)
+               +graph(transform.update, vector, state, vector)
+               +graph(lambda x, v, g, d: _backtrack(objective, x, v, g, d),
+                      vector, value, gradient, vector)
+               +graph(rotate, vector, coeff))
+    workspace_bytes(maximum, resident_bytes=resident+physical+scratch)
+    if dimension:
+        gradient = lambda x: value_grad(x, coeff, args)[1]
+        if dimension <= 32:
+            action = graph(jax.jacfwd(gradient), vector)
+            config = LinearSolverConfig(method='direct', max_dense=32)
+            fixed = dimension*physical
+        else:
+            action = graph(lambda x, v: jax.jvp(gradient, (x,), (v,))[1], vector, vector)
+            config = LinearSolverConfig(restart=min(dimension, 40), maxiter=10, rtol=1e-11, atol=0.)
+            fixed = physical
+        planned, _ = plan_linear(dimension, vector.dtype, config, maximum,
+            resident_bytes=resident, operator_min_bytes=fixed+action)
+        if config.method == 'gmres' and planned.restart != config.restart:
+            raise ValueError('Forward memory budget must retain the fixed primal GMRES restart')
+
+
+@partial(jax.jit, static_argnames=('energy', 'rotate', 'dimension', 'max_iterations',
+    'gradient_tolerance', 'max_memory', 'reserved_bytes', 'operator_min_bytes'))
+def solve_orbitals(args, coeff, *, energy, rotate, dimension, max_iterations, gradient_tolerance,
+                   max_memory=None, reserved_bytes=0, operator_min_bytes=0):
     """Bounded scans retain a genuine reverse-mode path through finite iterates."""
+    if max_memory is not None:
+        _check_orbital_memory(args, coeff, energy, rotate, dimension,
+            validate_memory_mb(max_memory), validate_reserved_bytes(reserved_bytes),
+            validate_reserved_bytes(operator_min_bytes))
     origin = jnp.zeros(dimension, dtype=coeff.real.dtype)
     value_grad = jax.value_and_grad(energy)
     iterations, evaluations = jnp.asarray(0), jnp.asarray(0)

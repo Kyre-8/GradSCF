@@ -69,7 +69,7 @@ class CorrelatedEnergy:
             mf._check_reference_source()
         self.max_memory = resolve_memory_mb(max_memory, mf)
         self.reference = MolecularEnergy(mf, gradient_tolerance=gradient_tolerance,
-                                         jk_backend=jk_backend)
+                                         jk_backend=jk_backend, max_memory=self.max_memory)
         self.coordinates = self.reference.coordinates
         occupations = np.asarray(mf.mo_occ)
         self.nocc = (tuple(int(np.count_nonzero(row)) for row in occupations)
@@ -124,7 +124,8 @@ class CorrelatedEnergy:
                 valid &= canonical_valid
         source = (state, inputs, coefficients, *(getattr(self.reference, name, None)
             for name in ('parameters', 'coefficients', 'coordinates', 'occupations')),
-            getattr(getattr(self.reference, 'plan', None), 'topology', None))
+            getattr(getattr(self.reference, 'plan', None), 'topology', None),
+            getattr(self.reference, 'spec', None))
         if self._selected_mp2 or self._selected_cc or self._selected_mp_series:
             cs = tuple(coefficients) if self.reference.unrestricted else (coefficients,)
             fs = tuple(state.fock_matrix) if self.reference.unrestricted else (state.fock_matrix.mean(axis=0),)
@@ -214,7 +215,8 @@ class CorrelatedEnergy:
         state, inputs = self.reference.solve_with_inputs(coordinates, field, potential=potential)
         coefficients = state.mo_coeff
         source = (state, inputs, self.reference.parameters, self.reference.coefficients,
-                  self.reference.coordinates, self.reference.occupations, self.reference.plan.topology)
+                  self.reference.coordinates, self.reference.occupations, self.reference.plan.topology,
+                  getattr(self.reference, 'spec', None))
         if self._selected_frame:
             shape = coefficients.shape[-2:]
             item = jnp.result_type(coefficients, inputs['overlap'], self.reference.coefficients).itemsize

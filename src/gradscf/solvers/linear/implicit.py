@@ -164,8 +164,11 @@ def solve_linear(matrix_or_operator, rhs, *, config=None, preconditioner=None,
     return LinearResult(solution, norm, valid, jnp.where(valid, 0, 1))
 
 
-def solve_implicit_linear_system(matvec, b_flat, *, tol, max_iter, restart=None, converged=True):
+def solve_implicit_linear_system(matvec, b_flat, *, tol, max_iter, restart=None, converged=True,
+                                 max_memory=None, reserved_bytes=0, operator_min_bytes=0):
     """Compatibility contract used by implicit SCF and scGW responses."""
     config = LinearSolverConfig(rtol=float(tol), maxiter=max(1, int(max_iter)),
                                  restart=20 if restart is None else max(1, int(restart)))
-    return checked_linear_solve(matvec, b_flat, config=config, converged=converged)[0]
+    return checked_linear_solve(matvec, b_flat, config=config, converged=converged,
+        max_memory=max_memory, reserved_bytes=reserved_bytes,
+        operator_min_bytes=operator_min_bytes)[0]

@@ -14,6 +14,8 @@ from gradscf import integrals, scf
 from gradscf.dft.xc import xc_type
 from gradscf.scf.inputs import build_rks_integral_inputs, build_uks_integral_inputs
 from gradscf.scf.rsh import local_xc_spec, rsh_preset
+from gradscf._memory import (tree_storage_bytes, validate_memory_mb,
+                            validate_reserved_bytes, workspace_bytes)
 
 
 class MolecularEnergy:
@@ -38,9 +40,11 @@ class MolecularEnergy:
     """
 
     def __init__(self, mf, *, mode="implicit", gradient_tolerance=1e-9,
-                 jk_backend="full"):
+                 jk_backend="full", max_memory=None, reserved_bytes=0):
         if jk_backend not in ("full", "direct"):
             raise ValueError("jk_backend must be 'full' or 'direct'.")
+        self.max_memory = None if max_memory is None else validate_memory_mb(max_memory)
+        self.reserved_bytes = validate_reserved_bytes(reserved_bytes)
         if not jax.config.x64_enabled:
             raise ValueError("MolecularEnergy requires JAX float64.")
         if not bool(mf.converged):
@@ -89,6 +93,12 @@ class MolecularEnergy:
         if np.max(distances[np.arange(len(self.owners)), self.owners]) > 1e-12:
             raise ValueError("Every basis center must belong to a molecular atom.")
 
+    def _memory_inputs(self):
+        # This workflow object is not a dataclass/PyTree. Declare its numerical
+        # owners explicitly rather than inspecting arbitrary object internals.
+        return (self.coefficients, self.occupations, self.parameters, self.coordinates,
+                self.owners, getattr(self, 'spec', None), getattr(self.plan, 'topology', None))
+
     def inputs(self, coordinates, field=None, *, potential=None):
         """Assemble differentiable inputs, optionally adding a real AO potential.
 
@@ -112,6 +122,21 @@ class MolecularEnergy:
             nao = self.coefficients.shape[-2]
             if potential.shape != (nao, nao) or jnp.iscomplexobj(potential):
                 raise ValueError("AO potential must be a real (nao, nao) matrix.")
+        if self.max_memory is not None and self.kind == 'HF':
+            nao = self.coefficients.shape[-2]
+            resident = self.reserved_bytes+tree_storage_bytes(
+                self._memory_inputs(), coordinates, field, potential)
+            # S/h, kinetic/nuclear terms and immutable one-body updates;
+            # a requested dipole and full s1 ERI remain mandatory outputs.
+            required = 8*(6*nao**2+(3*nao**2 if has_field else 0)
+                          +(nao**4 if self.jk_backend == 'full' else 0))
+            required += self.parameters.centers.size*8
+            if self.jk_backend == 'direct':
+                from gradscf.integrals.backends.native.jk import NativeDirectBasis
+                from gradscf.scf.orbital_optimization import _native_workspace
+                required += _native_workspace(NativeDirectBasis(self.plan, self.parameters),
+                                               self.direct_scf_workers)
+            workspace_bytes(self.max_memory, resident_bytes=resident+required)
         moving = replace(self.parameters, centers=coordinates[self.owners],
                          nuclear_coords=coordinates)
         # IntegralPlan defaults to a moving nuclear-charge-center origin.
@@ -161,6 +186,11 @@ class MolecularEnergy:
         inputs = self.inputs(coordinates, field, potential=potential)
         minimize = scf.minimize_uks_from_integrals if self.unrestricted else scf.minimize_roks_from_integrals
         options = dict(direct_scf_workers=self.direct_scf_workers) if self.jk_backend == "direct" else {}
+        if self.max_memory is not None:
+            options.update(max_memory=self.max_memory,
+                reserved_bytes=self.reserved_bytes+tree_storage_bytes(
+                    self._memory_inputs(), coordinates, field, potential,
+                    exclude=(inputs, self.coefficients, self.occupations)))
         state = minimize(
             **inputs, xc_spec=self.xc,
             mo_coeff=self.coefficients, mo_occ=self.occupations,

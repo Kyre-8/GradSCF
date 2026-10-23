@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-23): seven of the thirty-five parent tasks
-are fully accepted (WF-00/01/07/09/19/26/34); twenty-seven of the thirty-seven existing
+Current acceptance snapshot (2026-10-23): nine of the thirty-five parent tasks
+are fully accepted (WF-00/01/04/07/09/19/26/27/34); twenty-seven of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -279,8 +279,8 @@ successful component derivatives do not establish a whole-method memory bound.
 | WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, complete phase budgets and nuclear two-body-property response |
 | WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Remaining native phase budgets and whole-method measurements |
 | WF-18/19/20/21/22/27 | Selected and explicit-MO CI/UCIS/CIS(D) budgets, ROHF guards, FCI active/caller budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Complete phase/AD ownership, GPU and large-method measurements |
-| WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 mixed precision, pure-frame R/U MPn and moving native MP4 geometry second response | Complete cross-caller AD ownership and method-level size/performance acceptance |
-| WF-29 | Hermitian/non-Hermitian primal, isolated-pair response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining SCF/other spectral/physical caller ownership and whole-method reconciliation |
+| WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 mixed precision, pure-frame R/U MPn and moving native MP4 geometry second response | Standalone MP3 warm measurement, complete cross-caller AD ownership and method-level size/performance acceptance |
+| WF-29 | Hermitian/non-Hermitian primal, isolated-pair response, SCF implicit response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining cross-consumer ownership and whole-method reconciliation |
 | WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
 
 The damaged jy_gpu_1 stages remain paused. Allocation 103505/n002 is no longer
@@ -341,7 +341,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     consumers and measure conversion/scaling workspace and time. Reuse the
     corresponding WF-05/06/09/12/18/19 integration evidence; do not create a
     separate migration or benchmark campaign for the same consumer.
-- [ ] **WF-04 — Block integral JVP/VJP and HVP** (`in_progress`). Add coefficient/coordinate
+- [x] **WF-04 — Block integral JVP/VJP and HVP** (`verified`). Add coefficient/coordinate
   derivatives and contracted reverse accumulation. Acceptance: tangent/cotangent
   duality, dense AD, coordinate finite difference and HVP; structural/runtime
   absence of full ERI cotangent; explicit unsupported basis/mixed-order guards.
@@ -563,7 +563,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 
 ### Properties, storage, public integration and release gates
 
-- [ ] **WF-27 — Explicit full-RDM export.** Provide budgeted block export or
+- [x] **WF-27 — Explicit full-RDM export** (`verified`). Provide budgeted block export or
   direct contraction; retain requested dense output for small cases. Acceptance:
   traces, symmetries, energies, normalization and block reconstruction; avoid
   creating full spin 2-RDM merely to extract spatial blocks.
@@ -588,7 +588,8 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     Shared non-Hermitian/EOM primal capacity, closures and action batches are
     verified. Shared packed DIIS and checked linear/root phase planning are
     verified. Isolated non-Hermitian and isolated/cluster Hermitian response
-    phases are verified; remaining method/SCF ownership stays open.
+    phases and SCF assembly/forward/implicit response are verified; remaining
+    cross-consumer ownership and whole-method reconciliation stay open.
 - [ ] **WF-30 — CPU/GPU and nested-AD audit.** Run eager and JIT public entry
   points, native dispatch, device residency and transfer accounting. Acceptance:
   same numerical cases/dtype/seed, forward/JVP/VJP/HVP separately, actual peak
@@ -3167,3 +3168,37 @@ requires its own explicit decision and numerical validation.
   Evidence: delta-nv5090-20261023/native-admission-evidence.tar.gz, SHA256
   4a601571c8d9b7af9561c4140ee07bd287e79b613feec2975be809bedb0a916d.
   Whole-method warm scaling and peak-memory gates remain open; no TODO is added.
+
+### 2026-10-23 — WF-29c: SCF assembly, fixed forward and implicit-response ownership
+
+- CorrelatedEnergy passes its original MB budget into MolecularEnergy, HF
+  assembly, the existing orbital minimizer and the existing root/checked linear
+  response. None retains the original path. The forward preflight preserves
+  L-BFGS20, two stages, 24 backtracks, five polishing steps and the original
+  dense-Hessian/GMRES split; it rejects insufficient fixed capacity instead of
+  changing the algorithm. Only the existing implicit GMRES restart may adapt.
+- Known source owners, saved VJP leaves, both response orientations and opaque
+  native scratch are accounted by phase. Independent review reproduces two
+  small omissions, then verifies their fixes: retained initial_energy and the
+  original MoleculeSpec coordinate/charge arrays. Existing CE source ledgers
+  also retain that spec. No physical formula, residual sign, regularization,
+  reference anchor or AD owner is changed; 17 static proofs remain true.
+- Final CPU22 are 11 metadata, five budgeted scalar/moving-S/explicit/implicit
+  controls and three original native cases each for RHF and UHF. All exit0,
+  no skips, on104081/n006/CPU16-31, with unchanged before/after source maps.
+  The same final source additionally passes the existing complete MP2 CUDA
+  value/gradient/HVP case, exit0/96.649308 s on GPU0/CPU192-207. This verifies
+  budget introspection during actual CUDA tracing; GPU6 is not exposed.
+- Root checks all 109 indexed CPU payloads plus the archive index (110 files),
+  four raw exits/XML/maps, current seven source/four test files and 16 separate
+  CUDA payloads. Actual RED9, owner RED2 and an earlier collection-resource
+  failure remain recorded. Evidence scf-ownership/HANDOFF.md, root-verification.json;
+  CPU archive SHA256 fd668d966ed3f1cb83d72ba8000deee7aebcd0fbbfc75c2f6d1638d37a767687;
+  CUDA archive SHA256 a5c529db0721219a77503839ca83f7c0b6bb6381ae4974a71b179a01eee4626e.
+  No compiler/allocator/outer-explicit-tape hard cap or speed gain is asserted.
+- Acceptance review closes WF-04's established integral-response contract and
+  WF-27's explicit full/block/contracted RDM export contract, using their existing
+  CPU/CUDA and CC22/CI/FCI evidence. This does not close nuclear CC properties
+  or full-method scaling. WF-33's mathematical/API gates are complete, but its
+  required warm measurement remains open within the existing final benchmark
+  work. No TODO, child level or model matrix is added.

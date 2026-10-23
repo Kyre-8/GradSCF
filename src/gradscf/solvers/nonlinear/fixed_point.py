@@ -7,6 +7,8 @@ import jax
 import jax.numpy as jnp
 from ..linear import solve_implicit_linear_system
 from .root import attach_root
+from gradscf._memory import (jaxpr_temporary_bytes, tree_storage_bytes,
+    validate_memory_mb, validate_reserved_bytes, workspace_bytes)
 from jaxtyping import Array, PyTree
 
 
@@ -33,6 +35,9 @@ def implicit_fixed_point_solution(
     callback_aux: PyTree | None = None,
     converged: Array | bool = True,
     require_converged: bool = False,
+    max_memory=None,
+    reserved_bytes=0,
+    operator_min_bytes=0,
 ) -> Array:
     """Attach differentiable implicit response to a primal fixed-point solution.
 
@@ -47,6 +52,9 @@ def implicit_fixed_point_solution(
     """
 
     cfg = ImplicitFixedPointConfig() if config is None else config
+    maximum = None if max_memory is None else validate_memory_mb(max_memory)
+    reserved = validate_reserved_bytes(reserved_bytes)
+    physical = validate_reserved_bytes(operator_min_bytes)
     primal_solution = jax.lax.stop_gradient(jnp.asarray(solution))
     has_fixed_point_args = fixed_point_args is not None
     fixed_point_args_tree = () if fixed_point_args is None else fixed_point_args
@@ -66,6 +74,22 @@ def implicit_fixed_point_solution(
             return fn(*args)
         return fn(*args, callback_aux)
 
+    def _response_memory(operator, rhs, point, parameters, arguments):
+        if maximum is None:
+            return {}
+        resident = reserved+tree_storage_bytes(parameters, arguments, point, callback_aux)
+        workspace_bytes(maximum, resident_bytes=resident)
+        # Saved linearization arrays are counted by shape, never by executing
+        # a residual or inspecting numerical parameter values on the host.
+        metadata = jax.eval_shape(lambda x: jax.vjp(
+            lambda value: _call_fixed_point(value, parameters, arguments), x), point)
+        resident += tree_storage_bytes(jax.tree.leaves(metadata))+2*point.nbytes
+        vector = jax.ShapeDtypeStruct((rhs.size,), rhs.dtype)
+        transpose = lambda v: jax.linear_transpose(operator, jnp.zeros_like(v))(v)[0]
+        scratch = physical+sum(jaxpr_temporary_bytes(jax.make_jaxpr(action)(vector))
+                               for action in (operator, transpose))
+        return dict(max_memory=maximum, reserved_bytes=resident, operator_min_bytes=scratch)
+
     def _root(params_local, solution_local, args_local, converged_local):
         def residual(value):
             return _call_fixed_point(value, params_local, args_local) - value
@@ -76,7 +100,8 @@ def implicit_fixed_point_solution(
             operator = lambda v: matvec(v.reshape(shape)).reshape(-1)-regularization*v
             return solve_implicit_linear_system(operator, rhs.reshape(-1),
                 tol=cfg.tolerance, max_iter=cfg.max_iter, restart=cfg.restart,
-                converged=converged_local if require_converged else True).reshape(shape)
+                converged=converged_local if require_converged else True,
+                **_response_memory(operator, rhs, solution_local, params_local, args_local)).reshape(shape)
 
         # JAX's root JVP rebinds the root primitive when linearizing it. This
         # preserves the implicit state dependence under grad-of-grad while the
@@ -143,6 +168,7 @@ def implicit_fixed_point_solution(
             tol=cfg.tolerance,
             max_iter=cfg.max_iter,
             restart=cfg.restart,
+            **_response_memory(_adjoint_op, rhs, solution_local, params_local, args_local),
         )
         adjoint = lambda_flat.reshape(solution_local.shape)
 
