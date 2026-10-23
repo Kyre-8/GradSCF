@@ -13,7 +13,6 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 import numpy as np
-from jax.experimental.jet import jet
 
 from ..ci.space import make_ci_space, make_uci_space
 from ..ci import hamiltonian
@@ -21,6 +20,7 @@ from ..fci.cistring import excite
 from ..ao2mo import (validate_integrals, validate_unrestricted_integrals,
                      frozen_indices, unrestricted_frozen_indices)
 from ..solvers import LinearOperator, LinearSolverConfig, solve_linear
+from ..solvers.nonlinear.taylor import _jet
 from .._memory import (DEFAULT_MAX_MEMORY_MB, tree_storage_bytes,
                       validate_memory_mb, validate_reserved_bytes, workspace_bytes)
 from .types import MPResult
@@ -44,10 +44,6 @@ def make_series_space(nmo, nocc, *, frozen=None, config, packed_only=False):
     build = make_uci_space if isinstance(nocc, tuple) else make_ci_space
     return build(nmo, nocc, max_excitation=2*k, frozen=frozen,
                  max_determinants=config.max_determinants)
-
-
-def _jet(fun, primals, coefficients):
-    return jet(fun, primals, coefficients, factorial_scaled=False)
 
 
 def _amplitudes(first, space, unrestricted):

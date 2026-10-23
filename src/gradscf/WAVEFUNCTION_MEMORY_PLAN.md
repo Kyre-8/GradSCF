@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-23): twelve of the thirty-five parent tasks
-are fully accepted (WF-00/01/04/07/09/19/20/21/26/27/33/34); twenty-eight of the thirty-seven existing
+Current acceptance snapshot (2026-10-23): fifteen of the thirty-five parent tasks
+are fully accepted (WF-00/01/04/07/09/19/20/21/23/24/25/26/27/33/34); twenty-eight of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -530,7 +530,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 
 ### Recursive MP
 
-- [ ] **WF-23 — Exact target-rank restriction** (`in_progress`). Avoid residual target blocks
+- [x] **WF-23 — Exact target-rank restriction** (`verified`). Avoid residual target blocks
   that do not enter the requested Taylor/Wigner energy coefficient. Acceptance:
   per-order E2...E12 against current recursion, signs, open-shell/frozen cases;
   record which excitation ranks each case actually exercises (a two-electron
@@ -541,14 +541,18 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     to canonical tensor actions before contraction. Retain every required
     wave coefficient; compare projected actions/response and complete energy
     series, including actual triples/quadruples/sextuples and frozen spins.
-- [ ] **WF-24 — Packed target-tile contractions.** Keep increasing-index packed
+- [x] **WF-24 — Packed target-tile contractions** (`verified`). Keep increasing-index packed
   states and expand only contraction tiles. Acceptance: each excitation-block
   action against the current oracle, peak live buffers, JVP/VJP/HVP and costs.
-- [ ] **WF-25 — Taylor history lifetime/checkpoints.** Share each W*Psi_j once,
+  Dense contractions remain the explicit fast path when their complete workspace
+  fits; the capacity fallback preserves the same required packed space.
+- [x] **WF-25 — Taylor history lifetime/checkpoints** (`verified`). Share each W*Psi_j once,
   schedule waves/energies by last use and choose checkpoint/recompute policy.
   Acceptance: all Taylor coefficients and derivatives, with_coefficients True/
   False, no illegal removal of history required by later orders; measured time/
-  memory tradeoff. Reuse `solvers/nonlinear/taylor.py`, do not add a second engine.
+  memory tradeoff. Reuse the normalized Taylor primitive in
+  `solvers/nonlinear/taylor.py`; MP retains its physical residual and Wigner-energy
+  recurrence. Do not add a second engine.
 
   - [x] **WF-25a** (`verified`): stable whole-recurrence compilation at the
     public series entry, with physical inputs and tolerance dtypes left live.
@@ -2364,7 +2368,8 @@ requires its own explicit decision and numerical validation.
   tolerance is explicit; strict float64 comparisons remain at2e-13.
 - Same no3/nmo6/full-rank6/400 coefficients/f64/seed2423 component benchmark:
   dense->packed warm22.664->7.341ms and XLA temporary142740872->1015656B.
-  However compile3.360->75.454s and child peak918324->3011128KiB worsen.
+  However compile3.360->75.454s and complete child peak918324->3011136KiB worsen
+  (the packed benchmark's earlier internal sample is3011128KiB).
   The original default dense path is retained. This is a capacity fallback,
   not a general cold-start or peak-RSS improvement, and does not resolve the
   earlier H6 timeout. Recurrence history/AD budget integration and moving-frame
@@ -3343,3 +3348,63 @@ requires its own explicit decision and numerical validation.
   This is an evidence closure with no additional CI production change. Nuclear
   properties, outer-AD/full-method residency and scaling retain their separate
   WF-22/29/30/32 gates. No speedup or operating-system memory cap is asserted.
+
+### 2026-10-23 — WF-23/24: rank bounds and packed capacity fallback accepted
+
+- Recheck the original finite clauses against existing raw evidence before
+  adding further kernels. WF-23 has13 focused,28 forward and3 response passing
+  nodes in the recorded groups, with actual exit0. Order12 compares all energy
+  coefficients; separate nodes exercise actual triples/quadruples/sextuples,
+  frozen/open-shell spaces and extra wave orders. Required input histories and
+  the perturbation partition are preserved. The six mathematical definitions
+  remain AST-identical, including the normalized helper now shared with Taylor.
+- WF-24's four archived groups contain13 unique passing nodes, covering full
+  T6-to-T6 and T6-to-T2 actions, R/U joint input/state response, mixed dtype,
+  frozen spaces, no-expansion guards and packed series. Current packed source
+  and its action test match the executed bytes; reachable CI helper bodies are
+  unchanged apart from static-cache decorators. The earlier capacity node used
+  test-file54d14119 and the later response group usesb9d45c33; the capacity AST
+  and all scientific assertions are equivalent. Do not claim one test-file
+  revision was used by all four groups.
+- The same400-coefficient nmo6/no3/rank6, seed2423/f64 component changes dense
+  to packed warm22.664 to7.341 ms and XLA temporary142740872 to1015656 B.
+  Compilation3.360 to75.454 s and complete child RSS918324 to3011136 KiB
+  increase;3011128 KiB was the benchmark's earlier internal sample. Retain
+  dense contractions when affordable and report this as a capacity tradeoff,
+  not a universal process-memory reduction.
+- Root checks the original XML/exits, archive49 members, source/test lineage,
+  reachable helper ASTs and measurement records; independent spec/quality review
+  accepts WF-23/24. Evidence mp-checkpoint/green/rank-packed-root-verification.json;
+  packed archive SHA256678a9b72f1b77f3de2f70eabb1120c43fd8bbc72c4a0d3afd8d88aa1edd2cfc0.
+  Whole-method size/performance and final device coverage remain WF-30/32.
+
+### 2026-10-23 — WF-25: shared normalized Taylor and checkpoint cost gate
+
+- Move the existing two-line normalized `_jet` helper into the shared Taylor
+  module and use it from both MP and `root_taylor`. The generic root solver and
+  the specialized MP physical recurrence retain their existing equations.
+  Root/peer AST checks confirm the helper is unchanged, every other MP function
+  is unchanged, and inlining the helper restores the original root-Taylor AST.
+- New tests derive two budgets from the actual traced planner, then confirm
+  both real differentiated calls use dense actions with checkpoint off/on.
+  Both with_coefficients modes retain the complete required histories and match
+  all outputs and JVP/VJP/HVP; every compared numerical leaf must be finite.
+  Together with the original root-Taylor tests, the final5 cases pass, actual
+  exit0/51.174993 s, no errors/skips. The old helper-missing RED is retained.
+- The matched MP4/nmo3/no1/seed2318/f64 interaction-scale AD workload uses separate fresh CPU
+  children on104081/n006/CPU16-31. Off/on inputs, configuration and full saved
+  numerical outputs are identical. Off/on nominal budgets are0.026445/0.022125
+  MB. Lowering is1.16558/1.24771 s, compilation0.96510/1.17614 s, first execution
+  3.13886/5.63282 ms and seven-sample warm medians0.238478/0.248866 ms. XLA
+  temporaries are10241/11808 B; complete child peaks797592/809864 KiB differ
+  from internal samples739308/750444 KiB. This small forced-on point is slower
+  and uses more memory; it demonstrates no memory saving. The ordinary60 GB
+  budget selects off for this point.
+- Root and independent review verify45 payloads, all three actual exits and
+  source maps,5-case XML, final four files, policy flags and finite identical
+  numerical outputs. Evidence mp-checkpoint/green/HANDOFF.json and
+  root-verification.json; archive SHA256
+  7f346690dcdddfc0d6e30e5b2c6b7f625435030f4a83bea1785e0a7eec69d4cc.
+  WF-25's finite shared-primitive/history/policy/AD and measured-cost contract
+  is accepted. Its small-point result is not a scaling or RSS-improvement claim;
+  WF-32's method-level size/performance gate remains open.
