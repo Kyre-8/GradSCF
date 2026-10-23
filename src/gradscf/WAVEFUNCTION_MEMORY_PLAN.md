@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-23): nine of the thirty-five parent tasks
-are fully accepted (WF-00/01/04/07/09/19/26/27/34); twenty-seven of the thirty-seven existing
+Current acceptance snapshot (2026-10-23): ten of the thirty-five parent tasks
+are fully accepted (WF-00/01/04/07/09/19/26/27/33/34); twenty-seven of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -279,7 +279,7 @@ successful component derivatives do not establish a whole-method memory bound.
 | WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, complete phase budgets and nuclear two-body-property response |
 | WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Remaining native phase budgets and whole-method measurements |
 | WF-18/19/20/21/22/27 | Selected and explicit-MO CI/UCIS/CIS(D) budgets, ROHF guards, FCI active/caller budgets, spatial properties and native CI/FCI relaxed geometry; small full-RDM fast path retained | Complete phase/AD ownership, GPU and large-method measurements |
-| WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 mixed precision, pure-frame R/U MPn and moving native MP4 geometry second response | Standalone MP3 warm measurement, complete cross-caller AD ownership and method-level size/performance acceptance |
+| WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 math/API/warm gates, pure-frame R/U MPn and moving native MP4 geometry second response | Complete cross-caller AD ownership and higher-order method-level size/performance acceptance |
 | WF-29 | Hermitian/non-Hermitian primal, isolated-pair response, SCF implicit response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining cross-consumer ownership and whole-method reconciliation |
 | WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
 
@@ -431,7 +431,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   - [x] **WF-11a:** restricted virtual consumers and raw first/second response
     in CCS, CCD, LCCD, LCCSD, CC2, CCSD and QCI; their existing model equations
     remain distinct. This does not close their AO-source or total-budget work.
-- [ ] **WF-33 — Standalone canonical MP3.** Migrate its CC-integral preparation
+- [x] **WF-33 — Standalone canonical MP3** (`verified`). Migrate its CC-integral preparation
   and residual-JVP implementation separately from recursive MP. Acceptance:
   E2/E3, with/without-T2, frozen orbitals, JVP/VJP/HVP, series-order-three cross
   comparison, and byte-accounted simultaneous first/second doubles workspace.
@@ -3202,3 +3202,49 @@ requires its own explicit decision and numerical validation.
   or full-method scaling. WF-33's mathematical/API gates are complete, but its
   required warm measurement remains open within the existing final benchmark
   work. No TODO, child level or model matrix is added.
+
+### 2026-10-23 — WF-33/32: measured standalone MP3 warm gate
+
+- Reuse the already accepted four-orbital/two-occupied array case, seed2426,
+  float64, frozen=None, with_t2=True, max_memory64 MB. The thin runner calls
+  only the existing selected MP3 source entry and compares the complete result
+  against its saved accepted bundle with the original dtype checks and
+  atol3e-11/rtol3e-9. No new method, formula, oracle or model matrix is added.
+- Actual exit0/5.676390 s on104081/n006/CPU208-223, GPU hidden. Lowering is
+  0.224310 s, compilation0.193096 s, first execution0.026270 s; five synchronized
+  warm samples have median0.157196 ms. XLA temporary arrays are5760 B; complete
+  child peak738200 KiB includes startup/compiler/verification, distinct from
+  the earlier self-report666720 KiB. This is a nonexclusive fixed component
+  point, not scaling or a speedup. Source/input maps remain unchanged.
+- Root verifies14 archive members, the original fixture/setup/reference and
+  current source/runner, actual exit and accepted-output comparison. Evidence
+  delta-mp3-orbitals-r1/warm/HANDOFF.json and root-verification.json; archive
+  SHA2565acf0ca26b4627ea45a15c5d031f31f8fe642c75a72f3987eead4e374c5d9f9e.
+  This supplies WF-33's last required warm record; its established functional,
+  AD and caller gates are unchanged. WF-33 is accepted; WF-32 stays open.
+
+### 2026-10-23 — WF-08: combined direct aniline attempt, not a completed gradient
+
+- The same14-atom/119-AO Cartesian6-31G* input uses all25 occupied/94 virtual
+  orbitals, noncanonical MP2, no DF/frozen spaces, zero screening, original
+  60000 MB budget and eight direct workers. A fail-on-full-ERI guard covers
+  seed preparation and AD tracing. The entire source is frozen17b7b30; only
+  the thin runner adds explicit worker selection and records it in the report.
+- Seed mf.run completes in33.534554 s; compilation takes29.470212 s and reports
+  3020471744 B XLA temporaries. The adapter's first execution still includes
+  its orbital solve/polishing, correlation and reverse response. It does not
+  finish before the actual570.172754 s child cap (SIGKILL, wrapper exit124).
+  There is no first result, gradient or warm sample. Partial child peak2112080
+  KiB is not a completed workflow peak or evidence of a memory-reduction ratio.
+- Root verifies10 archived payloads, actual terminal/partial report and exact
+  before/after source, geometry, runner and library hashes. Evidence
+  delta-nv5090-20261023/aniline-direct-timeout-evidence.tar.gz, SHA256
+  47049944da99e5bd83a00839e1598db60bd6de6749ead07e0b08478e7a8d4f75.
+  The earlier fixed-density J/K speedup does not establish full MP2 speed.
+  Do not repeat the long attempt or raise its limit without new localization.
+- Source review identifies two finite profiling directions: invariant Fock/
+  Hessian linearization during existing polishing, and serial slab geometry
+  VJP plus cross-slab/rematerialization work. Same-slab MO requests already
+  share intermediates. The reference-BLAS link does not justify blaming BLAS:
+  external dgemm_ is used by ECP, not this all-electron shell path. A bounded
+  diagnostic probe belongs to the existing WF-08, not a new TODO branch.

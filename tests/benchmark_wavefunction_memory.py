@@ -46,6 +46,7 @@ def main():
     parser.add_argument('--mode', choices=('legacy', 'full', 'direct'), required=True)
     parser.add_argument('--derivative', choices=('energy', 'gradient'), default='gradient')
     parser.add_argument('--max-memory', type=float, default=60000.)
+    parser.add_argument('--direct-workers', type=int, default=1)
     parser.add_argument('--repeats', type=int, default=3)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--compile-only', action='store_true')
@@ -53,6 +54,8 @@ def main():
     args = parser.parse_args()
     if args.repeats < 1:
         parser.error('--repeats must be positive')
+    if args.direct_workers < 1:
+        parser.error('--direct-workers must be positive')
     args.output.parent.mkdir(parents=True, exist_ok=True)
     data = json.loads(args.geometry.read_text())
     atom = list(zip(data['symbols'], data['coords_angstrom']))
@@ -61,6 +64,7 @@ def main():
         basis=args.basis, cartesian=True, unit='Angstrom', method='noncanonical MP2',
         energy_unit='Hartree', gradient_unit='Hartree/Bohr',
         mode=args.mode, derivative=args.derivative, max_memory_mb=args.max_memory,
+        direct_workers=args.direct_workers,
         jax=jax.__version__, python=platform.python_version(), platform=platform.platform(),
         affinity=sorted(os.sched_getaffinity(0)) if hasattr(os, 'sched_getaffinity') else None,
         environment={key: os.environ.get(key) for key in ('JAX_PLATFORMS',
@@ -98,9 +102,20 @@ def main():
     mol = gto.M(atom=atom, basis=args.basis, charge=data.get('charge', 0),
                  spin=data.get('spin', 0), unit='Angstrom', cart=True)
     factory = scf.UHF if mol.spin else scf.RHF
+    if args.mode == 'direct':
+        from gradscf.integrals.plan import IntegralPlan
+        original_evaluate = IntegralPlan.evaluate
+
+        def checked_evaluate(self, operator, *values, **options):
+            if operator == 'eri':
+                raise RuntimeError('Direct benchmark requested a full AO ERI')
+            return original_evaluate(self, operator, *values, **options)
+
+        IntegralPlan.evaluate = checked_evaluate
     t0 = perf_counter()
     mf = factory(mol, integral_backend='native', execution_device='cpu',
         jk_backend='direct' if args.mode == 'direct' else 'full', direct_scf_tol=0.,
+        direct_scf_workers=args.direct_workers,
         conv_tol=1e-12, conv_tol_density=1e-11, conv_tol_grad=1e-10,
         max_cycle=250, max_memory=args.max_memory).run()
     jax.block_until_ready(mf.e_tot)
