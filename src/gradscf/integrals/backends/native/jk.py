@@ -251,6 +251,8 @@ def _zero_basis_tangent(message="Direct J/K supports density AD only; basis/geom
 
 @lru_cache(maxsize=32)
 def _direct_operator(atoms_key, basis_key, cart, cutoff, workers, with_j, with_k):
+    from .autodiff.common import register_cpu_product
+
     atoms = np.asarray(atoms_key, dtype=np.int32)
     basis = np.asarray(basis_key, dtype=np.int32)
     primitive = core.Primitive("gradscf_direct_jk")
@@ -275,27 +277,9 @@ def _direct_operator(atoms_key, basis_key, cart, cutoff, workers, with_j, with_k
             with_k=np.int32(with_k),
         )
 
-    primitive.def_impl(apply)
-    primitive.def_abstract_eval(
-        lambda env, d: jax.core.ShapedArray((nops, *d.shape), jnp.float64)
-    )
-    mlir.register_lowering(
-        primitive, mlir.lower_fun(apply, multiple_results=False), platform="cpu"
-    )
-
     # Keep the shell engine on CPU when response arrays live on CUDA. Only
     # bounded density/J/K batches cross devices, never an AO ERI tensor.
-    host_apply = jax.jit(apply)
-
-    def host_callback(env, density):
-        cpu = jax.local_devices(backend="cpu")[0]
-        return np.asarray(host_apply(jax.device_put(env, cpu), jax.device_put(density, cpu)))
-
-    def cuda_apply(env, density):
-        shape = jax.ShapeDtypeStruct((nops, *density.shape), jnp.float64)
-        return jax.pure_callback(host_callback, shape, env, density, vmap_method="sequential")
-
-    mlir.register_lowering(primitive, mlir.lower_fun(cuda_apply, multiple_results=False), platform="cuda")
+    register_cpu_product(primitive, apply, lambda env, d: (nops, *d.shape))
 
     def jvp(primals, tangents):
         env, d = primals
@@ -465,6 +449,7 @@ def direct_jk(atm, bas, env, density, *, cart, cutoff=0.0, workers=1,
 @lru_cache(maxsize=4)
 def _packed_operator(with_j=True, with_k=True):
     from ...molecular.jk import _build_jk_from_packed_jax
+    from .autodiff.common import register_eager_dispatch
 
     primitive = core.Primitive("gradscf_packed_jk")
     nops = int(with_j) + int(with_k)
@@ -483,7 +468,8 @@ def _packed_operator(with_j=True, with_k=True):
         )
         return call(eri, density, with_j=np.int32(with_j), with_k=np.int32(with_k))
 
-    primitive.def_impl(apply)
+    # Eager calls must honor the CPU FFI / portable CUDA lowering selection.
+    register_eager_dispatch(primitive)
     primitive.def_abstract_eval(
         lambda e, d: jax.core.ShapedArray((nops, *d.shape), jnp.float64)
     )

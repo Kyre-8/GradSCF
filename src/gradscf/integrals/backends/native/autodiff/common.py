@@ -11,10 +11,23 @@ def batch_product(primitive, args, axes):
     return jax.lax.map(lambda xs: primitive.bind(*xs), arrays), 0
 
 
+def register_eager_dispatch(primitive):
+    """Dispatch eager calls through lowerings even inside ``disable_jit``."""
+    jit_bind = jax.jit(primitive.bind)
+
+    def dispatch(*args):
+        # A primitive still needs compilation; an uncompiled bind recurses
+        # into this implementation when the caller disables ordinary JIT.
+        with jax.disable_jit(False):
+            return jit_bind(*args)
+
+    primitive.def_impl(dispatch)
+
+
 def register_cpu_product(primitive, call, shape):
     """Lower a bounded CPU shell product on CPU or through a CUDA host call."""
     # Eager calls must also dispatch through the platform-specific lowering.
-    primitive.def_impl(jax.jit(primitive.bind))
+    register_eager_dispatch(primitive)
     primitive.def_abstract_eval(lambda *args: jax.core.ShapedArray(shape(*args), jnp.float64))
     mlir.register_lowering(primitive, mlir.lower_fun(call, multiple_results=False), platform="cpu")
     host_call = jax.jit(call)

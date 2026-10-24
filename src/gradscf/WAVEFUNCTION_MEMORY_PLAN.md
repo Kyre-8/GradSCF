@@ -4221,3 +4221,35 @@ requires its own explicit decision and numerical validation.
   supersedes kernel-only6ec61b... retainedhistory. Only105216/n002,
   assigned16CPU lane,32GiB/600s,no GPU; **accept WF-14**.
 - Parents30/35,children35/37; remaining WF-02/28/29/30/32.
+
+### 2026-10-24 — WF-30: native eager/JIT device dispatch corrected
+
+- The new complete N2/STO-3G direct HF→MP2 CPU/CUDA energy/gradient/HVP
+  check exposes an actual GPU SCF failure: eager directJK calls its CPUFFI
+  implementation rather than the existing CUDA lowering. The standalone
+  component JIT tests did not cover this eager entry. Preserve that real
+ 1/1 failure separately from the initial test's unsupported constructor arg.
+- Native forward and geometryproducts now reuse register_cpu_product;
+  packed retains its CPUFFI/portableCUDA-JAX lowerings and selects them
+  through eager dispatch. Remove duplicate bridge code. All FFI operands,
+  mathematical/JVP/transpose/batching functions match baselineAST.
+- A finaltiny CPU check catches a regression when ordinaryJIT is globally
+  disabled: jit(primitive.bind) recurses. Use one pre-createdjit callable
+  inside publicjax.disable_jit(False) for this primitive only. Shared
+  register_eager_dispatch is reused by CPUproduct andpacked; no privateJAX
+  APIs or mathematical fallback. Existingglobal ordinaryJIT policy is intact.
+- Recorded prior24GPU focused/supplemental cases, originalN2 complete
+ 1pass(90.56s) and59CPU regressions all have0/0, no timeout/drift. Exact
+  GPU scope includes complex/nonsymmetric batched density and Cartesian
+  coordinate/density products, packedERI+densityjointAD, plus a real
+  sphericald-shell value/densityJVP point. Do not infer d-shell geometryHVP
+  or newoutervmap coverage. The finaldispatch-only delta has CPU2+GPU1
+  success; prior matrices retain their ownpredecessor hashes, not rerun.
+- Root verifies finalsource/test hashes, both evidence archives, rawXML and
+  nestedmath/AD AST. Evidence native-cuda-dispatch-69cc7f1-105216/
+  HANDOFF_DISABLE_JIT.json and root-verification.json; supplementSHA
+  c1858ca06f84a474c2589a70b2a9ae14b256faa21eb1c824d0576d554600e4f5
+  supersedes originalfinal hashes, original858114... preserved. Onlythe
+  single105216 pool, allocatedV100 UUID anddisjointCPUlanes were used.
+- This accepts the dispatch repair insideWF-30, not the entire remaining
+  device/CI/FCI/recursiveMP/warm-scale audit. Counts remain30/35,35/37.

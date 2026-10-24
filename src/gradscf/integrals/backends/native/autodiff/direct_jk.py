@@ -5,10 +5,10 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 from jax.extend import core
-from jax.interpreters import ad, batching, mlir
+from jax.interpreters import ad, batching
 
 from ...._native import register_integrals
-from .common import batch_product
+from .common import batch_product, register_cpu_product
 
 
 @lru_cache(maxsize=32)
@@ -19,23 +19,6 @@ def geometry_products(atoms_key, basis_key, cart, with_j, with_k, *, workers=1):
     basis = np.asarray(basis_key, dtype=np.int32)
     nops = int(with_j) + int(with_k)
     products, adjoints = {}, {}
-
-    def register(primitive, call, shape):
-        primitive.def_impl(call)
-        primitive.def_abstract_eval(lambda *args: jax.core.ShapedArray(shape(*args), jnp.float64))
-        mlir.register_lowering(primitive, mlir.lower_fun(call, multiple_results=False), platform="cpu")
-        host_call = jax.jit(call)
-
-        def callback(*args):
-            cpu = jax.local_devices(backend="cpu")[0]
-            return np.asarray(host_call(*(jax.device_put(x, cpu) for x in args)))
-
-        def cuda(*args):
-            return jax.pure_callback(callback, jax.ShapeDtypeStruct(shape(*args), jnp.float64),
-                                      *args, vmap_method="sequential")
-
-        mlir.register_lowering(primitive, mlir.lower_fun(cuda, multiple_results=False), platform="cuda")
-        batching.primitive_batchers[primitive] = partial(batch_product, primitive)
 
     for order in (1, 2):
         push = core.Primitive(f"gradscf_direct_jk_geometry_order{order}_jvp")
@@ -56,8 +39,12 @@ def geometry_products(atoms_key, basis_key, cart, with_j, with_k, *, workers=1):
                             order=np.int32(order), cart=np.int32(cart),
                             with_j=np.int32(with_j), with_k=np.int32(with_k), **options)
 
-        register(push, partial(call, False, order), lambda env, density, *vectors: (nops, *density.shape))
-        register(pull, partial(call, True, order), lambda env, density, *vectors: env.shape)
+        register_cpu_product(push, partial(call, False, order),
+                             lambda env, density, *vectors: (nops, *density.shape))
+        register_cpu_product(pull, partial(call, True, order),
+                             lambda env, density, *vectors: env.shape)
+        for primitive in (push, pull):
+            batching.primitive_batchers[primitive] = partial(batch_product, primitive)
 
     def derivative(order, transpose, primals, tangents):
         env, density, *vectors = primals
