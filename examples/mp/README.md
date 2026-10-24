@@ -10,6 +10,9 @@ Run scripts from the repository root with `PYTHONPATH=src`; numerical examples
 enable JAX float64. Native calculations require a built CPU integral library.
 PySCF is used only where an independent comparison is explicitly identified.
 
+The [wavefunction memory guide](../WAVEFUNCTION_MEMORY.md) explains `max_memory`,
+direct integral preparation, required amplitude/history storage and device limits.
+
 ## High-order convergence and divergence
 
 Start with [the reproduction report](CONVERGENCE.md), which includes settings,

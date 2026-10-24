@@ -65,6 +65,8 @@ they are not converged material benchmarks. See the
 
 ## Other methods
 
+- [Wavefunction memory guide](WAVEFUNCTION_MEMORY.md): the shared MB budget,
+  direct geometry example, required tensors and current derivative/device limits.
 - [CI](ci/), [FCI](fci/), [CC](cc/) and [MP](mp/README.md): correlated wavefunctions,
   perturbation series, spectra and differentiable observables.
 - [GW](gw/), [BSE](bse/) and [OFDFT](ofdft/): quasiparticles, optical response,

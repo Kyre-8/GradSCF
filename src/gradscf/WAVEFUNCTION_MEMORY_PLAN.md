@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-24): twenty of the thirty-five parent tasks
-are fully accepted (WF-00/01/03/04/05/07/08/09/18/19/20/21/22/23/24/25/26/27/33/34); thirty-two of the thirty-seven existing
+Current acceptance snapshot (2026-10-24): twenty-one of the thirty-five parent tasks
+are fully accepted (WF-00/01/03/04/05/07/08/09/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-two of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -283,14 +283,17 @@ successful component derivatives do not establish a whole-method memory bound.
 | WF-29 | Hermitian/non-Hermitian primal, isolated-pair response, SCF implicit response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining cross-consumer ownership and whole-method reconciliation |
 | WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
 
-The damaged jy_gpu_1 stages remain paused. Allocations103505/n002 and104081/n006
-are no longer active. The latest renewal is104443/n006: one RTX5090,64 logical
-CPUs,512 GiB and48 hours, ending2026-10-25 21:29:47 Asia/Shanghai. The actual
-affinity is96-127,288-319. Slurm assigns GPU1, remapped to process-visible GPU0,
-UUID GPU-7aa3e8aa-431b-da04-7ba3-5c37ae5479d0; GPU6 remains forbidden.
-The float64 CUDA/JIT/AD assertions completed and were read back from their JSON.
-The SSH control connection exited255, so its exact srun exit was not independently
-captured. This establishes readiness, not a numerical-method acceptance gate.
+The damaged jy_gpu_1 stages remain paused. Allocations103505/n002,104081/n006
+and104443/n006 are no longer active. The latest live allocation is CPU-only
+104910/n006:64 logical CPUs,256 GiB,ending2026-10-24 13:23:20 Asia/Shanghai.
+Its actual affinity is100-127,156-159,292-319,348-351. Four disjoint16-CPU lanes
+use60 GiB per step; their total plus the1 GiB holder fits the allocation.
+GPU renewal104911 requests one NV5090,64 CPUs,512 GiB and48 hours, dependent
+on104910 ending, so the project allocations cannot overlap. It remains queued;
+GPU6 is forbidden and no GPU is used during the CPU interval.
+Earlier104443's float64 CUDA/JIT/AD readiness assertions completed and were read
+back from JSON. Its initial SSH255 hid that readiness probe's exact srun exit;
+later146-case component validation has its own actual terminal records.
 Keep pending implementations separate from accepted evidence.
 Do not reuse damaged stages, c20 credentials or its compiled native library.
 
@@ -611,7 +614,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   same numerical cases/dtype/seed, forward/JVP/VJP/HVP separately, actual peak
   VRAM/RSS and warm time; a CPU FFI sent to CUDA is a failure, not an acceptable
   runner-only workaround. GPU6 remains forbidden.
-- [ ] **WF-31 — Public examples and capability table.** Thin readable examples
+- [x] **WF-31 — Public examples and capability table** (`verified`). Thin readable examples
   using public facades, no CLI and no algorithm under reproducibility. Include
   memory/derivative limits, a noncanonical-degeneracy example, and output evidence.
   Acceptance: examples run from installed source; conventional array users keep
@@ -3747,3 +3750,38 @@ requires its own explicit decision and numerical validation.
   spin gates, **accept WF-22b and WF-22** for the existing supported branches.
   Acceptance becomes 20/35 parents and 32/37 children. Larger-method and final
   GPU acceptance remain WF-30/32; this one small point does not close them.
+
+### 2026-10-24 — WF-31: public examples and memory capability guide
+
+- `examples/WAVEFUNCTION_MEMORY.md` documents the inherited decimal-MB budget,
+  required output/state storage, representation and derivative restrictions,
+  supported GPU placement and measured memory/time tradeoffs. Link it from the
+  examples and MP indexes. Examples continue to call `src/`; no algorithm or
+  maintained example copy is added under reproducibility or development output.
+- Validate six existing scripts in fresh CPU/float64 processes: native N2 MP2
+  nuclear gradient/HVP; restricted CC hierarchy/Lambda/(T)/one-RDM; restricted
+  CI through quadruples and CIS(D); fixed LiH active FCI; H3 UHF/ROHF CI/CC;
+  water EOM EE/IP/EA, three roots each. Restricted CC explicitly requests its
+  small full-MO reference for the fixed-integral response demonstration because
+  its selected CC source no longer owns h1/eri. That is the sole script change.
+- The guide's original RHF/MP2 snippet fails its canonical reference guard:
+  SCF energy is converged but Fock offdiagonal error 1.28869e-8 exceeds the
+  unchanged 1e-8 MP2 tolerance. A single same-setting diagnostic confirms finite
+  data and resolved denominators. Tighten only the guide's SCF density/gradient
+  stopping criteria to 1e-11/1e-10. Its sole rerun passes with canonical error
+  2.78667e-12 and MP2 total energy -76.19903271777832 Eh; the 4000 MB inheritance
+  is verified. Library defaults, MP2 guards, model and orbital space are intact.
+  Retain the original failure and diagnostic; the six passing scripts are not
+  rerun for a documentation-example stopping fix.
+- All seven final children/srun steps exit 0, no timeout. Complete-process times
+  are 22.540/57.224/305.915/9.383/106.969/61.962/7.529 s respectively; peaks and
+  settings are tabulated in the guide and raw evidence. Source `40824fe`, the
+  explicit script/snippet overlays, all 1783 runtime files and 140-225 loaded
+  project-module origins per case are checked. N2 energy/gradient/HVP differ
+  from output comments by at most 1.28e-13/2.66e-10/2.20e-10 in atomic units.
+- Root verifies the current script/code-block hashes, 135 final payloads and
+  actual exits. Evidence `wf31-public-examples/attempt-104910/HANDOFF.json` and
+  `root-verification.json`; run on 104910/n006, CPU116-127,156-159, 60 GiB cap,
+  no GPU. Initial 104443 launch rejection occurred before a scientific child
+  and remains preserved. **Accept WF-31.** Parents become 21/35; children stay
+  32/37. This finite public example matrix is separate from final WF-30/32.
