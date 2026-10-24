@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-24): twenty-six of the thirty-five parent tasks
-are fully accepted (WF-00/01/03/04/05/07/08/09/11/12/15/16/17/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-three of the thirty-seven existing
+Current acceptance snapshot (2026-10-24): twenty-nine of the thirty-five parent tasks
+are fully accepted (WF-00/01/03/04/05/06/07/08/09/10/11/12/13/15/16/17/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-five of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -367,7 +367,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   - [x] **WF-05a:** native direct SCF-to-OVOV and pure orbital preparation,
     existing dense/s4/DF compatibility and construction preflight.
   - [x] **WF-05b:** joint block/T2/solver ownership and measured method scaling.
-- [ ] **WF-06 — Unrestricted and noncanonical MP2.** Supply aa/ab/bb channels
+- [x] **WF-06 — Unrestricted and noncanonical MP2** (`verified`). Supply aa/ab/bb channels
   without spin ERI, retaining the shared tensor-sum resolvent. Acceptance:
   closed/open-shell equality as appropriate, occupied/virtual rotation covariance,
   strict internal degeneracy, residual tolerance, JVP/VJP/HVP. Streaming the
@@ -376,7 +376,9 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 
   - [x] **WF-06a:** native aa/ab/bb preparation from saved UHF Focks,
     noncanonical rotation and coefficient JVP/VJP/HVP, mixed dtype regressions.
-  - [ ] **WF-06b:** whole-caller spin/resolvent/AD residency and scaling.
+  - [x] **WF-06b:** whole-caller spin/resolvent/AD residency and finite scaling.
+    The NH whole-graph owner/admission gate and existing H3/NH/O2 family are
+    verified; arbitrary outer AD and process RSS remain outside this contract.
 - [x] **WF-07 — CorrelatedEnergy MP2 geometry integration.** Remove its obligatory
   full-MO conversion for R/U MP2. Keep moving S/h/J/K, stationary SCF, live C and
   correlation response. Acceptance: energy, full gradient, HVP and one small
@@ -420,7 +422,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   - [x] **WF-09d** (`verified`): switch the eager SCF facade and relaxed molecular adapter
     after prepared consumers pass; validate full-space metadata, freshness,
     properties and absence of hidden complete-MO materialization.
-- [ ] **WF-10 — RCC vvvv and intermediate actions.** Factor bare-vvvv contraction
+- [x] **WF-10 — RCC vvvv and intermediate actions** (`verified`). Factor bare-vvvv contraction
   from dressing; tile tau/W consumers and release/recompute by lifetime.
   Acceptance: residual and energy term comparison, converged CCD/CCSD, JVP/VJP,
   Lambda, HVP and measured action workspace; no hidden dressed-vvvv cache.
@@ -429,7 +431,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     smaller-scratch choice for occupied-dominated spaces. Algebra/AD and action
     measurements include CC2's complete singles-pair construction. Retain
     factored inputs when expanding their outer product would cost more.
-  - [ ] **WF-10b** (`in_progress`): remove the bare-vvvv residency through
+  - [x] **WF-10b** (`verified`): remove the bare-vvvv residency through
     shared AO-source actions, joint amplitude budgets and measured converged
     calculations. The explicit native action passes component correctness;
     measured speed regressions keep the performance gate open and dense default.
@@ -457,12 +459,13 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     integration, compact bare virtuals and matched6/17-MO complete post-SCF
     consumer pipelines are verified. Residual amplitude work and final whole-
     method/device scaling remain with WF-13/29/30/32.
-- [ ] **WF-13 — UCC residual/amplitude workspace** (`in_progress`). Reduce repeated dense
+- [x] **WF-13 — UCC residual/amplitude workspace** (`verified`). Reduce repeated dense
   spin-amplitude expansion using block consumers. Acceptance: UCCD/UCCSD forward,
   adjoints and geometry HVP, restricted-limit comparison; packed-coordinate
   normalization and dual factors preserved.
-  The packed energy callback is verified and shared with Lambda; the residual
-  still expands spin T2, so its existing budget and this parent remain open.
+  Block boundaries and the shared packed energy remove repeated expansions;
+  residuals retain one budgeted full-spin T2 per evaluation. UCCD/UCCSD
+  nuclear HVP and existing raw/dual/restricted-limit gates are verified.
 - [ ] **WF-14 — Triples total budget and AD integration.** Retain streamed (T)
   first/second derivatives; charge upstream integrals/T2/panels/adjoints and
   choose panels accordingly. Acceptance: canonical/semicanonical, off-diagonal
@@ -4097,3 +4100,80 @@ requires its own explicit decision and numerical validation.
   All remote CPU11-13,15-19,51-53,55-59 within the only105216/n002 pool,
   32GiB step,600s child,no GPU. This accepts the finite admission repair;
   WF-10's converged scale/RSS gate remains open. Counts stay26/35,33/37.
+
+### 2026-10-24 — WF-06: complete NH owner/admission reconciliation accepted
+
+- Read the full current NH triplet/Cartesian6-31G* path (17AO,occupations5/3):
+  moving native inputs, implicit SCF, frame transport, selected blocks and all
+  noncanonical MP2 channels. Actual first/second saved leaves are653399/1936286B.
+  Shared whole-graph declared arrays plus known native estimates are
+  13,357,761/13,476,433B. These are array/opaque models, not XLA/RSS peaks.
+- The larger existing SCF declaration uses3*12,487,516=37,462,548B native
+  scratch, plus declared orientations and GMRES; its maximum recorded
+  admission39,915,685B conservatively covers this finite whole graph. MP's
+  969661B already combines caller/prepared/directions/outputs/channel caches.
+  Fees overlap; do not add the graph, native and phase totals again. No
+  implementation omission is inferred from a tape larger than one MP phase.
+- The original111.658s diagnostics child exited1/1 only in the optional
+  official pretty-printer's output-tree assertion; preserve that failure and
+  its successfully written measurements. A separate prescribed admission
+  check removes that reporter, keeps the initial reference at60000MB, and
+  tests only45MB rejection/64MB exact response.45MB fails the original input
+  preflight (37,482,180B>36,000,000B usable);64MB returns full gradient/HVP
+  within2.419e-14/6.262e-14 of the saved60000 result, energy equal.
+- Actual newchild/srun0/0,41.590s,22payloads,1793 unchangedruntime files;
+  no src change or budget sweep. Root verifies archive/hash/terminal records.
+  Evidence wf06-whole-caller/nh-admission-755383d-105216/HANDOFF.json and
+  root-verification.json; archiveSHA
+  b1bf4c55219f644488e927b33c550b077f733e650b2a3467cdd01f38fca8ff96.
+  With the existing rotations/degeneracy/14-case channel tests and measured
+  H3/NH/O2 family6/17/30AO, **accept WF-06/06b**. No full external-AD/RSS cap.
+
+### 2026-10-24 — WF-10: finite converged dense/native CCSD measurement accepted
+
+- Frozen physical PySCF RHF C/F/E frames, sameCartesian water geometry, nocc5,
+  full spaces and CCSD1e-11/1e-10 thresholds. Reuse65AO input; generate19AO
+  reference once. Dense/direct returns match energy9.99e-16Eh,T1/T2
+  1.03e-15/5.04e-15,residualblocks1.09e-13; both pairs converge15/16iterations.
+-19AO at512MB: dense/direct5warm medians.030990/.472524s, compiled
+  temp2.98/2.72MB, completechildRSS1,160,476/1,176,012KiB.65AO dense512MB
+  correctly rejects its minimum native preparation tile before CC,1/1;
+  direct512neverstarts. Preserved failure is an admission result, not physics.
+- Under the authorized equal1024MB pair budget,65AO dense/direct warm
+  1.003350/23.181910s,temp197.04/93.36MB, completeRSS1,449,296/1,356,028KiB.
+  Preparedstorage114.58/10.93MB. This is not uniform-budget scaling: two
+  points use different caps. Native is15.25/23.10x slower, and65AO RSS falls
+  only6.4%; no speedup or2x whole-process claim. Its measured memory tradeoff
+  justifies the explicit fallback while dense remains preferred whenever fit.
+- All four successfulscientific children and comparator exit0/0, no timeout;
+  longest157.31s. Input/source/backend/units/config and original control
+  errors are preserved separately. Root verifies120payloads/currentrunner.
+  Evidence wf10b-converged-cc/verification.json, comparison.json and
+  root-verification.json; archiveSHA
+  b91d9c54d52ac18b6b2af471f3deb6207797fa9550f38da7e8577e01dc7cb55b.
+  With existing term/AD/geometry/caller-budget gates and the joint auto repair,
+  **accept WF-10/10b** for its original finite action/method scope.
+
+### 2026-10-24 — WF-13: explicit UCCD nuclear HVP closes the final ambiguity
+
+- Keep beneficial block boundary/packed energy/virtual action changes; the
+  measured slower genericprojection remains retired. Original task requests
+  fewer repeated expansions, not a ban on the remaining one full-spin T2
+  per residual. Existing39-boundary/48-packed-energy/compact-virtual tests
+  and measured6/17MO pipelines preserve raw charts,dual factors and both
+  UCCD/UCCSD restricted limits, forward and Lambda/parameter-HVP response.
+- Add only the missing UCCD nuclear point: LiH+/CartesianSTO-3G,3.1Bohr,
+  existing MolecularEnergy→transform_fock→selectedblocks→existingCCD solve.
+  An independent full-MO route finishes before selected-only fullAO/MO traps.
+  No new publicAPI or equations. NonzeroEcorr=-2.0971756858e-4Eh,
+  residual2.276e-11; dense differencesE0/G3.816e-16/HVP1.041e-15.
+  Two FD HVPerrors2.642e-9/2.966e-10; translation2.012e-16.
+- Actual1pass,0/0,97.781s,19payloads,1796 unchangedruntime files,69cc7f1
+  plussole testoverlay. Source/Treelimits and existingUCCSD nuclear gates
+  remain intact. Evidence wf13-uccd-geometry/HANDOFF.json and
+  root-verification.json; archiveSHA
+  e5a9f48710de504e74a4f3280ec28e0ada3984f07e71948879076b04986ccfac.
+  **Accept WF-13**; do not infer whole-UCC RSS/GPU/large-system acceptance.
+- All three new finite gates ran inside the only105216/n002 allocation.
+  Parent acceptance becomes29/35; children35/37. Remainingparents:
+  WF-02/14/28/29/30/32. No new TODO levels are introduced.

@@ -18,6 +18,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from gradscf import cc, integrals
+from gradscf._memory import tree_storage_bytes
 from gradscf.ao2mo import VirtualERI, transform_eri_blocks
 from gradscf.ao2mo.actions import contract_vvvv
 from gradscf.cc.integrals import from_orbitals
@@ -41,6 +42,7 @@ def main():
                        if line.startswith('VmRSS:'))
         rss_events.append(dict(phase=phase, seconds=time.perf_counter()-started,
             current_rss_kib=current, peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
+        print(json.dumps(rss_events[-1]), flush=True)
 
     snapshot('imports')
     rng = np.random.default_rng(6414)
@@ -48,14 +50,18 @@ def main():
     input_metadata = None
     frame = None
     if args.input is not None:
-        if args.case != 'action':
-            parser.error('--input is reserved for the frozen-frame action probe')
         input_metadata = json.loads(args.input.read_text())
         assert input_metadata['scf_converged']
         frame = args.input.with_suffix('.npz')
         assert hashlib.sha256(frame.read_bytes()).hexdigest() == input_metadata['input_npz_sha256']
         with np.load(frame) as saved:
-            c = jnp.asarray(saved['coefficients'][:, input_metadata['nocc']:])
+            nocc = input_metadata['nocc']
+            c = jnp.asarray(saved['coefficients'])
+            if args.case == 'action':
+                c = c[:, nocc:]
+            else:
+                fock, reference_energy = (jnp.asarray(saved[key]) for key in
+                                          ('fock', 'reference_energy'))
             centers = saved['coordinates_bohr']
             topology, parameters = integrals.prepare_basis(list(zip(('O', 'H', 'H'), centers)),
                 input_metadata['basis'], unit='Bohr', cart=input_metadata['cart'])
@@ -66,6 +72,8 @@ def main():
         basis_name = 'cc-pvdz' if args.case == 'action' else 'sto-3g'
         topology, parameters = integrals.prepare_basis(atom, basis_name)
     basis = NativeDirectBasis(integrals.make_plan(topology, backend='native'), parameters)
+    if frame is not None:
+        assert c.shape[0] == basis.nao == input_metadata['nao']
     snapshot('input')
     start = time.perf_counter()
     if args.case == 'action':
@@ -80,27 +88,41 @@ def main():
         jax.block_until_ready(provider)
         prepare_seconds = time.perf_counter()-start
         snapshot('prepared')
+        compile_start = time.perf_counter()
         executable = jax.jit(contract_vvvv).lower(provider, x).compile()
+        compile_seconds = time.perf_counter()-compile_start
         snapshot('compiled')
+        execution_start = time.perf_counter()
         result = executable(provider, x)
         jax.block_until_ready(result)
+        first_execution_seconds = time.perf_counter()-execution_start
         expected_converged = None
     else:
-        from pyscf import gto, scf
-        mol = gto.M(atom=atom, basis=basis_name, verbose=0)
-        mf = scf.RHF(mol).run(conv_tol=1e-13)
-        assert mf.converged
-        c = jnp.asarray(mf.mo_coeff)
-        prepared = from_orbitals(c, jnp.asarray(c.T@mf.get_fock()@c), mol.nelectron//2,
-            jnp.asarray(mf.e_tot), direct_basis=basis, max_memory=args.max_memory, vvvv=args.mode)
+        if frame is None:
+            from pyscf import gto, scf
+            mol = gto.M(atom=atom, basis=basis_name, verbose=0)
+            mf = scf.RHF(mol).run(conv_tol=1e-13)
+            assert mf.converged
+            c = jnp.asarray(mf.mo_coeff)
+            fock, reference_energy, nocc = jnp.asarray(c.T@mf.get_fock()@c), jnp.asarray(mf.e_tot), mol.nelectron//2
+        caller_data = (c, fock, reference_energy, basis, centers if frame is not None else vars(mf))
+        prepared = from_orbitals(c, fock, nocc, reference_energy,
+            direct_basis=basis, max_memory=args.max_memory, vvvv=args.mode,
+            reserved_bytes=tree_storage_bytes(caller_data, exclude=(c, fock, reference_energy, basis)))
         jax.block_until_ready(prepared)
         prepare_seconds = time.perf_counter()-start
         snapshot('prepared')
         config = cc.CCConfig(conv_tol=1e-11, residual_tol=1e-10)
-        executable = jax.jit(lambda p: cc.run_cc_from_integrals(p, config=config)).lower(prepared).compile()
+        caller_bytes = tree_storage_bytes(caller_data, exclude=(prepared,))
+        compile_start = time.perf_counter()
+        executable = jax.jit(lambda p: cc.run_cc_from_integrals(p, config=config,
+            max_memory=args.max_memory, reserved_bytes=caller_bytes)).lower(prepared).compile()
+        compile_seconds = time.perf_counter()-compile_start
         snapshot('compiled')
+        execution_start = time.perf_counter()
         result = executable(prepared)
         jax.block_until_ready(result)
+        first_execution_seconds = time.perf_counter()-execution_start
         assert result.converged
         expected_converged = bool(result.converged)
     first_seconds = time.perf_counter()-start
@@ -111,6 +133,8 @@ def main():
         result = executable(provider, x) if args.case == 'action' else executable(prepared)
         jax.block_until_ready(result)
         times.append(time.perf_counter()-tick)
+        if args.case == 'cc':
+            assert result.converged and np.isfinite(float(result.total_energy))
     primary_peak_rss_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     snapshot('warm_results')
     components = None
@@ -144,13 +168,19 @@ def main():
         ground = dict(total_energy_hartree=float(result.total_energy),
             correlation_energy_hartree=float(result.correlation_energy),
             reference_energy_hartree=float(result.reference_energy), iterations=int(result.iterations),
-            conv_tol=1e-11, residual_tol=1e-10)
+            conv_tol=1e-11, residual_tol=1e-10,
+            packed_residual_norm=float(result.residual_norm), nocc=nocc,
+            nvir=c.shape[1]-nocc, caller_reserved_bytes=caller_bytes)
+        output = dict(values=np.asarray(values), t1=np.asarray(result.t1), t2=np.asarray(result.t2),
+                      r1=np.asarray(residual[0]), r2=np.asarray(residual[1]))
+        assert all(np.isfinite(value).all() for value in output.values())
     else:
         residual_norm = None
         values = result
         ground = None
+        output = dict(values=np.asarray(values))
     output_arrays = Path(args.output).with_suffix('.npz')
-    np.savez(output_arrays, values=np.asarray(values))
+    np.savez(output_arrays, **output)
     memory = executable.memory_analysis()
     cpu = next((line.split(':', 1)[1].strip() for line in Path('/proc/cpuinfo').read_text().splitlines()
                 if line.startswith('model name')), 'unknown')
@@ -159,17 +189,24 @@ def main():
         command=[sys.executable, *sys.argv], cpu=cpu, affinity=sorted(os.sched_getaffinity(0)),
         omp_threads=os.environ.get('OMP_NUM_THREADS'), blas_threads=os.environ.get('OPENBLAS_NUM_THREADS'),
         seed=6414, coefficient_shape=list(c.shape), rhs_shape=list(x.shape) if args.case == 'action' else None,
-        frame_kind=('physical_frozen_rhf_virtuals' if frame is not None else
+        frame_kind=(('physical_frozen_rhf_virtuals' if args.case == 'action' else 'physical_frozen_rhf_ccsd')
+                    if frame is not None else
                     'algebraic_overcomplete_stress' if args.case == 'action' else 'physical_rhf_ccsd'),
         input_metadata=input_metadata, input_npz_sha256=hashlib.sha256(frame.read_bytes()).hexdigest() if frame else None,
         input_json_sha256=hashlib.sha256(args.input.read_bytes()).hexdigest() if args.input else None,
         max_memory_mb=args.max_memory, prepare_seconds=prepare_seconds, first_seconds=first_seconds,
+        compile_seconds=compile_seconds, first_execution_seconds=first_execution_seconds,
         warm_seconds=times, warm_median_seconds=statistics.median(times),
         component_warm_median_seconds=components,
         compiled_temp_bytes=memory.temp_size_in_bytes,
         compiled_argument_bytes=memory.argument_size_in_bytes,
         compiled_output_bytes=memory.output_size_in_bytes,
+        input_storage_bytes=tree_storage_bytes(provider, x) if args.case == 'action'
+                            else tree_storage_bytes(caller_data),
+        prepared_storage_bytes=tree_storage_bytes(provider if args.case == 'action' else prepared),
+        result_storage_bytes=tree_storage_bytes(result),
         peak_rss_kib=primary_peak_rss_kib, rss_snapshot_before_optional_component_profile=True,
+        whole_process_peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         rss_timeline=rss_events, geometry_unit='Angstrom', energy_unit='Hartree', cart=True,
         ground=ground, output_npz_sha256=hashlib.sha256(output_arrays.read_bytes()).hexdigest(),
         sum=float(jnp.sum(values)), norm=float(jnp.linalg.norm(values)),
