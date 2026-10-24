@@ -3,13 +3,13 @@
 from dataclasses import fields
 import jax
 import jax.numpy as jnp
-from .._memory import resolve_memory_mb, tree_storage_bytes
+from .._memory import array_device, resolve_memory_mb, tree_storage_bytes
 from ..scf.reference import (reference_from_source, UnrestrictedReference,
                              unrestricted_reference_from_source, is_unrestricted_source)
 from gradscf.ao2mo import frozen_indices, unrestricted_frozen_indices
 from ..scf.reference import reference_state_signature
 from .types import CCConfig
-from .ground import run_cc, run_cc_from_integrals
+from .ground import _prepare_ground, run_cc, run_cc_from_integrals
 from .integrals import from_orbitals
 from .uccsd import run_ucc, run_ucc_from_integrals
 from .unrestricted_integrals import from_orbitals as ucc_from_orbitals
@@ -63,6 +63,31 @@ class CC:
         return tree_storage_bytes(getattr(self.mf, '__dict__', {}), vars(self), extra,
                                   exclude=exclude)
 
+    def _restricted_integrals(self, ref, cfg, t1, t2, reservation):
+        def prepare(mode):
+            return from_orbitals(
+                ref.coefficients, ref.focks[0], ref.nocc, ref.reference_energy,
+                frozen=self.frozen, max_memory=self.max_memory, model=cfg.method,
+                vvvv=mode, reserved_bytes=reservation, **ref.ao_kwargs)
+
+        if 'direct_basis' not in ref.ao_kwargs or cfg.method == 'ccs':
+            return prepare('auto')
+        for mode in ('dense', 'direct'):
+            try:
+                # Separate preparation and ground peaks: do not charge their
+                # mutually exclusive workspaces as simultaneous residency.
+                with jax.default_device(array_device(ref.coefficients)):
+                    candidate = jax.eval_shape(lambda: prepare(mode))
+                    held = self._held_bytes(candidate, t1, t2)
+                    jax.eval_shape(lambda ints: _prepare_ground(
+                        ints, cfg, t1, t2, self.max_memory, held, preview=True)[1], candidate)
+            except ValueError as error:
+                if mode != 'dense' or 'budget' not in str(error):
+                    raise
+            else:
+                # Only the selected representation is ever materialized.
+                return prepare(mode)
+
     def kernel(self, t1=None, t2=None):
         # A failed rebuild cannot leave a previous snapshot available to
         # Lambda/properties/EOM, including when source validation raises.
@@ -91,11 +116,7 @@ class CC:
                     reserved_bytes=self._held_bytes(self._integrals, t1, t2))
             else:
                 self._nmo = ref.coefficients.shape[1]
-                self._integrals = from_orbitals(
-                    ref.coefficients, ref.focks[0], ref.nocc, ref.reference_energy,
-                    frozen=self.frozen, max_memory=self.max_memory, model=cfg.method,
-                    vvvv='auto', reserved_bytes=reservation,
-                    **ref.ao_kwargs)
+                self._integrals = self._restricted_integrals(ref, cfg, t1, t2, reservation)
                 self.result = run_cc_from_integrals(self._integrals, config=cfg, t1=t1, t2=t2,
                     max_memory=self.max_memory,
                     reserved_bytes=self._held_bytes(self._integrals, t1, t2))

@@ -40,18 +40,19 @@ def run_cc(
                                 max_memory=max_memory, reserved_bytes=reserved_bytes)
 
 
-def run_cc_from_integrals(ints, *, config=None, t1=None, t2=None,
-                          max_memory=None, reserved_bytes=0):
-    """Solve a restricted model from prepared blocks using the shared CC body.
-
-    The caller owns the integral snapshot and all reference/frozen-space
-    preparation. Iteration, convergence and implicit response are identical to
-    ``run_cc``; this entry does not prepare or copy the integral tensors.
-    """
-    cfg = CCConfig() if config is None else config
+def _prepare_ground(ints, cfg, t1, t2, max_memory, reserved_bytes, *, preview=False):
+    """Prepare the same initial state and phase budgets for planning or solving."""
     provided = (t1, t2) if max_memory is not None else ()
     no, nv = ints.nocc, ints.nvir
     space = AmplitudeSpace(no, nv, cfg.method)
+
+    def pack(a, b):
+        # The private preview runs only inside eval_shape. It needs declared
+        # vector storage, not the quadratic NumPy triangle/weight arrays.
+        if preview:
+            return jnp.empty((space.size,), dtype=jnp.result_type(a, b))
+        return space.pack(a, b)
+
     d1, d2 = denominators(ints)
     # This is an iteration preconditioner, not a change to R(T) or to (T).
     d1, d2 = d1 - cfg.level_shift, d2 - 2 * cfg.level_shift
@@ -70,10 +71,10 @@ def run_cc_from_integrals(ints, *, config=None, t1=None, t2=None,
         raise ValueError("Initial CC amplitudes have incorrect shapes")
     dtype = jnp.result_type(ints.fock.dtype, t1.dtype, t2.dtype)
     t1, t2 = t1.astype(dtype), t2.astype(dtype)
-    initial = space.pack(t1, 0.5 * (t2 + t2.transpose(1, 0, 3, 2)))
+    initial = pack(t1, 0.5 * (t2 + t2.transpose(1, 0, 3, 2)))
     # pack is norm-preserving for amplitudes; diagonal action itself has no sqrt(2).
-    ones = space.pack(jnp.ones_like(t1), jnp.ones_like(t2))
-    diagonal = space.pack(d1, d2) / jnp.where(ones != 0, ones, 1.0)
+    ones = pack(jnp.ones_like(t1), jnp.ones_like(t2))
+    diagonal = pack(d1, d2) / jnp.where(ones != 0, ones, 1.0)
     minimum = jnp.min(jnp.abs(diagonal), initial=jnp.inf)
     valid = (
         (minimum > cfg.denominator_tol)
@@ -88,6 +89,21 @@ def run_cc_from_integrals(ints, *, config=None, t1=None, t2=None,
     ints, numerical, response, budget = ground_budget(ints, initial,
         (provided, t1, t2, d1, d2, ones, diagonal, safe_diagonal), numerical, linear_config(cfg),
         max_memory, reserved_bytes, no, nv, cfg.method)
+    return space, initial, safe_diagonal, minimum, valid, ints, numerical, response, budget
+
+
+def run_cc_from_integrals(ints, *, config=None, t1=None, t2=None,
+                          max_memory=None, reserved_bytes=0):
+    """Solve a restricted model from prepared blocks using the shared CC body.
+
+    The caller owns the integral snapshot and all reference/frozen-space
+    preparation. Iteration, convergence and implicit response are identical to
+    ``run_cc``; this entry does not prepare or copy the integral tensors.
+    """
+    cfg = CCConfig() if config is None else config
+    (space, initial, safe_diagonal, minimum, valid,
+     ints, numerical, response, budget) = _prepare_ground(
+         ints, cfg, t1, t2, max_memory, reserved_bytes)
     r = lambda vector: space.pack(
         *residual(*space.unpack(vector), ints, model=cfg.method)
     )

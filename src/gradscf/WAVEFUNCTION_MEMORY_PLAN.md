@@ -4059,3 +4059,41 @@ requires its own explicit decision and numerical validation.
   WF-02/06/10/13/14/28/29/30/32. Resource settings above reflect the user's new
   single-pool authorization and liftedGPU6 restriction; historical records
   retain the device restrictions in force when they were executed.
+
+### 2026-10-24 — WF-10/29: joint native CC representation admission
+
+- Fix the public restricted-native auto gap: a dense preparation can fit while
+  its subsequent minimum ground/response state cannot. Preview each candidate
+  using the existing producer and the same extracted ground initialization/
+  ground_budget. Check separate phase peaks; do not sum mutually exclusive
+  workspaces. Retain dense when both phases fit, otherwise consider direct
+  only for a budget error. Materialize exactly the chosen representation once.
+  Pure producer signatures, explicit representation APIs and UCC are unchanged.
+- The actual55MB algebraic4AO/40MO witness has feasible dense preparation,
+  rejected dense ground and feasible native ground. Public selection initially
+  fails on its first physical vvvv request;96MB retains dense. It is an interface
+  counterexample, not an orthonormal molecular benchmark. Invalid-input errors
+  preserve their exceptions. Metadata checks inherit the source's concrete
+  device context; this does not solve the separate general outer-JIT device gap.
+- A real RED trap also catches NumPy triangle/weight creation during preview.
+  Add integer-only AmplitudeSpace.size and a private preview branch inside
+  eval_shape; actual solving retains the originalpack/unpack. All7 existing
+  model sizes equal actualpacked lengths. Preparation/residual expressions,
+  numerical solve/result AST and all original amplitude methods are unchanged.
+- Final6 affected policy/device/preview and actualnative ground/Lambda/HVP
+  cases pass, child/srun0/0,107.173s. Earlier8 numerical and4 device/policy
+  success sets remain separate provenance, not added as a new unique count.
+  ExpectedRED and the fixed missing-diagnostic-return failure are preserved.
+  Root independently verifies current5source/test hashes, AST equivalence,
+  originalterminal/XML records and58payloads.
+- Five-warm algebraic preparation costs:55MBdirect metadata84.41ms,
+  fullplanned319.67ms versus directprepare212.61ms;96MBdense metadata43.19ms,
+  fullplanned286.22ms versus directprepare247.16ms. Returned leaves match
+  exactly. Preview eliminates quadratic hostindices, not the actual packed
+  solver representation; no significant small-frame speedup is claimed.
+- Evidence wf10b-joint-auto/packed-verification.json,packed-change-proof.json
+  andpacked-root-verification.json; archive SHA256
+  bad4ba5675b564994b23833fb9e6ea325a0708e859f05df0af1d4892aabb6eeb.
+  All remote CPU11-13,15-19,51-53,55-59 within the only105216/n002 pool,
+  32GiB step,600s child,no GPU. This accepts the finite admission repair;
+  WF-10's converged scale/RSS gate remains open. Counts stay26/35,33/37.
