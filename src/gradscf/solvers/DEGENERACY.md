@@ -35,8 +35,8 @@ or nearly equal eigenvalues. It does not divide by internal eigenvalue gaps.
 For a concrete matrix, parameters and perturbations must preserve symmetry;
 for example, construct A=(B+B^T)/2 from unconstrained trainable parameters B.
 The public operator interface continues to require symmetry from matrix-free
-callers. The generic RPA and non-Hermitian EOM problems are outside this scope,
-as is a variable metric M in AX=MX Lambda.
+callers. This symmetric derivation does not apply to generic RPA or to a variable
+metric M in AX=MX Lambda. A separate real non-Hermitian extension follows below.
 
 ## Public interface
 
@@ -239,3 +239,72 @@ An absent upper guard is accepted only when the numerical basis covers the
 full spectrum; absent requested roots are never converged. Interval topology
 stays fixed within a differentiated call; a root at the cutoff is not a
 differentiable selection. With no lower bound, the lower gap is infinity.
+
+## Non-Hermitian invariant subspaces
+
+For a real nonnormal A, choose numerical dual frames R0,L0 with L0.T R0=I
+for a complete isolated cluster. The projector is oblique. With live frames
+R,L and M=L.T R, its invariant action and cluster energy are
+
+```text
+P q = R solve(M, L.T q),
+energy_sum = trace(T),  A R = R T.
+```
+
+A nonsingular basis change R->R V, L->L V^(-T) leaves P and trace(T)
+unchanged. The internal eigenvalues may cross while these observables remain
+smooth. Labelled sorted roots and individual vectors do not acquire that
+invariance; the legacy state response therefore continues to reject internal
+degeneracy. There is no internal-eigenvalue-gap denominator in the block roots.
+
+Fix the numerical anchors during AD and solve the square right chart
+
+```text
+F_R(R,T;A) = (A R - R T, L0.T R - I) = 0.
+```
+
+Its first differential is the coupled Sylvester/border system
+
+```text
+A dR - dR T - R dT = -(dA) R,
+L0.T dR = 0.
+```
+
+The gauge removes rotations inside the selected span. Separation from the
+complement makes the admitted chart locally invertible. The full T block
+must be retained after QR rebasing; replacing it with the list of sorted
+eigenvalues would generally change the equations. For projector observables,
+the analogous left chart is
+
+```text
+F_L(L,U;A) = (A.T L - L U, R0.T L - I) = 0.
+```
+
+Shared `attach_root` and checked linear solves differentiate these nonlinear
+residuals; neither Davidson iterations nor a new method-local adjoint solver
+are differentiated. Differentiating the nonlinear equations again retains
+terms such as dR*dT that a single frozen correction would omit. Each coupled
+unknown has n*k+k*k entries. The direct capacity check uses this joint size;
+independent per-root capacity checks are insufficient. Transposes are generated
+by AD, preserving the same equations for forward and reverse response.
+
+The overlap inverse in P is live. Although the gauges make the first variation
+of M vanish at a biorthogonal base point, its second variation can contain
+(dL).T*dR and need not vanish. Replacing solve(M,L.T q) with L.T q would
+therefore give an incorrect HVP. Trace-only requests need only the right root.
+
+Numerical admission checks both the original spans and the actual rebased
+block seeds. A small individual eigenvector residual alone is insufficient:
+QR can amplify errors in nearly collinear numerical vectors. No iterative
+seed correction or pseudoinverse silently rescues a rejected chart. External
+gaps, projector conditioning and true linear-response residuals all matter
+for nonnormal problems; eigenvalue spacing alone is not a conditioning bound.
+A finite full-span request bypasses the eigenvectors and charts entirely,
+returning the identity action and trace from bounded operator blocks.
+
+Tests cover analytic similarity families, exact/near internal crossings,
+general nonsingular frame changes, JIT JVP/VJP/HVP, two finite-difference
+steps, matrix-free Davidson, checked failures and memory preflight. EOM EE/IP/EA
+reuse this solver mode; tiny fixed-integral bridges verify the new connection.
+These checks do not establish arbitrary higher-order molecular response,
+complex-cluster AD, a variable AO metric, or GPU performance for this new mode.

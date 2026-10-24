@@ -1,8 +1,12 @@
-"""Dense or iterative real non-Hermitian pairs with first-order energy response."""
+"""Real non-Hermitian roots with isolated-pair or invariant-subspace response."""
+
+from dataclasses import replace
 
 import jax
 import jax.numpy as jnp
-from ..types import LinearSolverConfig, NonHermitianSolverConfig, NonHermitianResult
+from ..types import (EigenResponseConfig, LinearSolverConfig, NonHermitianSolverConfig,
+                     NonHermitianResult)
+from ._nonhermitian_subspace import attach_subspace_response, full_subspace
 from ..operators import as_operator, validate_real_square
 from ..diagnostics import require_converged_derivative
 from ._nonhermitian_ritz import paired_eigenvectors
@@ -13,7 +17,7 @@ from gradscf._memory import array_storage_bytes, tree_storage_bytes, validate_re
 
 
 def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
-                      vector_response=False, response_config=None,
+                      vector_response=False, response_config=None, response=None, probes=None,
                       max_memory=None, reserved_bytes=0, _batch_size=None,
                       _response_budget=None):
     """Lowest-real-part dense eigenpairs or iterative Ritz estimates.
@@ -23,7 +27,14 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
     attaches normalized local left/right response using shared root and linear
     solves. ``response_config`` controls those solves; direct capacity is n+1
     per right root and n per left root, not the number of requested roots.
-    Complex selected roots give NaN real outputs;
+    An explicit EigenResponseConfig selects the same state contracts, or a
+    subspace target with optional projector probes. A complete real semisimple
+    cluster then exposes only projection and eigenvalue_sum, with coupled
+    implicit JVP/VJP and higher response; raw_result is stopped diagnostics.
+    Internal degeneracy is allowed, but the external cluster boundary must be
+    resolved. Full-space invariants bypass eigenvector charts and eigensolvers,
+    including finite defective matrices. Explicit and legacy AD controls cannot
+    be mixed. Complex selected roots give NaN real outputs;
     raw_eigenvalues holds the dense spectrum or the final projected spectrum.
     Davidson uses bounded storage and true right/left and guard residuals; its
     gaps/order are local Ritz estimates, not a global isolation certificate.
@@ -36,6 +47,17 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
     remains caller-owned. A private EOM relay preserves its existing primal plan.
     """
     cfg = NonHermitianSolverConfig() if config is None else config
+    if response is not None:
+        if not isinstance(response, EigenResponseConfig):
+            raise TypeError("response must be an EigenResponseConfig")
+        if vector_response or response_config is not None:
+            raise ValueError("Use response controls or legacy AD controls, not both")
+        vector_response = response.target == 'eigenpairs'
+        if vector_response:
+            response_config = response.linear_config
+    subspace = response is not None and response.target == 'subspace'
+    if probes is not None and not subspace:
+        raise ValueError("probes require a subspace response")
     if not isinstance(vector_response, bool):
         raise TypeError("vector_response must be a static bool")
     if response_config is not None and not isinstance(response_config, LinearSolverConfig):
@@ -50,12 +72,25 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
     k = cfg.nroots
     if k > n:
         raise ValueError("nroots exceeds operator dimension")
+    original_probes = probes
+    if probes is not None:
+        probes = jnp.asarray(probes)
+        if probes.ndim not in (1, 2) or probes.shape[0] != n:
+            raise ValueError("Projector probes must have shape (n,) or (n,nvec)")
+        if not jnp.issubdtype(probes.dtype, jnp.floating):
+            raise NotImplementedError("Projector probes must be real floating-point data")
+        probes = probes.astype(jnp.result_type(probes.dtype, op.dtype))
     response_budget = None if _response_budget is None else dict(_response_budget)
+    if subspace and k == n:
+        budget = (dict(max_memory=max_memory, reserved_bytes=reserved_bytes+
+            array_storage_bytes(a, op.diagonal, initial_vectors, original_probes)) if max_memory is not None
+            else {} if response_budget is None else response_budget)
+        return full_subspace(op, probes, block_size=cfg.block_size, **budget)
     source_arrays = ()
     if max_memory is not None:
         # Preserve caller arrays before dtype promotion and before dense `a`
         # is rebound to the stopped numerical assembly below.
-        source_arrays = (a, op.diagonal, initial_vectors)
+        source_arrays = (a, op.diagonal, initial_vectors, original_probes)
         if initial_vectors is not None:
             if cfg.method == "dense":
                 raise ValueError("initial_vectors applies only to Davidson")
@@ -65,7 +100,7 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
             if (initial_vectors.ndim != 2 or initial_vectors.shape[0] != n
                     or not 1 <= initial_vectors.shape[1] <= min(n, cfg.max_space)):
                 raise ValueError("initial_vectors must have shape (n, 1..max_space)")
-        source_bytes = reserved_bytes+array_storage_bytes(*source_arrays, initial_vectors)
+        source_bytes = reserved_bytes+array_storage_bytes(*source_arrays, initial_vectors, probes)
         cfg, _, _batch_size = plan_nonhermitian(n, op.dtype, cfg, max_memory,
             resident_bytes=source_bytes,
             initial_columns=0 if initial_vectors is None else initial_vectors.shape[1],
@@ -81,10 +116,10 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
             raise ValueError("Non-Hermitian dense reference exceeds max_dense")
         blocks = []
         for start in range(0, n, cfg.block_size):
-            probes = jax.nn.one_hot(
+            basis_vectors = jax.nn.one_hot(
                 jnp.arange(start, min(start + cfg.block_size, n)), n, dtype=op.dtype
             ).T
-            blocks.append(apply(probes))
+            blocks.append(apply(basis_vectors))
         a = jax.lax.stop_gradient(jnp.concatenate(blocks, axis=1))
         wr, right, left = paired_eigenvectors(a, k)
         complete, iterations, dimension = (
@@ -95,8 +130,24 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
         guards = jnp.zeros((0,), dtype=op.dtype)
         numerical_valid = jnp.all(jnp.isfinite(a)) & jnp.all(jnp.isfinite(wr))
     else:
-        solved = (davidson_ritz(op, cfg, initial_vectors) if _batch_size is None else
-                  davidson_ritz(op, cfg, initial_vectors, batch_size=_batch_size))
+        primal_op = op
+        if subspace:
+            # Freeze hoisted operator parameters before the numerical while
+            # loop: stopping its outputs alone still visits nested loop AD.
+            # Preserve its existing vector/block actions and batch shapes.
+            def freeze(action, shape):
+                function, parameters = jax.closure_convert(action, jnp.zeros(shape, op.dtype))
+                parameters = jax.lax.stop_gradient(tuple(parameters))
+                return lambda x: function(x, *parameters)
+            width = min(n, cfg.max_space)
+            width = width if _batch_size is None else min(width, _batch_size)
+            primal_op = replace(op,
+                matvec=freeze(op.matvec, (n,)),
+                matmat=freeze(op.apply, (n, width)),
+                transpose_matvec=freeze(op.T.matvec, (n,)),
+                diagonal=None if op.diagonal is None else jax.lax.stop_gradient(op.diagonal))
+        solved = (davidson_ritz(primal_op, cfg, initial_vectors) if _batch_size is None else
+                  davidson_ritz(primal_op, cfg, initial_vectors, batch_size=_batch_size))
         wr, right, left = solved.spectrum, solved.right, solved.left
         iterations, dimension = solved.iterations, solved.dimension
         complete = dimension == n
@@ -144,7 +195,9 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
         present[None, :], jnp.abs(wr[:k, None] - wr[None, :]), jnp.inf
     )
     distances = distances.at[jnp.arange(k), jnp.arange(k)].set(jnp.inf)
-    margin = cfg.gap_atol + cfg.gap_rtol * jnp.maximum(
+    gap_atol = cfg.gap_atol if response is None else response.gap_atol
+    gap_rtol = cfg.gap_rtol if response is None else response.gap_rtol
+    margin = gap_atol + gap_rtol * jnp.maximum(
         jnp.abs(wr[:k, None]), jnp.where(present[None, :], jnp.abs(wr[None, :]), 0.0)
     )
     margin += 2 * condition[:, None] * jnp.maximum(right_res, left_res)[:, None]
@@ -155,6 +208,17 @@ def solve_nonhermitian(matrix_or_operator, *, config=None, initial_vectors=None,
         & numerical_valid
     )
     r, l = jax.lax.stop_gradient(r), jax.lax.stop_gradient(l)
+    if subspace:
+        raw = NonHermitianResult(energies, r, l, right_res, left_res, conv,
+            jnp.broadcast_to(valid, (k,)), condition, bio, wr, complete,
+            iterations, dimension, jnp.min(distances, axis=1), guards, restarts)
+        if response_budget is not None:
+            response_budget['reserved_bytes'] += tree_storage_bytes((a, wr, right,
+                left, l0, gram, singular, right_res, left_norm, left_res, bio,
+                real, conv, condition, present, distances, margin, valid, guards),
+                exclude=source_arrays)
+        return attach_subspace_response(op, raw, probes, config=cfg, response=response,
+            numerical_valid=numerical_valid, **({} if response_budget is None else response_budget))
     if vector_response:
         linear = (LinearSolverConfig(rtol=1e-10, restart=40)
                   if response_config is None else response_config)

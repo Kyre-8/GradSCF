@@ -4,7 +4,7 @@ from dataclasses import fields
 import numpy as np
 from ..._memory import resolve_memory_mb, tree_storage_bytes
 from ...scf.reference import _array_signature
-from .types import EOMConfig, EOMPrecisionDiagnostics
+from .types import EOMConfig, EOMPrecisionDiagnostics, EOMSubspaceResult
 from .amplitudes import EOMAmplitudeSpace
 from .operators import run_eom, run_eom_from_integrals
 
@@ -20,7 +20,7 @@ class _EOM:
         self.result = self.e = self.right_vectors = self.left_vectors = self.space = (
             None
         )
-        self.converged = None
+        self.converged = self.projection = self.eigenvalue_sum = None
         self._state_key = None
 
     @property
@@ -77,12 +77,13 @@ class _EOM:
         if self._key() != self._state_key:
             raise RuntimeError("EOM source or settings changed; run kernel again")
 
-    def kernel(self):
+    def kernel(self, *, probes=None):
+        """Return legacy roots, or the invariant result in explicit subspace mode."""
         self._state_key = None
         self.result = self.e = self.right_vectors = self.left_vectors = self.space = (
             None
         )
-        self.converged = None
+        self.converged = self.projection = self.eigenvalue_sum = None
         cfg = self._config()
         ref = self._source()
         owned = ((self.ground._integrals, self.ground.result) if self.ground._integrals is not None
@@ -92,11 +93,18 @@ class _EOM:
         if self.ground._integrals is not None:
             self.result = run_eom_from_integrals(self.ground._integrals,
                 self.ground.result, config=cfg, cc_config=self.ground._config(),
-                max_memory=self.max_memory, reserved_bytes=reserved)
+                max_memory=self.max_memory, reserved_bytes=reserved, probes=probes)
         else:
             self.result = run_eom(ref.h1, ref.eri, self.ground.result, nocc=ref.nocc,
                 frozen=self.ground.frozen, config=cfg, cc_config=self.ground._config(),
-                max_memory=self.max_memory, reserved_bytes=reserved)
+                max_memory=self.max_memory, reserved_bytes=reserved, probes=probes)
+        if isinstance(self.result, EOMSubspaceResult):
+            self.projection = self.result.projection
+            self.eigenvalue_sum = self.result.eigenvalue_sum
+            self.converged = np.asarray(self.result.raw_result.converged)
+            self.space = EOMAmplitudeSpace(*self.ground.t1.shape, cfg.sector)
+            self._state_key = self._key()
+            return self.result
         self.e = self.result.energies
         self.right_vectors, self.left_vectors = (
             self.result.right_vectors,
@@ -109,8 +117,8 @@ class _EOM:
             return self.e[0], self.right_vectors[:, 0]
         return self.e, self.right_vectors.T
 
-    def run(self):
-        self.kernel()
+    def run(self, *, probes=None):
+        self.kernel(probes=probes)
         return self
 
     def diagnostics(
@@ -138,11 +146,15 @@ class _EOM:
             else None
         )
         return EOMPrecisionDiagnostics(
-            scf, self.ground.result, self.result, cc_tol, eom_tol
+            scf, self.ground.result,
+            self.result.raw_result if isinstance(self.result, EOMSubspaceResult) else self.result,
+            cc_tol, eom_tol
         )
 
     def amplitudes(self, root=0):
         self.check_source()
+        if isinstance(self.result, EOMSubspaceResult):
+            raise ValueError("Subspace response exposes invariants, not individual amplitudes")
         if not isinstance(root, int) or not 0 <= root < self.nroots:
             raise ValueError("Invalid EOM root")
         return self.space.unpack(self.right_vectors[:, root])
@@ -152,6 +164,8 @@ class _EOM:
         from .properties import dyson_orbitals
 
         self.check_source()
+        if isinstance(self.result, EOMSubspaceResult):
+            raise ValueError("Subspace response exposes invariants, not individual Dyson orbitals")
         if self.sector not in {"ip", "ea"}:
             raise ValueError("Dyson orbitals require the IP or EA sector")
         self.ground.solve_lambda()

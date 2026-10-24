@@ -10,12 +10,13 @@ from .api import CC, CCS, CCD, CCSD, RCCSD, CC2, LCCD, LCCSD, UCCSD, UCCD, QCISD
 from .uccsd import run_ucc, run_ucc_from_integrals
 from ..scf.reference import UnrestrictedReference
 
-from .eom import (EOMConfig, EOMResult, EOMEE, EOMIP, EOMEA, run_eom,
+from .eom import (EOMConfig, EOMResult, EOMSubspaceResult, EOMEE, EOMIP, EOMEA, run_eom,
                   run_eom_from_integrals, DysonResult, dyson_orbitals)
 
 __all__ = [
     "EOMConfig",
     "EOMResult",
+    "EOMSubspaceResult",
     "EOMEE",
     "EOMIP",
     "EOMEA",

@@ -275,9 +275,9 @@ successful component derivatives do not establish a whole-method memory bound.
 
 | Existing scope | Accepted frontier | Remaining acceptance boundary |
 | --- | --- | --- |
-| WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response and measured consumer conversions, restricted MP2 integral/energy budgets, R/U full/direct gradient family and aniline oracle | Unrestricted saved response-state accounting, cross-caller ownership and traced target-device capacity; direct remains opt-in |
-| WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, complete phase budgets and nuclear two-body-property response |
-| WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Remaining native phase budgets and whole-method measurements |
+| WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response and measured consumer conversions, restricted MP2 integral/energy budgets, R/U full/direct gradient family and aniline oracle | Whole-caller/scaling reconciliation and traced target-device capacity; simultaneous noncanonical channel AD owners are now charged, direct remains opt-in |
+| WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, complete phase/scaling budgets; finite nuclear two-body response is accepted |
+| WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Native declared phase budgets and real invariant-cluster response are verified; whole-method measurements remain |
 | WF-18/19/20/21/22/27 | Selected CI through genuine U quadruples, UCIS/CIS(D) budgets and ROHF guards, joint FCI action/response budgets, scalar spin/spatial properties and relaxed CI/FCI/CIS(D) nuclear response | Final GPU and large-method measurements; arbitrary outer-AD/allocator bounds remain outside the known-array contract |
 | WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 math/API/warm gates, pure-frame R/U MPn and moving native MP4 geometry second response | Complete cross-caller AD ownership and higher-order method-level size/performance acceptance |
 | WF-29 | Hermitian/non-Hermitian primal, isolated-pair response, SCF implicit response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining cross-consumer ownership and whole-method reconciliation |
@@ -3906,3 +3906,57 @@ requires its own explicit decision and numerical validation.
   Response archive SHA256
   90dfc3cfa8328f5a4b85d82df69f754fedd99ec2ced419050d43ffb6901d0424.
   No new TODO level is added and acceptance counts remain22/35,32/37.
+
+### 2026-10-24 — WF-16/17/29: native EOM owners and real invariant-cluster backward
+
+- Extend the existing native virtual action's static execution plan with the
+  already selected worker/tile scratch and preserve its concrete working-byte
+  snapshot when EOM owns the original MB budget. Charge construction, primal
+  and isolated response phases through shared declarations; no new integral
+  engine, physical EOM Hamiltonian, solver trajectory or model equation. The
+  earlier48 native-budget cases and1 legacy-cluster guard have terminal proof
+  in eom-native-budget/HANDOFF.json and its cluster archive. They are a separate
+  finite frontier, not added to the new test count below.
+- Implement the user-requested non-Hermitian invariant response in shared
+  solvers with existing EigenResponseConfig(target='subspace') and optional
+  probes. A conditional result exposes only projector actions/cluster trace;
+  raw eigenpairs are stopped diagnostics and legacy tuples/defaults survive.
+  EE/IP/EA and eager/functional EOM reuse the same implementation. Individual
+  amplitudes/Dyson APIs explicitly reject an invariant-only result.
+- Use coupled anchored AR=RT and A.TL=LU roots, each n*k+k*k unknowns. Shared
+  attach_root/checked linear solves retain nested response, including the live
+  overlap inverse in R*solve(L.T*R,L.T*probes). Numerical Davidson closure
+  parameters are stopped before its loop, while the physical response operator
+  remains live. No denominator uses internal cluster eigenvalue gaps.
+- Check original rank, projector conditioning and an external spectral boundary.
+  A real RED counterexample shows that nearly collinear individual eigenvectors
+  can have residual3e-10 while QR block residual is0.03. The final code checks
+  actual right/left block seeds and gauge before admitting the implicit root,
+  and includes that error in the boundary margin. It does not silently refine
+  a rejected root or use a pseudoinverse. Full-span invariants bypass eigenvectors
+  entirely and use bounded true actions; their raw spectral diagnostics are empty.
+- Preflight both coupled roots before seed actions, retaining the prospective
+  right state during left response. Include original/promoted probes, projection
+  JVP/VJP arrays, arbitrary probe columns and declared native/opaque scratch.
+  Known-array planning stays distinct from compiler/allocator/RSS/VRAM.
+- Actual26 primary tests plus8 necessary delta tests give29 unique cases, no
+  failures/errors/skips/timeouts, child/srun exits0. Includes dense/Davidson
+  analytic nonnormal similarity families, exact/near crossing, GL(2) changes,
+  live probe JVP/VJP, HVP with2 difference steps, coupled GMRES, n30 bounded
+  operator, invalid boundary/rank/complex/linear/chart/byte guards, EE trace
+  curvature4, IP/EA gradients and eager EOM. All18 expected historical RED
+  failures are preserved. No native nuclear/GPU subspace result is claimed.
+- The62-line public example also exits0 (18.824s): trace=-2, observable=.04,
+  JVP=VJP=-.03648, HVP=.025992, external gap2.5. Append only measured-output
+  comments; AST equals the executed script. Documentation distinguishes oblique
+  invariants, empty full-span diagnostics and the new coupled capacity.
+- Root verifies current12 source/test hashes, all280 payloads,29 unique XML
+  cases, original exits and shared EOM memory AST. The sole shared-memory
+  difference is the independently validated MP liveness helper, which EOM does
+  not call. Evidence NONHERMITIAN_SUBSPACE_HANDOFF.json and
+  subspace-root-verification.json; bundle SHA256
+  204a95637b3e37932b4816b834be6fbfdfdf92172c84611ec3eace4fa5b2a6e0.
+  CPU308-319,348-351 on105031/n006,60GiB steps,600s children, no GPU.
+- Accept this explicit finite response/native-owner slice inside WF-16/17/29.
+  Whole-method scaling and final device gates remain; parent/child acceptance
+  counts remain22/35 and32/37, with no additional TODO level.

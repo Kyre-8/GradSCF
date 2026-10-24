@@ -9,7 +9,7 @@ import jax.numpy as jnp
 from ...solvers.diagnostics import require_converged_derivative
 from ..ground import METHODS
 from .amplitudes import EOMAmplitudeSpace
-from .types import DysonResult
+from .types import DysonResult, EOMSubspaceResult
 from ..._memory import tree_storage_bytes, resolve_memory_mb, validate_reserved_bytes, workspace_bytes
 
 
@@ -83,6 +83,8 @@ def dyson_orbitals(ground, left, result, *, sector=None, max_elements=20_000_000
     input/output and row work arrays in decimal MB. Full endpoint matrices are
     unnecessary. Reverse mode recomputes row tiles rather than storing a tape.
     """
+    if isinstance(result, EOMSubspaceResult):
+        raise ValueError("Subspace response exposes invariants, not individual Dyson orbitals")
     if sector is None:
         sector = result.sector
     elif sector != result.sector:

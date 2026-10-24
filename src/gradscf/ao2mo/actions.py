@@ -7,7 +7,7 @@ import jax.numpy as jnp
 
 from gradscf._memory import (
     DEFAULT_MAX_MEMORY_MB, array_device, array_storage_bytes, resolve_memory_mb,
-    validate_reserved_bytes, workspace_bytes,
+    validate_reserved_bytes, workspace_bytes, _requested_workspace_bytes,
 )
 from gradscf.integrals.backends.native.jk import (
     NativeDirectBasis, ProjectedNativeDirectBasis, native_jk_workspace_bytes,
@@ -32,6 +32,47 @@ def _native_action_workspace(basis, nvir, workers=1):
     return native, per_rhs
 
 
+def _native_action_plan(c, basis, x, max_memory, reserved_bytes, *, working_bytes=None):
+    """Shared worker/tile choice and opaque native/host-staging byte charge."""
+    nvir = c.shape[1]
+    output = jax.ShapeDtypeStruct(x.shape, jnp.float64)
+    promotions = tuple(jax.ShapeDtypeStruct(value.shape, jnp.float64)
+                       for value in (c, x) if value.dtype != jnp.float64)
+    resident = array_storage_bytes(c, x, *jax.tree.leaves(basis), *promotions)
+    resident += reserved_bytes+3*prod(output.shape)*8
+    if working_bytes is None:
+        available = workspace_bytes(max_memory, resident_bytes=resident,
+                                    device=array_device(x, c))
+    else:
+        # This call-scoped snapshot already includes the shared 20% reserve.
+        # A later smaller MB override can only tighten it, without re-querying
+        # device capacity between forecasting and tracing the same action.
+        available = min(validate_reserved_bytes(working_bytes, name='_working_bytes'),
+                        _requested_workspace_bytes(max_memory))-resident
+        if available < 0:
+            raise ValueError('Known resident arrays exceed the working-memory budget')
+    count = prod(x.shape[:-2])
+    if not count or not nvir:
+        return 1, 0, 0
+    native_workspace, per_rhs = _native_action_workspace(basis, nvir)
+    if native_workspace is None:
+        raise TypeError('VirtualERI requires a complete native shell topology')
+    # One density/K pair plus four CPU/CUDA transfer/staging buffers.
+    # Keep the existing measured four-worker policy whenever its full native
+    # workspace and at least one RHS fit; otherwise retain the one-worker path.
+    workers = 1
+    parallel_workspace = native_jk_workspace_bytes(_native_action_basis(basis), 4, 0.)
+    if parallel_workspace is not None and parallel_workspace+per_rhs <= available:
+        workers, native_workspace = 4, parallel_workspace
+    block = min(count, (available-native_workspace)//per_rhs)
+    if block < 1:
+        raise ValueError('Minimum native virtual-action RHS exceeds the working-memory budget')
+    # JAX graph outputs expose density/K/projection arrays, but not the four
+    # conservative CPU/CUDA staging copies in the existing per-RHS envelope.
+    staging = 4*block*_native_action_basis(basis).nao**2*8
+    return workers, block, native_workspace+staging
+
+
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class VirtualERI:
@@ -50,9 +91,10 @@ class VirtualERI:
     basis: object
     max_memory: float = DEFAULT_MAX_MEMORY_MB
     reserved_bytes: int = 0
+    _working_bytes: int | None = None
 
     def tree_flatten(self):
-        return (self.coefficients, self.basis), (self.max_memory, self.reserved_bytes)
+        return (self.coefficients, self.basis), (self.max_memory, self.reserved_bytes, self._working_bytes)
 
     @classmethod
     def tree_unflatten(cls, metadata, children):
@@ -69,7 +111,7 @@ class VirtualERI:
                     and basis.transform.shape != (primitive.nao, basis.nao))):
             raise ValueError('VirtualERI coefficients/projection must match the native AO dimensions')
         x = jnp.asarray(x)
-        nvir, nao = c.shape[1], c.shape[0]
+        nvir = c.shape[1]
         if x.ndim < 2 or x.shape[-2:] != (nvir, nvir):
             raise ValueError('VirtualERI RHS must have shape (..., nvir, nvir)')
         inputs = (c, x, basis.transform) if isinstance(basis, ProjectedNativeDirectBasis) else (c, x)
@@ -79,32 +121,11 @@ class VirtualERI:
             raise ValueError('VirtualERI coefficients, projection and RHS must be floating point')
         # Check all known residency and promotions before creating density or
         # output buffers. Three output buffers cover loop carry/update staging.
-        output = jax.ShapeDtypeStruct(x.shape, jnp.float64)
-        promotions = tuple(jax.ShapeDtypeStruct(value.shape, jnp.float64)
-                           for value in (c, x) if value.dtype != jnp.float64)
-        resident = array_storage_bytes(c, x, *jax.tree.leaves(basis), *promotions)
-        available = workspace_bytes(max_memory, resident_bytes=reserved+resident+3*prod(output.shape)*8,
-                                    device=array_device(x, c))
+        workers, block, _ = _native_action_plan(c, basis, x, max_memory, reserved,
+                                               working_bytes=self._working_bytes)
         count = prod(x.shape[:-2])
-        if not count or not nvir:
+        if not block:
             return jnp.zeros(x.shape, dtype=jnp.float64)
-        native_workspace, per_rhs = _native_action_workspace(basis, nvir)
-        if native_workspace is None:
-            raise TypeError('VirtualERI requires a complete native shell topology')
-        # One density/K pair plus four CPU/CUDA transfer/staging buffers.
-        # direct_jk.cc writes disjoint rows directly into K, without batch
-        # partials; shell/optimizer storage is charged above. Counting host
-        # NumPy and CPU-device buffers separately also covers non-aliasing.
-        # The measured four-worker exchange reduces native action latency.
-        # Keep the one-worker minimum for tight budgets, and charge the actual
-        # optimizer/shell workspace before selecting a simultaneous RHS batch.
-        workers = 1
-        parallel_workspace = native_jk_workspace_bytes(primitive, 4, 0.)
-        if parallel_workspace is not None and parallel_workspace+per_rhs <= available:
-            workers, native_workspace = 4, parallel_workspace
-        block = min(count, (available-native_workspace)//per_rhs)
-        if block < 1:
-            raise ValueError('Minimum native virtual-action RHS exceeds the working-memory budget')
         c, flat = jnp.asarray(c, dtype=jnp.float64), x.astype(jnp.float64).reshape(count, nvir, nvir)
 
         def body(index, result):
