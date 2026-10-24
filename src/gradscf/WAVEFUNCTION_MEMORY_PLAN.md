@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-24): twenty-three of the thirty-five parent tasks
-are fully accepted (WF-00/01/03/04/05/07/08/09/12/15/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-three of the thirty-seven existing
+Current acceptance snapshot (2026-10-24): twenty-six of the thirty-five parent tasks
+are fully accepted (WF-00/01/03/04/05/07/08/09/11/12/15/16/17/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-three of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -277,20 +277,20 @@ successful component derivatives do not establish a whole-method memory bound.
 | --- | --- | --- |
 | WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response and measured consumer conversions, restricted MP2 integral/energy budgets, R/U full/direct gradient family and aniline oracle | Whole-caller/scaling reconciliation and traced target-device capacity; simultaneous noncanonical channel AD owners are now charged, direct remains opt-in |
 | WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, complete phase/scaling budgets; finite nuclear two-body response is accepted |
-| WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Native declared phase budgets and real invariant-cluster response are verified; whole-method measurements remain |
+| WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Finite operator/response gates are accepted; final process/device/large-system measurements remain in WF-30/32 |
 | WF-18/19/20/21/22/27 | Selected CI through genuine U quadruples, UCIS/CIS(D) budgets and ROHF guards, joint FCI action/response budgets, scalar spin/spatial properties and relaxed CI/FCI/CIS(D) nuclear response | Final GPU and large-method measurements; arbitrary outer-AD/allocator bounds remain outside the known-array contract |
 | WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 math/API/warm gates, pure-frame R/U MPn and moving native MP4 geometry second response | Complete cross-caller AD ownership and higher-order method-level size/performance acceptance |
 | WF-29 | Hermitian/non-Hermitian primal, isolated-pair response, SCF implicit response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining cross-consumer ownership and whole-method reconciliation |
 | WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
 
-The damaged jy_gpu_1 stages remain paused. Allocations103505/n002,104081/n006
-and104443/n006 are no longer active. The latest live allocation is CPU-only
-105031/n006:64 logical CPUs,256 GiB,ending2026-10-24 15:23:39 Asia/Shanghai.
-Its actual affinity is100-127,156-159,292-319,348-351. Four disjoint16-CPU lanes
-use60 GiB per step; their total plus the1 GiB holder fits the allocation.
-GPU renewal104911 requests one NV5090,64 CPUs,512 GiB and48 hours, dependent
-on105031 ending, so the project allocations cannot overlap. It remains queued;
-GPU6 is forbidden and no GPU is used during the CPU interval.
+The damaged jy_gpu_1 stages remain paused. Former105031/105174 allocations
+are inactive;104911 was cancelled at the user's request. The only current
+resource pool is105216/n002, RUNNING: oneV100,48 logical CPUs,128GiB,48hours.
+The user explicitly authorized this free-resource request and removed theGPU6
+ban on2026-10-24. Do not add CPU-only or replacement pools while this one
+exists. All scientific work remains inside its checked Slurm steps.
+Actual affinity has24 core pairs across2-36 and42-76. Three disjoint16-CPU
+lanes are documented below;48+32+32GiB test steps plus1GiB holder fit128GiB.
 Earlier104443's float64 CUDA/JIT/AD readiness assertions completed and were read
 back from JSON. Its initial SSH255 hid that readiness probe's exact srun exit;
 later146-case component validation has its own actual terminal records.
@@ -433,7 +433,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     shared AO-source actions, joint amplitude budgets and measured converged
     calculations. The explicit native action passes component correctness;
     measured speed regressions keep the performance gate open and dense default.
-- [ ] **WF-11 — Existing approximate CC/QCI branches.** Inspect separate CCS,
+- [x] **WF-11 — Existing approximate CC/QCI branches** (`verified`). Inspect separate CCS,
   CC2/linearized/QCI pathways and migrate applicable consumers. Acceptance:
   branch-specific energy/residual/derivative regressions; explicit exceptions
   rather than asserting that CCSD migration automatically covers every branch.
@@ -474,11 +474,11 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   linear solver; compute contracted density/property contributions without full
   spin 2-RDM. Acceptance: one-/two-body observables, nonvariational response and
   geometry AD; include correction-specific response where part of the energy.
-- [ ] **WF-16 — EOM-EE operator lifetime.** Reuse ground-state blocks, limit
+- [x] **WF-16 — EOM-EE operator lifetime** (`verified`). Reuse ground-state blocks, limit
   `linearize` closure residency and RHS batches. Acceptance: left/right actions,
   singlet/triplet where supported, roots and biorthogonality, derivatives and
   invariant clustered-root observables; no full EOM Hamiltonian.
-- [ ] **WF-17 — EOM-IP/EA intermediates.** Audit Wvvvv*r2 and Wvvvv*t1/Wvvvo
+- [x] **WF-17 — EOM-IP/EA intermediates** (`verified`). Audit Wvvvv*r2 and Wvvvv*t1/Wvvvo
   consumers together. Acceptance: each charged sector's right/left roots,
   residuals and gradients; batching and restart memory under the same budget.
 - [x] **WF-34 — EOM Dyson properties.** Contract orbital/root tiles without
@@ -614,7 +614,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   points, native dispatch, device residency and transfer accounting. Acceptance:
   same numerical cases/dtype/seed, forward/JVP/VJP/HVP separately, actual peak
   VRAM/RSS and warm time; a CPU FFI sent to CUDA is a failure, not an acceptable
-  runner-only workaround. GPU6 remains forbidden.
+  runner-only workaround. Use only the GPU assigned to the single Slurm pool.
 - [x] **WF-31 — Public examples and capability table** (`verified`). Thin readable examples
   using public facades, no CLI and no algorithm under reproducibility. Include
   memory/derivative limits, a noncanonical-degeneracy example, and output evidence.
@@ -628,19 +628,20 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 
 ## 6. Validation matrix and measurement protocol
 
-Every numerical test runs remotely, never locally. The current 2026-10-23 user
-instruction authorizes **jy_gpu_2 / Delta** via Slurm: one 5090/V100, 64 logical
-CPUs, 512 GiB and 48 hours. The V100 nodes cannot supply 512 GiB; the admitted job is
-104443/n006 with typed `gpu:NV5090:1`. Read the latest `lwcluster manual` before
-operating; submit from `~/private/homefile/` to `home`. Execute all tests/builds
-inside the allocation's checked srun steps, not on the login node. Use only
-assigned Slurm GPU1/process-visible GPU0 by its recorded UUID; GPU6 remains
-prohibited. The observed CPU set is96-127,288-319. Four CPU lanes may use
-96-111,112-127,288-303,304-319; a GPU
-test consumes a released CPU lane rather than adding host threads beyond 64.
-CPU srun steps explicitly use `--gres=none --mem=120G --immediate=15`; otherwise
-they inherit the allocation's sole GPU and unnecessarily serialize. This
-behavior was observed and the CPU-only metadata step verified before use.
+Every numerical test runs remotely, never locally. The current2026-10-24 user
+instruction permits oneSlurm resource pool with one5090/V100 and at most64
+logical CPUs. The admitted free-resource pool105216/n002 has oneV10032GB,
+48CPUs,128GiB and48hours; the earlier512GiB request was cancelled. GPU6 is
+now permitted, but only Slurm-assigned devices may be used. Read the latest
+`lwcluster manual`; submit from `~/private/homefile/` to `home`. Execute all
+tests/builds inside checked steps, never on the login node.
+The allocated GPU has Slurm index1/process-visible index0, recorded UUID
+GPU-ff9441ad-473d-9d1c-219c-29771887d738. Its CPU lanes are:
+root/GPU2-9,42-49; RCC11-13,15-19,51-53,55-59; triples22,27-28,32-36,62,67-68,72-76.
+Each lane has16 logical CPUs and disjoint physical cores. A GPU test uses
+the root lane; it does not add host CPUs. CPU steps use `--gres=none`, explicit
+memory and `taskset` within the checked allocation. Root48GiB plus two32GiB
+steps and the1GiB holder remain below128GiB. No second allocation is permitted.
 The resource-holder step reserves only 1 GiB and no GPU, leaving the remaining
 allocation available to test steps. `--overlap` does not remove step-memory
 reservations. Prior startup attempts104075/104078/104079 did not run numerical
@@ -4018,3 +4019,43 @@ requires its own explicit decision and numerical validation.
   CPU292-307,105031/n006,60GiB steps,600s cap, no GPU. This fixes precision
   accounting, not the remaining explicit full first/HVP retained-state audit
   of the32-panel envelope. WF-14 stays open; acceptance counts stay23/35,33/37.
+
+### 2026-10-24 — WF-11/16/17: finite acceptance reconciliation
+
+- Close the final LCCD/LCCSD combination gap with one two-case native test:
+  same weak5MO algebraic frame, live C/F/reference perturbation, direct/dense
+  preparation and solves each under32MB; JIT energy/gradient/HVP agree and
+  correlation responses remain nonzero. Actual2passes, child/srun0/0,48.068s,
+  no skip/timeout. Sourceca5b9bd; testSHA
+  cbdaa0314eec9d4f81efbd7937adee688c526a4f5491498b785798b95b2c073e.
+  Root verifies46payloads, XML/exits and current test. Evidence lcc-native/
+  HANDOFF.json and root-verification.json. The existing model-specific raw AD,
+  CCS five-block and CC2/QCI guards remain authoritative; **accept WF-11**.
+- Independently compare original9f45059 WF-16/17 text with current wording.
+  Existing verified prepared/native right/left actions, roots and biorthogonality,
+  implicit state response, full-cluster invariants and bounded operators satisfy
+  those finite clauses. Supported channels are restricted singletEE/doubletIP/EA;
+  'where supported' does not add an unavailable triplet branch.
+- The old n256 budget experiment exercises real legal contraction32->14 search
+  columns, actionbatch2, restarts0->3, rootswithin1.39e-15; warm cost rises15.7%
+  and RSS stays similar. The shared planner/Davidson AST is unchanged. EA
+  o8/v64 old/new measurements remove retained dressedWvvvv, with peak
+  2,214,932->1,220,056KiB and warm32.960->32.674ms; action scratch increases.
+  The current charged equations match that exact-source evidence. Neither
+  experiment alone implies whole-method process/VRAM savings.
+- Latest native48-case evidence closes source/worker/opaque phase ownership;
+  the29-case invariant response gate closes the prior cluster backward gap.
+  The public water/STO-3G example independently completed three roots in all
+  EE/IP/EA sectors. Those evidence sets are mapped clause-by-clause, not summed
+  into a new test count. **Accept WF-16/17**. Final whole-method scale and GPU
+  audit remain WF-30/32; a later broad ledger phrase does not add a new finite
+  prerequisite to these two originally defined tasks.
+- Existing evidence: wf29c-eom-memory/summary.json and green/benchmark-budgeted.json,
+  delta-v100-20261022/eom-virtual-root-verification.json and
+  mp3-eom-root-verification.json, eom-native-budget/HANDOFF.json and
+  NONHERMITIAN_SUBSPACE_HANDOFF.json, wf31-public-examples/attempt-104910.
+  Native/current subspace hashes and unchanged shared/EA AST are checked.
+- Parent acceptance becomes26/35; children stay33/37. Remaining parents are
+  WF-02/06/10/13/14/28/29/30/32. Resource settings above reflect the user's new
+  single-pool authorization and liftedGPU6 restriction; historical records
+  retain the device restrictions in force when they were executed.
