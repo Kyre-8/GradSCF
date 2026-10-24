@@ -3874,3 +3874,35 @@ requires its own explicit decision and numerical validation.
 - This closes the saved-channel-owner omission within WF-06/29, not their
   remaining whole-caller/scaling or final device gates. Keep existing parent
   and child acceptance counts22/35 and32/37 until those criteria are reconciled.
+
+### 2026-10-24 — WF-13: projected-residual prototype retired after measurement
+
+- Test a private free-index spin projection of the existing residual equations,
+  reusing the density-expression evaluator rather than adding CC equations.
+ 27 correctness tests pass: raw/compact UCCD/UCCSD, unequal/empty spin sectors,
+  mixed precision, joint JVP/VJP/HVP and existing density compatibility. Traps
+  forbid full T2 expansion and a padded virtual operand. All original failures,
+  fixes, sources and terminal records are preserved in ucc-sector-residual.
+- Structural elimination is insufficient here. Matched synthetic U(3,2) frames
+  at12/25 orbitals give numerically equal residuals (max1.74e-18). At25 orbitals
+  old/projected warm is4.051/6.061ms, compiled temporary32.38/35.88MB. Whole
+  process RSS is1,177,500/1,154,724KiB, too small a decrease to offset that cost.
+- The amplitude-response comparison also fails the benefit gate. Gradient
+  warm6.505/7.878ms, temp31.46/48.08MB; HVP7.150/10.139ms, temp23.45/44.26MB.
+  Gradient/HVP whole-process RSS both increase. Output differences stay below
+ 3.56e-15. These are prepared-frame component results, not molecular scaling.
+  Every one of the12 benchmark/comparator children and srun steps exits0;
+  source-before/after and input/output hashes are checked. CPU100-115/n006,
+  float64, seed6555,5 timed warm executions, no GPU, same orbital space.
+- Retire this private prototype from maintained source/tests after preserving
+  exact source and measurements. Restore only root-owned experimental files;
+  retain the verified packed energy callback and original residual. No slower
+  default, extra public knob or unused expression layer is delivered. Further
+  residual work must avoid repeated projected intermediates, rather than infer
+  efficiency from absent logical tensor shapes. WF-13 remains open.
+- Evidence: ucc-sector-residual/root-verification.json (27cases,162payloads),
+  ucc-sector-benchmark/root-verification.json (6terminal records,71payloads),
+  ucc-sector-response-benchmark/root-verification.json (6records,69payloads).
+  Response archive SHA256
+  90dfc3cfa8328f5a4b85d82df69f754fedd99ec2ced419050d43ffb6901d0424.
+  No new TODO level is added and acceptance counts remain22/35,32/37.
