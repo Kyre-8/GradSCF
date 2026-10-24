@@ -76,9 +76,11 @@ def _noncanonical_channel(left_fock, right_fock, no, nj, *, block=None, factors=
 def evaluate_mp2(ints, config, *, max_memory=None, reserved_bytes=0):
     """MP2 in the supplied frame with optional joint known-array planning.
 
-    The original MB budget covers all retained spin-channel T2 outputs and
-    one channel's workspace. The noncanonical inverse shares that budget;
-    arbitrary outer AD/compilation/process residency is not bounded here.
+    The original MB budget includes required T2 and noncanonical first/second
+    response owners. The existing channel trajectory and caches are retained;
+    an insufficient known-array budget is rejected. Arbitrary outer AD,
+    compilation and process residency are not bounded here. The mathematical
+    resolvent and its response are unchanged.
     """
     maximum = None if max_memory is None else resolve_memory_mb(max_memory)
     resident = plan_mp2(ints, config, maximum, reserved_bytes)

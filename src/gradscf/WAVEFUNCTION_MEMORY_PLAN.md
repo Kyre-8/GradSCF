@@ -3842,3 +3842,35 @@ requires its own explicit decision and numerical validation.
   differences, failed-response/minimum-budget checks, and EOM integration.
   This capability is now in progress; the earlier forward-only projector and
   NaN derivative guard remain historical evidence, not completion of this work.
+
+### 2026-10-24 — WF-06/29: retained MP2 adjoint owners, negative rematerialization result
+
+- The noncanonical MP2 planner now derives immutable shape/dtype-only first- and
+  directional-second-adjoint metadata, sums simultaneously retained aa/ab/bb
+  caches, and charges input directions, gradients/HVPs and output cotangents.
+  It rejects insufficient known-array budgets before channel solves. Integral
+  preparation retains its separate forward reserve; this does not promise that
+  the AD-owner rejection precedes AO2MO preparation or bound arbitrary outer AD.
+- Extract the exact existing tensor-sum input/promotion/work expression rather
+  than maintain a second inverse estimate. This fixes an active scalar-channel
+  undercount (288 versus 360 bytes). The shared Jaxpr liveness helper includes
+  constants, literals, last uses and nested bodies in program order, plus known
+  opaque declarations. XLA scheduling, library/allocator state and RSS remain
+  outside that declared-array model. Its bounded cache holds only metadata.
+- Matched prepared U(5,4),20-orbital float64 experiments show why reduced saved
+  tape alone is insufficient: rematerialization reduces second saved leaves
+  954499 to122576 bytes, but HVP compiled temporary grows2214168 to2926616 bytes
+  and warm time2.361 to2.991 ms. Retain the original cached numerical trajectory;
+  no adaptive rematerialization is delivered. Entire mp2.py numerical AST equals
+  baseline bcb47c7 after removing docstrings. Frozen experimental source and
+  four measured outputs remain archived; prototype runners leave maintained tests.
+- Actual final14 affected/preparation/degeneracy tests pass, child/srun exits0,
+  no failures/skips/timeouts, source-before/after unchanged. The earlier49-case
+  helper/numerical frontier is separate and is not added as49+14 unique final
+  cases. Independent review and root hash/AST/exit checks agree. Evidence:
+  mp-ad-owners/HANDOFF.json and root-verification.json; final archive SHA256
+  17b6fc24227ec028499f8060752b0c3696172ba624a7d47a95e0cee3f09c8825,32payloads.
+  CPU292-307 on105031/n006,60GiB per step,600s child cap; no GPU used.
+- This closes the saved-channel-owner omission within WF-06/29, not their
+  remaining whole-caller/scaling or final device gates. Keep existing parent
+  and child acceptance counts22/35 and32/37 until those criteria are reconciled.

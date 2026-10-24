@@ -120,6 +120,12 @@ def effective_memory_mb(max_memory, device=None) -> float:
     return requested
 
 
+def _requested_workspace_bytes(max_memory):
+    """Requested usable bytes after the shared reserve, without device queries."""
+    total = int(validate_memory_mb(max_memory)*1_000_000)
+    return total-total//5
+
+
 def workspace_bytes(max_memory, *, resident_bytes=0, device=None) -> int:
     """Reserve 20% for runtime/model temporaries, then charge resident arrays.
 
@@ -128,8 +134,8 @@ def workspace_bytes(max_memory, *, resident_bytes=0, device=None) -> int:
     """
     if resident_bytes < 0:
         raise ValueError("resident_bytes must be nonnegative.")
-    total = int(effective_memory_mb(max_memory, device=device) * 1_000_000)
-    remaining = total - total // 5 - int(resident_bytes)
+    remaining = _requested_workspace_bytes(effective_memory_mb(
+        max_memory, device=device))-int(resident_bytes)
     if remaining < 0:
         raise ValueError("Known resident arrays exceed the working-memory budget.")
     return remaining
@@ -181,18 +187,33 @@ def tree_storage_bytes(*trees, exclude=()) -> int:
                if id(value) not in excluded)
 
 
-def jaxpr_temporary_bytes(jaxpr) -> int:
+def _primitive_byte_charges(primitive_bytes):
+    """Validate a caller's static opaque-workspace declarations once per graph."""
+    if primitive_bytes is None:
+        return {}
+    if not isinstance(primitive_bytes, Mapping) or any(
+            not isinstance(name, str) for name in primitive_bytes):
+        raise TypeError("primitive_bytes must map primitive names to byte counts")
+    return {name: validate_reserved_bytes(value, name="primitive_bytes")
+            for name, value in primitive_bytes.items()}
+
+
+def jaxpr_temporary_bytes(jaxpr, *, primitive_bytes=None) -> int:
     """Conservative sum of declared primitive output arrays, without execution.
 
     Nested call bodies are included. This intentionally assumes no allocator
-    reuse or view aliasing; opaque library scratch and compiler/allocator state
-    are outside this static array estimate. Inspecting a graph initializes no
-    device and imports no solver or numerical backend.
+    reuse or view aliasing. An optional name-to-byte mapping charges known
+    opaque scratch at each matching primitive, including nested calls. Other
+    library scratch and compiler/allocator state remain outside this estimate.
+    Inspecting a graph initializes no device or numerical backend.
     """
     if hasattr(jaxpr, 'jaxpr'):
         jaxpr = jaxpr.jaxpr
+    charges = _primitive_byte_charges(primitive_bytes)
     total = 0
     for equation in jaxpr.eqns:
+        if charges:
+            total += charges.get(equation.primitive.name, 0)
         for variable in equation.outvars:
             aval = getattr(variable, 'aval', None)
             if hasattr(aval, 'shape') and hasattr(aval, 'dtype'):
@@ -201,5 +222,86 @@ def jaxpr_temporary_bytes(jaxpr) -> int:
             values = value if isinstance(value, (tuple, list)) else (value,)
             for nested in values:
                 if hasattr(nested, 'eqns') or hasattr(nested, 'jaxpr'):
-                    total += jaxpr_temporary_bytes(nested)
+                    total += jaxpr_temporary_bytes(nested, primitive_bytes=charges)
     return total
+
+
+def jaxpr_live_bytes(jaxpr, *, primitive_bytes=None) -> int:
+    """Bound declared arrays in program order, releasing them after last use.
+
+    The caller owns top-level inputs. Constants, literal operands, all primitive
+    outputs and returned arrays are charged here; views are not assumed to alias.
+    Nested bodies include their inputs, so loop carries cannot disappear from
+    the estimate. Alternative bodies share scratch, while their constant stores
+    remain conservatively resident. Full scan outputs follow the outer shapes.
+
+    This describes Jaxpr array lifetimes, not an XLA scheduling/allocator or
+    process-RSS guarantee. Opaque scratch requires the same optional static
+    declarations as ``jaxpr_temporary_bytes``. No numerical operation is run.
+    """
+    from collections import Counter
+
+    charges = _primitive_byte_charges(primitive_bytes)
+    constants, peaks = {}, {}
+
+    def bodies(value):
+        if hasattr(value, 'eqns') or hasattr(value, 'jaxpr'):
+            yield getattr(value, 'jaxpr', value)
+        elif isinstance(value, Mapping):
+            for child in value.values():
+                yield from bodies(child)
+        elif isinstance(value, (tuple, list)):
+            for child in value:
+                yield from bodies(child)
+
+    def size(variable):
+        aval = getattr(variable, 'aval', None)
+        return (prod(aval.shape)*np.dtype(aval.dtype).itemsize
+                if hasattr(aval, 'shape') and hasattr(aval, 'dtype') else 0)
+
+    def constant_bytes(graph):
+        key = id(graph)
+        if key not in constants:
+            constants[key] = sum(size(v) for v in graph.constvars) + sum(
+                constant_bytes(child) for eq in graph.eqns for child in bodies(eq.params))
+        return constants[key]
+
+    def peak(graph, include_inputs):
+        key = id(graph), include_inputs
+        if key in peaks:
+            return peaks[key]
+        declared = {id(v) for v in (*graph.invars, *graph.constvars)}
+        declared.update(id(v) for eq in graph.eqns for v in eq.outvars)
+        returned_literals = {id(v): size(v) for v in graph.outvars if id(v) not in declared}
+        live = {id(v): size(v) for v in graph.constvars}
+        permanent = set(live)
+        if include_inputs:
+            live.update((id(v), size(v)) for v in graph.invars)
+        held = sum(live.values()) + sum(returned_literals.values())
+        held += constant_bytes(graph)-sum(size(v) for v in graph.constvars)
+        maximum = held
+        uses = Counter(id(v) for eq in graph.eqns for v in eq.invars)
+        uses.update(id(v) for v in graph.outvars)
+        for equation in graph.eqns:
+            children = tuple(bodies(equation.params))
+            nested = max((peak(child, True) for child in children), default=0)
+            literals = {id(v): size(v) for v in equation.invars
+                        if id(v) not in declared and id(v) not in returned_literals}
+            opaque = charges.get(equation.primitive.name, 0) if charges else 0
+            maximum = max(maximum, held + sum(size(v) for v in equation.outvars)
+                          + sum(literals.values()) + nested + opaque)
+            for variable in equation.outvars:
+                live[id(variable)] = size(variable)
+                held += size(variable)
+            for variable in equation.invars:
+                identifier = id(variable)
+                uses[identifier] -= 1
+                if uses[identifier] == 0 and identifier not in permanent:
+                    held -= live.pop(identifier, 0)
+            for variable in equation.outvars:
+                if not uses[id(variable)]:
+                    held -= live.pop(id(variable), 0)
+        peaks[key] = maximum
+        return maximum
+
+    return peak(getattr(jaxpr, 'jaxpr', jaxpr), False)

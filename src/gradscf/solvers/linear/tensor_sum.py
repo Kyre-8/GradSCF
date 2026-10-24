@@ -18,6 +18,18 @@ def _apply_axis(matrix, tensor, axis):
     return jnp.moveaxis(jnp.tensordot(matrix, tensor, axes=(1, axis)), 0, axis)
 
 
+def _tensor_sum_workspace_bytes(factors, rhs):
+    """Known input, promotion and inverse buffers from shape/dtype metadata."""
+    dtype = jnp.result_type(rhs, *factors)
+    promotions = tuple(jax.ShapeDtypeStruct(x.shape, dtype)
+                       for x in (rhs, *factors) if x.dtype != dtype)
+    # Spectrum, transformed/returned tensors, true-residual contractions and
+    # factor/eigenvector arrays coexist; there is no full Kronecker matrix.
+    working = (12*rhs.size+3*sum(f.size for f in factors)
+               +4*sum(f.shape[0] for f in factors))*dtype.itemsize
+    return working+array_storage_bytes(rhs, *factors, *promotions)
+
+
 def solve_tensor_sum(factors, rhs, *, denominator_tol=1e-10, rtol=1e-10, atol=1e-12,
                      max_memory=None, reserved_bytes=0):
     """Solve sum_k F[k] acting on axis k of X = rhs, for real symmetric F.
@@ -44,15 +56,8 @@ def solve_tensor_sum(factors, rhs, *, denominator_tol=1e-10, rtol=1e-10, atol=1e
         raise ValueError("Tensor-sum inputs require real floating-point dtype")
     dtype = jnp.result_type(rhs, *factors)
     if max_memory is not None:
-        promotions = tuple(jax.ShapeDtypeStruct(x.shape, dtype)
-                           for x in (rhs, *factors) if x.dtype != dtype)
-        # Keep spectrum, transformed/returned tensors and true-residual
-        # contractions charged together. Factor matrices/eigenvectors use
-        # only the individual axes, never a full Kronecker matrix.
-        working = (12*rhs.size+3*sum(f.size for f in factors)
-                   +4*sum(f.shape[0] for f in factors))*dtype.itemsize
-        workspace_bytes(max_memory, resident_bytes=reserved_bytes+working+
-            array_storage_bytes(rhs, *factors, *promotions), device=getattr(rhs, 'device', None))
+        workspace_bytes(max_memory, resident_bytes=reserved_bytes+
+            _tensor_sum_workspace_bytes(factors, rhs), device=getattr(rhs, 'device', None))
     rhs = rhs.astype(dtype)
     factors = tuple(f.astype(dtype) for f in factors)
     valid = jnp.asarray(True)
