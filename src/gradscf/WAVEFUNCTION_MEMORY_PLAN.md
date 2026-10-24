@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-24): twenty-two of the thirty-five parent tasks
-are fully accepted (WF-00/01/03/04/05/07/08/09/15/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-two of the thirty-seven existing
+Current acceptance snapshot (2026-10-24): twenty-three of the thirty-five parent tasks
+are fully accepted (WF-00/01/03/04/05/07/08/09/12/15/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-three of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -445,17 +445,18 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   and residual-JVP implementation separately from recursive MP. Acceptance:
   E2/E3, with/without-T2, frozen orbitals, JVP/VJP/HVP, series-order-three cross
   comparison, and byte-accounted simultaneous first/second doubles workspace.
-- [ ] **WF-12 — UCC spatial-spin integral blocks.** Remove full `(2*nmo)^4`
+- [x] **WF-12 — UCC spatial-spin integral blocks** (`verified`). Remove full `(2*nmo)^4`
   construction, map allowed aa/ab/bb blocks lazily. Acceptance: signs, factors,
   antisymmetry, unequal occupations, frozen orbitals, existing ROHF conversion
   and residual parity.
 
   - [x] **WF-12a:** assemble the six existing UCC blocks directly from spatial
     spin sectors, eliminating full total/active spin ERIs.
-  - [ ] **WF-12b** (`in_progress`): AO-source selected blocks, byte ownership
+  - [x] **WF-12b** (`verified`): AO-source selected blocks, byte ownership
     and scale evidence. The pure producer, UHF facade and relaxed CCSD/(T)
-    integration are verified; spin-vvvv/amplitude work, whole-phase byte ownership
-    and shared method scaling remain with WF-13/14/15/29/32.
+    integration, compact bare virtuals and matched6/17-MO complete post-SCF
+    consumer pipelines are verified. Residual amplitude work and final whole-
+    method/device scaling remain with WF-13/29/30/32.
 - [ ] **WF-13 — UCC residual/amplitude workspace** (`in_progress`). Reduce repeated dense
   spin-amplitude expansion using block consumers. Acceptance: UCCD/UCCSD forward,
   adjoints and geometry HVP, restricted-limit comparison; packed-coordinate
@@ -3960,3 +3961,38 @@ requires its own explicit decision and numerical validation.
 - Accept this explicit finite response/native-owner slice inside WF-16/17/29.
   Whole-method scaling and final device gates remain; parent/child acceptance
   counts remain22/35 and32/37, with no additional TODO level.
+
+### 2026-10-24 — WF-12 acceptance: completed matched UCC consumer pipelines
+
+- Complete the previously interrupted LiH+ raw/selected measurement using the
+  existing benchmark, now with explicit256MB planning throughout preparation,
+  CCSD, Lambda, RDM1 and(T), declared surviving SCF/caller owners, selected
+  vvvv='blocks' matching the facade, and dynamic MO count. No source equations
+  change. Use the same geometry3.1Bohr, charge1/spin1, all orbitals, Cartesian
+  STO-3G/6-31G*,float64 and unchanged1e-12/1e-10 energy/residual tolerances.
+- Four fresh scientific processes and one comparator exit0/0, no timeout.
+  The actual C/F/E/AO input hashes match within each pair, every returned leaf
+  is finite and matches (max5.00e-16/3.55e-15), CC/Lambda converge, density
+  traces are(2,1), and triples are nonzero(-8.4983e-8/-3.54996e-7Eh).
+- Six/17 MOs: raw/selected five-call warm medians6.172/6.559ms and
+  164.627/145.933ms; compiled temporaries0.698/0.817MB and32.221/28.051MB.
+  Complete child peaks are1,204,368/1,242,072KiB and1,336,844/1,349,088KiB.
+  The selected17-MO warm/temp improvement does not imply RSS improvement: both
+  measured whole-child peaks increase slightly. Instrumented pre-report RSS
+  snapshots in the original comparator are separately labelled in HANDOFF;
+  final peaks above come from original terminal RUSAGE_CHILDREN records.
+- Compilation/SCF/setup are included in complete-child peaks/times, excluded
+  from the post-SCF warm calls. This is not complete nuclear response, GPU
+  performance or large-molecule scaling. CPU100-115 on105031/n006,60GiB steps,
+  600s children,no GPU. Frozen numerical commit595e99d has only the thin runner
+  overlay; concurrent new EOM code is excluded.
+- Root verifies54 payload hashes, all1786 source-tar files,1787 runtime maps,
+  original exits/current benchmark SHA and the matched comparator. Evidence
+  ucc-pipeline/HANDOFF.json and root-verification.json; archive SHA256
+  cb90ef05e5327f1fc05b59ba9c7fc9d308bd94734c53bf3ca249c044e683e835.
+  Independent source/evidence audit confirms that this fills WF-12's sole
+  remaining finite measurement gap; producer parity/unequal/frozen/empty/ROHF
+  and raw/DF/native coefficient/source/geometry response were already verified.
+- **Accept WF-12/12b.** Parents become23/35 and children33/37. Residual-amplitude
+  and final process/device/scale gates remain in their existing parents, without
+  adding or recursively reopening producer tasks.

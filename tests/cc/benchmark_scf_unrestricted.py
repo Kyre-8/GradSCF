@@ -13,6 +13,7 @@ import jax
 import numpy as np
 
 from gradscf import cc, gto, scf
+from gradscf._memory import tree_storage_bytes
 from gradscf.ao2mo import transform_unrestricted_integrals
 from gradscf.ao2mo.scf import prepare_scf_source
 from gradscf.cc.unrestricted_integrals import from_orbitals
@@ -27,35 +28,50 @@ def _rss():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', choices=('raw', 'selected'), required=True)
+    parser.add_argument('--basis', default='sto-3g')
+    parser.add_argument('--max-memory', type=float, default=64.)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    mol = gto.M(atom='Li 0 0 0; H 0 0 3.1', basis='sto-3g',
+    mol = gto.M(atom='Li 0 0 0; H 0 0 3.1', basis=args.basis,
                 charge=1, spin=1, unit='Bohr', cart=True)
     mf = scf.UHF(mol, integral_backend='native', execution_device='cpu',
-        max_memory=64., conv_tol=1e-12, conv_tol_density=1e-11,
+        max_memory=args.max_memory, conv_tol=1e-12, conv_tol_density=1e-11,
         conv_tol_grad=1e-10, max_cycle=250).run()
     assert mf.converged
     data = prepare_scf_source(mf)
     point = (data.coefficients, data.focks, data.reference_energy,
              data.hcore, data.ao_kwargs)
+    caller = tree_storage_bytes(vars(mf), data, exclude=point)
     cfg = cc.CCConfig(conv_tol=1e-12, residual_tol=1e-10)
     options = dict(residual_tol=cfg.residual_tol, denominator_tol=cfg.denominator_tol)
+    nmo = data.coefficients[0].shape[1]
 
     def pipeline(c, f, e, h, source):
+        held = caller+tree_storage_bytes(c, f, e, h, source)
         if args.mode == 'raw':
-            hs, gs = transform_unrestricted_integrals(h, c, **source, max_memory=64.)
+            hs, gs = transform_unrestricted_integrals(h, c, **source,
+                max_memory=args.max_memory, reserved_bytes=caller+tree_storage_bytes(f, e))
             state = cc.run_ucc(hs, gs, nocc=(2, 1),
-                nuclear_repulsion=mf.reference.nuclear_repulsion, config=cfg)
-            left = cc.solve_lambda(hs, gs, state, nocc=(2, 1), config=cfg)
-            dm = _density_from_lambda(hs, gs, state, left, nocc=(2, 1), frozen=None, config=cfg)
-            triples = cc.evaluate_triples(hs, gs, state, nocc=(2, 1), **options)
+                nuclear_repulsion=mf.reference.nuclear_repulsion, config=cfg,
+                max_memory=args.max_memory, reserved_bytes=held)
+            left = cc.solve_lambda(hs, gs, state, nocc=(2, 1), config=cfg,
+                max_memory=args.max_memory, reserved_bytes=held)
+            dm = _density_from_lambda(hs, gs, state, left, nocc=(2, 1), frozen=None,
+                config=cfg, max_memory=args.max_memory, reserved_bytes=held)
+            triples = cc.evaluate_triples(hs, gs, state, nocc=(2, 1), **options,
+                max_memory=args.max_memory, reserved_bytes=held+tree_storage_bytes(left, dm))
         else:
             ints, occupied, virtual = from_orbitals(c, f, (2, 1), e,
-                                                    **source, max_memory=64.)
-            state = cc.run_ucc_from_integrals(ints, occupied, virtual, config=cfg)
-            left = cc.solve_lambda_from_integrals(ints, state, config=cfg)
-            dm = _density_ucc_from_integrals(ints, state, left, nmo=6, nocc=(2, 1), config=cfg)
-            triples = cc.evaluate_triples_from_integrals(ints, state, **options)
+                **source, max_memory=args.max_memory, vvvv='blocks',
+                reserved_bytes=caller+tree_storage_bytes(h))
+            state = cc.run_ucc_from_integrals(ints, occupied, virtual, config=cfg,
+                max_memory=args.max_memory, reserved_bytes=held)
+            left = cc.solve_lambda_from_integrals(ints, state, config=cfg,
+                max_memory=args.max_memory, reserved_bytes=held)
+            dm = _density_ucc_from_integrals(ints, state, left, nmo=nmo, nocc=(2, 1),
+                config=cfg, max_memory=args.max_memory, reserved_bytes=held)
+            triples = cc.evaluate_triples_from_integrals(ints, state, **options,
+                max_memory=args.max_memory, reserved_bytes=held+tree_storage_bytes(left, dm))
         return (state.total_energy, state.t1, state.t2, left.l1, left.l2, dm,
                 triples.energy, state.residual_norm, left.residual_norm,
                 state.converged, left.converged, triples.valid)
@@ -66,6 +82,7 @@ def main():
     started = time.perf_counter()
     result = jax.block_until_ready(executable(*point))
     first_seconds = time.perf_counter()-started
+    assert all(np.isfinite(np.asarray(value)).all() for value in jax.tree.leaves(result))
     assert all(bool(value) for value in result[-3:])
     assert abs(float(result[6])) > 1e-12
     after_compile = _rss()
@@ -88,6 +105,7 @@ def main():
     finally:
         stopped.set()
         thread.join()
+    assert all(np.isfinite(np.asarray(value)).all() for value in jax.tree.leaves(result))
     digest = hashlib.sha256()
     for value in jax.tree.leaves(point):
         array = np.asarray(value)
@@ -99,7 +117,9 @@ def main():
         'unrestricted_integrals', 'lambda_equations', 'properties', 'triples', '_spin_triples')]
     names.append('tests/cc/benchmark_scf_unrestricted.py')
     record = dict(mode=args.mode, molecule='LiH+; Li(0,0,0), H(0,0,3.1) Bohr',
-        basis='STO-3G Cartesian', charge=1, spin=1, nocc=(2, 1), dtype='float64',
+        basis=args.basis, cart=True, nmo=nmo, max_memory_mb=args.max_memory,
+        external_scf_bytes=caller,
+        charge=1, spin=1, nocc=(2, 1), dtype='float64',
         backend=jax.default_backend(), jax=jax.__version__, input_sha256=digest.hexdigest(),
         affinity=sorted(os.sched_getaffinity(0)),
         cpu=next(line for line in Path('/proc/cpuinfo').read_text().splitlines()
@@ -114,7 +134,7 @@ def main():
         density_traces=[float(np.trace(d)) for d in result[5]],
         output_leaves=[np.asarray(value).tolist() for value in jax.tree.leaves(result)],
         sha256={name: hashlib.sha256((root/name).read_bytes()).hexdigest() for name in names},
-        scope='Current raw full-MO APIs vs selected snapshot reuse; five warm pipeline calls after compilation. Timed work excludes SCF and outer geometry AD. Dense spin vvvv/amplitudes remain; not a total-method hard cap.')
+        scope='Full-MO/dense-spin-virtual APIs vs selected snapshot/compact virtuals; five warm pipeline calls after compilation. Timed work excludes SCF and outer geometry AD. Dense spin amplitudes remain; the known-array budget is not a process memory cap.')
     args.output.write_text(json.dumps(record, indent=2)+'\n')
     print(json.dumps({key: value for key, value in record.items() if key != 'output_leaves'}, indent=2))
 
