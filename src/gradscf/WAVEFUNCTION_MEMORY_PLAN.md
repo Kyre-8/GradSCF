@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-24): twenty-one of the thirty-five parent tasks
-are fully accepted (WF-00/01/03/04/05/07/08/09/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-two of the thirty-seven existing
+Current acceptance snapshot (2026-10-24): twenty-two of the thirty-five parent tasks
+are fully accepted (WF-00/01/03/04/05/07/08/09/15/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-two of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -285,11 +285,11 @@ successful component derivatives do not establish a whole-method memory bound.
 
 The damaged jy_gpu_1 stages remain paused. Allocations103505/n002,104081/n006
 and104443/n006 are no longer active. The latest live allocation is CPU-only
-104910/n006:64 logical CPUs,256 GiB,ending2026-10-24 13:23:20 Asia/Shanghai.
+105031/n006:64 logical CPUs,256 GiB,ending2026-10-24 15:23:39 Asia/Shanghai.
 Its actual affinity is100-127,156-159,292-319,348-351. Four disjoint16-CPU lanes
 use60 GiB per step; their total plus the1 GiB holder fits the allocation.
 GPU renewal104911 requests one NV5090,64 CPUs,512 GiB and48 hours, dependent
-on104910 ending, so the project allocations cannot overlap. It remains queued;
+on105031 ending, so the project allocations cannot overlap. It remains queued;
 GPU6 is forbidden and no GPU is used during the CPU interval.
 Earlier104443's float64 CUDA/JIT/AD readiness assertions completed and were read
 back from JSON. Its initial SSH255 hid that readiness probe's exact srun exit;
@@ -469,7 +469,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   derivative guard only where that algorithm lacks it. Audit `ccsd+t(ccsd)` and
   `qcisd(t)` separately; preserve their current semicanonical/streamed rejection
   rather than implying an unavailable variant is now supported.
-- [ ] **WF-15 — Lambda and contracted CC properties.** Reuse residual VJP/shared
+- [x] **WF-15 — Lambda and contracted CC properties** (`verified`). Reuse residual VJP/shared
   linear solver; compute contracted density/property contributions without full
   spin 2-RDM. Acceptance: one-/two-body observables, nonvariational response and
   geometry AD; include correction-specific response where part of the energy.
@@ -3785,3 +3785,60 @@ requires its own explicit decision and numerical validation.
   no GPU. Initial 104443 launch rejection occurred before a scientific child
   and remains preserved. **Accept WF-31.** Parents become 21/35; children stay
   32/37. This finite public example matrix is separate from final WF-30/32.
+
+### 2026-10-24 — WF-15: relaxed nuclear two-body observable acceptance
+
+- Add a test-only fixed water/STO-3G Cartesian RHF/CCSD calculation observing
+  Vee=0.5*G:Gamma through the existing contracted spatial-density path. Keep
+  moving native integrals, implicit HF, CC amplitudes and Lambda response live.
+  A complete spin 2-RDM export is trapped. Small full spatial MO G is the
+  admitted observable input; no large-system integral-storage claim follows.
+- An independent route computes partial_strength E_CC(h,strength*G) at 1,
+  holding the moving HF frame fixed only for that partial derivative. The frame
+  still reconverges with R. Raw CC preparation supplies the corresponding Fock
+  and reference-energy terms, so no manual response or new property equation
+  is added. Both routes return Vee=38.03326809992738 Eh; one-/two-body plus
+  nuclear energy reconstruct CCSD to 8.53e-14 Eh.
+- All nine nuclear-gradient and HVP components are finite and nonzero. The
+  contracted/energy-derivative routes differ by at most 3.69e-14 Eh/bohr and
+  2.77e-13 Eh/bohr^2. Nuclear steps 3e-4/1e-4 Bohr give directional-gradient
+  errors 4.26e-8/5.65e-9 and maximum HVP errors 6.15e-8/6.97e-9 in those
+  units. Two independent strength differences also pass. This validates the
+  specified R^2*strength mixed combination, not a general third nuclear derivative.
+- Actual 1 pass, zero failures/errors/skips/timeouts, child/srun exits 0,
+  253.357780 s and 4292708 KiB full test-process peak on 104910/n006,
+  CPU116-127,156-159, no GPU. The 256 MB method array budget is distinct from
+  compilation/allocator/RSS. Source `5f1fa36` has only the new test overlay;
+  concurrent prototype changes are excluded. Root verifies the test SHA,
+  archive, all 31 payloads, XML and original exits. Evidence
+  `wf15-two-body-geometry/HANDOFF.json` and `root-verification.json`, archive
+  SHA256 `20fc68c0c7deb2b247bedfe1ab40617699a6637df6b93a30733729bfa665af86`.
+- Together with the accepted one-body/raw-chart, UCC/frozen and correction-
+  specific energy-response gates, **accept WF-15** for the existing declared
+  density variants. Parents become 22/35; children remain 32/37. Existing
+  unsupported CC2/linearized/corrected-CC two-RDM variants remain explicit;
+  they are not introduced by this memory project. Final scale/device gates remain.
+
+### 2026-10-24 — WF-16 scope: non-Hermitian invariant-subspace backward
+
+- The user explicitly expands this engineering slice to include non-Hermitian
+  subspace backward, after the preserved isolated-only EOM cluster check.
+  The implementation belongs to shared solvers and is reused by EOM; no new
+  parent/child TODO or method-local eigensolver is introduced.
+- Select the differentiated observable with the existing EigenResponseConfig
+  target='subspace' vocabulary and optional projector probes. Proper selected
+  real semisimple clusters require an external spectral boundary; internal
+  degeneracy must not introduce individual eigenvalue denominators. Only
+  invariant projector actions and the cluster trace are differentiated.
+- Use coupled invariant-frame root equations with fixed numerical left/right
+  anchors and small live block Hamiltonians. Reuse attach_root and shared
+  checked linear solves. Retain the full overlap inverse in
+  P=R*(L.T*R)^(-1)*L.T: first-order gauge normalization does not make that
+  overlap constant at second order. Preserve existing isolated-root defaults
+  and explicit complex/defective/incomplete-boundary guards.
+- Acceptance extends WF-16's existing invariant-observable clause: analytic
+  nonnormal similarity families, exact/near internal degeneracy, GL(k) basis
+  invariance, matrix-free dense/Davidson comparisons, JIT JVP/VJP/HVP, two-step
+  differences, failed-response/minimum-budget checks, and EOM integration.
+  This capability is now in progress; the earlier forward-only projector and
+  NaN derivative guard remain historical evidence, not completion of this work.
