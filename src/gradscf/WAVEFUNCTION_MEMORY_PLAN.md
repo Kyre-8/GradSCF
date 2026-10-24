@@ -3996,3 +3996,25 @@ requires its own explicit decision and numerical validation.
 - **Accept WF-12/12b.** Parents become23/35 and children33/37. Residual-amplitude
   and final process/device/scale gates remain in their existing parents, without
   adding or recursively reopening producer tasks.
+
+### 2026-10-24 — WF-14: actual triples moment precision in byte planning
+
+- Independent audit finds a real undercount: prepared float32 Fock/amplitudes
+  with a float64 moment integral produce float64 panels, but triples_budget
+  previously used only Fock/T precision. Include the actual restricted
+  ovvv/ovoo/ovov or unrestricted ovvv/ooov/oovv operands in result_type. Keep
+  every panel/bridge formula, mathematical kernel and AD rule unchanged.
+- Six actual RED cases independently promote each R/U moment operand. A
+  0.65MB budget lies between the old/new estimates and reaches a physical-work
+  sentinel under the old code. The correction rejects before residual/spin
+  expansion; a32MB counterpart proves that the entry remains reachable.
+- Final15 affected/mixed/bridge/old-budget/degenerate-HVP cases pass, no skip
+  or timeout, child/srun0/0 in34.350s; source-before/after unchanged. Root checks
+  the31 payloads, exact source/test SHA and AST: only triples_budget changes;
+  all three triples physical kernels are byte-identical to ad97124.
+- Evidence wf14-mixed-budget/verification.json, change-proof.json and
+  root-verification.json; archive SHA256
+  16fbdb8c572bad35f1cbab8b71cd0356c05b01f6a262d93d81579f1a415f01e7.
+  CPU292-307,105031/n006,60GiB steps,600s cap, no GPU. This fixes precision
+  accounting, not the remaining explicit full first/HVP retained-state audit
+  of the32-panel envelope. WF-14 stays open; acceptance counts stay23/35,33/37.

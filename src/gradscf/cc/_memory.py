@@ -143,7 +143,12 @@ def triples_budget(ints, result, max_memory, reserved_bytes, no, nv, method,
         return ints
     memory = resolve_memory_mb(max_memory)
     external = validate_reserved_bytes(reserved_bytes)+source_reservation(ints)
-    item = jnp.result_type(ints.fock, *jax.tree.leaves((result.t1, result.t2))).itemsize
+    # These are the moment operands used by the spatial formula or its spin
+    # bridge. A higher-precision integral promotes the panel even when the
+    # supplied Fock matrix and amplitudes have lower precision.
+    moments = (ints.ovvv, ints.ooov, ints.oovv) if spin else (ints.ovvv, ints.ovoo, ints.ovov)
+    item = jnp.result_type(ints.fock, *moments,
+                          *jax.tree.leaves((result.t1, result.t2))).itemsize
     resident = external+tree_storage_bytes(ints, result)
     native_min = _native_scratch(ints.vvvv) if isinstance(ints.vvvv, VirtualERI) else 0
     residual = residual_workspace(ints, no, nv, method, spin=spin)+native_min
