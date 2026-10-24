@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-24): twenty-nine of the thirty-five parent tasks
-are fully accepted (WF-00/01/03/04/05/06/07/08/09/10/11/12/13/15/16/17/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-five of the thirty-seven existing
+Current acceptance snapshot (2026-10-24): thirty of the thirty-five parent tasks
+are fully accepted (WF-00/01/03/04/05/06/07/08/09/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-five of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -434,7 +434,8 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   - [x] **WF-10b** (`verified`): remove the bare-vvvv residency through
     shared AO-source actions, joint amplitude budgets and measured converged
     calculations. The explicit native action passes component correctness;
-    measured speed regressions keep the performance gate open and dense default.
+    measured19/65AO convergence records its time/memory tradeoff; dense stays
+    preferred whenever joint preparation/solve admission fits.
 - [x] **WF-11 — Existing approximate CC/QCI branches** (`verified`). Inspect separate CCS,
   CC2/linearized/QCI pathways and migrate applicable consumers. Acceptance:
   branch-specific energy/residual/derivative regressions; explicit exceptions
@@ -466,7 +467,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   Block boundaries and the shared packed energy remove repeated expansions;
   residuals retain one budgeted full-spin T2 per evaluation. UCCD/UCCSD
   nuclear HVP and existing raw/dual/restricted-limit gates are verified.
-- [ ] **WF-14 — Triples total budget and AD integration.** Retain streamed (T)
+- [x] **WF-14 — Triples total budget and AD integration** (`verified`). Retain streamed (T)
   first/second derivatives; charge upstream integrals/T2/panels/adjoints and
   choose panels accordingly. Acceptance: canonical/semicanonical, off-diagonal
   Fock response and internal degeneracy; CCSD(T) gradient/HVP; explicit third-
@@ -4177,3 +4178,46 @@ requires its own explicit decision and numerical validation.
 - All three new finite gates ran inside the only105216/n002 allocation.
   Parent acceptance becomes29/35; children35/37. Remainingparents:
   WF-02/14/28/29/30/32. No new TODO levels are introduced.
+
+### 2026-10-24 — WF-14: complete streamed caller AD admission accepted
+
+- Actual o2/v16 float64 kernel VJP saved2,677,016B exceeds the old working
+  window1,730,688B, excluding original inputs. Replace the fixed32-panel
+  first/second assumption with shape/dtype-only metadata of existing value,
+  trueVJP and forward-over-reverse direction. Cache at most32 integer bounds.
+  The numerical(T)kernel, tensor inverse and customAD rules are byte-unchanged.
+- Kernel-only metadata is insufficient: the real restricted lift adds masks,
+  conversion/gather residuals. Its actualsavedVJP is10,006,184B; whole lift
+  declared first/directional-second reaches36,316,344B against an intermediate
+  kernel-only31,702,721B window. Preserve that intermediate as superseded.
+  Final R/U static modes trace the actual caller shape/dtype and existing
+  restricted_inputs/from_blocks→general correction, including casts.
+- Metadata has_aux returns the realR six spin inputs orU expandedT1/T2 and
+  their direction to pin eager caller lifetimes through graph end. Existing
+  SSA variables are not billed twice. At o2/v16 the finalcaller graph requires
+  38,972,600B; added2,656,256B equals twice the five newlyheld spin inputs
+  (Fock already has a later use). With held validation outputs,working is
+  38,985,553B and totalminimum policy49.515431MB, not an observed RSS peak.
+- Explicitly charge R r1/r2/packed residual+diagnostics,U eps+diagnostics,
+  preserve expansion once perphase, and merge actual amplitude/integral
+  residual precision. Source arrays remain resident, directions/cotangents
+  separate, correction/residual phase peaks use max. No newphysical equation,
+  publicbudget knob or speculative multiplier for masks.
+- Earlier19 mathematical/mixed/guard checks remain valid at recorded kernel
+  hashes; finalfollow-up tests only caller metadata and cold R/U JIT response.
+  Both cold cases explicitly verify finite value/grad/HVP andequal_nan=False,
+  nonzero correction andvalidstates. All successfulchild/srun0/0, no timeout
+  orsource drift. Across snapshots20unique cases, not20rerun onfinalsource.
+  Canonical/semicanonical math and rejected variants/third-order guards retain
+  their existing coverage; this newgraph policy applies specificallystreamed.
+- Finalcold metadata1.407s/cachehit.425ms/100-call mean.329ms at o2/v16.
+  These are shape-planning costs, not solve speedups. General outer AD,
+  compiler/library/allocator storage andprocess/VRAM limits remain separate.
+- Root verifies4finalsource/test hashes,157follow-up payloads,5 unchanged
+  numericalsource files and6 unaffectedmemory functions. Evidence
+  streamed-triples-owners-755810e/HANDOFF_WHOLE_CALLER.json and
+  root-verification-whole-caller.json. FinalbundleSHA
+  74fea02ab3d9d253a371b93050a4dd5170f388c6e0569c1d0c95e0e311e2b209
+  supersedes kernel-only6ec61b... retainedhistory. Only105216/n002,
+  assigned16CPU lane,32GiB/600s,no GPU; **accept WF-14**.
+- Parents30/35,children35/37; remaining WF-02/28/29/30/32.
