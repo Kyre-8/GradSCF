@@ -267,30 +267,30 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-24): thirty of the thirty-five parent tasks
-are fully accepted (WF-00/01/03/04/05/06/07/08/09/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/31/33/34); thirty-five of the thirty-seven existing
+Current acceptance snapshot (2026-10-24): thirty-one of the thirty-five parent tasks
+are fully accepted (WF-00/01/03/04/05/06/07/08/09/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/29/31/33/34); thirty-six of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
 
 | Existing scope | Accepted frontier | Remaining acceptance boundary |
 | --- | --- | --- |
-| WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response and measured consumer conversions, restricted MP2 integral/energy budgets, R/U full/direct gradient family and aniline oracle | Whole-caller/scaling reconciliation and traced target-device capacity; simultaneous noncanonical channel AD owners are now charged, direct remains opt-in |
-| WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Efficient bare-vvvv policy, packed residual lifetime, complete phase/scaling budgets; finite nuclear two-body response is accepted |
+| WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response and measured consumer conversions, restricted MP2 integral/energy budgets, R/U full/direct gradient family and aniline oracle | Traced target-device capability remains WF-02c; finite whole-caller/scaling MP2 gates accepted, direct remains opt-in |
+| WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Finite phase/admission/response gates accepted with measured native cost; final CPU/GPU/large-method audit remains WF-30/32 |
 | WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Finite operator/response gates are accepted; final process/device/large-system measurements remain in WF-30/32 |
 | WF-18/19/20/21/22/27 | Selected CI through genuine U quadruples, UCIS/CIS(D) budgets and ROHF guards, joint FCI action/response budgets, scalar spin/spatial properties and relaxed CI/FCI/CIS(D) nuclear response | Final GPU and large-method measurements; arbitrary outer-AD/allocator bounds remain outside the known-array contract |
 | WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 math/API/warm gates, pure-frame R/U MPn and moving native MP4 geometry second response | Complete cross-caller AD ownership and higher-order method-level size/performance acceptance |
-| WF-29 | Hermitian/non-Hermitian primal, isolated-pair response, SCF implicit response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Remaining cross-consumer ownership and whole-method reconciliation |
+| WF-29 | Hermitian/non-Hermitian primal, isolated-pair response, SCF implicit response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Finite known-array ownership and cache-release reconciliation accepted; final WF-30/32 scope remains |
 | WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
 
-The damaged jy_gpu_1 stages remain paused. Former105031/105174 allocations
-are inactive;104911 was cancelled at the user's request. The only current
-resource pool is105216/n002, RUNNING: oneV100,48 logical CPUs,128GiB,48hours.
-The user explicitly authorized this free-resource request and removed theGPU6
-ban on2026-10-24. Do not add CPU-only or replacement pools while this one
-exists. All scientific work remains inside its checked Slurm steps.
-Actual affinity has24 core pairs across2-36 and42-76. Three disjoint16-CPU
-lanes are documented below;48+32+32GiB test steps plus1GiB holder fit128GiB.
+The damaged jy_gpu_1 stages remain paused.105216 was cancelled on2026-10-24
+20:06:51, before its nominal48hours; its holder recordsSIGTERM, no release
+marker, and the reason/initiator are not known. The user explicitly authorized
+renewal on2026-10-25. Only106642/n002 is current: oneV10032GB,16logicalCPUs,
+96GiB,48hours. GPU6 is permitted and is the allocated Slurm index6, visible0;
+UUID GPU-84f16c55-4e74-84b1-a538-088bab519fed. No secondpool is allowed.
+GPUlane19,23,34,35,59,63,74,75 andCPUlane36-39,76-79 are disjoint8CPU
+sets;48+32GiB test steps plus1GiB holder fit96GiB.
 Earlier104443's float64 CUDA/JIT/AD readiness assertions completed and were read
 back from JSON. Its initial SSH255 hid that readiness probe's exact srun exit;
 later146-case component validation has its own actual terminal records.
@@ -596,7 +596,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   boundary. Acceptance: in-memory parity, bounded host/device staging, repeated
   reads, clear I/O failures, derivative tests for advertised modes. No claim that
   HDF5 is automatically differentiable; defer unsupported modes explicitly.
-- [ ] **WF-29 — Solver and cache budget integration.** Coordinate Davidson,
+- [x] **WF-29 — Solver and cache budget integration** (`verified`). Coordinate Davidson,
   non-Hermitian Krylov, DIIS, Lambda and nonlinear-state residency with integral
   workspace. Acceptance: few/multiple-root and restart equivalence, minimum-
   subspace diagnostics, caller ownership, repeated-call release; retain shared
@@ -607,13 +607,13 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     budget. Optional basis capacity must not starve useful action batches.
   - [x] **WF-29b:** bounded numerical GMRES probe with true-residual checks,
     finite-candidate retry and full recovery; retain the existing AD owner.
-  - [ ] **WF-29c:** non-Hermitian, DIIS, Lambda/SCF and response-state ownership,
+  - [x] **WF-29c:** non-Hermitian, DIIS, Lambda/SCF and response-state ownership,
     phase-aware lifetimes and byte-controlled caches across all consumers.
     Shared non-Hermitian/EOM primal capacity, closures and action batches are
     verified. Shared packed DIIS and checked linear/root phase planning are
     verified. Isolated non-Hermitian and isolated/cluster Hermitian response
-    phases and SCF assembly/forward/implicit response are verified; remaining
-    cross-consumer ownership and whole-method reconciliation stay open.
+    phases and SCF assembly/forward/implicit response are verified; the finite cross-consumer ownership/release reconciliation is accepted.
+    Final process/device/scale checks remain WF-30/32.
 - [ ] **WF-30 — CPU/GPU and nested-AD audit.** Run eager and JIT public entry
   points, native dispatch, device residency and transfer accounting. Acceptance:
   same numerical cases/dtype/seed, forward/JVP/VJP/HVP separately, actual peak
@@ -632,20 +632,18 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
 
 ## 6. Validation matrix and measurement protocol
 
-Every numerical test runs remotely, never locally. The current2026-10-24 user
-instruction permits oneSlurm resource pool with one5090/V100 and at most64
-logical CPUs. The admitted free-resource pool105216/n002 has oneV10032GB,
-48CPUs,128GiB and48hours; the earlier512GiB request was cancelled. GPU6 is
-now permitted, but only Slurm-assigned devices may be used. Read the latest
-`lwcluster manual`; submit from `~/private/homefile/` to `home`. Execute all
-tests/builds inside checked steps, never on the login node.
-The allocated GPU has Slurm index1/process-visible index0, recorded UUID
-GPU-ff9441ad-473d-9d1c-219c-29771887d738. Its CPU lanes are:
-root/GPU2-9,42-49; RCC11-13,15-19,51-53,55-59; triples22,27-28,32-36,62,67-68,72-76.
-Each lane has16 logical CPUs and disjoint physical cores. A GPU test uses
-the root lane; it does not add host CPUs. CPU steps use `--gres=none`, explicit
-memory and `taskset` within the checked allocation. Root48GiB plus two32GiB
-steps and the1GiB holder remain below128GiB. No second allocation is permitted.
+Every numerical test runs remotely, never locally. The current2026-10-25 user
+instruction permits renewal of a singleSlurm pool, one5090/V100 and at most64
+logicalCPUs; GPU6 is allowed. Current106642/n002 supplies oneV10032GB,
+16CPUs,96GiB and48hours. Earlier pools are inactive. Read current lwcluster
+manual; use private /home/... PWD,homepartition and typedGRES. All tests/builds
+run in checked steps, never onlogin/local.
+The assigned GPU is Slurm6/process0, UUID
+GPU-84f16c55-4e74-84b1-a538-088bab519fed. GPUlane uses
+19,23,34,35,59,63,74,75; CPUlane36-39,76-79. They are disjoint physical
+core pairs. GPUstep48GiB+CPUstep32GiB+holder1GiB<96GiB. CPUsteps explicitly
+use--gres=none and emptyCUDA_VISIBLE_DEVICES. No extra orreplacement pool
+may be added while this one exists.
 The resource-holder step reserves only 1 GiB and no GPU, leaving the remaining
 allocation available to test steps. `--overlap` does not remove step-memory
 reservations. Prior startup attempts104075/104078/104079 did not run numerical
@@ -4253,3 +4251,26 @@ requires its own explicit decision and numerical validation.
   single105216 pool, allocatedV100 UUID anddisjointCPUlanes were used.
 - This accepts the dispatch repair insideWF-30, not the entire remaining
   device/CI/FCI/recursiveMP/warm-scale audit. Counts remain30/35,35/37.
+
+### 2026-10-25 — WF-29 finite acceptance and resource recovery
+
+- Independent clause-by-clause read-only review maps the original known-array
+  contract to shared DIIS/GMRES/nonlinear/linear memory evidence, Hermitian/FCI
+  and non-Hermitian primal/pair/subspace planners, SCF preparation/forward/
+  implicit response, actual Lambda pullback owners, CI/FCI byte caches and
+  repeated eviction/release. No new method-local solver or separate budget.
+- NH complete-caller saved/phase/admission evidence and the finalstreamed(T)
+  actual R/U lift/first/second policy complete the previously open reconciliation.
+  These finite obligations exclude arbitrary outertapes,XLA/library/allocator
+  and process/VRAM hardbounds; their exclusion is not a new missing criterion.
+- Actual priorroot evidence includes response-memory/common-root-verification,
+  cc-caller-budget-evidence/summary,wf29-review-evidence,wf29c-eom-memory,
+  eom-response-evidence,hermitian-response,ci-owner-checkpoint,
+  fci-current-response-7753 and the newer NH/native-auto/triples/EOM handoffs.
+  Current relevant source hashes match latest accepted reports; older wholefile
+  differences are tracked budget/packed/preconditioner increments.
+- **Accept WF-29/29c**. Parents31/35,children36/37; remainingWF-02/28/30/32.
+  This is not a finalGPU/large-system or wholeprocess cap claim.
+- Resource105216 was cancelled while the last test-onlybatch was still local
+  prepared input, so do not infer newGPU results from it. User-approved new
+  solepool106642 is active; fixed snapshots and completed oldresults are reused.
