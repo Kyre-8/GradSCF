@@ -198,5 +198,3 @@ def test_budgeted_channel_preserves_invalid_denominator_and_reference_guards():
         result = evaluate_mp2(inputs, config, max_memory=maximum)
         assert not result.valid and np.isnan(result.total_energy)
         assert all(np.isnan(t).all() for t in result.t2)
-
-

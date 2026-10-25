@@ -92,5 +92,3 @@ def test_selected_ucis_keeps_the_nonstationary_rohf_boundary(source, monkeypatch
     monkeypatch.setattr(api, 'unrestricted_reference_from_source', forbidden)
     with pytest.raises(ValueError, match='stationary'):
         ci.UCIS(mf, solver='dense').run()
-
-
