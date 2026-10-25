@@ -267,8 +267,8 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-24): thirty-one of the thirty-five parent tasks
-are fully accepted (WF-00/01/03/04/05/06/07/08/09/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/29/31/33/34); thirty-six of the thirty-seven existing
+Current acceptance snapshot (2026-10-24): thirty-two of the thirty-five parent tasks
+are fully accepted (WF-00/01/02/03/04/05/06/07/08/09/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/29/31/33/34); thirty-seven of the thirty-seven existing
 children are checked. These are acceptance counts, not a percentage estimate of
 engineering effort. Keep all other parent checkboxes open. In particular,
 successful component derivatives do not establish a whole-method memory bound.
@@ -310,7 +310,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   geometry JVP/VJP and directional second derivatives on tiny R/U systems;
   fail-on-full-ERI instrumentation; unchanged dense-path regression. RSH/custom
   XC expansion is not required to close this HF task and must remain guarded.
-- [ ] **WF-02 — Shared block and byte-budget contract** (`in_progress`). Add only the metadata,
+- [x] **WF-02 — Shared block and byte-budget contract** (`verified`). Add only the metadata,
   block/action requests, accounting and ownership required by MP2 and CC.
   Acceptance: dense/DF request equivalence, dtype/device retention, invalid
   representation errors, cache lifetime and minimum-memory diagnostics. Include
@@ -324,11 +324,11 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     canonical orbital-solve relay are verified. Cross-channel saved AD state
     and downstream phase integration remain with their specific consumer gates.
     Historical checkpoint: WF-02b1.
-  - [ ] **WF-02c:** complete the native block/capability contract with WF-03/04,
-    including target-device capacity when JIT tracing hides concrete devices.
-    Concrete default-device inheritance and ambiguous accelerator-label guards
-    are verified. General outer-JIT target inference with captured CPU arrays
-    is still unsupported; do not count a context-only test as that capability.
+  - [x] **WF-02c:** complete the native block/capability contract with WF-03/04,
+    with the user-approved explicit target contract: inputs and captured arrays
+    reside on that device and tracing/execution use jax.default_device. Shared
+    capacity and ambiguous-label guards are verified. Implicit captured-CPU/
+    outer-GPU-JIT target inference is explicitly outside this accepted scope.
   - [x] **WF-02d:** establish the dedicated AO2MO domain package and migrate
     existing callers without redundant forwarding files; share byte-reservation
     validation in `_memory` without an integral-to-solver dependency or a second
@@ -591,7 +591,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   direct contraction; retain requested dense output for small cases. Acceptance:
   traces, symmetries, energies, normalization and block reconstruction; avoid
   creating full spin 2-RDM merely to extract spatial blocks.
-- [ ] **WF-28 — Optional out-of-core backend.** Implement only after measured
+- [ ] **WF-28 — Optional out-of-core backend** (`deferred_by_user`; condition not triggered). Implement only after measured
   consumers justify it; specify storage dtype/chunking/version/lifetime and AD
   boundary. Acceptance: in-memory parity, bounded host/device staging, repeated
   reads, clear I/O failures, derivative tests for advertised modes. No claim that
@@ -4274,3 +4274,23 @@ requires its own explicit decision and numerical validation.
 - Resource105216 was cancelled while the last test-onlybatch was still local
   prepared input, so do not infer newGPU results from it. User-approved new
   solepool106642 is active; fixed snapshots and completed oldresults are reused.
+
+### 2026-10-25 — User-approved final scope decisions
+
+- The user explicitly selects the existing verified concrete-device contract
+  for WF-02c: move inputs and captured arrays to the actual target and keep
+  jax.default_device around tracing/execution. An outerjit(device=GPU) with
+  captured CPU arrays alone is not supported for capacity inference. Do not
+  add privateJAX compile/effect mechanisms or claim those implicit cases work.
+  The source/docs already state this boundary; actual context-based CPU/CUDA
+  capacity, native/JVP/VJP/HVP and mixeddevice guards retain their evidence.
+  **Accept WF-02/02c under this explicitly approved scope.**
+- The user also explicitly declines a newdiskbackend this round. WF-28's
+  measured-consumer precondition is untriggered: retain existing in-memory/
+  native paths. Record the backend as deferred/notimplemented, not as passing
+  nonexistent storage-parity/AD tests. No fileprovider, dependencies or
+  accidental frozen-integral gradient contract is introduced.
+- Current status:32/35 parenttasks accepted,37/37 existingchildren checked;
+  WF-28 deferred by user, WF-30/32 still open. All mandatory unresolved work
+  is final device validation and final regression/API review. The fixedtree
+  remains35parents/37children with no added scope branches.
