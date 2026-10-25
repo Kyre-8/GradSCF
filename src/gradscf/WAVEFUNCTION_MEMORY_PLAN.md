@@ -273,7 +273,8 @@ WF-28 is explicitly deferred by the user, with its condition untriggered. All
 within the agreed scope. This does not count a disk backend as implemented, or
 component derivatives as a whole-process memory bound. The final evidence entry
 below records the exact device, regression, scale and API acceptance boundaries.
-The branch is retained for review; merge and push require a user instruction.
+The user authorized merge and push on 2026-10-25, followed by another explicit
+TODO/TDD evidence review before integration.
 
 | Existing scope | Accepted frontier | Capability and measurement boundary |
 | --- | --- | --- |
@@ -399,11 +400,11 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   - [x] **WF-08a:** repair the physical SCF-to-MO Fock transport exposed by
     aniline, preserving noncanonical response and explicit invalid-input guards.
     Small-system geometry/HVP checks close this correctness prerequisite;
-    measured full-gradient/scaling performance and larger oracles remain open.
+    the later accepted WF-08b/08 records provide full-gradient/scaling evidence.
   - [x] **WF-08b:** complete the fixed-aniline selected-MP2 full-input geometry
     gradient, one warm execution and independent same-basis PySCF comparison.
-    Keep the dense-AO input lineage explicit; direct input and increasing-size
-    scaling plus total-budget closure are still separate acceptance gates.
+    Keep the dense-AO input lineage explicit; direct input, increasing-size
+    scaling and total-budget closure have separate accepted WF-08/29 records.
 
 ### Coupled cluster, perturbative corrections and EOM
 
@@ -460,8 +461,8 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   - [x] **WF-12b** (`verified`): AO-source selected blocks, byte ownership
     and scale evidence. The pure producer, UHF facade and relaxed CCSD/(T)
     integration, compact bare virtuals and matched6/17-MO complete post-SCF
-    consumer pipelines are verified. Residual amplitude work and final whole-
-    method/device scaling remain with WF-13/29/30/32.
+    consumer pipelines are verified. Residual amplitude and final finite
+    method/device measurements are recorded under WF-13/29/30/32.
 - [x] **WF-13 — UCC residual/amplitude workspace** (`verified`). Reduce repeated dense
   spin-amplitude expansion using block consumers. Acceptance: UCCD/UCCSD forward,
   adjoints and geometry HVP, restricted-limit comparison; packed-coordinate
@@ -512,8 +513,9 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     coefficient/geometry products through two and allocation preflights.
   - [x] **WF-19b:** all reference representations and joint consumer budgets,
     verified for the stated real common-spatial CPU/known-array contract.
-    Reuse representation/core-fold layers and the native relaxed closure;
-    CUDA geometry and large-CAS scaling remain WF-30/32.
+    Reuse representation/core-fold layers and the native relaxed closure.
+    Device and CAS/action measurements are recorded under WF-30/32 with
+    their exact scope; the complete native relaxed FCI geometry gate is CPU.
 - [x] **WF-20 — CI action/cache budget** (`verified`). Replace fixed creator/spectator/RHS
   batches with byte planning and bound numerical/RDM caches by bytes.
   Acceptance: direct action/matmat parity, Davidson forward/response, no all-pairs
@@ -615,7 +617,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     verified. Shared packed DIIS and checked linear/root phase planning are
     verified. Isolated non-Hermitian and isolated/cluster Hermitian response
     phases and SCF assembly/forward/implicit response are verified; the finite cross-consumer ownership/release reconciliation is accepted.
-    Final process/device/scale checks remain WF-30/32.
+    Final finite process/device/scale checks are recorded under WF-30/32.
 - [x] **WF-30 — CPU/GPU and nested-AD audit** (`verified`). Run eager and JIT public entry
   points, native dispatch, device residency and transfer accounting. Acceptance:
   same numerical cases/dtype/seed, forward/JVP/VJP/HVP separately, actual peak
@@ -4367,3 +4369,97 @@ requires its own explicit decision and numerical validation.
   This is not a full-repository suite pass, arbitrary outer-AD memory bound,
   all-basis/all-method GPU claim, disk-backend pass or large-molecule guarantee.
   Keep the worktree and commits for review; no merge or push is authorized.
+
+
+### 2026-10-25 — Pre-merge TODO/TDD evidence review
+
+The user requested another task-by-task review before the authorized merge and
+HTTPS push. Rechecked all35 parents and37 children against the acceptance clauses
+and dated evidence, including later completions of earlier partial checkpoints.
+The following is a traceability index, not a new TODO tree or a claim that one
+representative test covers every clause. Exact cases, source hashes, process
+exits and measured limitations remain in their original ledger entries.
+
+| Task | Status | Acceptance evidence |
+| --- | --- | --- |
+| WF-00 Baseline and isolation | Verified | Git/source inspection; no numerical gate |
+| WF-01 Direct SCF | Verified | test_scf_orbital_direct; test_correlated_direct |
+| WF-02 AO2MO/budget contract | Verified | test_ao2mo_memory; test_memory_budget; explicit device evidence |
+| WF-03 Native partial AO2MO | Verified | test_native_ao2mo; test_native_ao2mo_batch |
+| WF-04 Block AD | Verified | test_native_eri_slabs; test_direct_geometry_response; AO2MO joint-response cases |
+| WF-05 RMP2 | Verified | test_direct; test_mp2_memory; direct/full family |
+| WF-06 UMP2/noncanonical MP2 | Verified | test_orbitals; test_ad_owners; NH complete-caller admission |
+| WF-07 MP2 nuclear response | Verified | test_correlated_direct; N2 degeneracy and native CUDA complete path |
+| WF-08 Memory/scaling | Verified | size-family; fixed119AO aniline direct/full process records |
+| WF-09 RCC preparation | Verified | test_prepared_integrals; test_prepared_consumers; test_correlated_cc_blocks |
+| WF-10 RCC virtual actions | Verified | test_native_cc_auto; test_native_virtual_action; converged19/65AO pair |
+| WF-11 Approximate CC/QCI | Verified | test_ccs_virtual_lifetime; test_lcc_native_memory; per-model virtual regressions |
+| WF-12 Spatial-spin UCC | Verified | test_spin_integral_memory; test_scf_unrestricted_prepared; matched consumer pipelines |
+| WF-13 UCC workspace | Verified | test_spin_packed_energy; test_spin_block_coordinates; test_uccd_geometry |
+| WF-14 Triples/AD budget | Verified | test_streamed_triples_memory; test_triples_memory; complete R/U lift ownership |
+| WF-15 Lambda/contracted CC | Verified | test_prepared_properties; test_two_body_geometry; one-/two-body identities |
+| WF-16 EOM-EE/subspace AD | Verified | test_eom_native_budget; test_nonhermitian_subspace; invariant response |
+| WF-17 EOM-IP/EA | Verified | test_native_eom_action; test_eom_response_memory; charged virtual measurements |
+| WF-18 Truncated CI | Verified | test_selected_integrals; test_scf_selected; genuine U quadruples/frozen/CID cases |
+| WF-19 FCI reference/core | Verified | test_native_reference; test_joint_memory; native relaxed CPU geometry |
+| WF-20 CI action/cache | Verified | test_matmat_memory; test_raw_memory; test_spin_memory; cache release |
+| WF-21 FCI tiles/solver | Verified | test_action_memory; test_solver_memory; nact8/10/12 action measurements |
+| WF-22 CI/FCI observables/geometry | Verified | test_property_memory; test_cis_d_geometry; geometry/frame records |
+| WF-23 MP target ranks | Verified | test_target_rank; real triples/quadruples/sextuples and per-order comparisons |
+| WF-24 Packed target tiles | Verified | test_packed_action; test_series_packed; complete capacity fallback |
+| WF-25 Taylor/history | Verified | test_series_checkpoint; test_series_staging; with/without retained histories |
+| WF-26 MPn nuclear response | Verified | test_series_noncanonical; test_selected_series_geometry; split original frame responses |
+| WF-27 Requested full RDM | Verified | test_rdm2_blocks; test_rdm_blocks; density reconstruction/response records |
+| WF-28 Optional disk backend | Deferred by user | User-deferred; condition not triggered; no implementation/test claim |
+| WF-29 Shared solvers/cache | Verified | test_eigen_memory; test_nonhermitian_response_memory; DIIS/SCF/Lambda owner records |
+| WF-30 CPU/CUDA nested AD | Verified | Final6CPU+11GPU; native eager/JIT dispatch; synchronized MP4 warm measurement |
+| WF-31 Public examples | Verified | Six example scripts plus guide snippet: seven successful separate CPU processes |
+| WF-32 Final review | Verified | Cross-family ledger; source/API/AST/plan audit; no full-suite or arbitrary process-bound claim |
+| WF-33 Standalone MP3 | Verified | test_mp3_orbitals; measured MP3 preparation/energy/response/warm phases |
+| WF-34 Dyson properties | Verified | test_eom_dyson_memory; PySCF endpoints; retained owner and endpoint lifetime records |
+
+The TDD provenance check indexed391 raw/archived XML documents. All427 distinct
+historically failing cases that still belong to retained current test functions
+have corresponding GREEN evidence. Timestamped GREEN XML is later than the
+recorded failures; two MP response cases use verified split-process completion
+instead. Thirty-two failed keys belong to removed prototypes or diagnostic-only
+tests and are excluded, rather than being counted as production successes.
+
+The previously easy-to-miss retained-Dyson GREEN is the36-case all-passing XML
+inside retained-state-evidence.tar.gz (verified archive SHAad6a5710...5073a59).
+The three small MP orbital gates have actual0/0 exits and a three-case GREEN XML
+inside combined-timeout-evidence.tar. The separate timed-out response process in
+that archive remains failed. Original R/U response closures instead ran in raw
+and selected phases, identical signature per case, all0/0. Re-reading the saved
+bundles checks148/141 scalar fields, respectively, at the unchanged comparison
+tolerances; maximum absolute difference8.674e-19 in each case. The driver invokes
+the original assertions, including compact output flags and full-transform traps.
+
+A historical failure-to-GREEN link is not proof that every function and every
+existing test was originally written in strict test-first order. Documentation,
+measurement and aggregate acceptance tasks reuse existing regression evidence;
+no artificial RED history is manufactured for them. Recorded failed processes
+are retained, and no partial log is promoted to a successful process result.
+Additional narrow receipt tests from earlier mixed-result groups are run in the
+same authorized pool before integration; their actual results follow below.
+
+Audit records: artifacts/wavefunction-memory-20261021/merge-push-20261025/
+{xml-index,archive-xml-index,chronology-check,todo-tdd-audit,task-traceability}.json.
+The fixed scope remains34verified parents plus user-deferredWF-28 and37verified
+children. Device and disk decisions are unchanged; no model, tolerance or budget
+boundary is relaxed during this review.
+
+
+The additional pre-merge receipt run completed: **17/17 CPU tests pass**, no
+skips, all three child/Slurm exits0/0, no timeout or source drift. Groups are
+12 solver/orbital-diagonal/Lambda admission cases (47.105s),2 prepared CC
+Lambda/density cases (83.358s), and3 compact UCC dtype/public-consumer cases
+(158.323s). All used the existing106642 CPUlane, float64, CPU-only,32GiB and
+600-second child caps; no new resource allocation or source algorithm change.
+Root verified raw XML and unchanged manifests after download. Evidence archive
+SHA256443dc7034b58026d17e11f0b24a9a679ac4cb8a0c34eb6ff144027c6854d7d4a;
+local tdd-receipts-root-verification.json records each accepted process.
+The TODO/TDD review is complete within the explicit scope above. The user has
+authorized integration into release/v1.0.0 and a normal HTTPS push. Unrelated
+main-worktree changes are backed up, preserved as uncommitted work and excluded
+from the pushed tree. No version bump, new tag or extra physics is introduced.
