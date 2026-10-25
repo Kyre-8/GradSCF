@@ -1,5 +1,6 @@
 """CI observables reuse sigma actions; dense spatial exports are budgeted."""
 import importlib
+import os
 
 import jax
 import jax.numpy as jnp
@@ -46,13 +47,20 @@ def test_observable_contracts_without_density_export_and_retains_second_response
     expected = jnp.sum(h*dm1.T)+.5*jnp.sum(g*dm2)
     monkeypatch.setattr(module, 'make_rdm2', lambda *a, **kw: pytest.fail('Observable exported a 2-RDM'))
     actual = jax.jit(lambda x: expect(x, space, h, g, max_memory=32.))(c)
-    np.testing.assert_allclose(actual, expected, atol=2e-12)
+    assert np.isfinite(np.asarray(actual)).all()
+    assert np.isfinite(np.asarray(expected)).all()
+    np.testing.assert_allclose(actual, expected, atol=2e-12, equal_nan=False)
     direction = .03*jnp.sin(c)
     gradient = jax.jit(jax.grad(lambda x: expect(x, space, h, g, max_memory=32.)))
-    hvp = jax.jvp(gradient, (c,), (direction,))[1]
+    derivative, hvp = jax.jvp(gradient, (c,), (direction,))
     step = 1e-4
     finite = (gradient(c+step*direction)-gradient(c-step*direction))/(2*step)
-    np.testing.assert_allclose(hvp, finite, atol=2e-7, rtol=2e-6)
+    for value in (actual, derivative, hvp):
+        assert np.isfinite(np.asarray(value)).all()
+        if os.environ.get('GRADSCF_TEST_GPU') == '1':
+            assert value.devices() == {jax.devices('gpu')[0]}
+    assert np.isfinite(np.asarray(finite)).all()
+    np.testing.assert_allclose(hvp, finite, atol=2e-7, rtol=2e-6, equal_nan=False)
 
 
 def test_dense_export_rejects_known_output_before_sigma(monkeypatch):

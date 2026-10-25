@@ -267,21 +267,23 @@ Evidence may satisfy several related integration gates without repeating the
 implementation or the same test campaign. Historical checkpoint labels in
 section 8 are provenance, not additional active TODO levels.
 
-Current acceptance snapshot (2026-10-24): thirty-two of the thirty-five parent tasks
-are fully accepted (WF-00/01/02/03/04/05/06/07/08/09/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/29/31/33/34); thirty-seven of the thirty-seven existing
-children are checked. These are acceptance counts, not a percentage estimate of
-engineering effort. Keep all other parent checkboxes open. In particular,
-successful component derivatives do not establish a whole-method memory bound.
+Current acceptance snapshot (2026-10-25): **34 of 35 parent tasks are verified;
+WF-28 is explicitly deferred by the user, with its condition untriggered. All
+37 existing children are checked.** No mandatory engineering task remains open
+within the agreed scope. This does not count a disk backend as implemented, or
+component derivatives as a whole-process memory bound. The final evidence entry
+below records the exact device, regression, scale and API acceptance boundaries.
+The branch is retained for review; merge and push require a user instruction.
 
-| Existing scope | Accepted frontier | Remaining acceptance boundary |
+| Existing scope | Accepted frontier | Capability and measurement boundary |
 | --- | --- | --- |
-| WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response and measured consumer conversions, restricted MP2 integral/energy budgets, R/U full/direct gradient family and aniline oracle | Traced target-device capability remains WF-02c; finite whole-caller/scaling MP2 gates accepted, direct remains opt-in |
-| WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Finite phase/admission/response gates accepted with measured native cost; final CPU/GPU/large-method audit remains WF-30/32 |
-| WF-16/17/34 | Shared EOM primal and isolated-pair response planners, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson, retained-state accounting and matched component measurements | Finite operator/response gates are accepted; final process/device/large-system measurements remain in WF-30/32 |
-| WF-18/19/20/21/22/27 | Selected CI through genuine U quadruples, UCIS/CIS(D) budgets and ROHF guards, joint FCI action/response budgets, scalar spin/spatial properties and relaxed CI/FCI/CIS(D) nuclear response | Final GPU and large-method measurements; arbitrary outer-AD/allocator bounds remain outside the known-array contract |
-| WF-23/24/25/26/33 | Exact target bounds, packed canonical actions including actual sextuples, shared Taylor history/caller budgets, selected eager dispatch, standalone MP3 math/API/warm gates, pure-frame R/U MPn and moving native MP4 geometry second response | Complete cross-caller AD ownership and higher-order method-level size/performance acceptance |
-| WF-29 | Hermitian/non-Hermitian primal, isolated-pair response, SCF implicit response and common linear/nonlinear phase planners; explicit CI and CC caller phases | Finite known-array ownership and cache-release reconciliation accepted; final WF-30/32 scope remains |
-| WF-28/30/31/32 | Existing small oracles and component device checks remain usable | Evidence-based disk decision, final CPU/GPU audit, public examples/capability table and cross-family regression/scaling |
+| WF-02/03/04/05/06/08 | Shared AO2MO/DF factors, native block response and measured consumer conversions, restricted MP2 integral/energy budgets, R/U full/direct gradient family and aniline oracle | Explicit target placement/default-device contract accepted; implicit captured-CPU/outer-GPU-JIT inference is outside the user-approved scope |
+| WF-10/11/12/13/14/15 | Restricted/spin virtual dressing actions; selected UHF facade, Lambda/RDM1, requested/contracted RDM2 and nonzero streamed-(T) geometry; five-block CCS and direct physical-coordinate boundaries | Finite phase/admission/response and device gates accepted with measured native cost. Native virtual actions can be substantially slower; the UCC residual still expands spin amplitudes |
+| WF-16/17/34 | Shared EOM primal and isolated-pair/complete-cluster response, factored EA virtual actions, native prepared EE/IP/EA, streamed Dyson and retained-state accounting | Prepared EOM remains restricted-reference CCSD. Subspace invariants do not define individual vectors inside a degenerate cluster; finite operator measurements are not a large-molecule EOM benchmark |
+| WF-18/19/20/21/22/27 | Selected CI through genuine U quadruples, UCIS/CIS(D) budgets and ROHF guards, joint FCI action/response budgets, contracted properties and relaxed nuclear response; final selected CI/FCI CUDA gates | CAS/action scaling and tiny converged-root device tests are distinct. Arbitrary outer-AD/allocator bounds remain outside the known-array contract |
+| WF-23/24/25/26/33 | Exact target bounds, packed actions including actual sextuples, Taylor history/caller budgets, standalone MP3, moving native MP4 geometry response and final degenerate MP4 CUDA checks | Requested histories and excitation spaces remain necessary. The final CUDA warm benchmark is a three-orbital fixture, not evidence of large-system acceleration |
+| WF-29 | Shared solver phases, actual Lambda/SCF response owners, CI/FCI byte caches and release reconciliation | Accepted for declared known-array phases; runtime libraries, allocator reservations and arbitrary enclosing AD tapes remain separate |
+| WF-28/30/31/32 | Public examples, final finite CPU/CUDA regression and warm measurement, retained scale evidence and API/source review | Disk backend deferred and unimplemented. No full-repository test-suite or universal RSS/VRAM guarantee is claimed. Integration awaits user instruction |
 
 The damaged jy_gpu_1 stages remain paused.105216 was cancelled on2026-10-24
 20:06:51, before its nominal48hours; its holder recordsSIGTERM, no release
@@ -591,7 +593,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   direct contraction; retain requested dense output for small cases. Acceptance:
   traces, symmetries, energies, normalization and block reconstruction; avoid
   creating full spin 2-RDM merely to extract spatial blocks.
-- [ ] **WF-28 — Optional out-of-core backend** (`deferred_by_user`; condition not triggered). Implement only after measured
+- [ ] **WF-28 — Optional out-of-core backend** (`deferred`; user-approved, condition not triggered). Implement only after measured
   consumers justify it; specify storage dtype/chunking/version/lifetime and AD
   boundary. Acceptance: in-memory parity, bounded host/device staging, repeated
   reads, clear I/O failures, derivative tests for advertised modes. No claim that
@@ -614,7 +616,7 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
     verified. Isolated non-Hermitian and isolated/cluster Hermitian response
     phases and SCF assembly/forward/implicit response are verified; the finite cross-consumer ownership/release reconciliation is accepted.
     Final process/device/scale checks remain WF-30/32.
-- [ ] **WF-30 — CPU/GPU and nested-AD audit.** Run eager and JIT public entry
+- [x] **WF-30 — CPU/GPU and nested-AD audit** (`verified`). Run eager and JIT public entry
   points, native dispatch, device residency and transfer accounting. Acceptance:
   same numerical cases/dtype/seed, forward/JVP/VJP/HVP separately, actual peak
   VRAM/RSS and warm time; a CPU FFI sent to CUDA is a failure, not an acceptable
@@ -624,11 +626,12 @@ Do not reuse damaged stages, c20 credentials or its compiled native library.
   memory/derivative limits, a noncanonical-degeneracy example, and output evidence.
   Acceptance: examples run from installed source; conventional array users keep
   compatible results and errors identify unsupported representation/AD order.
-- [ ] **WF-32 — Final regression, scaling and API review.** Audit all in-scope
+- [x] **WF-32 — Final regression, scaling and API review** (`verified`). Audit all in-scope
   families, old dense oracles and defaults before enabling the scalable default.
   Acceptance: the validation matrix below, recorded regressions/limitations,
-  no duplicate engines, no unrelated files, focused code review and explicit
-  merge/push instruction. No source-only or one-method pass closes this task.
+  no duplicate engines, no unrelated files and focused code review. Keep merge
+  and push gated on explicit user instruction; the verified engineering handoff
+  does not authorize integration. No source-only or one-method pass closes this task.
 
 ## 6. Validation matrix and measurement protocol
 
@@ -4294,3 +4297,73 @@ requires its own explicit decision and numerical validation.
   WF-28 deferred by user, WF-30/32 still open. All mandatory unresolved work
   is final device validation and final regression/API review. The fixedtree
   remains35parents/37children with no added scope branches.
+
+
+### 2026-10-25 — WF-30/32: final finite acceptance and engineering handoff
+
+- The final scientific snapshot is d8aa52f plus eight test-only overlays.
+  These overlays add finite-output, equal_nan=False and actual GPU-placement
+  assertions. Inputs, seeds, excitation spaces, methods, reference oracles and
+  tolerances are unchanged. The subsequently committed changes before this
+  handoff affect documentation only. Root compares 1,708 executed non-document
+  files against the current worktree and parses all 294 changed Python files.
+- All final science runs inside the only pool106642/n002: one allocated
+  V100-SXM2-32GB, Slurm6/process0, UUID recorded above. GPU and CPU steps use
+  the disjoint eight-logical-CPU lanes, with 48/32GiB and 600-second child
+  limits. No local numerical tests or extra resource pools are used.
+- Final focused results: **6 CPU + 11 GPU test cases pass**, with actual child
+  and Slurm exits0/0, no timeout, no source drift and no skipped cases in the
+  accepted XML. CPU covers CI contracted-property HVP, tiled FCI Davidson
+  energy/gradient/HVP, CI integral/coefficient derivatives, CI batched joint
+  response and exactly internally degenerate MP4. CUDA adds the same selected
+  cases, R/U MP2 and ground/Lambda joint responses, and MP4 history/device AD.
+  Individual test functions define their exact first/second-response scope.
+- The original four-case CPU process reached its600-second limit. Its raw
+  log reports all four bodies passed, but it is excluded from successful
+  process counts. The identical four cases were then run in separate fresh
+  processes, each ending0/0 within600seconds. No scientific setting or
+  threshold changed. The successful GPU MP2/RCC/UCC cases were not rerun.
+- Accepted focused-process elapsed times are18.86–543.17s on CUDA and
+  27.37–373.21s on CPU, including compilation and verification. Max observed
+  child RSS across these groups is6,836,948KiB. One-second whole-device
+  observations range594–3,472MiB across CUDA groups; these are sampled
+  device-use maxima, not exact JAX allocator peaks or declared tensor budgets.
+- One remaining CUDA measurement uses the unchanged existing benchmark:
+  `python tests/mp/benchmark_series_staging.py --execution outer-jit
+  --algorithm tensor --order 4 --samples 5 --output gpu-warm-mp4-report.json`.
+  Public mp.run_mp, real float64,3MO/1occupied,seed2318; valid state and finite
+  MP2–4 coefficients agree with the frozen reference. Lowering0.679879s,
+  compile4.436956s, first execution0.006610s; synchronized warm samples
+  [0.003791,0.000415,0.000414,0.000381,0.000396]s, median0.000414s.
+  XLA temporary4,206,640B, benchmark self-RSS1,065,900KiB; wrapper child-peak
+  metric1,100,316KiB, sampleddevice1,358MiB, complete child9.774s, exits0/0.
+  The initial controller path guard failed before any science started and is
+  retained; using the logical private /home path fixes that launch metadata.
+- Root verifies downloaded raw XML, before/after runtime manifests, all eight
+  current test hashes and the native SO. Evidence root:
+  artifacts/wavefunction-memory-20261021/wf30-family-d8aa52f-106642/.
+  Test archive SHA2566824171658c364be3f64d3e16d9a2f76a7ce50b6b893524e54b49c7dcec82d3b;
+  warm archive SHA256fe259eddf29737cdb381008f0e3f37f161bea5fbf23b8a1b91a64d2e9b61d721.
+  root-verification-tests.json and root-verification-final.json record the
+  exact nodes, commands, hardware, exits, limits, metrics and source checks.
+- Final review reuses each family's existing finite physics and scale gates,
+  rather than launching another campaign: R/U complete MP2 gradient family
+  including119AO aniline; matched19/65AO converged CC dense/native solves;
+  UCC complete-consumer/moving-geometry results; CI/FCI actions, properties
+  and CAS/action scaling; recursive MP ranks/orders and EOM operator/response
+  measurements. These results retain their original source/hardware labels.
+  Aniline direct uses25.34% of the matched full peak but3.389x the warm time;
+  65AO native CC reduces compiler temporaries197.04→93.36MB but takes
+  23.18s versus1.00s warm. No universal speed or process-memory claim follows.
+- API/source review retains gradscf.ao2mo as a peer package, shared solvers,
+  dense reference paths and explicit unsupported-mode guards. No duplicate
+  numerical engine or algorithm under reproducibility is added. All six
+  public examples remain ordinary scripts with no CLI. Correct CI's documented
+  CIS(D) default budget and compressed spin expectation; reconcile the public
+  EOM capability table and accepted explicit-device contract.
+- **Accept WF-30 and WF-32 within their finite documented scope.** Final ledger:
+  34/35 parents verified,37/37 children checked; WF-28 explicitly deferred by
+  the user and unimplemented. No mandatory engineering item remains open.
+  This is not a full-repository suite pass, arbitrary outer-AD memory bound,
+  all-basis/all-method GPU claim, disk-backend pass or large-molecule guarantee.
+  Keep the worktree and commits for review; no merge or push is authorized.

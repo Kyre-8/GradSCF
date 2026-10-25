@@ -61,7 +61,7 @@ correlation or unrestricted support for every excited-state sector.
 | CCS/CCD/CCSD and existing approximate CC/QCI models | Selected blocks; virtual dressing contractions avoid a mandatory full dressed Wvvvv. | Dense bare vvvv remains the ordinary fast path. The explicit native virtual action trades recomputation for storage; it is not universally faster. |
 | UCCD/UCCSD | Spatial-spin integral blocks and packed amplitude coordinates; energy and Lambda share a packed energy contraction. | The residual still expands dense spin amplitudes. The energy-callback optimization is not a fully blockwise UCC residual. |
 | CCSD(T) | Existing streamed triples panels retain first- and directional second-response support. | Upstream integrals, T2 and response state remain live. Existing third-derivative and variant-specific restrictions still apply. |
-| EOM-EE/IP/EA | Matrix-free right/left actions, shared non-Hermitian solvers and factored virtual dressings. | Current prepared EOM is restricted-reference CCSD. Native provider/outer-response budget integration is still being completed. |
+| EOM-EE/IP/EA | Matrix-free right/left actions, shared non-Hermitian solvers and factored virtual dressings. | Current prepared EOM is restricted-reference CCSD. Native provider and supported outer-response known-array phases share the budget. Measurements apply to their recorded cases, rather than every EOM sector and device combination. |
 | CIS and truncated CI | Selected integral kernels, compressed excitation/string topology and direct Hamiltonian action. | CI coefficients and Davidson state remain necessary. Internal orbital degeneracy and degeneracy of a selected CI root are different problems. |
 | FCI in a fixed active space | Core folding and active ERIs; tiled string actions share the solver budget. | An active a⁴ ERI and the chosen full CI space remain required. This is not selected CI or orbital-optimized CAS. |
 | RDMs and properties | Requested blocks or contracted observables avoid building an unrelated full spin 2-RDM. | Explicit full-RDM export still pays for that output. A fixed-MO property response is not automatically a relaxed nuclear derivative. |
@@ -113,7 +113,7 @@ Related runnable examples are [restricted CC](cc/restricted_ground.py),
 [open-shell CI/CC](cc/open_shell_ground.py), [CI](ci/restricted_ci.py),
 [active-space FCI](fci/active_space.py) and [EOM](cc/eom_ccsd.py). The engineering
 [acceptance ledger](../src/gradscf/WAVEFUNCTION_MEMORY_PLAN.md) distinguishes
-completed component gates from remaining whole-method and device validation.
+component gates, finite whole-method/device measurements and capability limits.
 
 The following public examples were executed in separate CPU/float64 processes
 on 2026-10-24 (AMD EPYC 9654, JAX 0.10.0, native library built on the same node).
@@ -138,3 +138,26 @@ MP2's unchanged 1e-8 threshold. The six other examples were retained after the
 guide's SCF stopping criteria were tightened. These small examples demonstrate
 interfaces and derivative consistency; large-system and GPU validation remain
 separate acceptance gates.
+
+On 2026-10-25, the final focused device audit passed 6 CPU and 11 CUDA tests
+on one allocated V100-SXM2-32GB (JAX 0.10.0, float64). It covered R/U MP2 and
+CC ground/Lambda joint responses, CI actions and contracted observables,
+FCI Davidson energy/gradient/HVP, CI energy/coefficient derivatives, and MP4
+with exactly degenerate occupied/virtual orbitals. Tests explicitly reject
+nonfinite numerical outputs and check GPU placement. These selected cases
+are additional evidence, rather than a full-suite or all-method GPU claim.
+
+The existing three-orbital, one-occupied-orbital tensor MP4 benchmark (seed
+2318) also ran through the public `mp.run_mp` entry on that V100. With an
+explicit outer JIT, lowering took 0.680 s, compilation 4.437 s and first execution
+6.610 ms. Five synchronized warm samples ranged from 0.381 to 3.791 ms;
+the median was 0.414 ms. XLA reported 4,206,640 temporary bytes. The benchmark
+reported peak child RSS of 1,065,900 KiB; one-second device observations reached
+1,358 MiB. These fields measure different things, and sampling can miss short
+device peaks. This tiny fixed-input point supplies CUDA timing evidence; it
+does not establish a GPU speedup or a large-molecule memory limit.
+
+The agreed engineering plan is closed with 34 parent tasks verified and the
+optional disk backend explicitly deferred. Conventional dense paths remain
+available. Larger required amplitudes, CI spaces, library allocations and
+recomputation costs still determine which calculations are practical.

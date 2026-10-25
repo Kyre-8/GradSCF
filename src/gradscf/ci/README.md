@@ -102,10 +102,11 @@ matrix. `CIS(..., max_memory=1024.)` budgets this path in decimal MB; frozen
 spaces, singlet/triplet selection and unit-norm CIS amplitudes are preserved.
 Explicit-integral CI, CIS, UCIS and CIS(D) facades pass the same budget through
 their source arrays, preparation, action and common solver. The pure
-`solve_ci`, `solve_cis`, `solve_ucis` and `cis_d_correction` functions accept
-`max_memory` and `reserved_bytes`; their default `max_memory=None` preserves the
-original unplanned call. Supply a budget explicitly when using these functions
-inside a larger workflow. Existing MO tensors remain part of that budget;
+`solve_ci`, `solve_cis` and `solve_ucis` functions accept `max_memory` and
+`reserved_bytes`; their default `max_memory=None` preserves the original
+unplanned call. `cis_d_correction` instead defaults to the shared 60000 MB
+planning budget. Supply the encompassing workflow budget and caller reservation
+explicitly when composing these routines. Existing MO tensors remain part of that budget;
 passing them does not provide an out-of-core integral representation.
 AO-CIS reserves the existing TD action's planned share during its eigensolve.
 These are known-array estimates, with runtime headroom, rather than a bound on
@@ -214,9 +215,10 @@ the Fock matrix is diagonal and consistent with the supplied orbital energies.
   remains limited to 2048 determinants. These exported
   `hamiltonian_action`/`hamiltonian_matrix` oracle functions retain their static
   connection/dimension guards and do not accept a caller memory budget.
-  `spin_square` currently uses the density exporter with its default budget;
-  it does not forward a facade's custom budget. The iterative solver and
-  explicit density/expectation interfaces have the budget controls above.
+  `spin_square` contracts compressed exchange/sigma kernels without exporting
+  a complete RDM. The facade forwards its budget and caller reservation;
+  the compressed kernels and action still have their own required storage.
+  Iterative solver and explicit density/expectation controls are described above.
 - GHF, complex orbitals, periodic CI, and automatic
   spin selection for general CI roots are not implemented.
 - Named `CISD(T)` / `CISDT(Q)` corrections are not exported. They need a specific

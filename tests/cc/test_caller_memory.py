@@ -114,7 +114,11 @@ def test_roomy_ground_and_lambda_budget_preserves_joint_response(unrestricted):
         return jax.jit(lambda x: jax.jvp(jax.value_and_grad(lambda y: value(y, budget)),
                                         (x,), (direction,)))(jnp.asarray(.02))
     for actual, expected in zip(jax.tree.leaves(bundle(32.)), jax.tree.leaves(bundle(None))):
-        np.testing.assert_allclose(actual, expected, atol=3e-10, rtol=3e-8)
+        assert np.isfinite(np.asarray(actual)).all()
+        assert np.isfinite(np.asarray(expected)).all()
+        if jax.default_backend() == 'gpu':
+            assert actual.devices() == {jax.devices('gpu')[0]}
+        np.testing.assert_allclose(actual, expected, atol=3e-10, rtol=3e-8, equal_nan=False)
 
 
 def _native_frame():

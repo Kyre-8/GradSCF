@@ -74,6 +74,8 @@ def test_batched_integral_state_jvp_vjp_hvp(unrestricted):
 
     actual, expected = (jax.jit(lambda: response(batch))() for batch in (True, False))
     for a, e in zip(jax.tree.leaves(actual), jax.tree.leaves(expected)):
+        assert np.isfinite(np.asarray(a)).all()
+        assert np.isfinite(np.asarray(e)).all()
         if os.environ.get('GRADSCF_TEST_GPU') == '1':
             assert a.devices() == {jax.devices('gpu')[0]}
-        np.testing.assert_allclose(a, e, atol=3e-12, rtol=3e-12)
+        np.testing.assert_allclose(a, e, atol=3e-12, rtol=3e-12, equal_nan=False)

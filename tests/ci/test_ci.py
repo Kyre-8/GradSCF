@@ -1,4 +1,6 @@
 """Independent molecular references for the restricted CI hierarchy (CPU/x64)."""
+import os
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -122,7 +124,10 @@ def test_ci_integral_gradient_matches_finite_difference(h4, solver):
 
     ad = jax.jit(jax.grad(energy))(0.)
     fd = (energy(1e-4) - energy(-1e-4)) / 2e-4
-    np.testing.assert_allclose(ad, fd, atol=2e-7, rtol=2e-7)
+    assert np.isfinite(np.asarray(ad)).all() and np.isfinite(np.asarray(fd)).all()
+    if os.environ.get('GRADSCF_TEST_GPU') == '1':
+        assert ad.devices() == {jax.devices('gpu')[0]}
+    np.testing.assert_allclose(ad, fd, atol=2e-7, rtol=2e-7, equal_nan=False)
 
 
 def test_facade_frozen_cisd_and_high_rank(h4):
@@ -204,7 +209,10 @@ def test_implicit_ci_coefficient_response(h4):
         return c[0]**2
     ad = jax.jit(jax.grad(reference_weight))(0.)
     fd = (reference_weight(1e-4)-reference_weight(-1e-4))/2e-4
-    np.testing.assert_allclose(ad, fd, atol=2e-7, rtol=2e-6)
+    assert np.isfinite(np.asarray(ad)).all() and np.isfinite(np.asarray(fd)).all()
+    if os.environ.get('GRADSCF_TEST_GPU') == '1':
+        assert ad.devices() == {jax.devices('gpu')[0]}
+    np.testing.assert_allclose(ad, fd, atol=2e-7, rtol=2e-6, equal_nan=False)
 
 
 def test_unconverged_eigenvalue_derivative_is_not_silently_zero(h4):

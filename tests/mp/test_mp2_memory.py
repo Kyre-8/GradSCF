@@ -84,5 +84,9 @@ def test_budgeted_mp2_preserves_degenerate_joint_response(unrestricted, monkeypa
     bundle = lambda budgeted: jax.jit(lambda x: jax.jvp(
         jax.value_and_grad(lambda y: energy(y, budgeted)), (x,), (1.,)))(0.)
     for actual, expected in zip(jax.tree.leaves(bundle(True)), jax.tree.leaves(bundle(False))):
-        np.testing.assert_allclose(actual, expected, atol=3e-12, rtol=3e-11)
+        assert np.isfinite(np.asarray(actual)).all()
+        assert np.isfinite(np.asarray(expected)).all()
+        if jax.default_backend() == 'gpu':
+            assert actual.devices() == {jax.devices('gpu')[0]}
+        np.testing.assert_allclose(actual, expected, atol=3e-12, rtol=3e-11, equal_nan=False)
     assert calls and all(maximum == 2. and resident >= 4096 for maximum, resident in calls)

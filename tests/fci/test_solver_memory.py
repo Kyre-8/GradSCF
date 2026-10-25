@@ -1,5 +1,6 @@
 """Public FCI solver/action budgets share the existing CPU float64 tiles."""
 import importlib
+import os
 
 import jax
 import jax.numpy as jnp
@@ -174,11 +175,19 @@ def test_low_level_small_tile_energy_gradient_and_hvp_match_dense_oracle(method)
     expected = jax.value_and_grad(oracle)(point)
     actual_hvp = jax.jit(lambda t: jax.jvp(jax.grad(selected), (t,), (jnp.ones_like(t),))[1])(point)
     expected_hvp = jax.jvp(jax.grad(oracle), (point,), (jnp.ones_like(point),))[1]
-    np.testing.assert_allclose(actual, expected, atol=3e-9, rtol=3e-8)
-    np.testing.assert_allclose(actual_hvp, expected_hvp, atol=3e-8, rtol=3e-7)
+    for observed, reference in zip(jax.tree.leaves((actual, actual_hvp)),
+                                    jax.tree.leaves((expected, expected_hvp))):
+        assert np.isfinite(np.asarray(observed)).all()
+        assert np.isfinite(np.asarray(reference)).all()
+        if os.environ.get('GRADSCF_TEST_GPU') == '1':
+            assert observed.devices() == {jax.devices('gpu')[0]}
+    np.testing.assert_allclose(actual, expected, atol=3e-9, rtol=3e-8, equal_nan=False)
+    np.testing.assert_allclose(actual_hvp, expected_hvp, atol=3e-8, rtol=3e-7, equal_nan=False)
     step = 1e-4
     finite_difference = (selected(point+step)-selected(point-step))/(2*step)
-    np.testing.assert_allclose(actual[1], finite_difference, atol=3e-8, rtol=3e-7)
+    assert np.isfinite(np.asarray(finite_difference)).all()
+    np.testing.assert_allclose(actual[1], finite_difference, atol=3e-8, rtol=3e-7,
+                               equal_nan=False)
 
 
 @pytest.mark.parametrize("method", ["make_rdm1", "make_rdm12", "trans_rdm12", "spin_square"])

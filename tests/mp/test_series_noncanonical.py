@@ -1,4 +1,6 @@
 """MP coefficients and their response in a smooth, noncanonical HF frame."""
+import os
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -61,15 +63,24 @@ def test_high_order_gradient_and_hvp_at_exact_internal_degeneracy(algorithm, ord
     value, derivative = jnp.sum(values), jnp.sum(derivatives)
     curvature = jax.jit(lambda x: jax.jvp(jax.grad(energy), (x,), (1.,))[1])(0.)
     assert np.isfinite([value, derivative, curvature]).all()
-    np.testing.assert_allclose(value, _reference(0., order).sum(), atol=2e-11)
+    for observed in (values, derivatives, value, derivative, curvature):
+        assert np.isfinite(np.asarray(observed)).all()
+        if os.environ.get('GRADSCF_TEST_GPU') == '1':
+            assert observed.devices() == {jax.devices('gpu')[0]}
+    reference = _reference(0., order)
+    assert np.isfinite(reference).all()
+    np.testing.assert_allclose(value, reference.sum(), atol=2e-11, equal_nan=False)
     for step in (1e-3, 3e-4):
         coefficient_samples = [_reference(x, order) for x in (step, 0., -step)]
+        assert np.isfinite(np.asarray(coefficient_samples)).all()
         np.testing.assert_allclose(derivatives,
-            (coefficient_samples[0]-coefficient_samples[2])/(2*step), atol=2e-12, rtol=2e-5)
+            (coefficient_samples[0]-coefficient_samples[2])/(2*step), atol=2e-12, rtol=2e-5,
+            equal_nan=False)
         plus, zero, minus = [sample.sum() for sample in coefficient_samples]
-        np.testing.assert_allclose(derivative, (plus-minus)/(2*step), atol=2e-9, rtol=2e-6)
+        np.testing.assert_allclose(derivative, (plus-minus)/(2*step), atol=2e-9, rtol=2e-6,
+                                   equal_nan=False)
         np.testing.assert_allclose(curvature, (plus-2*zero+minus)/step**2,
-                                   atol=2e-8, rtol=2e-4)
+                                   atol=2e-8, rtol=2e-4, equal_nan=False)
 
 
 def test_noncanonical_series_still_rejects_zero_excitation_denominator():

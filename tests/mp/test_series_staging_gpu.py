@@ -30,10 +30,17 @@ def test_series_gpu_outputs_and_nested_response():
     for leaf in jax.tree.leaves((result, value, tangent, adjoint, curvature)):
         assert leaf.devices() == {devices[0]}
     assert result.valid and result.t2 is not None and result.wavefunction_coefficients is not None
+    for leaf in jax.tree.leaves((result.corrections, value, result.t2,
+                                result.wavefunction_coefficients, tangent, adjoint, curvature)):
+        assert np.isfinite(np.asarray(leaf)).all()
     # Frozen CPU reference of this deterministic three-orbital fixture, Hartree.
     expected = np.array([-2.0311098517910836e-6, 6.1549725205459445e-9,
                          -2.4267943368525522e-11])
-    np.testing.assert_allclose(result.corrections, expected, atol=2e-14, rtol=1e-9)
+    assert np.isfinite(expected).all()
+    np.testing.assert_allclose(result.corrections, expected, atol=2e-14, rtol=1e-9,
+                               equal_nan=False)
     orders = np.arange(2, 5)
-    np.testing.assert_allclose([tangent, adjoint], np.sum(orders*expected), atol=2e-14)
-    np.testing.assert_allclose(curvature, .2*np.sum(orders*(orders-1)*expected), atol=2e-14)
+    np.testing.assert_allclose([tangent, adjoint], np.sum(orders*expected), atol=2e-14,
+                               equal_nan=False)
+    np.testing.assert_allclose(curvature, .2*np.sum(orders*(orders-1)*expected), atol=2e-14,
+                               equal_nan=False)
