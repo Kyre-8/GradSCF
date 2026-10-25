@@ -876,7 +876,13 @@ def _build_restricted_response_operator_data(
         )
         grid_response_tensor = getattr(resolved_xc, "grid_response_tensor", None)
         grid_response_hvp = getattr(resolved_xc, "grid_response_hvp", None)
-        if callable(grid_response_hvp):
+        ao_kernel_action = getattr(resolved_xc, "ao_kernel_action", None)
+        if callable(ao_kernel_action):
+            def xc_response_action_fn(values):
+                tangent = _restricted_transition_density(orbo, orbv, values, bottom=False)
+                response = jax.lax.map(lambda d: ao_kernel_action(molecule, d), tangent)
+                return _restricted_project_response(response, orbo, orbv, bottom=False)
+        elif callable(grid_response_hvp):
             feature_kind = normalize_response_feature_kind(
                 getattr(resolved_xc, "response_feature_kind", None),
                 default="LDA",
