@@ -30,6 +30,7 @@ def put_restricted_molecule_on_device(
     return replace(
         molecule,
         ao=jax.device_put(molecule.ao, device),
+        grid_ao=(None if molecule.grid_ao is None else jax.device_put(molecule.grid_ao, device)),
         dipole_integrals=jax.device_put(molecule.dipole_integrals, device),
         rep_tensor=jax.device_put(molecule.rep_tensor, device),
         mo_coeff=jax.device_put(molecule.mo_coeff, device),
@@ -37,6 +38,12 @@ def put_restricted_molecule_on_device(
         mo_energy=jax.device_put(molecule.mo_energy, device),
         rdm1=jax.device_put(molecule.rdm1, device),
         h1e=jax.device_put(molecule.h1e, device),
+        overlap_matrix=(
+            None if molecule.overlap_matrix is None else jax.device_put(molecule.overlap_matrix, device)
+        ),
+        fock_matrix=(
+            None if molecule.fock_matrix is None else jax.device_put(molecule.fock_matrix, device)
+        ),
         atom_coords=(
             None
             if getattr(molecule, "atom_coords", None) is None
@@ -49,6 +56,9 @@ def put_restricted_molecule_on_device(
         ),
         ao_deriv1=(
             None if molecule.ao_deriv1 is None else jax.device_put(molecule.ao_deriv1, device)
+        ),
+        ao_laplacian=(
+            None if molecule.ao_laplacian is None else jax.device_put(molecule.ao_laplacian, device)
         ),
         hfx_local=(
             None if molecule.hfx_local is None else jax.device_put(molecule.hfx_local, device)
@@ -131,6 +141,7 @@ def put_molecule_on_device(
 
     for name in (
         "ao",
+        "grid_ao",
         "dipole_integrals",
         "rep_tensor",
         "mo_coeff",
@@ -141,6 +152,8 @@ def put_molecule_on_device(
         "atom_coords",
         "atom_charges",
         "overlap_matrix",
+        "fock_matrix",
+        "ao_laplacian",
         "hfx_local",
         "hfx_fxx",
         "hfx_nu",

@@ -110,11 +110,13 @@ def test_sextuple_block_action_matches_determinant_vector():
     np.testing.assert_allclose(actual,expected,atol=2e-11,rtol=0.)
 
 
-def test_dense_expansion_capacity_precedes_allocation():
+@pytest.mark.parametrize("packed_only", [False, True])
+def test_dense_expansion_capacity_precedes_allocation(packed_only):
     from gradscf.mp._tensor import make_tensor_space
     with pytest.raises(ValueError, match="tensor"):
         make_tensor_space(19, 5, frozen=1, max_excitation=4, max_determinants=1_000_000,
-                          max_tensor_elements=2_000_000)
+                          max_tensor_elements=10 if packed_only else 2_000_000,
+                          packed_only=packed_only)
 
 
 def test_reference_only_space_builds_no_unused_integral_nodes():
@@ -150,8 +152,12 @@ def test_tensor_mp_uses_same_lifting_and_matches_series(order, unrestricted):
     h = canonical if unrestricted else canonical[0]
     old_cfg = mp.MPConfig(order=order, algorithm="series", with_coefficients=True)
     new_cfg = mp.MPConfig(order=order, algorithm="tensor", with_coefficients=True)
-    old = mp.run_mp(h,g,nocc=no,nuclear_repulsion=.7,config=old_cfg)
-    new = mp.run_mp(h,g,nocc=no,nuclear_repulsion=.7,config=new_cfg)
+    # Compile each complete recurrence rather than thousands of eager
+    # fragments; retain every order and wave coefficient in the comparison.
+    def evaluate(config):
+        return jax.jit(lambda hh, gg: mp.run_mp(hh, gg, nocc=no,
+            nuclear_repulsion=.7, config=config))(h, g)
+    old, new = evaluate(old_cfg), evaluate(new_cfg)
     assert old.valid and new.valid
     np.testing.assert_allclose(new.corrections, old.corrections, atol=2e-11, rtol=0.)
     np.testing.assert_allclose(new.total_energy, old.total_energy, atol=2e-11, rtol=0.)

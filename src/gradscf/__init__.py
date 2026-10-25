@@ -12,6 +12,7 @@ from typing import Any
 
 
 _NAMESPACE_EXPORTS = {
+    "ao2mo",
     "bse",
     "gw",
     "cc",

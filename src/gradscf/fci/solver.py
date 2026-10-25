@@ -2,10 +2,15 @@
 from typing import NamedTuple
 import jax
 import jax.numpy as jnp
-from gradscf.integrals.molecular.ao2mo import validate_integrals
+from gradscf._memory import (DEFAULT_MAX_MEMORY_MB, array_storage_bytes,
+                             resolve_memory_mb, validate_reserved_bytes)
+from gradscf.ao2mo import validate_integrals
 from ..solvers import EigenSolverConfig, EigenResponseConfig, LinearOperator, solve_hermitian
 from ..solvers.diagnostics import require_converged_derivative
-from .hamiltonian import DEFAULT_WORKSPACE, build_hamiltonian, coefficient_array
+from ..solvers.eigen.davidson import _solver_dtype
+from ..solvers.memory import plan_hermitian
+from .hamiltonian import (DEFAULT_WORKSPACE, _action_tiles, _link_storage_bytes,
+                           build_hamiltonian, coefficient_array)
 
 
 class FCIResult(NamedTuple):
@@ -43,22 +48,72 @@ def _physical_integrals_valid(h, g):
             & (jnp.max(jnp.abs(g-g.transpose(2,3,0,1)), initial=0.) <= tol))
 
 
+def _plan_fci_memory(space, dtype, config, max_memory, *, arrays=(), ci0=None,
+                      probes=None, reserved_bytes=0):
+    """Reserve shared Ritz arrays before integral absorption or CI guesses.
+
+    Preparation scratch is conservatively reserved alongside iteration state;
+    this first joint plan does not claim optimal phase-aware lifetimes.
+    """
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    columns = 0
+    if ci0 is not None:
+        c = jnp.asarray(ci0)
+        if c.shape in (space.shape, (space.size,)):
+            columns = 1
+        elif c.ndim == 3 and c.shape[1:] == space.shape and c.shape[0]:
+            columns = c.shape[0]
+        else:
+            raise ValueError("ci0 must be one CI matrix or a stack of CI matrices")
+        if jnp.iscomplexobj(c):
+            raise ValueError("ci0 must be real")
+    # Davidson promotes float32 vectors when x64 is enabled. Its actions and
+    # signs therefore need the promoted dtype even for float32 input integrals.
+    dtype = _solver_dtype(dtype) if config.method == 'davidson' else jnp.dtype(dtype)
+    itemsize = jnp.dtype(dtype).itemsize
+    resident = (reserved_bytes + array_storage_bytes(*arrays, ci0, probes)
+                + (3*space.norb**4 + space.size)*itemsize
+                + _link_storage_bytes(space, dtype))
+    return plan_hermitian(space.size, dtype, config, max_memory,
+        resident_bytes=resident, operator_min_bytes=6*space.norb**2*itemsize,
+        # Original/promoted input plus the three immutable output versions
+        # charged by the action's own planner, even if XLA later aliases them.
+        operator_bytes_per_column=5*space.size*itemsize,
+        initial_columns=columns if config.method == 'davidson' else 0,
+        device=next((getattr(a, 'device', None) for a in arrays
+                     if getattr(a, 'device', None) is not None), None))
+
+
 def solve_fci(h1, eri, space, *, ecore=0., config=None, response=None,
-              ci0=None, probes=None, max_workspace_elements=DEFAULT_WORKSPACE):
+              ci0=None, probes=None, max_workspace_elements=DEFAULT_WORKSPACE,
+              max_memory=DEFAULT_MAX_MEMORY_MB, reserved_bytes=0):
     """Solve a fixed electron/spatial-orbital space; numerical configs are shared.
 
     Coefficients have (nroots,nalpha_strings,nbeta_strings) shape. A subspace
     response instead returns only energy_sum and projector probes, including
     internal degeneracy. The constant ecore is kept out of spectral gap tests.
+    max_memory jointly plans known preparation, primal eigensolver and operator
+    arrays in decimal MB. Implicit response/AD and allocator residency remain
+    separate lifetimes; this is not a complete process-memory hard limit.
+    reserved_bytes charges known caller-owned arrays that remain live.
     """
+    max_memory = resolve_memory_mb(max_memory)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     cfg = config or EigenSolverConfig(atol=1e-10, max_subspace=40)
     policy = response
     h,g = validate_integrals(h1,eri,space.norb)
     core = jnp.asarray(ecore)
     if core.shape != () or jnp.iscomplexobj(core):
         raise ValueError("ecore must be a real scalar")
+    dtype = jnp.result_type(h,g)
+    cfg, solver_bytes, batch_size = _plan_fci_memory(space,dtype,cfg,max_memory,
+        arrays=(h,g,core),ci0=ci0,probes=probes,reserved_bytes=reserved_bytes)
+    _action_tiles(space,dtype,1,max_workspace_elements,max_memory,
+        arrays=(h,g,core,ci0,probes),
+        extra_bytes=reserved_bytes+solver_bytes+(3*g.size+2*space.size)*jnp.dtype(dtype).itemsize)
     physical = _physical_integrals_valid(h,g) & jnp.isfinite(core)
-    original = build_hamiltonian(h,g,space,max_workspace_elements=max_workspace_elements)
+    original = build_hamiltonian(h,g,space,max_workspace_elements=max_workspace_elements,
+        max_memory=max_memory,reserved_bytes=reserved_bytes+solver_bytes+array_storage_bytes(core,ci0,probes))
     # closure_convert hoists inexact leaves, not a captured boolean tracer.
     # Keep the same NaN guard explicit under nested JIT; its tangent is zero.
     physical_gate = physical.astype(original.dtype)
@@ -90,8 +145,13 @@ def solve_fci(h1, eri, space, *, ecore=0., config=None, response=None,
             initial = jax.random.normal(jax.random.PRNGKey(cfg.seed),(space.size,width),dtype=op.dtype) / jnp.sqrt(float(space.size))
             initial = initial.at[:,:c.shape[0]].set(
                 c.reshape(c.shape[0],space.size).T + 1e-3*initial[:,:c.shape[0]])
+    # The action retains h/g, absorbed ERIs and string links throughout both
+    # primal and implicit response. Forward the original budget to that owner.
+    shared_resident = (reserved_bytes+array_storage_bytes(h,g,core,ci0,probes)
+                       +g.nbytes+_link_storage_bytes(space,op.dtype))
     solved = solve_hermitian(op, config=cfg, response=policy, probes=probes,
-                             initial_vectors=initial)
+        initial_vectors=initial, _batch_size=batch_size,
+        max_memory=max_memory,reserved_bytes=shared_resident)
     valid = solved.response_valid & physical
     solved = solved._replace(converged=solved.converged & physical, response_valid=valid)
     energies = coefficients = total_sum = None

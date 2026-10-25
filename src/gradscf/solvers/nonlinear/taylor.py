@@ -16,6 +16,10 @@ class TaylorResult(NamedTuple):
     converged: object
 
 
+def _jet(fun, primals, coefficients):
+    return jet(fun, primals, coefficients, factorial_scaled=False)
+
+
 def root_taylor(residual, solution, parameter=0., *, order, config=None, valid=True):
     """Solve J0*x_n = -[s**n]R(x0+sum_{j<n}x_j*s**j, parameter+s).
 
@@ -38,7 +42,7 @@ def root_taylor(residual, solution, parameter=0., *, order, config=None, valid=T
     for n in range(1, order + 1):
         series = (tuple(coefficients + [jnp.zeros_like(x)]),
                   (jnp.ones_like(s),) + (jnp.zeros_like(s),) * (n-1))
-        _, terms = jet(residual, (x, s), series, factorial_scaled=False)
+        _, terms = _jet(residual, (x, s), series)
         rhs = -terms[-1]
         result = solve_linear(op, rhs, config=cfg)
         # Avoid custom_linear_solve auxiliary tangent-batch axes under jacfwd.

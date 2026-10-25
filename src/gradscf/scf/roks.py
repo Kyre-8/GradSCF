@@ -102,6 +102,7 @@ def run_roks_from_integrals(
     nuclear_repulsion: float | Array, ao: Array, ao_deriv1: Array, grid_weights: Array,
     init_density_alpha: Array | None = None, init_density_beta: Array | None = None,
     init_mo_coeff: Array | None = None, config: ROKSConfig | None = None,
+    grid_ao: Any | None = None,
 ) -> ROKSResult:
     """Solve high-spin, common-orbital ROKS using real AO integrals.
 
@@ -141,6 +142,7 @@ def run_roks_from_integrals(
             density_a=density[0], density_b=density[1], ao=ao, ao_deriv1=deriv,
             weights=weights, h=h, eri=eri, df_factors=None, enuc=enuc,
             alpha=alpha, cfg=cfg, xc_kind=kind,
+            grid_ao=grid_ao,
         )
         fs = jnp.stack([fa, fb])
         major, minor = (0, 1) if alpha_major else (1, 0)
@@ -239,7 +241,9 @@ class ROKS(_BaseKS):
     def _config(self) -> ROKSConfig:
         return ROKSConfig(xc_spec=self.xc, max_cycle=self.max_cycle, conv_tol=self.conv_tol,
                           conv_tol_density=self.conv_tol_density, conv_tol_grad=self.conv_tol_grad,
-                          damping=self.damp, level_shift=self.level_shift)
+                          damping=self.damp, level_shift=self.level_shift,
+                          max_memory=self.max_memory,
+                          grid_block_size=self.grid_block_size, grid_max_memory=self.grid_max_memory)
 
     def kernel(self) -> Any:
         self._configure_jax_cache()
@@ -256,6 +260,7 @@ class ROKS(_BaseKS):
         )
         kwargs = dict(overlap=inputs.overlap, hcore=inputs.hcore, eri=inputs.eri,
                       ao=inputs.ao, ao_deriv1=inputs.ao_deriv1, grid_weights=inputs.grid_weights,
+                      grid_ao=inputs.grid_ao,
                       nuclear_repulsion=inputs.nuclear_repulsion,
                       init_density_alpha=inputs.init_density_alpha,
                       init_density_beta=inputs.init_density_beta)

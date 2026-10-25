@@ -5,6 +5,39 @@ import numpy as np
 import pytest
 
 
+def test_mp2_geometry_at_nitrogen_pi_degeneracy_matches_pyscf_gradient():
+    from gradscf import gto, scf
+    from gradscf_tools.correlated_response import CorrelatedEnergy
+    pytest.importorskip("pyscf")
+    from pyscf import gto as pgto, mp as pmp, scf as pscf
+
+    atom = "N 0 0 -1.04; N 0 0 1.04"
+    mol = gto.M(atom=atom, basis="sto-3g", unit="Bohr", cart=True)
+    # The normalized STO-3G AOs give Tr[D S] = 14 for this rotation-symmetric
+    # seed. Select the usual closed-shell branch: the default hcore seed can
+    # instead converge to a higher, symmetry-broken stationary solution.
+    mf = scf.RHF(mol, integral_backend="native", conv_tol=1e-13,
+                 conv_tol_density=1e-11, conv_tol_grad=1e-10, max_cycle=250,
+                 init_guess=1.4*np.eye(10)).run()
+    assert np.min(np.abs(np.diff(np.asarray(mf.mo_energy)))) < 1e-9
+    model = CorrelatedEnergy(mf, "mp2")
+    value, gradient = jax.jit(jax.value_and_grad(model))(model.coordinates)
+    assert np.isfinite(value) and np.isfinite(np.asarray(gradient)).all()
+    reference = pscf.RHF(pgto.M(atom=atom, basis="sto-3g", unit="Bohr", cart=True, verbose=0))
+    reference.conv_tol, reference.conv_tol_grad = 1e-13, 1e-11
+    reference.kernel()
+    assert reference.converged
+    correlated = pmp.MP2(reference).run()
+    np.testing.assert_allclose(value, correlated.e_tot, atol=3e-9, rtol=0)
+    np.testing.assert_allclose(gradient, correlated.nuc_grad_method().kernel(), atol=3e-7, rtol=0)
+    direction = jnp.array([[0., 0., -.5], [0., 0., .5]])
+    for step in (3e-4, 1e-4):
+        finite = (model(model.coordinates+step*direction)
+                  - model(model.coordinates-step*direction))/(2*step)
+        np.testing.assert_allclose(jnp.sum(gradient*direction), finite, atol=3e-7, rtol=2e-5)
+    np.testing.assert_allclose(gradient.sum(axis=0), 0., atol=2e-8, rtol=0)
+
+
 @pytest.mark.parametrize("method", ["mp2", "ccsd"])
 @pytest.mark.parametrize("unrestricted", [False, True])
 def test_correlated_geometry_matches_pyscf_and_gradient_differences(method, unrestricted):

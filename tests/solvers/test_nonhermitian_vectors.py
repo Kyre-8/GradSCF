@@ -19,7 +19,7 @@ def family(t):
     return frame @ jnp.diag(energies) @ jnp.linalg.inv(frame)
 
 
-def solved(t, *, method="direct", max_dense=4, operator=False):
+def solved(t, *, method="direct", max_dense=4, operator=False, max_memory=None):
     a = family(t)
     source = (LinearOperator(a.shape, a.dtype, lambda v: a @ v)
               if operator else a)
@@ -27,7 +27,8 @@ def solved(t, *, method="direct", max_dense=4, operator=False):
         config=NonHermitianSolverConfig(nroots=2, atol=1e-11),
         vector_response=True,
         response_config=LinearSolverConfig(method=method, rtol=1e-11,
-                                          restart=4, max_dense=max_dense))
+                                          restart=4, max_dense=max_dense),
+        max_memory=max_memory)
 
 
 def observable(t, **kwargs):
@@ -79,11 +80,12 @@ def test_nested_jit_and_second_derivative_retain_live_pairs():
     np.testing.assert_allclose(forward, hessian, atol=2e-10)
 
 
-def test_per_root_capacity_not_joint_root_count():
+@pytest.mark.parametrize('budget', [None, 4.])
+def test_per_root_capacity_not_joint_root_count(budget):
     # n=3, two selected roots: right response is two independent 4x4 blocks.
-    assert np.all(np.isfinite(jax.jvp(observable, (.1,), (1.,))[1]))
+    assert np.all(np.isfinite(jax.jvp(lambda t: observable(t, max_memory=budget), (.1,), (1.,))[1]))
     with pytest.raises(ValueError, match="max_dense"):
-        jax.jvp(lambda t: observable(t, max_dense=3), (.1,), (1.,))
+        jax.jvp(lambda t: observable(t, max_dense=3, max_memory=budget), (.1,), (1.,))
 
 
 @pytest.mark.parametrize("matrix", [
@@ -91,12 +93,14 @@ def test_per_root_capacity_not_joint_root_count():
     [[1., 1., 0.], [0., 1., 0.], [0., 0., 3.]],
     [[0., -1., 0.], [1., 0., 0.], [0., 0., 3.]],
 ])
-def test_invalid_pairs_reject_vector_derivatives(matrix):
+@pytest.mark.parametrize('budget', [None, 4.])
+def test_invalid_pairs_reject_vector_derivatives(matrix, budget):
     a = jnp.asarray(matrix)
     def properties(t):
         result = solve_nonhermitian(a*t,
             config=NonHermitianSolverConfig(nroots=1), vector_response=True,
-            response_config=LinearSolverConfig(method="direct", max_dense=4))
+            response_config=LinearSolverConfig(method="direct", max_dense=4),
+            max_memory=budget)
         return jnp.sum(result.right_vectors)+jnp.sum(result.left_vectors)
     assert not np.isfinite(jax.jvp(properties, (1.,), (1.,))[1])
     assert not np.isfinite(jax.grad(properties)(1.))

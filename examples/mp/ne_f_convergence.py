@@ -22,7 +22,7 @@ jax.config.update("jax_enable_x64", True)
 from gradscf import mp
 from gradscf.integrals.basis import prepare_basis
 from gradscf.integrals import make_plan
-from gradscf.integrals.molecular.ao2mo import transform_integrals
+from gradscf.ao2mo import transform_integrals
 from gradscf.scf.rhf import run_rhf_from_integrals, RHFConfig
 from _pyscf_reference import symmetry_reference, rs_coefficients
 

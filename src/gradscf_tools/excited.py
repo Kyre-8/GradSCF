@@ -12,7 +12,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from gradscf import ci
-from gradscf.integrals.molecular.ao2mo import transform_integrals
+from gradscf.ao2mo import transform_integrals
 from .molecular_ep import NativeRHF
 from .molecular_response import MolecularEnergy
 

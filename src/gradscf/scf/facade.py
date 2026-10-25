@@ -7,6 +7,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 
+from .._memory import DEFAULT_MAX_MEMORY_MB, validate_memory_mb
 from ..data.molecule import MoleculeSpec
 from ..tools.jax_runtime import configure_jax_persistent_cache
 from .builders import (
@@ -67,6 +68,9 @@ class _BaseKS:
     integral_backend: Literal["native", "jax", "cpu", "libcint"] = "cpu"
     geometry_grad_policy: Literal["analytic", "error", "zero"] = "analytic"
     grid_ao_backend: Literal["jax"] = "jax"
+    grid_block_size: int = 0
+    grid_max_memory: float | None = None
+    max_memory: float = field(default=DEFAULT_MAX_MEMORY_MB, kw_only=True)
     execution_device: Literal["auto", "cpu", "gpu"] = "auto"
     init_guess: Any = "hcore"
     chkfile: str | None = None
@@ -88,6 +92,11 @@ class _BaseKS:
     _cached_scf_key: Any | None = field(default=None,init=False,repr=False)
     _cached_response_key: Any | None = field(default=None,init=False,repr=False)
     _cached_orbital_key: Any | None = field(default=None, init=False, repr=False)
+
+    def __post_init__(self):
+        self.max_memory = validate_memory_mb(self.max_memory)
+        if self.grid_max_memory is not None:
+            self.grid_max_memory = validate_memory_mb(self.grid_max_memory, name="grid_max_memory")
 
     def _orbital_signature(self):
         from .reference import _array_signature
@@ -121,6 +130,7 @@ class _BaseKS:
         from .differentiable import DifferentiableSCF, DifferentiableSCFConfig
         from .energy import XCContribution, unrestricted_energy
         from .uks import _spin_jk_matrices
+        from ..integrals.backends.native.jk import _selected_jk
 
         if self.params is None:
             raise ValueError("External XC requires explicit params; use {} for a parameter-free Functional.")
@@ -134,7 +144,7 @@ class _BaseKS:
         initial = initializer._build_reference(spec)
         if isinstance(self, RKS):
             self._scf_inputs = initializer._scf_inputs
-        if initial.ao_laplacian is None:
+        if initial.ao_laplacian is None and getattr(initial, "grid_ao", None) is None:
             from ..integrals import basis_from_molecule_spec, evaluate_cartesian_ao_with_derivatives
             basis = basis_from_molecule_spec(spec, basis=self.mol.basis,
                 max_l=self.max_l, precompute_eri_groups=False)
@@ -150,12 +160,17 @@ class _BaseKS:
             eigenvalue_jitter=0., vxc_clip=float("inf")))
         state, info = solver.run(initial, self.xc, self.params)
         density_spin = jnp.asarray(state.rdm1)
-        eri = getattr(state, "eri_pair_matrix", None)
-        if eri is None or not int(jnp.asarray(eri).size):
-            eri = state.rep_tensor
-        _, coulomb, ka, kb = _spin_jk_matrices(
-            eri, density_spin[0], density_spin[1],
-            df_factors=getattr(state, "df_factors", None), with_k=False)
+        direct_basis = getattr(state, "direct_basis", None)
+        if callable(getattr(direct_basis, "get_jk", None)):
+            coulomb, _ = _selected_jk(direct_basis, density_spin.sum(axis=0), with_k=False)
+            ka = kb = jnp.zeros_like(coulomb)
+        else:
+            eri = getattr(state, "eri_pair_matrix", None)
+            if eri is None or not int(jnp.asarray(eri).size):
+                eri = state.rep_tensor
+            _, coulomb, ka, kb = _spin_jk_matrices(
+                eri, density_spin[0], density_spin[1],
+                df_factors=getattr(state, "df_factors", None), with_k=False)
         xc_energy = self.xc.energy_from_molecule(self.params, state)
         potential_spin = self.xc.potential(self.params, state, density_spin)
         total = unrestricted_energy(density_spin, state.h1e, coulomb, jnp.stack([ka, kb]),
@@ -336,6 +351,7 @@ class RKS(_BaseKS):
     df_max_rank: int | None = None
     auxbasis: str | None = None
     direct_scf_tol: float = 0.0
+    direct_scf_workers: int = 1
     compute_local_hfx_features: bool = False
     compute_local_hfx_aux: bool = False
     hfx_omega_values: tuple[float, ...] = (0.0, 0.4)
@@ -355,6 +371,10 @@ class RKS(_BaseKS):
             df_max_rank=self.df_max_rank,
             auxbasis=self.auxbasis,
             direct_scf_tol=self.direct_scf_tol,
+            direct_scf_workers=self.direct_scf_workers,
+            max_memory=self.max_memory,
+            grid_block_size=self.grid_block_size,
+            grid_max_memory=self.grid_max_memory,
         )
 
     def _build_reference(self, spec: MoleculeSpec) -> Any:
@@ -461,8 +481,10 @@ class RHF(RKS):
 @dataclass
 class UKS(_BaseKS):
     conv_tol_grad: float = 1e-7
-    jk_backend: Literal['full','df'] = 'full'
+    jk_backend: Literal['full','df','direct'] = 'full'
     auxbasis: str | None = None
+    direct_scf_tol: float = 0.0
+    direct_scf_workers: int = 1
 
     def _response_signature(self):
         # UKS builds the response container during SCF, without the optional
@@ -490,6 +512,11 @@ class UKS(_BaseKS):
             level_shift=self.level_shift,
             jk_backend=self.jk_backend,
             auxbasis=self.auxbasis,
+            direct_scf_tol=self.direct_scf_tol,
+            direct_scf_workers=self.direct_scf_workers,
+            max_memory=self.max_memory,
+            grid_block_size=self.grid_block_size,
+            grid_max_memory=self.grid_max_memory,
         )
 
     def _build_reference(self, spec: MoleculeSpec) -> Any:
@@ -538,7 +565,8 @@ class UKS(_BaseKS):
         return self
 
     def direct_scf(self) -> "UKS":
-        raise NotImplementedError("UKS direct SCF is not exposed by the current core solver.")
+        self.jk_backend = "direct"
+        return self
 
 
 @dataclass(frozen=True)

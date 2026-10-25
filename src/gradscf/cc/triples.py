@@ -9,17 +9,19 @@
 # Adapted from PySCF 2.9.0 cc/ccsd_t_slow.py; see NOTICE.md and LICENSE.pyscf.
 # Original author: Qiming Sun <osirpt.sun@gmail.com>
 # QCISD(T) weight/contractions: PySCF qcisd_t_slow, Qiming Sun and Timothy Berkelbach.
-"""CC/QCI noniterative triples; canonical streaming and opt-in CC tensor solve."""
+"""CC/QCI triples: canonical streaming, general tensor and panel response."""
 from math import isfinite
 from itertools import permutations
 import numpy as np
 import jax
 import jax.numpy as jnp
+from .._memory import tree_storage_bytes, validate_reserved_bytes, workspace_bytes
 from .integrals import prepare_integrals
 from .ground import METHODS
 from .amplitudes import AmplitudeSpace
 from .rccsd import residual
 from .types import TriplesResult
+from ._memory import preparation_reservation, triples_budget
 
 
 def _r3(w):
@@ -31,6 +33,35 @@ def _r3(w):
         - 2 * w.transpose(0, 2, 1)
         - 2 * w.transpose(1, 0, 2)
     )
+
+
+def _check_options(orbital_basis, algorithm, max_workspace_elements, variant):
+    if orbital_basis not in {"canonical", "semicanonical"}:
+        raise ValueError("orbital_basis must be 'canonical' or 'semicanonical'")
+    if algorithm not in {"auto", "streamed"}:
+        raise ValueError("algorithm must be 'auto' or 'streamed'")
+    if not isinstance(max_workspace_elements, int) or max_workspace_elements < 1:
+        raise ValueError("max_workspace_elements must be a positive integer")
+    if algorithm == "streamed" and variant != "ccsd(t)":
+        raise NotImplementedError("Streamed full-Fock response currently implements only CCSD(T)")
+    if orbital_basis == "semicanonical" and variant != "ccsd(t)":
+        raise NotImplementedError("Semicanonical triples currently implement only CCSD(T)")
+
+
+def _restricted_model(variant, denominator_tol, residual_tol, canonical_tol,
+                      max_virtual_triples, orbital_basis, algorithm, max_triples_elements):
+    variants = ("ccsd+t(ccsd)", "ccsd(t)", "qcisd(t)")
+    if variant not in variants:
+        raise ValueError(f"Unknown triples variant {variant!r}; choose {variants}")
+    for value in (denominator_tol, residual_tol, canonical_tol):
+        if not isfinite(value) or value <= 0:
+            raise ValueError("Triples tolerances must be finite and positive")
+    if not isinstance(max_virtual_triples, int) or max_virtual_triples < 1:
+        raise ValueError("max_virtual_triples must be a positive integer")
+    if orbital_basis == "semicanonical" and algorithm == "auto":
+        if not isinstance(max_triples_elements, int) or max_triples_elements < 1:
+            raise ValueError("max_triples_elements must be a positive integer")
+    return "qcisd" if variant == "qcisd(t)" else "ccsd"
 
 
 def evaluate_triples(
@@ -47,6 +78,10 @@ def evaluate_triples(
     canonical_tol=1e-7,
     orbital_basis="canonical",
     max_triples_elements=2_000_000,
+    algorithm="auto",
+    max_workspace_elements=2_000_000,
+    max_memory=None,
+    reserved_bytes=0,
 ):
     """CCSD(T), restricted Urban +T(CCSD), or canonical restricted QCISD(T).
 
@@ -60,16 +95,22 @@ def evaluate_triples(
     orbital_basis='semicanonical' selects the general-reference formula,
     including F_vo*T2, through the common tensor-sum inverse. That bounded
     reference path stores (nocc_spin*nvir_spin)**3 elements per triples tensor;
-    it is not the canonical streaming algorithm. See SEMICANONICAL.md.
+    it is not the canonical streaming algorithm. algorithm='streamed' instead
+    opts into bounded panels with full Fock-block JVP/VJP and second response;
+    third-order AD is explicitly rejected. max_workspace_elements limits one
+    spin-orbital panel, not total memory. See SEMICANONICAL.md.
     """
-    if orbital_basis not in {"canonical", "semicanonical"}:
-        raise ValueError("orbital_basis must be 'canonical' or 'semicanonical'")
-    if orbital_basis == "semicanonical" and variant != "ccsd(t)":
-        raise NotImplementedError("Semicanonical triples currently implement only CCSD(T)")
-    if orbital_basis == "semicanonical" and not isinstance(nocc, (tuple, list)):
-        # The general-reference formula is shared in the spin-orbital kernel.
-        # Restricted and unrestricted amplitudes use different storage, not
-        # different occupied/virtual rotation conventions.
+    _check_options(orbital_basis, algorithm, max_workspace_elements, variant)
+    if (orbital_basis == "semicanonical" and algorithm == "auto"
+            and not isinstance(nocc, (tuple, list))):
+        if max_memory is not None:
+            # The legacy chart constructs one complete same-spin T2 bridge
+            # before UCC preparation; reject its known minimum before doing so.
+            bridge = jax.ShapeDtypeStruct(result.t2.shape, result.t2.dtype)
+            workspace_bytes(max_memory, resident_bytes=validate_reserved_bytes(reserved_bytes)
+                +tree_storage_bytes(h1, eri, result, bridge))
+        # Preserve the legacy raw Hamiltonian chart, including independent
+        # alpha/beta Fock responses off the spatial ERI permutation manifold.
         same_spin = result.t2-result.t2.swapaxes(2, 3)
         result = result._replace(t1=(result.t1, result.t1),
                                   t2=(same_spin, result.t2, same_spin))
@@ -79,35 +120,91 @@ def evaluate_triples(
         return evaluate_ucc_triples(h1, eri, result, nocc=nocc, frozen=frozen,
             denominator_tol=denominator_tol, max_virtual_triples=max_virtual_triples,
             variant=variant, residual_tol=residual_tol, canonical_tol=canonical_tol,
-            orbital_basis=orbital_basis, max_triples_elements=max_triples_elements)
-    variants = ("ccsd+t(ccsd)", "ccsd(t)", "qcisd(t)")
-    if variant not in variants:
-        raise ValueError(f"Unknown triples variant {variant!r}; choose {variants}")
-    for value in (denominator_tol, residual_tol, canonical_tol):
-        if not isfinite(value) or value <= 0:
-            raise ValueError("Triples tolerances must be finite and positive")
-    if not isinstance(max_virtual_triples, int) or max_virtual_triples < 1:
-        raise ValueError("max_virtual_triples must be a positive integer")
-    model = "qcisd" if variant == "qcisd(t)" else "ccsd"
+            orbital_basis=orbital_basis, max_triples_elements=max_triples_elements,
+            algorithm=algorithm, max_workspace_elements=max_workspace_elements,
+            max_memory=max_memory, reserved_bytes=reserved_bytes)
+    _restricted_model(variant, denominator_tol, residual_tol, canonical_tol,
+                      max_virtual_triples, orbital_basis, algorithm, max_triples_elements)
+    reserved_bytes = preparation_reservation(lambda a, b: prepare_integrals(a, b,
+        nocc=nocc, frozen=frozen), (h1, eri), max_memory, reserved_bytes, consumer_owned=(result,))
     ints = prepare_integrals(h1, eri, nocc=nocc, frozen=frozen)
+    return evaluate_triples_from_integrals(ints, result,
+        denominator_tol=denominator_tol, max_virtual_triples=max_virtual_triples,
+        variant=variant, residual_tol=residual_tol, canonical_tol=canonical_tol,
+        orbital_basis=orbital_basis, max_triples_elements=max_triples_elements,
+        algorithm=algorithm, max_workspace_elements=max_workspace_elements,
+        max_memory=max_memory, reserved_bytes=reserved_bytes)
+
+
+def evaluate_triples_from_integrals(
+    ints, result, *, denominator_tol=1e-10, max_virtual_triples=20000,
+    variant="ccsd(t)", residual_tol=1e-8, canonical_tol=1e-7,
+    orbital_basis="canonical", max_triples_elements=2_000_000,
+    algorithm="auto", max_workspace_elements=2_000_000,
+    max_memory=None, reserved_bytes=0,
+):
+    """Restricted or UCC triples from the matching prepared integral snapshot.
+
+    Canonical auto uses the spatial streaming formula. Semicanonical auto
+    retains the bounded six-index tensor reference, using only the existing
+    required spin-block bridge; it does not prepare full UCC integral blocks.
+    Explicit streamed panels retain their workspace and second-order AD guard.
+    Semicanonical auto assumes a physically consistent restricted snapshot and
+    pair-symmetric T2. Its supplied single-Fock chart is independent of the raw
+    Hamiltonian API's alpha/beta responses off that physical manifold.
+    """
+    _check_options(orbital_basis, algorithm, max_workspace_elements, variant)
+    if isinstance(result.t1, (tuple, list)):
+        from ._spin_triples import evaluate_ucc_triples_from_integrals
+        return evaluate_ucc_triples_from_integrals(ints, result,
+            denominator_tol=denominator_tol, max_virtual_triples=max_virtual_triples,
+            variant=variant, residual_tol=residual_tol, canonical_tol=canonical_tol,
+            orbital_basis=orbital_basis, max_triples_elements=max_triples_elements,
+            algorithm=algorithm, max_workspace_elements=max_workspace_elements,
+            max_memory=max_memory, reserved_bytes=reserved_bytes)
+    variants = ("ccsd+t(ccsd)", "ccsd(t)", "qcisd(t)")
+    model = _restricted_model(variant, denominator_tol, residual_tol, canonical_tol,
+        max_virtual_triples, orbital_basis, algorithm, max_triples_elements)
     no, nv = ints.nocc, ints.nvir
+    ints = triples_budget(ints, result, max_memory, reserved_bytes, no, nv,
+                          model, orbital_basis, algorithm)
     space = AmplitudeSpace(no, nv)
     space.pack(result.t1, result.t2)  # Validate before any empty-space shortcut.
-    cc_residual = space.pack(*residual(result.t1, result.t2, ints, model=model))
+    r1, r2 = residual(result.t1, result.t2, ints, model=model)
+    cc_residual = space.pack(r1, r2)
+    general = orbital_basis == "semicanonical" and algorithm == "auto"
+    if general:
+        # Match the old restricted-to-UCC reference's residual coordinate norm.
+        from .spin_amplitudes import SpinAmplitudeSpace
+        spin_space = SpinAmplitudeSpace((no, no), (nv, nv))
+        same = r2-r2.swapaxes(2, 3)
+        cc_residual = spin_space.pack(*spin_space.from_blocks(
+            (r1, r1), (same, r2, same), ints.fock.dtype))
     cc_norm = jnp.max(jnp.abs(cc_residual), initial=0.0)
     canonical_error = jnp.max(
-        jnp.abs(ints.fock - jnp.diag(ints.mo_energy)), initial=0.0
+        jnp.abs(ints.fock - jnp.diag(jnp.diag(ints.fock) if general else ints.mo_energy)), initial=0.0
     )
     symmetry_error = jnp.max(
         jnp.abs(result.t2 - result.t2.transpose(1, 0, 3, 2)), initial=0.0
     )
+    if general:
+        chart_tol = (64*jnp.finfo(result.t2.dtype).eps
+                     * jnp.maximum(1., jnp.max(jnp.abs(result.t2), initial=0.)))
+        # The restricted residual-to-spin norm is undefined outside this
+        # chart; never report it as the legacy UCC residual of a damaged state.
+        cc_norm = jnp.where(symmetry_error <= chart_tol, cc_norm, jnp.nan)
+        same = result.t2-result.t2.swapaxes(2, 3)
+        symmetry_error = jnp.maximum(
+            jnp.max(jnp.abs(same+same.swapaxes(0, 1)), initial=0.),
+            jnp.max(jnp.abs(same+same.swapaxes(2, 3)), initial=0.))
     state_valid = (
         result.converged
         & (result.method_id == METHODS.index(model))
         & (cc_norm <= residual_tol)
-        & (canonical_error <= canonical_tol)
         & (symmetry_error <= residual_tol)
     )
+    if orbital_basis == "canonical":
+        state_valid &= canonical_error <= canonical_tol
     dtype = jnp.result_type(ints.fock.dtype, result.t1.dtype, result.t2.dtype)
 
     def assemble(connected, singles, minimum):
@@ -118,20 +215,40 @@ def evaluate_triples(
         )
         applied_singles = singles if variant != "ccsd+t(ccsd)" else jnp.zeros_like(singles)
         correction = connected + applied_singles
+        def checked(value):
+            if algorithm == "streamed":
+                return value * jnp.where(valid, jnp.ones_like(value), jnp.full_like(value, jnp.nan))
+            return jnp.where(valid, value, jnp.nan)
         return TriplesResult(
-            jnp.where(valid, correction, jnp.nan),
-            jnp.where(valid, connected, jnp.nan),
-            jnp.where(valid, applied_singles, jnp.nan),
+            checked(correction),
+            checked(connected),
+            checked(applied_singles),
             minimum,
             cc_norm,
             canonical_error,
             valid,
-            jnp.asarray(variants.index(variant)),
+            jnp.asarray(variants.index(variant), dtype=jnp.int32 if general else None),
         )
 
     if no < 2 or nv < 2:
         zero = jnp.asarray(0.0, dtype=dtype)
         return assemble(zero, zero, jnp.asarray(jnp.inf, dtype=dtype))
+    if algorithm == "streamed" or general:
+        from ._streamed_triples import _restricted_inputs, _streamed_general_correction
+        if algorithm == "streamed" and (2 * nv) * (2 * no)**3 > max_workspace_elements:
+            raise ValueError("Restricted spin triples panel exceeds max_workspace_elements")
+        if general and ((2 * no) * (2 * nv))**3 > max_triples_elements:
+            raise ValueError("Semicanonical triples exceed max_triples_elements; reduce the active space")
+        spin_ints, spin_t1, spin_t2 = _restricted_inputs(ints, result.t1, result.t2)
+        if general:
+            from ._spin_triples import _general_correction
+            kernel = _general_correction
+        else:
+            kernel = _streamed_general_correction
+        connected, singles, minimum, solved = kernel(
+            spin_ints, spin_t1, spin_t2, denominator_tol=denominator_tol)
+        state_valid &= solved
+        return assemble(connected, singles, minimum)
     if nv * (nv + 1) * (nv + 2) // 6 > max_virtual_triples:
         raise ValueError("Virtual triples exceed max_virtual_triples")
     combinations = np.asarray(
@@ -211,6 +328,10 @@ def triples_correction(
     canonical_tol=1e-7,
     orbital_basis="canonical",
     max_triples_elements=2_000_000,
+    algorithm="auto",
+    max_workspace_elements=2_000_000,
+    max_memory=None,
+    reserved_bytes=0,
 ):
     """Scalar correction; use evaluate_triples for decomposition and diagnostics."""
     return evaluate_triples(
@@ -226,4 +347,13 @@ def triples_correction(
         canonical_tol=canonical_tol,
         orbital_basis=orbital_basis,
         max_triples_elements=max_triples_elements,
+        algorithm=algorithm,
+        max_workspace_elements=max_workspace_elements,
+        max_memory=max_memory,
+        reserved_bytes=reserved_bytes,
     ).energy
+
+
+def triples_correction_from_integrals(ints, result, **kwargs):
+    """Scalar prepared correction; see evaluate_triples_from_integrals."""
+    return evaluate_triples_from_integrals(ints, result, **kwargs).energy

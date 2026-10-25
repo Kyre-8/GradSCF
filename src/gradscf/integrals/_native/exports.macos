@@ -4,6 +4,8 @@ _GradSCFGeometryVJP
 _GradSCFECP
 _GradSCFCompact
 _GradSCFDirectJK
+_GradSCFDirectJKGeometryJVP
+_GradSCFDirectJKGeometryVJP
 _GradSCFPackedJK
 _GradSCFGeometryHessianJVP
 _GradSCFGeometryHessianVJP
@@ -15,3 +17,14 @@ _GradSCFCoefficientHessianJVP
 _GradSCFCoefficientHessianVJP
 _GradSCFExponentJVP
 _GradSCFExponentVJP
+_GradSCFERISlice
+_GradSCFERISliceGeometryJVP
+_GradSCFERISliceGeometryVJP
+_GradSCFERISliceGeometryHessianJVP
+_GradSCFERISliceGeometryHessianVJP
+_GradSCFERISlab
+_GradSCFERISlabGeometryJVP
+_GradSCFERISlabGeometryVJP
+_GradSCFERISlabGeometryHessianJVP
+_GradSCFERISlabGeometryHessianVJP
+_GradSCFDirectJKGeometryVJPParallel

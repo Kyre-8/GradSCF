@@ -2,24 +2,35 @@
 
 from dataclasses import fields
 import numpy as np
+from ..._memory import resolve_memory_mb, tree_storage_bytes
 from ...scf.reference import _array_signature
-from .types import EOMConfig, EOMPrecisionDiagnostics
+from .types import EOMConfig, EOMPrecisionDiagnostics, EOMSubspaceResult
 from .amplitudes import EOMAmplitudeSpace
-from .operators import run_eom
+from .operators import run_eom, run_eom_from_integrals
 
 
 class _EOM:
-    def __init__(self, ground, *, sector, **kwargs):
+    def __init__(self, ground, *, sector, max_memory=None, **kwargs):
         cfg = EOMConfig(sector=sector, **kwargs)
         self.ground = ground
+        self.max_memory = max_memory
         self._sector = sector
         for field in fields(cfg):
             setattr(self, field.name, getattr(cfg, field.name))
         self.result = self.e = self.right_vectors = self.left_vectors = self.space = (
             None
         )
-        self.converged = None
+        self.converged = self.projection = self.eigenvalue_sum = None
         self._state_key = None
+
+    @property
+    def max_memory(self):
+        """Original decimal-MB budget, dynamically inherited from CC by default."""
+        return resolve_memory_mb(self._max_memory, self.ground)
+
+    @max_memory.setter
+    def max_memory(self, value):
+        self._max_memory = None if value is None else resolve_memory_mb(value)
 
     def _config(self):
         if self.sector != self._sector:
@@ -57,6 +68,7 @@ class _EOM:
             _array_signature(self.ground.result.t1),
             _array_signature(self.ground.result.t2),
             self._config(),
+            self.max_memory,
         )
 
     def check_source(self):
@@ -65,23 +77,34 @@ class _EOM:
         if self._key() != self._state_key:
             raise RuntimeError("EOM source or settings changed; run kernel again")
 
-    def kernel(self):
+    def kernel(self, *, probes=None):
+        """Return legacy roots, or the invariant result in explicit subspace mode."""
         self._state_key = None
         self.result = self.e = self.right_vectors = self.left_vectors = self.space = (
             None
         )
-        self.converged = None
+        self.converged = self.projection = self.eigenvalue_sum = None
         cfg = self._config()
         ref = self._source()
-        self.result = run_eom(
-            ref.h1,
-            ref.eri,
-            self.ground.result,
-            nocc=ref.nocc,
-            frozen=self.ground.frozen,
-            config=cfg,
-            cc_config=self.ground._config(),
-        )
+        owned = ((self.ground._integrals, self.ground.result) if self.ground._integrals is not None
+                 else (ref.h1, ref.eri, self.ground.result))
+        reserved = tree_storage_bytes(self.ground.mf, ref,
+            getattr(self.ground, 'lambda_result', None), exclude=owned)
+        if self.ground._integrals is not None:
+            self.result = run_eom_from_integrals(self.ground._integrals,
+                self.ground.result, config=cfg, cc_config=self.ground._config(),
+                max_memory=self.max_memory, reserved_bytes=reserved, probes=probes)
+        else:
+            self.result = run_eom(ref.h1, ref.eri, self.ground.result, nocc=ref.nocc,
+                frozen=self.ground.frozen, config=cfg, cc_config=self.ground._config(),
+                max_memory=self.max_memory, reserved_bytes=reserved, probes=probes)
+        if isinstance(self.result, EOMSubspaceResult):
+            self.projection = self.result.projection
+            self.eigenvalue_sum = self.result.eigenvalue_sum
+            self.converged = np.asarray(self.result.raw_result.converged)
+            self.space = EOMAmplitudeSpace(*self.ground.t1.shape, cfg.sector)
+            self._state_key = self._key()
+            return self.result
         self.e = self.result.energies
         self.right_vectors, self.left_vectors = (
             self.result.right_vectors,
@@ -94,8 +117,8 @@ class _EOM:
             return self.e[0], self.right_vectors[:, 0]
         return self.e, self.right_vectors.T
 
-    def run(self):
-        self.kernel()
+    def run(self, *, probes=None):
+        self.kernel(probes=probes)
         return self
 
     def diagnostics(
@@ -123,25 +146,36 @@ class _EOM:
             else None
         )
         return EOMPrecisionDiagnostics(
-            scf, self.ground.result, self.result, cc_tol, eom_tol
+            scf, self.ground.result,
+            self.result.raw_result if isinstance(self.result, EOMSubspaceResult) else self.result,
+            cc_tol, eom_tol
         )
 
     def amplitudes(self, root=0):
         self.check_source()
+        if isinstance(self.result, EOMSubspaceResult):
+            raise ValueError("Subspace response exposes invariants, not individual amplitudes")
         if not isinstance(root, int) or not 0 <= root < self.nroots:
             raise ValueError("Invalid EOM root")
         return self.space.unpack(self.right_vectors[:, root])
 
-    def dyson(self, *, max_elements=20_000_000):
+    def dyson(self, *, max_elements=20_000_000, max_memory=None):
         """One-spin IP/EA Dyson amplitudes and biorthogonal spectral weights."""
         from .properties import dyson_orbitals
 
         self.check_source()
+        if isinstance(self.result, EOMSubspaceResult):
+            raise ValueError("Subspace response exposes invariants, not individual Dyson orbitals")
         if self.sector not in {"ip", "ea"}:
             raise ValueError("Dyson orbitals require the IP or EA sector")
         self.ground.solve_lambda()
+        reserved = tree_storage_bytes(self.ground.reference, self.ground._integrals,
+            self.ground.mf,
+            exclude=(self.ground.result, self.ground.lambda_result, self.result))
         return dyson_orbitals(self.ground.result, self.ground.lambda_result,
-                              self.result, max_elements=max_elements)
+            self.result, max_elements=max_elements,
+            max_memory=self.max_memory if max_memory is None else max_memory,
+            reserved_bytes=reserved)
 
 
 class EOMEE(_EOM):

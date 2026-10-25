@@ -38,6 +38,7 @@ class RKSIntegralInputs:
     grid_ao_backend: str = "jax"
     eri_lr: Array | None = None
     dispersion_energy: Array | None = None
+    grid_ao: Any | None = None
 
     def as_rks_kwargs(self) -> dict[str, Any]:
         """Return keyword arguments accepted by run_rks_from_integrals."""
@@ -59,6 +60,8 @@ class RKSIntegralInputs:
             "init_mo_occ": self.init_mo_occ,
             "init_mo_energy": self.init_mo_energy,
         }
+        if self.grid_ao is not None:
+            kwargs["grid_ao"] = self.grid_ao
         if self.eri_lr is not None or self.dispersion_energy is not None:
             kwargs.update(eri_lr=self.eri_lr, dispersion_energy=self.dispersion_energy)
         return kwargs
@@ -80,7 +83,7 @@ class RKSIntegralInputs:
 
 @dataclass(frozen=True)
 class UKSIntegralInputs:
-    """AO integrals/grid for UKS; eri may be full or native s4 packed."""
+    """AO/grid data for UKS, with full/packed ERIs or an AO J/K provider."""
 
     basis: CartesianBasis
     overlap: Array
@@ -96,6 +99,7 @@ class UKSIntegralInputs:
     ao_laplacian: Array | None
     dipole_integrals: Array
     df_factors: Array | None = None
+    direct_basis: Any | None = None
     init_density_alpha: Array | None = None
     init_density_beta: Array | None = None
     init_mo_coeff_alpha: Array | None = None
@@ -111,6 +115,7 @@ class UKSIntegralInputs:
     grid_ao_backend: str = "jax"
     eri_lr: Array | None = None
     dispersion_energy: Array | None = None
+    grid_ao: Any | None = None
 
     def as_uks_kwargs(self) -> dict[str, Any]:
         """Return keyword arguments accepted by run_uks_from_integrals."""
@@ -135,6 +140,10 @@ class UKSIntegralInputs:
             "init_mo_energy_alpha": self.init_mo_energy_alpha,
             "init_mo_energy_beta": self.init_mo_energy_beta,
         }
+        if self.grid_ao is not None:
+            kwargs["grid_ao"] = self.grid_ao
         if self.eri_lr is not None or self.dispersion_energy is not None:
             kwargs.update(eri_lr=self.eri_lr, dispersion_energy=self.dispersion_energy)
+        if self.direct_basis is not None:
+            kwargs["direct_basis"] = self.direct_basis
         return kwargs

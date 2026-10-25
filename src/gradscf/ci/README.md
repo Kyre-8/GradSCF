@@ -95,7 +95,25 @@ of supplied integrals and the reference is the caller's responsibility.
 
 For explicit inputs to a facade use
 `CIReference(h1_mo, eri_mo, nocc, nuclear_repulsion=..., mo_energy=...)`.
-For AO inputs, `integrals.molecular.ao2mo.transform_integrals` supports full ERIs, an s4
+SCF-backed restricted non-DF `CIS` instead shares the AO single-excitation
+action with TD response, avoiding a complete MO-ERI transformation. Native
+direct references retain their J/K provider without constructing an AO-pair
+matrix. `CIS(..., max_memory=1024.)` budgets this path in decimal MB; frozen
+spaces, singlet/triplet selection and unit-norm CIS amplitudes are preserved.
+Explicit-integral CI, CIS, UCIS and CIS(D) facades pass the same budget through
+their source arrays, preparation, action and common solver. The pure
+`solve_ci`, `solve_cis` and `solve_ucis` functions accept `max_memory` and
+`reserved_bytes`; their default `max_memory=None` preserves the original
+unplanned call. `cis_d_correction` instead defaults to the shared 60000 MB
+planning budget. Supply the encompassing workflow budget and caller reservation
+explicitly when composing these routines. Existing MO tensors remain part of that budget;
+passing them does not provide an out-of-core integral representation.
+AO-CIS reserves the existing TD action's planned share during its eigensolve.
+These are known-array estimates, with runtime headroom, rather than a bound on
+XLA compilation, arbitrary external AD state or total process RSS.
+See [direct response and validation](../tddft/DIRECT_RESPONSE.md) for its
+fixed-basis AD contract, cache format, device behavior and measured limits.
+For AO inputs, `ao2mo.transform_integrals` supports full ERIs, an s4
 AO-pair matrix, or density-fitting factors with shape `(naux, nao, nao)`.
 The SCF facade adapter is eager and accepts converged GradSCF `scf.RHF` (or `RKS(xc="hf")`),
 `UHF` and `ROHF`; the latter two use `UnrestrictedReference` and `make_uci_space`.
@@ -140,6 +158,14 @@ inputs; complete nuclear gradients also require SCF orbital response and the
 chosen integral backend's derivative support. No automatic backend fallback is
 introduced here.
 
+Degenerate molecular orbitals inside an isolated occupied or virtual subspace
+do not by themselves invalidate a CISD energy gradient. The nuclear-response
+path uses a smooth transported HF frame and differentiates the CI Hamiltonian;
+it does not differentiate individual canonical orbitals. This differs from a
+true degeneracy of the selected many-electron CI root, which retains the
+individual-root restrictions above. Native N2 checks and their basis/size
+limits are recorded in [VALIDATION.md](VALIDATION.md).
+
 ## CIS(D) theory and validation
 
 The singlet correction implements the unscaled CIS(D) method of
@@ -170,16 +196,29 @@ the Fock matrix is diagonal and consistent with the supplied orbital energies.
 
 ## Scope and computational limits
 
-- The Hamiltonian is applied through stored Slater–Condon connections; Davidson
-  does not construct a dense determinant Hamiltonian. Static connections are
-  cached on the host, while integral contractions and vector actions use JAX.
-- This generic implementation targets small reference calculations. Full MO
-  ERIs still require O(nmo^4) storage (dense spin embedding for UCI), and the connection table can be large.
-  It is not an optimized production CISD/FCI engine.
-- The default space limit is 5000 determinants (configurable); connection
-  construction stops at 1,000,000 stored diagonal/undirected connections.
-  Dense verification is limited to 2048 determinants. Reducing the orbital
-  space or excitation rank is preferable to simply increasing these limits.
+- Variational solves use compact alpha/beta excitation-rank blocks. Increasing
+  particle/hole strings, one-group removal/creation maps and tiled integral
+  contractions replace stored determinant-pair Hamiltonian connections. The
+  complete one-/two-body operator is projected into the retained space; an
+  intermediate single-excitation projection is not introduced.
+- Full MO ERIs still require O(nmo^4) storage. Restricted and unrestricted
+  Hamiltonian actions retain spatial/spin integral blocks without constructing
+  a full spin-orbital ERI. The coefficient vector and Davidson subspace remain
+  combinatorial; this does not turn high-rank CI into a polynomial method.
+- The default vector capacity is 1,000,000 determinants (configurable). Creator
+  and spectator string contractions are tiled, and vector columns are processed
+  in batches. The default Davidson basis capacity is
+  `min(ndet, max(40, 4*(nroots+1)))`. Initial guesses retain exact reference/low
+  diagonal unit vectors and add separate full-support random columns. The old
+  Slater–Condon connection implementation remains a small
+  independent oracle, with its 1,000,000-connection bound; dense verification
+  remains limited to 2048 determinants. These exported
+  `hamiltonian_action`/`hamiltonian_matrix` oracle functions retain their static
+  connection/dimension guards and do not accept a caller memory budget.
+  `spin_square` contracts compressed exchange/sigma kernels without exporting
+  a complete RDM. The facade forwards its budget and caller reservation;
+  the compressed kernels and action still have their own required storage.
+  Iterative solver and explicit density/expectation controls are described above.
 - GHF, complex orbitals, periodic CI, and automatic
   spin selection for general CI roots are not implemented.
 - Named `CISD(T)` / `CISDT(Q)` corrections are not exported. They need a specific
@@ -207,10 +246,29 @@ derivatives. Their trace and contraction are `Tr(dm1)=N` and
 Use `gradient_mode="implicit_eigenvector"` for integral derivatives of a density;
 the default energy-only mode intentionally stops CI coefficient response.
 
-The implementation stores static operator connections (up to 4,000,000 per
-density rank) and full MO density arrays. It remains a small-system reference
-implementation; transition densities, AO output and automatic total-spin selection
-are future work. See [forward parity and remaining gaps](../cc/FORWARD_PARITY.md).
+An affordable small spatial export uses the original fermionic connection and
+scatter formula. A conservative connection-count bound checks its construction,
+array-cache and output storage before building the table. Otherwise the shared
+physical sigma action supplies these coefficients, including its raw-integral
+normal-ordering correction, without a density connection table. Neither route
+builds a full spin-orbital 2-RDM. Requested spatial outputs retain their explicit
+quadratic/quartic size.
+`max_memory` (decimal MB) is shared with the action's creator/spectator/RHS
+tiles; a bound facade also reserves its source, integral payload and other roots.
+Functional calls accept `reserved_bytes` for additional caller-owned arrays.
+
+When only an observable is needed, `expectation_value(c, space, h1, eri)`
+contracts it directly without exporting either density. Its real unrestricted
+input conventions and half/unity/half spin weights match those above.
+Transition CI densities, AO output and automatic total-spin selection remain
+future work. See [forward parity and remaining gaps](../cc/FORWARD_PARITY.md).
+
+The array-bearing static CI/FCI caches have finite entry and byte limits (a
+combined 288,000,000-byte payload envelope). The direct sigma factory is charged
+for its known topology/map arrays even if another cache releases them. These
+limits cover declared array payload, not Python integer keys/headers or JAX
+compiled executables. Numerical integrals, amplitudes and CI vectors are not
+cached. Computation budgets do not constitute a process-RSS or complete AD cap.
 
 ## Reproduce the checks
 

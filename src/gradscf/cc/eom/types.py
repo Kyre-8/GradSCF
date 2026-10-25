@@ -6,7 +6,7 @@ from typing import NamedTuple, TYPE_CHECKING
 import numpy as np
 import jax
 from jaxtyping import Array
-from ...solvers import LinearSolverConfig
+from ...solvers import EigenResponseConfig, LinearSolverConfig
 
 if TYPE_CHECKING:
     from ...scf.diagnostics import RestrictedSCFDiagnostics
@@ -32,6 +32,7 @@ class EOMConfig:
     preconditioner_floor: float = 1e-8
     vector_response: bool = False
     response_config: LinearSolverConfig | None = None
+    response: EigenResponseConfig | None = None
 
     def __post_init__(self):
         if self.sector not in {"ee", "ip", "ea"}:
@@ -40,6 +41,11 @@ class EOMConfig:
             raise ValueError("EOM solver must be dense or davidson")
         if not isinstance(self.vector_response, bool):
             raise TypeError("vector_response must be a static bool")
+        if self.response is not None:
+            if not isinstance(self.response, EigenResponseConfig):
+                raise TypeError("response must be an EigenResponseConfig")
+            if self.vector_response or self.response_config is not None:
+                raise ValueError("Use response controls or legacy AD controls, not both")
         if self.response_config is not None:
             if not isinstance(self.response_config, LinearSolverConfig):
                 raise TypeError("response_config must be a LinearSolverConfig")
@@ -104,6 +110,28 @@ jax.tree_util.register_pytree_node(
     EOMResult, lambda result: (result[:-2], (result.vector_response, result.sector)),
     lambda metadata, values: EOMResult(*values, vector_response=metadata[0], sector=metadata[1]),
 )
+
+
+class EOMSubspaceResult(NamedTuple):
+    """Cluster invariants with a fully stopped conventional EOM diagnostic result."""
+    projection: Array | None
+    eigenvalue_sum: Array
+    response_valid: Array
+    boundary_gap: Array
+    ground_valid: Array
+    raw_result: EOMResult
+
+    @property
+    def energies(self):
+        return None
+
+    @property
+    def right_vectors(self):
+        return None
+
+    @property
+    def left_vectors(self):
+        return None
 
 
 class DysonResult(NamedTuple):

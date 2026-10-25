@@ -3,9 +3,11 @@ import jax
 from ..diagnostics import require_converged_derivative
 from ..linear.implicit import checked_linear_solve
 from ..types import LinearSolverConfig
+from gradscf._memory import array_storage_bytes, validate_reserved_bytes
 
 
-def attach_root(residual, solution, *, config=None, tangent_solve=None, converged=True):
+def attach_root(residual, solution, *, config=None, tangent_solve=None, converged=True,
+                 max_memory=None, reserved_bytes=0, operator_min_bytes=0):
     """Attach root JVP/VJP and higher response without differentiating the trajectory.
 
     residual may close over differentiable parameters. Numerical forward
@@ -13,13 +15,16 @@ def attach_root(residual, solution, *, config=None, tangent_solve=None, converge
     An optional tangent_solve supports structured response operators.
     """
     cfg = LinearSolverConfig() if config is None else config
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     seed = jax.lax.stop_gradient(solution)
     if tangent_solve is None:
         def tangent_solve(operator, rhs):
             shape = rhs.shape
             return checked_linear_solve(
                 lambda v: operator(v.reshape(shape)).reshape(-1), rhs.reshape(-1),
-                config=cfg, converged=converged)[0].reshape(shape)
+                config=cfg, converged=converged, max_memory=max_memory,
+                reserved_bytes=reserved_bytes+array_storage_bytes(seed),
+                operator_min_bytes=operator_min_bytes)[0].reshape(shape)
     return jax.lax.custom_root(residual, seed,
         solve=lambda _residual, _initial: seed, tangent_solve=tangent_solve)
 

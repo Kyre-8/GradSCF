@@ -18,6 +18,7 @@ from gradscf.scf import (
     run_uks_from_integrals,
 )
 from gradscf.integrals import build_j_from_eri_pair_matrix, build_jk_from_eri_pair_matrix
+from gradscf.integrals.backends.native.jk import _selected_jk
 from gradscf.integrals.molecular.jk import build_j_from_df, build_jk_from_df
 from gradscf.scf.rks import _vxc_matrix_from_grid_potential
 from gradscf.tools.spectra import HARTREE_TO_EV, lorentzian_spectrum, oscillator_strengths
@@ -456,6 +457,9 @@ def _coulomb_potential_from_molecule(molecule: Any, density_matrix: Array) -> Ar
         factors = jnp.asarray(df_factors)
         if int(factors.size) > 0:
             return build_j_from_df(factors, density_matrix)
+    direct_basis = getattr(molecule, "direct_basis", None)
+    if callable(getattr(direct_basis, "get_jk", None)):
+        return _selected_jk(direct_basis, density_matrix, with_k=False)[0]
     return _coulomb_potential(density_matrix, _repulsion_integrals_from_molecule(molecule))
 
 
@@ -466,6 +470,9 @@ def _exchange_potential_from_molecule(molecule: Any, density_matrix: Array) -> A
         if int(factors.size) > 0:
             _, k_matrix = build_jk_from_df(factors, density_matrix)
             return k_matrix
+    direct_basis = getattr(molecule, "direct_basis", None)
+    if callable(getattr(direct_basis, "get_jk", None)):
+        return _selected_jk(direct_basis, density_matrix, with_j=False)[1]
     return _exchange_potential(density_matrix, _repulsion_integrals_from_molecule(molecule))
 
 

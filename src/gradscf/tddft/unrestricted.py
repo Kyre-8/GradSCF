@@ -6,6 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, fields, replace
 from typing import Any
 from typing import Literal
+from types import SimpleNamespace
 
 import jax
 import jax.numpy as jnp
@@ -17,6 +18,7 @@ from .cisd import unrestricted_cisd_second_order_correction
 from ._unrestricted_semilocal_response import (
     UnrestrictedSemilocalResponseFunctional,
     build_unrestricted_semilocal_response_action,
+    _build_blocked_spin_response_action,
 )
 from ..solvers.eigen.rpa import implicit_differential_davidson_lowest_tdhf
 from .defaults import (
@@ -33,9 +35,18 @@ from ..solvers.eigen.response import (
 )
 from ._utils import (
     _resolve_xc_functional,
-    _transition_densities_on_grid,
 )
-from .response import _needs_exchange_terms, _raise_if_strict_local_hf_response
+from .response import (
+    _needs_exchange_terms, _raise_if_strict_local_hf_response,
+    _map_response_vectors, _restricted_fock_action,
+    _jk_from_df_factors, _j_from_df_factors,
+    _response_grid_view,
+)
+from .response_options import (
+    ResponseKernelOptions, normalize_response_kernel_options, plan_response_memory,
+    _response_memory_inputs,
+)
+from .._memory import DEFAULT_MAX_MEMORY_MB
 
 
 def _pytree_dataclass(cls):
@@ -90,6 +101,9 @@ class _UnrestrictedResponseOperatorData:
     ao_response_action_fn: Callable[[Array, Array], tuple[Array, Array]]
     ao_mo_response_action_fn: Callable[..., tuple[Array, Array]] | None = None
     xc_response_action_fn: Callable[[Array, Array], tuple[Array, Array]] | None = None
+    fock_occupied: tuple[Array, Array] | None = None
+    fock_virtual: tuple[Array, Array] | None = None
+    memory_plan: Any | None = None
 
 
 def _unrestricted_orbital_data(
@@ -149,10 +163,15 @@ def _unrestricted_orbital_data(
 
 
 def _spin_densities_on_grid(molecule: Any) -> tuple[Array, Array]:
-    ao = jnp.asarray(molecule.ao)
     rdm1 = jnp.asarray(molecule.rdm1)
     if rdm1.ndim != 3 or rdm1.shape[0] != 2:
         raise ValueError("Unrestricted response requires spin-resolved rdm1 with shape (2, nao, nao).")
+    provider = getattr(molecule, "grid_ao", None)
+    if provider is not None:
+        density = provider.map(lambda ao, dao, lap, coords, weights:
+            jnp.einsum("spq,gp,gq->gs", rdm1, ao, ao, precision=Precision.HIGHEST), deriv=0)
+        return density[:, 0], density[:, 1]
+    ao = jnp.asarray(molecule.ao)
     rho_a = jnp.einsum("pq,rp,rq->r", rdm1[0], ao, ao, precision=Precision.HIGHEST)
     rho_b = jnp.einsum("pq,rp,rq->r", rdm1[1], ao, ao, precision=Precision.HIGHEST)
     return rho_a, rho_b
@@ -279,33 +298,74 @@ def _unrestricted_ao_response_action(
     *,
     include_exchange: bool,
     dtype: Any,
+    response_options: ResponseKernelOptions | None = None,
+    eri_cache_bytes: int = 0,
 ) -> Callable[[Array, Array], tuple[Array, Array]]:
-    if getattr(molecule, "rep_tensor", None) is None:
-        raise ValueError("The molecule must provide rep_tensor for Hartree/exchange response.")
-    eri = jnp.asarray(molecule.rep_tensor, dtype=dtype)
+    response_options = normalize_response_kernel_options(
+        response_options,
+        default_max_memory=getattr(molecule, "max_memory", DEFAULT_MAX_MEMORY_MB))
     alpha = jnp.asarray(hybrid_fraction, dtype=dtype)
     from ..scf.rsh import response_rsh_coefficients
     rsh = response_rsh_coefficients(molecule)
     eri_lr = None
+    mode = response_options.two_electron_mode
+    direct_basis = getattr(molecule, "direct_basis", None)
+    use_direct = mode in {"auto", "direct"} and direct_basis is not None
     if rsh is not None:
         from .response import _validate_restricted_rsh_mode
-        _validate_restricted_rsh_mode(molecule, "auto")
+        _validate_restricted_rsh_mode(molecule, mode)
         _, long_range, short_range = rsh
         alpha = jnp.asarray(short_range, dtype=dtype)
-        eri_lr = jnp.asarray(molecule.eri_lr, dtype=dtype)
+        if not use_direct:
+            eri_lr = jnp.asarray(molecule.eri_lr, dtype=dtype)
         include_exchange = True
+
+    factors = getattr(molecule, "df_factors", None)
+    has_df = factors is not None and int(jnp.asarray(factors).size) > 0
+    if mode == "ris":
+        raise NotImplementedError("Unrestricted response does not implement RIS fitting.")
+    if mode == "df" and not has_df:
+        raise ValueError('Unrestricted response mode="df" requires df_factors.')
+    if use_direct:
+        if rsh is not None:
+            from ..scf.rsh import _direct_rsh_jk
+            jk_fn = lambda density: _direct_rsh_jk(
+                direct_basis, density, rsh, screening_threshold=response_options.direct_tol,
+                workers=response_options.direct_workers)
+            alpha = jnp.asarray(1., dtype=dtype)
+        else:
+            from ..integrals.backends.native.jk import NativeDirectBasis, _selected_jk
+            jk_fn = (direct_basis.prepare_jk(
+                cache_bytes=eri_cache_bytes, screening_threshold=response_options.direct_tol,
+                workers=response_options.direct_workers, with_k=include_exchange)
+                if type(direct_basis) is NativeDirectBasis else
+                lambda density: _selected_jk(
+                    direct_basis, density, with_k=include_exchange,
+                    screening_threshold=response_options.direct_tol, workers=response_options.direct_workers))
+        j_fn = lambda density: jk_fn(density)[0]
+    elif mode in {"auto", "df"} and has_df:
+        source = jnp.asarray(factors, dtype=dtype)
+        jk_fn = lambda density: _jk_from_df_factors(source, density)
+        j_fn = lambda density: _j_from_df_factors(source, density)
+    else:
+        source = getattr(molecule, "eri_pair_matrix", None)
+        if source is None or not int(jnp.asarray(source).size):
+            source = getattr(molecule, "rep_tensor", None)
+        if source is None or not int(jnp.asarray(source).size):
+            raise ValueError("Unrestricted response requires direct_basis or AO ERIs.")
+        source = jnp.asarray(source, dtype=dtype)
+        jk_fn = lambda density: _jk_from_full_eri(source, density)
+        j_fn = lambda density: _j_from_full_eri(source, density)
 
     def action(density_alpha: Array, density_beta: Array) -> tuple[Array, Array]:
         density_alpha = jnp.asarray(density_alpha, dtype=dtype)
         density_beta = jnp.asarray(density_beta, dtype=dtype)
         if not include_exchange:
-            j_total = _j_from_full_eri(eri, density_alpha) + _j_from_full_eri(
-                eri,
-                density_beta,
-            )
+            j_total = j_fn(density_alpha + density_beta)
             return j_total, j_total
-        j_alpha, k_alpha = _jk_from_full_eri(eri, density_alpha)
-        j_beta, k_beta = _jk_from_full_eri(eri, density_beta)
+        j_spin, k_spin = jk_fn(jnp.concatenate((density_alpha, density_beta), axis=0))
+        j_alpha, j_beta = jnp.split(j_spin, 2)
+        k_alpha, k_beta = jnp.split(k_spin, 2)
         j_total = j_alpha + j_beta
         exchange_a, exchange_b = alpha*k_alpha, alpha*k_beta
         if eri_lr is not None:
@@ -409,11 +469,10 @@ def _unrestricted_grid_xc_response_action(
     orbv_b: Array,
     *,
     dtype: Any,
+    block_size: int = 256,
 ) -> Callable[[Array, Array], tuple[Array, Array]] | None:
     if resolved_xc is None:
         return None
-    ao = jnp.asarray(molecule.ao)
-    weights = jnp.asarray(molecule.grid.weights, dtype=dtype)
     rho_a, rho_b = _spin_densities_on_grid(molecule)
     f_aa, f_ab, f_bb = _spin_resolved_kernel_on_grid(
         molecule,
@@ -422,22 +481,39 @@ def _unrestricted_grid_xc_response_action(
         rho_b,
         dtype,
     )
-    weighted_f_aa = weights * f_aa
-    weighted_f_ab = weights * f_ab
-    weighted_f_bb = weights * f_bb
-    rho_ov_a = _transition_densities_on_grid(ao, orbo_a, orbv_a)
-    rho_ov_b = _transition_densities_on_grid(ao, orbo_b, orbv_b)
+    f_aa, f_ab, f_bb = tuple(jnp.broadcast_to(value, molecule.grid.weights.shape)
+                              for value in (f_aa, f_ab, f_bb))
 
-    def action(alpha: Array, beta: Array) -> tuple[Array, Array]:
-        proj_a = jnp.einsum("ria,nia->nr", rho_ov_a, alpha, precision=Precision.HIGHEST)
-        proj_b = jnp.einsum("ria,nia->nr", rho_ov_b, beta, precision=Precision.HIGHEST)
-        pot_a = weighted_f_aa[None, :] * proj_a + weighted_f_ab[None, :] * proj_b
-        pot_b = weighted_f_ab[None, :] * proj_a + weighted_f_bb[None, :] * proj_b
-        out_a = jnp.einsum("ria,nr->nia", rho_ov_a, pot_a, precision=Precision.HIGHEST)
-        out_b = jnp.einsum("ria,nr->nia", rho_ov_b, pot_b, precision=Precision.HIGHEST)
-        return out_a, out_b
+    def block_hvp(start, size, tangent_a, tangent_b):
+        aa, ab, bb = (jax.lax.dynamic_slice_in_dim(value, start, size)
+                      for value in (f_aa, f_ab, f_bb))
+        return (aa[None, None, :]*tangent_a + ab[None, None, :]*tangent_b,
+                ab[None, None, :]*tangent_a + bb[None, None, :]*tangent_b)
 
-    return action
+    return _build_blocked_spin_response_action(
+        molecule, orbo_a, orbv_a, orbo_b, orbv_b, block_hvp,
+        feature_kind="LDA", dtype=dtype, block_size=block_size,
+    )
+
+
+def _unrestricted_memory_plan(molecule, resolved_xc, de_a, de_b, options, *,
+                              nroots=1, max_subspace=None, rpa=True):
+    if isinstance(resolved_xc, str):
+        resolved_xc = UnrestrictedSemilocalResponseFunctional(resolved_xc)
+    standard_hf = (type(resolved_xc) is UnrestrictedSemilocalResponseFunctional
+                   and resolved_xc.xc_spec == "hf")
+    return plan_response_memory(
+        molecule.mo_coeff.shape[-2], de_a.size + de_b.size, nroots,
+        jnp.result_type(de_a, de_b), options.max_memory,
+        max_subspace=max_subspace, rpa=rpa, spin_channels=2,
+        direct_basis=(getattr(molecule, "direct_basis", None)
+                      if options.two_electron_mode in {"auto", "direct"} else None),
+        integral_cache=("none" if getattr(resolved_xc, "range_separated_coefficients", None) is not None
+                        else options.integral_cache), direct_workers=options.direct_workers,
+        direct_tol=options.direct_tol,
+        grid_block_size=options.grid_block_size if resolved_xc is not None and not standard_hf else 0,
+        **_response_memory_inputs(molecule, resolved_xc, spin_channels=2),
+    )
 
 
 def _build_unrestricted_response_operator_data(
@@ -446,7 +522,12 @@ def _build_unrestricted_response_operator_data(
     *,
     xc_params: Any | None = None,
     occupation_tolerance: float = 1e-8,
+    need_b_terms: bool = True,
+    response_kernel_options: ResponseKernelOptions | dict[str, Any] | None = None,
 ) -> _UnrestrictedResponseOperatorData:
+    response_options = normalize_response_kernel_options(
+        response_kernel_options,
+        default_max_memory=getattr(molecule, "max_memory", DEFAULT_MAX_MEMORY_MB))
     from ..scf.rsh import response_rsh_coefficients
     rsh = response_rsh_coefficients(molecule)
     resolved_xc = _resolve_xc_functional(molecule, xc_functional, xc_params)
@@ -465,6 +546,20 @@ def _build_unrestricted_response_operator_data(
         molecule,
         occupation_tolerance,
     )
+    fock_occupied = fock_virtual = None
+    fock = getattr(molecule, "fock_matrix", None)
+    if fock is not None:
+        fock = jnp.asarray(fock)
+        nao = orbo_a.shape[0]
+        if fock.shape != (2, nao, nao) or jnp.iscomplexobj(fock):
+            raise ValueError("Noncanonical unrestricted response requires real fock_matrix (2,nao,nao).")
+        fock_occupied = tuple(o.T @ f @ o for o, f in zip((orbo_a, orbo_b), fock))
+        fock_virtual = tuple(v.T @ f @ v for v, f in zip((orbv_a, orbv_b), fock))
+        de_a, de_b = tuple(jnp.diag(v)[None, :] - jnp.diag(o)[:, None]
+                          for o, v in zip(fock_occupied, fock_virtual))
+    memory_plan = _unrestricted_memory_plan(
+        molecule, resolved_xc, de_a, de_b, response_options, rpa=need_b_terms)
+    molecule = _response_grid_view(molecule, memory_plan.grid_block_size)
     hybrid_fraction_raw = getattr(molecule, "exact_exchange_fraction", 0.0)
     hybrid_fraction: Any = (
         float(hybrid_fraction_raw)
@@ -483,10 +578,15 @@ def _build_unrestricted_response_operator_data(
         hybrid_fraction,
         include_exchange=_needs_exchange_terms(hybrid_fraction),
         dtype=jnp.result_type(de_a, de_b),
+        response_options=response_options,
+        eri_cache_bytes=memory_plan.eri_cache_bytes,
     )
     df_factors = getattr(molecule, "df_factors", None)
     ao_mo_response_action_fn = None
-    if df_factors is not None and int(jnp.asarray(df_factors).size) > 0:
+    use_direct = (response_options.two_electron_mode in {"auto", "direct"}
+                  and getattr(molecule, "direct_basis", None) is not None)
+    if (not use_direct and response_options.two_electron_mode in {"auto", "df"}
+            and df_factors is not None and int(jnp.asarray(df_factors).size) > 0):
         ao_mo_response_action_fn = _unrestricted_df_mo_response_action(
             df_factors,
             orbo_a,
@@ -511,8 +611,12 @@ def _build_unrestricted_response_operator_data(
         spin_grid_response_hvp = None
     elif callable(explicit_spin_hvp):
         spin_grid_response_hvp = explicit_spin_hvp
+    standard_hf = (type(resolved_xc) is UnrestrictedSemilocalResponseFunctional
+                   and resolved_xc.xc_spec == "hf")
     ao_kernel_action = getattr(resolved_xc, "ao_kernel_action", None)
-    if callable(ao_kernel_action):
+    if standard_hf:
+        xc_response_action_fn = None
+    elif callable(ao_kernel_action):
         def xc_response_action_fn(alpha, beta):
             da = _unrestricted_transition_density(orbo_a, orbv_a, alpha, bottom=False)
             db = _unrestricted_transition_density(orbo_b, orbv_b, beta, bottom=False)
@@ -529,6 +633,7 @@ def _build_unrestricted_response_operator_data(
             spin_grid_response_hvp,
             feature_kind=str(getattr(resolved_xc, "response_feature_kind", "LDA")),
             dtype=jnp.result_type(de_a, de_b),
+            block_size=memory_plan.grid_block_size,
         )
     else:
         xc_response_action_fn = _unrestricted_grid_xc_response_action(
@@ -539,6 +644,7 @@ def _build_unrestricted_response_operator_data(
             orbo_b,
             orbv_b,
             dtype=jnp.result_type(de_a, de_b),
+            block_size=memory_plan.grid_block_size,
         )
     return _UnrestrictedResponseOperatorData(
         orbital_energy_differences_alpha=de_a,
@@ -550,6 +656,9 @@ def _build_unrestricted_response_operator_data(
         ao_response_action_fn=ao_response_action_fn,
         ao_mo_response_action_fn=ao_mo_response_action_fn,
         xc_response_action_fn=xc_response_action_fn,
+        fock_occupied=fock_occupied,
+        fock_virtual=fock_virtual,
+        memory_plan=memory_plan,
     )
 
 
@@ -653,8 +762,9 @@ def _unrestricted_a_action(
         bottom_projection=False,
     )
     xc_alpha, xc_beta = _unrestricted_xc_action(data, alpha, beta)
-    out_alpha = out_alpha + xc_alpha + alpha * data.orbital_energy_differences_alpha[None, :, :]
-    out_beta = out_beta + xc_beta + beta * data.orbital_energy_differences_beta[None, :, :]
+    fock_alpha, fock_beta = _unrestricted_fock_actions(data, alpha, beta)
+    out_alpha = out_alpha + xc_alpha + fock_alpha
+    out_beta = out_beta + xc_beta + fock_beta
     return _join_unrestricted_rows(out_alpha, out_beta)
 
 
@@ -686,6 +796,15 @@ def _unrestricted_tda_diagonal(data: _UnrestrictedResponseOperatorData) -> Array
     )
 
 
+def _unrestricted_fock_actions(data, alpha, beta):
+    gaps = (data.orbital_energy_differences_alpha, data.orbital_energy_differences_beta)
+    return tuple(_restricted_fock_action(SimpleNamespace(
+        delta_eps=gap,
+        fock_occupied=None if data.fock_occupied is None else data.fock_occupied[spin],
+        fock_virtual=None if data.fock_virtual is None else data.fock_virtual[spin],
+    ), values) for spin, (gap, values) in enumerate(zip(gaps, (alpha, beta))))
+
+
 def _unrestricted_tdhf_action(
     data: _UnrestrictedResponseOperatorData,
     x_rows: Array,
@@ -693,6 +812,8 @@ def _unrestricted_tdhf_action(
 ) -> tuple[Array, Array]:
     x_alpha, x_beta = _split_unrestricted_rows(data, x_rows)
     y_alpha, y_beta = _split_unrestricted_rows(data, y_rows)
+    fock_x_alpha, fock_x_beta = _unrestricted_fock_actions(data, x_alpha, x_beta)
+    fock_y_alpha, fock_y_beta = _unrestricted_fock_actions(data, y_alpha, y_beta)
     if data.ao_mo_response_action_fn is not None:
         upper_x_alpha, upper_x_beta = data.ao_mo_response_action_fn(
             x_alpha,
@@ -727,25 +848,25 @@ def _unrestricted_tdhf_action(
             upper_x_alpha
             + upper_y_alpha
             + xc_alpha
-            + x_alpha * data.orbital_energy_differences_alpha[None, :, :]
+            + fock_x_alpha
         )
         upper_beta = (
             upper_x_beta
             + upper_y_beta
             + xc_beta
-            + x_beta * data.orbital_energy_differences_beta[None, :, :]
+            + fock_x_beta
         )
         lower_alpha = (
             lower_x_alpha
             + lower_y_alpha
             + xc_alpha
-            + y_alpha * data.orbital_energy_differences_alpha[None, :, :]
+            + fock_y_alpha
         )
         lower_beta = (
             lower_x_beta
             + lower_y_beta
             + xc_beta
-            + y_beta * data.orbital_energy_differences_beta[None, :, :]
+            + fock_y_beta
         )
         return _join_unrestricted_rows(upper_alpha, upper_beta), _join_unrestricted_rows(
             lower_alpha,
@@ -804,10 +925,10 @@ def _unrestricted_tdhf_action(
         x_alpha + y_alpha,
         x_beta + y_beta,
     )
-    upper_alpha = upper_alpha + xc_alpha + x_alpha * data.orbital_energy_differences_alpha[None, :, :]
-    upper_beta = upper_beta + xc_beta + x_beta * data.orbital_energy_differences_beta[None, :, :]
-    lower_alpha = lower_alpha + xc_alpha + y_alpha * data.orbital_energy_differences_alpha[None, :, :]
-    lower_beta = lower_beta + xc_beta + y_beta * data.orbital_energy_differences_beta[None, :, :]
+    upper_alpha = upper_alpha + xc_alpha + fock_x_alpha
+    upper_beta = upper_beta + xc_beta + fock_x_beta
+    lower_alpha = lower_alpha + xc_alpha + fock_y_alpha
+    lower_beta = lower_beta + xc_beta + fock_y_beta
     return _join_unrestricted_rows(upper_alpha, upper_beta), _join_unrestricted_rows(
         lower_alpha,
         lower_beta,
@@ -820,17 +941,25 @@ def build_unrestricted_tda_operator(
     *,
     xc_params: Any | None = None,
     occupation_tolerance: float = 1e-8,
+    response_kernel_options: ResponseKernelOptions | dict[str, Any] | None = None,
 ) -> tuple[Callable[[Array], Array], Array, Array, Array]:
     data = _build_unrestricted_response_operator_data(
         molecule,
         xc_functional,
         xc_params=xc_params,
         occupation_tolerance=occupation_tolerance,
+        need_b_terms=False,
+        response_kernel_options=response_kernel_options,
     )
     diagonal = _unrestricted_tda_diagonal(data)
 
     def vind(rows: Array) -> Array:
-        return _unrestricted_a_action(data, rows)
+        _, _, _, _, dim = _unrestricted_dimensions(data)
+        values = jnp.asarray(rows).reshape(-1, dim)
+        return _map_response_vectors(lambda block: _unrestricted_a_action(data, block),
+                                     values, data.memory_plan.batch_size)
+
+    vind.memory_plan = data.memory_plan
 
     return (
         vind,
@@ -846,21 +975,27 @@ def build_unrestricted_tdhf_operator(
     *,
     xc_params: Any | None = None,
     occupation_tolerance: float = 1e-8,
+    response_kernel_options: ResponseKernelOptions | dict[str, Any] | None = None,
 ) -> tuple[Callable[[Array], Array], Array, Array]:
     data = _build_unrestricted_response_operator_data(
         molecule,
         xc_functional,
         xc_params=xc_params,
         occupation_tolerance=occupation_tolerance,
+        response_kernel_options=response_kernel_options,
     )
     _, _, _, _, dim = _unrestricted_dimensions(data)
 
     def vind(rows: Array) -> Array:
         rows = jnp.asarray(rows).reshape(-1, 2 * dim)
-        x = rows[:, :dim]
-        y = rows[:, dim:]
-        upper, lower = _unrestricted_tdhf_action(data, x, y)
-        return jnp.concatenate([upper, -lower], axis=-1)
+
+        def block_action(block):
+            upper, lower = _unrestricted_tdhf_action(data, block[:, :dim], block[:, dim:])
+            return jnp.concatenate([upper, -lower], axis=-1)
+
+        return _map_response_vectors(block_action, rows, data.memory_plan.batch_size)
+
+    vind.memory_plan = data.memory_plan
 
     return (
         vind,
@@ -1051,6 +1186,18 @@ def solve_unrestricted_casida_from_tdhf_operator(
     )
 
 
+def _unrestricted_solver_memory_plan(driver, de_a, de_b, nstates, *, rpa=False):
+    dim = int(de_a.size + de_b.size)
+    nroots = dim if nstates is None else min(int(nstates), dim)
+    return _unrestricted_memory_plan(
+        driver.molecule,
+        _resolve_xc_functional(driver.molecule, driver.xc_functional, driver.xc_params),
+        de_a, de_b, normalize_response_kernel_options(driver.response_kernel_options,
+            default_max_memory=getattr(driver.molecule, "max_memory", DEFAULT_MAX_MEMORY_MB)),
+        nroots=nroots, max_subspace=driver.davidson_max_subspace, rpa=rpa,
+    )
+
+
 @dataclass(frozen=True)
 class UnrestrictedTDA:
     """PySCF-like unrestricted TDA driver."""
@@ -1067,6 +1214,7 @@ class UnrestrictedTDA:
     tda_gradient_mode: EigenGradientMode = "eigenvalue_only"
     eigenvector_adjoint_tol: float = 1e-6
     eigenvector_adjoint_max_iter: int = 64
+    response_kernel_options: ResponseKernelOptions | dict[str, Any] | None = None
 
     def gen_tda_vind(self):
         vind, _, _, _ = build_unrestricted_tda_operator(
@@ -1074,6 +1222,7 @@ class UnrestrictedTDA:
             self.xc_functional,
             xc_params=self.xc_params,
             occupation_tolerance=self.occupation_tolerance,
+            response_kernel_options=self.response_kernel_options,
         )
         return vind
 
@@ -1132,7 +1281,9 @@ class UnrestrictedTDA:
             self.xc_functional,
             xc_params=self.xc_params,
             occupation_tolerance=self.occupation_tolerance,
+            response_kernel_options=self.response_kernel_options,
         )
+        memory = _unrestricted_solver_memory_plan(self, de_a, de_b, nstates)
         result = solve_unrestricted_tda_from_operator(
             de_a,
             de_b,
@@ -1142,7 +1293,7 @@ class UnrestrictedTDA:
             excitation_threshold=self.excitation_threshold,
             davidson_tol=self.davidson_tol,
             davidson_max_iter=self.davidson_max_iter,
-            davidson_max_subspace=self.davidson_max_subspace,
+            davidson_max_subspace=memory.max_subspace,
             tda_gradient_mode=self.tda_gradient_mode,
             eigenvector_adjoint_tol=self.eigenvector_adjoint_tol,
             eigenvector_adjoint_max_iter=self.eigenvector_adjoint_max_iter,
@@ -1167,6 +1318,7 @@ class UnrestrictedCasidaTDDFT:
     tda_gradient_mode: EigenGradientMode = "eigenvalue_only"
     eigenvector_adjoint_tol: float = 1e-6
     eigenvector_adjoint_max_iter: int = 64
+    response_kernel_options: ResponseKernelOptions | dict[str, Any] | None = None
 
     def tda(self, nstates: int | None = None) -> UnrestrictedTDAResult:
         mode = str(self.eigensolver).lower()
@@ -1179,7 +1331,9 @@ class UnrestrictedCasidaTDDFT:
             self.xc_functional,
             xc_params=self.xc_params,
             occupation_tolerance=self.occupation_tolerance,
+            response_kernel_options=self.response_kernel_options,
         )
+        memory = _unrestricted_solver_memory_plan(self, de_a, de_b, nstates)
         result = solve_unrestricted_tda_from_operator(
             de_a,
             de_b,
@@ -1189,7 +1343,7 @@ class UnrestrictedCasidaTDDFT:
             excitation_threshold=self.excitation_threshold,
             davidson_tol=self.davidson_tol,
             davidson_max_iter=self.davidson_max_iter,
-            davidson_max_subspace=self.davidson_max_subspace,
+            davidson_max_subspace=memory.max_subspace,
             tda_gradient_mode=self.tda_gradient_mode,
             eigenvector_adjoint_tol=self.eigenvector_adjoint_tol,
             eigenvector_adjoint_max_iter=self.eigenvector_adjoint_max_iter,
@@ -1202,6 +1356,7 @@ class UnrestrictedCasidaTDDFT:
             self.xc_functional,
             xc_params=self.xc_params,
             occupation_tolerance=self.occupation_tolerance,
+            response_kernel_options=self.response_kernel_options,
         )
         return vind
 
@@ -1211,6 +1366,7 @@ class UnrestrictedCasidaTDDFT:
             self.xc_functional,
             xc_params=self.xc_params,
             occupation_tolerance=self.occupation_tolerance,
+            response_kernel_options=self.response_kernel_options,
         )
         return vind
 
@@ -1277,7 +1433,9 @@ class UnrestrictedCasidaTDDFT:
             self.xc_functional,
             xc_params=self.xc_params,
             occupation_tolerance=self.occupation_tolerance,
+            response_kernel_options=self.response_kernel_options,
         )
+        memory = _unrestricted_solver_memory_plan(self, de_a, de_b, nstates, rpa=True)
         result = solve_unrestricted_casida_from_tdhf_operator(
             de_a,
             de_b,
@@ -1287,6 +1445,6 @@ class UnrestrictedCasidaTDDFT:
             matrix_eps=self.matrix_eps,
             davidson_tol=self.davidson_tol,
             davidson_max_iter=self.davidson_max_iter,
-            davidson_max_subspace=self.davidson_max_subspace,
+            davidson_max_subspace=memory.max_subspace,
         )
         return self._apply_posthoc_correction(result, use_tda=False)

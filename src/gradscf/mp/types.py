@@ -16,14 +16,19 @@ class MPConfig:
     wavefunction_order: int | None = None
     with_coefficients: bool = False
     max_tensor_elements: int = 2_000_000
+    orbital_basis: str = "canonical"
 
     def __post_init__(self):
         if isinstance(self.order, bool) or not isinstance(self.order, Integral) or self.order < 2:
             raise ValueError("MP order must be an integer at least 2")
         if self.algorithm not in {"auto", "direct", "series", "tensor"}:
             raise ValueError("MP algorithm must be auto, direct, series or tensor")
+        if self.orbital_basis not in {"canonical", "noncanonical"}:
+            raise ValueError("orbital_basis must be canonical or noncanonical")
         if self.algorithm == "direct" and self.order > 3:
             raise ValueError("Direct MP kernels support only orders 2 and 3")
+        if self.algorithm == "direct" and self.order == 3 and self.orbital_basis == "noncanonical":
+            raise ValueError("Noncanonical MP3 requires series or tensor rather than direct")
         if self.algorithm == "direct" and (self.with_coefficients or self.wavefunction_order is not None):
             raise ValueError("Wavefunction coefficients require the series or tensor algorithm")
         if (isinstance(self.max_determinants, bool) or not isinstance(self.max_determinants, Integral)
@@ -43,6 +48,7 @@ class MPConfig:
     def _use_series(self, unrestricted=False):
         return (self.algorithm in {"series", "tensor"} or self.order > 3 or self.with_coefficients
                 or self.wavefunction_order is not None
+                or (self.order == 3 and self.orbital_basis == "noncanonical")
                 or (unrestricted and self.order == 3 and self.algorithm == "auto"))
 
 

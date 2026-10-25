@@ -9,9 +9,9 @@ import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array, PyTree
 
-from gradscf.integrals import eri_pair_matrix_to_mo_eri_slices
+from gradscf.ao2mo import eri_pair_matrix_to_mo_eri_slices
 from gradscf.integrals.molecular.eri import _metadata_arrays
-from gradscf.integrals.molecular.ao2mo import _mo_pair_products
+from gradscf.ao2mo.blocks import _mo_pair_products
 from ...tools.features import (
     grid_features_for_molecule,
     requires_unrestricted_spin_treatment,

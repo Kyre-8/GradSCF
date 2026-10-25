@@ -23,6 +23,7 @@ def _molecular(mf, tolerance):
     names = ('overlap', 'hcore', 'eri', 'eri_pair_matrix', 'df_factors', 'ao', 'ao_deriv1',
              'grid_weights', 'nuclear_repulsion')
     args = {key: getattr(data, key) for key in names}
+    args['grid_ao'] = getattr(data, 'grid_ao', None)
     alpha, kind = hybrid_coeff(cfg.xc_spec), xc_type(cfg.xc_spec)
     def evaluate(d, a):
         jk = _make_jk_builder(a['eri'], cfg, eri_pair_matrix=a['eri_pair_matrix'],
@@ -31,7 +32,8 @@ def _molecular(mf, tolerance):
         e, _, f, _, _ = _energy_and_raw_fock_for_density(
             density=d[0], mo_coeff=None, mo_occ=None, mo_energy=None, jk_builder=jk,
             ao=a['ao'], ao_deriv1=a['ao_deriv1'], weights=a['grid_weights'], h=a['hcore'],
-            enuc=a['nuclear_repulsion'], alpha=alpha, cfg=cfg, xc_kind=kind)
+            enuc=a['nuclear_repulsion'], alpha=alpha, cfg=cfg, xc_kind=kind,
+            grid_ao=a.get('grid_ao'))
         return e, f[None]
     problem = ks_problem(jnp.asarray(mf.mo_coeff)[None], (data.nelectron//2,), args,
                           lambda d,a: evaluate(d,a)[1], lambda d,a: evaluate(d,a)[0],

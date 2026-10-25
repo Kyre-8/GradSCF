@@ -14,7 +14,7 @@ from .types import TensorSumResult, RPAResult
 from .eigen.stable_rpa import solve_stable_rpa
 from .eigen.structured_rpa import solve_rpa
 
-from .types import NonHermitianSolverConfig, NonHermitianResult
+from .types import NonHermitianSolverConfig, NonHermitianResult, NonHermitianSubspaceResult
 from .eigen.nonhermitian import solve_nonhermitian
 
 __all__ = [
@@ -34,5 +34,6 @@ __all__ = [
     "RPAResult",
     "NonHermitianSolverConfig",
     "NonHermitianResult",
+    "NonHermitianSubspaceResult",
     "solve_nonhermitian",
 ]

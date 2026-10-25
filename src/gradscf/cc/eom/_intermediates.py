@@ -17,7 +17,7 @@
 
 
 import jax.numpy as jnp
-from .._intermediates import Loo, Lvv, cc_Fov
+from .._intermediates import Loo, Lvv, cc_Fov, contract_Wvvvv as contract_virtual
 
 
 def W1ovvo(t1, t2, eris):
@@ -112,7 +112,19 @@ def Wvvvv(t1, t2, eris):
     return Wabcd
 
 
-def Wvvvo(t1, t2, eris, _Wvvvv=None):
+def contract_Wvvvv(t1, t2, eris, x):
+    """Apply charged W without storing its dressed four-virtual tensor.
+
+    The ground-state action supplies the same bare and ovvv terms. Only the
+    charged t2/t1-t1 dressing remains, factored through two occupied indices.
+    """
+    result = contract_virtual(t1, eris, x)
+    occupied = jnp.einsum("kcld,...cd->...kl", eris.ovov, x)
+    result += jnp.einsum("...kl,klab->...ab", occupied, t2)
+    return result+jnp.einsum("...kl,ka,lb->...ab", occupied, t1, t1)
+
+
+def Wvvvo(t1, t2, eris, _Wvvvv=None, *, include_vvvv=True):
     nocc, nvir = t1.shape
     eris_ovvv = jnp.asarray(eris.get_ovvv())
     Wabcj = -jnp.einsum("alcj,lb->abcj", W1ovov(t1, t2, eris).transpose(1, 0, 3, 2), t1)
@@ -126,8 +138,9 @@ def Wvvvo(t1, t2, eris, _Wvvvv=None):
     Wabcj += jnp.einsum("kclj,lb,ka->abcj", eris_ovoo, t1, t1)
     Wabcj += -jnp.einsum("kc,kjab->abcj", cc_Fov(t1, t2, eris), t2)
     Wabcj += jnp.asarray(eris_ovvv).transpose(3, 1, 2, 0).conj()
-    if _Wvvvv is None:
-        _Wvvvv = Wvvvv(t1, t2, eris)
-    # Keep this term at t1=0: its parameter derivative need not vanish.
-    Wabcj += jnp.einsum("abcd,jd->abcj", _Wvvvv, t1)
+    if include_vvvv:
+        if _Wvvvv is None:
+            _Wvvvv = Wvvvv(t1, t2, eris)
+        # Keep this term at t1=0: its parameter derivative need not vanish.
+        Wabcj += jnp.einsum("abcd,jd->abcj", _Wvvvv, t1)
     return Wabcj

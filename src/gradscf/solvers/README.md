@@ -259,8 +259,9 @@ python -m pytest -q tests/solvers tests/ci tests/test_tddft_eigensolvers.py \
   tests/test_scf_higher_order.py tests/test_scf_implicit_and_xc_energy.py
 ```
 
-Biorthogonal non-Hermitian vector response and variable-metric subspace
-response remain future work. Hermitian higher response assumes a fixed real
+Real isolated non-Hermitian pair response and the invariant-cluster mode
+below use shared implicit solves. Variable-metric subspace response remains
+outside these contracts. Hermitian higher response assumes a fixed real
 Euclidean metric, fixed selected rank and a resolved external spectral gap.
 The present RPA implementation is not a generic non-Hermitian EOM solver.
 GPU behavior has not been validated in this migration.
@@ -309,8 +310,9 @@ Isolated real eigenvalue JVP/VJP uses `d omega = L.T (dA) R`. Numerical vectors
 and raw spectra have stopped AD. Complex selected roots have NaN real outputs;
 negative real roots remain selectable. Failed requested/guard residuals,
 observed unresolved gaps or excessive conditioning invalidate derivatives for
-the complete requested set. Vector/cluster and higher-order response are not
-provided. The caller owns CC amplitude response and sector interpretation;
+the complete requested set. The default rule provides only first-order energy
+response. Opt-in isolated-pair and invariant-subspace responses use shared
+implicit solves. The caller owns CC amplitude response and sector interpretation;
 see [EOM-CCSD](../cc/eom/README.md).
 
 Real clusters unresolved at matrix-scaled roundoff are represented by real
@@ -332,3 +334,35 @@ convergence/iterations and batch evaluation counters. `scan=True` permits
 explicit trajectory AD; an implicit physical root rule can wrap the default
 while-loop solver, as GW does. Rejected nonfinite trials do not enter the
 explicit derivative graph. See [QP usage and validation](../gw/QP_SOLVERS.md).
+
+## Real non-Hermitian invariant clusters
+
+`solve_nonhermitian(A, response=EigenResponseConfig(target="subspace"),
+probes=q)` returns a `NonHermitianSubspaceResult`. Its differentiated outputs
+are `projection=P@q` and `eigenvalue_sum`; `probes=None` requests only the trace.
+The probe can be a vector or a column matrix. The oblique projector P need not
+be symmetric. `values`, `right_vectors` and `left_vectors` are None; numerical
+eigenpairs remain available in the entirely stopped `raw_result` for proper-
+subspace requests. The existing
+result layout and isolated-root defaults are unchanged when response is omitted.
+Mixing explicit response with `vector_response`/`response_config` raises.
+
+A proper selected cluster must be complete, real and semisimple, with a resolved
+external boundary. Internal degeneracy is allowed. The numerical left/right
+spans, overlap conditioning and QR-rebased block residuals must pass before
+response is valid. Davidson's boundary uses converged local Ritz/guard roots;
+it is not a global spectral certificate. Complex, rank-deficient, defective or
+cut clusters retain inspectable numerical diagnostics and invalid derivatives.
+The full space instead gives P=I and trace(A), using bounded true operator
+actions without an eigenvector chart, including finite Jordan examples. Its
+raw spectral arrays are empty, `spectrum_complete=False`, and iteration/subspace
+counts are zero because no numerical eigensolve is performed.
+
+The shared coupled implicit roots retain first and second response. Direct
+capacity in `response.linear_config.max_dense` is n*k+k*k for each coupled
+root, rather than n per requested state;
+GMRES avoids that dense Jacobian. Required frames, arbitrary probe batches,
+known operator scratch and both root phases share the caller's original MB
+budget. This is declared-array planning, not an RSS/VRAM cap. See the
+[derivation](DEGENERACY.md#non-hermitian-invariant-subspaces) and
+[executed example](../../../examples/solvers/nonhermitian_subspace.py).

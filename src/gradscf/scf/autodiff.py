@@ -58,6 +58,9 @@ def attach_scf_backward(
     residual: Callable[[Array, PyTree], Array],
     config: SCFDifferentiationConfig | None = None,
     converged: Array | bool = True,
+    max_memory=None,
+    reserved_bytes=0,
+    operator_min_bytes=0,
 ) -> Array:
     """Attach a backward rule for ``residual(solution, params) = 0``.
 
@@ -75,4 +78,6 @@ def attach_scf_backward(
         fixed_point=lambda state, inputs: state - residual(state, inputs),
         config=cfg.as_implicit_config(), converged=converged,
         require_converged=cfg.require_converged,
+        max_memory=max_memory, reserved_bytes=reserved_bytes,
+        operator_min_bytes=operator_min_bytes,
     )

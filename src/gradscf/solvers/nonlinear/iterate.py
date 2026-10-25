@@ -7,6 +7,7 @@ import jax
 import jax.numpy as jnp
 from .diis import diis_push, diis_solve
 from .root import attach_root
+from gradscf._memory import array_storage_bytes, validate_reserved_bytes
 
 
 @dataclass(frozen=True)
@@ -46,6 +47,9 @@ def solve_nonlinear(
     config=None,
     linear_config=None,
     valid_inputs=True,
+    max_memory=None,
+    reserved_bytes=0,
+    operator_min_bytes=0,
 ):
     """Converge a real vector residual, then differentiate its root, not DIIS.
 
@@ -59,6 +63,12 @@ def solve_nonlinear(
         raise ValueError("Nonlinear iterates must be packed vectors")
     if not jnp.issubdtype(initial.dtype, jnp.floating):
         raise ValueError("Nonlinear iterates must be real floating-point vectors")
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    if max_memory is not None:
+        from ..memory import plan_nonlinear
+        cfg, _ = plan_nonlinear(initial.size, initial.dtype, cfg, max_memory,
+            resident_bytes=reserved_bytes+array_storage_bytes(initial),
+            operator_min_bytes=operator_min_bytes, device=getattr(initial, "device", None))
     if initial.size == 0:
         return NonlinearResult(
             initial,
@@ -132,5 +142,7 @@ def solve_nonlinear(
         & (r <= cfg.residual_tol)
         & (de <= cfg.energy_tol)
     )
-    x = attach_root(residual, x, config=linear_config, converged=valid)
+    x = attach_root(residual, x, config=linear_config, converged=valid,
+        max_memory=max_memory, reserved_bytes=reserved_bytes+array_storage_bytes(initial),
+        operator_min_bytes=operator_min_bytes)
     return NonlinearResult(x, k, r, de, valid)

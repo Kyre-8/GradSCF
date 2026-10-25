@@ -197,7 +197,7 @@ update imports rather than relying on compatibility aliases:
 | `gradscf.integrals.assembly` / `integrals.input_*` | `gradscf.scf.inputs` |
 | `gradscf.df` J/K functions | `gradscf.integrals.molecular.jk` |
 | `gradscf.df` spectral ERI factorization | `gradscf.integrals.molecular.factorization` |
-| `gradscf.integrals.mo` | `gradscf.integrals.molecular.ao2mo` |
+| `gradscf.integrals.mo` / `gradscf.integrals.molecular.ao2mo` | `gradscf.ao2mo` |
 | `gradscf.integrals.density_fitting` | `gradscf.integrals.molecular.density_fitting` |
 | `gradscf.integrals.contraction` basis transforms | `gradscf.integrals.basis.contraction` |
 | `gradscf.integrals.contraction.exchange_matrix` | `gradscf.integrals.molecular.jk.exchange_matrix` |

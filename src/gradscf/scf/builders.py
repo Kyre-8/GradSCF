@@ -155,6 +155,10 @@ def _build_restricted_reference(
     if include_dipole_integrals and scf_inputs.dipole_integrals is None:
         spec = atom if isinstance(atom,MoleculeSpec) else parse_molecule_spec(atom,unit=unit,charge=charge,spin=spin)
         scf_inputs = complete_restricted_response_inputs(scf_inputs,spec,basis)
+    if scf_inputs.grid_ao is not None and (compute_local_hfx_features or compute_local_pt2_features):
+        raise NotImplementedError(
+            "Legacy local HFX/PT2 feature caches require dense grid AO data; "
+            "use grid_block_size=-1 for these explicit feature requests.")
     basis_cart = scf_inputs.basis
     s = scf_inputs.overlap
     h1e = scf_inputs.hcore
@@ -197,6 +201,7 @@ def _build_restricted_reference(
     pt2_local = None
     pt2_fock_response = None
     reference_eri_pair_matrix = None
+    reference_direct_basis = None
     if compute_local_hfx_features:
         hfx_result = _local_hfx_features_from_basis_dm(
             basis_cart,
@@ -221,6 +226,11 @@ def _build_restricted_reference(
     if cfg.jk_backend == "df":
         if df_factors is None:
             raise RuntimeError("DF backend requested but df_factors were not constructed.")
+        rep_tensor = _empty_rep_tensor_like(s)
+    elif cfg.jk_backend == "direct" and not compute_local_pt2_features and callable(
+        getattr(scf_inputs.direct_basis, "get_jk", None)
+    ):
+        reference_direct_basis = scf_inputs.direct_basis
         rep_tensor = _empty_rep_tensor_like(s)
     else:
         if eri is None and eri_pair_matrix is None:
@@ -263,6 +273,8 @@ def _build_restricted_reference(
     )
     return RestrictedMolecule(
         ao=ao,
+        grid_ao=scf_inputs.grid_ao,
+        max_memory=cfg.max_memory,
         grid=QuadratureGrid(weights=weights, coords=coords),
         dipole_integrals=dipole_integrals,
         rep_tensor=rep_tensor,
@@ -292,6 +304,7 @@ def _build_restricted_reference(
         pt2_fock_response=pt2_fock_response,
         df_factors=reference_arrays["df_factors"],
         eri_pair_matrix=reference_eri_pair_matrix,
+        direct_basis=reference_direct_basis,
         scf_converged=bool(rks.converged),
         scf_cycles=int(rks.cycles),
         eri_lr=getattr(scf_inputs, "eri_lr", None),
@@ -472,10 +485,15 @@ def _build_unrestricted_reference(
         verbose=verbose,
         **mol_kwargs,
     )
+    if scf_inputs.grid_ao is not None and (compute_local_hfx_features or compute_local_pt2_features):
+        raise NotImplementedError(
+            "Legacy local HFX/PT2 feature caches require dense grid AO data; "
+            "use grid_block_size=-1 for these explicit feature requests.")
     basis_cart = scf_inputs.basis
     s = scf_inputs.overlap
     h1e = scf_inputs.hcore
     eri = scf_inputs.eri
+    direct_basis = getattr(scf_inputs, "direct_basis", None)
     coords = scf_inputs.coords
     weights = scf_inputs.grid_weights
     ao = scf_inputs.ao
@@ -522,6 +540,10 @@ def _build_unrestricted_reference(
         else:
             hfx_local, hfx_fxx = hfx_result
     if compute_local_pt2_features:
+        if direct_basis is not None:
+            # This explicit feature request requires orbital integrals. The
+            # default direct reference retains only its spatial AO action.
+            eri = direct_basis.response_eri_pair_matrix()
         pt2_local, pt2_fock_response = _local_pt2_feature_from_unrestricted_orbitals(
             ao,
             jnp.stack([uks.mo_coeff_alpha, uks.mo_coeff_beta], axis=0),
@@ -543,6 +565,8 @@ def _build_unrestricted_reference(
     nocc_beta = int(np.count_nonzero(np.asarray(uks.mo_occ_beta) > 1e-8))
     return UnrestrictedMolecule(
         ao=ao,
+        grid_ao=scf_inputs.grid_ao,
+        max_memory=cfg.max_memory,
         grid=QuadratureGrid(weights=weights, coords=coords),
         dipole_integrals=dipole_integrals,
         rep_tensor=jnp.asarray(eri),
@@ -579,6 +603,7 @@ def _build_unrestricted_reference(
         dispersion_energy=getattr(scf_inputs, "dispersion_energy", None),
         range_separated_coefficients=getattr(uks, "range_separated_coefficients", None),
         xc_spec=xc_spec_resolved,
+        direct_basis=direct_basis,
     )
 
 

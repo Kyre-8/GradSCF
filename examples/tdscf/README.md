@@ -5,6 +5,12 @@ Each result record states its basis, geometry, units, convergence gates, source
 hashes, independent checks, and measured scope. Native calculations and PySCF
 references are separate scripts; they do not share electronic integrals.
 
+[Direct response storage](direct_response.py) computes benzene/Cartesian
+6-31G* with native direct RHF and five TDA roots. It reports integral-cache
+bytes, compiled action workspace, warm action time and the full solve without
+a CLI. The [implementation and measured comparison](../../src/gradscf/tddft/DIRECT_RESPONSE.md)
+separate memory savings from the cost of recomputing shell integrals.
+
 | Entry | Example and measured record |
 | --- | --- |
 | X01 | [Vertical absorption](formaldehyde_absorption.py): HF/PBE/PBE0/B3LYP/original omegaB97X-D, TDA/full TD, first six singlets; [record](../../reproducibility/ad_showcase/X01_formaldehyde_absorption/README.md). |

@@ -3,15 +3,26 @@
 #include "geometry_contraction.h"
 
 template<bool transpose>
-static ffi::Error GeometryHessian(ffi::BufferR2<ffi::S32> atoms,
+static ffi::Error GeometryHessianImpl(ffi::BufferR2<ffi::S32> atoms,
                                   ffi::BufferR2<ffi::S32> basis,
                                   ffi::BufferR1<ffi::F64> environment,
                                   ffi::Buffer<ffi::F64> direction,
                                   ffi::Buffer<ffi::F64> vector,
                                   ffi::ResultBuffer<ffi::F64> result,
-                                  int32_t op, int32_t cart) {
+                                  int32_t op, int32_t cart,
+                                  const int32_t* slice=nullptr,size_t count=0,bool padded=false) {
   try {
+    if (padded && count!=8) throw std::invalid_argument("ERI slab bounds must have eight endpoints");
     IntegralTables t(atoms,basis,environment,op,cart,true);
+    ERIWindow window(t,slice,count);
+    if (slice && op!=4) throw std::invalid_argument("shell_slice applies only to ERI");
+    if (padded) {
+      if constexpr (transpose) window.pad_to(vector); else window.pad_to(*result);
+    }
+    auto check_shape=[&](const ffi::Buffer<ffi::F64>& buffer) {
+      if (padded) return;
+      if (slice) window.check_shape(buffer); else t.check_shape(buffer,op);
+    };
     std::vector<bool> allowed(t.env.size(),false);
     for (int a=0; a<t.natm; ++a)
       for (int x=0; x<3; ++x) allowed[t.atm[a*ATM_SLOTS+PTR_COORD]+x]=true;
@@ -28,14 +39,14 @@ static ffi::Error GeometryHessian(ffi::BufferR2<ffi::S32> atoms,
     };
     check_direction(direction);
     if constexpr (transpose) {
-      t.check_shape(vector,op);
+      check_shape(vector);
       if (result->dimensions().size()!=1 || result->element_count()!=t.env.size())
         throw std::invalid_argument("Invalid geometry Hessian VJP output shape");
       for (size_t i=0; i<vector.element_count(); ++i)
         if (!std::isfinite(vector.typed_data()[i]))
           throw std::invalid_argument("Derivative vector must be finite");
     } else {
-      t.check_shape(*result,op);
+      check_shape(*result);
       check_direction(vector);
     }
     const double* u=direction.typed_data();
@@ -46,13 +57,38 @@ static ffi::Error GeometryHessian(ffi::BufferR2<ffi::S32> atoms,
                       std::vector<double>& block,std::vector<double>& cache,int) {
       t.shell(kernel,shells,size,block,cache);
     };
-    contract_geometry_hessian<transpose>(t,op,cart,u,input,output,evaluate);
+    contract_geometry_hessian<transpose>(t,op,cart,u,input,output,evaluate,slice ? &window : nullptr);
     return ffi::Error::Success();
   } catch (const std::invalid_argument& error) {
     return ffi::Error::InvalidArgument(error.what());
   } catch (const std::exception& error) {
     return ffi::Error::Internal(error.what());
   }
+}
+
+template<bool transpose>
+static ffi::Error GeometryHessian(ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<ffi::S32> basis,
+                                  ffi::BufferR1<ffi::F64> env,ffi::Buffer<ffi::F64> direction,
+                                  ffi::Buffer<ffi::F64> vector,ffi::ResultBuffer<ffi::F64> result,
+                                  int32_t op,int32_t cart) {
+  return GeometryHessianImpl<transpose>(atoms,basis,env,direction,vector,result,op,cart);
+}
+
+template<bool transpose>
+static ffi::Error ERISliceGeometryHessian(ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<ffi::S32> basis,
+                                          ffi::BufferR1<ffi::F64> env,ffi::Buffer<ffi::F64> direction,
+                                          ffi::Buffer<ffi::F64> vector,ffi::ResultBuffer<ffi::F64> result,
+                                          int32_t op,int32_t cart,ffi::Span<const int32_t> slice) {
+  return GeometryHessianImpl<transpose>(atoms,basis,env,direction,vector,result,op,cart,slice.begin(),slice.size());
+}
+
+template<bool transpose>
+static ffi::Error ERISlabGeometryHessian(ffi::BufferR2<ffi::S32> atoms,ffi::BufferR2<ffi::S32> basis,
+                                         ffi::BufferR1<ffi::F64> env,ffi::Buffer<ffi::F64> direction,
+                                         ffi::Buffer<ffi::F64> vector,ffi::BufferR1<ffi::S32> bounds,
+                                         ffi::ResultBuffer<ffi::F64> result,int32_t op,int32_t cart) {
+  return GeometryHessianImpl<transpose>(atoms,basis,env,direction,vector,result,op,cart,
+                                         bounds.typed_data(),bounds.element_count(),true);
 }
 
 extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFGeometryHessianJVP(XLA_FFI_CallFrame*);
@@ -63,3 +99,18 @@ extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFGeometry
     .Ret<ffi::Buffer<ffi::F64>>().Attr<int32_t>("operator").Attr<int32_t>("cart")
 XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFGeometryHessianJVP, GeometryHessian<false>, GEOMETRY_HESSIAN_BIND);
 XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFGeometryHessianVJP, GeometryHessian<true>, GEOMETRY_HESSIAN_BIND);
+extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFERISliceGeometryHessianJVP(XLA_FFI_CallFrame*);
+extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFERISliceGeometryHessianVJP(XLA_FFI_CallFrame*);
+XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFERISliceGeometryHessianJVP, ERISliceGeometryHessian<false>,
+                              GEOMETRY_HESSIAN_BIND.Attr<ffi::Span<const int32_t>>("shell_slice"));
+XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFERISliceGeometryHessianVJP, ERISliceGeometryHessian<true>,
+                              GEOMETRY_HESSIAN_BIND.Attr<ffi::Span<const int32_t>>("shell_slice"));
+extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFERISlabGeometryHessianJVP(XLA_FFI_CallFrame*);
+extern "C" __attribute__((visibility("default"))) XLA_FFI_Error* GradSCFERISlabGeometryHessianVJP(XLA_FFI_CallFrame*);
+#define ERI_SLAB_HESSIAN_BIND ffi::Ffi::Bind().Arg<ffi::BufferR2<ffi::S32>>() \
+    .Arg<ffi::BufferR2<ffi::S32>>().Arg<ffi::BufferR1<ffi::F64>>() \
+    .Arg<ffi::Buffer<ffi::F64>>().Arg<ffi::Buffer<ffi::F64>>() \
+    .Arg<ffi::BufferR1<ffi::S32>>().Ret<ffi::Buffer<ffi::F64>>() \
+    .Attr<int32_t>("operator").Attr<int32_t>("cart")
+XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFERISlabGeometryHessianJVP, ERISlabGeometryHessian<false>, ERI_SLAB_HESSIAN_BIND);
+XLA_FFI_DEFINE_HANDLER_SYMBOL(GradSCFERISlabGeometryHessianVJP, ERISlabGeometryHessian<true>, ERI_SLAB_HESSIAN_BIND);

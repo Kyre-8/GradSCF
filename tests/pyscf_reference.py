@@ -36,7 +36,7 @@ from gradscf.scf import (
     run_rks_from_integrals,
     run_uks_from_integrals,
 )
-from gradscf.integrals.molecular.ao2mo import eri_pair_matrix_to_mo_eri_slices
+from gradscf.ao2mo import eri_pair_matrix_to_mo_eri_slices
 
 
 def _hybrid_fraction_from_mf(mf: Any) -> float:

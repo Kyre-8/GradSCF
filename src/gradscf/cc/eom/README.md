@@ -110,8 +110,30 @@ conditioning invalidate energy derivatives (NaN), rather than changing the
 method with a pseudoinverse. The response flag applies conservatively to the
 whole requested root set. Dense solving checks the full computed spectrum.
 Davidson checks the projected spectrum and converged guard roots, subject to
-the spectral-completeness limitation below. This first version does not attach a differentiable
-non-Hermitian degenerate-subspace projector.
+the spectral-completeness limitation below. A separate invariant-subspace mode
+provides the complete-cluster observables described next.
+
+## Complete-cluster response
+
+All three sectors accept the shared `EigenResponseConfig(target="subspace")`.
+For example, `cc.EOMEE(mycc, nroots=2, response=response).run(probes=q)` stores
+a conditional `EOMSubspaceResult` with `projection`, `eigenvalue_sum`,
+`response_valid`, `boundary_gap` and stopped `raw_result`. The functional
+`run_eom`/`run_eom_from_integrals` entries use
+`config=cc.EOMConfig(..., response=response), probes=q` inside a differentiated
+function. Probe rows use the packed EOM amplitude
+coordinate space; the trace sums sector energies relative to the CC ground
+state. Add k times the live ground energy if a sum of absolute energies is
+required.
+
+Internal crossings are allowed for a complete real semisimple cluster with
+a valid external boundary. The shared solver uses coupled left/right block
+roots and the live overlap inverse, not independent sorted-root derivatives.
+Its checked direct dimension is n*k+k*k; GMRES is also supported. Individual
+amplitudes and Dyson orbitals require an eigenpair result and explicitly reject
+this invariant result. Differentiated state properties require isolated-pair
+response; legacy degenerate forward properties keep their existing contract. The eigenpair defaults/legacy tuple are intact.
+See the [mathematics and numerical guards](../../solvers/DEGENERACY.md#non-hermitian-invariant-subspaces).
 
 ## Isolated charged-state Dyson properties
 
@@ -205,8 +227,8 @@ before EOM intermediates; it does not estimate peak memory or bound the earlier
 CC calculation. Removing the EOM matrix bottleneck does not make integrals or
 CC intermediates low-memory algorithms.
 
-UHF/ROHF, triplet/SF, higher-rank EOM methods, complex orbitals, degenerate
-cluster response, transition properties beyond the charged-state Dyson
+UHF/ROHF, triplet/SF, higher-rank EOM methods, complex orbitals, complex-cluster
+response, transition properties beyond the charged-state Dyson
 quantities above, and GPU performance remain outside this implementation.
 The molecular example validates a complete first bond derivative, not a general
 higher-order EOM molecular response facility.

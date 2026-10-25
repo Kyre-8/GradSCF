@@ -11,6 +11,11 @@ subspace benchmark and native benzene example add controlled backward checks.
   scan and independent dense differences. [plot_degenerate_subspace.py](plot_degenerate_subspace.py)
   plots saved data. See [A03 results and validity boundaries](../../reproducibility/ad_showcase/A03_degenerate_subspace/README.md).
 
+- [nonhermitian_subspace.py](nonhermitian_subspace.py): a nonnormal real matrix
+  with an exact internal crossing. Shared Davidson and coupled implicit block
+  solves give projector/cluster-trace JVP, VJP and HVP. Raw eigenvectors are
+  stopped diagnostics; individual sorted roots remain guarded.
+
 - [degenerate_vjp.py](degenerate_vjp.py): n=256/1024/4096 complete-subspace
   VJPs with analytic references, internal/external gap scans and frame checks.
   [compare_degenerate_eigh_ad.py](compare_degenerate_eigh_ad.py) compares ordinary

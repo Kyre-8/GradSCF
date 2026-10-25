@@ -7,6 +7,10 @@ from jaxtyping import Array
 
 @dataclass(frozen=True)
 class CIConfig:
+    """CI roots and response; None max_space selects a bounded Davidson basis.
+
+    The default capacity is min(ndet, max(40, 4*(nroots+1))).
+    """
     nroots: int = 1
     solver: str = "davidson"
     conv_tol: float = 1e-9

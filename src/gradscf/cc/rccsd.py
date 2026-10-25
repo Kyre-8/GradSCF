@@ -25,7 +25,7 @@ def residual(t1, t2, ints, *, model="ccsd"):
         r0, linear = jax.jvp(lambda a, b: residual_full(a, b, ints), zero, (t1, t2))
         r1, r2 = jax.tree.map(lambda a, b: a + b, r0, linear)
     else:
-        r1, r2 = residual_full(t1, t2, ints, cc2=model == "cc2")
+        r1, r2 = residual_full(t1, t2, ints, cc2=model == "cc2", doubles=model != "ccs")
     if model in {"ccd", "lccd"}:
         r1 = jnp.zeros_like(r1)
     if model == "ccs":

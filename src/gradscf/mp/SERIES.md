@@ -1,8 +1,10 @@
 # Residual-driven MP series
 
 `MP(mf, order=p)` computes all corrections E2 through Ep from one physical
-residual. The generic engine supports real canonical restricted/unrestricted
-HF frames, integer occupations and fixed frozen spaces. It has no fixed order
+residual. The generic engine supports real restricted/unrestricted HF frames,
+integer occupations and fixed frozen spaces. Canonical frames remain the
+default; `orbital_basis="noncanonical"` retains full occupied/virtual Fock blocks.
+It has no fixed order
 ceiling, but it has explicit representation-dependent capacity limits.
 It does not claim convergence of the series at lambda=1.
 
@@ -15,7 +17,7 @@ H(\lambda)=H_0+\lambda V_N,\qquad
 H_0=E_\mathrm{HF}+F_N.
 $$
 
-For each retained determinant D, its Fock excitation gap is
+In canonical orbitals, each retained determinant D has the Fock excitation gap
 
 $$
 \Omega_D=\sum_{\sigma p}\epsilon_p^\sigma
@@ -24,10 +26,11 @@ $$
 
 All occupied electrons, including frozen cores, contribute to the physical HF
 Fock and reference energy. Frozen orbitals restrict excitations; they are not
-removed from reference determinants. The default operator is generated from the
-shared CI Slater--Condon machinery on the retained space. The experimental
-`algorithm='tensor'` instead contracts complete excitation blocks; see
-[TENSOR_BLOCKS.md](TENSOR_BLOCKS.md). No FCI product-space
+removed from reference determinants. The default operator uses the shared CI
+compact particle/hole string contractions on the retained space. The
+canonical `algorithm='tensor'` contracts dense antisymmetric blocks; its
+noncanonical variant uses the compact direct action with the same packed
+output coordinates. See [TENSOR_BLOCKS.md](TENSOR_BLOCKS.md). No FCI product-space
 enumeration, physical dense Hamiltonian or diagonalization is required.
 
 Use intermediate normalization, c0(lambda)=1. Write the unknowns as
@@ -38,8 +41,9 @@ F_D=(\Omega_D-\delta E)c_D+\lambda(Wc)_D,\quad D\ne0,
 \qquad F_E=\lambda(Wc)_0-\delta E.
 $$
 
-Its known zero-point solution is y0=0. The zero-point Jacobian is
-J0=diag(Omega_exc,-1), so the physical reference must be isolated from all
+Here Q excludes the reference determinant. Its known zero-point solution is
+y0=0. The zero-point Jacobian is the block operator diag(Q F_N Q,-1), reducing
+to diag(Omega_exc,-1) in canonical coordinates. The reference must be isolated from all
 retained excitations. Internal degeneracies among excited gaps are permitted.
 The reported minimum denominator covers these excitation gaps, unlike the
 optimized MP2 diagnostic that covers allowed doubles only.
@@ -54,8 +58,9 @@ b_n=[\lambda^n]F\left(\sum_{j=1}^{n-1}\lambda^j y_j,\lambda\right),
 $$
 
 `jax.experimental.jet` extracts the source coefficient with
-`factorial_scaled=False`. The Jacobian action comes from `jax.linearize`;
-the same checked shared linear solver is used at every degree. Its diagonal
+`factorial_scaled=False`. The known zero-point Jacobian applies the complete
+normal-ordered Fock operator and a minus sign on the energy coordinate.
+The same checked shared linear solver is used at every degree. Its diagonal
 preconditioner is the exact inverse for a valid canonical reference. Both
 primal and transpose solves retain the shared residual checks. No independent
 iterative or adjoint solver lives in MP.
@@ -63,7 +68,15 @@ iterative or adjoint solver lives in MP.
 The linear nodes W Psi_j are computed once per state coefficient and shared
 with later residual degrees and Rayleigh extraction. Only the remaining
 polynomial/quotient graph is lifted by Taylor AD. This preserves all outer
-integral and gap derivatives; see [GRAPH_REUSE.md](GRAPH_REUSE.md) for the
+integral and full-Fock derivatives. The linear F_N term has zero source at degree
+n when the unknown nth state coefficient is zero; only its Jacobian action is
+needed by that step. Thus no Hamiltonian action is traced through `jet`.
+For the noncanonical path, the shared direct builder constructs W from the
+normal-ordered quartic interaction and cross occupied/virtual Fock terms.
+Same-block Fock kernels and the reference constant are omitted before tracing,
+rather than generated in H and subtracted again. The complete occupied/virtual
+Fock operator remains live in the residual Jacobian and Rayleigh functional.
+See [GRAPH_REUSE.md](GRAPH_REUSE.md) for the
 coefficient alignment, measured CPU speedups and scope.
 
 The determinant residual is only a generic polynomial in state, energy and
@@ -98,8 +111,22 @@ $$
 agrees with the true eigenvalue through order 2k+1. The state error is
 $O(lambda^(k+1))$; stationarity makes the energy error $O(lambda^(2k+2))$. Taylor
 AD of this one functional therefore gives every requested energy coefficient.
+In code, its lambda-independent E_HF offset is removed before Taylor lifting:
+the quotient uses F_N + lambda W and E_HF is added once to the final total.
+This exact energy-origin shift preserves every requested coefficient and its
+physical parameter response while avoiding high-order cancellations of E_HF
+times the state norm.
 Increasing `wavefunction_order` above the default computes more complete state
 coefficients and increases the rank/capacity requirement accordingly.
+
+Each shared node uses exact rank support: `W Psi_j` has input rank at most
+`2j` and output rank at most `2j+2`. The final node `W Psi_k` appears only in
+the Rayleigh numerator at degree `k+1`. For energies through degree p its bra
+can have degree at most `p-k-1`, hence rank at most `2(p-k-1)`. Projecting this
+node onto those output ranks leaves every requested coefficient unchanged,
+including its outer parameter derivatives. The projector is applied to the
+whole `H-E_HF-F_N` action, and its transpose exchanges input/output projectors.
+No coefficient magnitude enters this pruning.
 
 | Energy request | Default complete state order | Maximum retained rank |
 | --- | ---: | ---: |
@@ -111,11 +138,10 @@ coefficients and increases the rank/capacity requirement accordingly.
 Physical particle/hole counts can reduce the actual rank. At sufficiently high
 order the retained space can coincide with the entire finite determinant space;
 the algorithm still does not perform an FCI eigensolve. Wavefunctions in this
-representation and their connection table grow combinatorially. This is an
-in-core generic reference engine, not yet a tensor-factorized high-order backend.
-The unrestricted CI adapter also materializes spin-orbital integral tensors.
-The opt-in tensor backend avoids that adapter and its connection table, but
-still has combinatorial state growth and dense antisymmetric temporary blocks.
+representation grow combinatorially. Direct actions avoid the complete
+determinant-pair connection table and spin-orbital four-index integrals. Full
+spatial MO integrals are still required. The canonical tensor backend still
+has dense antisymmetric temporary blocks, within its explicit capacity budget.
 
 ## Public usage
 
@@ -136,12 +162,27 @@ from MP2 onward. `algorithm='tensor'` uses the same Taylor engine with the
 experimental block action, from MP2 onward. `algorithm='direct'` explicitly selects a specialized kernel
 and rejects unsupported orders or coefficient requests. The existing MP2/MP3
 facades remain convenient aliases; UHF MP3 uses the generic engine.
+Noncanonical MP3 always uses the series engine. Explicit `algorithm='direct'`
+with noncanonical MP3 is rejected rather than silently selecting another method.
 
 `t2` always contains first-order amplitudes, and SS/OS energies decompose E2
 only. `with_t2=False` omits amplitude extraction, not internal response states.
 `with_coefficients=True` returns the complete state rows through k. Capacity
-checks precede Hamiltonian connections and eager MO transformations. Unresolved
-gaps/noncanonical inputs invalidate values and generic JVP/VJP with NaNs.
+checks precede action construction and eager MO transformations. Unresolved
+gaps or invalid references invalidate values and generic JVP/VJP with NaNs.
+
+In noncanonical mode, the occupied--virtual Fock blocks must vanish within
+`canonical_tol`; off-diagonal occupied/occupied and virtual/virtual entries
+remain part of H0. Frozen/active blocks must be decoupled and spectrally
+separated. This excludes freezing part of an exactly degenerate manifold.
+The array derivative contract keeps the selected frozen subspaces fixed;
+general moving frozen-core nuclear response requires a separate projector
+response and is not implemented here.
+
+The shared linear solve differentiates A x=b as A dx=db-(dA)x, retaining the
+off-diagonal Fock response at internal orbital degeneracy. Numerical small-block
+eigenvalues are used only to diagnose the excitation spectrum, outside AD;
+they do not replace the live Fock operator or stop its physical response.
 
 Outer JAX gradients/HVPs differentiate integral, denominator and response
 dependence. Upstream HF/integral/basis response must remain on the graph for
@@ -165,5 +206,6 @@ PySCF-action recurrence is a reference construction, not a native PySCF MP8 API.
 - [Rayleigh--Schrodinger partitioning by excitation order](https://doi.org/10.1002/qua.560230446),
   International Journal of Quantum Chemistry 23 (1983): order-dependent spaces.
 - [JAX Taylor mode](https://docs.jax.dev/en/latest/jax.experimental.jet.html):
-  normalized versus factorial-scaled coefficients. The tested runtime is JAX 0.8.1.
+  normalized versus factorial-scaled coefficients. The initial validation used
+  JAX 0.8.1; the 2026-10-20 response increment used JAX 0.10.0.
 - [Method references](REFERENCES.md) and [validation](VALIDATION.md).

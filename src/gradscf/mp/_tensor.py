@@ -5,7 +5,7 @@ Independent increasing-index coefficients are orthonormal. Dense antisymmetric
 blocks are expanded only under an explicit capacity bound. No determinant
 connection table, dense Hamiltonian or bespoke numerical solver is constructed.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from itertools import combinations, permutations, product
 from math import comb, factorial, prod
 
@@ -13,7 +13,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from .integrals import _active_orbitals
-from ..integrals.molecular.ao2mo import frozen_indices, unrestricted_frozen_indices
+from gradscf.ao2mo import frozen_indices, unrestricted_frozen_indices
 
 
 def _parity(order):
@@ -68,6 +68,8 @@ class TensorSpace:
             if max_rank is not None and sum(block.excitation) > max_rank:
                 result.append(None)
                 continue
+            if any(item is None for item in maps):
+                raise ValueError("This packed-only space does not expand high-rank tensors")
             packed = vector[block.offset:block.offset+block.size].reshape(block.shape)
             positions, phase, axis = [], 1, 0
             for count, (index, sign) in zip(block.counts, maps):
@@ -112,6 +114,26 @@ class TensorSpace:
             result.append(gap.reshape(-1))
         return jnp.concatenate(result)
 
+    def determinant_map(self, determinants):
+        """Physical determinant indices/signs for the packed wedge chart."""
+        from ..fci.cistring import excite
+        n = self.nmo
+        na, nb = self.nocc
+        reference = ((1 << na)-1) | (((1 << nb)-1) << n)
+        lookup = {d: i for i, d in enumerate(determinants)}
+        va, vb, oa, ob = self.orbitals
+        indices, signs = [], []
+        for block in self.blocks:
+            rank = sum(block.excitation)
+            phase = (-1)**(rank*(rank-1)//2)
+            for selected in product(*block.indices):
+                particles = tuple(va[i] for i in selected[0])+tuple(n+vb[i] for i in selected[1])
+                holes = tuple(oa[i] for i in selected[2])+tuple(n+ob[i] for i in selected[3])
+                determinant, sign = excite(reference, holes, particles)
+                indices.append(lookup[determinant])
+                signs.append(phase*sign)
+        return np.asarray(indices, dtype=np.int32), np.asarray(signs, dtype=np.int8)
+
 
 def _antisymmetry_map(n, rank):
     if rank == 0:
@@ -125,8 +147,23 @@ def _antisymmetry_map(n, rank):
     return indices, signs
 
 
+def _with_dense_maps(space):
+    """Fill only missing maps, preserving the existing packed space and data."""
+    dimensions = tuple(map(len, space.orbitals))
+    cache = {(n, r): table for block, tables in zip(space.blocks, space.maps)
+             for n, r, table in zip(dimensions, block.counts, tables) if table is not None}
+    maps = []
+    for block in space.blocks:
+        for key in zip(dimensions, block.counts):
+            if key not in cache:
+                cache[key] = _antisymmetry_map(*key)
+        maps.append(tuple(cache[key] for key in zip(dimensions, block.counts)))
+    return replace(space, maps=tuple(maps))
+
+
 def make_tensor_space(nmo, nocc, *, max_excitation, frozen=None,
-                      max_determinants=5000, max_tensor_elements=2_000_000):
+                      max_determinants=5000, max_tensor_elements=2_000_000,
+                      packed_only=False):
     unrestricted = isinstance(nocc, tuple)
     ns = nocc if unrestricted else (nocc, nocc)
     if unrestricted:
@@ -152,8 +189,10 @@ def make_tensor_space(nmo, nocc, *, max_excitation, frozen=None,
         dense += prod(full)
     if size > max_determinants:
         raise ValueError(f"Tensor space requires {size} independent coefficients; max_determinants={max_determinants}")
-    if dense > max_tensor_elements:
-        raise ValueError(f"Dense tensor expansion requires {dense} elements; max_tensor_elements={max_tensor_elements}")
+    expanded = (sum(prod(full) for a, b, _, _, full in descriptors if a+b <= 2)
+                if packed_only else dense)
+    if expanded > max_tensor_elements:
+        raise ValueError(f"Dense tensor expansion requires {expanded} elements; max_tensor_elements={max_tensor_elements}")
     blocks, maps, offset, cache = [], [], 0, {}
     for a, b, counts, shape, full in descriptors:
         indices = tuple(np.asarray(list(combinations(range(n), r)), dtype=np.int32).reshape((comb(n, r), r))
@@ -162,6 +201,9 @@ def make_tensor_space(nmo, nocc, *, max_excitation, frozen=None,
         blocks.append(Block((a, b), counts, shape, full, indices, offset, block_size))
         group_maps = []
         for n, r in zip(dims, counts):
+            if packed_only and a+b > 2:
+                group_maps.append(None)
+                continue
             if (n, r) not in cache:
                 cache[(n, r)] = _antisymmetry_map(n, r)
             group_maps.append(cache[(n, r)])
@@ -204,13 +246,29 @@ class TensorAction:
     def __call__(self, vector):
         return self.apply(vector)
 
-    def apply(self, vector, *, max_input_rank=None):
+    def apply_packed(self, vector, *, max_input_rank=None, max_output_rank=None,
+                     max_tile_elements=4096):
+        """Contract increasing-index target tiles without dense expansion."""
+        from ._tensor_packed import apply_packed
+        return apply_packed(self, vector, max_input_rank=max_input_rank,
+            max_output_rank=max_output_rank, max_tile_elements=max_tile_elements)
+
+    def apply(self, vector, *, max_input_rank=None, max_output_rank=None):
+        """Apply W with exact static input/output excitation-rank projections.
+
+        Discarded output blocks are skipped before contraction, not zeroed
+        after a full dense antisymmetric tensor has already been produced.
+        The packed vector's full layout is preserved for Taylor recursion.
+        """
         tensors = self.space.expand(vector, max_rank=max_input_rank)
+        if max_input_rank is not None:
+            max_output_rank = (max_input_rank+2 if max_output_rank is None
+                               else min(max_output_rank, max_input_rank+2))
         result = [jnp.zeros(b.full_shape, vector.dtype)
-                  if max_input_rank is None or sum(b.excitation) <= max_input_rank+2 else None
+                  if max_output_rank is None or sum(b.excitation) <= max_output_rank else None
                   for b in self.space.blocks]
         for source, target, kernel, axes, order, sign, shuffles in self.plans:
-            if tensors[source] is None:
+            if tensors[source] is None or result[target] is None:
                 continue
             value = jnp.tensordot(self.kernels[kernel], tensors[source],
                                  axes=(tuple(range(self.kernels[kernel].ndim-len(axes), self.kernels[kernel].ndim)), axes))

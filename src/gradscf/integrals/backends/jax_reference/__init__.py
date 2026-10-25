@@ -19,7 +19,7 @@ _EXPORTS = {'DirectJKResult': 'gradscf.integrals.backends.jax_reference.direct_j
  'rinv_matrix': 'gradscf.integrals.backends.jax_reference.one_electron',
  'build_j_from_eri_pair_matrix': 'gradscf.integrals.molecular.jk',
  'build_jk_from_eri_pair_matrix': 'gradscf.integrals.molecular.jk',
- 'eri_pair_matrix_to_mo_eri_slices': 'gradscf.integrals.molecular.ao2mo',
+ 'eri_pair_matrix_to_mo_eri_slices': 'gradscf.ao2mo',
  'schwarz_bounds': 'gradscf.integrals.backends.jax_reference.screening',
  'shell_pair_schwarz_bounds': 'gradscf.integrals.backends.jax_reference.screening',
  'eri_element': 'gradscf.integrals.backends.jax_reference.two_electron',

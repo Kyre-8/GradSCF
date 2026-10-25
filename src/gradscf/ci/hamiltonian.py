@@ -6,7 +6,6 @@ The host builds integer connections once. All integral contractions use JAX.
 Slater (1929), doi:10.1103/PhysRev.34.1293; Condon (1930),
 doi:10.1103/PhysRev.36.1121. See ci/REFERENCES.md for scope and attribution.
 """
-from functools import lru_cache
 from itertools import combinations
 from typing import NamedTuple
 
@@ -15,10 +14,12 @@ import numpy as np
 
 from .space import UCISpace
 from ..fci.cistring import excite
-from gradscf.integrals.molecular.ao2mo import validate_integrals, spin_orbital_integrals
+from gradscf.ao2mo import validate_integrals, spin_orbital_integrals
+from .direct import build_direct_hamiltonian, build_one_body, build_fluctuation
+from .._cache import array_cache
 
 
-@lru_cache(maxsize=8)
+@array_cache(maxsize=8, max_bytes=32_000_000)
 def _connections(space):
     n = space.nmo
     unrestricted = isinstance(space, UCISpace)

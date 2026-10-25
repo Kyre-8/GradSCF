@@ -6,6 +6,7 @@ from typing import Any
 import jax.numpy as jnp
 import numpy as np
 
+from gradscf._memory import DEFAULT_MAX_MEMORY_MB
 from gradscf.scf.molecules import QuadratureGrid, RestrictedMolecule, UnrestrictedMolecule
 
 
@@ -38,6 +39,120 @@ _ARRAY_FIELDS = (
     "eri_ovvo",
     "eri_oovv",
 )
+
+
+_BASIS_TOPOLOGY_FIELDS = (
+    "angular_momenta", "primitive_counts", "contraction_counts", "nuclear_charges",
+)
+
+
+def _validate_grid_ao(provider: Any, grid: QuadratureGrid) -> None:
+    from gradscf.integrals.grids.blocks import AOGrid
+
+    if type(provider) is not AOGrid:
+        raise TypeError(f"Unsupported AO grid provider type: {type(provider).__name__}.")
+    for field in ("coords", "weights"):
+        value = getattr(grid, field)
+        if value is None or not np.array_equal(np.asarray(getattr(provider, field)), np.asarray(value)):
+            raise ValueError(f"AO grid provider {field} must match the molecule grid before caching.")
+
+
+def _replace_grid_ao(group: Any, provider: Any) -> None:
+    if "grid_ao" in group:
+        del group["grid_ao"]
+    if provider is None:
+        return
+    target = group.create_group("grid_ao")
+    target.attrs["kind"] = "cartesian"
+    target.attrs["block_size"] = int(provider.block_size)
+    target.attrs["adaptive"] = bool(provider.adaptive)
+    target.attrs["nprims"] = np.asarray(provider.nprims, dtype=np.int64)
+    target.attrs["angulars"] = np.asarray(provider.angulars, dtype=np.int64).reshape(provider.nao, 3)
+    for field in ("centers", "exponents", "coefficients"):
+        _write_array(target, field, getattr(provider, field))
+
+
+def _read_grid_ao(group: Any, grid: QuadratureGrid, *, array_backend: str) -> Any:
+    from gradscf.integrals.grids.blocks import AOGrid
+
+    kind = str(group.attrs.get("kind", ""))
+    if kind != "cartesian":
+        raise ValueError(f"Unsupported AO grid provider kind: {kind!r}.")
+    return AOGrid(
+        coords=grid.coords, weights=grid.weights,
+        **{field: _read_array(group, field, array_backend=array_backend)
+           for field in ("centers", "exponents", "coefficients")},
+        nprims=tuple(int(value) for value in group.attrs["nprims"]),
+        angulars=tuple(tuple(int(value) for value in row) for row in group.attrs["angulars"]),
+        block_size=int(group.attrs["block_size"]),
+        adaptive=bool(group.attrs.get("adaptive", False)),
+    )
+
+
+def _validate_direct_basis(provider: Any) -> None:
+    from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
+
+    if type(provider) is NativeDirectBasis:
+        return
+    if type(provider) is ProjectedNativeDirectBasis:
+        _validate_direct_basis(provider.primitive_basis)
+        return
+    raise TypeError(f"Unsupported direct basis provider type: {type(provider).__name__}.")
+
+
+def _write_direct_basis(group: Any, provider: Any) -> None:
+    from gradscf.integrals.backends.native.jk import ProjectedNativeDirectBasis
+
+    if type(provider) is ProjectedNativeDirectBasis:
+        group.attrs["kind"] = "projected_native"
+        _write_array(group, "transform", provider.transform)
+        _write_direct_basis(group.create_group("primitive_basis"), provider.primitive_basis)
+        return
+    group.attrs["kind"] = "native"
+    group.attrs["backend"] = provider.plan.backend
+    topology_group = group.create_group("topology")
+    topology_group.attrs["cart"] = bool(provider.plan.topology.cart)
+    for field in _BASIS_TOPOLOGY_FIELDS:
+        _write_array(topology_group, field, np.asarray(getattr(provider.plan.topology, field), dtype=np.int64))
+    parameters_group = group.create_group("parameters")
+    for field in ("exponents", "coefficients"):
+        shells_group = parameters_group.create_group(field)
+        for index, value in enumerate(getattr(provider.parameters, field)):
+            _write_array(shells_group, str(index), value)
+    for field in ("centers", "nuclear_coords"):
+        _write_array(parameters_group, field, getattr(provider.parameters, field))
+
+
+def _read_direct_basis(group: Any, *, array_backend: str) -> Any:
+    from gradscf.integrals import make_plan
+    from gradscf.integrals.basis import BasisTopology, BasisParameters
+    from gradscf.integrals.basis.types import check_parameter_shapes
+    from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
+
+    kind = str(group.attrs.get("kind", ""))
+    if kind == "projected_native":
+        return ProjectedNativeDirectBasis(
+            _read_direct_basis(group["primitive_basis"], array_backend=array_backend),
+            _read_array(group, "transform", array_backend=array_backend),
+        )
+    if kind != "native":
+        raise ValueError(f"Unsupported direct basis provider kind: {kind!r}.")
+    topology_group = group["topology"]
+    topology = BasisTopology(
+        **{field: tuple(int(value) for value in topology_group[field][()])
+           for field in _BASIS_TOPOLOGY_FIELDS},
+        cart=bool(topology_group.attrs["cart"]),
+    )
+    parameters_group = group["parameters"]
+    parameters = BasisParameters(
+        **{field: tuple(_read_array(parameters_group[field], str(index), array_backend=array_backend)
+                        for index in range(len(topology.angular_momenta)))
+           for field in ("exponents", "coefficients")},
+        centers=_read_array(parameters_group, "centers", array_backend=array_backend),
+        nuclear_coords=_read_array(parameters_group, "nuclear_coords", array_backend=array_backend),
+    )
+    check_parameter_shapes(topology, parameters)
+    return NativeDirectBasis(make_plan(topology, backend=str(group.attrs["backend"])), parameters)
 
 
 def _write_array(group: Any, name: str, value: Any) -> None:
@@ -116,11 +231,35 @@ def _read_array(group: Any, name: str, *, array_backend: str = "jax") -> Any | N
     raise ValueError(f"Unsupported array_backend {array_backend!r}.")
 
 
+def _clear_unused_integral_arrays(group: Any, molecule: Any) -> None:
+    for field in (
+        "eri_pair_matrix", "df_factors", "response_df_factors_j", "response_df_factors_k",
+        "eri_ovov", "eri_ovvo", "eri_oovv",
+    ):
+        if getattr(molecule, field, None) is None and field in group:
+            del group[field]
+
+
+def _replace_direct_basis(group: Any, provider: Any) -> None:
+    if "direct_basis" in group:
+        del group["direct_basis"]
+    if provider is not None:
+        _write_direct_basis(group.create_group("direct_basis"), provider)
+
+
 def write_restricted_molecule(group: Any, molecule: RestrictedMolecule) -> None:
     """Write a restricted molecule's large numerical inputs to an HDF5 group."""
 
+    # Reject unknown providers before mutating an existing cache group.
+    provider = molecule.direct_basis
+    if provider is not None:
+        _validate_direct_basis(provider)
+    grid_provider = getattr(molecule, "grid_ao", None)
+    if grid_provider is not None:
+        _validate_grid_ao(grid_provider, molecule.grid)
     group.attrs["nuclear_repulsion"] = float(molecule.nuclear_repulsion)
     group.attrs["exact_exchange_fraction"] = float(molecule.exact_exchange_fraction)
+    group.attrs["max_memory"] = float(molecule.max_memory)
     if molecule.mf_energy is not None:
         group.attrs["mf_energy"] = float(molecule.mf_energy)
     if molecule.nocc is not None:
@@ -135,18 +274,29 @@ def write_restricted_molecule(group: Any, molecule: RestrictedMolecule) -> None:
     grid_group = group.require_group("grid")
     _write_array(grid_group, "weights", molecule.grid.weights)
     _write_array(grid_group, "coords", molecule.grid.coords)
+    # A rewritten reference must not reload integral arrays from its old mode.
+    _clear_unused_integral_arrays(group, molecule)
     for field in _ARRAY_FIELDS:
         if field == "hfx_nu":
             continue
         _write_array(group, field, getattr(molecule, field))
     _write_hfx_nu(group, molecule)
+    _replace_direct_basis(group, provider)
+    _replace_grid_ao(group, grid_provider)
 
 
 def write_unrestricted_molecule(group: Any, molecule: UnrestrictedMolecule) -> None:
     """Write an unrestricted molecule's large numerical inputs to an HDF5 group."""
 
+    provider = molecule.direct_basis
+    if provider is not None:
+        _validate_direct_basis(provider)
+    grid_provider = getattr(molecule, "grid_ao", None)
+    if grid_provider is not None:
+        _validate_grid_ao(grid_provider, molecule.grid)
     group.attrs["nuclear_repulsion"] = float(molecule.nuclear_repulsion)
     group.attrs["exact_exchange_fraction"] = float(molecule.exact_exchange_fraction)
+    group.attrs["max_memory"] = float(molecule.max_memory)
     if molecule.mf_energy is not None:
         group.attrs["mf_energy"] = float(molecule.mf_energy)
     if molecule.nocc_alpha is not None:
@@ -159,12 +309,15 @@ def write_unrestricted_molecule(group: Any, molecule: UnrestrictedMolecule) -> N
     grid_group = group.require_group("grid")
     _write_array(grid_group, "weights", molecule.grid.weights)
     _write_array(grid_group, "coords", molecule.grid.coords)
+    _clear_unused_integral_arrays(group, molecule)
     for field in _ARRAY_FIELDS:
         if field == "hfx_nu":
             continue
         if hasattr(molecule, field):
             _write_array(group, field, getattr(molecule, field))
     _write_hfx_nu(group, molecule)
+    _replace_direct_basis(group, provider)
+    _replace_grid_ao(group, grid_provider)
 
 
 def read_restricted_molecule(
@@ -199,6 +352,7 @@ def read_restricted_molecule(
     elif hfx_nu_storage != "array":
         raise ValueError(f"Unsupported hfx_nu_storage={hfx_nu_storage!r}.")
     return RestrictedMolecule(
+        max_memory=float(group.attrs.get("max_memory", DEFAULT_MAX_MEMORY_MB)),
         ao=kwargs.pop("ao"),
         grid=grid,
         dipole_integrals=kwargs.pop("dipole_integrals"),
@@ -232,6 +386,12 @@ def read_restricted_molecule(
             else None
         ),
         hfx_nu_api=hfx_nu_api,
+        direct_basis=(
+            _read_direct_basis(group["direct_basis"], array_backend=array_backend)
+            if "direct_basis" in group else None
+        ),
+        grid_ao=(_read_grid_ao(group["grid_ao"], grid, array_backend=array_backend)
+                 if "grid_ao" in group else None),
         **kwargs,
     )
 
@@ -268,6 +428,7 @@ def read_unrestricted_molecule(
     elif hfx_nu_storage != "array":
         raise ValueError(f"Unsupported hfx_nu_storage={hfx_nu_storage!r}.")
     return UnrestrictedMolecule(
+        max_memory=float(group.attrs.get("max_memory", DEFAULT_MAX_MEMORY_MB)),
         ao=kwargs.pop("ao"),
         grid=grid,
         dipole_integrals=kwargs.pop("dipole_integrals"),
@@ -286,6 +447,12 @@ def read_unrestricted_molecule(
         exact_exchange_fraction=float(group.attrs.get("exact_exchange_fraction", 0.0)),
         nocc_alpha=(int(group.attrs["nocc_alpha"]) if "nocc_alpha" in group.attrs else None),
         nocc_beta=(int(group.attrs["nocc_beta"]) if "nocc_beta" in group.attrs else None),
+        direct_basis=(
+            _read_direct_basis(group["direct_basis"], array_backend=array_backend)
+            if "direct_basis" in group else None
+        ),
+        grid_ao=(_read_grid_ao(group["grid_ao"], grid, array_backend=array_backend)
+                 if "grid_ao" in group else None),
         runtime_scf_backend=(
             str(group.attrs["runtime_scf_backend"])
             if "runtime_scf_backend" in group.attrs

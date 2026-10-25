@@ -66,6 +66,32 @@ def test_eager_iteration_explicitly_rejects_traced_forward_iterations():
         jax.jit(lambda value: iterate(lambda x: .5*x, value).solution)(jnp.ones(2))
 
 
+@pytest.mark.parametrize("transform", [jax.jit, jax.grad], ids=["jit", "grad"])
+def test_eager_rejects_transforms_even_when_initial_values_are_closed_constants(transform):
+    iterate = _iterate()
+    initial = jnp.ones(2)
+
+    def forbidden(value):
+        pytest.fail("Physical map ran inside an unsupported transformation")
+
+    def function(parameter):
+        return iterate(forbidden, initial).solution[0]+parameter
+
+    with pytest.raises(NotImplementedError, match="eager|AD|differentiat"):
+        transform(function)(1.)
+
+
+def test_eager_guard_keeps_legacy_public_jax_core_support(monkeypatch):
+    # Older supported JAX releases export this through public jax.core.
+    monkeypatch.setattr(jax.core, "trace_state_clean", lambda: False, raising=False)
+
+    def forbidden(value):
+        pytest.fail("Legacy public trace guard was ignored")
+
+    with pytest.raises(NotImplementedError, match="eager|AD|differentiat"):
+        _iterate()(forbidden, jnp.ones(2))
+
+
 def test_eager_additional_check_can_veto_but_cannot_replace_true_residual():
     iterate = _iterate()
     config = NonlinearConfig(maxiter=3, diis_space=2, residual_tol=1e-10, energy_tol=1e-10)

@@ -14,6 +14,8 @@ from gradscf import integrals, scf
 from gradscf.dft.xc import xc_type
 from gradscf.scf.inputs import build_rks_integral_inputs, build_uks_integral_inputs
 from gradscf.scf.rsh import local_xc_spec, rsh_preset
+from gradscf._memory import (tree_storage_bytes, validate_memory_mb,
+                            validate_reserved_bytes, workspace_bytes)
 
 
 class MolecularEnergy:
@@ -27,15 +29,22 @@ class MolecularEnergy:
     Every call transports the AO metric and relaxes the orbitals again. The
     implicit backward follows this stationary branch, including in nested AD.
 
-    This small-system adapter uses full native ERIs for geometry AD. It does
-    not inherit DF or direct-SCF approximations from a seed. Original
-    omegaB97X-D carries full/LR ERIs and its geometry-dependent CHG energy
-    explicitly through the same solver.
+    Full native ERIs are the default geometry-AD representation. HF may opt
+    into ``jk_backend="direct"`` to use moving native J/K without AO ERIs.
+    Direct calls inherit the seed's J/K worker count and retain zero screening.
+    The default requires a full-J/K seed; explicit direct accepts full or
+    direct HF seeds. Original omegaB97X-D carries full/LR ERIs and its
+    geometry-dependent CHG energy explicitly through the same solver.
     DFT grids and AO values move with R. Isolated state stability and numerical
     grid convergence must be checked for each demonstrated observable.
     """
 
-    def __init__(self, mf, *, mode="implicit", gradient_tolerance=1e-9):
+    def __init__(self, mf, *, mode="implicit", gradient_tolerance=1e-9,
+                 jk_backend="full", max_memory=None, reserved_bytes=0):
+        if jk_backend not in ("full", "direct"):
+            raise ValueError("jk_backend must be 'full' or 'direct'.")
+        self.max_memory = None if max_memory is None else validate_memory_mb(max_memory)
+        self.reserved_bytes = validate_reserved_bytes(reserved_bytes)
         if not jax.config.x64_enabled:
             raise ValueError("MolecularEnergy requires JAX float64.")
         if not bool(mf.converged):
@@ -55,13 +64,18 @@ class MolecularEnergy:
                     or not np.all((occupations == 0) | (occupations == 2))):
                 raise ValueError("Restricted orbitals require integer 0/2 occupations.")
             self.occupations = np.stack([occupations / 2] * 2)
-        if not mf.mol.cart or getattr(mf, "jk_backend", "full") != "full":
-            raise NotImplementedError("Use Cartesian AOs and full J/K for this response adapter.")
+        seed_backends = ("full", "direct") if jk_backend == "direct" else ("full",)
+        if not mf.mol.cart or getattr(mf, "jk_backend", "full") not in seed_backends:
+            raise NotImplementedError("Use Cartesian AOs and full J/K, or explicitly opt into direct HF J/K.")
+        self.jk_backend = jk_backend
+        self.direct_scf_workers = getattr(mf, "direct_scf_workers", 1)
         self.xc = mf.xc
         self.rsh = rsh_preset(self.xc)
         self.kind = xc_type(local_xc_spec(self.xc))
         if self.kind not in ("HF", "LDA", "GGA"):
             raise NotImplementedError("This molecular adapter supports HF/LDA/GGA/global hybrids.")
+        if jk_backend == "direct" and (self.kind != "HF" or self.rsh is not None):
+            raise NotImplementedError("Direct molecular response currently supports HF only.")
         self.spec = mf.mol.to_spec()
         self.basis = mf.mol.basis
         self.coordinates = jnp.asarray(self.spec.coords_bohr)
@@ -78,6 +92,12 @@ class MolecularEnergy:
         self.owners = np.argmin(distances, axis=1)
         if np.max(distances[np.arange(len(self.owners)), self.owners]) > 1e-12:
             raise ValueError("Every basis center must belong to a molecular atom.")
+
+    def _memory_inputs(self):
+        # This workflow object is not a dataclass/PyTree. Declare its numerical
+        # owners explicitly rather than inspecting arbitrary object internals.
+        return (self.coefficients, self.occupations, self.parameters, self.coordinates,
+                self.owners, getattr(self, 'spec', None), getattr(self.plan, 'topology', None))
 
     def inputs(self, coordinates, field=None, *, potential=None):
         """Assemble differentiable inputs, optionally adding a real AO potential.
@@ -102,6 +122,21 @@ class MolecularEnergy:
             nao = self.coefficients.shape[-2]
             if potential.shape != (nao, nao) or jnp.iscomplexobj(potential):
                 raise ValueError("AO potential must be a real (nao, nao) matrix.")
+        if self.max_memory is not None and self.kind == 'HF':
+            nao = self.coefficients.shape[-2]
+            resident = self.reserved_bytes+tree_storage_bytes(
+                self._memory_inputs(), coordinates, field, potential)
+            # S/h, kinetic/nuclear terms and immutable one-body updates;
+            # a requested dipole and full s1 ERI remain mandatory outputs.
+            required = 8*(6*nao**2+(3*nao**2 if has_field else 0)
+                          +(nao**4 if self.jk_backend == 'full' else 0))
+            required += self.parameters.centers.size*8
+            if self.jk_backend == 'direct':
+                from gradscf.integrals.backends.native.jk import NativeDirectBasis
+                from gradscf.scf.orbital_optimization import _native_workspace
+                required += _native_workspace(NativeDirectBasis(self.plan, self.parameters),
+                                               self.direct_scf_workers)
+            workspace_bytes(self.max_memory, resident_bytes=resident+required)
         moving = replace(self.parameters, centers=coordinates[self.owners],
                          nuclear_coords=coordinates)
         # IntegralPlan defaults to a moving nuclear-charge-center origin.
@@ -113,7 +148,12 @@ class MolecularEnergy:
             nao = self.coefficients.shape[-2]
             overlap = self.plan.evaluate("overlap", moving)
             hcore = self.plan.evaluate("kinetic", moving) + self.plan.evaluate("nuclear", moving)
-            eri = self.plan.evaluate("eri", moving)
+            if self.jk_backend == "direct":
+                from gradscf.integrals.backends.native.jk import NativeDirectBasis
+                eri = None
+                extra = dict(direct_basis=NativeDirectBasis(self.plan, moving))
+            else:
+                eri = self.plan.evaluate("eri", moving)
             enuc = scf.nuclear_repulsion_energy(coordinates, jnp.asarray(self.spec.charges))
             ao, dao, weights = jnp.zeros((0, nao)), jnp.zeros((4, 0, nao)), jnp.zeros(0)
         else:
@@ -145,11 +185,17 @@ class MolecularEnergy:
         """Return ``(state, inputs)`` from one assembly for downstream response."""
         inputs = self.inputs(coordinates, field, potential=potential)
         minimize = scf.minimize_uks_from_integrals if self.unrestricted else scf.minimize_roks_from_integrals
+        options = dict(direct_scf_workers=self.direct_scf_workers) if self.jk_backend == "direct" else {}
+        if self.max_memory is not None:
+            options.update(max_memory=self.max_memory,
+                reserved_bytes=self.reserved_bytes+tree_storage_bytes(
+                    self._memory_inputs(), coordinates, field, potential,
+                    exclude=(inputs, self.coefficients, self.occupations)))
         state = minimize(
             **inputs, xc_spec=self.xc,
             mo_coeff=self.coefficients, mo_occ=self.occupations,
             orthonormalize_initial=True, max_iterations=300,
-            gradient_tolerance=self.gradient_tolerance, differentiation=self.differentiation)
+            gradient_tolerance=self.gradient_tolerance, differentiation=self.differentiation, **options)
         return state, inputs
 
     def __call__(self, coordinates, field=None, *, potential=None):

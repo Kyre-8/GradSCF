@@ -29,8 +29,16 @@ def iterate_eager(physical_map, initial, *, config=None, valid_state=None,
     toward the current valid state. No expensive map is evaluated outside
     valid_state. This forward solver explicitly supplies no AD/JIT contract.
     """
-    from jax._src import core
-    if not core.trace_state_clean() or any(isinstance(x, jax.core.Tracer)
+    legacy_clean = getattr(jax.core, 'trace_state_clean', None)
+    if legacy_clean is None:
+        from jax.extend import core
+        active_trace = core.get_opaque_trace_state()
+        with core.take_current_trace():
+            eager_trace = core.get_opaque_trace_state()
+        eager = active_trace == eager_trace
+    else:
+        eager = legacy_clean()
+    if not eager or any(isinstance(x, jax.core.Tracer)
             for x in jax.tree_util.tree_leaves(initial)):
         raise NotImplementedError('iterate_eager is eager forward only; AD/JIT is unsupported')
     cfg = NonlinearConfig() if config is None else config

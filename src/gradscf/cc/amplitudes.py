@@ -19,6 +19,11 @@ class AmplitudeSpace:
     def doubles(self):
         return self.method != "ccs"
 
+    @property
+    def size(self):
+        k = self.nocc * self.nvir
+        return (k if self.singles else 0) + (k * (k + 1) // 2 if self.doubles else 0)
+
     def pack(self, t1, t2):
         if t1.shape != (self.nocc, self.nvir) or t2.shape != (
             self.nocc,
