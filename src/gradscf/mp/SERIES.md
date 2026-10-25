@@ -12,17 +12,17 @@ It does not claim convergence of the series at lambda=1.
 
 Normal ordering with respect to the fixed HF determinant gives
 
-\[
+$$
 H(\lambda)=H_0+\lambda V_N,\qquad
 H_0=E_\mathrm{HF}+F_N.
-\]
+$$
 
 In canonical orbitals, each retained determinant D has the Fock excitation gap
 
-\[
+$$
 \Omega_D=\sum_{\sigma p}\epsilon_p^\sigma
 \left(n_{Dp}^\sigma-n_{0p}^\sigma\right).
-\]
+$$
 
 All occupied electrons, including frozen cores, contribute to the physical HF
 Fock and reference energy. Frozen orbitals restrict excitations; they are not
@@ -36,11 +36,10 @@ enumeration, physical dense Hamiltonian or diagonalization is required.
 Use intermediate normalization, c0(lambda)=1. Write the unknowns as
 y=(c_exc, delta E), c=(1,c_exc), and W=H-H0. The residual is
 
-\[
-F_{\mathrm{exc}}=QF_NQ c_{\mathrm{exc}}
--\delta E c_{\mathrm{exc}}+\lambda QWc,
+$$
+F_D=(\Omega_D-\delta E)c_D+\lambda(Wc)_D,\quad D\ne0,
 \qquad F_E=\lambda(Wc)_0-\delta E.
-\]
+$$
 
 Here Q excludes the reference determinant. Its known zero-point solution is
 y0=0. The zero-point Jacobian is the block operator diag(Q F_N Q,-1), reducing
@@ -53,10 +52,10 @@ optimized MP2 diagnostic that covers allowed doubles only.
 
 For normalized coefficients y(lambda)=sum lambda^n y_n, each step evaluates
 
-\[
+$$
 b_n=[\lambda^n]F\left(\sum_{j=1}^{n-1}\lambda^j y_j,\lambda\right),
 \qquad J_0 y_n=-b_n.
-\]
+$$
 
 `jax.experimental.jet` extracts the source coefficient with
 `factorial_scaled=False`. The known zero-point Jacobian applies the complete
@@ -97,20 +96,20 @@ without dropping selected classes such as triples or quadruples.
 
 For energy order p, default k=floor(p/2). Let
 
-\[
+$$
 \chi_k(\lambda)=\Phi_0+\sum_{j=1}^{k}\lambda^j\Psi_j.
-\]
+$$
 
 The Rayleigh quotient
 
-\[
+$$
 \mathcal E_k(\lambda)=
 \frac{\langle\chi_k|H(\lambda)|\chi_k\rangle}
      {\langle\chi_k|\chi_k\rangle}
-\]
+$$
 
 agrees with the true eigenvalue through order 2k+1. The state error is
-O(lambda^(k+1)); stationarity makes the energy error O(lambda^(2k+2)). Taylor
+$O(lambda^(k+1))$; stationarity makes the energy error $O(lambda^(2k+2))$. Taylor
 AD of this one functional therefore gives every requested energy coefficient.
 In code, its lambda-independent E_HF offset is removed before Taylor lifting:
 the quotient uses F_N + lambda W and E_HF is added once to the final total.
