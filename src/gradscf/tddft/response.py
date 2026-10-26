@@ -1111,7 +1111,10 @@ def _build_restricted_response_operator_data(
         if callable(ao_kernel_action):
             def xc_response_action_fn(values):
                 tangent = _restricted_transition_density(orbo, orbv, values, bottom=False)
-                response = jax.vmap(lambda d: ao_kernel_action(molecule, d))(tangent)
+                # Serialise over the Davidson trial vectors instead of vmapping them:
+                # vmap multiplies the (ngrid, nao, nao) XC-kernel workspace by the
+                # number of trial vectors and dominates peak memory.
+                response = jax.lax.map(lambda d: ao_kernel_action(molecule, d), tangent)
                 return _restricted_project_response(response, orbo, orbv, bottom=False)
         elif callable(grid_response_hvp):
             feature_kind = normalize_response_feature_kind(
