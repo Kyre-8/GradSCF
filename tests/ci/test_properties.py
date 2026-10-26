@@ -3,6 +3,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
+import json
 
 
 @pytest.mark.parametrize("unrestricted,frozen", [(False, None), (False, [0, 3]),
@@ -37,6 +38,14 @@ def test_densities_match_fci_for_arbitrary_ci_vector(unrestricted, frozen):
         return sum(jnp.sum(a*a) for a in jax.tree.leaves(densities))
     np.testing.assert_allclose(jax.jit(jax.grad(value))(0.),
         (value(1e-5)-value(-1e-5))/2e-5, atol=2e-6, rtol=0)
+    derivative = jax.jit(jax.grad(value))
+    second = jax.jvp(derivative,(0.,),(1.,))[1]
+    steps = (3e-5, 1e-5)
+    finite = [(derivative(step)-derivative(-step))/(2*step) for step in steps]
+    print(json.dumps(dict(coefficient_hessian=float(second),steps=steps,
+        absolute_errors=[float(jnp.abs(second-x)) for x in finite])),flush=True)
+    for estimate in finite:
+        np.testing.assert_allclose(second,estimate,atol=2e-5,rtol=2e-6)
 
 
 def test_density_facade_and_invalid_requests(radical):

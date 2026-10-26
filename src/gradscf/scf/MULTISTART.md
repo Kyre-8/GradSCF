@@ -7,11 +7,10 @@ finite set of native orbital-rotation density starts. They select the lowest
 opt-in host-side branch-selection workflow. `RKS.run()` is unchanged.
 
 ```python
-from gradscf import gto, dft, cc
+from gradscf import gto, scf, cc
 
-mf = dft.RKS(
-    gto.M(atom="N 0 0 0; N 0 0 1.1", basis="sto-3g", unit="Angstrom"),
-    xc="hf", conv_tol=1e-12, conv_tol_density=1e-10,
+mf = scf.RHF(
+    gto.M(atom="N 0 0 0; N 0 0 1.1", basis="sto-3g", unit="Angstrom"), conv_tol=1e-12, conv_tol_density=1e-10,
     conv_tol_grad=1e-9, max_cycle=150,
 )
 selection = mf.multistart(amplitudes=(0.05, 0.15, 0.4), seed=20260923)

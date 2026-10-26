@@ -4,12 +4,13 @@ from dataclasses import dataclass
 from math import isfinite
 from numbers import Integral
 from ..scf._pytree import pytree_dataclass
+from ..solvers import LinearSolverConfig
 
 
 @dataclass(frozen=True)
 class BSEConfig:
     nroots: int = 3
-    singlet: bool = True
+    singlet: bool | None = True
     tda: bool = True
     solver: str = "davidson"
     conv_tol: float = 1e-9
@@ -24,10 +25,16 @@ class BSEConfig:
     max_factor_elements: int = 20_000_000
     block_size: int = 16
     seed: int = 0
+    screening_config: LinearSolverConfig | None = None
+    response_config: LinearSolverConfig | None = None
 
     def __post_init__(self):
-        if type(self.singlet) is not bool or type(self.tda) is not bool:
-            raise ValueError("singlet and tda must be booleans")
+        for name in ("screening_config", "response_config"):
+            value = getattr(self, name)
+            if value is not None and not isinstance(value, LinearSolverConfig):
+                raise TypeError(f"{name} must be a LinearSolverConfig")
+        if (self.singlet is not None and type(self.singlet) is not bool) or type(self.tda) is not bool:
+            raise ValueError("singlet must be boolean or None; tda must be boolean")
         if self.solver not in {"dense", "davidson"} or self.gradient_mode not in {
             "eigenvalue_only",
             "implicit_eigenvector",
@@ -67,7 +74,7 @@ class BSEResult:
     response_valid: object
     screening_valid: object
     min_screening_gap: object
-    singlet: bool
+    singlet: bool | None
     amplitude_response: bool
     stability_margins: object = None
     stability_certified: object = False

@@ -1,0 +1,157 @@
+{
+  "trace_complete": true,
+  "pid": 348606,
+  "side": 2,
+  "old_root_constants": {
+    "count": 0,
+    "bytes": 0,
+    "largest": []
+  },
+  "new_root_constants": {
+    "count": 0,
+    "bytes": 0,
+    "largest": []
+  },
+  "old_nested_constants": {
+    "count": 41319,
+    "bytes": 17445483,
+    "largest": [
+      {
+        "shape": [
+          8,
+          4,
+          3375,
+          8
+        ],
+        "dtype": "complex128",
+        "bytes": 13824000
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      }
+    ]
+  },
+  "new_nested_constants": {
+    "count": 41308,
+    "bytes": 3415939,
+    "largest": [
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      },
+      {
+        "shape": [
+          4913,
+          3
+        ],
+        "dtype": "float64",
+        "bytes": 117912
+      }
+    ]
+  }
+}

@@ -1,0 +1,1055 @@
+{
+  "complete": true,
+  "comparison_credible": true,
+  "passed": true,
+  "cases": [
+    {
+      "dimension": 32,
+      "rank": 4,
+      "internal_width": 0.1,
+      "exterior_gap": 0.7,
+      "theta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "reference_loss": 0.47359096946821877,
+      "reference_vjp": [
+        0.034501357970956256,
+        0.0024791237677090298,
+        0.044232542939251204,
+        -0.009749652270323157
+      ],
+      "shared_settings": {
+        "max_subspace": 32,
+        "eig_tol": 1e-10,
+        "response_tol": 1e-10,
+        "restart": 40,
+        "maxiter": 100
+      },
+      "ordinary": {
+        "loss": 0.47359096946821894,
+        "loss_absolute_error": 1.6653345369377348e-16,
+        "vjp": [
+          0.03450135797095628,
+          0.0024791237677090194,
+          0.04423254293925123,
+          -0.009749652270322947
+        ],
+        "finite": true,
+        "absolute_errors": [
+          2.0816681711721685e-17,
+          1.0408340855860843e-17,
+          2.7755575615628914e-17,
+          2.0990154059319366e-16
+        ],
+        "max_absolute_error": 2.0990154059319366e-16,
+        "relative_error": 3.737450754237775e-15,
+        "within_tolerance": true,
+        "raw_values": [
+          0.9500000000000003,
+          0.9833333333333335,
+          1.0166666666666664,
+          1.0499999999999994,
+          1.7500000000000022
+        ],
+        "raw_internal_gaps": [
+          0.033333333333333215,
+          0.03333333333333288,
+          0.03333333333333299
+        ],
+        "raw_min_internal_gap": 0.03333333333333288,
+        "raw_internal_width": 0.09999999999999909,
+        "raw_exterior_gap": 0.7000000000000028
+      },
+      "shared": {
+        "loss": 0.47359096946821877,
+        "loss_absolute_error": 0.0,
+        "vjp": [
+          0.034501357970983124,
+          0.002479123767729705,
+          0.04423254293927903,
+          -0.009749652270282742
+        ],
+        "finite": true,
+        "absolute_errors": [
+          2.6867397195928788e-14,
+          2.0675301748429575e-14,
+          2.7824964554667986e-14,
+          4.041558754330765e-14
+        ],
+        "max_absolute_error": 4.041558754330765e-14,
+        "relative_error": 1.0464731039850317e-12,
+        "within_tolerance": true,
+        "converged": true,
+        "response_valid": true,
+        "status": 0,
+        "raw_values": [
+          0.9500000000000007,
+          0.9833333333333328,
+          1.016666666666667,
+          1.0499999999999996,
+          1.750000000000002
+        ],
+        "ritz_residuals": [
+          1.1498348461034173e-15,
+          1.890864253686304e-15,
+          2.1688898263193285e-15,
+          2.2790868970093414e-15,
+          2.6434814389010764e-15
+        ],
+        "boundary_gap": 0.7000000000000024,
+        "adjoint_residual": null
+      },
+      "comparison_credible": true
+    },
+    {
+      "dimension": 32,
+      "rank": 4,
+      "internal_width": 0.001,
+      "exterior_gap": 0.7,
+      "theta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "reference_loss": 0.47359096946821877,
+      "reference_vjp": [
+        0.036167196961289526,
+        0.0032265922899386117,
+        0.04376080485428842,
+        -0.009952742744248096
+      ],
+      "shared_settings": {
+        "max_subspace": 32,
+        "eig_tol": 1e-10,
+        "response_tol": 1e-10,
+        "restart": 40,
+        "maxiter": 100
+      },
+      "ordinary": {
+        "loss": 0.4735909694682186,
+        "loss_absolute_error": 1.6653345369377348e-16,
+        "vjp": [
+          0.036167196961287375,
+          0.0032265922899293864,
+          0.04376080485431182,
+          -0.009952742744255751
+        ],
+        "finite": true,
+        "absolute_errors": [
+          2.1510571102112408e-15,
+          9.22525944524466e-15,
+          2.340488913787908e-14,
+          7.65533469948565e-15
+        ],
+        "max_absolute_error": 2.340488913787908e-14,
+        "relative_error": 4.570418061977622e-13,
+        "within_tolerance": true,
+        "raw_values": [
+          0.9995000000000004,
+          0.9998333333333329,
+          1.0001666666666666,
+          1.0004999999999993,
+          1.7004999999999977
+        ],
+        "raw_internal_gaps": [
+          0.00033333333333251947,
+          0.0003333333333337407,
+          0.0003333333333326305
+        ],
+        "raw_min_internal_gap": 0.00033333333333251947,
+        "raw_internal_width": 0.0009999999999988907,
+        "raw_exterior_gap": 0.6999999999999984
+      },
+      "shared": {
+        "loss": 0.4735909694682186,
+        "loss_absolute_error": 1.6653345369377348e-16,
+        "vjp": [
+          0.03616719696129219,
+          0.0032265922898872413,
+          0.04376080485422241,
+          -0.009952742744248752
+        ],
+        "finite": true,
+        "absolute_errors": [
+          2.6645352591003757e-15,
+          5.137036629410119e-14,
+          6.600969770786946e-14,
+          6.557254739192331e-16
+        ],
+        "max_absolute_error": 6.600969770786946e-14,
+        "relative_error": 1.4496951939028941e-12,
+        "within_tolerance": true,
+        "converged": true,
+        "response_valid": true,
+        "status": 0,
+        "raw_values": [
+          0.9995000000000004,
+          0.9998333333333334,
+          1.0001666666666655,
+          1.0004999999999997,
+          1.7004999999999983
+        ],
+        "ritz_residuals": [
+          5.059883046617389e-16,
+          1.4891055483506018e-15,
+          2.368175879911381e-15,
+          2.0889921364123182e-15,
+          2.9774562897831437e-15
+        ],
+        "boundary_gap": 0.6999999999999986,
+        "adjoint_residual": null
+      },
+      "comparison_credible": true
+    },
+    {
+      "dimension": 32,
+      "rank": 4,
+      "internal_width": 1e-06,
+      "exterior_gap": 0.7,
+      "theta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "reference_loss": 0.47359096946821877,
+      "reference_vjp": [
+        0.036184646872645235,
+        0.003234975958401689,
+        0.04375579116673741,
+        -0.00995470777726369
+      ],
+      "shared_settings": {
+        "max_subspace": 32,
+        "eig_tol": 1e-10,
+        "response_tol": 1e-10,
+        "restart": 40,
+        "maxiter": 100
+      },
+      "ordinary": {
+        "loss": 0.4735909694682189,
+        "loss_absolute_error": 1.1102230246251565e-16,
+        "vjp": [
+          0.03618464687426474,
+          0.0032349759844308755,
+          0.04375579116110737,
+          -0.009954707781883211
+        ],
+        "finite": true,
+        "absolute_errors": [
+          1.6195031427024276e-12,
+          2.6029186618592437e-11,
+          5.6300381023888235e-12,
+          4.619521778992386e-12
+        ],
+        "max_absolute_error": 2.6029186618592437e-11,
+        "relative_error": 4.68983252938005e-10,
+        "within_tolerance": true,
+        "raw_values": [
+          0.9999995000000004,
+          0.9999998333333332,
+          1.0000001666666676,
+          1.0000004999999994,
+          1.7000004999999991
+        ],
+        "raw_internal_gaps": [
+          3.333333328248145e-07,
+          3.333333343791267e-07,
+          3.3333333182561375e-07
+        ],
+        "raw_min_internal_gap": 3.3333333182561375e-07,
+        "raw_internal_width": 9.99999999029555e-07,
+        "raw_exterior_gap": 0.6999999999999997
+      },
+      "shared": {
+        "loss": 0.4735909694682191,
+        "loss_absolute_error": 3.3306690738754696e-16,
+        "vjp": [
+          0.036184646872653124,
+          0.0032349759584743482,
+          0.043755791166720785,
+          -0.009954707777255123
+        ],
+        "finite": true,
+        "absolute_errors": [
+          7.889522368742519e-15,
+          7.265932647215756e-14,
+          1.662558979376172e-14,
+          8.566064524373473e-15
+        ],
+        "max_absolute_error": 7.265932647215756e-14,
+        "relative_error": 1.306659298408631e-12,
+        "within_tolerance": true,
+        "converged": true,
+        "response_valid": true,
+        "status": 0,
+        "raw_values": [
+          0.9999995000000002,
+          0.999999833333335,
+          1.000000166666666,
+          1.0000005,
+          1.7000005
+        ],
+        "ritz_residuals": [
+          5.761574636314746e-16,
+          2.517002003985848e-15,
+          1.8068549075248054e-15,
+          2.132582463744545e-15,
+          1.3690543216409226e-15
+        ],
+        "boundary_gap": 0.7,
+        "adjoint_residual": null
+      },
+      "comparison_credible": true
+    },
+    {
+      "dimension": 32,
+      "rank": 4,
+      "internal_width": 1e-09,
+      "exterior_gap": 0.7,
+      "theta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "reference_loss": 0.47359096946821877,
+      "reference_vjp": [
+        0.03618466432911512,
+        0.0032349843512412962,
+        0.04375578615035737,
+        -0.009954709741190549
+      ],
+      "shared_settings": {
+        "max_subspace": 32,
+        "eig_tol": 1e-10,
+        "response_tol": 1e-10,
+        "restart": 40,
+        "maxiter": 100
+      },
+      "ordinary": {
+        "loss": 0.4735909694682195,
+        "loss_absolute_error": 7.216449660063518e-16,
+        "vjp": [
+          0.03618468275123369,
+          0.0032349739132326596,
+          0.04375578948195098,
+          -0.009954709868995994
+        ],
+        "finite": true,
+        "absolute_errors": [
+          1.8422118566729928e-08,
+          1.043800863667968e-08,
+          3.3315936120992262e-09,
+          1.2780544504653601e-10
+        ],
+        "max_absolute_error": 1.8422118566729928e-08,
+        "relative_error": 3.7125120273535256e-07,
+        "within_tolerance": true,
+        "raw_values": [
+          0.9999999995000002,
+          0.9999999998333333,
+          1.0000000001666658,
+          1.0000000005000005,
+          1.7000000004999998
+        ],
+        "raw_internal_gaps": [
+          3.333331388688521e-10,
+          3.333324727350373e-10,
+          3.3333469318108655e-10
+        ],
+        "raw_min_internal_gap": 3.333324727350373e-10,
+        "raw_internal_width": 1.000000304784976e-09,
+        "raw_exterior_gap": 0.6999999999999993
+      },
+      "shared": {
+        "loss": 0.47359096946821966,
+        "loss_absolute_error": 8.881784197001252e-16,
+        "vjp": [
+          0.03618466432912216,
+          0.0032349843513204686,
+          0.043755786150345935,
+          -0.009954709741183638
+        ],
+        "finite": true,
+        "absolute_errors": [
+          7.0360384185619296e-15,
+          7.917234576271248e-14,
+          1.1435297153639112e-14,
+          6.9111383282915995e-15
+        ],
+        "max_absolute_error": 7.917234576271248e-14,
+        "relative_error": 1.3959995271428871e-12,
+        "within_tolerance": true,
+        "converged": true,
+        "response_valid": true,
+        "status": 0,
+        "raw_values": [
+          0.9999999995000007,
+          0.9999999998333339,
+          1.0000000001666682,
+          1.0000000005000005,
+          1.700000000500001
+        ],
+        "ritz_residuals": [
+          9.263770763958464e-16,
+          1.9833408807360674e-15,
+          2.4242548347163736e-15,
+          1.6358779569539024e-15,
+          2.607170974915857e-15
+        ],
+        "boundary_gap": 0.7000000000000006,
+        "adjoint_residual": null
+      },
+      "comparison_credible": true
+    },
+    {
+      "dimension": 32,
+      "rank": 4,
+      "internal_width": 0.0,
+      "exterior_gap": 0.7,
+      "theta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "reference_loss": 0.47359096946821877,
+      "reference_vjp": [
+        0.03618466434658908,
+        0.0032349843596425464,
+        0.04375578614533596,
+        -0.009954709743156442
+      ],
+      "shared_settings": {
+        "max_subspace": 32,
+        "eig_tol": 1e-10,
+        "response_tol": 1e-10,
+        "restart": 40,
+        "maxiter": 100
+      },
+      "ordinary": {
+        "loss": 0.47359096946821855,
+        "loss_absolute_error": 2.220446049250313e-16,
+        "vjp": [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        "finite": false,
+        "absolute_errors": [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        "max_absolute_error": null,
+        "relative_error": null,
+        "within_tolerance": false,
+        "raw_values": [
+          0.9999999999999988,
+          1.0,
+          1.0,
+          1.0,
+          1.7000000000000006
+        ],
+        "raw_internal_gaps": [
+          1.2212453270876722e-15,
+          0.0,
+          0.0
+        ],
+        "raw_min_internal_gap": 0.0,
+        "raw_internal_width": 1.2212453270876722e-15,
+        "raw_exterior_gap": 0.7000000000000006
+      },
+      "shared": {
+        "loss": 0.47359096946821866,
+        "loss_absolute_error": 1.1102230246251565e-16,
+        "vjp": [
+          0.0361846643465961,
+          0.0032349843597217582,
+          0.04375578614532447,
+          -0.009954709743149534
+        ],
+        "finite": true,
+        "absolute_errors": [
+          7.015221736850208e-15,
+          7.921181072179095e-14,
+          1.149080830487037e-14,
+          6.907668881339646e-15
+        ],
+        "max_absolute_error": 7.921181072179095e-14,
+        "relative_error": 1.3967710791836848e-12,
+        "within_tolerance": true,
+        "converged": true,
+        "response_valid": true,
+        "status": 0,
+        "raw_values": [
+          1.0000000000000004,
+          0.9999999999999992,
+          0.9999999999999998,
+          0.9999999999999997,
+          1.6999999999999997
+        ],
+        "ritz_residuals": [
+          1.5811917758680387e-15,
+          9.670700954430112e-16,
+          1.6121368546169449e-15,
+          1.901312583172445e-15,
+          1.7063669222257852e-15
+        ],
+        "boundary_gap": 0.7000000000000001,
+        "adjoint_residual": null
+      },
+      "comparison_credible": true
+    },
+    {
+      "dimension": 256,
+      "rank": 4,
+      "internal_width": 0.1,
+      "exterior_gap": 0.7,
+      "theta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "reference_loss": 0.1403140492127643,
+      "reference_vjp": [
+        -0.028550990954631296,
+        -0.023061430192231006,
+        0.0038884244826861824,
+        -0.006902797830175046
+      ],
+      "shared_settings": {
+        "max_subspace": 64,
+        "eig_tol": 1e-10,
+        "response_tol": 1e-10,
+        "restart": 40,
+        "maxiter": 100
+      },
+      "ordinary": {
+        "loss": 0.14031404921276489,
+        "loss_absolute_error": 5.828670879282072e-16,
+        "vjp": [
+          -0.02855099095463163,
+          -0.023061430192230864,
+          0.0038884244826859634,
+          -0.006902797830174893
+        ],
+        "finite": true,
+        "absolute_errors": [
+          3.3306690738754696e-16,
+          1.4224732503009818e-16,
+          2.190088388420719e-16,
+          1.5352302762394743e-16
+        ],
+        "max_absolute_error": 3.3306690738754696e-16,
+        "relative_error": 1.1991042216884468e-14,
+        "within_tolerance": true,
+        "raw_values": [
+          0.9500000000000003,
+          0.9833333333333342,
+          1.0166666666666668,
+          1.0500000000000016,
+          1.7499999999999996
+        ],
+        "raw_internal_gaps": [
+          0.03333333333333388,
+          0.03333333333333266,
+          0.03333333333333477
+        ],
+        "raw_min_internal_gap": 0.03333333333333266,
+        "raw_internal_width": 0.10000000000000131,
+        "raw_exterior_gap": 0.699999999999998
+      },
+      "shared": {
+        "loss": 0.14031404921276397,
+        "loss_absolute_error": 3.3306690738754696e-16,
+        "vjp": [
+          -0.028550990954611943,
+          -0.023061430192228703,
+          0.0038884244826765733,
+          -0.006902797830170927
+        ],
+        "finite": true,
+        "absolute_errors": [
+          1.935257509799726e-14,
+          2.3037127760972e-15,
+          9.609067014304529e-15,
+          4.1191008937069284e-15
+        ],
+        "max_absolute_error": 1.935257509799726e-14,
+        "relative_error": 5.890337621676399e-13,
+        "within_tolerance": true,
+        "converged": true,
+        "response_valid": true,
+        "status": 0,
+        "raw_values": [
+          0.9499999999999994,
+          0.9833333333333342,
+          1.0166666666666653,
+          1.0500000000000014,
+          1.7500000000000007
+        ],
+        "ritz_residuals": [
+          1.6212580693414262e-15,
+          3.5906489201156575e-15,
+          3.981715141680385e-15,
+          3.0920253452993087e-15,
+          2.8677377066175415e-15
+        ],
+        "boundary_gap": 0.6999999999999993,
+        "adjoint_residual": null
+      },
+      "comparison_credible": true
+    },
+    {
+      "dimension": 256,
+      "rank": 4,
+      "internal_width": 0.001,
+      "exterior_gap": 0.7,
+      "theta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "reference_loss": 0.1403140492127643,
+      "reference_vjp": [
+        -0.028305948160937178,
+        -0.024731662767446566,
+        0.0045425187312518826,
+        -0.007030804959707655
+      ],
+      "shared_settings": {
+        "max_subspace": 64,
+        "eig_tol": 1e-10,
+        "response_tol": 1e-10,
+        "restart": 40,
+        "maxiter": 100
+      },
+      "ordinary": {
+        "loss": 0.14031404921276372,
+        "loss_absolute_error": 5.828670879282072e-16,
+        "vjp": [
+          -0.0283059481609495,
+          -0.024731662767447066,
+          0.004542518731261655,
+          -0.007030804959718357
+        ],
+        "finite": true,
+        "absolute_errors": [
+          1.2323475573339238e-14,
+          4.996003610813204e-16,
+          9.772564701915343e-15,
+          1.0701509123300923e-14
+        ],
+        "max_absolute_error": 1.2323475573339238e-14,
+        "relative_error": 4.94170696244796e-13,
+        "within_tolerance": true,
+        "raw_values": [
+          0.9995,
+          0.999833333333332,
+          1.0001666666666644,
+          1.000499999999999,
+          1.7005000000000015
+        ],
+        "raw_internal_gaps": [
+          0.00033333333333196435,
+          0.00033333333333240844,
+          0.0003333333333346289
+        ],
+        "raw_min_internal_gap": 0.00033333333333196435,
+        "raw_internal_width": 0.0009999999999990017,
+        "raw_exterior_gap": 0.7000000000000024
+      },
+      "shared": {
+        "loss": 0.14031404921276322,
+        "loss_absolute_error": 1.0824674490095276e-15,
+        "vjp": [
+          -0.028305948160926988,
+          -0.024731662767476566,
+          0.0045425187313019744,
+          -0.007030804959741893
+        ],
+        "finite": true,
+        "absolute_errors": [
+          1.0189765697887765e-14,
+          3.00003077935429e-14,
+          5.009187509230628e-14,
+          3.4237369883616253e-14
+        ],
+        "max_absolute_error": 5.009187509230628e-14,
+        "relative_error": 1.7774730760204796e-12,
+        "within_tolerance": true,
+        "converged": true,
+        "response_valid": true,
+        "status": 0,
+        "raw_values": [
+          0.9994999999999994,
+          0.9998333333333324,
+          1.0001666666666666,
+          1.0004999999999988,
+          1.700500000000002
+        ],
+        "ritz_residuals": [
+          8.067544286573346e-16,
+          3.009175144393837e-15,
+          3.2248614734103347e-15,
+          3.24470016100445e-15,
+          3.1605458544432172e-15
+        ],
+        "boundary_gap": 0.7000000000000031,
+        "adjoint_residual": null
+      },
+      "comparison_credible": true
+    },
+    {
+      "dimension": 256,
+      "rank": 4,
+      "internal_width": 1e-06,
+      "exterior_gap": 0.7,
+      "theta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "reference_loss": 0.1403140492127643,
+      "reference_vjp": [
+        -0.02830343821757024,
+        -0.024750029914289824,
+        0.0045495738329804376,
+        -0.007032231791873107
+      ],
+      "shared_settings": {
+        "max_subspace": 64,
+        "eig_tol": 1e-10,
+        "response_tol": 1e-10,
+        "restart": 40,
+        "maxiter": 100
+      },
+      "ordinary": {
+        "loss": 0.14031404921276427,
+        "loss_absolute_error": 2.7755575615628914e-17,
+        "vjp": [
+          -0.02830343822550694,
+          -0.024750029891180934,
+          0.004549573812210268,
+          -0.00703223176568662
+        ],
+        "finite": true,
+        "absolute_errors": [
+          7.936699908395184e-12,
+          2.3108889801726207e-11,
+          2.0770169438522057e-11,
+          2.6186487006585324e-11
+        ],
+        "max_absolute_error": 2.6186487006585324e-11,
+        "relative_error": 1.0748207576727094e-09,
+        "within_tolerance": true,
+        "raw_values": [
+          0.9999995,
+          0.9999998333333343,
+          1.000000166666668,
+          1.000000500000001,
+          1.7000005000000036
+        ],
+        "raw_internal_gaps": [
+          3.333333342681044e-07,
+          3.333333337129929e-07,
+          3.333333329358368e-07
+        ],
+        "raw_min_internal_gap": 3.333333329358368e-07,
+        "raw_internal_width": 1.000000000916934e-06,
+        "raw_exterior_gap": 0.7000000000000026
+      },
+      "shared": {
+        "loss": 0.1403140492127636,
+        "loss_absolute_error": 6.938893903907228e-16,
+        "vjp": [
+          -0.028303438217560643,
+          -0.024750029914319967,
+          0.004549573833030533,
+          -0.0070322317919058784
+        ],
+        "finite": true,
+        "absolute_errors": [
+          9.596490269103697e-15,
+          3.0142555118573e-14,
+          5.0095344539258235e-14,
+          3.277152854641585e-14
+        ],
+        "max_absolute_error": 5.0095344539258235e-14,
+        "relative_error": 1.7576943516173667e-12,
+        "within_tolerance": true,
+        "converged": true,
+        "response_valid": true,
+        "status": 0,
+        "raw_values": [
+          0.9999995000000004,
+          0.9999998333333339,
+          1.0000001666666658,
+          1.000000500000001,
+          1.7000005000000007
+        ],
+        "ritz_residuals": [
+          1.0180100167566478e-15,
+          2.8477005361815488e-15,
+          3.512691076368162e-15,
+          3.43461229886071e-15,
+          4.189599766712893e-15
+        ],
+        "boundary_gap": 0.6999999999999997,
+        "adjoint_residual": null
+      },
+      "comparison_credible": true
+    },
+    {
+      "dimension": 256,
+      "rank": 4,
+      "internal_width": 1e-09,
+      "exterior_gap": 0.7,
+      "theta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "reference_loss": 0.1403140492127643,
+      "reference_vjp": [
+        -0.028303435707252265,
+        -0.024750048298026732,
+        0.00454958089301674,
+        -0.007032233220215538
+      ],
+      "shared_settings": {
+        "max_subspace": 64,
+        "eig_tol": 1e-10,
+        "response_tol": 1e-10,
+        "restart": 40,
+        "maxiter": 100
+      },
+      "ordinary": {
+        "loss": 0.1403140492127641,
+        "loss_absolute_error": 1.942890293094024e-16,
+        "vjp": [
+          -0.02830343584587503,
+          -0.02475003486359401,
+          0.004549585929671625,
+          -0.007032235628974343
+        ],
+        "finite": true,
+        "absolute_errors": [
+          1.3862276604381663e-10,
+          1.3434432722531087e-08,
+          5.036654885694214e-09,
+          2.4087588043966712e-09
+        ],
+        "max_absolute_error": 1.3434432722531087e-08,
+        "relative_error": 3.7769845910047766e-07,
+        "within_tolerance": true,
+        "raw_values": [
+          0.9999999995000001,
+          0.9999999998333339,
+          1.0000000001666662,
+          1.0000000005,
+          1.7000000005000002
+        ],
+        "raw_internal_gaps": [
+          3.3333380500266685e-10,
+          3.3333236171273484e-10,
+          3.3333380500266685e-10
+        ],
+        "raw_min_internal_gap": 3.3333236171273484e-10,
+        "raw_internal_width": 9.999999717180685e-10,
+        "raw_exterior_gap": 0.7000000000000002
+      },
+      "shared": {
+        "loss": 0.140314049212763,
+        "loss_absolute_error": 1.304512053934559e-15,
+        "vjp": [
+          -0.028303435707242502,
+          -0.02475004829805682,
+          0.004549580893066802,
+          -0.007032233220248307
+        ],
+        "finite": true,
+        "absolute_errors": [
+          9.76302372279747e-15,
+          3.008704396734174e-14,
+          5.0062384793214676e-14,
+          3.2768926461201886e-14
+        ],
+        "max_absolute_error": 5.0062384793214676e-14,
+        "relative_error": 1.7570052474493337e-12,
+        "within_tolerance": true,
+        "converged": true,
+        "response_valid": true,
+        "status": 0,
+        "raw_values": [
+          0.9999999995,
+          0.9999999998333298,
+          1.0000000001666667,
+          1.0000000004999998,
+          1.7000000004999987
+        ],
+        "ritz_residuals": [
+          8.19653994811749e-16,
+          5.1026251563064585e-15,
+          3.847788682410581e-15,
+          3.914505321945992e-15,
+          3.2302485052109736e-15
+        ],
+        "boundary_gap": 0.6999999999999988,
+        "adjoint_residual": null
+      },
+      "comparison_credible": true
+    },
+    {
+      "dimension": 256,
+      "rank": 4,
+      "internal_width": 0.0,
+      "exterior_gap": 0.7,
+      "theta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "reference_loss": 0.1403140492127643,
+      "reference_vjp": [
+        -0.028303435704739435,
+        -0.024750048316428873,
+        0.004549580900083844,
+        -0.007032233221645316
+      ],
+      "shared_settings": {
+        "max_subspace": 64,
+        "eig_tol": 1e-10,
+        "response_tol": 1e-10,
+        "restart": 40,
+        "maxiter": 100
+      },
+      "ordinary": {
+        "loss": 0.14031404921276477,
+        "loss_absolute_error": 4.718447854656915e-16,
+        "vjp": [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        "finite": false,
+        "absolute_errors": [
+          NaN,
+          NaN,
+          NaN,
+          NaN
+        ],
+        "max_absolute_error": null,
+        "relative_error": null,
+        "within_tolerance": false,
+        "raw_values": [
+          0.999999999999998,
+          0.9999999999999999,
+          0.9999999999999999,
+          1.000000000000001,
+          1.7
+        ],
+        "raw_internal_gaps": [
+          1.887379141862766e-15,
+          0.0,
+          1.2212453270876722e-15
+        ],
+        "raw_min_internal_gap": 0.0,
+        "raw_internal_width": 3.1086244689504383e-15,
+        "raw_exterior_gap": 0.6999999999999988
+      },
+      "shared": {
+        "loss": 0.14031404921276497,
+        "loss_absolute_error": 6.661338147750939e-16,
+        "vjp": [
+          -0.028303435704729867,
+          -0.02475004831645899,
+          0.004549580900133871,
+          -0.0070322332216781625
+        ],
+        "finite": true,
+        "absolute_errors": [
+          9.568734693488068e-15,
+          3.0118268989909325e-14,
+          5.002682296195715e-14,
+          3.2846121655882854e-14
+        ],
+        "max_absolute_error": 5.002682296195715e-14,
+        "relative_error": 1.756934240708241e-12,
+        "within_tolerance": true,
+        "converged": true,
+        "response_valid": true,
+        "status": 0,
+        "raw_values": [
+          0.9999999999999998,
+          1.0000000000000002,
+          0.9999999999999994,
+          1.0000000000000029,
+          1.7
+        ],
+        "ritz_residuals": [
+          3.1263909571887716e-15,
+          3.2639810417109514e-15,
+          7.265407281902903e-16,
+          4.289620040783322e-15,
+          2.829252784711253e-15
+        ],
+        "boundary_gap": 0.6999999999999971,
+        "adjoint_residual": null
+      },
+      "comparison_credible": true
+    }
+  ],
+  "dimensions": [
+    32,
+    256
+  ],
+  "rank": 4,
+  "nparameters": 4,
+  "seed": 1703,
+  "units": "dimensionless",
+  "dtype": "float64",
+  "source_python_sha256": "d0e419a50cc96ebbcaebe8f491879343011f3b019c65582344741d587590d01e",
+  "script_sha256": "af8071b3472c75a968da75db1b9346696954417e97fc62aab92cdf9f42c0699c",
+  "model_script_sha256": "3fe9f0674ab57cc210de86547990f4d9c5d51b2c49821be106654ff80a207cf0",
+  "hostname": "c20",
+  "process_id": 59974,
+  "started_utc": "2026-10-16T02:59:05.687434+00:00",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "numpy": "2.4.4",
+  "devices": [
+    "cpu:0"
+  ],
+  "persistent_compilation_cache_enabled": false,
+  "threads": {
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "MKL_NUM_THREADS": "2"
+  },
+  "loss": "sum(W * (B.T @ P_lowest_rank4 @ B)); identical complete-cluster loss for both methods",
+  "ordinary_method": "jnp.linalg.eigh with its default AD and symmetrize_input=True; no stop_gradient",
+  "shared_method": "dense forward plus existing shared implicit subspace GMRES response",
+  "acceptance": "Shared finite valid/converged VJP and loss must match the analytic reference; ordinary failures are observations.",
+  "derivative_atol": 2e-07,
+  "derivative_rtol": 2e-05,
+  "scope": "A fixed exterior gap keeps this projector loss mathematically smooth; no individual-state loss or speed comparison.",
+  "elapsed_seconds": 4.991328595999676,
+  "process_peak_rss_mib": 1079.97265625,
+  "ordinary_within_tolerance_count": 8,
+  "ordinary_finite_count": 8
+}

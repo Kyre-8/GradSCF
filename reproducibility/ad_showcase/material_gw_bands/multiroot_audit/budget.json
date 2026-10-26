@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "jobs/berkeleygw_review/graphene_pair_20261018/probe.py"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 6249308,
+  "budget_kib": 16777216,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true,
+  "elapsed_seconds": 167.4715826289903,
+  "allowed_cpu_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ]
+}

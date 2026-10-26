@@ -1,0 +1,13 @@
+{
+  "hostname": "c20",
+  "system": "Linux",
+  "kernel": "4.18.0-348.el8.x86_64",
+  "architecture": "x86_64",
+  "logical_cpus": 192,
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8457C",
+  "backend": "CPU",
+  "dtype": "float64/complex128",
+  "OMP_NUM_THREADS": 2,
+  "OPENBLAS_NUM_THREADS": 2,
+  "affinity": "default unchanged"
+}

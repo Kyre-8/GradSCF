@@ -1,0 +1,99 @@
+FFFFFF                                                                   [100%]
+=================================== FAILURES ===================================
+________ test_explicit_ao_potential_has_symmetric_coordinate_convention ________
+
+hydrogen = (array([[ 0.2, -0.1, -0.6],
+       [ 0.2, -0.1,  0.8]]), RHF(mol=Mole(atom=[('H', array([ 0.2, -0.1, -0.6])), ('H', ar...=False, hfx_omega_values=(0.0, 0.4), hfx_chunk_size=512), <gradscf_tools.excited.CISGeometry object at 0x7f89040dae90>)
+
+    def test_explicit_ao_potential_has_symmetric_coordinate_convention(hydrogen):
+        coordinates, mf, _ = hydrogen
+        engine = MolecularEnergy(mf)
+        field = jnp.array([.001, -.002, .003])
+        n = mf.mo_coeff.shape[0]
+        potential = jnp.arange(n*n, dtype=jnp.float64).reshape(n, n)*1e-3
+        baseline = engine.inputs(coordinates, field)
+>       changed = engine.inputs(coordinates, field, potential=potential)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: MolecularEnergy.inputs() got an unexpected keyword argument 'potential'
+
+tests/test_cis_response_density.py:34: TypeError
+__ test_explicit_ao_potential_rejects_invalid_shape_or_complex_values[shape] ___
+
+hydrogen = (array([[ 0.2, -0.1, -0.6],
+       [ 0.2, -0.1,  0.8]]), RHF(mol=Mole(atom=[('H', array([ 0.2, -0.1, -0.6])), ('H', ar...=False, hfx_omega_values=(0.0, 0.4), hfx_chunk_size=512), <gradscf_tools.excited.CISGeometry object at 0x7f89040dae90>)
+kind = 'shape'
+
+    @pytest.mark.parametrize("kind", ["shape", "complex"])
+    def test_explicit_ao_potential_rejects_invalid_shape_or_complex_values(hydrogen, kind):
+        coordinates, mf, _ = hydrogen
+        potential = (jnp.zeros((2, 2)) if kind == "shape"
+                     else jnp.eye(mf.mo_coeff.shape[0], dtype=jnp.complex128))
+        with pytest.raises(ValueError, match="potential"):
+>           MolecularEnergy(mf).inputs(coordinates, potential=potential)
+E           TypeError: MolecularEnergy.inputs() got an unexpected keyword argument 'potential'
+
+tests/test_cis_response_density.py:47: TypeError
+_ test_explicit_ao_potential_rejects_invalid_shape_or_complex_values[complex] __
+
+hydrogen = (array([[ 0.2, -0.1, -0.6],
+       [ 0.2, -0.1,  0.8]]), RHF(mol=Mole(atom=[('H', array([ 0.2, -0.1, -0.6])), ('H', ar...=False, hfx_omega_values=(0.0, 0.4), hfx_chunk_size=512), <gradscf_tools.excited.CISGeometry object at 0x7f89040dae90>)
+kind = 'complex'
+
+    @pytest.mark.parametrize("kind", ["shape", "complex"])
+    def test_explicit_ao_potential_rejects_invalid_shape_or_complex_values(hydrogen, kind):
+        coordinates, mf, _ = hydrogen
+        potential = (jnp.zeros((2, 2)) if kind == "shape"
+                     else jnp.eye(mf.mo_coeff.shape[0], dtype=jnp.complex128))
+        with pytest.raises(ValueError, match="potential"):
+>           MolecularEnergy(mf).inputs(coordinates, potential=potential)
+E           TypeError: MolecularEnergy.inputs() got an unexpected keyword argument 'potential'
+
+tests/test_cis_response_density.py:47: TypeError
+____________ test_cis_geometry_rejects_unrestricted_orbital_arrays _____________
+
+hydrogen = (array([[ 0.2, -0.1, -0.6],
+       [ 0.2, -0.1,  0.8]]), RHF(mol=Mole(atom=[('H', array([ 0.2, -0.1, -0.6])), ('H', ar...=False, hfx_omega_values=(0.0, 0.4), hfx_chunk_size=512), <gradscf_tools.excited.CISGeometry object at 0x7f89040dae90>)
+
+    def test_cis_geometry_rejects_unrestricted_orbital_arrays(hydrogen):
+        _, mf, _ = hydrogen
+        invalid = copy(mf)
+        invalid.mo_coeff = np.stack([mf.mo_coeff]*2)
+        invalid.mo_occ = np.stack([np.asarray(mf.mo_occ)/2]*2)
+>       with pytest.raises(NotImplementedError, match="RHF"):
+E       Failed: DID NOT RAISE <class 'NotImplementedError'>
+
+tests/test_cis_response_density.py:55: Failed
+_______ test_relaxed_cis_density_has_particle_count_and_dipole_identity ________
+
+hydrogen = (array([[ 0.2, -0.1, -0.6],
+       [ 0.2, -0.1,  0.8]]), RHF(mol=Mole(atom=[('H', array([ 0.2, -0.1, -0.6])), ('H', ar...=False, hfx_omega_values=(0.0, 0.4), hfx_chunk_size=512), <gradscf_tools.excited.CISGeometry object at 0x7f89040dae90>)
+
+    def test_relaxed_cis_density_has_particle_count_and_dipole_identity(hydrogen):
+        coordinates, mf, model = hydrogen
+        field = np.array([0., 0., .002])
+>       density, dipole, state = model.density_and_dipole(coordinates, 0, field=field)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'CISGeometry' object has no attribute 'density_and_dipole'
+
+tests/test_cis_response_density.py:84: AttributeError
+__ test_relaxed_cis_density_and_dipole_match_independent_finite_perturbations __
+
+hydrogen = (array([[ 0.2, -0.1, -0.6],
+       [ 0.2, -0.1,  0.8]]), RHF(mol=Mole(atom=[('H', array([ 0.2, -0.1, -0.6])), ('H', ar...=False, hfx_omega_values=(0.0, 0.4), hfx_chunk_size=512), <gradscf_tools.excited.CISGeometry object at 0x7f89040dae90>)
+
+    def test_relaxed_cis_density_and_dipole_match_independent_finite_perturbations(hydrogen):
+        coordinates, _, model = hydrogen
+        field = np.array([0., 0., .002])
+>       density, dipole, _ = model.density_and_dipole(coordinates, 0, field=field)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'CISGeometry' object has no attribute 'density_and_dipole'
+
+tests/test_cis_response_density.py:107: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_cis_response_density.py::test_explicit_ao_potential_has_symmetric_coordinate_convention
+FAILED tests/test_cis_response_density.py::test_explicit_ao_potential_rejects_invalid_shape_or_complex_values[shape]
+FAILED tests/test_cis_response_density.py::test_explicit_ao_potential_rejects_invalid_shape_or_complex_values[complex]
+FAILED tests/test_cis_response_density.py::test_cis_geometry_rejects_unrestricted_orbital_arrays
+FAILED tests/test_cis_response_density.py::test_relaxed_cis_density_has_particle_count_and_dipole_identity
+FAILED tests/test_cis_response_density.py::test_relaxed_cis_density_and_dipole_match_independent_finite_perturbations
+6 failed in 9.24s

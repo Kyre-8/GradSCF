@@ -47,7 +47,7 @@ _DEFAULT_TRAIN_SCF_SAFETY_MAX_CYCLE = 512
 
 neural_xc = None
 restricted_reference_from_pyscf = None
-restricted_molecule_from_spec_with_jax_rks = None
+_build_restricted_reference = None
 RKSConfig = None
 HARTREE_TO_EV = None
 MolecularTrainingDatum = None
@@ -78,7 +78,7 @@ def _load_runtime_dependencies(logger: "RunLogger | None" = None) -> None:
     global _RUNTIME_DEPENDENCIES_LOADED
     global neural_xc
     global restricted_reference_from_pyscf
-    global restricted_molecule_from_spec_with_jax_rks
+    global _build_restricted_reference
     global RKSConfig
     global HARTREE_TO_EV
     global MolecularTrainingDatum
@@ -100,30 +100,32 @@ def _load_runtime_dependencies(logger: "RunLogger | None" = None) -> None:
     _log("[bootstrap] import pyscf_data_reference")
     from pyscf_data_reference import restricted_reference_from_pyscf as _restricted_reference_from_pyscf
     _log("[bootstrap] import gradscf.scf")
-    from gradscf.scf import (
-        RKSConfig as _RKSConfig,
-        restricted_molecule_from_spec_with_jax_rks as _restricted_molecule_from_spec_with_jax_rks,
+    from gradscf.scf import RKSConfig as _RKSConfig
+    from gradscf.scf.builders import (
+        _build_restricted_reference as __build_restricted_reference,
     )
     _log("[bootstrap] import gradscf.tools.spectra")
     from gradscf.tools.spectra import HARTREE_TO_EV as _HARTREE_TO_EV
-    _log("[bootstrap] import gradscf.model.training")
-    from gradscf.model.training import (
+    _log("[bootstrap] import gradscf.model.neural_xc.training")
+    from gradscf.model.neural_xc.training import (
         MolecularTrainingDatum as _MolecularTrainingDatum,
         MolecularTrainingConfig as _MolecularTrainingConfig,
-        create_train_state_from_molecule as _create_train_state_from_molecule,
         molecular_loss as _molecular_loss,
         load_params_checkpoint as _load_params_checkpoint,
-        make_molecular_loss_and_grad as _make_molecular_loss_and_grad,
-        make_molecular_train_step as _make_molecular_train_step,
         make_ground_state_predictor as _make_ground_state_predictor,
         save_params_checkpoint as _save_params_checkpoint,
     )
-    _log("[bootstrap] import gradscf.model.training.targets")
-    from gradscf.model.training.targets import predict_excitation_energies as _predict_excitation_energies
+    from gradscf.model.neural_xc.training.trainer import (
+        create_train_state_from_molecule as _create_train_state_from_molecule,
+        make_molecular_loss_and_grad as _make_molecular_loss_and_grad,
+        make_molecular_train_step as _make_molecular_train_step,
+    )
+    _log("[bootstrap] import gradscf.model.neural_xc.training.targets")
+    from gradscf.model.neural_xc.training.targets import predict_excitation_energies as _predict_excitation_energies
 
     neural_xc = _neural_xc
     restricted_reference_from_pyscf = _restricted_reference_from_pyscf
-    restricted_molecule_from_spec_with_jax_rks = _restricted_molecule_from_spec_with_jax_rks
+    _build_restricted_reference = __build_restricted_reference
     RKSConfig = _RKSConfig
     HARTREE_TO_EV = _HARTREE_TO_EV
     MolecularTrainingDatum = _MolecularTrainingDatum
@@ -711,7 +713,7 @@ def build_reference_point(
     if reference_backend == "jax_rks":
         if str(grid_ao_backend) != "jax":
             raise ValueError("JAX reference building requires --grid-ao-backend jax.")
-        reference = restricted_molecule_from_spec_with_jax_rks(
+        reference = _build_restricted_reference(
             atom=atom,
             basis=basis,
             xc_spec=xc,
@@ -1798,7 +1800,7 @@ def main() -> None:
         },
     )()
 
-    from gradscf.workflows.reporting import plot_training_curves, write_training_curve_csv
+    from gradscf.model.neural_xc.workflows.reporting import plot_training_curves, write_training_curve_csv
 
     write_training_curve_csv(training_curve_csv, training_run_like)
     write_dense_csv(training_per_point_csv, training["per_point_history"])

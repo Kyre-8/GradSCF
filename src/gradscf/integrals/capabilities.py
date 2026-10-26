@@ -19,9 +19,14 @@ class BackendCapabilities:
         if layout not in self.layouts:return False
         if layout!='full' and operator!='eri':return False
         if self.name=='native' and layout!='full' and derivative_order>0:return False
+        if (self.name=='native' and variable in {'coefficients','exponents'} and derivative_order>0
+                and operator not in {'overlap','kinetic','nuclear','dipole'}):return False
+        if self.name=='native' and variable=='exponents' and derivative_order>1:return False
         if operator not in self.operators or derivative_order < 0:
             return False
         if operator == "ecp" and derivative_order > 0:
+            return False
+        if variable == "origin" and operator != "dipole" and derivative_order > 0:
             return False
         return derivative_order == 0 or (
             derivative_order <= self.max_derivative_order and variable in self.derivative_variables
@@ -32,7 +37,7 @@ def backend_capabilities(name):
     operators = ("overlap", "kinetic", "nuclear", "dipole", "eri")
     if name == "native":
         return BackendCapabilities(name, operators+("ecp",), ("cpu",), True,
-                                   ("centers", "nuclear_coords"), 1,
+                                   ("centers", "nuclear_coords", "origin", "coefficients", "exponents"), 2,
                                    representations=("cartesian", "spherical"),
                                    layouts=("full", "s4", "s8"),
                                    ad_modes=("jvp", "vjp"))

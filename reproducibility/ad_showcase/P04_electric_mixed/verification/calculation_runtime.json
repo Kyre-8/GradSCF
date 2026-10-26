@@ -1,0 +1,37 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-electric-mixed-20261016",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "source_sha256": {
+    "src/gradscf/dfpt/electric.py": "5bc3a766419cb5630238e1b0f9a083219c6f03bb00d814c1cefba2e1e8b0f37f",
+    "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+    "src/gradscf/dfpt/ks.py": "f5dc7b4ba7ba70a3a704359f98f9609ee51db18ddccbb5e6f1406d0f45104e93",
+    "src/gradscf/dfpt/core.py": "4765b5e80c2804f07e22ebcec7584bbed1d271fecdf4dd89949895b307e054bb",
+    "src/gradscf/dfpt/atomic.py": "f854dacb99b1c6a219d7c63fa5173e852dde51383e71345bcb1a1f788cbd5a3d",
+    "src/gradscf/solvers/nonlinear/iterate.py": "985caa51531077be9ca98b558d1658971b5f3ca0c91c56f3fca9d76a82ac071b",
+    "src/gradscf/solvers/nonlinear/root.py": "6896011c23957975ad5420cbd14edd47a69d2b837189723841484f07f6108981",
+    "tests/dfpt/test_electric_field.py": "56f44db3a654aa43d2197242d80e1957a037181ef7afd559c5006dc01fe7a218",
+    "tests/dfpt/test_electric_mixed.py": "697f3ec5e8c9f6911e9e11b3bf01f27d3fea3e441e32460b3af9af520107d4f4"
+  },
+  "archive_sha256": "c90c1a7041962997085680a8c9ec059dbf3b0ad4058b994ce16ddedb59ba3a5d",
+  "scope": "Analytic dimer and H2HF/FFT9/k(3,1,1) full-root Maxwell and directional dielectric derivative only; separate source from FFT31/FFT71 material calculations. No Raman mode spectrum or general material mixed response.",
+  "runs": {
+    "dimer": {
+      "exit": 0,
+      "tests_passed": 1,
+      "pytest_seconds": 156.55,
+      "peak_rss_kib": 2543620
+    },
+    "h2": {
+      "exit": 0,
+      "tests_passed": 1,
+      "pytest_seconds": 311.38,
+      "peak_rss_kib": 4538980
+    },
+    "legacy_field_wrapper": {
+      "exit": 0,
+      "tests_passed": 1,
+      "pytest_seconds": 44.34
+    }
+  }
+}

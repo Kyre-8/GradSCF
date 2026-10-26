@@ -1,0 +1,313 @@
+{
+  "complete": true,
+  "model": "Fixed-N periodic TF+lambda-vW+Hartree, no XC; manufactured local potential",
+  "length_bohr": 5.0,
+  "lattice_bohr": [
+    [
+      5.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      5.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      5.0
+    ]
+  ],
+  "nelectron": 2.0,
+  "amplitude_modulation": [
+    0.18,
+    0.12
+  ],
+  "tf_weight": 0.8,
+  "vw_weight": 0.6,
+  "target_chemical_potential_hartree": 0.17,
+  "cases": [
+    {
+      "mesh": [
+        5,
+        5,
+        3
+      ],
+      "total_energy_hartree": 0.1244173305105967,
+      "energy_components": {
+        "kinetic": 0.32792029189740446,
+        "external": -0.21491486193233333,
+        "hartree": 0.011411900545525579,
+        "xc": 0.0,
+        "nuclear": 0.0
+      },
+      "chemical_potential_hartree": 0.16999999999907334,
+      "electron_number": 1.9999999999999991,
+      "forward_residual": 8.187796577981284e-11,
+      "forward_iterations": 56,
+      "maximum_manufactured_density_error": 9.676773271571903e-13,
+      "potential_response_residual": 2.659298838236143e-15,
+      "potential_energy_curvature": -2.0927170426408006,
+      "elapsed_seconds": 26.53670622498612
+    },
+    {
+      "mesh": [
+        7,
+        7,
+        3
+      ],
+      "total_energy_hartree": 0.12441728133833918,
+      "energy_components": {
+        "kinetic": 0.3279203656606491,
+        "external": -0.2149149848694753,
+        "hartree": 0.011411900547165399,
+        "xc": 0.0,
+        "nuclear": 0.0
+      },
+      "chemical_potential_hartree": 0.17000000000058535,
+      "electron_number": 2.0000000000000013,
+      "forward_residual": 9.022311552330332e-11,
+      "forward_iterations": 117,
+      "maximum_manufactured_density_error": 9.27685012142021e-13,
+      "potential_response_residual": 5.1181404436750055e-15,
+      "potential_energy_curvature": -2.092638431422761,
+      "elapsed_seconds": 22.572691264998866
+    },
+    {
+      "mesh": [
+        9,
+        9,
+        3
+      ],
+      "total_energy_hartree": 0.12441728129652617,
+      "energy_components": {
+        "kinetic": 0.32792036571889005,
+        "external": -0.2149149849681163,
+        "hartree": 0.011411900545752437,
+        "xc": 0.0,
+        "nuclear": 0.0
+      },
+      "chemical_potential_hartree": 0.16999999999927953,
+      "electron_number": 2.0000000000000027,
+      "forward_residual": 7.90815696378319e-11,
+      "forward_iterations": 131,
+      "maximum_manufactured_density_error": 4.502995198940596e-13,
+      "potential_response_residual": 7.813185869880389e-15,
+      "potential_energy_curvature": -2.092637050668943,
+      "parameter_order": [
+        "potential_amplitude_Eh",
+        "tf_weight",
+        "vw_weight"
+      ],
+      "base_parameters": [
+        0.0,
+        0.8,
+        0.6
+      ],
+      "energy_gradient": [
+        0.35176861442251306,
+        0.3828202840442687,
+        0.036106897476723215
+      ],
+      "potential_parameter_fd_checks": [
+        {
+          "parameter": "potential",
+          "step": 0.001,
+          "density_max_error": 2.0565984359954825e-08,
+          "energy_gradient_error": 1.695367922160962e-07
+        },
+        {
+          "parameter": "potential",
+          "step": 0.0003,
+          "density_max_error": 2.7864626092610756e-09,
+          "energy_gradient_error": 1.52580981738204e-08
+        },
+        {
+          "parameter": "potential",
+          "step": 0.0001,
+          "density_max_error": 4.947978932828834e-09,
+          "energy_gradient_error": 1.6947810932421703e-09
+        },
+        {
+          "parameter": "tf",
+          "step": 0.001,
+          "density_max_error": 9.091057108501222e-10,
+          "energy_gradient_error": 2.3821961625536403e-09
+        },
+        {
+          "parameter": "tf",
+          "step": 0.0003,
+          "density_max_error": 1.6071267641346032e-09,
+          "energy_gradient_error": 2.1342411171687559e-10
+        },
+        {
+          "parameter": "tf",
+          "step": 0.0001,
+          "density_max_error": 3.082368555708259e-09,
+          "energy_gradient_error": 2.2396307031158358e-11
+        },
+        {
+          "parameter": "vw",
+          "step": 0.001,
+          "density_max_error": 2.747716248106824e-09,
+          "energy_gradient_error": 2.0048826404606146e-08
+        },
+        {
+          "parameter": "vw",
+          "step": 0.0003,
+          "density_max_error": 1.1586430092268285e-09,
+          "energy_gradient_error": 1.8053594869060774e-09
+        },
+        {
+          "parameter": "vw",
+          "step": 0.0001,
+          "density_max_error": 3.3105049028155954e-09,
+          "energy_gradient_error": 2.0238247189219294e-10
+        }
+      ],
+      "density_vjp": [
+        -2.1594281982739725,
+        -0.1317905068493035,
+        -0.25919049835988567
+      ],
+      "density_adjoint_error": 1.7763568394002505e-15,
+      "implicit_dfpt_jacobian_error": 1.1796119636642288e-16,
+      "taylor_path_direction": [
+        0.03,
+        0.05,
+        -0.04
+      ],
+      "taylor_energy_coefficients": [
+        0.02824979673581988,
+        -0.0008351413845837205
+      ],
+      "taylor_coefficient_convention": "coefficient[k-1] = derivative(order=k)/k!, k=1,2; path t dimensionless",
+      "taylor_response_residuals": [
+        2.1836646417223162e-16,
+        4.910128466528278e-18
+      ],
+      "taylor_fd_checks": [
+        {
+          "step": 0.02,
+          "density_coefficient2_error": 1.0295833609469168e-09,
+          "energy_coefficient2_error": 1.2952927359172195e-11
+        },
+        {
+          "step": 0.01,
+          "density_coefficient2_error": 6.866092514917383e-09,
+          "energy_coefficient2_error": 2.91979244601559e-12
+        },
+        {
+          "step": 0.005,
+          "density_coefficient2_error": 2.321650302762967e-08,
+          "energy_coefficient2_error": 3.754487302651266e-11
+        }
+      ],
+      "parameter_path": [
+        {
+          "t": -0.2,
+          "energy_hartree": 0.11873402416513268,
+          "linear_energy_hartree": 0.1187673219493622,
+          "quadratic_energy_hartree": 0.11873391629397885,
+          "density_probe": 0.3635256046127034,
+          "linear_density_probe": 0.36356936405170104,
+          "quadratic_density_probe": 0.3635257095237684
+        },
+        {
+          "t": -0.1,
+          "energy_hartree": 0.12158396368950096,
+          "linear_energy_hartree": 0.12159230162294418,
+          "quadratic_energy_hartree": 0.12158395020909835,
+          "density_probe": 0.3576580624025518,
+          "linear_density_probe": 0.35766898923094725,
+          "quadratic_density_probe": 0.3576580755989639
+        },
+        {
+          "t": -0.05,
+          "energy_hartree": 0.1230027052910998,
+          "linear_energy_hartree": 0.12300479145973517,
+          "quadratic_energy_hartree": 0.1230027036062737,
+          "density_probe": 0.3547160717729222,
+          "linear_density_probe": 0.3547188018205702,
+          "quadratic_density_probe": 0.3547160734125745
+        },
+        {
+          "t": 0.0,
+          "energy_hartree": 0.12441728129652617,
+          "linear_energy_hartree": 0.12441728129652617,
+          "quadratic_energy_hartree": 0.12441728129652617,
+          "density_probe": 0.3517686144101934,
+          "linear_density_probe": 0.3517686144101934,
+          "quadratic_density_probe": 0.3517686144101934
+        },
+        {
+          "t": 0.05,
+          "energy_hartree": 0.1258276815954861,
+          "linear_energy_hartree": 0.12582977113331717,
+          "quadratic_energy_hartree": 0.12582768327985572,
+          "density_probe": 0.3488157002668746,
+          "linear_density_probe": 0.34881842699981647,
+          "quadratic_density_probe": 0.3488156985918207
+        },
+        {
+          "t": 0.1,
+          "energy_hartree": 0.12723389608318372,
+          "linear_energy_hartree": 0.12724226097010816,
+          "quadratic_energy_hartree": 0.12723390955626232,
+          "density_probe": 0.34585733933538665,
+          "linear_density_probe": 0.3458682395894394,
+          "quadratic_density_probe": 0.34585732595745666
+        },
+        {
+          "t": 0.2,
+          "energy_hartree": 0.13003372723435083,
+          "linear_energy_hartree": 0.13006724064369016,
+          "quadratic_energy_hartree": 0.1300338349883068,
+          "density_probe": 0.33992431793811106,
+          "linear_density_probe": 0.3399678647686857,
+          "quadratic_density_probe": 0.3399242102407527
+        }
+      ],
+      "elapsed_seconds": 76.92716422100784
+    },
+    {
+      "mesh": [
+        11,
+        11,
+        3
+      ],
+      "total_energy_hartree": 0.12441728129644095,
+      "energy_components": {
+        "kinetic": 0.32792036572157174,
+        "external": -0.2149149849716601,
+        "hartree": 0.011411900546529297,
+        "xc": 0.0,
+        "nuclear": 0.0
+      },
+      "chemical_potential_hartree": 0.16999999999999862,
+      "electron_number": 2.000000000000003,
+      "forward_residual": 1.5717011802713103e-13,
+      "forward_iterations": 101,
+      "maximum_manufactured_density_error": 2.831068712794149e-15,
+      "potential_response_residual": 1.4118110581162275e-14,
+      "potential_energy_curvature": -2.09263703979581,
+      "elapsed_seconds": 24.86160169899813
+    }
+  ],
+  "units": {
+    "density": "electron/bohr^3",
+    "potential": "Eh",
+    "energy": "Eh",
+    "kinetic_weights": "dimensionless"
+  },
+  "hartree_convention": "4*pi/G^2 for G!=0, zero at G=0; fixed uniform neutralizing background",
+  "spatial_scope": "3D periodic box, exactly uniform in z; x/y collocation grids 5,7,9,11; not a material benchmark",
+  "source_python_sha256": "c792320a88f24c695049469ac317d26953efc0888cd3236c44cb0fb393220abc",
+  "elapsed_seconds": 151.52257101802388,
+  "peak_rss_kib": 3040204,
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "dtype": "float64"
+}

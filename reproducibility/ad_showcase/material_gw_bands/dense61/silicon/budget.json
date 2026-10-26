@@ -1,0 +1,42 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "-c",
+    "from examples.pbc.band_structures.gw_bands import run; run('silicon', case='silicon_szv_qp_dense61_20261017', path_points=61, checkpoint='reproducibility/ad_showcase/material_gw_bands/silicon_szv_reference_20261017/scf_reference.npz')"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 4722452,
+  "budget_kib": 16777216,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true,
+  "elapsed_seconds": 2096.540794597997,
+  "allowed_cpu_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8457C"
+}

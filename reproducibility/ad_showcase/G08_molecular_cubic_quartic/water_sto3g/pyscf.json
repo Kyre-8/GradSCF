@@ -1,0 +1,84 @@
+{
+  "case": "water_sto3g",
+  "pyscf_version": "2.13.0",
+  "points": [
+    {
+      "q_bohr": 0.0,
+      "energy": -74.96308293133251,
+      "first_derivative": -0.0589581851096604,
+      "curvature": 0.9454321646563585,
+      "orbital_gradient_norm": 2.4278639676556944e-12
+    },
+    {
+      "q_bohr": 0.003,
+      "energy": -74.96325556159326,
+      "first_derivative": -0.056132032718048175,
+      "curvature": 0.938677511629943,
+      "orbital_gradient_norm": 2.5749430687883677e-12
+    },
+    {
+      "q_bohr": -0.003,
+      "energy": -74.96290179214576,
+      "first_derivative": -0.06180467442019116,
+      "curvature": 0.9522355320170107,
+      "orbital_gradient_norm": 2.4373342760591544e-12
+    },
+    {
+      "q_bohr": 0.001,
+      "energy": -74.9631414171779,
+      "first_derivative": -0.058013881866178896,
+      "curvature": 0.9431752229694957,
+      "orbital_gradient_norm": 2.516635410886498e-12
+    },
+    {
+      "q_bohr": -0.001,
+      "energy": -74.96302350005453,
+      "first_derivative": -0.059904747999717005,
+      "curvature": 0.9476945190051068,
+      "orbital_gradient_norm": 2.5426833053278777e-12
+    },
+    {
+      "q_bohr": 0.0003,
+      "energy": -74.96310057625372,
+      "first_derivative": -0.05867465711994514,
+      "curvature": 0.9447545145732656,
+      "orbital_gradient_norm": 2.422547074218395e-12
+    },
+    {
+      "q_bohr": -0.0003,
+      "energy": -74.96306520132241,
+      "first_derivative": -0.05924191646745609,
+      "curvature": 0.9461103018792778,
+      "orbital_gradient_norm": 2.4118253249157568e-12
+    }
+  ],
+  "checks": [
+    {
+      "step_bohr": 0.003,
+      "cubic": -2.2596700645112953,
+      "quartic": 5.412703804077681,
+      "cubic_error": 2.4802820075997545e-05,
+      "quartic_error": 4.717842453683119e-05
+    },
+    {
+      "step_bohr": 0.001,
+      "cubic": -2.259648017805538,
+      "quartic": 5.412661885584313,
+      "cubic_error": 2.756114318547276e-06,
+      "quartic_error": 5.259931168843934e-06
+    },
+    {
+      "step_bohr": 0.0003,
+      "cubic": -2.2596455100202624,
+      "quartic": 5.412664738635443,
+      "cubic_error": 2.4832904310656545e-07,
+      "quartic_error": 8.11298229841384e-06
+    }
+  ],
+  "seconds": 1.1598794379970059,
+  "method": "central differences of independent PySCF analytic relaxed Hessians",
+  "scf_energy_tolerance": 1e-13,
+  "scf_gradient_tolerance": 1e-11,
+  "cpscf_tolerance": 1e-12,
+  "actual_orbital_gradient_gate": 1e-10
+}

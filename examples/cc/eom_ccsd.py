@@ -9,14 +9,14 @@ import numpy as np
 
 jax.config.update("jax_enable_x64", True)
 
-from gradscf import gto, dft, cc
+from gradscf import gto, scf, cc
 
 mol = gto.M(
     atom="O 0 0 0; H 0 -.757 .587; H 0 .757 .587",
     basis="sto-3g",
     unit="Angstrom",
 )
-mf = dft.RKS(mol, xc="hf", conv_tol=1e-12).run()
+mf = scf.RHF(mol, conv_tol=1e-12).run()
 mycc = cc.CCSD(mf, conv_tol=1e-12, residual_tol=1e-11).run()
 
 for method in (cc.EOMEE, cc.EOMIP, cc.EOMEA):

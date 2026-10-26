@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from functools import lru_cache
+from dataclasses import dataclass, field
 from typing import Any, Callable, Literal
 
 import jax
@@ -9,9 +8,11 @@ import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
 
+from .._memory import DEFAULT_MAX_MEMORY_MB, validate_memory_mb
 from ..tools.features import (
     MoleculeLikeState,
     _spin_density_and_gradient,
+    _spin_tau,
     molecule_grid_view,
 )
 from .core import (
@@ -22,6 +23,7 @@ from .core import (
 )
 from .convergence import convergence_reached
 from .energy import XCContribution, unrestricted_energy, unrestricted_fock
+from .rsh import local_xc_spec, validate_rsh_inputs
 from .rks import (
     _PYSCF_LIKE_DIIS_SPACE,
     _apply_optional_fock_damping,
@@ -33,11 +35,16 @@ from .rks import (
     _orthogonalizer,
     _vxc_matrix_from_grid_potential,
 )
-from ..dft.libxc_jax.jax_libxc import (
-    eval_xc_energy_density_unrestricted_from_density_gradients,
+from ..dft.xc import (
     hybrid_coeff,
     parse_xc,
     xc_type,
+)
+from ..dft.xc.evaluate import (
+    point_energy as _point_unrestricted_xc_energy,
+    grid_energy as _point_unrestricted_xc_energy_kernel,
+    grid_value_and_grad as _point_unrestricted_xc_value_and_grad_kernel,
+    grid_hessian as _point_unrestricted_xc_hessian_kernel,
 )
 
 
@@ -59,10 +66,21 @@ class UKSConfig:
     orthogonalization_eps: float = 1e-10
     density_floor: float = 1e-12
     potential_clip: float | None = None
-    jk_backend: Literal["full", "df"] = "full"
+    jk_backend: Literal["full", "df", "direct"] = "full"
     df_tol: float = 1e-10
     df_max_rank: int | None = None
     auxbasis: str | None = None
+    direct_scf_tol: float = 0.0
+    direct_scf_workers: int = 1
+    grid_block_size: int = 0
+    grid_max_memory: float | None = None
+    max_memory: float = field(default=DEFAULT_MAX_MEMORY_MB, kw_only=True)
+
+    def __post_init__(self):
+        object.__setattr__(self, "max_memory", validate_memory_mb(self.max_memory))
+        if self.grid_max_memory is not None:
+            object.__setattr__(self, "grid_max_memory",
+                               validate_memory_mb(self.grid_max_memory, name="grid_max_memory"))
 
 
 @dataclass(frozen=True)
@@ -88,6 +106,8 @@ class UKSResult:
     overlap_matrix: Array
     hcore_matrix: Array
     cycles: int
+    range_separated_coefficients: tuple[float, float, float] | None = None
+    dispersion_energy: Array | float | None = None
 
 def _default_spin_mo_occ(nao: int, nelec: int, dtype) -> Array:
     return jnp.zeros((nao,), dtype=dtype).at[:nelec].set(1.0)
@@ -97,48 +117,18 @@ def _validate_spin_occ(mo_occ: Array, *, nao: int, nelec: int, label: str) -> Ar
     occ = jnp.asarray(mo_occ)
     if occ.ndim != 1 or int(occ.shape[0]) != nao:
         raise ValueError(f"{label} occupations must be a 1D vector with length nao.")
-    if float(jnp.min(occ)) < -1e-8 or float(jnp.max(occ)) > 1.0 + 1e-8:
-        raise ValueError(f"{label} occupations must lie in [0, 1].")
-    if abs(float(jnp.sum(occ)) - float(nelec)) > 1e-6:
-        raise ValueError(f"{label} occupations must sum to the requested electron count.")
+    if not _contains_jax_tracer(occ):
+        if float(jnp.min(occ)) < -1e-8 or float(jnp.max(occ)) > 1.0 + 1e-8:
+            raise ValueError(f"{label} occupations must lie in [0, 1].")
+        if abs(float(jnp.sum(occ)) - float(nelec)) > 1e-6:
+            raise ValueError(f"{label} occupations must sum to the requested electron count.")
     return occ
-
-
-@lru_cache(maxsize=64)
-def _point_unrestricted_xc_value_and_grad_kernel(
-    xc_spec: str,
-    xc_kind: str,
-):
-    xc_spec_norm = str(xc_spec)
-    xc_kind_norm = str(xc_kind).upper()
-
-    def point_energy(variables: Array) -> Array:
-        rho_a = jnp.where(variables[0] >= 0.0, variables[0], 0.0)
-        rho_b = jnp.where(variables[1] >= 0.0, variables[1], 0.0)
-        zero_grad = jnp.zeros((3,), dtype=variables.dtype)
-        if xc_kind_norm == "LDA":
-            grad_a = zero_grad
-            grad_b = zero_grad
-        elif xc_kind_norm == "GGA":
-            grad_a = variables[2:5]
-            grad_b = variables[5:8]
-        else:
-            raise ValueError(f"Unsupported XC kind={xc_kind_norm!r}.")
-        return eval_xc_energy_density_unrestricted_from_density_gradients(
-            xc_spec_norm,
-            rho_a,
-            rho_b,
-            grad_a,
-            grad_b,
-        )
-
-    return jax.jit(jax.vmap(jax.value_and_grad(point_energy)))
 
 
 def _unrestricted_xc_energy_and_potential_on_grid(
     *,
     ao: Array,
-    ao_deriv1: Array,
+    ao_deriv1: Array | None,
     weights: Array,
     density_a: Array,
     density_b: Array,
@@ -146,18 +136,31 @@ def _unrestricted_xc_energy_and_potential_on_grid(
     density_floor: float,
     potential_clip: float | None,
     xc_kind: str,
-) -> tuple[Array, Array, Array, Array, Array]:
-    rho_a, grad_a = _spin_density_and_gradient(ao, ao_deriv1, density_a)
-    rho_b, grad_b = _spin_density_and_gradient(ao, ao_deriv1, density_b)
+    compute_potential: bool = True,
+    return_tau: bool = False,
+) -> tuple[Array | None, ...]:
+    if xc_kind == "MGGA" and not return_tau:
+        raise ValueError("MGGA grid potentials require return_tau=True to retain both kinetic-density potentials.")
+    if xc_kind in {"HF", "LDA"}:
+        rho_a = jnp.einsum("rp,pq,rq->r", ao, density_a, ao, precision=Precision.HIGHEST)
+        rho_b = jnp.einsum("rp,pq,rq->r", ao, density_b, ao, precision=Precision.HIGHEST)
+        grad_a = grad_b = jnp.zeros((ao.shape[0], 3), dtype=rho_a.dtype)
+    else:
+        rho_a, grad_a = _spin_density_and_gradient(ao, ao_deriv1, density_a)
+        rho_b, grad_b = _spin_density_and_gradient(ao, ao_deriv1, density_b)
     rho_total = rho_a + rho_b
     if xc_kind == "HF":
+        if not compute_potential:
+            result = (jnp.asarray(0.0, dtype=rho_total.dtype), None, None, None, None)
+            return result + (None, None) if return_tau else result
         zeros = jnp.zeros_like(rho_total)
         zero_grads = jnp.zeros((rho_total.shape[0], 3), dtype=rho_total.dtype)
-        return jnp.asarray(0.0, dtype=rho_total.dtype), zeros, zeros, zero_grads, zero_grads
+        result = (jnp.asarray(0.0, dtype=rho_total.dtype), zeros, zeros, zero_grads, zero_grads)
+        return result + (zeros, zeros) if return_tau else result
 
     if xc_kind == "LDA":
         response_variables = jnp.stack([rho_a, rho_b], axis=-1)
-    elif xc_kind == "GGA":
+    elif xc_kind in {"GGA", "MGGA"}:
         response_variables = jnp.concatenate(
             [
                 rho_a[..., None],
@@ -167,26 +170,37 @@ def _unrestricted_xc_energy_and_potential_on_grid(
             ],
             axis=-1,
         )
+        if xc_kind == "MGGA":
+            response_variables = jnp.concatenate([response_variables,
+                _spin_tau(ao_deriv1, density_a)[:, None],
+                _spin_tau(ao_deriv1, density_b)[:, None]], axis=-1)
     else:
         raise ValueError(f"Unsupported XC kind={xc_kind!r}.")
 
-    point_exc, point_grad = _point_unrestricted_xc_value_and_grad_kernel(
-        xc_spec,
-        xc_kind,
-    )(response_variables)
-    point_exc = jnp.nan_to_num(point_exc, nan=0.0, posinf=0.0, neginf=0.0)
-    point_grad = jnp.nan_to_num(point_grad, nan=0.0, posinf=0.0, neginf=0.0)
-    exc = jnp.tensordot(weights, point_exc, axes=(0, 0))
-
     mask = rho_total > density_floor
+    response_variables = jnp.where(mask[:, None], response_variables,
+                                   jnp.ones_like(response_variables))
+    if compute_potential:
+        point_exc, point_grad = _point_unrestricted_xc_value_and_grad_kernel(
+            xc_spec, xc_kind)(response_variables)
+    else:
+        point_exc = _point_unrestricted_xc_energy_kernel(xc_spec, xc_kind)(response_variables)
+    point_exc = jnp.where(mask, point_exc, 0.)
+    exc = jnp.tensordot(weights, point_exc, axes=(0, 0))
+    if not compute_potential:
+        result = (exc, None, None, None, None)
+        return result + (None, None) if return_tau else result
+
     vxc_rho_a = jnp.where(mask, point_grad[:, 0], 0.0)
     vxc_rho_b = jnp.where(mask, point_grad[:, 1], 0.0)
-    if xc_kind == "GGA":
+    if xc_kind in {"GGA", "MGGA"}:
         vxc_grad_a = jnp.where(mask[:, None], point_grad[:, 2:5], 0.0)
         vxc_grad_b = jnp.where(mask[:, None], point_grad[:, 5:8], 0.0)
     else:
         vxc_grad_a = jnp.zeros((rho_total.shape[0], 3), dtype=rho_total.dtype)
         vxc_grad_b = jnp.zeros((rho_total.shape[0], 3), dtype=rho_total.dtype)
+    vxc_tau_a = jnp.where(mask, point_grad[:, 8], 0.) if xc_kind == "MGGA" else jnp.zeros_like(rho_total)
+    vxc_tau_b = jnp.where(mask, point_grad[:, 9], 0.) if xc_kind == "MGGA" else jnp.zeros_like(rho_total)
 
     if potential_clip is not None:
         clip = jnp.asarray(potential_clip, dtype=rho_total.dtype)
@@ -194,7 +208,10 @@ def _unrestricted_xc_energy_and_potential_on_grid(
         vxc_rho_b = jnp.clip(vxc_rho_b, -clip, clip)
         vxc_grad_a = jnp.clip(vxc_grad_a, -clip, clip)
         vxc_grad_b = jnp.clip(vxc_grad_b, -clip, clip)
-    return exc, vxc_rho_a, vxc_rho_b, vxc_grad_a, vxc_grad_b
+        vxc_tau_a = jnp.clip(vxc_tau_a, -clip, clip)
+        vxc_tau_b = jnp.clip(vxc_tau_b, -clip, clip)
+    result = (exc, vxc_rho_a, vxc_rho_b, vxc_grad_a, vxc_grad_b)
+    return result + (vxc_tau_a, vxc_tau_b) if return_tau else result
 
 
 def _spin_jk_matrices(
@@ -207,6 +224,9 @@ def _spin_jk_matrices(
     mo_occ_a: Array | None = None,
     mo_occ_b: Array | None = None,
     with_k: bool = True,
+    direct_basis: Any | None = None,
+    direct_scf_tol: float = 0.0,
+    direct_scf_workers: int = 1,
 ) -> tuple[Array, Array, Array, Array]:
     density_tot = density_a + density_b
     if df_factors is not None:
@@ -233,6 +253,17 @@ def _spin_jk_matrices(
         k_a = _k_from_density_or_orbitals(density_a, mo_coeff_a, mo_occ_a)
         k_b = _k_from_density_or_orbitals(density_b, mo_coeff_b, mo_occ_b)
         return density_tot, j_tot, k_a, k_b
+    if direct_basis is not None:
+        from ..integrals.backends.native.jk import _selected_jk
+
+        density = jnp.stack((density_a, density_b)) if with_k else density_tot
+        coulomb, exchange = _selected_jk(
+            direct_basis, density, with_k=with_k,
+            screening_threshold=direct_scf_tol, workers=direct_scf_workers)
+        if with_k:
+            return density_tot, coulomb.sum(axis=0), exchange[0], exchange[1]
+        zero = jnp.zeros_like(coulomb)
+        return density_tot, coulomb, zero, zero
     j_tot, _ = _build_jk(eri, density_tot)
     if not bool(with_k):
         zero_k = jnp.zeros_like(j_tot)
@@ -245,15 +276,19 @@ def _spin_jk_matrices(
 def _unrestricted_vxc_matrices(
     *,
     ao: Array,
-    ao_deriv1: Array,
-    ao_laplacian: Array,
+    ao_deriv1: Array | None,
+    ao_laplacian: Array | None,
     weights: Array,
     vxc_rho_a: Array,
     vxc_rho_b: Array,
     vxc_grad_a: Array,
     vxc_grad_b: Array,
     xc_kind: str,
+    vxc_tau_a: Array | None = None,
+    vxc_tau_b: Array | None = None,
 ) -> tuple[Array, Array]:
+    if xc_kind in {"MGGA", "MGGA_LAPL"} and (vxc_tau_a is None or vxc_tau_b is None):
+        raise ValueError("MGGA AO potentials require both spin kinetic-density potentials.")
     zeros_a = jnp.zeros_like(vxc_rho_a)
     zeros_b = jnp.zeros_like(vxc_rho_b)
     return (
@@ -264,7 +299,7 @@ def _unrestricted_vxc_matrices(
             weights=weights,
             vxc_rho=vxc_rho_a,
             vxc_grad=vxc_grad_a,
-            vxc_tau=zeros_a,
+            vxc_tau=zeros_a if vxc_tau_a is None else vxc_tau_a,
             vxc_lapl=zeros_a,
             xc_kind=xc_kind,
         ),
@@ -275,11 +310,50 @@ def _unrestricted_vxc_matrices(
             weights=weights,
             vxc_rho=vxc_rho_b,
             vxc_grad=vxc_grad_b,
-            vxc_tau=zeros_b,
+            vxc_tau=zeros_b if vxc_tau_b is None else vxc_tau_b,
             vxc_lapl=zeros_b,
             xc_kind=xc_kind,
         ),
     )
+
+
+def _unrestricted_xc_energy_and_matrices(
+    *,
+    density_a: Array,
+    density_b: Array,
+    ao: Array,
+    ao_deriv1: Array | None,
+    weights: Array,
+    cfg: UKSConfig,
+    xc_kind: str,
+    grid_ao: Any | None = None,
+    compute_potential: bool = True,
+) -> tuple[Array, Array]:
+    """Reduce unrestricted built-in XC to an energy and two AO potentials."""
+    dtype = jnp.result_type(density_a, density_b, ao, weights)
+    initial = (jnp.asarray(0., dtype=dtype),
+               jnp.zeros((2,) + density_a.shape, dtype=dtype))
+    if xc_kind == "HF":
+        return initial
+
+    def contribution(carry, block_ao, derivative, laplacian, coords, block_weights):
+        del laplacian, coords
+        energy, v_ra, v_rb, v_ga, v_gb, v_ta, v_tb = _unrestricted_xc_energy_and_potential_on_grid(
+            ao=block_ao, ao_deriv1=derivative, weights=block_weights,
+            density_a=density_a, density_b=density_b, xc_spec=cfg.xc_spec,
+            density_floor=cfg.density_floor, potential_clip=cfg.potential_clip,
+            xc_kind=xc_kind, compute_potential=compute_potential, return_tau=True)
+        if not compute_potential:
+            return carry[0] + energy, carry[1]
+        va, vb = _unrestricted_vxc_matrices(
+            ao=block_ao, ao_deriv1=derivative, ao_laplacian=None, weights=block_weights,
+            vxc_rho_a=v_ra, vxc_rho_b=v_rb, vxc_grad_a=v_ga, vxc_grad_b=v_gb,
+            vxc_tau_a=v_ta, vxc_tau_b=v_tb, xc_kind=xc_kind)
+        return carry[0] + energy, carry[1] + jnp.stack([va, vb])
+
+    if grid_ao is None:
+        return contribution(initial, ao, ao_deriv1, None, None, weights)
+    return grid_ao.reduce(contribution, initial, deriv=0 if xc_kind == "LDA" else 1)
 
 
 def _raw_fock_and_energy_for_state(
@@ -305,33 +379,55 @@ def _raw_fock_and_energy_for_state(
     overlap: Array | None = None,
     bound_xc: Any | None = None,
     molecule_template: Any | None = None,
-) -> tuple[Array, Array, Array, Array]:
-    density_tot, j_tot, k_a, k_b = _spin_jk_matrices(
-        eri,
-        density_a,
-        density_b,
-        df_factors=df_factors,
-        mo_coeff_a=mo_coeff_a,
-        mo_coeff_b=mo_coeff_b,
-        mo_occ_a=mo_occ_a,
-        mo_occ_b=mo_occ_b,
-    )
+    eri_lr: Array | None = None,
+    dispersion_energy: Array | None = None,
+    compute_potential: bool = True,
+    direct_basis: Any | None = None,
+    grid_ao: Any | None = None,
+) -> tuple[Array, Array, Array | None, Array | None]:
+    if not compute_potential and bound_xc is not None:
+        raise NotImplementedError("Energy-only evaluation is limited to the classic orbital objective.")
+    rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy,
+                              jk_backend=cfg.jk_backend, direct_basis=direct_basis)
+    if rsh is not None and bound_xc is not None:
+        raise NotImplementedError("Range-separated XC does not support bound_xc overrides.")
+    if rsh is not None and cfg.jk_backend == "direct":
+        from .rsh import _direct_rsh_jk
+        density_tot = density_a + density_b
+        coefficients = rsh.to_range_separated_hybrid_coefficients()
+        controls = dict(screening_threshold=cfg.direct_scf_tol, workers=cfg.direct_scf_workers)
+        j_tot, _ = _direct_rsh_jk(direct_basis, density_tot, coefficients, with_k=False, **controls)
+        _, exchange = _direct_rsh_jk(direct_basis, jnp.stack((density_a, density_b)),
+                                     coefficients, with_j=False, **controls)
+        k_a, k_b = exchange[0], exchange[1]
+    else:
+        density_tot, j_tot, k_a, k_b = _spin_jk_matrices(
+            eri,
+            density_a,
+            density_b,
+            df_factors=df_factors,
+            mo_coeff_a=mo_coeff_a,
+            mo_coeff_b=mo_coeff_b,
+            mo_occ_a=mo_occ_a,
+            mo_occ_b=mo_occ_b,
+            with_k=(bound_xc is not None or rsh is not None
+                    or abs(float(hybrid_coeff(cfg.xc_spec))) > 1e-14),
+            direct_basis=direct_basis,
+            direct_scf_tol=cfg.direct_scf_tol,
+            direct_scf_workers=cfg.direct_scf_workers,
+        )
+        if rsh is not None:
+            sr, delta = rsh.default_sr_hf_fraction, rsh.default_lr_hf_fraction-rsh.default_sr_hf_fraction
+            k_a = sr*k_a + delta*_build_jk(eri_lr, density_a)[1]
+            k_b = sr*k_b + delta*_build_jk(eri_lr, density_b)[1]
     extra_fock_a = extra_fock_b = jnp.zeros_like(h)
     include_hf_energy = bound_xc is None
     if bound_xc is None:
-        alpha_eff = jnp.asarray(alpha, dtype=h.dtype)
-        ao_laplacian = jnp.zeros_like(ao)
-        xc_energy, vxc_rho_a, vxc_rho_b, vxc_grad_a, vxc_grad_b = _unrestricted_xc_energy_and_potential_on_grid(
-            ao=ao,
-            ao_deriv1=ao_deriv1,
-            weights=weights,
-            density_a=density_a,
-            density_b=density_b,
-            xc_spec=cfg.xc_spec,
-            density_floor=cfg.density_floor,
-            potential_clip=cfg.potential_clip,
-            xc_kind=xc_kind,
-        )
+        alpha_eff = jnp.asarray(1.0 if rsh is not None else alpha, dtype=h.dtype)
+        xc_energy, potential = _unrestricted_xc_energy_and_matrices(
+            density_a=density_a, density_b=density_b, ao=ao, ao_deriv1=ao_deriv1,
+            weights=weights, cfg=cfg, xc_kind=xc_kind, grid_ao=grid_ao,
+            compute_potential=compute_potential)
     else:
         molecule_state = _molecule_like_state_for_bound_xc(
             density_a=density_a,
@@ -349,6 +445,7 @@ def _raw_fock_and_energy_for_state(
             eri=eri,
             overlap=overlap,
             molecule_template=molecule_template,
+            grid_ao=grid_ao,
         )
         (
             vxc_rho_a,
@@ -360,26 +457,27 @@ def _raw_fock_and_energy_for_state(
             extra_fock_a,
             extra_fock_b,
         ) = bound_xc.unrestricted_scf_components(molecule_state)
-        ao_laplacian = getattr(molecule_state, "ao_laplacian", None)
-        if ao_laplacian is None:
-            ao_laplacian = jnp.zeros_like(ao)
         xc_energy = jnp.asarray(bound_xc.energy_from_molecule(molecule_state), dtype=h.dtype)
-    vxc_matrix_a, vxc_matrix_b = _unrestricted_vxc_matrices(
-        ao=ao,
-        ao_deriv1=ao_deriv1,
-        ao_laplacian=ao_laplacian,
-        weights=weights,
-        vxc_rho_a=vxc_rho_a,
-        vxc_rho_b=vxc_rho_b,
-        vxc_grad_a=vxc_grad_a,
-        vxc_grad_b=vxc_grad_b,
-        xc_kind=xc_kind,
-    )
-    xc=XCContribution(xc_energy,jnp.stack([vxc_matrix_a,vxc_matrix_b]),alpha_eff,
+        # This legacy callback has no kinetic-density potential channels.
+        if xc_kind in {"MGGA", "MGGA_LAPL"}:
+            raise ValueError("MGGA AO potentials require both spin kinetic-density potentials.")
+        from .differentiable import _build_vxc_matrix_from_components
+
+        potential = jnp.stack([
+            _build_vxc_matrix_from_components(
+                molecule=molecule_state, weights=weights, v_rho=v_rho, v_grad=v_grad,
+                v_tau=jnp.zeros_like(v_rho), v_lapl=jnp.zeros_like(v_rho), xc_kind=xc_kind)
+            for v_rho, v_grad in ((vxc_rho_a, vxc_grad_a), (vxc_rho_b, vxc_grad_b))
+        ])
+    xc=XCContribution(xc_energy,potential,alpha_eff,
         jnp.stack([extra_fock_a,extra_fock_b]),energy_includes_exact_exchange=not include_hf_energy)
     exchange=jnp.stack([k_a,k_b])
-    fock=unrestricted_fock(h,j_tot,exchange,xc)
     total=unrestricted_energy(jnp.stack([density_a,density_b]),h,j_tot,exchange,xc,nuclear_repulsion=enuc)
+    if dispersion_energy is not None:
+        total = total + dispersion_energy
+    if not compute_potential:
+        return total, xc_energy, None, None
+    fock=unrestricted_fock(h,j_tot,exchange,xc)
     return total,xc_energy,fock[0],fock[1]
 
 
@@ -400,6 +498,7 @@ def _molecule_like_state_for_bound_xc(
     eri: Array,
     overlap: Array,
     molecule_template: Any | None,
+    grid_ao: Any | None = None,
 ) -> Any:
     return MoleculeLikeState(
         ao=ao,
@@ -421,6 +520,7 @@ def _molecule_like_state_for_bound_xc(
         hfx_nu=getattr(molecule_template, "hfx_nu", None),
         pt2_local=getattr(molecule_template, "pt2_local", None),
         pt2_fock_response=getattr(molecule_template, "pt2_fock_response", None),
+        grid_ao=grid_ao if grid_ao is not None else getattr(molecule_template, "grid_ao", None),
     )
 
 
@@ -527,10 +627,7 @@ def run_unrestricted_scf_scan(
                 eigenvalue_jitter=eigenvalue_jitter,
             )
         )(fock_eff_i)
-        mo_energy_new = jnp.nan_to_num(mo_energy_new, nan=0.0, posinf=0.0, neginf=0.0)
-        mo_coeff_new = jnp.nan_to_num(mo_coeff_new, nan=0.0, posinf=0.0, neginf=0.0)
         density_new = _build_density_spin(mo_coeff_new, mo_occ_spin)
-        density_new = jnp.nan_to_num(density_new, nan=0.0, posinf=0.0, neginf=0.0)
         density_next = density_new
         _fock_eff_next, raw_fock_next, energy_next = _unpack_fock_builder_output(
             fock_builder(density_next, mo_coeff_new, mo_energy_new),
@@ -549,6 +646,9 @@ def run_unrestricted_scf_scan(
             conv_tol_density=conv_tol_density, conv_tol_grad=conv_tol_grad,
             energy_only=energy_only, has_prior_cycle=has_prior_cycle,
         )
+        converged_step = (converged_step & jnp.all(jnp.isfinite(raw_fock_next))
+                          & jnp.all(jnp.isfinite(mo_coeff_new))
+                          & jnp.all(jnp.isfinite(mo_energy_new)))
         converged_next = jnp.logical_or(
             converged_i,
             converged_step,
@@ -687,6 +787,7 @@ def run_uks_from_integrals(
     ao: Array,
     ao_deriv1: Array,
     grid_weights: Array,
+    grid_ao: Any | None = None,
     init_density_alpha: Array | None = None,
     init_density_beta: Array | None = None,
     init_mo_coeff_alpha: Array | None = None,
@@ -699,19 +800,19 @@ def run_uks_from_integrals(
     config: UKSConfig | None = None,
     bound_xc: Any | None = None,
     molecule_template: Any | None = None,
+    eri_lr: Array | None = None,
+    dispersion_energy: Array | None = None,
+    direct_basis: Any | None = None,
 ) -> UKSResult:
     """Run unrestricted Kohn-Sham SCF from AO integrals and numerical grid data."""
 
     cfg = UKSConfig() if config is None else config
+    rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy,
+                              jk_backend=cfg.jk_backend, direct_basis=direct_basis)
     xc_kind = None
     if bound_xc is None:
-        parse_xc(cfg.xc_spec)
-        xc_kind = xc_type(cfg.xc_spec)
-        if xc_kind == "MGGA":
-            raise NotImplementedError(
-                "UKS SCF matrix assembly currently supports LDA/GGA/HF semilocal terms. "
-                "MGGA requires tau-dependent AO Hessian terms."
-            )
+        parse_xc(local_xc_spec(cfg.xc_spec))
+        xc_kind = xc_type(local_xc_spec(cfg.xc_spec))
     s = jnp.asarray(overlap)
     h = jnp.asarray(hcore)
     eri = jnp.asarray(eri)
@@ -722,12 +823,14 @@ def run_uks_from_integrals(
     enuc = jnp.asarray(nuclear_repulsion)
     if cfg.jk_backend == "df" and df_factors_arr is None:
         raise ValueError("UKS jk_backend='df' requires df_factors.")
-    traceable_inputs = _contains_jax_tracer((s, h, eri, df_factors_arr, ao, ao_deriv1, weights, enuc))
+    if cfg.jk_backend == "direct" and direct_basis is None:
+        raise ValueError("UKS jk_backend='direct' requires an AO J/K provider.")
+    traceable_inputs = _contains_jax_tracer((s, h, eri, eri_lr, dispersion_energy, df_factors_arr, ao, ao_deriv1, weights, enuc, grid_ao))
     nao = int(s.shape[0])
     if nalpha < 0 or nalpha > nao or nbeta < 0 or nbeta > nao or (nalpha + nbeta) <= 0:
         raise ValueError("Invalid occupation counts for UKS.")
-    if xc_kind == "GGA" and ao_deriv1.shape[0] < 4:
-        raise ValueError("GGA UKS requires ao_deriv1 to include AO values plus first derivatives.")
+    if xc_kind in {"GGA", "MGGA"} and ao_deriv1.shape[0] < 4:
+        raise ValueError("GGA/MGGA UKS requires ao_deriv1 to include AO values plus first derivatives.")
 
     x = _orthogonalizer(s, cfg.orthogonalization_eps)
     core_mo_energy, core_mo_coeff = _diagonalize_fock(h, x)
@@ -763,7 +866,7 @@ def run_uks_from_integrals(
         density_b = init_density_b
 
     if bound_xc is None:
-        alpha_scalar = float(hybrid_coeff(cfg.xc_spec))
+        alpha_scalar = rsh.default_sr_hf_fraction if rsh is not None else float(hybrid_coeff(cfg.xc_spec))
         alpha = jnp.asarray(alpha_scalar, dtype=h.dtype)
     else:
         alpha = None
@@ -799,6 +902,10 @@ def run_uks_from_integrals(
             overlap=s,
             bound_xc=bound_xc,
             molecule_template=molecule_template,
+            eri_lr=eri_lr,
+            dispersion_energy=dispersion_energy,
+            direct_basis=direct_basis if cfg.jk_backend == "direct" else None,
+            grid_ao=grid_ao,
         )
 
     def fock_builder(density_spin: Array, mo_coeff_spin: Array, mo_energy_spin: Array) -> tuple[Array, Array, Array]:
@@ -874,7 +981,7 @@ def run_uks_from_integrals(
     return UKSResult(
         converged=converged,
         total_energy=_host_float_unless_traced(energy),
-        electronic_energy=_host_float_unless_traced(energy - enuc),
+        electronic_energy=_host_float_unless_traced(energy - enuc - (0. if dispersion_energy is None else dispersion_energy)),
         nuclear_repulsion=_host_float_unless_traced(enuc),
         xc_energy=_host_float_unless_traced(xc_energy),
         exact_exchange_fraction=float(alpha_scalar),
@@ -891,4 +998,6 @@ def run_uks_from_integrals(
         overlap_matrix=s,
         hcore_matrix=h,
         cycles=cycles,
+        range_separated_coefficients=None if rsh is None else rsh.to_range_separated_hybrid_coefficients(),
+        dispersion_energy=dispersion_energy,
     )

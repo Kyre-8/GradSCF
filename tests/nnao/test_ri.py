@@ -1,4 +1,5 @@
 """NNAO optimization uses direct J/K or RI factors, never dense ERIs."""
+from importlib import import_module
 import inspect
 import runpy
 import jax.numpy as jnp
@@ -14,7 +15,7 @@ def test_methane_gradient_without_full_eri(monkeypatch,jk_backend,tmp_path):
         assert op!='eri','NNAO coefficient optimization must not allocate four-center ERIs'
         return original(self,op,*args,**kwargs)
     monkeypatch.setattr(IntegralPlan,'evaluate',checked)
-    cls=runpy.run_path('tools/optimize_methane_nnao.py')['MethaneRHF']
+    cls=vars(import_module("gradscf.model.nnao.training.objective"))['BasisRHF']
     assert 'jk_backend' in inspect.signature(cls).parameters
     assert 'eri_backend' not in inspect.signature(cls).parameters
     assert 'max_primitive_eri_gib' not in inspect.signature(cls).parameters

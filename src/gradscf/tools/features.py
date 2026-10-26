@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
+from types import SimpleNamespace
 from typing import Any
 import weakref
 
@@ -11,7 +12,7 @@ from jax import core as jax_core
 from jax.lax import Precision
 from jaxtyping import Array
 
-from ..dft.libxc_jax.jax_libxc import (
+from ..dft.xc import (
     RestrictedFeatureBundle,
     restricted_feature_bundle_from_rho_grad_tau,
 )
@@ -80,6 +81,7 @@ class MoleculeLikeState:
     hfx_nu: Array | None = None
     pt2_local: Array | None = None
     pt2_fock_response: Array | None = None
+    grid_ao: Any | None = None
 
 
 def molecule_grid_view(
@@ -93,6 +95,29 @@ def molecule_grid_view(
         weights=weights,
         coords=getattr(template, "coords", None),
         points=getattr(template, "points", None),
+    )
+
+
+def molecule_grid_block(molecule: Any, start: Any, size: int, *, deriv: int = 1):
+    """Local AO view shared by semilocal grid consumers and response actions."""
+    provider = getattr(molecule, "grid_ao", None)
+    if provider is not None:
+        ao, dao, lap, coords, weights = provider.block(start, size, deriv=deriv)
+    else:
+        def on_grid(value, axis=0):
+            return (None if value is None else jax.lax.dynamic_slice_in_dim(
+                jnp.asarray(value), start, size, axis=axis))
+
+        ao = on_grid(molecule.ao)
+        dao = on_grid(getattr(molecule, "ao_deriv1", None), axis=1) if deriv else None
+        lap = on_grid(getattr(molecule, "ao_laplacian", None)) if deriv == 2 else None
+        coords = on_grid(getattr(molecule.grid, "coords", None))
+        weights = on_grid(molecule.grid.weights)
+    return SimpleNamespace(
+        ao=ao, ao_deriv1=dao, ao_laplacian=lap, grid_ao=None,
+        rdm1=molecule.rdm1, grid=SimpleNamespace(coords=coords, weights=weights),
+        xc_density_floor=getattr(molecule, "xc_density_floor", 1e-12),
+        dispersion_energy=getattr(molecule, "dispersion_energy", None),
     )
 
 
@@ -348,14 +373,19 @@ def _restricted_spin_inputs(
 
 
 def _spin_resolved_grid_features(molecule: Any) -> RestrictedFeatureBundle:
-    ao, ao_deriv1, rdm1 = _restricted_spin_inputs(molecule)
-    bundle, _ = _restricted_spin_channels_kernel(ao, ao_deriv1, rdm1)
-    return bundle
+    return _spin_resolved_grid_features_with_gradients(molecule)[0]
 
 
 def _spin_resolved_grid_features_with_gradients(
     molecule: Any,
 ) -> tuple[RestrictedFeatureBundle, Array]:
+    provider = getattr(molecule, "grid_ao", None)
+    if provider is not None:
+        rdm1 = jnp.asarray(molecule.rdm1)
+        if rdm1.ndim == 2:
+            rdm1 = jnp.stack((.5 * rdm1, .5 * rdm1))
+        return provider.map(lambda ao, dao, lap, coords, weights:
+                            _restricted_spin_channels_kernel(ao, dao, rdm1), deriv=1)
     ao, ao_deriv1, rdm1 = _restricted_spin_inputs(molecule)
     return _restricted_spin_channels_kernel(ao, ao_deriv1, rdm1)
 
@@ -424,6 +454,13 @@ _has_explicit_spin_axis = has_explicit_spin_axis
 def grid_features_with_spin_gradients_for_molecule(
     molecule: Any,
 ) -> tuple[RestrictedFeatureBundle, Array, Array]:
+    provider = getattr(molecule, "grid_ao", None)
+    if provider is not None:
+        rdm1 = jnp.asarray(molecule.rdm1)
+        if rdm1.ndim == 2:
+            rdm1 = jnp.stack((.5 * rdm1, .5 * rdm1))
+        return provider.map(lambda ao, dao, lap, coords, weights:
+                            _spin_resolved_channels_kernel(ao, dao, rdm1), deriv=1)
     ao, ao_deriv1, rdm1 = _restricted_spin_inputs(molecule)
     return _spin_resolved_channels_kernel(ao, ao_deriv1, rdm1)
 
@@ -447,10 +484,21 @@ def restricted_grid_response_variables(
     *,
     feature_kind: str = "LDA",
 ) -> tuple[Array, Array | None, Array | None, Array | None]:
-    ao, ao_deriv1, rdm1 = _restricted_spin_inputs(molecule)
     kind = normalize_response_feature_kind(feature_kind)
+    provider = getattr(molecule, "grid_ao", None)
+    if provider is not None:
+        def fields(ao, dao, lap, coords, weights):
+            view = SimpleNamespace(ao=ao, ao_deriv1=dao, ao_laplacian=lap,
+                                   rdm1=molecule.rdm1)
+            return restricted_grid_response_variables(view, feature_kind=kind)
+
+        return provider.map(fields, deriv=0 if kind == "LDA" else 2 if kind == "MGGA_LAPL" else 1)
     if kind == "LDA":
+        ao, rdm1 = jnp.asarray(molecule.ao), jnp.asarray(molecule.rdm1)
+        if rdm1.ndim == 2:
+            rdm1 = rdm1[None]
         return _restricted_rho_kernel(ao, rdm1), None, None, None
+    ao, ao_deriv1, rdm1 = _restricted_spin_inputs(molecule)
     if kind == "GGA":
         rho, grad = _restricted_rho_grad_kernel(ao, ao_deriv1, rdm1)
         return rho, grad, None, None
@@ -640,6 +688,24 @@ def restricted_transition_response_features(
 
     orbo = mo_coeff[:, :nocc]
     orbv = mo_coeff[:, nocc:]
+    provider = getattr(molecule, "grid_ao", None)
+    if provider is not None:
+        # This explicit feature API intentionally returns G*OV data. Production
+        # response actions instead project each AO block before storing fields.
+        def features(ao, dao, lap, coords, weights):
+            if kind == "LDA":
+                left, right = ao @ orbo, ao @ orbv
+                result = jnp.einsum("gi,ga->gia", left, right)[None]
+            elif kind == "GGA":
+                result = _restricted_transition_response_gga_kernel(dao, orbo, orbv)
+            elif kind == "MGGA":
+                result = _restricted_transition_response_mgga_kernel(dao, orbo, orbv)
+            else:
+                result = _restricted_transition_response_mgga_lapl_kernel(dao, lap, orbo, orbv)
+            return result.transpose(1, 0, 2, 3)
+
+        deriv = 0 if kind == "LDA" else 2 if kind == "MGGA_LAPL" else 1
+        return provider.map(features, deriv=deriv).transpose(1, 0, 2, 3)
     rho_o = jnp.einsum("rp,pi->ri", ao, orbo, precision=Precision.HIGHEST)
     rho_v = jnp.einsum("rp,pa->ra", ao, orbv, precision=Precision.HIGHEST)
     rho_ov = jnp.einsum("ri,ra->ria", rho_o, rho_v, precision=Precision.HIGHEST)

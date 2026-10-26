@@ -79,7 +79,7 @@ def test_rks_kernel_runs_ground_state_without_building_reference(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "gradscf.scf.facade.restricted_molecule_from_spec_with_jax_rks",
+        "gradscf.scf.facade._build_restricted_reference",
         forbidden_reference_builder,
     )
     monkeypatch.setattr("gradscf.scf.facade.configure_jax_persistent_cache", fake_cache)
@@ -129,7 +129,7 @@ def test_rks_lazy_reference_passes_hfx_feature_options(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "gradscf.scf.facade.restricted_molecule_from_spec_with_jax_rks",
+        "gradscf.scf.facade._build_restricted_reference",
         fake_builder,
     )
 
@@ -139,7 +139,10 @@ def test_rks_lazy_reference_passes_hfx_feature_options(monkeypatch):
     mf.hfx_omega_values = (0.0, 0.4)
     mf.hfx_chunk_size = 128
     mf.e_tot = -76.0
-    reference = mf._ensure_reference()
+    mf.converged = True
+    mf._cached_scf_key = mf._scf_signature()
+    mf._cached_orbital_key = mf._orbital_signature()
+    reference = mf.to_reference()
 
     assert reference.mf_energy == -76.0
     assert captured["compute_local_hfx_features"] is True
@@ -158,12 +161,15 @@ def test_tdscf_builds_reference_lazily_after_ground_state_kernel(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "gradscf.scf.facade.restricted_molecule_from_spec_with_jax_rks",
+        "gradscf.scf.facade._build_restricted_reference",
         fake_builder,
     )
 
     mf = scf.RKS(gto.M(atom="H 0 0 0; H 0 0 0.74", basis="sto-3g"))
     mf.e_tot = -1.0
+    mf.converged = True
+    mf._cached_scf_key = mf._scf_signature()
+    mf._cached_orbital_key = mf._orbital_signature()
 
     td = mf.TDA()
 
@@ -190,7 +196,7 @@ def test_uks_kernel_calls_existing_unrestricted_reference_builder(monkeypatch):
         return kwargs["cache_dir"]
 
     monkeypatch.setattr(
-        "gradscf.scf.facade.unrestricted_molecule_from_spec_with_jax_uks",
+        "gradscf.scf.facade._build_unrestricted_reference",
         fake_builder,
     )
     monkeypatch.setattr("gradscf.scf.facade.configure_jax_persistent_cache", fake_cache)

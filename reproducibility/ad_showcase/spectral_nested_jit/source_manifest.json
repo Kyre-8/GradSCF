@@ -1,0 +1,23 @@
+{
+  "source_python_sha256": "4879dbbf932aa068c3dcb108f20640dce1a67a7f6ddc8d9716ca040b4d19fb88",
+  "files": {
+    "src/gradscf/solvers/eigen/api.py": "b481a4501129c18e022a079e3bdfa2dfbab7b3d662506ad9cdcb1db27f4f7aa1",
+    "src/gradscf/solvers/eigen/response.py": "8566c795e5a098ab72d7255a6b607fe0545e41d585e3c4646bd6aec389406e7b",
+    "tests/solvers/test_spectral_higher_response.py": "00b78f67f2793b50c9eec7993d59b6bf8333633d0981ca8abe263309096ae908",
+    "src/gradscf_tools/correlated_response.py": "2aef64387e3a788f7ddb9aadc78f76a3898f3ddb34872276189c547180eb86a1",
+    "tests/test_molecular_correlated_response.py": "d6c114c81255e27c959e96715f8a0c07a097993d6569a8af79e194b1d4667127",
+    "src/gradscf/solvers/nonlinear/root.py": "6896011c23957975ad5420cbd14edd47a69d2b837189723841484f07f6108981",
+    "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+    "src/gradscf/integrals/_native/lib/libgradscf_integrals.so": "e02844ce6c1b5eebc2dc00a6eec5f1803fd33ad4150aa82e9858d5c0890b9904"
+  },
+  "hostname": "c20",
+  "python": "3.11.15",
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-spectral-jit-20261015",
+  "environment": {
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2"
+  }
+}

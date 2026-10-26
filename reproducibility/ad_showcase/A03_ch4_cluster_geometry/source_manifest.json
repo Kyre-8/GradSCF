@@ -1,0 +1,214 @@
+{
+  "baseline_commit": "58e9f5d",
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-ch4-cluster-20261016",
+  "baseline": {
+    "baseline": "/home/yjiao/gradscf_checks/ad-showcase-merge-20261016",
+    "native_checked": 65,
+    "native_sha256": "8176ca97f9758ba3810b727c5a2e90572ac4f8f205e4a16e0d7a7177221b1829"
+  },
+  "source_sha256": {
+    "src/gradscf_tools/cis_cluster.py": "ccbaef9e84329cdcfcbe8ef16549eebc1e3601c58f7b8c7d6551efc43e5c8cd2",
+    "src/gradscf_tools/cis_cluster_reference.py": "658b6a886757e20e44ff72ec34c62f24d80834ee19536fe26a250817b50824ec",
+    "tests/test_cis_cluster.py": "2aa22747c4ee43cd3e5ce52867325a63f403246b36a9b29ec4eb4cdb9326348f"
+  },
+  "public_examples": {
+    "examples/solvers/ch4_cis_cluster.py": {
+      "public_sha256": "d3286731bea6679bac4b71a65d8145aea00ed9ed84d1bfa08a111a009dcc5924",
+      "executed_sha256": "92156809aef4f26bc6553fca2b797cdc8d38622a74f6d78f786c3f022162c8cd",
+      "numerical_ast_unchanged": true
+    },
+    "examples/solvers/compare_ch4_cis_cluster.py": {
+      "public_sha256": "36a43387d6890661db656742f030c50c8a95341db6aa7aae1e52cfe0b4579bce",
+      "executed_sha256": "83312674314c35ac7792a27d1f4d6c19c2d5f4ac10c5c44f7036684f6eb9c01f",
+      "numerical_ast_unchanged": true
+    }
+  },
+  "scientific_artifacts": {
+    "README.md": "1c069e3b00380c0f0291cd30b4898d1b99d919cc663a57f9314cac9a4334dc59",
+    "ch4_cluster_geometry.pdf": "74b78e1b8e711b26e900029c916d22cdfc6470094b635d1e8f587b52abf70b3f",
+    "ch4_cluster_geometry.png": "e2ff9be2633a18952eea91ba313220499269fc53ffa7175b1c6a53cc92ee5506",
+    "forward.json": "5ea0dcc85bf86de06cc9b9c4a4b9288c1cb510279fdfc7f4b87f90462c2ce543",
+    "frame_davidson_90.json": "17fbc0c34f4ef8962ce14058e0859895e95fa5998de1bbd5f7882d2990cceca7",
+    "gradscf.json": "13f57011c2418b11006f24470031b1ab15a2bd5cfd1615922712b3513a304b00",
+    "pyscf.json": "750ec1d4ce8f2c986304a7b5cbabb21766851ca1143e01fad7c9944f0d39e23b"
+  },
+  "focused_test_gate": {
+    "passed": 9,
+    "source_matches_final": true,
+    "source_sha256": "ccbaef9e84329cdcfcbe8ef16549eebc1e3601c58f7b8c7d6551efc43e5c8cd2",
+    "test_sha256": "2aa22747c4ee43cd3e5ce52867325a63f403246b36a9b29ec4eb4cdb9326348f",
+    "log_sha256": "0c8991db767a3b488ba5e4c4291736aaeadd9d8b8bc615ed2ac27ccc643be9d8",
+    "exit_code": 0
+  },
+  "jobs": {
+    "cluster-certificate-green": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_cis_cluster.py"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 1720112,
+      "budget_kib": 8388608,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true,
+      "elapsed_seconds": 51.85446828700151,
+      "allowed_cpu_ids": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47
+      ]
+    },
+    "ch4-original-response-checked": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "-c",
+        "from examples.solvers.ch4_cis_cluster import run; run(\"response\")"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 1900556,
+      "budget_kib": 16777216,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true,
+      "elapsed_seconds": 69.40171319799992,
+      "allowed_cpu_ids": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47
+      ]
+    },
+    "ch4-independent-fd": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "examples/solvers/compare_ch4_cis_cluster.py"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 303788,
+      "budget_kib": 16777216,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true,
+      "elapsed_seconds": 4.259208322000632,
+      "allowed_cpu_ids": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47
+      ]
+    },
+    "ch4-frame-space90": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "-c",
+        "from examples.solvers.ch4_cis_cluster import check_frame; check_frame(max_subspace=90)"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 1606188,
+      "budget_kib": 16777216,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true,
+      "elapsed_seconds": 59.38678367000102,
+      "allowed_cpu_ids": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47
+      ]
+    },
+    "ch4-geometry-plot": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "-c",
+        "from examples.solvers.compare_ch4_cis_cluster import plot; plot()"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 243484,
+      "budget_kib": 2097152,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true,
+      "elapsed_seconds": 3.2543093060012325,
+      "allowed_cpu_ids": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47
+      ]
+    }
+  },
+  "development_archive": "artifacts/ad_showcase/development/completion_20261016/cluster",
+  "visual_inspection": "Final PNG inspected; no clipping or overlapping labels.",
+  "scope": "Actual completed numerical records; original-frame and gauge certificates kept separately. No code is stored in this scientific results folder."
+}

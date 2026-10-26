@@ -8,7 +8,7 @@ import pytest
 
 
 def _patch_excitation(monkeypatch, value: float = 0.4) -> None:
-    from gradscf.model.training import targets
+    from gradscf.model.neural_xc.training import targets
 
     monkeypatch.setattr(
         targets,
@@ -25,7 +25,7 @@ def _predict_e0(params, molecule):
 
 
 def test_density_loss_api_only_exposes_grid_density():
-    import gradscf.model.training as training
+    import gradscf.model.neural_xc.training as training
 
     config_fields = set(training.MolecularTrainingConfig.__dataclass_fields__)
     datum_fields = set(training.MolecularTrainingDatum.__dataclass_fields__)
@@ -41,7 +41,7 @@ def test_density_loss_api_only_exposes_grid_density():
 
 
 def test_s1_total_and_excitation_gap_are_distinct_objectives(monkeypatch):
-    from gradscf.model.training import (
+    from gradscf.model.neural_xc.training import (
         MolecularTrainingConfig,
         MolecularTrainingDatum,
         molecular_loss,
@@ -88,7 +88,7 @@ def test_s1_total_and_excitation_gap_are_distinct_objectives(monkeypatch):
 
 
 def test_total_loss_is_sum_of_named_weighted_components(monkeypatch):
-    from gradscf.model.training import (
+    from gradscf.model.neural_xc.training import (
         MolecularTrainingConfig,
         MolecularTrainingDatum,
         molecular_loss,
@@ -128,7 +128,7 @@ def test_total_loss_is_sum_of_named_weighted_components(monkeypatch):
 
 
 def test_active_objective_requires_matching_target(monkeypatch):
-    from gradscf.model.training import (
+    from gradscf.model.neural_xc.training import (
         MolecularTrainingConfig,
         MolecularTrainingDatum,
         molecular_loss,
@@ -148,7 +148,7 @@ def test_active_objective_requires_matching_target(monkeypatch):
 
 
 def test_excitation_gaps_require_one_dimensional_target():
-    from gradscf.model.training import MolecularTrainingDatum
+    from gradscf.model.neural_xc.training import MolecularTrainingDatum
 
     with pytest.raises(ValueError, match="target_excitation_gaps_h"):
         MolecularTrainingDatum(
@@ -158,7 +158,7 @@ def test_excitation_gaps_require_one_dimensional_target():
 
 
 def test_molecular_datum_is_jittable_with_static_sample_weight(monkeypatch):
-    from gradscf.model.training import (
+    from gradscf.model.neural_xc.training import (
         MolecularTrainingConfig,
         MolecularTrainingDatum,
         molecular_loss,
@@ -185,7 +185,7 @@ def test_molecular_datum_is_jittable_with_static_sample_weight(monkeypatch):
 
 
 def test_grid_density_objective_requires_explicit_grid_target():
-    from gradscf.model.training import (
+    from gradscf.model.neural_xc.training import (
         MolecularTrainingConfig,
         MolecularTrainingDatum,
         molecular_loss,
@@ -203,7 +203,7 @@ def test_grid_density_objective_requires_explicit_grid_target():
 
 
 def test_empty_dataset_and_empty_objective_are_rejected():
-    from gradscf.model.training import (
+    from gradscf.model.neural_xc.training import (
         MolecularTrainingConfig,
         MolecularTrainingDatum,
         molecular_loss,
@@ -229,7 +229,7 @@ def test_empty_dataset_and_empty_objective_are_rejected():
 
 
 def test_legacy_ambiguous_training_api_is_not_public():
-    import gradscf.model.training as training
+    import gradscf.model.neural_xc.training as training
 
     for name in (
         "GroundStateDatum",

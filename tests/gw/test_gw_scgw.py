@@ -17,7 +17,7 @@ def _run(**kwargs):
 
 
 def _h2_inputs():
-    from gradscf.df import eri_pair_matrix_to_df_factors
+    from gradscf.integrals.molecular.factorization import eri_pair_matrix_to_df_factors
     mol = gto.M(atom="H 0 0 0; H 0 0 0.74", basis="sto-3g", cart=True)
     mf = dft.RKS(mol, xc="hf").run()
     res = mf.scf_result
@@ -45,7 +45,7 @@ def test_scgw_h2_sto3g_converges_with_sane_energy():
     mol = gto.M(atom="H 0 0 0; H 0 0 0.74", basis="sto-3g", cart=True)
     mf = dft.RKS(mol, xc="hf").run()
     res = mf.scf_result
-    from gradscf.df import eri_pair_matrix_to_df_factors
+    from gradscf.integrals.molecular.factorization import eri_pair_matrix_to_df_factors
 
     df = eri_pair_matrix_to_df_factors(
         mf._scf_inputs.eri_pair_matrix, nao=res.mo_coeff.shape[0], tol=1e-12
@@ -80,7 +80,7 @@ def test_scgw_h2_sto3g_converges_with_sane_energy():
 
 
 def test_returned_state_satisfies_dyson_and_full_gw_map():
-    from gradscf.df import build_jk_from_df
+    from gradscf.integrals.molecular.jk import build_jk_from_df
     from gradscf.gw.g0w0 import _mo_factors
     from gradscf.gw.matsubara import gw_matsubara_step
 

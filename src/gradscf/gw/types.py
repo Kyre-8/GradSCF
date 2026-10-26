@@ -9,7 +9,7 @@ import jax.numpy as jnp
 from ..scf._pytree import pytree_dataclass
 
 
-@pytree_dataclass(static_fields=("nw",))
+@pytree_dataclass(static_fields=("nw", "g_orbitals", "screening_occupied", "screening_virtual", "method"))
 @dataclass(frozen=True)
 class GWResult:
     """Quasiparticle energies from a (G0W0/evGW/qsGW/scGW) calculation.
@@ -18,7 +18,8 @@ class GWResult:
     ----------
     mo_energy:
         Quasiparticle energies, shape ``(nmo,)`` (restricted) or
-        ``(2, nmo)`` (unrestricted).  Orbitals not included in the
+        ``(2, nmo)`` (unrestricted), or ``(nk, nmo)`` (periodic restricted).
+        Orbitals not included in the
         self-energy evaluation are prefilled with the mean-field values
         (unlike PySCF, which fills them with zeros).
     mo_coeff:
@@ -50,6 +51,19 @@ class GWResult:
         when its outer equations converge. None means coverage is not recorded
         by the producing driver. MF-filled levels must not be inferred from
         converged_mask or zero qp_residual alone.
+    qp_weight:
+        Local Z=1/(1-d Re Sigma/d omega) at the returned energy, with G/W
+        spectra and residue branch fixed. Restricted CD paths provide it;
+        other methods may leave it None. Unrequested levels and singular
+        slopes are NaN. Inspect QP coverage/convergence as well; Z is not a
+        convergence certificate or a differentiable root-selection rule.
+    g_orbitals, screening_occupied, screening_virtual:
+        Recorded original-MO correlation windows. For restricted periodic CD,
+        these band-index windows apply at every screening/internal k point;
+        qp_computed_mask separately records selected output k/band pairs.
+        None denotes unrecorded metadata; explicit empty tuples mean no sums.
+    method:
+        CD method/backend label, or None for drivers without recorded metadata.
     screening_energy:
         Actual independent-particle pole spectrum used to build W, in the
         returned orbital frame. Restricted/unrestricted CD drivers record it;
@@ -70,6 +84,24 @@ class GWResult:
     # None means the producing driver has not supplied coverage metadata.
     qp_computed_mask: jnp.ndarray | None = None
     screening_energy: jnp.ndarray | None = None
+
+    # Local frequency derivative at the returned energy, with G and W fixed.
+    # This is diagnostic, not a convergence certificate; unrequested levels are NaN.
+    qp_weight: jnp.ndarray | None = None
+    g_orbitals: tuple[int, ...] | None = None
+    screening_occupied: tuple[int, ...] | None = None
+    screening_virtual: tuple[int, ...] | None = None
+    method: str | None = None
+
+    # Fixed-G/W baselines and tested positive-slope root selection. Count zero
+    # means no candidate enumeration (e.g. an outer evGW residual evaluation).
+    qp_on_shell: jnp.ndarray | None = None
+    qp_linearized: jnp.ndarray | None = None
+    qp_candidate_count: jnp.ndarray | None = None
+    qp_branch_valid: jnp.ndarray | None = None
+    # Energy-dependent projected Dyson vectors in the KS frame. These columns
+    # need not be mutually orthogonal and never replace the KS/BSE MO frame.
+    qp_vectors: jnp.ndarray | None = None
 
 
 __all__ = ["GWResult"]

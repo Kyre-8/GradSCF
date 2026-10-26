@@ -7,7 +7,7 @@ from .api import CI, CIS, CISD, CISDT, CISDTQ, CIS_D, UCI, UCIS, UCISD, UCISDT, 
 from .types import UCISResult
 from ..scf.reference import UnrestrictedReference
 from .corrections import cis_d_correction
-from .properties import make_rdm1, make_rdm2, make_rdm12
+from .properties import make_rdm1, make_rdm2, make_rdm12, expectation_value
 from .api import CID, UCID
 from .spin import spin_square
 
@@ -16,4 +16,4 @@ __all__ = ["CIConfig", "CIReference", "CIResult", "CISResult", "CISpace",
            "CI", "CIS", "CISD", "CISDT", "CISDTQ", "CIS_D", "cis_d_correction",
            "CISDCorrectionResult", "UnrestrictedReference", "UCISpace", "make_uci_space",
            "UCI", "UCIS", "solve_ucis", "UCISResult", "UCISD", "UCISDT", "UCISDTQ",
-           "make_rdm1", "make_rdm2", "make_rdm12", "CID", "UCID", "spin_square"]
+           "make_rdm1", "make_rdm2", "make_rdm12", "expectation_value", "CID", "UCID", "spin_square"]

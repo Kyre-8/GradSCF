@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "examples/pbc/lih_polar_bands.py",
+    "--raw",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/ifc_raw",
+    "--born",
+    "reproducibility/ad_showcase/P04_lih_born/k223_fft41.json",
+    "--dielectric",
+    "reproducibility/ad_showcase/P04_lih_dielectric/k223_fft41.json",
+    "--field",
+    "reproducibility/ad_showcase/P04_lih_dielectric/k223_fft41_finite_field.json"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 1362528,
+  "budget_kib": 8388608,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true,
+  "elapsed_seconds": 24.577222658999744
+}

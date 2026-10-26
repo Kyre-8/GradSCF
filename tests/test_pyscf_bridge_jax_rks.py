@@ -6,12 +6,12 @@ from pyscf_reference import (
     restricted_reference_from_pyscf_spec_with_jax_rks,
     restricted_reference_from_pyscf_with_jax_rks,
 )
-from gradscf.scf.builders import restricted_molecule_from_spec_with_jax_rks
+from gradscf.scf.builders import _build_restricted_reference
 from reference_scf_features import _charge_center
 from gradscf.scf import RKSConfig
 from gradscf.scf.rks import TraceableRKSResult
-from gradscf.workflows.core import run_reference
-from gradscf.workflows.types import SimulationConfig
+from gradscf.model.neural_xc.workflows.core import run_reference
+from gradscf.model.neural_xc.workflows.types import SimulationConfig
 
 
 def _pyscf_or_skip():
@@ -96,7 +96,7 @@ def test_build_rks_integral_inputs_accepts_strict_jax_default_grid_level():
     _pyscf_or_skip()
     from pyscf import dft, gto
 
-    from gradscf.integrals.assembly import build_rks_integral_inputs
+    from gradscf.scf.inputs.assembly import build_rks_integral_inputs
 
     atom = """
     H 0.0 0.0 -0.35
@@ -246,7 +246,7 @@ def test_restricted_molecule_from_spec_with_jax_rks_direct_backend_matches_water
     if not mf.converged:
         raise RuntimeError("PySCF SCF did not converge for direct-RKS water test setup.")
 
-    ref = restricted_molecule_from_spec_with_jax_rks(
+    ref = _build_restricted_reference(
         atom=atom,
         basis="sto-3g",
         unit="Angstrom",
@@ -377,7 +377,7 @@ def test_restricted_molecule_from_spec_with_jax_rks_can_precompile_eri(monkeypat
 
     monkeypatch.setattr("gradscf.scf.builders.precompile_eri_kernels", fake_precompile)
 
-    ref = restricted_molecule_from_spec_with_jax_rks(
+    ref = _build_restricted_reference(
         atom="""
         H 0.0 0.0 -0.35
         H 0.0 0.0  0.35
@@ -427,7 +427,7 @@ def test_restricted_molecule_from_spec_with_jax_rks_libcint_matches_jax():
         density_floor=1e-12,
         potential_clip=20.0,
     )
-    ref_jax = restricted_molecule_from_spec_with_jax_rks(
+    ref_jax = _build_restricted_reference(
         atom=atom,
         basis="sto-3g",
         unit="Angstrom",
@@ -441,7 +441,7 @@ def test_restricted_molecule_from_spec_with_jax_rks_libcint_matches_jax():
         grid_ao_backend="jax",
         integral_backend="jax",
     )
-    ref_libcint = restricted_molecule_from_spec_with_jax_rks(
+    ref_libcint = _build_restricted_reference(
         atom=atom,
         basis="sto-3g",
         unit="Angstrom",
@@ -479,7 +479,7 @@ def test_restricted_molecule_from_spec_with_jax_rks_libcint_full_uses_packed_eri
 
     monkeypatch.setattr(gto.mole.Mole, "intor", _guarded_intor)
 
-    ref = restricted_molecule_from_spec_with_jax_rks(
+    ref = _build_restricted_reference(
         atom="""
         H 0.0 0.0 -0.35
         H 0.0 0.0  0.35
@@ -526,7 +526,7 @@ def test_restricted_molecule_from_spec_with_jax_rks_libcint_skips_precompile(mon
     monkeypatch.setattr("gradscf.scf.builders.precompile_eri_kernels", fake_precompile)
 
     with pytest.warns(RuntimeWarning, match="ignored when integral_backend='cpu'"):
-        _ = restricted_molecule_from_spec_with_jax_rks(
+        _ = _build_restricted_reference(
             atom="""
             H 0.0 0.0 -0.35
             H 0.0 0.0  0.35
@@ -559,7 +559,7 @@ def test_restricted_molecule_from_spec_with_jax_rks_libcint_skips_precompile(mon
 def test_restricted_molecule_from_spec_with_jax_rks_libcint_zero_policy_runs():
     _pyscf_or_skip()
 
-    ref = restricted_molecule_from_spec_with_jax_rks(
+    ref = _build_restricted_reference(
         atom="""
         H 0.0 0.0 -0.35
         H 0.0 0.0  0.35
@@ -590,7 +590,7 @@ def test_restricted_molecule_from_spec_with_jax_rks_libcint_zero_policy_runs():
 
 def test_restricted_molecule_from_spec_with_jax_rks_invalid_libcint_policy_raises():
     with pytest.raises(ValueError, match="Unsupported libcint_geometry_grad_policy"):
-        _ = restricted_molecule_from_spec_with_jax_rks(
+        _ = _build_restricted_reference(
             atom="""
             H 0.0 0.0 -0.35
             H 0.0 0.0  0.35

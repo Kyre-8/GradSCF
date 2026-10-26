@@ -1,0 +1,54 @@
+{
+  "rows": [
+    {
+      "case": "matrix3",
+      "mode": "outer_jit",
+      "passed": true
+    },
+    {
+      "case": "matrix3",
+      "mode": "nested_jit",
+      "passed": true
+    },
+    {
+      "case": "h3_bundle",
+      "mode": "outer_jit",
+      "passed": true
+    },
+    {
+      "case": "h3_bundle",
+      "mode": "nested_jit",
+      "passed": true
+    },
+    {
+      "case": "h3_cross",
+      "mode": "outer_jit",
+      "passed": true
+    },
+    {
+      "case": "h3_cross",
+      "mode": "nested_jit",
+      "passed": true
+    },
+    {
+      "case": "h3_transported",
+      "mode": "outer_jit",
+      "passed": true
+    },
+    {
+      "case": "h3_transported",
+      "mode": "nested_jit",
+      "passed": true
+    }
+  ],
+  "jax": "0.10.0",
+  "source_sha256": {
+    "src/gradscf/fci/solver.py": "410f1ec3e5d7bc4200d094568210663408dd6a6fd544a7f7e13d81faca8f72f8",
+    "src/gradscf/solvers/eigen/api.py": "b481a4501129c18e022a079e3bdfa2dfbab7b3d662506ad9cdcb1db27f4f7aa1",
+    "src/gradscf/solvers/eigen/response.py": "8566c795e5a098ab72d7255a6b607fe0545e41d585e3c4646bd6aec389406e7b",
+    "src/gradscf/solvers/nonlinear/root.py": "6896011c23957975ad5420cbd14edd47a69d2b837189723841484f07f6108981",
+    "src/gradscf/integrals/backends/native/ffi.py": "dcd5a65c7c5b05ccc2d5b67d2ba64af752ed61adfb34c53997b62dfa57262c5f",
+    "src/gradscf/fci/overlap.py": "57576eb6c6ed9fd58b5855536e6c50b428c56ab307ba23e2a3eafb3e6ded6e96",
+    "examples/fci/h3_nac_model.py": "18238f55392d381f392725dcddcc6f754bee9253383525de314c3e25a85281be"
+  }
+}

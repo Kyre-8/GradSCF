@@ -52,7 +52,7 @@ gab[p,q,r,s] = (p_alpha q_alpha | r_beta s_beta)
 Each spin orbital frame is orthonormal, real, equally sized, and ordered occupied
 before virtual. All energies and denominators are in Hartree. Full AO ERIs,
 s4 pair matrices and density-fitted AO factors can be transformed through
-`integrals.mo.transform_unrestricted_integrals`. Mixed-spin ERIs use both orbital
+`ao2mo.transform_unrestricted_integrals`. Mixed-spin ERIs use both orbital
 frames. They are not obtained by reusing a restricted spatial tensor.
 
 The chemists' spin-orbital tensor inserts spin deltas on each orbital pair.

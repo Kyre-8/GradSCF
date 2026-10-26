@@ -1,0 +1,43 @@
+{
+  "direction": [
+    [
+      0.5,
+      0.0,
+      0.0
+    ],
+    [
+      0.5,
+      0.0,
+      0.0
+    ],
+    [
+      0.5,
+      0.0,
+      0.0
+    ],
+    [
+      0.5,
+      0.0,
+      0.0
+    ]
+  ],
+  "amplitudes_bohr": [
+    -0.0004,
+    -0.0002,
+    0.0,
+    0.0002,
+    0.0004
+  ],
+  "free_energies_Eh": [
+    -22.42712964601002,
+    -22.427129658672683,
+    -22.427129662967616,
+    -22.427129658672698,
+    -22.427129646010023
+  ],
+  "dfpt_curvature_Eh_Bohr2": 0.21540947254343457,
+  "fd_curvature_Eh_Bohr2": 0.2119699304969913,
+  "half_step_curvature_Eh_Bohr2": 0.21474626521467144,
+  "seconds": 319.5123659929959,
+  "interpretation": "No ASR applied; a rigid translation should have zero curvature in the continuum."
+}

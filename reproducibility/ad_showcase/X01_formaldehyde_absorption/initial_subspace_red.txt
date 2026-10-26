@@ -1,0 +1,82 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_full_td_initial_guess_reaches_disconnected_lowest_root[3] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3b93472210>
+guess_count = 3
+
+    @pytest.mark.parametrize("guess_count", [3, 10])
+    def test_full_td_initial_guess_reaches_disconnected_lowest_root(monkeypatch, guess_count):
+        # The orbital-gap ordering differs from the screened excitation ordering.
+        # A one-vector seed is an invariant subspace with a perfectly converged
+        # higher root. Expanding the seed must expose the other symmetry sectors.
+        a = jnp.array([1.4, .9, .3])
+        b = jnp.array([.1, .1, .05])
+        reference = SimpleNamespace(mo_coeff=jnp.eye(4), mo_occ=jnp.array([2., 0., 0., 0.]),
+                                    mo_energy=jnp.array([0., .2, .4, .6]), nocc=1)
+    
+        def operator(rows):
+            x, y = rows[:, :3], rows[:, 3:]
+            return jnp.concatenate([a*x+b*y, -(b*x+a*y)], axis=1)
+    
+        monkeypatch.setattr("gradscf.tddft.casida.gen_tdhf_vind", lambda *args, **kwargs: operator)
+        narrow = tdscf.TDDFT(reference, nstates=1, davidson_tol=1e-11).kernel()
+        expanded = tdscf.TDDFT(reference, nstates=1, davidson_tol=1e-11,
+                              davidson_initial_guess_count=guess_count).kernel()
+        assert bool(narrow.converged) and bool(expanded.converged)
+        np.testing.assert_allclose(narrow.excitation_energies, np.sqrt(1.4**2-.1**2), atol=1e-11)
+>       np.testing.assert_allclose(expanded.excitation_energies, np.sqrt(.3**2-.05**2), atol=1e-11)
+E       AssertionError: 
+E       Not equal to tolerance rtol=1e-07, atol=1e-11
+E       
+E       Mismatched elements: 1 / 1 (100%)
+E       Mismatch at index:
+E        [0]: 1.396424004376894 (ACTUAL), 0.2958039891549808 (DESIRED)
+E       Max absolute difference among violations: 1.10062002
+E       Max relative difference among violations: 3.72077475
+E        ACTUAL: array([1.396424])
+E        DESIRED: array(0.295804)
+
+tests/test_tddft_initial_subspace.py:31: AssertionError
+_______ test_full_td_initial_guess_reaches_disconnected_lowest_root[10] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3a00279dd0>
+guess_count = 10
+
+    @pytest.mark.parametrize("guess_count", [3, 10])
+    def test_full_td_initial_guess_reaches_disconnected_lowest_root(monkeypatch, guess_count):
+        # The orbital-gap ordering differs from the screened excitation ordering.
+        # A one-vector seed is an invariant subspace with a perfectly converged
+        # higher root. Expanding the seed must expose the other symmetry sectors.
+        a = jnp.array([1.4, .9, .3])
+        b = jnp.array([.1, .1, .05])
+        reference = SimpleNamespace(mo_coeff=jnp.eye(4), mo_occ=jnp.array([2., 0., 0., 0.]),
+                                    mo_energy=jnp.array([0., .2, .4, .6]), nocc=1)
+    
+        def operator(rows):
+            x, y = rows[:, :3], rows[:, 3:]
+            return jnp.concatenate([a*x+b*y, -(b*x+a*y)], axis=1)
+    
+        monkeypatch.setattr("gradscf.tddft.casida.gen_tdhf_vind", lambda *args, **kwargs: operator)
+        narrow = tdscf.TDDFT(reference, nstates=1, davidson_tol=1e-11).kernel()
+        expanded = tdscf.TDDFT(reference, nstates=1, davidson_tol=1e-11,
+                              davidson_initial_guess_count=guess_count).kernel()
+        assert bool(narrow.converged) and bool(expanded.converged)
+        np.testing.assert_allclose(narrow.excitation_energies, np.sqrt(1.4**2-.1**2), atol=1e-11)
+>       np.testing.assert_allclose(expanded.excitation_energies, np.sqrt(.3**2-.05**2), atol=1e-11)
+E       AssertionError: 
+E       Not equal to tolerance rtol=1e-07, atol=1e-11
+E       
+E       Mismatched elements: 1 / 1 (100%)
+E       Mismatch at index:
+E        [0]: 1.396424004376894 (ACTUAL), 0.2958039891549808 (DESIRED)
+E       Max absolute difference among violations: 1.10062002
+E       Max relative difference among violations: 3.72077475
+E        ACTUAL: array([1.396424])
+E        DESIRED: array(0.295804)
+
+tests/test_tddft_initial_subspace.py:31: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_tddft_initial_subspace.py::test_full_td_initial_guess_reaches_disconnected_lowest_root[3]
+FAILED tests/test_tddft_initial_subspace.py::test_full_td_initial_guess_reaches_disconnected_lowest_root[10]
+2 failed in 9.15s

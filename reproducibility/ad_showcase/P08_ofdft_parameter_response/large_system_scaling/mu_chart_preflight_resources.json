@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "artifacts/ad_showcase/ofdft_scaling/preflight.py"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 8030028,
+  "budget_kib": 33554432,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true,
+  "elapsed_seconds": 751.6469615860005,
+  "sampled_peak_gpu0_mib": 4527,
+  "gpu_measurement": "Exclusive GPU0 total used memory, includes context; sampled at 1 s"
+}

@@ -1,0 +1,21 @@
+{
+  "input_sha256": {
+    "gamma_baseline": "561e23acb21f3c4bab692db6a757a7eeab6852b7a1ad571c78ac9d78d64765e4",
+    "source_state": "dd683f57b9bb0064328e4f1df280a18ed6a1fe49fd9a6f39e64ca6affa2dee24",
+    "main_comparison": "a0b5f22ed9ee3c4422b9569fdb1771a4cbc99d4bbd5f971abc907420bf344323"
+  },
+  "implementation_sha256": {
+    "src/gradscf/gw/pbc/query.py": "32da4ca526e8ff3bbd78d877f1c51515c0fad8adf5b8695df899b554d9857d6c",
+    "src/gradscf/gw/qp.py": "65ec34064a7272cdc72c700ff4ab656e5f1c4fc898f01cb5d0ebdd318fda12b7",
+    "src/gradscf/solvers/nonlinear/scalar.py": "f20e5f681cbde7ab0f159d7daadc29cc45931f0649a79f14927362b37d44464b"
+  },
+  "download_verified_sha256": {
+    "result.json": "ef562c793df16e9bb6a1096428e036a01d3c84d0599d3b541e3bad25fc4c7461",
+    "run.json": "4a617f78068a919adc4a5c9c1120c79bd6668ba39bd603d67d66d6611f1b10a2",
+    "run.stdout": "1a25712e7470160ba275ef155cfb76a72dc67fa9ef13fa9306420c8aa99f8fc9",
+    "matrices.npz": "88e57763b65bc28a969aed88a823f430f788c73a335af83f253dcf2eb351ce85"
+  },
+  "workflow_sha256": "c4ac1a4f7bd113783adf857713c89f6761fbd59eb1c1d678ff75b97e575d78e0",
+  "scope": "Exact saved Gamma (F,R,Eref) equation replay; no new SCF/GW/continuation",
+  "frame_scope": "Gamma baseline contains all matrices in one self-contained MO frame. Main comparison lacks query F/C; only its saved roots/masks are compared, not claimed an exact matrix replay."
+}

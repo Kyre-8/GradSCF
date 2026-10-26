@@ -14,11 +14,12 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from ..df import build_jk_from_df
+from gradscf.integrals.molecular.jk import build_jk_from_df
 from ..solvers.linear import solve_scalar_border
 from ..solvers import LinearSolverConfig
 from ..solvers.nonlinear import attach_root
-from .matsubara import dyson_green_and_density, gw_matsubara_step
+from .matsubara import dyson_green_and_density
+from .scgw import _scgw_step
 
 
 def _symmetric(values, nmo):
@@ -50,9 +51,9 @@ def _unpack_state(state, nmo, grid):
 def _residual(state, params, grid, nocc):
     fock, sigma, moment, mu = _unpack_state(state, params["hcore"].shape[0], grid)
     green, per_spin = dyson_green_and_density(fock, sigma, mu, grid)
-    mapped = gw_matsubara_step(green, fock, mu, params["b"], grid, moment)
-    jmat, kmat = build_jk_from_df(params["b"], 2 * per_spin)
-    fock_new = params["hcore"] + jmat - 0.5 * kmat
+    mapped = _scgw_step(green, fock, mu, params["b"], params["hcore"],
+                        2 * per_spin, grid, moment, params.get('phonons'))
+    fock_new = mapped['fock']
     result = state - _pack_state(fock_new, mapped["sigma_iw"], mapped["sigma_moment"], mu, grid)
     return result.at[-1].set((2 * jnp.trace(per_spin) - 2 * nocc) / grid.beta)
 
@@ -101,7 +102,8 @@ def _chemical_potential(fock, sigma, guess, grid, target, particle_tol):
 
 
 @partial(jax.jit, static_argnames=("nocc", "max_iter", "tol", "mixing", "particle_tol"))
-def _solve_state(hcore, b, energy_guess, grid, *, nocc, max_iter, tol, mixing, particle_tol):
+def _solve_state(hcore, b, energy_guess, grid, *, nocc, max_iter, tol, mixing, particle_tol,
+                 phonons=None):
     nmo = hcore.shape[0]
     density = jnp.diag(jnp.where(jnp.arange(nmo) < nocc, 2.0, 0.0))
     jmat, kmat = build_jk_from_df(b, density)
@@ -117,9 +119,8 @@ def _solve_state(hcore, b, energy_guess, grid, *, nocc, max_iter, tol, mixing, p
         fock, sigma, moment, mu, iteration, _, _, _ = s
         mu, number_ok = _chemical_potential(fock, sigma, mu, grid, 2 * nocc, particle_tol)
         green, density = dyson_green_and_density(fock, sigma, mu, grid)
-        mapped = gw_matsubara_step(green, fock, mu, b, grid, moment)
-        jmat, kmat = build_jk_from_df(b, 2 * density)
-        new_fock = hcore + jmat - 0.5 * kmat
+        mapped = _scgw_step(green, fock, mu, b, hcore, 2 * density, grid, moment, phonons)
+        new_fock = mapped['fock']
         new_sigma, new_moment = mapped["sigma_iw"], mapped["sigma_moment"]
         residual = jnp.maximum(jnp.max(jnp.abs(new_fock - fock)), jnp.max(jnp.abs(new_sigma - sigma)))
         residual = jnp.maximum(residual, jnp.max(jnp.abs(new_moment - moment)) / (jnp.pi / grid.beta))
@@ -136,11 +137,11 @@ def _solve_state(hcore, b, energy_guess, grid, *, nocc, max_iter, tol, mixing, p
 
 
 def _charge_linear_solve(matvec, rhs, config, beta, charge_response_tol, converged):
-    """Supply the physical charge-resolution policy to the shared bordered solve."""
+    """Require a resolved positive dN/dmu for a stable finite-T branch."""
     linear_config = LinearSolverConfig(rtol=config.tolerance, maxiter=config.max_iter,
                                         restart=20 if config.restart is None else config.restart)
     return solve_scalar_border(matvec, rhs, config=linear_config, converged=converged,
-        schur_valid=lambda schur: jnp.abs(beta * schur) > charge_response_tol)
+        schur_valid=lambda schur: beta * schur > charge_response_tol)
 
 
 def _raise_nonconverged(residual):
@@ -148,7 +149,8 @@ def _raise_nonconverged(residual):
 
 
 def implicit_scgw(*, coeff, energy_guess, hcore, b, nocc, nuclear_repulsion, grid,
-                  max_iter, tol, mixing, particle_tol, config, charge_response_tol):
+                  max_iter, tol, mixing, particle_tol, config, charge_response_tol,
+                  phonons=None):
     from .scgw import _assemble_scgw_result
     if config.mode != "implicit":
         raise ValueError("scGW differentiation currently supports mode='implicit' only.")
@@ -156,13 +158,14 @@ def implicit_scgw(*, coeff, energy_guess, hcore, b, nocc, nuclear_repulsion, gri
         raise ValueError("scGW implicit response requires converged states and zero regularization.")
     if not np.isfinite(charge_response_tol) or charge_response_tol < 0:
         raise ValueError("charge_response_tol must be finite and nonnegative (electrons/Ha).")
-    stopped = jax.tree_util.tree_map(jax.lax.stop_gradient, (hcore, b, energy_guess))
+    stopped = jax.tree_util.tree_map(jax.lax.stop_gradient, (hcore, b, energy_guess, phonons))
     seed, iteration, error, converged = _solve_state(
-        *stopped, grid, nocc=nocc, max_iter=max_iter, tol=tol, mixing=mixing, particle_tol=particle_tol
+        *stopped[:3], grid, nocc=nocc, max_iter=max_iter, tol=tol, mixing=mixing,
+        particle_tol=particle_tol, phonons=stopped[3],
     )
     jax.lax.cond(converged, lambda: None, lambda: jax.debug.callback(_raise_nonconverged, error))
     seed = jax.lax.stop_gradient(seed)
-    params = {"hcore": hcore, "b": b}
+    params = {"hcore": hcore, "b": b, "phonons": phonons}
     residual = lambda state: _residual(state, params, grid, nocc)
     tangent_solve = lambda matvec, rhs: _charge_linear_solve(
         matvec, rhs, config, grid.beta, charge_response_tol, converged
@@ -173,4 +176,5 @@ def implicit_scgw(*, coeff, energy_guess, hcore, b, nocc, nuclear_repulsion, gri
         coeff=coeff, hcore=hcore, b=b, nuclear_repulsion=nuclear_repulsion,
         fock=fock, sigma=sigma, moment=moment, mu=mu, grid=grid,
         nocc=nocc, n_iter=iteration, converged=converged,
+        phonons=phonons,
     )

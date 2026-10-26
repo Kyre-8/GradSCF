@@ -1,0 +1,44 @@
+[
+  {
+    "basis": "gth-dzv",
+    "nao": 11,
+    "minimum_overlap_eigenvalue": 5.842551866395613e-06,
+    "maximum_overlap_eigenvalue": 51.199535378157115,
+    "relative_minimum": 1.1411337667896452e-07,
+    "accepted_metric": true,
+    "explicit_nelectron": 4,
+    "valence_charges": [
+      3,
+      1
+    ],
+    "scope": "Metric screening only; not SCF, force or basis-accuracy validation."
+  },
+  {
+    "basis": "gth-dzvp-molopt-sr",
+    "nao": 11,
+    "minimum_overlap_eigenvalue": 0.0001778605247148346,
+    "maximum_overlap_eigenvalue": 32.77717164240298,
+    "relative_minimum": 5.4263536419579605e-06,
+    "accepted_metric": true,
+    "explicit_nelectron": 4,
+    "valence_charges": [
+      3,
+      1
+    ],
+    "scope": "Metric screening only; not SCF, force or basis-accuracy validation."
+  },
+  {
+    "basis": "gth-cc-dzvp",
+    "nao": 19,
+    "minimum_overlap_eigenvalue": 0.0024649782980610156,
+    "maximum_overlap_eigenvalue": 8.129139032855,
+    "relative_minimum": 0.0003032274744100792,
+    "accepted_metric": true,
+    "explicit_nelectron": 4,
+    "valence_charges": [
+      3,
+      1
+    ],
+    "scope": "Metric screening only; not SCF, force or basis-accuracy validation."
+  }
+]

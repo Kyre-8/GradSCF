@@ -1,0 +1,2 @@
+Independent X05 errors: {'excitations_hartree': 1.7524870443708096e-13, 'oscillator_strengths': 4.0734082773496993e-13, 'dipole_outer_products': 1.5416556919944924e-12, 'weights': 2.095323914375058e-12, 'attachment': 3.1928903965194877e-12, 'detachment': 5.957317972260512e-13, 'phase_invariant_transition_overlap': np.float64(4.440892098500626e-16), 'reference_transition_reconstruction': 3.5909746466707905e-14, 'centroid_bohr': 1.4240830736866883e-12}
+Independent X05 checks passed in 0.76 s

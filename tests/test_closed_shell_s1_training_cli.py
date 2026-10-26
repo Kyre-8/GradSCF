@@ -478,7 +478,7 @@ def test_dense_chunked_hfx_nu_padded_reads_with_dynamic_scan_start_under_jit():
     import jax
     import jax.numpy as jnp
 
-    from gradscf.model.neural_xc.inputs import ChunkedHFXNu, hfx_nu_grid_chunk_padded
+    from gradscf.dft.hfx import ChunkedHFXNu, hfx_nu_grid_chunk_padded
 
     hfx_nu = np.arange(2 * 5 * 2 * 2, dtype=np.float64).reshape(2, 5, 2, 2)
     path = tmp_path / "refs.h5"
@@ -507,7 +507,7 @@ def test_dense_chunked_hfx_nu_padded_reads_with_dynamic_scan_start_under_jit():
     import jax
     import jax.numpy as jnp
 
-    from gradscf.model.neural_xc.inputs import ChunkedHFXNu, hfx_nu_grid_chunk_padded
+    from gradscf.dft.hfx import ChunkedHFXNu, hfx_nu_grid_chunk_padded
 
     hfx_nu = np.arange(2 * 5 * 2 * 2, dtype=np.float64).reshape(2, 5, 2, 2)
     api = ChunkedHFXNu.from_dense(hfx_nu, chunk_size=2)
@@ -531,7 +531,7 @@ def test_hdf5_cache_materializes_chunked_hfx_nu_api(tmp_path):
         read_restricted_molecule,
         write_restricted_molecule,
     )
-    from gradscf.model.neural_xc.inputs import ChunkedHFXNu
+    from gradscf.dft.hfx import ChunkedHFXNu
     from gradscf.scf.molecules import QuadratureGrid, RestrictedMolecule
 
     hfx_nu = np.arange(2 * 5 * 2 * 2, dtype=np.float64).reshape(2, 5, 2, 2)
@@ -572,9 +572,9 @@ def test_hdf5_cache_materializes_chunked_hfx_nu_api(tmp_path):
 
 def test_streaming_preserves_chunked_hfx_nu_api():
     module = _load_training_tool()
-    from gradscf.model.neural_xc.inputs import ChunkedHFXNu
+    from gradscf.dft.hfx import ChunkedHFXNu
     from gradscf.scf.molecules import QuadratureGrid, RestrictedMolecule
-    from gradscf.model.training import MolecularTrainingDatum
+    from gradscf.model.neural_xc.training import MolecularTrainingDatum
 
     hfx_nu = np.arange(2 * 5 * 2 * 2, dtype=np.float64).reshape(2, 5, 2, 2)
 

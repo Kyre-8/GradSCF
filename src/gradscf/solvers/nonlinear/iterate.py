@@ -7,6 +7,7 @@ import jax
 import jax.numpy as jnp
 from .diis import diis_push, diis_solve
 from .root import attach_root
+from gradscf._memory import array_storage_bytes, validate_reserved_bytes
 
 
 @dataclass(frozen=True)
@@ -46,6 +47,9 @@ def solve_nonlinear(
     config=None,
     linear_config=None,
     valid_inputs=True,
+    max_memory=None,
+    reserved_bytes=0,
+    operator_min_bytes=0,
 ):
     """Converge a real vector residual, then differentiate its root, not DIIS.
 
@@ -59,6 +63,12 @@ def solve_nonlinear(
         raise ValueError("Nonlinear iterates must be packed vectors")
     if not jnp.issubdtype(initial.dtype, jnp.floating):
         raise ValueError("Nonlinear iterates must be real floating-point vectors")
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    if max_memory is not None:
+        from ..memory import plan_nonlinear
+        cfg, _ = plan_nonlinear(initial.size, initial.dtype, cfg, max_memory,
+            resident_bytes=reserved_bytes+array_storage_bytes(initial),
+            operator_min_bytes=operator_min_bytes, device=getattr(initial, "device", None))
     if initial.size == 0:
         return NonlinearResult(
             initial,
@@ -67,57 +77,64 @@ def solve_nonlinear(
             jnp.array(0.0),
             jnp.asarray(valid_inputs),
         )
-    zeros = jnp.zeros((cfg.diis_space, initial.size), dtype=initial.dtype)
-    norm = lambda x: jnp.max(jnp.abs(residual(x)))
-    initial_norm = norm(initial)
-    state = (
-        initial,
-        observable(initial),
-        initial_norm,
-        jnp.array(jnp.inf, initial.dtype),
-        jnp.array(0, jnp.int32),
-        zeros,
-        zeros,
-        jnp.array(0, jnp.int32),
-        jnp.array(0, jnp.int32),
-    )
-
-    def condition(s):
-        done = (s[2] <= cfg.residual_tol) & (s[3] <= cfg.energy_tol)
-        return (
-            (~done)
-            & (s[4] < cfg.maxiter)
-            & jnp.isfinite(s[2])
-            & jnp.asarray(valid_inputs)
+    def numerical_forward(seed):
+        zeros = jnp.zeros((cfg.diis_space, seed.size), dtype=seed.dtype)
+        norm = lambda x: jnp.max(jnp.abs(residual(x)))
+        state = (
+            seed,
+            observable(seed),
+            norm(seed),
+            jnp.array(jnp.inf, seed.dtype),
+            jnp.array(0, jnp.int32),
+            zeros,
+            zeros,
+            jnp.array(0, jnp.int32),
+            jnp.array(0, jnp.int32),
         )
 
-    def step(s):
-        x, e, r, de, k, hist, err, head, count = s
-        trial = update(x, residual(x))
-        trial = (1 - cfg.damping) * trial + cfg.damping * x
-        hist, err, head, count = diis_push(
-            trial, residual(trial), hist, err, head, count
-        )
-        trial = jax.lax.cond(
-            (count >= 2) & (k + 1 >= cfg.diis_start),
-            lambda _: diis_solve(hist, err, count),
-            lambda _: trial,
-            None,
-        )
-        new_energy = observable(trial)
-        return (
-            trial,
-            new_energy,
-            norm(trial),
-            jnp.abs(new_energy - e),
-            k + 1,
-            hist,
-            err,
-            head,
-            count,
-        )
+        def condition(s):
+            done = (s[2] <= cfg.residual_tol) & (s[3] <= cfg.energy_tol)
+            return (
+                (~done)
+                & (s[4] < cfg.maxiter)
+                & jnp.isfinite(s[2])
+                & jnp.asarray(valid_inputs)
+            )
 
-    state = jax.lax.while_loop(condition, step, state)
+        def step(s):
+            x, e, r, de, k, hist, err, head, count = s
+            trial = update(x, residual(x))
+            trial = (1 - cfg.damping) * trial + cfg.damping * x
+            hist, err, head, count = diis_push(
+                trial, residual(trial), hist, err, head, count
+            )
+            trial = jax.lax.cond(
+                (count >= 2) & (k + 1 >= cfg.diis_start),
+                lambda _: diis_solve(hist, err, count),
+                lambda _: trial,
+                None,
+            )
+            new_energy = observable(trial)
+            return (
+                trial,
+                new_energy,
+                norm(trial),
+                jnp.abs(new_energy - e),
+                k + 1,
+                hist,
+                err,
+                head,
+                count,
+            )
+
+        return jax.lax.while_loop(condition, step, state)
+
+    # Stop every physical input before tracing derivatives of the numerical
+    # trajectory. Stopping only the returned state is too late for nested AD:
+    # residual/update/observable can close over another implicit root's tangent.
+    forward, parameters = jax.closure_convert(numerical_forward, initial)
+    state = forward(jax.lax.stop_gradient(initial),
+                    *jax.tree.map(jax.lax.stop_gradient, parameters))
     x, _, r, de, k, *_ = jax.tree.map(jax.lax.stop_gradient, state)
     valid = (
         jnp.asarray(valid_inputs)
@@ -125,5 +142,7 @@ def solve_nonlinear(
         & (r <= cfg.residual_tol)
         & (de <= cfg.energy_tol)
     )
-    x = attach_root(residual, x, config=linear_config, converged=valid)
+    x = attach_root(residual, x, config=linear_config, converged=valid,
+        max_memory=max_memory, reserved_bytes=reserved_bytes+array_storage_bytes(initial),
+        operator_min_bytes=operator_min_bytes)
     return NonlinearResult(x, k, r, de, valid)

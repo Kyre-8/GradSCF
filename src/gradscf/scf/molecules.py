@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import jax.numpy as jnp
 
+from .._memory import DEFAULT_MAX_MEMORY_MB, validate_memory_mb
 from ._pytree import pytree_dataclass
 
 
@@ -26,6 +27,10 @@ class QuadratureGrid:
         "runtime_scf_options",
         "hfx_nu_api",
         "response_df_metadata",
+        "range_separated_coefficients",
+        "xc_density_floor",
+        "xc_spec",
+        "max_memory",
     )
 )
 @dataclass(frozen=True)
@@ -71,8 +76,29 @@ class RestrictedMolecule:
     scf_cycles: int | None = None
     runtime_scf_backend: str | None = None
     runtime_scf_options: Any | None = None
+    eri_lr: jnp.ndarray | None = None
+    dispersion_energy: jnp.ndarray | None = None
+    range_separated_coefficients: tuple[float, float, float] | None = None
+    xc_density_floor: float = 1e-12
+    xc_spec: str | None = None
+    # Optional real AO Fock matrix for noncanonical restricted TD response.
+    # A dynamic pytree leaf: occupied/virtual projections retain input AD.
+    # None preserves the canonical mo_energy-difference contract.
+    fock_matrix: jnp.ndarray | None = None
+    # Optional native AO J/K action. Its plan is static and its basis
+    # parameters are dynamic pytree leaves; no ERI array is required.
+    direct_basis: Any | None = None
+    grid_ao: Any | None = None
+    max_memory: float = field(default=DEFAULT_MAX_MEMORY_MB, kw_only=True)
+
+    def __post_init__(self):
+        object.__setattr__(self, "max_memory", validate_memory_mb(self.max_memory))
 
     def density(self) -> jnp.ndarray:
+        if self.grid_ao is not None:
+            return self.grid_ao.map(
+                lambda ao, _dao, _lap, _coords, _weights:
+                    jnp.einsum("spq,rp,rq->rs", self.rdm1, ao, ao), deriv=0)
         return jnp.einsum("spq,rp,rq->rs", self.rdm1, self.ao, self.ao)
 
 
@@ -80,11 +106,14 @@ class RestrictedMolecule:
     static_fields=(
         "nocc_alpha",
         "nocc_beta",
+        "xc_spec",
+        "range_separated_coefficients",
         "scf_converged",
         "scf_cycles",
         "runtime_scf_backend",
         "runtime_scf_options",
         "hfx_nu_api",
+        "max_memory",
     )
 )
 @dataclass(frozen=True)
@@ -123,6 +152,19 @@ class UnrestrictedMolecule:
     scf_cycles: int | None = None
     runtime_scf_backend: str | None = None
     runtime_scf_options: Any | None = None
+    eri_lr: jnp.ndarray | None = None
+    dispersion_energy: jnp.ndarray | None = None
+    range_separated_coefficients: tuple[float, float, float] | None = None
+    fock_matrix: jnp.ndarray | None = None
+    xc_spec: str | None = None
+    # The same spatial AO provider serves both spin densities. Its topology
+    # is static; numerical basis parameters remain dynamic PyTree leaves.
+    direct_basis: Any | None = None
+    grid_ao: Any | None = None
+    max_memory: float = field(default=DEFAULT_MAX_MEMORY_MB, kw_only=True)
+
+    def __post_init__(self):
+        object.__setattr__(self, "max_memory", validate_memory_mb(self.max_memory))
 
     @property
     def eri_pair_matrix(self):
@@ -130,6 +172,10 @@ class UnrestrictedMolecule:
         return self.rep_tensor if self.rep_tensor.ndim==2 else None
 
     def density(self) -> jnp.ndarray:
+        if self.grid_ao is not None:
+            return self.grid_ao.map(
+                lambda ao, _dao, _lap, _coords, _weights:
+                    jnp.einsum("spq,rp,rq->r", self.rdm1, ao, ao), deriv=0)
         return jnp.einsum("spq,rp,rq->r", self.rdm1, self.ao, self.ao)
 
 

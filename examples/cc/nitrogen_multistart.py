@@ -3,11 +3,10 @@
 import jax
 
 jax.config.update("jax_enable_x64", True)
-from gradscf import gto, dft, cc
+from gradscf import gto, scf, cc
 
-mf = dft.RKS(
+mf = scf.RHF(
     gto.M(atom="N 0 0 0; N 0 0 1.1", basis="sto-3g"),
-    xc="hf",
     conv_tol=1e-12,
     conv_tol_density=1e-10,
     conv_tol_grad=1e-9,

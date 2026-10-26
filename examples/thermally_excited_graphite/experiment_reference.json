@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "source": {
+    "arxiv_id": "2610.18561v1",
+    "title": "Time-Resolved Phonon Dispersions of Thermally Excited Graphite at the Nanoscale",
+    "url": "https://arxiv.org/html/2610.18561v1",
+    "verified_date": "2026-10-15",
+    "verification_scope": "Original HTML Methods, III.1, III.2 and IV; no figure digitization or raw experimental data"
+  },
+  "status_definitions": {
+    "VERIFIED_REPORTED": "Numerical value explicitly reported in original prose",
+    "VERIFIED_APPROXIMATE": "Original prose explicitly gives an approximate value",
+    "NOT_REPORTED_IN_PROSE": "No precise numerical endpoint available in inspected prose",
+    "SECONDARY_THEORY": "Theory quoted by this paper; not its measured peak",
+    "MODEL_ASSUMPTION": "Declared modeling choice, not experimental evidence"
+  },
+  "gamma_static_peak": [
+    {"temperature_label": "room temperature", "comparison_temperature_K": 300.0, "temperature_assignment_status": "MODEL_ASSUMPTION", "temperature_uncertainty_K": null, "energy_meV": 193.7, "energy_reported_uncertainty_meV": 0.2, "status": "VERIFIED_REPORTED", "locator": "III.1, paragraph beginning At the Gamma point; Fig. 3c,d"},
+    {"temperature_label": "laser heated", "comparison_temperature_K": 1377.0, "temperature_assignment_status": "VERIFIED_REPORTED", "temperature_uncertainty_K": 11.0, "energy_meV": 185.2, "energy_reported_uncertainty_meV": 0.3, "status": "VERIFIED_REPORTED", "locator": "III.1, paragraph beginning At the Gamma point; Fig. 3c,d"}
+  ],
+  "energy_uncertainty_definition": "Least-squares fit uncertainty (Methods); confidence coverage and endpoint covariance unspecified",
+  "instrument": {
+    "zlp_width_meV": 11.0,
+    "status": "VERIFIED_REPORTED",
+    "locator": "II Methods, microscope paragraph",
+    "model_profile": "Gaussian",
+    "model_fwhm_meV": 11.0,
+    "profile_assignment_status": "MODEL_ASSUMPTION"
+  },
+  "momentum_acceptance": {"interval_angstrom_inverse": 0.26, "detector_pixels": 4, "status": "VERIFIED_REPORTED", "locator": "II Methods, quantitative analysis paragraph; III.1, Fig. 3c discussion", "modeled": false},
+  "experimental_fit": {"gamma": "Optical Voigt contribution with power-law background", "locator": "II Methods, quantitative analysis paragraph", "status": "VERIFIED_REPORTED"},
+  "gamma_width": {
+    "static_room_temperature_meV": null,
+    "static_1377K_meV": null,
+    "endpoint_status": "NOT_REPORTED_IN_PROSE",
+    "time_resolved_increase_meV": 7.0,
+    "increase_status": "VERIFIED_APPROXIMATE",
+    "increase_uncertainty_meV": null,
+    "locator": "IV Discussion, paragraph beginning The initial energy separation; Fig. 4f",
+    "comparison_boundary": "Time-resolved dataset; not a measured static 300-to-1377 K width difference"
+  },
+  "cited_theory_dispersion": {
+    "status": "SECONDARY_THEORY",
+    "locator": "III.1, expected dispersions paragraph; Fig. 2c; reference 28",
+    "reference": "Senga et al., Nature 573, 247-250 (2019)",
+    "TO_LO_Gamma_meV_approx": [197, 197],
+    "TO_LO_K_meV_approx": [163, 153],
+    "TO_LO_M_meV_approx": [177, 170],
+    "use_as_experimental_target": false
+  }
+}

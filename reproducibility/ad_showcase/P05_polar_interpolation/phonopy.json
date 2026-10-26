@@ -1,0 +1,39 @@
+{
+  "complete": true,
+  "passed": true,
+  "errors": {
+    "non_gamma": 1.2230759731486295e-17,
+    "gamma": 8.673617379884035e-19,
+    "directional_gamma": 1.387778783151026e-17,
+    "total_interpolation": 5.551172364895483e-17
+  },
+  "finite_differences": [
+    {
+      "step": 0.001,
+      "derivative_error": 2.1746399041663704e-08
+    },
+    {
+      "step": 0.0003,
+      "derivative_error": 1.9571681078626445e-09
+    },
+    {
+      "step": 0.0001,
+      "derivative_error": 2.174488741826872e-10
+    }
+  ],
+  "gates": {
+    "matrix": 1e-11,
+    "derivative": 2e-08
+  },
+  "native_json_sha256": "8f552c864d726890b7ffe6a3fcd4b996e96a524d82c421c826d2e483805d4271",
+  "native_arrays_sha256": "b5d892bc04d13a327aae9e423b4a03a56acd4552260e3cc098b10526e52042d6",
+  "script_sha256": "aed6bb1cfb9423c8cb938d7508d11fc82f06d39c7422e7f6ed332c26a96750e8",
+  "versions": {
+    "phonopy": "2.44.0",
+    "spglib": "2.5.0",
+    "symfc": "1.5.0"
+  },
+  "elapsed_seconds": 0.09382730200013611,
+  "convention": "Phonopy reciprocal cycles/Lambda converted to angular units; raw unweighted C kernel; atomic to lattice phase U=exp(i q.tau).",
+  "scope": "Independent implementation of a fixed reciprocal dipole model and manufactured short-range part; not independent electronic structure."
+}

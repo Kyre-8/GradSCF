@@ -8,19 +8,20 @@ import jax.numpy as jnp
 import numpy as np
 
 from gradscf.integrals import precompile_eri_kernels
-from gradscf.integrals.input_types import GeometryGradPolicy
+from gradscf.scf.inputs.types import GeometryGradPolicy
 from ..data.molecule import MoleculeSpec, parse_molecule_spec
-from ..dft.libxc_jax.jax_libxc import hybrid_coeff, parse_xc
-from ..model.neural_xc.inputs import (
-    _local_hfx_features_from_basis_dm,
+from ..dft.xc import hybrid_coeff, parse_xc
+from gradscf.dft.hfx import _local_hfx_features_from_basis_dm
+from gradscf.dft.pt2 import (
     _local_pt2_feature_and_fock_response_from_restricted_orbitals,
     _local_pt2_feature_from_unrestricted_orbitals,
 )
 from .core import _contains_jax_tracer, _host_float_unless_traced
-from gradscf.integrals.assembly import build_rks_integral_inputs, build_uks_integral_inputs
+from gradscf.scf.inputs.assembly import build_rks_integral_inputs, build_uks_integral_inputs
 from .molecules import QuadratureGrid, RestrictedMolecule, UnrestrictedMolecule
 from .rks import RKSConfig, run_rks_from_integrals
 from .uks import UKSConfig, run_uks_from_integrals
+from .rsh import local_xc_spec, rsh_preset
 
 
 def _host_array(value: Any, dtype: Any | None = None) -> np.ndarray:
@@ -78,7 +79,7 @@ def complete_restricted_response_inputs(inputs, spec, basis, *, cart=True):
     return replace(inputs,dipole_integrals=dipole)
 
 
-def restricted_molecule_from_spec_with_jax_rks(
+def _build_restricted_reference(
     *,
     atom: Any,
     basis: Any,
@@ -117,12 +118,14 @@ def restricted_molecule_from_spec_with_jax_rks(
         raise ValueError('A cached SCF result requires the inputs from the same calculation.')
 
     xc_spec_resolved = str(xc_spec)
-    parse_xc(xc_spec_resolved)
+    parse_xc(local_xc_spec(xc_spec_resolved))
     cfg = RKSConfig(xc_spec=xc_spec_resolved) if rks_config is None else rks_config
     if cfg.xc_spec != xc_spec_resolved:
         cfg = replace(cfg, xc_spec=xc_spec_resolved)
 
-    exact_exchange_fraction = float(hybrid_coeff(xc_spec_resolved))
+    rsh = rsh_preset(xc_spec_resolved)
+    exact_exchange_fraction = (rsh.default_sr_hf_fraction if rsh is not None
+                               else float(hybrid_coeff(xc_spec_resolved)))
     if scf_inputs is None:
         scf_inputs = build_rks_integral_inputs(
             atom=atom,
@@ -152,6 +155,10 @@ def restricted_molecule_from_spec_with_jax_rks(
     if include_dipole_integrals and scf_inputs.dipole_integrals is None:
         spec = atom if isinstance(atom,MoleculeSpec) else parse_molecule_spec(atom,unit=unit,charge=charge,spin=spin)
         scf_inputs = complete_restricted_response_inputs(scf_inputs,spec,basis)
+    if scf_inputs.grid_ao is not None and (compute_local_hfx_features or compute_local_pt2_features):
+        raise NotImplementedError(
+            "Legacy local HFX/PT2 feature caches require dense grid AO data; "
+            "use grid_block_size=-1 for these explicit feature requests.")
     basis_cart = scf_inputs.basis
     s = scf_inputs.overlap
     h1e = scf_inputs.hcore
@@ -194,6 +201,7 @@ def restricted_molecule_from_spec_with_jax_rks(
     pt2_local = None
     pt2_fock_response = None
     reference_eri_pair_matrix = None
+    reference_direct_basis = None
     if compute_local_hfx_features:
         hfx_result = _local_hfx_features_from_basis_dm(
             basis_cart,
@@ -218,6 +226,11 @@ def restricted_molecule_from_spec_with_jax_rks(
     if cfg.jk_backend == "df":
         if df_factors is None:
             raise RuntimeError("DF backend requested but df_factors were not constructed.")
+        rep_tensor = _empty_rep_tensor_like(s)
+    elif cfg.jk_backend == "direct" and not compute_local_pt2_features and callable(
+        getattr(scf_inputs.direct_basis, "get_jk", None)
+    ):
+        reference_direct_basis = scf_inputs.direct_basis
         rep_tensor = _empty_rep_tensor_like(s)
     else:
         if eri is None and eri_pair_matrix is None:
@@ -260,6 +273,8 @@ def restricted_molecule_from_spec_with_jax_rks(
     )
     return RestrictedMolecule(
         ao=ao,
+        grid_ao=scf_inputs.grid_ao,
+        max_memory=cfg.max_memory,
         grid=QuadratureGrid(weights=weights, coords=coords),
         dipole_integrals=dipole_integrals,
         rep_tensor=rep_tensor,
@@ -289,8 +304,14 @@ def restricted_molecule_from_spec_with_jax_rks(
         pt2_fock_response=pt2_fock_response,
         df_factors=reference_arrays["df_factors"],
         eri_pair_matrix=reference_eri_pair_matrix,
+        direct_basis=reference_direct_basis,
         scf_converged=bool(rks.converged),
         scf_cycles=int(rks.cycles),
+        eri_lr=getattr(scf_inputs, "eri_lr", None),
+        dispersion_energy=getattr(scf_inputs, "dispersion_energy", None),
+        range_separated_coefficients=getattr(rks, "range_separated_coefficients", None),
+        xc_density_floor=cfg.density_floor,
+        xc_spec=xc_spec_resolved,
     )
 
 
@@ -402,7 +423,7 @@ def build_restricted_scf_result_from_facade(
     return (result, scf_inputs) if return_inputs else result
 
 
-def unrestricted_molecule_from_spec_with_jax_uks(
+def _build_unrestricted_reference(
     *,
     atom: Any,
     basis: Any,
@@ -435,7 +456,7 @@ def unrestricted_molecule_from_spec_with_jax_uks(
     """Build an unrestricted strict-JAX UKS reference directly from molecule specs."""
 
     xc_spec_resolved = str(xc_spec)
-    parse_xc(xc_spec_resolved)
+    parse_xc(local_xc_spec(xc_spec_resolved))
     cfg = UKSConfig(xc_spec=xc_spec_resolved) if uks_config is None else uks_config
     if cfg.xc_spec != xc_spec_resolved:
         cfg = replace(cfg, xc_spec=xc_spec_resolved)
@@ -464,10 +485,15 @@ def unrestricted_molecule_from_spec_with_jax_uks(
         verbose=verbose,
         **mol_kwargs,
     )
+    if scf_inputs.grid_ao is not None and (compute_local_hfx_features or compute_local_pt2_features):
+        raise NotImplementedError(
+            "Legacy local HFX/PT2 feature caches require dense grid AO data; "
+            "use grid_block_size=-1 for these explicit feature requests.")
     basis_cart = scf_inputs.basis
     s = scf_inputs.overlap
     h1e = scf_inputs.hcore
     eri = scf_inputs.eri
+    direct_basis = getattr(scf_inputs, "direct_basis", None)
     coords = scf_inputs.coords
     weights = scf_inputs.grid_weights
     ao = scf_inputs.ao
@@ -514,6 +540,10 @@ def unrestricted_molecule_from_spec_with_jax_uks(
         else:
             hfx_local, hfx_fxx = hfx_result
     if compute_local_pt2_features:
+        if direct_basis is not None:
+            # This explicit feature request requires orbital integrals. The
+            # default direct reference retains only its spatial AO action.
+            eri = direct_basis.response_eri_pair_matrix()
         pt2_local, pt2_fock_response = _local_pt2_feature_from_unrestricted_orbitals(
             ao,
             jnp.stack([uks.mo_coeff_alpha, uks.mo_coeff_beta], axis=0),
@@ -535,6 +565,8 @@ def unrestricted_molecule_from_spec_with_jax_uks(
     nocc_beta = int(np.count_nonzero(np.asarray(uks.mo_occ_beta) > 1e-8))
     return UnrestrictedMolecule(
         ao=ao,
+        grid_ao=scf_inputs.grid_ao,
+        max_memory=cfg.max_memory,
         grid=QuadratureGrid(weights=weights, coords=coords),
         dipole_integrals=dipole_integrals,
         rep_tensor=jnp.asarray(eri),
@@ -542,6 +574,7 @@ def unrestricted_molecule_from_spec_with_jax_uks(
         mo_occ=jnp.stack([uks.mo_occ_alpha, uks.mo_occ_beta], axis=0),
         mo_energy=jnp.stack([uks.mo_energy_alpha, uks.mo_energy_beta], axis=0),
         rdm1=jnp.stack([uks.density_matrix_alpha, uks.density_matrix_beta], axis=0),
+        fock_matrix=jnp.stack([uks.fock_matrix_alpha, uks.fock_matrix_beta], axis=0),
         h1e=jnp.asarray(h1e),
         nuclear_repulsion=_host_float_unless_traced(uks.nuclear_repulsion),
         atom_coords=jnp.asarray(basis_cart.atom_coords),
@@ -566,6 +599,11 @@ def unrestricted_molecule_from_spec_with_jax_uks(
         df_factors=scf_inputs.df_factors,
         scf_converged=bool(uks.converged) if not uks_is_traceable else None,
         scf_cycles=int(uks.cycles) if not uks_is_traceable else None,
+        eri_lr=getattr(scf_inputs, "eri_lr", None),
+        dispersion_energy=getattr(scf_inputs, "dispersion_energy", None),
+        range_separated_coefficients=getattr(uks, "range_separated_coefficients", None),
+        xc_spec=xc_spec_resolved,
+        direct_basis=direct_basis,
     )
 
 
@@ -625,6 +663,6 @@ __all__ = [
     "build_restricted_reference_from_facade",
     "build_restricted_scf_result_from_facade",
     "build_unrestricted_reference_from_facade",
-    "restricted_molecule_from_spec_with_jax_rks",
-    "unrestricted_molecule_from_spec_with_jax_uks",
+    "_build_restricted_reference",
+    "_build_unrestricted_reference",
 ]

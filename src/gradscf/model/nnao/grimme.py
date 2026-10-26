@@ -12,7 +12,7 @@ import jax.numpy as jnp
 import numpy as np
 from gradscf.data.molecule import parse_molecule_spec,atomic_number
 from gradscf.integrals.basis import BasisTopology,BasisParameters
-from gradscf.integrals.ecp import AtomicECP
+from gradscf.integrals.basis.ecp import AtomicECP
 from .basis import supported_elements,DirectBasis
 
 

@@ -1,23 +1,82 @@
 """Checked implicit linear solves, including their transpose and higher response."""
 import jax
 import jax.numpy as jnp
+from jax.scipy.linalg import solve_triangular
 
 from ..diagnostics import linear_residual
 from ..operators import as_operator, validate_real_square
 from ..types import LinearSolverConfig, LinearResult
 from .direct import direct_solve
 from .gmres import gmres_solve
+from gradscf._memory import array_storage_bytes, validate_reserved_bytes
 
 
 def checked_linear_solve(matvec, rhs, *, config, converged=True,
-                         preconditioner=None, transpose_preconditioner=None):
-    """Internal scalar-vector kernel; validity is checked inside the opaque solve.
+                         preconditioner=None, transpose_preconditioner=None,
+                         cholesky=None, diagonal_factor=None,
+                         max_memory=None, reserved_bytes=0, operator_min_bytes=0):
+    """Internal vector/block kernel; validity is checked inside the opaque solve.
 
     Placing a nonlinear residual predicate in a linear tangent map would break
     transposition. Both primal and transposed numerical solves are checked here.
     """
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    if max_memory is not None:
+        from ..memory import plan_linear
+        structure = ("diagonal" if diagonal_factor is not None else
+                     "cholesky" if cholesky is not None else None)
+        config, _ = plan_linear(rhs.shape[0], rhs.dtype, config, max_memory,
+            resident_bytes=reserved_bytes+array_storage_bytes(rhs, diagonal_factor, cholesky),
+            operator_min_bytes=operator_min_bytes,
+            nrhs=1 if rhs.ndim == 1 else rhs.shape[1], structure=structure,
+            device=getattr(rhs, "device", None))
+    if diagonal_factor is not None:
+        if cholesky is not None:
+            raise ValueError("Supply either an exact diagonal or Cholesky factor")
+        factor = jnp.asarray(diagonal_factor)
+        if factor.shape != (rhs.shape[0],):
+            raise ValueError("Exact diagonal factor must match the operator shape")
+        if not jnp.issubdtype(factor.dtype, jnp.floating):
+            raise NotImplementedError("Exact diagonal solves require real floating-point data")
+        factor = jax.lax.stop_gradient(factor.astype(rhs.dtype))
+        finite = jnp.isfinite(factor) & (factor != 0)
+        safe = jnp.where(finite, factor, 1.).reshape((-1,)+(1,)*(rhs.ndim-1))
+        action = matvec if rhs.ndim == 1 else lambda x: jax.vmap(
+            matvec, in_axes=1, out_axes=1)(x)
+
+        def solve(operator, value):
+            candidate = value/safe
+            norm, valid = linear_residual(operator, candidate, value,
+                rtol=config.rtol, atol=config.atol,
+                converged=jnp.asarray(converged) & jnp.all(finite))
+            return jnp.where(valid, candidate, jnp.nan), (norm, valid)
+
+        # The stopped factor is numerical only. AD differentiates the original
+        # action, including RHS response at zero and all off-diagonal tangents.
+        return jax.lax.custom_linear_solve(action, rhs, solve=solve,
+            transpose_solve=solve, has_aux=True)
+
     if rhs.size == 0:
         return rhs, (jnp.asarray(0., dtype=rhs.real.dtype), jnp.asarray(converged))
+
+    if cholesky is not None:
+        if config.method != "direct" or rhs.shape[0] > config.max_dense:
+            raise ValueError("A Cholesky factor requires a bounded direct solve")
+        factor = jax.lax.stop_gradient(jnp.asarray(cholesky))
+        if factor.shape != (rhs.shape[0], rhs.shape[0]):
+            raise ValueError("Cholesky factor must match the operator shape")
+        action = matvec if rhs.ndim == 1 else lambda x: jax.vmap(
+            matvec, in_axes=1, out_axes=1)(x)
+
+        def solve(operator, value):
+            candidate = solve_triangular(factor.T,
+                solve_triangular(factor, value, lower=True), lower=False)
+            norm, valid = linear_residual(operator, candidate, value,
+                rtol=config.rtol, atol=config.atol, converged=converged)
+            return jnp.where(valid, candidate, jnp.nan), (norm, valid)
+
+        return jax.lax.custom_linear_solve(action, rhs, solve=solve,
+            transpose_solve=solve, has_aux=True)
 
     if rhs.ndim == 2 and config.method == "direct":
         if rhs.shape[0] > config.max_dense:
@@ -47,34 +106,69 @@ def checked_linear_solve(matvec, rhs, *, config, converged=True,
             return jnp.where(valid, result, jnp.full_like(result, jnp.nan)), (norm, valid)
         return solve
 
+    if rhs.ndim == 2:
+        # Keep the column loop INSIDE the opaque linear solve. Mapping public
+        # solves outside it breaks linear_transpose of the block action.
+        transpose = jax.linear_transpose(matvec, jnp.zeros(rhs.shape[0], rhs.dtype))
+
+        def block_factory(vector_operator, precond):
+            def solve(operator, value):
+                solution, (norms, valid) = jax.lax.map(
+                    lambda column: factory(precond)(vector_operator, column), value.T
+                )
+                return solution.T, (jnp.linalg.norm(norms), jnp.all(valid))
+            return solve
+
+        return jax.lax.custom_linear_solve(
+            lambda x: jax.vmap(matvec, in_axes=1, out_axes=1)(x), rhs,
+            solve=block_factory(matvec, preconditioner),
+            transpose_solve=block_factory(lambda x: transpose(x)[0], transpose_preconditioner),
+            has_aux=True,
+        )
+
     return jax.lax.custom_linear_solve(matvec, rhs, solve=factory(preconditioner),
         transpose_solve=factory(transpose_preconditioner), has_aux=True)
 
 
 def solve_linear(matrix_or_operator, rhs, *, config=None, preconditioner=None,
-                 transpose_preconditioner=None):
-    """Solve a real square system; direct solves also accept a (n,nrhs) block.
+                 transpose_preconditioner=None, cholesky=None,
+                 max_memory=None, reserved_bytes=0, operator_min_bytes=0):
+    """Solve a real square system for a vector or (n,nrhs) block.
 
     maxiter counts GMRES restart cycles. True residuals certify convergence;
     the upstream GMRES info flag is never treated as a convergence certificate.
+    An optional lower Cholesky factor reuses a real SPD matrix factorization;
+    implicit response and both primal/transpose residual checks are retained.
+    Explicit exact-diagonal operator structure bypasses dense/Krylov work, with
+    the same true-residual checks and implicit response through the live action.
     """
     config = LinearSolverConfig() if config is None else config
-    op = as_operator(matrix_or_operator)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
+    array = None if hasattr(matrix_or_operator, "matvec") else jnp.asarray(matrix_or_operator)
+    op = as_operator(matrix_or_operator if array is None else array)
     validate_real_square(op)
     rhs = jnp.asarray(rhs)
     if not (rhs.shape == (op.shape[0],) or
-            (config.method == "direct" and rhs.ndim == 2 and rhs.shape[0] == op.shape[0])):
-        raise ValueError("rhs shape must be (n,), or (n,nrhs) for a direct solve")
+            (rhs.ndim == 2 and rhs.shape[0] == op.shape[0])):
+        raise ValueError("rhs shape must be (n,) or (n,nrhs)")
     if not jnp.issubdtype(rhs.dtype, jnp.floating):
         raise ValueError("rhs must have real floating-point dtype")
     rhs = rhs.astype(jnp.result_type(rhs.dtype, op.dtype))
+    if max_memory is not None:
+        reserved_bytes += array_storage_bytes(array, None if op.exact_diagonal else op.diagonal)
     solution, (norm, valid) = checked_linear_solve(op.apply, rhs, config=config,
-        preconditioner=preconditioner, transpose_preconditioner=transpose_preconditioner)
+        preconditioner=preconditioner, transpose_preconditioner=transpose_preconditioner,
+        cholesky=cholesky, diagonal_factor=op.diagonal if op.exact_diagonal else None,
+        max_memory=max_memory, reserved_bytes=reserved_bytes,
+        operator_min_bytes=operator_min_bytes)
     return LinearResult(solution, norm, valid, jnp.where(valid, 0, 1))
 
 
-def solve_implicit_linear_system(matvec, b_flat, *, tol, max_iter, restart=None, converged=True):
+def solve_implicit_linear_system(matvec, b_flat, *, tol, max_iter, restart=None, converged=True,
+                                 max_memory=None, reserved_bytes=0, operator_min_bytes=0):
     """Compatibility contract used by implicit SCF and scGW responses."""
     config = LinearSolverConfig(rtol=float(tol), maxiter=max(1, int(max_iter)),
                                  restart=20 if restart is None else max(1, int(restart)))
-    return checked_linear_solve(matvec, b_flat, config=config, converged=converged)[0]
+    return checked_linear_solve(matvec, b_flat, config=config, converged=converged,
+        max_memory=max_memory, reserved_bytes=reserved_bytes,
+        operator_min_bytes=operator_min_bytes)[0]

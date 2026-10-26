@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "unique_selected_tests": 58,
+  "receipts": {
+    "scale_and_chart": {
+      "log": "/home/yjiao/gradscf_checks/ad-showcase-ofdft-scaling-20261016/logs/mu-chart-tests.log",
+      "summary": "14 passed",
+      "log_sha256": "64fad0721f14f49f0d35fb1fbbbff69410d84d76f9fc9ef309fa9fcbdffba55a"
+    },
+    "native_forces_and_dfpt": {
+      "log": "/home/yjiao/gradscf_checks/ad-showcase-ofdft-scaling-native-fixture-20261016/logs/native_gaussian_tests.log",
+      "summary": "28 passed",
+      "log_sha256": "d0bd2e7895fcd384f104f7afee110b48ade7c0b447721882ed3d98ad4bf18d46"
+    },
+    "reference_fixture_and_euler_units": {
+      "log": "/home/yjiao/gradscf_checks/ad-showcase-ofdft-scaling-20261016/logs/wgc-fixture-and-units.log",
+      "summary": "2 passed",
+      "log_sha256": "8bf7c0034267a38122c8b4ef12f5095eddde696933d1fc274cda85dde222a023"
+    }
+  },
+  "wgc_showcase_history": "15 passed, one missing fixture; failing fixture and strengthened Euler-unit test then both passed",
+  "native_audit_count": 85,
+  "source_sha256": {
+    "src/gradscf/solvers/nonlinear/sphere.py": "99db882377466578b8d4c26c6990d27152666bc84467fe6339bc6432e2c722fd",
+    "src/gradscf/ofdft/problem.py": "9891fd3df1feea50f640a62eda0f2f80285696dfeacf05a4e1f8e0783488e0cd",
+    "src/gradscf/dfpt/ofdft.py": "531276124f1f0a664dd2f3cf9498237ddccab6dc4c66449ade665f9b0ad44ef8",
+    "src/gradscf/dfpt/atomic.py": "a71b18c37fb7a4b80bd9871a1da29111cd506976c9ae9e79e3d0bf4226e25bb5",
+    "tests/ofdft/test_sphere_scaling.py": "eafa6ecb6e046c7c89d7ee767f4f223d8cd3bcdb84f21bb59acf33f8cdac694a",
+    "tests/ofdft/test_number_scaled_response.py": "21972493e4286fc3489086e3febf29ba0f976570c58d35db46797674a19997b1",
+    "tests/ofdft/test_large_system_response.py": "6dcef65002ab85fe2e455d392fe4b2957e6759296741b2e15e66682bd0c86e3b",
+    "tests/ofdft/test_showcase_response.py": "7af09a3ccee7c1da17dc3296ef6d52e3cd0fbcbe50ff41fbf11fe9754397c2bd",
+    "tests/ofdft/test_wgc.py": "1afb83932020376d845bf120f9328991584895ab5a71e10372264b7c98e8ed30",
+    "tests/ofdft/test_response.py": "4f066f4e1fc0a9b5abf73ff163d8cc80942ec12f3b51db182cd6ec97a61eacc8",
+    "tests/ofdft/test_representations.py": "cc2f4526c023eef19407c40be6551642ef6d3456148a2657dcc5d6515238b9b3",
+    "tests/ofdft/test_periodic_forces.py": "8c3baaabdc03b5c074b1616d083c32c2486061ebe7ab7d59f5a181b13cabc841",
+    "tests/dfpt/test_ofdft.py": "6bbf21e415b8a9bbc317204e96cdf836732b8a83fd7342548425f1be1b0da2d8",
+    "tests/dfpt/test_atomic.py": "47c4c6ebf6ff822391ed4ca3d6e222aca7717c37c19591971b1c240506380f79",
+    "tests/ofdft/data/libkedf_wgc_first_frame.npz": "b2a013a83c3686a08ffd0075d8d823536f874c24fdaf5c5df76199f816397334"
+  },
+  "scope": "Selected OFDFT/DFPT/force and showcase regressions; not the full repository test suite"
+}

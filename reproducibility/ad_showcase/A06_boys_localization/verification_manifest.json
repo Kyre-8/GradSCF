@@ -1,0 +1,19 @@
+{
+  "source_unchanged": true,
+  "source_python_sha256": "ca37f375d0e4cc673d1ca2e5b50f189b9047ad8bce56e00f7f397156fac3e43f",
+  "hostname": "c20",
+  "status": "passed",
+  "executed_script_hashes": {
+    "examples/localization/ethylene_boys.py": "ca64ae95247b889c4b2785ba6349771e1af3ae6a5b6d1fb1e8c3f97c93f01fba",
+    "examples/localization/archive_ethylene_boys.py": "5d6f1d3afd70cfa282361f8464ff3b8505fb05c89dd180880113f557482b5099",
+    "examples/localization/plot_ethylene_boys.py": "b8ceafd3450244e73f7b66cb3cb105c068e94ca8797e4f95427a210d75cd64e0",
+    "tests/comparisons/compare_ethylene_boys.py": "387ca08b4c583ac54943d77043826d627514121d0a4c15ff1c9d15d15ee9bddc"
+  },
+  "artifacts": {
+    "A06_native_pyscf.log": "2845d81b9f697ff97ae2c074a56f29702056f448bdd8b14d3ddf0c06cadfd483",
+    "boys_localization.pdf": "f114efe76a0288e49b3e331a9ac8d8c769076712e3c59b72e95ba2f238e7503e",
+    "boys_localization.png": "7eb71ce57d20c19393c14370bbe93c0919f97ced25f28af9cd74abc15bc9fbd1",
+    "results.json": "8ac4e08e4da1bba73a11fc9c5575f7ed44ac11d8cd23d4fe4fc793c22457ed9c",
+    "source_manifest.json": "91a0b5092e40e236b34ffaae239cf74964d21c3f3665f59bcb1f06645a309f38"
+  }
+}

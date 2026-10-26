@@ -1,0 +1,19 @@
+{
+  "source_repository": "https://github.com/Quantum-MultiScale/DFTpy",
+  "commit": "fbc47b4e1df3def1a2206e58c5a1a1a4d51db1d0",
+  "license": "LICENSE.DFTpy",
+  "files": {
+    "Mg_lda.oe01.recpot": {
+      "sha256": "4547542aedd7101b44b27c45f18de344158df83464261598fa1b437cce09fae9",
+      "upstream_path": "examples/DATA/Mg_lda.oe01.recpot",
+      "author": "Wenhui Mi (file header)",
+      "valence": 2
+    },
+    "Al_lda.oe01.recpot": {
+      "sha256": "7104d4d2c41f2564e31cc6c6fd6e077125147cd099a27271133230b45d094375",
+      "upstream_path": "examples/DATA/Al_lda.oe01.recpot",
+      "author": "Wenhui Mi (file header)",
+      "valence": 3
+    }
+  }
+}

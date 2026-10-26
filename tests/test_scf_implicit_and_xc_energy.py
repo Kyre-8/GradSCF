@@ -7,7 +7,7 @@ from gradscf.solvers.nonlinear import (
     implicit_fixed_point_solution,
 )
 from gradscf.solvers.linear import solve_implicit_linear_system
-from gradscf.scf.xc_energy import xc_energy_and_potential_from_density
+from gradscf.dft.derivatives import xc_energy_and_potential_from_density
 
 
 def test_implicit_fixed_point_solution_matches_scalar_analytic_gradient():
@@ -36,7 +36,7 @@ def test_solver_and_scf_exports_follow_module_boundaries():
         ImplicitFixedPointConfig as ExportedImplicitFixedPointConfig,
         implicit_fixed_point_solution as exported_implicit_fixed_point_solution,
     )
-    from gradscf.scf import (
+    from gradscf.dft import (
         XCEnergyPotentialResult,
         xc_energy_and_potential_from_density as exported_xc_energy_and_potential,
     )

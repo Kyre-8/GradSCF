@@ -1,0 +1,28 @@
+{
+  "title": "Role of bulk and surface phonons in the decay of metal surface states",
+  "authors": "A. Eiguren et al.",
+  "doi": "10.1103/PhysRevLett.88.066805",
+  "source_url": "https://arxiv.org/pdf/cond-mat/0111029v1",
+  "pdf_sha256": "686cc14a9f458882a89cd553a86878daa7bdb28a6522f11659cd7881681b3252",
+  "publication_year": 2002,
+  "arxiv_version": "cond-mat/0111029v1",
+  "pymupdf_version": "1.27.2.3",
+  "extraction": "Original PDF vector paths and marker centers; not original instrument files.",
+  "alpha2f_source": "PDF p5 Fig1(b), solid curve paths 27911 and 27912; duplicate energies averaged.",
+  "experiment_source": "PDF p7 Fig3 Cu111 upper panel open circles; inset circle markers.",
+  "electronic_baseline_mev": 14.0,
+  "baseline_source": "Table I: calculated electron-electron linewidth (a stated lower bound).",
+  "paper_tabulated_ep_zero_temperature_mev": 6.6,
+  "paper_tabulated_lambda": 0.16,
+  "instrument_energy_resolution_mev": 3.0,
+  "photon_energy_ev": 21.23,
+  "experiment_method": "He I ARUPS; published widths are fitted intrinsic Lorentzian FWHM.",
+  "normalization": "EDCs have arbitrary intensity; peak alignment/normalization occurs only in plotting.",
+  "uncertainty": "Only the displayed 125 K error bar is extracted. Other uncertainties are unknown, not zero.",
+  "limitations": "Graph-derived precision; curves are not refitted to experimental widths. Not a new slab GW/DFPT calculation.",
+  "csv_sha256": {
+    "experiment_linewidth.csv": "be848c7c1745e250068d8851dd539fed2fa359f1a12a14d7a4d066578a8fe1bb",
+    "experiment_edc.csv": "8bf9d263f2ac3292a41eded7c25ef1a2d071f5b7fe478128e796927966e11653",
+    "alpha2f.csv": "7600045adc839d6bde9cb3beb60e1ee190c9ecb389de1ef347a948eae6942fa1"
+  }
+}

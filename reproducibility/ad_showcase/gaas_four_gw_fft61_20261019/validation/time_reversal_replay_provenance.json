@@ -1,0 +1,17 @@
+{
+  "source_sha256": "caa88f3c75c3fe01ea369b5aa82b66d673b515fbf80af60f8781184a446f0da9",
+  "current_source_sha256": {
+    "src/gradscf/gw/pbc/spectrum.py": "89262a39dc4d584cbc156e773c6a4cd244609dc61582de5223427ab7dbcc3111",
+    "src/gradscf/gw/pbc/interpolation.py": "f1558be076b41ab61c00c1f689a188f2ccfbb5397fb457bd70bc6acfa5ac84bb",
+    "src/gradscf/solvers/poles.py": "82328417587ebb50cc144729ee40f64559f2318a488c34a3c9865f5dc38936a9"
+  },
+  "download_verified_sha256": {
+    "result.json": "11c095c48f295e72da11fec92c747853b3049c992ab5fff49846f84658a8a7a6",
+    "run.json": "e135f24d8d3f29d6214dc1c72dd47dfd8f60d2d73f0586a102660fa5c5161b57",
+    "run.stdout": "da020497d1ff1012554db29859427ffd7b838918f933bac9575b386745f9b256",
+    "source_measure.npz": "9db70de62dd19d1756b824eb144e271abe1dfc16991e39c82c02f40dd69f45a2",
+    "samples.npz": "ab9aa61ce6db7fc454bf23d1ade8d357dd181d742925a76471187f9689cba38f"
+  },
+  "workflow_sha256": "f22918ac1165e49d5941b3e53135e10b58caa8812b95f9876f5946534816a06f",
+  "scope": "TR and k-continuity of one fine512 measure; not real-axis accuracy or rank/window/512-to-1024 stability"
+}

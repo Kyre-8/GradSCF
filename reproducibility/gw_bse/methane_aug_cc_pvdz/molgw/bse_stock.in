@@ -1,0 +1,32 @@
+&molgw
+scf='HF'
+basis_path='/private/tmp/molgw-reference-20260930/basis/'
+tda='no'
+triplet='no'
+read_restart='yes'
+basis='AUG-CC-PVDZ'
+auxil_basis='weigend'
+gaussian_type='CART'
+tolscf=1.0e-10
+nscf=100
+frozencore='no'
+ncoreg=0
+ncorew=0
+nvirtualg=62
+nvirtualw=35
+selfenergy_state_min=1
+selfenergy_state_max=34
+nomega_sigma=4001
+step_sigma=0.0005
+postscf='BSE'
+nstep_gw=1
+eta=0.0055123983263482487
+print_w='no'
+length_unit='angstrom'
+natom=5
+/
+C   0.000   0.000   0.000
+H   0.629   0.629   0.629
+H   0.629  -0.629  -0.629
+H  -0.629   0.629  -0.629
+H  -0.629  -0.629   0.629

@@ -12,14 +12,13 @@ from jax.lax import Precision
 from jaxtyping import Array, PyTree
 
 from gradscf.integrals import build_j_from_eri_pair_matrix
-from ..df import build_j_from_df, build_jk_from_df
-from ..model.neural_xc.inputs import (
-    hfx_nu_source,
-)
+from gradscf.integrals.backends.native.jk import _selected_jk
+from gradscf.integrals.molecular.jk import build_j_from_df, build_jk_from_df
+from gradscf.dft.hfx import hfx_nu_source
 from .core import _build_density_from_occ, _diagonalize_fock, _orthogonalizer
 from .autodiff import SCFDifferentiationConfig, normalize_scf_gradient_mode
 from ..solvers.nonlinear import implicit_fixed_point_solution
-from .xc_energy import xc_energy_and_potential_from_density
+from ..dft.derivatives import xc_energy_and_potential_from_density
 from .energy import (XCContribution, restricted_energy, restricted_fock,
                      unrestricted_energy, unrestricted_fock)
 from .rks import (
@@ -36,6 +35,7 @@ _GRID_PAYLOAD_DEPENDENCY_FIELDS = frozenset(
         "ao",
         "ao_deriv1",
         "ao_laplacian",
+        "grid_ao",
         "grid",
         "rdm1",
         "mo_coeff",
@@ -495,10 +495,33 @@ def _build_vxc_matrix_from_components(
     v_lapl: Array,
     xc_kind: str,
 ) -> Array:
+    provider = getattr(molecule, "grid_ao", None)
+    kind = _normalize_response_feature_kind(xc_kind)
+    if provider is not None:
+        from gradscf.integrals.grids.blocks import grid_slice
+
+        dtype = jnp.result_type(provider.centers, provider.exponents,
+                               provider.coefficients, weights, v_rho, v_grad, v_tau, v_lapl)
+        initial = (jnp.asarray(0, dtype=jnp.int32),
+                   jnp.zeros((provider.nao, provider.nao), dtype=dtype))
+
+        def accumulate(carry, ao, dao, lap, coords, block_weights):
+            index, matrix = carry
+            start = index * provider.block_size
+            block = _vxc_matrix_from_grid_potential(
+                ao=ao, ao_deriv1=dao, ao_laplacian=lap,
+                weights=grid_slice(weights, start, provider.block_size),
+                vxc_rho=grid_slice(v_rho, start, provider.block_size),
+                vxc_grad=grid_slice(v_grad, start, provider.block_size),
+                vxc_tau=grid_slice(v_tau, start, provider.block_size),
+                vxc_lapl=grid_slice(v_lapl, start, provider.block_size), xc_kind=kind)
+            return index + 1, matrix + block
+
+        deriv = 2 if kind == "MGGA_LAPL" else 0 if kind == "LDA" else 1
+        return provider.reduce(accumulate, initial, deriv=deriv)[1]
     ao = jnp.asarray(molecule.ao)
     ao_deriv1 = getattr(molecule, "ao_deriv1", None)
     ao_laplacian = getattr(molecule, "ao_laplacian", None)
-    kind = _normalize_response_feature_kind(xc_kind)
     if ao_deriv1 is None:
         kind = "LDA"
         ao_deriv1_arr = jnp.zeros((4, ao.shape[0], ao.shape[1]), dtype=ao.dtype)
@@ -644,7 +667,7 @@ class DifferentiableSCFConfig:
     """Configuration for fixed-density / self-consistent differentiable SCF."""
 
     mode: Literal["fixed_density", "self_consistent"] = "fixed_density"
-    gradient_mode: Literal["unrolled", "implicit", "expl", "impl"] = "expl"
+    gradient_mode: Literal["explicit", "implicit", "expl", "impl", "unrolled"] = "expl"
     max_cycle: int = 12
     damping: float = 0.25
     level_shift: float = 0.0
@@ -711,6 +734,7 @@ class _RestrictedSCFContext:
     h1e: Array
     rep_tensor: Array
     df_factors: Array | None
+    direct_basis: Any | None
     ao: Array
     weights: Array
     overlap: Array
@@ -930,6 +954,7 @@ class DifferentiableSCF:
             h1e=h1e,
             rep_tensor=rep_tensor,
             df_factors=_df_factors_from_molecule(molecule),
+            direct_basis=getattr(molecule, "direct_basis", None),
             ao=ao,
             weights=weights,
             overlap=overlap,
@@ -948,11 +973,18 @@ class DifferentiableSCF:
         *,
         with_k: bool = True,
     ) -> tuple[Array, Array]:
+        from ..dft.functional import Functional
+
+        if isinstance(getattr(ctx, "xc_functional", None), Functional):
+            # The full external XC energy has no separate exact-exchange term.
+            with_k = False
         if ctx.df_factors is not None:
             if not bool(with_k):
                 j_mat = build_j_from_df(ctx.df_factors, density)
                 return j_mat, jnp.zeros_like(j_mat)
             return build_jk_from_df(ctx.df_factors, density)
+        if ctx.direct_basis is not None:
+            return _selected_jk(ctx.direct_basis, density, with_k=with_k)
         if not bool(with_k):
             j_mat = _coulomb_matrix(ctx.rep_tensor, density)
             return j_mat, jnp.zeros_like(j_mat)
@@ -1290,55 +1322,64 @@ class DifferentiableSCF:
             mo_occ_a=None if occ_for_jk is None else occ_for_jk[0],
             mo_occ_b=None if occ_for_jk is None else occ_for_jk[1],
             with_k=with_exchange,
+            direct_basis=getattr(molecule, "direct_basis", None),
         )
-        (
-            vxc_rho_a,
-            vxc_rho_b,
-            vxc_grad_a,
-            vxc_grad_b,
-            xc_kind,
-            alpha,
-            extra_fock_a,
-            extra_fock_b,
-        ) = _unrestricted_scf_xc_components(
-            params,
-            xc_functional,
-            molecule_iter,
-            functional_dtype=h1e.dtype,
-        )
-        vxc_rho_a, vxc_grad_a = _clip_grid_potential_components(
-            vxc_rho_a,
-            vxc_grad_a,
-            self.config.vxc_clip,
-        )
-        vxc_rho_b, vxc_grad_b = _clip_grid_potential_components(
-            vxc_rho_b,
-            vxc_grad_b,
-            self.config.vxc_clip,
-        )
-        zero_aux_a = jnp.zeros_like(vxc_rho_a)
-        zero_aux_b = jnp.zeros_like(vxc_rho_b)
-        vxc_matrix_a = _build_vxc_matrix_from_components(
-            molecule=molecule_iter,
-            weights=weights,
-            v_rho=vxc_rho_a,
-            v_grad=vxc_grad_a,
-            v_tau=zero_aux_a,
-            v_lapl=zero_aux_a,
-            xc_kind=xc_kind,
-        )
-        vxc_matrix_b = _build_vxc_matrix_from_components(
-            molecule=molecule_iter,
-            weights=weights,
-            v_rho=vxc_rho_b,
-            v_grad=vxc_grad_b,
-            v_tau=zero_aux_b,
-            v_lapl=zero_aux_b,
-            xc_kind=xc_kind,
-        )
-        alpha = _clip_hybrid_alpha(alpha)
-        xc=XCContribution(0.,jnp.stack([vxc_matrix_a,vxc_matrix_b]),alpha,
-                          jnp.stack([extra_fock_a,extra_fock_b]))
+        energy_callback = getattr(xc_functional, 'scf_spin_xc_energy_for_density', None)
+        if callable(energy_callback):
+            result = xc_energy_and_potential_from_density(
+                params, molecule=molecule_iter, density=density_spin,
+                xc_energy_fn=energy_callback)
+            alpha = result.exact_exchange_fraction
+            xc = XCContribution(result.xc_energy, result.vxc_matrix, alpha, result.extra_fock_matrix)
+        else:
+            (
+                vxc_rho_a,
+                vxc_rho_b,
+                vxc_grad_a,
+                vxc_grad_b,
+                xc_kind,
+                alpha,
+                extra_fock_a,
+                extra_fock_b,
+            ) = _unrestricted_scf_xc_components(
+                params,
+                xc_functional,
+                molecule_iter,
+                functional_dtype=h1e.dtype,
+            )
+            vxc_rho_a, vxc_grad_a = _clip_grid_potential_components(
+                vxc_rho_a,
+                vxc_grad_a,
+                self.config.vxc_clip,
+            )
+            vxc_rho_b, vxc_grad_b = _clip_grid_potential_components(
+                vxc_rho_b,
+                vxc_grad_b,
+                self.config.vxc_clip,
+            )
+            zero_aux_a = jnp.zeros_like(vxc_rho_a)
+            zero_aux_b = jnp.zeros_like(vxc_rho_b)
+            vxc_matrix_a = _build_vxc_matrix_from_components(
+                molecule=molecule_iter,
+                weights=weights,
+                v_rho=vxc_rho_a,
+                v_grad=vxc_grad_a,
+                v_tau=zero_aux_a,
+                v_lapl=zero_aux_a,
+                xc_kind=xc_kind,
+            )
+            vxc_matrix_b = _build_vxc_matrix_from_components(
+                molecule=molecule_iter,
+                weights=weights,
+                v_rho=vxc_rho_b,
+                v_grad=vxc_grad_b,
+                v_tau=zero_aux_b,
+                v_lapl=zero_aux_b,
+                xc_kind=xc_kind,
+            )
+            alpha = _clip_hybrid_alpha(alpha)
+            xc=XCContribution(0.,jnp.stack([vxc_matrix_a,vxc_matrix_b]),alpha,
+                              jnp.stack([extra_fock_a,extra_fock_b]))
         fock_spin=jax.vmap(_safe_symmetric_matrix)(
             unrestricted_fock(h1e,j_mat,jnp.stack([k_alpha,k_beta]),xc))
         return fock_spin, molecule_iter, density_total, j_mat, k_alpha, k_beta, alpha
@@ -1680,6 +1721,7 @@ class DifferentiableSCF:
                 h1e=h1e,
                 rep_tensor=rep_tensor,
                 df_factors=_df_factors_from_molecule(molecule_arg),
+                direct_basis=getattr(molecule_arg, "direct_basis", None),
                 ao=ao,
                 weights=weights,
                 overlap=overlap,

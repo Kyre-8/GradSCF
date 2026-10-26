@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from gradscf import integrals
-from gradscf.integrals.assembly import build_rks_integral_inputs, build_uks_integral_inputs
+from gradscf.scf.inputs.assembly import build_rks_integral_inputs, build_uks_integral_inputs
 from gradscf.scf import RKSConfig, UKSConfig, run_rks_from_integrals
 from gradscf.scf.init_guess import restricted_initial_guess, unrestricted_initial_guess
 
@@ -46,7 +46,7 @@ def test_native_inputs_match_independent_reference_integrals():
 
 
 def test_native_spectral_df_preserves_full_jk():
-    from gradscf.df import build_jk_from_df
+    from gradscf.integrals.molecular.jk import build_jk_from_df
     data=build_rks_integral_inputs(atom=ATOM,basis="3-21g",config=RKSConfig(xc_spec="hf",jk_backend="df",df_tol=1e-12))
     top,p=integrals.prepare_basis(ATOM,"3-21g")
     eri=integrals.make_plan(top,backend="native").evaluate("eri",p)

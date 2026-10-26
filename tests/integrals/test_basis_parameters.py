@@ -94,7 +94,12 @@ def test_native_capabilities_distinguish_geometry_and_basis_derivatives():
     assert not caps.supports("eri", variable="exponents", derivative_order=1)
     assert caps.supports("kinetic", variable="centers", derivative_order=1)
     assert caps.supports("nuclear", variable="nuclear_coords", derivative_order=1)
-    assert not caps.supports("eri", variable="centers", derivative_order=2)
+    assert caps.supports("eri", variable="centers", derivative_order=2)
+    assert caps.supports("dipole", variable="origin", derivative_order=2)
+    assert not caps.supports("overlap", variable="origin", derivative_order=1)
+    assert not caps.supports("eri", variable="centers", derivative_order=3)
+    assert not caps.supports("eri", variable="centers", derivative_order=2, layout="s4")
+    assert not caps.supports("ecp", variable="centers", derivative_order=2)
 
 
 def test_reference_eri_parameter_gradient_and_center_gradient():

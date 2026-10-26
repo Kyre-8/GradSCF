@@ -1,0 +1,385 @@
+{
+  "settings": {
+    "a_bohr": 7.780032276700287,
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pade",
+    "mesh": [
+      31,
+      31,
+      31
+    ],
+    "kmesh": [
+      2,
+      2,
+      2
+    ],
+    "precision": 1e-10,
+    "displacement_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ]
+    ]
+  },
+  "explicit_nelectron": 4,
+  "pseudopotential_valence_charges": [
+    3,
+    1
+  ],
+  "electron_number": 4.0,
+  "nao": 3,
+  "occupied_orbitals": 2,
+  "sampled_indirect_gap_hartree": 0.14272638774851443,
+  "mo_fock_occupied_virtual_norm": 4.846430458842972e-16,
+  "minimum_overlap_eigenvalue": 0.015429803271097092,
+  "occupation_values": [
+    0.0,
+    2.0
+  ],
+  "scf_converged": true,
+  "scf_cycles": 12,
+  "energy_hartree": -8.00763182486617,
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      3.8900161383501435,
+      3.8900161383501435,
+      3.8900161383501435
+    ]
+  ],
+  "lattice_bohr": [
+    [
+      0.0,
+      3.8900161383501435,
+      3.8900161383501435
+    ],
+    [
+      3.8900161383501435,
+      0.0,
+      3.8900161383501435
+    ],
+    [
+      3.8900161383501435,
+      3.8900161383501435,
+      0.0
+    ]
+  ],
+  "fractional_kpoints": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      1.1406847552064604e-18,
+      1.1406847552064604e-18,
+      -0.5000000000000001
+    ],
+    [
+      -3.842356836066713e-17,
+      -0.49999999999999994,
+      -3.128373098836689e-17
+    ],
+    [
+      -3.436780288832828e-17,
+      -0.49999999999999994,
+      -0.5000000000000001
+    ],
+    [
+      -0.49999999999999994,
+      -3.842356836066713e-17,
+      -3.842356836066713e-17
+    ],
+    [
+      -0.49999999999999994,
+      -3.436780288832828e-17,
+      -0.5000000000000001
+    ],
+    [
+      -0.5,
+      -0.5,
+      -6.873560577665656e-17
+    ],
+    [
+      -0.5,
+      -0.5,
+      -0.5000000000000001
+    ]
+  ],
+  "basis_data": {
+    "Li": [
+      [
+        0,
+        [
+          7.2610457926,
+          -0.2798628497,
+          0.0501840556
+        ],
+        [
+          2.1056583087,
+          -0.447742079,
+          0.1084202571
+        ],
+        [
+          0.6439906571,
+          -0.3912929157,
+          0.1448363201
+        ],
+        [
+          0.0797152017,
+          -0.0282408543,
+          -0.4643021689
+        ],
+        [
+          0.029402959,
+          0.0106542324,
+          -0.6220213304
+        ]
+      ]
+    ],
+    "H": [
+      [
+        0,
+        [
+          8.3744350009,
+          -0.0283380461
+        ],
+        [
+          1.805868146,
+          -0.1333810052
+        ],
+        [
+          0.4852528328,
+          -0.3995676063
+        ],
+        [
+          0.1658236932,
+          -0.5531027541
+        ]
+      ]
+    ]
+  },
+  "pseudopotential_data": [
+    [
+      [
+        3
+      ],
+      0.4,
+      4,
+      [
+        -14.03486849,
+        9.55347627,
+        -1.76648817,
+        0.08436998
+      ],
+      0
+    ],
+    [
+      [
+        1
+      ],
+      0.2,
+      2,
+      [
+        -4.1802368,
+        0.72507482
+      ],
+      0
+    ]
+  ],
+  "masses_amu": [
+    7.0160034366,
+    1.00782503223
+  ],
+  "mass_sources": [
+    "https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=Li",
+    "https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=H"
+  ],
+  "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+  "script_sha256": "9b231e2890a4b686140d513a9e7d6ba6b87bcddf638b40d94dc9032c4e5ce724",
+  "helper_sha256": "4431a8c0439a2b60b4d4befb9c8c1792fd65d2bd0b1107937aa5f75a03bc8d68",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "dtype": "float64",
+  "scope": "Raw self-inverse q=(0,0,1/2) response only; no general conjugacy, interpolation or material convergence claim.",
+  "complete": true,
+  "passed": true,
+  "probe": true,
+  "gamma_helper_sha256": "52753c5e997b4b221e8004f48b9ed3218aaa744d4f11ffa13fa0f13a5741fa44",
+  "q_requested": [
+    0.0,
+    0.0,
+    0.5
+  ],
+  "q_evaluated": [
+    0.0,
+    0.0,
+    -0.5
+  ],
+  "k_partners": [
+    1,
+    0,
+    3,
+    2,
+    5,
+    4,
+    7,
+    6
+  ],
+  "reciprocal_shifts": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "response_dimension": 288,
+  "directions": [
+    [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        1.0,
+        0.0,
+        0.0
+      ]
+    ]
+  ],
+  "force_constant_actions_real_hartree_per_bohr2": [
+    [
+      -4.785458712792879e-15
+    ],
+    [
+      -3.76940810821209e-15
+    ],
+    [
+      -2.9262343005161393e-15
+    ],
+    [
+      0.017031197388167215
+    ],
+    [
+      0.024366439613315704
+    ],
+    [
+      -0.02436393410873735
+    ]
+  ],
+  "force_constant_actions_imag_hartree_per_bohr2": [
+    [
+      2.3261280122136314e-10
+    ],
+    [
+      2.383934454897763e-10
+    ],
+    [
+      -6.552686363223365e-10
+    ],
+    [
+      -1.768737238438876e-16
+    ],
+    [
+      -2.0198577249742607e-16
+    ],
+    [
+      5.931189577229697e-17
+    ]
+  ],
+  "reference_forces_hartree_per_bohr": [
+    [
+      -1.6237989340560337e-15,
+      -1.5453087882410866e-15,
+      2.441803887313811e-16
+    ],
+    [
+      1.2527087322005378e-15,
+      1.1337911721539492e-15,
+      6.016599532516184e-16
+    ]
+  ],
+  "linear_solver": {
+    "method": "gmres",
+    "rtol": 1e-10,
+    "atol": 1e-12,
+    "maxiter": 100,
+    "restart": 40,
+    "max_dense": 256
+  },
+  "linear_residuals": [
+    6.913479860987118e-13
+  ],
+  "solve_converged": [
+    true
+  ],
+  "errors": {
+    "linear_residual_norm": 6.913479860987118e-13,
+    "imaginary_hartree_per_bohr2": 6.552686363223365e-10
+  },
+  "gates": {
+    "linear_residual_norm": 1e-09,
+    "imaginary_hartree_per_bohr2": 1e-08
+  },
+  "asr_projected": false,
+  "workspace_limits": {
+    "max_grid": 30000,
+    "max_pair_elements": 20000000
+  },
+  "workspace_grid_points": 29791,
+  "workspace_pair_elements": 17159616,
+  "response_seconds_includes_compilation": 84.52193968798383,
+  "action_seconds": [
+    84.52170286598266
+  ],
+  "elapsed_seconds": 130.91669790699962,
+  "peak_rss_kib": 8302656
+}

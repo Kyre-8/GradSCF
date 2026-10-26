@@ -1,3 +1,4 @@
+from importlib import import_module
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -43,7 +44,7 @@ def test_new_d_channel_is_trainable_and_core_stays_fixed(symbol):
 def test_expanded_methane_energy_gradient_for_added_primitives():
     from pathlib import Path
     import runpy
-    cls=runpy.run_path(str(Path('tools/optimize_methane_nnao.py')))['MethaneRHF']
+    cls=vars(import_module("gradscf.model.nnao.training.objective"))['BasisRHF']
     ex=cls(basis_family='szp442_direct',core_primitives=3)
     assert ex.layout.topology.nao==26 and ex.primitive_topology.nao==53 and ex.nelectron==10
     x=ex.layout.reference_outputs();energy,g,info=ex.evaluate(x)

@@ -1,8 +1,49 @@
 # Migrating from GradTDDFT to GradSCF
 
-GradSCF is the current project and package name. This migration changes the
-package identity and imports; it preserves the existing numerical methods,
-function signatures, and scientific submodule names.
+GradSCF is the current project and package name. The original package rename preserved numerical methods and signatures.
+Subsequent API changes are listed below; some old import paths are removed.
+
+## 2026-09-28 — Public entry points use domain ownership
+
+Use `from gradscf import gto, dft, training` and
+`mf = dft.RKS(gto.M(...), xc=...).run()`. The former
+`restricted_molecule_from_spec_with_jax_rks` / unrestricted builder names
+are private implementations. Obtain their prepared AO/grid state through
+`mf.to_reference()`, or pass the solved `mf` directly to `training.Sample`
+and `trainer.predict`.
+
+The root no longer reexports 144 individual symbols. This is a breaking
+import cleanup, not a numerical-method change. See [API.md](API.md) and the
+complete [old-to-new table](API_MIGRATION.csv). DFT forwarding modules and
+six duplicate workflow builder wrappers are removed. Advanced numerical
+APIs remain available in their owning modules.
+
+## 2026-09-28 — Generic functionals and training are framework modules
+
+Concrete neural architectures remain under `gradscf.model`. The generic
+functional adapter, physical ingredients and derivatives belong to DFT;
+training is shared infrastructure at the package root.
+
+| Previous import | Current import |
+|---|---|
+| `gradscf.model.neural_xc.ExternalFunctional` | `gradscf.dft.Functional` |
+| `gradscf.model.neural_xc.DensityInputs` | `gradscf.dft.DensityInputs` |
+| `gradscf.model.training` | `gradscf.model.neural_xc.training` |
+| `gradscf.scf.xc_energy` | `gradscf.dft.derivatives` |
+| HFX physical/cache helpers in `model.neural_xc.inputs` | `gradscf.dft.hfx` |
+| PT2 physical helpers in `model.neural_xc.inputs` | `gradscf.dft.pt2` |
+
+Use `from gradscf import dft, training` for a user-defined architecture.
+The built-in model remains `from gradscf.model import neural_xc`, followed
+by `neural_xc.Functional(...)`. Its model-specific feature transforms and
+presets remain in that package. The ambiguous root `gradscf.Functional`
+export is removed; it is not silently redirected to a different class.
+Old module paths are removed rather than retained as forwarding files.
+
+Generic examples and their recorded results moved from `examples/neural_xc/`
+to `examples/training/`. The shared SCF modes remain `fixed_density`,
+`explicit`, and `implicit`; this ownership change does not alter numerical
+methods, losses, or gradients.
 
 ## DifferentiableSCF XC contracts
 
@@ -24,13 +65,13 @@ XC/NeuralD/force-training interfaces. Historical SCF-only fallbacks were removed
 The optimized direct-Fock path, SCF-specific bound path (including frozen
 functional diagnostics), and eight-entry unrestricted potential path remain
 active. Public response APIs on bound XC objects are unchanged. This cleanup
-does not alter SCF iterations, density layouts, or implicit/unrolled semantics.
+does not alter SCF iterations, density layouts, or implicit/explicit semantics.
 
 ## SCF backward configuration
 
 `gradscf.scf.SCFDifferentiationConfig` is shared by the functional/molecule SCF
 adapter and the fixed-occupation orbital solvers. Use `mode="implicit"` or
-`mode="unrolled"`; `impl` and `expl` remain accepted aliases. Pass this object
+`mode="explicit"`; `impl`, `expl`, and the historical `unrolled` name remain accepted aliases. Pass this object
 as `DifferentiableSCFConfig(differentiation=...)` or as the orbital solver's
 `differentiation=...` argument. An explicit object takes precedence over the
 legacy DFT backward fields. Existing DFT defaults are retained when it is absent.
@@ -47,7 +88,7 @@ may differ from the former exponential parametrization.
 
 The shared implicit policy requires a converged state by default and checks
 the adjoint residual. Failed backward solves return nonfinite cotangents while
-preserving forward diagnostics. Unrolled differentiates the finite iterations
+preserving forward diagnostics. Explicit AD differentiates the existing JAX loop computation
 and can be used before convergence. Fixed 0/1 occupations are static topology;
 continuous integrals and overlap remain differentiable. Use
 `orthonormalize_initial=True` to transport a fixed orbital seed as overlap changes.
@@ -55,8 +96,14 @@ continuous integrals and overlap remain differentiable. Use
 The default implicit path now composes JVP/VJP rules through its root and linear
 solves. `training.energy_and_forces`, `force_matching_loss`, and
 `make_force_loss_and_grad` provide force supervision for differentiable energy
-callbacks. Model/geometry mixed derivatives are supported with native integrals;
-pure native coordinate Hessians and native basis derivatives remain unsupported.
+callbacks whose full derivative chain is supported. Native derivative support
+is operator-, layout- and parameter-specific: documented dense operators have
+coordinate Hessian products, while one-electron and fixed-auxiliary three-center
+paths support coefficient products and first-order exponent derivatives.
+Native exponent Hessians and basis/geometry mixed second derivatives remain
+unsupported. See the [native derivative contract](src/gradscf/integrals/_native/README.md);
+integral-level rules alone do not establish complete molecular Hessian or
+force-loss coverage.
 Overlap orthogonalization now differentiates the inverse square root with a
 Sylvester solve above the eigenvalue cutoff, avoiding spurious loss of response
 at repeated overlap eigenvalues. Clipped overlaps retain regularized derivatives.
@@ -144,18 +191,33 @@ update imports rather than relying on compatibility aliases:
 | `gradscf.data.integrals.libcint.mol` | Removed; use native integral plans |
 | `gradscf.data.integrals.libcint.autodiff` | Removed; native plans provide geometry AD |
 | `gradscf.data.basis` | `gradscf.integrals.basis` |
-| `gradscf.data.pyscf_basis_loader` | `gradscf.integrals.basis_data` |
+| `gradscf.data.pyscf_basis_loader` | `gradscf.integrals.basis.data` |
 | `gradscf.data.grid` / `data.grid_ao` | `gradscf.integrals.grids` / `integrals.grids.ao` |
-| `gradscf.data.ris_auxbasis` | `gradscf.integrals.auxbasis` |
-| `gradscf.scf.inputs` | `gradscf.integrals.assembly` |
+| `gradscf.data.ris_auxbasis` | `gradscf.integrals.basis.auxiliary` |
+| `gradscf.integrals.assembly` / `integrals.input_*` | `gradscf.scf.inputs` |
+| `gradscf.df` J/K functions | `gradscf.integrals.molecular.jk` |
+| `gradscf.df` spectral ERI factorization | `gradscf.integrals.molecular.factorization` |
+| `gradscf.integrals.mo` / `gradscf.integrals.molecular.ao2mo` | `gradscf.ao2mo` |
+| `gradscf.integrals.density_fitting` | `gradscf.integrals.molecular.density_fitting` |
+| `gradscf.integrals.contraction` basis transforms | `gradscf.integrals.basis.contraction` |
+| `gradscf.integrals.contraction.exchange_matrix` | `gradscf.integrals.molecular.jk.exchange_matrix` |
 | `gradscf._native` | `gradscf.integrals._native` |
 
 Basis/grid functions previously exported from `gradscf.data` are exported from
 `gradscf.integrals`. Public `gradscf.gto` facades remain available. All 321
 original basis snapshot files and the supplementary JSON basis bundle are
-retained; resource lookup now uses `gradscf.integrals.basis_data`. Angular
+retained; resource lookup now uses `gradscf.integrals.basis.data`. Angular
 momenta, general contractions and kappa labels are preserved by the loader.
 Loading data does not imply native ECP/spinor/operator support.
+
+Native Python bindings now live under `integrals.backends.native`: `ffi` owns
+raw FFI, `packing` owns ATM/BAS/ENV, `autodiff` owns geometry/coefficient/exponent
+rules, and `eri`, `density_fitting`, `jk` separate execution roles. The old
+`native_geometry`, `native_coefficients` and `native_compact` files are removed.
+Current public `prepare_basis`, `make_plan`, `make_auxiliary_plan` and
+`backend_capabilities` imports remain unchanged. See the
+[integral ownership guide](src/gradscf/integrals/README.md) for remaining
+reference-kernel and dense-ERI migration dependencies.
 
 ## External chemistry dependency removal
 
@@ -171,13 +233,16 @@ Python-format resources now have the inert `.pydata` suffix.
 
 ## 2026-09-18 — Neural model code moves to `gradscf.model`
 
+Historical migration; the 2026-09-28 section above supersedes the training
+location and ambiguous top-level `Functional` export.
+
 Hard switch, no compatibility aliases:
 
 | Old path | New path |
 |---|---|
 | `gradscf.neural_xc` | `gradscf.model.neural_xc` |
 | `gradscf.neural_d` | `gradscf.model.neural_d` |
-| `gradscf.training` | `gradscf.model.training` |
+| `gradscf.model.neural_xc.training` | `gradscf.model.training` |
 | `nnao` (top level) | `gradscf.model.nnao` |
 
 Top-level `gradscf` symbols re-exported via `gradscf/__init__.py`

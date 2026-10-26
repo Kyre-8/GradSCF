@@ -1,0 +1,242 @@
+{
+  "scope": "SC1024 source2 full-matrix spectral/QP pilot; no final four-method plot, dense-BZ or bulk/forward-frequency-convergence claim",
+  "numerical_endpoint_gates_only": true,
+  "beta_hartree_inverse": 400.0,
+  "chemical_potential_hartree": 0.4899145003244022,
+  "source_gamma_index": [
+    0
+  ],
+  "cases": [
+    {
+      "name": "baseline",
+      "source_pole_count": [
+        192,
+        186
+      ],
+      "common_pole_count": 378,
+      "holdout_relative_error": [
+        2.2182654338793403e-06,
+        4.0254043470562825e-07
+      ],
+      "excluded_relative_error": [
+        0.0028001360260560475,
+        0.0025803694702101598
+      ],
+      "number_error_electrons": -1.2482655179724134e-05,
+      "qp_valid_count": 28,
+      "multi_candidate_states": 13,
+      "qp_slope_weight_min": 0.0006089839205961897,
+      "qp_slope_weight_max": 1.5211969693582945,
+      "maximum_true_matrix_residual_hartree": 3.9612757518625585e-13,
+      "max_difference_from_static_fock_eigenvalues_hartree": 5.606103140183638,
+      "source_gamma_gap_ev": 0.7364933992272231,
+      "source_sampled_gap_ev": 0.7364933992272231,
+      "max_qp_change_hartree": 0.0,
+      "max_qp_change_ev": 0.0,
+      "largest_change_k_band": [
+        0,
+        0
+      ],
+      "qp_changes_ev": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "max_valence_edge_change_ev": 0.0,
+      "max_conduction_edge_change_ev": 0.0,
+      "gamma_gap_change_ev": 0.0,
+      "spectral_matrix_relative_change": 0.0,
+      "spectral_trace_relative_change": 0.0,
+      "maximum_spectral_trace_change_per_hartree": 0.0,
+      "same_control_sc512_comparison": {
+        "source_gamma_gap_change_ev": -0.06724292854854576,
+        "source_sampled_gap_change_ev": -0.06724292854854576,
+        "maximum_qp_change_ev": 113.99328624407242,
+        "spectral_trace_relative_change": 0.13455409561052067
+      }
+    },
+    {
+      "name": "rank5e13",
+      "source_pole_count": [
+        198,
+        192
+      ],
+      "common_pole_count": 390,
+      "holdout_relative_error": [
+        2.6855374661124535e-06,
+        4.298499066672183e-07
+      ],
+      "excluded_relative_error": [
+        0.00249104801897645,
+        0.0022339618478716974
+      ],
+      "number_error_electrons": -7.834749954582776e-06,
+      "qp_valid_count": 28,
+      "multi_candidate_states": 13,
+      "qp_slope_weight_min": 0.0627972420223325,
+      "qp_slope_weight_max": 1.2848148001198525,
+      "maximum_true_matrix_residual_hartree": 4.857780844247372e-13,
+      "max_difference_from_static_fock_eigenvalues_hartree": 0.1368577835620398,
+      "source_gamma_gap_ev": 0.7354898822792999,
+      "source_sampled_gap_ev": 0.7354898822792999,
+      "max_qp_change_hartree": 5.7343666418788395,
+      "max_qp_change_ev": 156.04006556827423,
+      "largest_change_k_band": [
+        0,
+        0
+      ],
+      "qp_changes_ev": [
+        [
+          156.04006556827423,
+          38.93478536647573,
+          0.09501396787582982,
+          3.439319207728151,
+          0.02099812694830285,
+          0.02839626629633995,
+          0.014578013335749663,
+          0.006081577253051674,
+          0.058093018604887296,
+          0.05708950165696401,
+          0.009987182927402418,
+          -0.0059679928401234345,
+          -0.0008760205999171134,
+          0.1583025061860172
+        ],
+        [
+          41.83089341883919,
+          7.792998939943236,
+          0.3529070481930636,
+          -0.851517908665722,
+          -1.4068661278394083,
+          -0.14087440692589373,
+          -0.056727027394377794,
+          0.022305726204970015,
+          -0.0059561871783159765,
+          0.11313650429299842,
+          0.15342811088024605,
+          -0.11929918214439107,
+          0.01912504403818999,
+          1.3775995702962003
+        ]
+      ],
+      "max_valence_edge_change_ev": 0.058093018604887296,
+      "max_conduction_edge_change_ev": 0.11313650429299842,
+      "gamma_gap_change_ev": -0.0010035169479232797,
+      "spectral_matrix_relative_change": 0.3628408204971936,
+      "spectral_trace_relative_change": 0.2730608725748067,
+      "maximum_spectral_trace_change_per_hartree": 38.792668124774536,
+      "same_control_sc512_comparison": {
+        "source_gamma_gap_change_ev": -0.10827466551003238,
+        "source_sampled_gap_change_ev": -0.10827466551003238,
+        "maximum_qp_change_ev": 8.659651066155893,
+        "spectral_trace_relative_change": 0.1600389259969139
+      }
+    },
+    {
+      "name": "cutoff151",
+      "source_pole_count": [
+        187,
+        179
+      ],
+      "common_pole_count": 366,
+      "holdout_relative_error": [
+        3.838921612159921e-06,
+        2.525185522382762e-07
+      ],
+      "excluded_relative_error": [
+        0.0054428734281372244,
+        0.005603226646713398
+      ],
+      "number_error_electrons": -8.21413072422672e-05,
+      "qp_valid_count": 28,
+      "multi_candidate_states": 14,
+      "qp_slope_weight_min": 0.007120709134306318,
+      "qp_slope_weight_max": 0.9274000197060329,
+      "maximum_true_matrix_residual_hartree": 5.019318294330333e-13,
+      "max_difference_from_static_fock_eigenvalues_hartree": 0.15263490194562604,
+      "source_gamma_gap_ev": 0.6906918158079267,
+      "source_sampled_gap_ev": 0.6906918158079267,
+      "max_qp_change_hartree": 5.614118577146858,
+      "max_qp_change_ev": 152.76794903351973,
+      "largest_change_k_band": [
+        0,
+        0
+      ],
+      "qp_changes_ev": [
+        [
+          152.76794903351973,
+          39.119013870827054,
+          0.014671697913262133,
+          3.502516165482759,
+          0.05382767713154949,
+          0.057101884872871676,
+          -4.416343504271931,
+          -0.009532805545341758,
+          0.04652576987849805,
+          0.0007241864592015926,
+          -0.027943426185869744,
+          0.014547674178336176,
+          0.010523336827137233,
+          -0.3580357935499207
+        ],
+        [
+          34.501174821266105,
+          3.289426265550406,
+          -0.6466191256994621,
+          -0.005043248948494392,
+          -0.9284277606515509,
+          0.13308314290495504,
+          0.19860298038604396,
+          0.010488017975289095,
+          0.00021523089173630287,
+          -0.012272838200102906,
+          -0.0949173922494351,
+          -0.34358398530886586,
+          -0.5165596137367963,
+          1.9101410186015424
+        ]
+      ],
+      "max_valence_edge_change_ev": 0.04652576987849805,
+      "max_conduction_edge_change_ev": 0.012272838200102906,
+      "gamma_gap_change_ev": -0.04580158341929645,
+      "spectral_matrix_relative_change": 0.5779187518917757,
+      "spectral_trace_relative_change": 0.49272780294450436,
+      "maximum_spectral_trace_change_per_hartree": 100.49806844467764,
+      "same_control_sc512_comparison": {
+        "source_gamma_gap_change_ev": -0.001724612257181469,
+        "source_sampled_gap_change_ev": -0.001724612257181469,
+        "maximum_qp_change_ev": 38.45540825192279,
+        "spectral_trace_relative_change": 0.15531474753062766
+      }
+    }
+  ]
+}

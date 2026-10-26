@@ -1,0 +1,34 @@
+LiH reference -8.007629338162591 gap 0.14272751247194976 minimum Berry singular value 0.742708569180782
+Born direction 0 0 {'atom': 0, 'axis': 0, 'charge_e': [0.9967341373414317, 1.2749301674282537e-15, 5.87574109661688e-16], 'ionic_charge_e': [3.0, 0.0, 0.0], 'linear_residual': 9.645528030044104e-14, 'converged': True, 'seconds': 61.77351475099567}
+Born direction 0 1 {'atom': 0, 'axis': 1, 'charge_e': [1.2788169417177633e-15, 0.996734137341431, 3.824979197905235e-16], 'ionic_charge_e': [0.0, 3.0, 0.0], 'linear_residual': 1.2321274524647114e-13, 'converged': True, 'seconds': 11.1458649970009}
+Born direction 0 2 {'atom': 0, 'axis': 2, 'charge_e': [-8.625165327683143e-16, -1.1452325044539602e-15, 0.9967341373414295], 'ionic_charge_e': [0.0, 0.0, 3.0], 'linear_residual': 1.8077971485162104e-13, 'converged': True, 'seconds': 11.42968177399598}
+Born direction 1 0 {'atom': 1, 'axis': 0, 'charge_e': [-0.99673414275391, -6.27704123563572e-16, -7.781927735031957e-17], 'ionic_charge_e': [1.0, 0.0, 0.0], 'linear_residual': 2.091393782907483e-14, 'converged': True, 'seconds': 10.783306357014226}
+Born direction 1 1 {'atom': 1, 'axis': 1, 'charge_e': [-3.5664847474645563e-16, -0.9967341427539095, -3.3848113159912964e-16], 'ionic_charge_e': [0.0, 1.0, 0.0], 'linear_residual': 1.1115242312577028e-14, 'converged': True, 'seconds': 10.391222973004915}
+Born direction 1 2 {'atom': 1, 'axis': 2, 'charge_e': [3.5664847474645563e-16, 3.5664847474645563e-16, -0.9967341427539088], 'ionic_charge_e': [0.0, 0.0, 1.0], 'linear_residual': 1.0544278130993742e-14, 'converged': True, 'seconds': 10.081501398002729}
+FD 0 0 0.0003 Born error 1.0277092510335706e-09
+FD 0 0 0.0001 Born error 1.1549261547116885e-10
+FD 0 1 0.0003 Born error 1.0304315178899515e-09
+FD 0 1 0.0001 Born error 1.1549194933735407e-10
+FD 0 2 0.0003 Born error 1.0268101924282291e-09
+FD 0 2 0.0001 Born error 1.151032602564328e-10
+FD 1 0 0.0003 Born error 1.0322402932416708e-09
+FD 1 0 0.0001 Born error 1.0368561564888523e-10
+FD 1 1 0.0003 Born error 1.0295166941176603e-09
+FD 1 1 0.0001 Born error 1.1593870308246323e-10
+FD 1 2 0.0003 Born error 1.0290008845004195e-09
+FD 1 2 0.0001 Born error 1.1153555856679986e-10
+LiH Born completed 440.4904647379881 seconds; peak RSS 18810928 KiB
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "-c",
+    "from lih_born_charges import SETTINGS, run; SETTINGS['mesh']=[71]*3; run('fft71')"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 18810928,
+  "budget_kib": 67108864,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true
+}

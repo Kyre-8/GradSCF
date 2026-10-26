@@ -5,9 +5,9 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
+from gradscf.solvers.nonlinear import ScalarRootConfig, solve_scalar_roots
+
 from gradscf.gw.qp import (
-    _secant_batch,
-    _secant_batch_scan,
     solve_qp_batch,
     solve_qp_orbital,
 )
@@ -32,14 +32,15 @@ def _context():
     return shared, stacked
 
 
+@pytest.mark.parametrize("method", ["secant", "newton", "hybrid"])
 @pytest.mark.parametrize("mode", ["implicit", "unrolled"])
-def test_jit_preserves_nonconvergence_with_custom_iteration_limit(mode):
+def test_jit_preserves_nonconvergence_with_custom_iteration_limit(mode,method):
     shared, stacked = _context()
 
     def solve(e):
         return solve_qp_batch(
             e, jnp.zeros(1), shared, stacked, occupied=jnp.array([True]),
-            maxiter=1, tol=1e-12, diff_mode=mode,
+            maxiter=1, tol=1e-12, diff_mode=mode, method=method,
         )
 
     eager = solve(jnp.array([-0.5]))
@@ -59,14 +60,15 @@ def test_orbital_wrapper_preserves_nonconvergence_under_jit():
     assert not bool(done)
 
 
-def test_context_only_implicit_gradient_matches_finite_difference():
+@pytest.mark.parametrize("method", ["secant", "newton", "hybrid"])
+def test_context_only_implicit_gradient_matches_finite_difference(method):
     shared, stacked = _context()
 
     def energy(scale):
         return solve_qp_batch(
             jnp.array([-0.5]), jnp.zeros(1), shared,
             {**stacked, "wmn_p": scale * stacked["wmn_p"]},
-            occupied=jnp.array([True]), tol=1e-10,
+            occupied=jnp.array([True]), tol=1e-10, method=method,
         )[0][0]
 
     grad = jax.jit(jax.grad(energy))(1.0)
@@ -75,11 +77,12 @@ def test_context_only_implicit_gradient_matches_finite_difference():
     np.testing.assert_allclose(grad, fd, rtol=1e-6, atol=1e-9)
 
 
-@pytest.mark.parametrize("solver", [_secant_batch, _secant_batch_scan])
-def test_small_step_without_small_residual_is_not_converged(solver):
+@pytest.mark.parametrize("scan", [False, True])
+def test_small_step_without_small_residual_is_not_converged(scan):
     # A jump can yield a tiny secant step although no root exists.
     fn = lambda x: jnp.where(x > 0.0, 1e12, 1.0)
-    root, done = solver(fn, jnp.array([1.0]), jnp.array([0.0]), tol=1e-6, maxiter=3)
+    out = solve_scalar_roots(fn, jnp.array([1.0]), x1=jnp.array([0.0]), config=ScalarRootConfig(maxiter=3), scan=scan)
+    root, done = out.roots, out.converged
     assert not bool(done[0])
     assert np.isfinite(root).all()
 

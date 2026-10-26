@@ -1,0 +1,15 @@
+{
+  "frequencies_signed_cm1": [
+    -438.549819533371,
+    -438.487455908503,
+    -103.76779972739708,
+    -103.73667716552873,
+    596.1232933942998,
+    1313.0853864973178
+  ],
+  "negative_native_modes": 4,
+  "native_probe_column_difference_hartree_per_bohr2": 0.0,
+  "native_sha256": "a933b10f13dc61598369fb308364e0480c6de521e2e53c544ca1508d14f6d73a",
+  "asr_projected": false,
+  "scope": "Eager existing mode postprocessing of a raw finite-model q-half matrix. No independent full-matrix validation or material instability claim."
+}

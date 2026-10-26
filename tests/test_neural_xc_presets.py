@@ -1,4 +1,4 @@
-from gradscf.dft.libxc_jax.jax_libxc import b3lyp_component_basis, b3lyp_component_coefficients
+from gradscf.dft.xc import b3lyp_component_basis, b3lyp_component_coefficients
 from gradscf.model.neural_xc import (
     DEFAULT_NEURAL_XC_COEFFICIENT_PRIOR_MODE,
     DEFAULT_NEURAL_XC_COEFFICIENT_PRIOR_VALUES,

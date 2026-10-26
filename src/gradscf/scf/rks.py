@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from functools import lru_cache
-from dataclasses import dataclass, replace
+from functools import lru_cache, partial
+from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Literal
 
 import jax
@@ -9,6 +9,7 @@ import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
 
+from .._memory import DEFAULT_MAX_MEMORY_MB, validate_memory_mb
 from gradscf.integrals.basis import CartesianBasis
 from gradscf.integrals import (
     build_j_from_eri_pair_matrix,
@@ -16,8 +17,9 @@ from gradscf.integrals import (
     build_direct_jk_incremental,
     eri_pair_matrix_packed,
 )
-from gradscf.integrals.jk import _DIRECT_PACKED_JK_MAX_NAO
-from ..df import build_j_from_df, build_jk_from_df, build_jk_from_df_orbitals, eri_to_df_factors
+from gradscf.integrals.molecular.jk import _DIRECT_PACKED_JK_MAX_NAO
+from gradscf.integrals.molecular.jk import build_j_from_df, build_jk_from_df, build_jk_from_df_orbitals
+from gradscf.integrals.molecular.factorization import eri_to_df_factors
 from ..tools.features import (
     MoleculeLikeState,
     _spin_density_and_gradient,
@@ -25,13 +27,12 @@ from ..tools.features import (
     molecule_grid_view,
     restricted_grid_features_with_gradients,
 )
-from ..dft.libxc_jax.jax_libxc import (
-    eval_xc_energy_density,
+from ..dft.xc import (
     hybrid_coeff,
     parse_xc,
-    restricted_feature_bundle_from_rho_grad_tau,
     xc_type,
 )
+from ..dft.xc.evaluate import grid_value_and_grad
 from .convergence import convergence_reached
 from .core import (
     _build_density_from_occ,
@@ -40,6 +41,7 @@ from .core import (
     _validate_density_matrix,
 )
 from ._pytree import pytree_dataclass
+from .rsh import local_xc_spec, validate_rsh_inputs
 from .energy import XCContribution, restricted_energy, restricted_fock
 
 from ..solvers.nonlinear.diis import (
@@ -78,7 +80,17 @@ class RKSConfig:
     df_max_rank: int | None = None
     auxbasis: str | None = None
     direct_scf_tol: float = 0.0
+    direct_scf_workers: int = 1
+    grid_block_size: int = 0
+    grid_max_memory: float | None = None
+    max_memory: float = field(default=DEFAULT_MAX_MEMORY_MB, kw_only=True)
     convergence_metric: Literal["energy_and_residual", "energy"] = "energy_and_residual"
+
+    def __post_init__(self):
+        object.__setattr__(self, "max_memory", validate_memory_mb(self.max_memory))
+        if self.grid_max_memory is not None:
+            object.__setattr__(self, "grid_max_memory",
+                               validate_memory_mb(self.grid_max_memory, name="grid_max_memory"))
 
 
 @pytree_dataclass
@@ -100,6 +112,10 @@ class RKSResult:
     overlap_matrix: Array
     hcore_matrix: Array
     cycles: Array | int
+    # For RSH, exact_exchange_fraction is the short-range value. The tuple
+    # identifies (omega, long-range fraction, short-range fraction).
+    range_separated_coefficients: tuple[float, float, float] | None = field(default=None, kw_only=True)
+    dispersion_energy: Array | float | None = field(default=None, kw_only=True)
 
 
 # Preserve the historical import/constructor while sharing the result contract.
@@ -133,12 +149,12 @@ def _closed_shell_mo_occ(nao: int, nocc: int, dtype: Array) -> Array:
 def _build_jk(eri: Array, density: Array) -> tuple[Array, Array]:
     eri_arr = jnp.asarray(eri)
     if eri_arr.ndim in (1,2):
-        from ..integrals.layouts import build_jk_from_packed
+        from gradscf.integrals.molecular.jk import build_jk_from_packed
         return build_jk_from_packed(eri_arr, density)
     if int(eri_arr.size) == 0:
         raise ValueError("JK build requires full AO ERI or packed AO-pair ERI data.")
     j_mat = jnp.einsum("pqrs,rs->pq", eri, density, precision=Precision.HIGHEST)
-    from ..integrals.contraction import exchange_matrix
+    from gradscf.integrals.molecular.jk import exchange_matrix
     k_mat = exchange_matrix(eri, density)
     return j_mat, k_mat
 
@@ -237,6 +253,29 @@ def _diis_extrapolate(
     )
 
 
+@partial(jax.custom_jvp, nondiff_argnums=(4,))
+def _df_jk_with_orbital_hint(factors, density, mo_coeff, mo_occ, nocc):
+    """Orbitals accelerate a consistent primal; density defines its response."""
+    orbital_density = _build_density_from_occ(mo_coeff, mo_occ)
+    tolerance = 64*jnp.finfo(density.dtype).eps*jnp.maximum(1., jnp.max(jnp.abs(density)))
+    consistent = jnp.max(jnp.abs(density-orbital_density)) <= tolerance
+    return jax.lax.cond(
+        consistent,
+        lambda _: build_jk_from_df_orbitals(factors, density, mo_coeff, mo_occ, nocc=nocc),
+        lambda _: build_jk_from_df(factors, density), None)
+
+
+@_df_jk_with_orbital_hint.defjvp
+def _df_jk_with_orbital_hint_jvp(nocc, primals, tangents):
+    factors, density, coeff, occ = primals
+    dfactors, ddensity, _, _ = tangents
+    value = _df_jk_with_orbital_hint(factors, density, coeff, occ, nocc)
+    # A numerically coincident guess/damped density need not share its tangent
+    # with the orbital hint. Differentiate the physical J/K operands instead.
+    _, tangent = jax.jvp(build_jk_from_df, (factors, density), (dfactors, ddensity))
+    return value, tangent
+
+
 def _make_jk_builder(
     eri: Array | None,
     cfg: RKSConfig,
@@ -246,18 +285,38 @@ def _make_jk_builder(
     direct_basis: CartesianBasis | None = None,
     with_k: bool = True,
     nocc: int | None = None,
+    eri_lr: Array | None = None,
 ) -> JKBuilder:
+    from .rsh import rsh_preset
+    rsh = rsh_preset(cfg.xc_spec)
+    if rsh is not None:
+        if cfg.jk_backend == "direct":
+            from .rsh import _require_direct_rsh_provider
+            _require_direct_rsh_provider(direct_basis)
+        elif cfg.jk_backend == "full":
+            if eri_lr is None or eri is None or jnp.ndim(eri) != 4:
+                raise ValueError("Range-separated XC requires full eri and eri_lr.")
+            exchange_eri = (rsh.default_sr_hf_fraction * jnp.asarray(eri)
+                            + (rsh.default_lr_hf_fraction-rsh.default_sr_hf_fraction) * jnp.asarray(eri_lr))
+        else:
+            raise NotImplementedError("Range-separated XC requires full ERIs or canonical native direct J/K.")
     def _direct_builder() -> JKBuilder:
         if direct_basis is None:
             raise ValueError("jk_backend='direct' requires direct_basis.")
 
         threshold = float(cfg.direct_scf_tol)
-        from ..integrals.backends.native_compact import NativeDirectBasis,ProjectedNativeDirectBasis
+        from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
         if isinstance(direct_basis,(NativeDirectBasis,ProjectedNativeDirectBasis)):
             def _native_direct(density,mo_coeff=None,mo_occ=None,density_last=None,j_last=None,k_last=None):
                 del mo_coeff,mo_occ
                 delta=density if density_last is None else density-density_last
-                j,k=direct_basis.get_jk(delta,screening_threshold=threshold)
+                if rsh is not None:
+                    from .rsh import _direct_rsh_jk
+                    j,k=_direct_rsh_jk(direct_basis,delta,rsh.to_range_separated_hybrid_coefficients(),
+                        screening_threshold=threshold,workers=cfg.direct_scf_workers,with_k=with_k)
+                else:
+                    j,k=direct_basis.get_jk(delta,screening_threshold=threshold,
+                                          workers=cfg.direct_scf_workers,with_k=with_k)
                 if density_last is not None:j,k=j+j_last,k+k_last
                 return j,k if with_k else jnp.zeros_like(density)
             return _native_direct
@@ -335,7 +394,7 @@ def _make_jk_builder(
                 if eri_arr is None:
                     raise ValueError("jk_backend='full' requires full AO ERI or packed AO-pair ERI.")
                 if eri_arr.ndim in (1,2):
-                    from ..integrals.layouts import build_jk_from_packed
+                    from gradscf.integrals.molecular.jk import build_jk_from_packed
                     return build_jk_from_packed(eri_arr,density)[0],jnp.zeros_like(density)
                 return (
                     jnp.einsum("pqrs,rs->pq", eri_arr, density, precision=Precision.HIGHEST),
@@ -353,6 +412,10 @@ def _make_jk_builder(
             k_last: Array | None = None,
         ):
             del mo_coeff, mo_occ, density_last, j_last, k_last
+            if rsh is not None:
+                j_mat = jnp.einsum("pqrs,rs->pq", eri_arr, density, precision=Precision.HIGHEST)
+                k_mat = jnp.einsum("prqs,rs->pq", exchange_eri, density, precision=Precision.HIGHEST)
+                return j_mat, k_mat
             if pair_arr is not None:
                 return build_jk_from_eri_pair_matrix(pair_arr, density)
             if eri_arr is None:
@@ -396,13 +459,9 @@ def _make_jk_builder(
         ):
             del density_last, j_last, k_last
             if use_orbital_k and mo_coeff is not None and mo_occ is not None:
-                return build_jk_from_df_orbitals(
-                    factors,
-                    density,
-                    mo_coeff,
-                    mo_occ,
-                    nocc=int(nocc),
-                )
+                # Density-only guesses and density damping need K[D], not
+                # K from orbitals that describe a different density.
+                return _df_jk_with_orbital_hint(factors, density, mo_coeff, mo_occ, int(nocc))
             return build_jk_from_df(factors, density)
 
         return _df_jk
@@ -444,39 +503,21 @@ def _array_xc_value_and_grad_kernel(
     xc_kind: str,
     density_floor: float,
 ) -> Callable[[Array], tuple[Array, Array]]:
-    xc_spec_norm = str(xc_spec)
-    xc_kind_norm = str(xc_kind)
-    density_floor_value = float(density_floor)
-
-    def point_exc_array(variables: Array) -> Array:
-        rho = jnp.maximum(variables[:, 0], density_floor_value)
-        if xc_kind_norm == "LDA":
-            grad = jnp.zeros((variables.shape[0], 3), dtype=variables.dtype)
-            tau = jnp.zeros_like(rho)
-        elif xc_kind_norm == "GGA":
-            grad = variables[:, 1:4]
-            tau = jnp.zeros_like(rho)
-        elif xc_kind_norm == "MGGA":
-            grad = variables[:, 1:4]
-            tau = jnp.maximum(variables[:, 4], 0.0)
-        else:
-            raise ValueError(f"Unsupported XC kind={xc_kind_norm!r}.")
-        features = restricted_feature_bundle_from_rho_grad_tau(
-            rho,
-            grad,
-            tau,
-            density_floor=density_floor_value,
-        )
-        return eval_xc_energy_density(xc_spec_norm, features)
-
-    def unweighted_sum(variables: Array) -> Array:
-        return jnp.sum(point_exc_array(variables))
-
-    value_and_grad = jax.value_and_grad(unweighted_sum)
-
     def kernel(variables: Array) -> tuple[Array, Array]:
-        _, grad = value_and_grad(variables)
-        return point_exc_array(variables), grad
+        rho = jnp.maximum(variables[:, :1], density_floor)
+        blocks = [rho/2, rho/2]
+        if xc_kind in {"GGA", "MGGA"}:
+            blocks.extend([variables[:, 1:4]/2, variables[:, 1:4]/2])
+        if xc_kind == "MGGA":
+            tau = jnp.maximum(variables[:, 4:5], 0.)
+            blocks.extend([tau/2, tau/2])
+        values, spin_grad = grid_value_and_grad(xc_spec, xc_kind)(jnp.concatenate(blocks, axis=-1))
+        gradients = [(spin_grad[:, :1]+spin_grad[:, 1:2])/2]
+        if xc_kind in {"GGA", "MGGA"}:
+            gradients.append((spin_grad[:, 2:5]+spin_grad[:, 5:8])/2)
+        if xc_kind == "MGGA":
+            gradients.append((spin_grad[:, 8:9]+spin_grad[:, 9:10])/2)
+        return values, jnp.concatenate(gradients, axis=-1)
 
     return jax.jit(kernel)
 
@@ -491,7 +532,10 @@ def _xc_energy_and_potential_on_grid(
     density_floor: float,
     potential_clip: float | None,
     xc_kind: str,
-) -> tuple[Array, Array, Array]:
+    return_tau: bool = False,
+) -> tuple[Array, ...]:
+    if xc_kind == "MGGA" and not return_tau:
+        raise ValueError("MGGA grid potentials require return_tau=True to retain the kinetic-density potential.")
     rho = jnp.maximum(jnp.asarray(rho), density_floor)
     grad = jnp.asarray(grad)
     tau = jnp.maximum(jnp.asarray(tau), 0.0)
@@ -499,7 +543,8 @@ def _xc_energy_and_potential_on_grid(
 
     if xc_kind == "HF":
         zeros = jnp.zeros_like(rho)
-        return jnp.asarray(0.0, dtype=rho.dtype), zeros, jnp.zeros((rho.shape[0], 3), dtype=rho.dtype)
+        result = (jnp.asarray(0.0, dtype=rho.dtype), zeros, jnp.zeros((rho.shape[0], 3), dtype=rho.dtype))
+        return result + (zeros,) if return_tau else result
 
     if xc_kind == "LDA":
         response_variables = rho[..., None]
@@ -510,34 +555,41 @@ def _xc_energy_and_potential_on_grid(
     else:
         raise ValueError(f"Unsupported XC kind={xc_kind!r}.")
 
+    mask = rho > density_floor
+    # The quadrature cutoff applies to energy and all potential channels.
+    # Evaluate inactive points at a regular dummy input before masking, so
+    # invalid tail branches cannot contaminate higher derivatives.
+    response_variables = jnp.where(mask[:, None], response_variables,
+                                   jnp.ones_like(response_variables))
     point_exc, point_grad = _array_xc_value_and_grad_kernel(
         xc_spec,
         xc_kind,
         density_floor,
     )(response_variables)
-    point_exc = jnp.nan_to_num(point_exc, nan=0.0, posinf=0.0, neginf=0.0)
-    point_grad = jnp.nan_to_num(point_grad, nan=0.0, posinf=0.0, neginf=0.0)
+    point_exc = jnp.where(mask, point_exc, 0.)
     exc = jnp.tensordot(weights, point_exc, axes=(0, 0))
 
-    mask = rho > density_floor
     vxc_rho = jnp.where(mask, point_grad[:, 0], 0.0)
     if xc_kind in {"GGA", "MGGA"}:
         vxc_grad = jnp.where(mask[:, None], point_grad[:, 1:4], 0.0)
     else:
         vxc_grad = jnp.zeros((rho.shape[0], 3), dtype=rho.dtype)
+    vxc_tau = jnp.where(mask, point_grad[:, 4], 0.) if xc_kind == "MGGA" else jnp.zeros_like(rho)
 
     if potential_clip is not None:
         clip = jnp.asarray(potential_clip, dtype=rho.dtype)
         vxc_rho = jnp.clip(vxc_rho, -clip, clip)
         vxc_grad = jnp.clip(vxc_grad, -clip, clip)
-    return exc, vxc_rho, vxc_grad
+        vxc_tau = jnp.clip(vxc_tau, -clip, clip)
+    result = (exc, vxc_rho, vxc_grad)
+    return result + (vxc_tau,) if return_tau else result
 
 
 def _vxc_matrix_from_grid_potential(
     *,
     ao: Array,
-    ao_deriv1: Array,
-    ao_laplacian: Array,
+    ao_deriv1: Array | None,
+    ao_laplacian: Array | None,
     weights: Array,
     vxc_rho: Array,
     vxc_grad: Array,
@@ -589,6 +641,46 @@ def _vxc_matrix_from_grid_potential(
     return 0.5 * (vxc_matrix + vxc_matrix.T)
 
 
+def _restricted_xc_energy_and_matrix(
+    *,
+    density: Array,
+    ao: Array,
+    ao_deriv1: Array | None,
+    weights: Array,
+    cfg: RKSConfig,
+    xc_kind: str,
+    grid_ao: Any | None = None,
+) -> tuple[Array, Array]:
+    """Integrate built-in XC, reducing AO blocks before advancing the grid."""
+    dtype = jnp.result_type(density, ao, weights)
+    initial = (jnp.asarray(0., dtype=dtype), jnp.zeros(density.shape, dtype=dtype))
+    if xc_kind == "HF":
+        return initial
+
+    def contribution(carry, block_ao, derivative, laplacian, coords, block_weights):
+        del laplacian, coords
+        if xc_kind == "LDA":
+            rho = jnp.einsum("rp,pq,rq->r", block_ao, density, block_ao,
+                             precision=Precision.HIGHEST)
+            grad = jnp.zeros((block_ao.shape[0], 3), dtype=rho.dtype)
+        else:
+            rho, grad = _spin_density_and_gradient(block_ao, derivative, density)
+        tau = _spin_tau(derivative, density) if xc_kind == "MGGA" else jnp.zeros_like(rho)
+        energy, v_rho, v_grad, v_tau = _xc_energy_and_potential_on_grid(
+            rho=rho, grad=grad, tau=tau, weights=block_weights,
+            xc_spec=cfg.xc_spec, density_floor=cfg.density_floor,
+            potential_clip=cfg.potential_clip, xc_kind=xc_kind, return_tau=True)
+        potential = _vxc_matrix_from_grid_potential(
+            ao=block_ao, ao_deriv1=derivative, ao_laplacian=None, weights=block_weights,
+            vxc_rho=v_rho, vxc_grad=v_grad, vxc_tau=v_tau,
+            vxc_lapl=jnp.zeros_like(rho), xc_kind=xc_kind)
+        return carry[0] + energy, carry[1] + potential
+
+    if grid_ao is None:
+        return contribution(initial, ao, ao_deriv1, None, None, weights)
+    return grid_ao.reduce(contribution, initial, deriv=0 if xc_kind == "LDA" else 1)
+
+
 def _fock_components_for_density(
     *,
     density: Array,
@@ -606,32 +698,13 @@ def _fock_components_for_density(
     alpha: Array,
     cfg: RKSConfig,
     xc_kind: str,
+    grid_ao: Any | None = None,
 ) -> tuple[Array, Array, Array, Array]:
     j_mat, k_mat = jk_builder(density, mo_coeff, mo_occ, density_last, j_last, k_last)
     del mo_energy
-    rho, grad = _spin_density_and_gradient(ao, ao_deriv1, density)
-    tau = _spin_tau(ao_deriv1, density)
-    xc_energy, vxc_rho, vxc_grad = _xc_energy_and_potential_on_grid(
-        rho=rho,
-        grad=grad,
-        tau=tau,
-        weights=weights,
-        xc_spec=cfg.xc_spec,
-        density_floor=cfg.density_floor,
-        potential_clip=cfg.potential_clip,
-        xc_kind=xc_kind,
-    )
-    vxc_matrix = _vxc_matrix_from_grid_potential(
-        ao=ao,
-        ao_deriv1=ao_deriv1,
-        ao_laplacian=jnp.zeros_like(ao),
-        weights=weights,
-        vxc_rho=vxc_rho,
-        vxc_grad=vxc_grad,
-        vxc_tau=jnp.zeros_like(vxc_rho),
-        vxc_lapl=jnp.zeros_like(vxc_rho),
-        xc_kind=xc_kind,
-    )
+    xc_energy, vxc_matrix = _restricted_xc_energy_and_matrix(
+        density=density, ao=ao, ao_deriv1=ao_deriv1, weights=weights,
+        cfg=cfg, xc_kind=xc_kind, grid_ao=grid_ao)
     xc = XCContribution(xc_energy,vxc_matrix,alpha)
     return j_mat,k_mat,xc,restricted_fock(h,j_mat,k_mat,xc)
 
@@ -654,6 +727,7 @@ def _energy_and_raw_fock_for_density(
     alpha: Array,
     cfg: RKSConfig,
     xc_kind: str,
+    grid_ao: Any | None = None,
 ) -> tuple[Array, Array, Array, Array, Array]:
     j_mat, k_mat, xc, fock = _fock_components_for_density(
         density=density,
@@ -671,6 +745,7 @@ def _energy_and_raw_fock_for_density(
         alpha=alpha,
         cfg=cfg,
         xc_kind=xc_kind,
+        grid_ao=grid_ao,
     )
 
     total=restricted_energy(density,h,j_mat,k_mat,xc,nuclear_repulsion=enuc)
@@ -853,9 +928,7 @@ def _run_scf_iterations_lax_core(
             diis_active,
             lambda operand: _diis_extrapolate(
                 operand[0],
-                _orthonormal_diis_error(
-                    operand[0], operand[1], operand[2], operand[3]
-                ),
+                _orthonormal_diis_error(operand[0], operand[1], operand[2], operand[3]),
                 operand[4],
                 operand[5],
                 operand[6],
@@ -868,16 +941,7 @@ def _run_scf_iterations_lax_core(
                 operand[6],
                 operand[7],
             ),
-            operand=(
-                fock_pre_diis,
-                density_i,
-                s,
-                diis_basis,
-                fock_hist,
-                err_hist,
-                hist_head,
-                hist_count,
-            ),
+            operand=(fock_pre_diis, density_i, s, diis_basis, fock_hist, err_hist, hist_head, hist_count),
         )
         fock_eff = _apply_optional_level_shift(
             fock_eff,
@@ -1026,6 +1090,7 @@ def _run_rks_from_integrals_shared(
     ao: Array,
     ao_deriv1: Array,
     grid_weights: Array,
+    grid_ao: Any | None = None,
     df_factors: Array | None = None,
     direct_basis: CartesianBasis | None = None,
     init_density: Array | None = None,
@@ -1033,21 +1098,15 @@ def _run_rks_from_integrals_shared(
     init_mo_occ: Array | None = None,
     init_mo_energy: Array | None = None,
     config: RKSConfig | None = None,
+    eri_lr: Array | None = None,
+    dispersion_energy: Array | None = None,
     traceable: bool,
 ) -> RKSResult:
     cfg = RKSConfig() if config is None else config
-    parse_xc(cfg.xc_spec)
-    xc_kind = xc_type(cfg.xc_spec)
-    if xc_kind == "MGGA":
-        if traceable:
-            raise NotImplementedError(
-                "Traceable RKS matrix assembly currently supports LDA/GGA/HF semilocal terms. "
-                "MGGA requires tau-dependent AO Hessian terms."
-            )
-        raise NotImplementedError(
-            "RKS SCF matrix assembly currently supports LDA/GGA/HF semilocal terms. "
-            "MGGA requires tau-dependent AO Hessian terms."
-        )
+    rsh = validate_rsh_inputs(cfg.xc_spec, eri, eri_lr, dispersion_energy,
+                              jk_backend=cfg.jk_backend, direct_basis=direct_basis)
+    parse_xc(local_xc_spec(cfg.xc_spec))
+    xc_kind = xc_type(local_xc_spec(cfg.xc_spec))
 
     s = jnp.asarray(overlap)
     h = jnp.asarray(hcore)
@@ -1103,7 +1162,7 @@ def _run_rks_from_integrals_shared(
         density = init_density_matrix
 
     skip_first_fock_damping = (init_mo_coeff is not None) or (init_density_matrix is not None)
-    alpha_scalar = float(hybrid_coeff(cfg.xc_spec))
+    alpha_scalar = 1.0 if rsh is not None else float(hybrid_coeff(cfg.xc_spec))
     alpha = jnp.asarray(alpha_scalar, dtype=h.dtype)
     jk_builder = _make_jk_builder(
         eri_arr,
@@ -1113,6 +1172,7 @@ def _run_rks_from_integrals_shared(
         direct_basis=direct_basis,
         with_k=bool(abs(alpha_scalar) > 1e-14),
         nocc=nocc,
+        eri_lr=eri_lr,
     )
     j_mat, k_mat, _, fock = _fock_components_for_density(
         density=density,
@@ -1127,6 +1187,7 @@ def _run_rks_from_integrals_shared(
         alpha=alpha,
         cfg=cfg,
         xc_kind=xc_kind,
+        grid_ao=grid_ao,
     )
 
     def energy_and_fock_builder(
@@ -1155,6 +1216,7 @@ def _run_rks_from_integrals_shared(
             alpha=alpha,
             cfg=cfg,
             xc_kind=xc_kind,
+            grid_ao=grid_ao,
         )
 
     scf_kwargs = dict(
@@ -1216,13 +1278,14 @@ def _run_rks_from_integrals_shared(
         k_mat=k_mat,
         traceable=traceable,
     )
+    total_energy = energy if dispersion_energy is None else energy + dispersion_energy
     return RKSResult(
-        converged=jnp.asarray(converged),
-        total_energy=energy,
+        converged=jnp.asarray(converged) & jnp.isfinite(total_energy),
+        total_energy=total_energy,
         electronic_energy=energy - enuc,
         nuclear_repulsion=enuc,
         xc_energy=xc_energy,
-        exact_exchange_fraction=alpha,
+        exact_exchange_fraction=alpha if rsh is None else jnp.asarray(rsh.default_sr_hf_fraction),
         mo_energy=mo_energy,
         mo_coeff=mo_coeff,
         mo_occ=mo_occ_fixed,
@@ -1231,6 +1294,8 @@ def _run_rks_from_integrals_shared(
         overlap_matrix=s,
         hcore_matrix=h,
         cycles=jnp.asarray(cycles),
+        range_separated_coefficients=None if rsh is None else rsh.to_range_separated_hybrid_coefficients(),
+        dispersion_energy=dispersion_energy,
     )
 
 
@@ -1245,6 +1310,7 @@ def run_rks_from_integrals(
     ao: Array,
     ao_deriv1: Array,
     grid_weights: Array,
+    grid_ao: Any | None = None,
     df_factors: Array | None = None,
     direct_basis: CartesianBasis | None = None,
     init_density: Array | None = None,
@@ -1252,6 +1318,8 @@ def run_rks_from_integrals(
     init_mo_occ: Array | None = None,
     init_mo_energy: Array | None = None,
     config: RKSConfig | None = None,
+    eri_lr: Array | None = None,
+    dispersion_energy: Array | None = None,
 ) -> RKSResult:
     """Run restricted Kohn-Sham SCF from AO integrals and numerical grid data."""
     result = _run_rks_from_integrals_shared(
@@ -1264,6 +1332,7 @@ def run_rks_from_integrals(
         ao=ao,
         ao_deriv1=ao_deriv1,
         grid_weights=grid_weights,
+        grid_ao=grid_ao,
         df_factors=df_factors,
         direct_basis=direct_basis,
         init_density=init_density,
@@ -1271,6 +1340,8 @@ def run_rks_from_integrals(
         init_mo_occ=init_mo_occ,
         init_mo_energy=init_mo_energy,
         config=config,
+        eri_lr=eri_lr,
+        dispersion_energy=dispersion_energy,
         traceable=False,
     )
 
@@ -1297,6 +1368,7 @@ def run_rks_from_integrals_traceable(
     ao: Array,
     ao_deriv1: Array,
     grid_weights: Array,
+    grid_ao: Any | None = None,
     df_factors: Array | None = None,
     direct_basis: CartesianBasis | None = None,
     init_density: Array | None = None,
@@ -1304,6 +1376,8 @@ def run_rks_from_integrals_traceable(
     init_mo_occ: Array | None = None,
     init_mo_energy: Array | None = None,
     config: RKSConfig | None = None,
+    eri_lr: Array | None = None,
+    dispersion_energy: Array | None = None,
 ) -> TraceableRKSResult:
     """Traceable RKS SCF from AO integrals (array-valued outputs for autodiff)."""
     return _run_rks_from_integrals_shared(
@@ -1316,6 +1390,7 @@ def run_rks_from_integrals_traceable(
         ao=ao,
         ao_deriv1=ao_deriv1,
         grid_weights=grid_weights,
+        grid_ao=grid_ao,
         df_factors=df_factors,
         direct_basis=direct_basis,
         init_density=init_density,
@@ -1323,5 +1398,7 @@ def run_rks_from_integrals_traceable(
         init_mo_occ=init_mo_occ,
         init_mo_energy=init_mo_energy,
         config=config,
+        eri_lr=eri_lr,
+        dispersion_energy=dispersion_energy,
         traceable=True,
     )

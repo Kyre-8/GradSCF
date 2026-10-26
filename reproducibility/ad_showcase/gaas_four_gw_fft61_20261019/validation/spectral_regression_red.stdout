@@ -1,0 +1,132 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_continuation_restores_same_pole_tr_after_complex_gauge_and_exact_union __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc84a485490>
+
+    def test_continuation_restores_same_pole_tr_after_complex_gauge_and_exact_union(monkeypatch):
+        from gradscf.gw.pbc import spectrum
+        model, result, original = _source()
+        saved = {name: np.array(getattr(result, name), copy=True)
+                 for name in ('full_fock', 'sigma_moment', 'sigma_c_iw')}
+        calls = []
+        def realization(z, values, **options):
+            fit = original[len(calls)]
+            error = np.linalg.norm(evaluate_poles(fit, z)-values)/np.linalg.norm(values)
+            assert error < options['tolerance']
+            np.testing.assert_allclose(fit.residues.sum(axis=0), options['moment'], atol=1e-15)
+            assert np.linalg.eigvalsh(fit.residues).min() >= -1e-15
+            calls.append(error)
+            return fit
+        monkeypatch.setattr(spectrum, 'interpolate_causal', realization)
+        z = np.array([.35-1e-6+1e-7j, .35+1e-6+1e-7j, -.4+.02j])
+        # AO transport is independent of the MO gauge and uses the actual partner
+        # row table[Gamma,:], rather than the identity q=0 column.
+        partners = model.table[model.zero_q]
+        legacy, legacy_reports = spectrum.continue_self_energy(result, tolerance=1e-4)
+        assert all(report['holdout_relative_error'] < 1e-4 for report in legacy_reports)
+        old_ao = [c@evaluate_poles(fit, z)@c.conj().T
+                  for c, fit in zip(model.coeff, legacy)]
+        assert max(np.linalg.norm(old_ao[k]-old_ao[bar].swapaxes(-1, -2))
+                   for k, bar in enumerate(partners)) > 1.
+        calls.clear()
+>       fits, reports = spectrum.continue_self_energy(result, model=model, tolerance=1e-4)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: continue_self_energy() got an unexpected keyword argument 'model'
+
+tests/gw/pbc/test_spectrum_time_reversal.py:86: TypeError
+____ test_genuine_raw_tr_breaking_is_rejected_before_realization[full_fock] ____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc84a485450>
+quantity = 'full_fock'
+
+    @pytest.mark.parametrize('quantity', ['full_fock', 'sigma_moment', 'sigma_c_iw'])
+    def test_genuine_raw_tr_breaking_is_rejected_before_realization(monkeypatch, quantity):
+        from gradscf.gw.pbc import spectrum
+        model, result, _ = _source()
+        # Break only +1/3, so a Gamma-only or identity-column check is insufficient.
+        odd = np.array([[0., .005j], [-.005j, 0.]])
+        change = model.coeff[1].conj().T@odd@model.coeff[1]
+        if quantity == 'sigma_c_iw':
+            change = change[None]/(1j*result.grid.fermion[:, None, None]-.9)
+        getattr(result, quantity)[1] += change
+        def no_fit(*args, **kwargs):
+            pytest.fail('Genuinely TR-breaking source reached causal realization')
+        monkeypatch.setattr(spectrum, 'interpolate_causal', no_fit)
+        with pytest.raises((ValueError, ArithmeticError), match='[Tt]ime.?reversal|TR'):
+>           spectrum.continue_self_energy(result, model=model, tolerance=1e-4)
+E           TypeError: continue_self_energy() got an unexpected keyword argument 'model'
+
+tests/gw/pbc/test_spectrum_time_reversal.py:118: TypeError
+__ test_genuine_raw_tr_breaking_is_rejected_before_realization[sigma_moment] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc84a014890>
+quantity = 'sigma_moment'
+
+    @pytest.mark.parametrize('quantity', ['full_fock', 'sigma_moment', 'sigma_c_iw'])
+    def test_genuine_raw_tr_breaking_is_rejected_before_realization(monkeypatch, quantity):
+        from gradscf.gw.pbc import spectrum
+        model, result, _ = _source()
+        # Break only +1/3, so a Gamma-only or identity-column check is insufficient.
+        odd = np.array([[0., .005j], [-.005j, 0.]])
+        change = model.coeff[1].conj().T@odd@model.coeff[1]
+        if quantity == 'sigma_c_iw':
+            change = change[None]/(1j*result.grid.fermion[:, None, None]-.9)
+        getattr(result, quantity)[1] += change
+        def no_fit(*args, **kwargs):
+            pytest.fail('Genuinely TR-breaking source reached causal realization')
+        monkeypatch.setattr(spectrum, 'interpolate_causal', no_fit)
+        with pytest.raises((ValueError, ArithmeticError), match='[Tt]ime.?reversal|TR'):
+>           spectrum.continue_self_energy(result, model=model, tolerance=1e-4)
+E           TypeError: continue_self_energy() got an unexpected keyword argument 'model'
+
+tests/gw/pbc/test_spectrum_time_reversal.py:118: TypeError
+___ test_genuine_raw_tr_breaking_is_rejected_before_realization[sigma_c_iw] ____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc84a0aec50>
+quantity = 'sigma_c_iw'
+
+    @pytest.mark.parametrize('quantity', ['full_fock', 'sigma_moment', 'sigma_c_iw'])
+    def test_genuine_raw_tr_breaking_is_rejected_before_realization(monkeypatch, quantity):
+        from gradscf.gw.pbc import spectrum
+        model, result, _ = _source()
+        # Break only +1/3, so a Gamma-only or identity-column check is insufficient.
+        odd = np.array([[0., .005j], [-.005j, 0.]])
+        change = model.coeff[1].conj().T@odd@model.coeff[1]
+        if quantity == 'sigma_c_iw':
+            change = change[None]/(1j*result.grid.fermion[:, None, None]-.9)
+        getattr(result, quantity)[1] += change
+        def no_fit(*args, **kwargs):
+            pytest.fail('Genuinely TR-breaking source reached causal realization')
+        monkeypatch.setattr(spectrum, 'interpolate_causal', no_fit)
+        with pytest.raises((ValueError, ArithmeticError), match='[Tt]ime.?reversal|TR'):
+>           spectrum.continue_self_energy(result, model=model, tolerance=1e-4)
+E           TypeError: continue_self_energy() got an unexpected keyword argument 'model'
+
+tests/gw/pbc/test_spectrum_time_reversal.py:118: TypeError
+____________ test_nonclosed_time_reversed_mo_subspaces_are_rejected ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc84a091a10>
+
+    def test_nonclosed_time_reversed_mo_subspaces_are_rejected(monkeypatch):
+        from gradscf.gw.pbc import spectrum
+        model, result, _ = _source()
+        coeff = np.zeros((3, 3, 2), complex)
+        coeff[:, :2] = model.coeff
+        coeff[2] = np.array([[1., 0.], [0., 0.], [0., 1.]])
+        model.coeff = coeff
+        def no_fit(*args, **kwargs):
+            pytest.fail('Nonclosed TR subspaces reached causal realization')
+        monkeypatch.setattr(spectrum, 'interpolate_causal', no_fit)
+        with pytest.raises((ValueError, ArithmeticError), match='[Tt]ime.?reversal|TR|subspace|unitar|clos'):
+>           spectrum.continue_self_energy(result, model=model, tolerance=1e-4)
+E           TypeError: continue_self_energy() got an unexpected keyword argument 'model'
+
+tests/gw/pbc/test_spectrum_time_reversal.py:132: TypeError
+=========================== short test summary info ============================
+FAILED tests/gw/pbc/test_spectrum_time_reversal.py::test_continuation_restores_same_pole_tr_after_complex_gauge_and_exact_union
+FAILED tests/gw/pbc/test_spectrum_time_reversal.py::test_genuine_raw_tr_breaking_is_rejected_before_realization[full_fock]
+FAILED tests/gw/pbc/test_spectrum_time_reversal.py::test_genuine_raw_tr_breaking_is_rejected_before_realization[sigma_moment]
+FAILED tests/gw/pbc/test_spectrum_time_reversal.py::test_genuine_raw_tr_breaking_is_rejected_before_realization[sigma_c_iw]
+FAILED tests/gw/pbc/test_spectrum_time_reversal.py::test_nonclosed_time_reversed_mo_subspaces_are_rejected
+5 failed in 0.54s

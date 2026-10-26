@@ -1,16 +1,16 @@
 import pytest
-from gradscf.model.training import MolecularTrainingConfig
+from gradscf.model.neural_xc.training import MolecularTrainingConfig
 
-from gradscf.workflows import (
+from gradscf.model.neural_xc.workflows import (
     ExperimentConfig,
     ExperimentPipeline,
     NeuralXCTrainingConfig,
     MoleculeSpecConfig,
     SystemConfig,
+)
+from gradscf.model.neural_xc.workflows.presets import (
     benzene_experiment_config,
-    benzene_strict_jax_experiment_config,
     water_experiment_config,
-    water_strict_jax_experiment_config,
 )
 from gradscf.model.neural_xc import (
     DEFAULT_NEURAL_XC_COEFFICIENT_PRIOR_MODE,
@@ -92,11 +92,11 @@ def test_experiment_pipeline_routes_reference_spec_systems(monkeypatch):
         return "run"
 
     monkeypatch.setattr(
-        "gradscf.workflows.pipeline.run_neural_xc_spectrum_pipeline",
+        "gradscf.model.neural_xc.workflows.pipeline.run_neural_xc_spectrum_pipeline",
         fake_pipeline,
     )
     monkeypatch.setattr(
-        "gradscf.workflows.pipeline.print_run_summary",
+        "gradscf.model.neural_xc.workflows.pipeline.print_run_summary",
         lambda *args, **kwargs: None,
     )
 
@@ -134,8 +134,8 @@ def test_workflow_presets_return_non_empty_systems():
 
 
 def test_strict_jax_workflow_presets_return_reference_specs():
-    water = water_strict_jax_experiment_config()
-    benzene = benzene_strict_jax_experiment_config()
+    water = water_experiment_config()
+    benzene = benzene_experiment_config()
 
     assert len(water.systems) == 1
     assert len(benzene.systems) == 1
@@ -186,7 +186,7 @@ def test_neural_xc_training_config_defaults_follow_neural_xc_defaults():
 
 
 def test_simulation_config_defaults_to_strict_jax_runtime():
-    from gradscf.workflows import SimulationConfig
+    from gradscf.model.neural_xc.workflows import SimulationConfig
 
     config = SimulationConfig()
 

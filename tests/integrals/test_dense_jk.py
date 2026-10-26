@@ -15,7 +15,7 @@ def test_exchange_above_uint32_tensor_size_is_not_zero():
     j,k=jax.jit(_build_jk)(eri,density)
     np.testing.assert_allclose(j,np.full((n,n),n),atol=1e-12,rtol=0)
     np.testing.assert_allclose(k,np.full((n,n),n),atol=1e-12,rtol=0)
-    from gradscf.integrals.contraction import contract_integrals
+    from gradscf.integrals.basis.contraction import contract_integrals
     t=jnp.eye(n,dtype=jnp.float64)[:,[0,n//2,n-1]]
     contracted=jax.jit(lambda e,t:contract_integrals({'eri':e},t)['eri'])(eri,t)
     np.testing.assert_allclose(contracted,np.ones((3,)*4),atol=1e-12,rtol=0)
@@ -26,7 +26,7 @@ def test_exchange_above_uint32_tensor_size_is_not_zero():
     np.testing.assert_allclose(gj,np.kron(np.eye(2),np.full((n,n),1.5*n)),atol=1e-10,rtol=0)
     np.testing.assert_allclose(gk,np.kron(np.asarray(spin),np.full((n,n),n)),atol=1e-10,rtol=0)
     # The public restricted facade can choose packed integrals instead.
-    from gradscf.integrals.layouts import build_jk_from_eri_pair_matrix
+    from gradscf.integrals.molecular.jk import build_jk_from_eri_pair_matrix
     del eri,gj,gk,contracted,t
     npair=n*(n+1)//2
     pair=jnp.ones((npair,npair),dtype=jnp.float64)
@@ -37,7 +37,7 @@ def test_exchange_above_uint32_tensor_size_is_not_zero():
 
 @pytest.mark.parametrize('complex_density',[False,True])
 def test_blocked_exchange_matches_numpy_and_supports_higher_ad(complex_density):
-    from gradscf.integrals.contraction import exchange_matrix
+    from gradscf.integrals.molecular.jk import exchange_matrix
     rng=np.random.default_rng(27);n=5
     eri=jnp.asarray(rng.normal(size=(n,)*4))
     density=rng.normal(size=(2,n,n))

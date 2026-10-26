@@ -1,0 +1,21 @@
+{
+  "case": "NO_pbe",
+  "stationary": true,
+  "spectrum_certified": true,
+  "stable": true,
+  "eigenvalues_hartree": [
+    -1.3623131179521092e-06,
+    0.3921668507445025,
+    0.394210521764753
+  ],
+  "residual_norms": [
+    2.6082684386996925e-14,
+    2.4417401147279157e-14,
+    2.118160855633998e-14
+  ],
+  "orbital_gradient_norm": 4.266590576480476e-14,
+  "max_density_difference_from_force_branch": 0.0,
+  "davidson_minimum_hartree": 0.3921668507445022,
+  "elapsed_seconds": 30.376869750994956,
+  "stability_source_sha256": "6d362cb0f22574f5386c193c3c698531892fda1264b85ce352b7f1e64dd03da5"
+}

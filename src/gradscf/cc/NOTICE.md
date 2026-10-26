@@ -14,7 +14,8 @@ Other original GradSCF files retain the repository's license.
 | `_spin_intermediates.py` | [`pyscf/cc/gintermediates.py`](https://github.com/pyscf/pyscf/blob/v2.9.0/pyscf/cc/gintermediates.py), `make_tau` and six `cc_` intermediates | JAX operations on in-core antisymmetrized spin-orbital blocks |
 | `_spin_triples.py` | [`pyscf/cc/gccsd_t.py`](https://github.com/pyscf/pyscf/blob/v2.9.0/pyscf/cc/gccsd_t.py), `kernel` | Real canonical collinear inputs, static JAX loop, spin/Pauli-allowed denominator diagnostics, convergence/symmetry checks, separated connected/singles terms |
 | `_spin_triples.py`, `_general_correction` | [`pyscf/cc/gccsd_t_slow.py`](https://github.com/pyscf/pyscf/blob/v2.9.0/pyscf/cc/gccsd_t_slow.py), `kernel` moment contractions | JAX W/V moments including F_vo*T2; common tensor resolvent replaces diagonal division to support noncanonical inputs and degenerate-factor response; explicit capacity guard |
-| `_spin_density.py` | [`pyscf/cc/gccsd_rdm.py`](https://github.com/pyscf/pyscf/blob/v2.9.0/pyscf/cc/gccsd_rdm.py), `_gamma1_intermediates`, `_gamma2_intermediates`, active portions of `_make_rdm1/2` | Pure real JAX contractions and functional block assembly; reference/frozen terms restored separately by GradSCF |
+| `_streamed_triples.py` | The same `gccsd_t_slow` moment equations; current PySCF `ccsd_t_rdm.py`/`ccsd_t_lambda.py` consulted for bounded triples workspaces | Independently derived panel JVP/VJP and second response from D X = W; full occupied/virtual matrix cotangents, recomputed moment pullbacks and neighbouring panels; restricted bridge expands only needed integral blocks |
+| `_spin_density.py` | [`pyscf/cc/gccsd_rdm.py`](https://github.com/pyscf/pyscf/blob/v2.9.0/pyscf/cc/gccsd_rdm.py), `_gamma1_intermediates`, `_gamma2_intermediates`, active portions of `_make_rdm1/2` | Pure real JAX contractions and functional block assembly; the same expressions support requested four-axis blocks through GradSCF's index adapter; reference/frozen terms restored separately by GradSCF |
 | `_qci_equations.py` | [`pyscf/cc/qcisd_slow.py`](https://github.com/pyscf/pyscf/blob/v2.9.0/pyscf/cc/qcisd_slow.py), `update_amps` | Shared JAX intermediates with QCI singles selection; full Fock diagonals produce physical residuals directly; no iterative update/denominator division |
 | `rccsd.py`, QCI energy branch | [`pyscf/cc/qcisd.py`](https://github.com/pyscf/pyscf/blob/v2.9.0/pyscf/cc/qcisd.py), `energy` | Use tau=t2, retain 2*Fov*t1; reuse shared energy contractions |
 | `triples.py`, QCI variant | [`pyscf/cc/qcisd_t_slow.py`](https://github.com/pyscf/pyscf/blob/v2.9.0/pyscf/cc/qcisd_t_slow.py), `kernel` | QCI singles weight and F_vo*T2 in the shared streamed permutation kernel; QCI-specific residual/method validation |
@@ -41,6 +42,16 @@ qcisd_t_slow.py  84506867d3bc10c1c74fe516507283f4833c3172fb8f3642a8e2be76ad3db37
 PySCF is a numerical comparison dependency in tests, not a dependency of these
 production kernels. See [REFERENCES.md](REFERENCES.md) for scientific method
 attribution, which is distinct from the source-code attribution above.
+
+The restricted IP/EA Dyson endpoint contractions in `eom/properties.py` are
+adapted separately from PySCF **2.13.0**,
+[`cc/momgfccsd.py`](https://github.com/pyscf/pyscf/blob/v2.13.0/pyscf/cc/momgfccsd.py),
+`build_bra_hole`, `build_bra_part`, `build_ket_hole`, and `build_ket_part`.
+The installed upstream file SHA-256 is
+`eefcee6acdfbe5e88aaa38fc10903c2f78aa6ce3e6183b8b711f8857ad2344fb`.
+Only the physical endpoint contractions are adapted to real JAX arrays and
+the existing EOM packing. The particle-moment outer minus sign is absorbed in
+the particle ket. No moment reconstruction or numerical solver is copied.
 
 OpenMolcas was subsequently consulted for triples-method definitions and
 iteration controls. Its inspected revision and source hashes are recorded in

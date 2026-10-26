@@ -1,0 +1,618 @@
+{
+  "scope": "Same eight source files and postprocessing options; QP certification guard comparison",
+  "old_directory": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/gaas_four_gw_fft61_20261019_r1",
+  "new_directory": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/gaas_four_gw_fft61_qp_guard_20261019",
+  "comparison_tolerance_hartree": 1e-08,
+  "postprocessing_options_identical": true,
+  "inputs": {
+    "g0w0.npz": {
+      "sha256": "bb59c475b4ba61b9171a6d08ee7b2d25c901b5c1c632ae690e25fca82ca0b669",
+      "byte_identical": true,
+      "new_copy_readonly": true
+    },
+    "g0w0.json": {
+      "sha256": "46ac1f724658eaf5211aec666ba186fa499ca064f817836a692b475ad334452e",
+      "byte_identical": true,
+      "new_copy_readonly": true
+    },
+    "evgw.npz": {
+      "sha256": "7981aab1c1d839906cdcde36a2f11a7113e9a59007db886d8c70738cb260e916",
+      "byte_identical": true,
+      "new_copy_readonly": true
+    },
+    "evgw.json": {
+      "sha256": "ff2d4e2a50f81afcc3d6ca5db7380f458e68d57110af63497a5e0040a1cfd604",
+      "byte_identical": true,
+      "new_copy_readonly": true
+    },
+    "qsgw.npz": {
+      "sha256": "d548b176b3aa6f1b27a1dc318ceb1b95ea4def38e32b4bc10c4c0f972a6bccf5",
+      "byte_identical": true,
+      "new_copy_readonly": true
+    },
+    "qsgw.json": {
+      "sha256": "82de94bd6ef5748c11713d2faa057576482194d6bee5686de9f831d93b0fe048",
+      "byte_identical": true,
+      "new_copy_readonly": true
+    },
+    "scgw.npz": {
+      "sha256": "dd683f57b9bb0064328e4f1df280a18ed6a1fe49fd9a6f39e64ca6affa2dee24",
+      "byte_identical": true,
+      "new_copy_readonly": true
+    },
+    "scgw.json": {
+      "sha256": "05b4d3678741204fd38c99c45e5c1a0274ac6ccfb75bc00d7b35dee5597b163c",
+      "byte_identical": true,
+      "new_copy_readonly": true
+    }
+  },
+  "crc": {
+    "gaas_four_gw_fft61_20261019_r1/g0w0.npz": true,
+    "gaas_four_gw_fft61_20261019_r1/evgw.npz": true,
+    "gaas_four_gw_fft61_20261019_r1/qsgw.npz": true,
+    "gaas_four_gw_fft61_20261019_r1/scgw.npz": true,
+    "gaas_four_gw_fft61_20261019_r1/comparison.npz": true,
+    "gaas_four_gw_fft61_qp_guard_20261019/g0w0.npz": true,
+    "gaas_four_gw_fft61_qp_guard_20261019/evgw.npz": true,
+    "gaas_four_gw_fft61_qp_guard_20261019/qsgw.npz": true,
+    "gaas_four_gw_fft61_qp_guard_20261019/scgw.npz": true,
+    "gaas_four_gw_fft61_qp_guard_20261019/comparison.npz": true
+  },
+  "arrays": {
+    "pbe_bands": {
+      "old_shape": [
+        121,
+        14
+      ],
+      "new_shape": [
+        121,
+        14
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 1694,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "g0w0_bands": {
+      "old_shape": [
+        121,
+        14
+      ],
+      "new_shape": [
+        121,
+        14
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 1694,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "g0w0_dos": {
+      "old_shape": [
+        10001
+      ],
+      "new_shape": [
+        10001
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 10001,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "evgw_bands": {
+      "old_shape": [
+        121,
+        14
+      ],
+      "new_shape": [
+        121,
+        14
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 1694,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "evgw_dos": {
+      "old_shape": [
+        10001
+      ],
+      "new_shape": [
+        10001
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 10001,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "qsgw_bands": {
+      "old_shape": [
+        121,
+        14
+      ],
+      "new_shape": [
+        121,
+        14
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 1694,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "qsgw_dos": {
+      "old_shape": [
+        10001
+      ],
+      "new_shape": [
+        10001
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 10001,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "scgw_poles": {
+      "old_shape": [
+        367
+      ],
+      "new_shape": [
+        367
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 367,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "scgw_source_residues": {
+      "old_shape": [
+        2,
+        367,
+        14,
+        14
+      ],
+      "new_shape": [
+        2,
+        367,
+        14,
+        14
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 143864,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "scgw_spectral": {
+      "old_shape": [
+        121,
+        10001
+      ],
+      "new_shape": [
+        121,
+        10001
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 1210121,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "scgw_dos": {
+      "old_shape": [
+        10001
+      ],
+      "new_shape": [
+        10001
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 10001,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "axis_ev": {
+      "old_shape": [
+        10001
+      ],
+      "new_shape": [
+        10001
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 10001,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "path_distance": {
+      "old_shape": [
+        121
+      ],
+      "new_shape": [
+        121
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 121,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "path_ticks": {
+      "old_shape": [
+        6
+      ],
+      "new_shape": [
+        6
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 6,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "path_labels": {
+      "old_shape": [
+        6
+      ],
+      "new_shape": [
+        6
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true
+    },
+    "query_kpoints": {
+      "old_shape": [
+        186,
+        3
+      ],
+      "new_shape": [
+        186,
+        3
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 558,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "dos_kpoints": {
+      "old_shape": [
+        64,
+        3
+      ],
+      "new_shape": [
+        64,
+        3
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 192,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    }
+  },
+  "previously_certified_roots": {
+    "count": 2596,
+    "retained_certified_count": 2596,
+    "energy": {
+      "old_shape": [
+        2596
+      ],
+      "new_shape": [
+        2596
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 2596,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "weight": {
+      "old_shape": [
+        2596
+      ],
+      "new_shape": [
+        2596
+      ],
+      "dtype_identical": true,
+      "shape_identical": true,
+      "byte_identical": true,
+      "array_equal": true,
+      "old_nonfinite_count": 0,
+      "new_nonfinite_count": 0,
+      "finite_pair_count": 2596,
+      "max_abs_difference_on_finite_pairs": 0.0,
+      "relative_frobenius_difference": 0.0
+    },
+    "energy_change_exceeds_1e_minus8_hartree_count": 0,
+    "candidate_count_changed": 0
+  },
+  "old_coverage": {
+    "requested": 2604,
+    "certified": 2596,
+    "incomplete_query_indices": [
+      0,
+      91,
+      121,
+      185
+    ],
+    "gamma_complete": false,
+    "dos_complete": false,
+    "gap_policy": "Report each gap only with complete certified roots for its own sample; missing roots stay NaN and unavailable gaps/changes are null. The retarded spectral map and DOS do not require a unique QP root."
+  },
+  "new_coverage": {
+    "requested": 2604,
+    "certified": 2604,
+    "incomplete_query_indices": [],
+    "gamma_complete": true,
+    "dos_complete": true,
+    "gap_policy": "Report each gap only with complete certified roots for its own sample; missing roots stay NaN and unavailable gaps/changes are null. The retarded spectral map and DOS do not require a unique QP root."
+  },
+  "old_gaps": {
+    "pbe": {
+      "gamma_direct_ev": 0.28386067858929254,
+      "sampled_gap_ev": 0.28386067858929254,
+      "minimum_direct_ev": 0.28386067858929254
+    },
+    "g0w0": {
+      "gamma_direct_ev": 0.38847779008333977,
+      "sampled_gap_ev": 0.38847779008333977,
+      "minimum_direct_ev": 0.38847779008333977,
+      "sampled_gap_change_ev": 0.10461711149404723,
+      "gamma_gap_change_ev": 0.10461711149404723,
+      "minimum_direct_gap_change_ev": 0.10461711149404723
+    },
+    "evgw": {
+      "gamma_direct_ev": 1.033671314172418,
+      "sampled_gap_ev": 0.6069948076083347,
+      "minimum_direct_ev": 1.033671314172418,
+      "sampled_gap_change_ev": 0.32313412901904215,
+      "gamma_gap_change_ev": 0.7498106355831256,
+      "minimum_direct_gap_change_ev": 0.7498106355831256
+    },
+    "qsgw": {
+      "gamma_direct_ev": 1.2997116634708927,
+      "sampled_gap_ev": 1.2005266461158115,
+      "minimum_direct_ev": 1.2997116634708927,
+      "sampled_gap_change_ev": 0.916665967526519,
+      "gamma_gap_change_ev": 1.0158509848816002,
+      "minimum_direct_gap_change_ev": 1.0158509848816002
+    },
+    "scgw": {
+      "gamma_direct_ev": null,
+      "sampled_gap_ev": null,
+      "minimum_direct_ev": null,
+      "sampled_gap_change_ev": null,
+      "gamma_gap_change_ev": null,
+      "minimum_direct_gap_change_ev": null
+    }
+  },
+  "new_gaps": {
+    "pbe": {
+      "gamma_direct_ev": 0.28386067858929254,
+      "sampled_gap_ev": 0.28386067858929254,
+      "minimum_direct_ev": 0.28386067858929254
+    },
+    "g0w0": {
+      "gamma_direct_ev": 0.38847779008333977,
+      "sampled_gap_ev": 0.38847779008333977,
+      "minimum_direct_ev": 0.38847779008333977,
+      "sampled_gap_change_ev": 0.10461711149404723,
+      "gamma_gap_change_ev": 0.10461711149404723,
+      "minimum_direct_gap_change_ev": 0.10461711149404723
+    },
+    "evgw": {
+      "gamma_direct_ev": 1.033671314172418,
+      "sampled_gap_ev": 0.6069948076083347,
+      "minimum_direct_ev": 1.033671314172418,
+      "sampled_gap_change_ev": 0.32313412901904215,
+      "gamma_gap_change_ev": 0.7498106355831256,
+      "minimum_direct_gap_change_ev": 0.7498106355831256
+    },
+    "qsgw": {
+      "gamma_direct_ev": 1.2997116634708927,
+      "sampled_gap_ev": 1.2005266461158115,
+      "minimum_direct_ev": 1.2997116634708927,
+      "sampled_gap_change_ev": 0.916665967526519,
+      "gamma_gap_change_ev": 1.0158509848816002,
+      "minimum_direct_gap_change_ev": 1.0158509848816002
+    },
+    "scgw": {
+      "gamma_direct_ev": 1.0310192499930781,
+      "sampled_gap_ev": 1.0310192499930781,
+      "minimum_direct_ev": 1.0310192499930781,
+      "sampled_gap_change_ev": 0.7471585714037856,
+      "gamma_gap_change_ev": 0.7471585714037856,
+      "minimum_direct_gap_change_ev": 0.7471585714037856
+    }
+  },
+  "continued_electrons": {
+    "old_shape": [],
+    "new_shape": [],
+    "dtype_identical": true,
+    "shape_identical": true,
+    "byte_identical": true,
+    "array_equal": true,
+    "old_nonfinite_count": 0,
+    "new_nonfinite_count": 0,
+    "finite_pair_count": 1,
+    "max_abs_difference_on_finite_pairs": 0.0,
+    "relative_frobenius_difference": 0.0
+  },
+  "newly_certified_query_band_indices": [
+    [
+      0,
+      6
+    ],
+    [
+      0,
+      7
+    ],
+    [
+      91,
+      6
+    ],
+    [
+      91,
+      7
+    ],
+    [
+      121,
+      6
+    ],
+    [
+      121,
+      7
+    ],
+    [
+      185,
+      6
+    ],
+    [
+      185,
+      7
+    ]
+  ],
+  "lost_certified_query_band_indices": [],
+  "gamma_newly_certified_bands": [
+    6,
+    7
+  ],
+  "gamma_energy_hartree": [
+    -0.21323345458848048,
+    -0.09282875431773221,
+    -0.08645345064221231,
+    -0.08445438144075962,
+    -0.08445434852098845,
+    -0.03232773438001043,
+    0.4505258846441614,
+    0.4505258896656016,
+    0.47239092455191584,
+    0.5102801831392136,
+    0.6196370355334916,
+    0.6248411078149899,
+    0.6248411352690807,
+    5.788646722133876
+  ],
+  "gamma_weight": [
+    0.16238161486242192,
+    0.23087244112834396,
+    0.5932850191292215,
+    0.8448790264845414,
+    0.8448802817199856,
+    0.11652114237096699,
+    0.9066888082838757,
+    0.9066873868715288,
+    2.646735458384532,
+    0.99145484295341,
+    0.8875936714596276,
+    0.9077337182798594,
+    0.9077448900193941,
+    0.9559276562770104
+  ],
+  "all_new_certified_weights_positive": true,
+  "all_new_masked_energies_nan": true,
+  "retarded_map_and_dos_finite": true,
+  "new_source_sha256": {
+    "examples/pbc/band_structures/gaas_gw_spectra.py": "2f7cda11cc4c4f324ac74f59338e171e3d27036e8945c62c57fcdc7c7df05078",
+    "examples/pbc/band_structures/gaas_self_consistent_gw.py": "b17bb3c678ccc66dd3e4b9a8eb22f18f9671416ab43035f02b4bd01a341f3594",
+    "src/gradscf/gw/pbc/spectrum.py": "89262a39dc4d584cbc156e773c6a4cd244609dc61582de5223427ab7dbcc3111",
+    "src/gradscf/gw/pbc/interpolation.py": "f1558be076b41ab61c00c1f689a188f2ccfbb5397fb457bd70bc6acfa5ac84bb",
+    "src/gradscf/gw/pbc/query.py": "f4b1c73c9e616809ae249b28837a92a8a7012639db8bc4e673221b0b07100494",
+    "src/gradscf/solvers/poles.py": "82328417587ebb50cc144729ee40f64559f2318a488c34a3c9865f5dc38936a9",
+    "src/gradscf_tools/gaas_gw_plot.py": "a864d0a05dcc59f9ff13eda2fa637d865a75b657c565f85f696dd3321a01e40c"
+  },
+  "unchanged_common_source_files": {
+    "examples/pbc/band_structures/gaas_gw_spectra.py": true,
+    "examples/pbc/band_structures/gaas_self_consistent_gw.py": true,
+    "src/gradscf/gw/pbc/spectrum.py": true,
+    "src/gradscf/gw/pbc/interpolation.py": true,
+    "src/gradscf/solvers/poles.py": true,
+    "src/gradscf_tools/gaas_gw_plot.py": true
+  },
+  "elapsed_seconds": 0.5007816430006642,
+  "new_output_sha256": {
+    "comparison.npz": "276641b5525d0e920a8841b84bf6e289ef70d94cc7359c6295f80a489f29a19c",
+    "comparison.json": "3f11ae97f4ddd01fd56bd9a5d686c4ebe8713d3ea6b3fa15513abe3b9242fda9",
+    "gaas_four_gw.png": "11bcbe6214631c13dec793d679c16405ce6d6cdd502568c0af77e5f95ebdf006",
+    "gaas_four_gw.pdf": "1e9095db37f4cfdae29c429c47567bf271f86944d52fc31b322214b0e8dee621",
+    "gaps.csv": "a14709478b11eb40eebf43653ea21199d5178d95b6a7a443ec812dbd488b4a57"
+  }
+}

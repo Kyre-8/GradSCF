@@ -1,0 +1,35 @@
+{
+  "verified": true,
+  "python": "3.11.15",
+  "machine": "x86_64",
+  "libc": [
+    "glibc",
+    "2.28"
+  ],
+  "total_bytes": 15369822,
+  "base_versions": {
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "pillow": "12.2.0",
+    "networkx": "3.6.1",
+    "packaging": "26.2"
+  },
+  "files": [
+    {
+      "filename": "imageio-2.38.1-py3-none-any.whl",
+      "sha256": "36d23eb7423d2fb63f637098758edb3d2df3687f7125e0a5ce8596572022dcf9"
+    },
+    {
+      "filename": "lazy_loader-0.4-py3-none-any.whl",
+      "sha256": "342aa8e14d543a154047afb4ba8ef17f5563baad3fc610d7b15b213b0f119efc"
+    },
+    {
+      "filename": "scikit_image-0.25.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "sha256": "24cc986e1f4187a12aa319f777b36008764e856e5013666a4a83f8df083c2641"
+    },
+    {
+      "filename": "tifffile-2026.3.3-py3-none-any.whl",
+      "sha256": "e8be15c94273113d31ecb7aa3a39822189dd11c4967e3cc88c178f1ad2fd1170"
+    }
+  ]
+}

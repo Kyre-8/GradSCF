@@ -1,0 +1,109 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "-c",
+    "from examples.ofdft.large_system_response import calculate; calculate(1)"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 5226800,
+  "budget_kib": 33554432,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true,
+  "started_unix": 1792132817.1621468,
+  "elapsed_seconds": 971.9543118470028,
+  "inherited_cpu_affinity_at_start": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "wrapper_cpu_affinity_at_end": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "thread_environment": {
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "MKL_NUM_THREADS": "2",
+    "NUMEXPR_NUM_THREADS": "2"
+  },
+  "hwloc_thissystem": "0",
+  "numa_policy": "hwloc CPU/NUMA memory binding hooks disabled; taskset affinity inherited",
+  "resource_driver_sha256": "e09b4a8cb73f8f6b3f44577bc8d31b7894b4783f965a8ec98745d8a019d88807",
+  "rss_monitor_sha256": "673d449cb2f334b1fd4e6b4c04302039d54e4ef4ca822f336e45cb0a8e4a44d5",
+  "host_load_average_at_start": [
+    158.37,
+    159.66,
+    164.79
+  ],
+  "host_load_average_at_end": [
+    162.72,
+    166.92,
+    167.74
+  ],
+  "observed_child_cpu_sets": [
+    [
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63
+    ]
+  ],
+  "thread_affinity_violations": [],
+  "sampling_errors": [],
+  "runtime_sample_count": 840,
+  "own_children_stopped_for_policy": [],
+  "maximum_observed_child_threads": 79,
+  "sample_schema": "threads_by_cpu_set maps comma-separated Linux CPU IDs to [PID,TID] pairs; observer never changes affinity",
+  "gpu_index": 6,
+  "gpu_initial": {
+    "uuid": "GPU-1e6a853f-9000-6569-7e61-0fc9291c49b2",
+    "memory_mib": 15,
+    "utilization_percent": 0,
+    "pids": []
+  },
+  "other_gpu_pids_observed": [],
+  "sampled_peak_gpu_mib": 2869,
+  "gpu_measurement": "GPU6 board memory and utilization, including context; compute PIDs filtered by UUID; 1 s sampling",
+  "cpu_pool_unchanged": true
+}

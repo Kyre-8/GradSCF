@@ -1,0 +1,385 @@
+{
+  "scope": "H2 query correctness and resource evidence; staged focused tests, not a repository suite",
+  "remote_snapshot": "/home/yjiao/gradscf_checks/ad-showcase-query-20261016",
+  "baseline_snapshot": "/home/yjiao/gradscf_checks/ad-showcase-merge-20261016",
+  "hardware": "Intel Xeon Platinum 8457C",
+  "allowed_cpu_ids": [
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47
+  ],
+  "threads": {
+    "OMP": 2,
+    "OPENBLAS": 2,
+    "MKL": 2,
+    "NUMEXPR": 2
+  },
+  "rss_limit_gib": 16,
+  "job_limit_seconds": 600,
+  "passed_unique_query_tests": 18,
+  "groups": [
+    {
+      "job": "green-contour",
+      "resources": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-u",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_query.py",
+          "-k",
+          "not allocation and not joint_gap and not real_offmesh and not source_domain"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 922060,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 9.766488932997163,
+        "allowed_cpu_ids": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ]
+      },
+      "uploaded_source_sha256": {
+        "tests/gw/pbc/test_query.py": "fd6c7f4ac4784cbc656a7099629884d38cef8a2a3f9058ffccb1b5606de8c3a4",
+        "src/gradscf/gw/pbc/query.py": "8caafd620e0d2e4cb74346e8571aafb97e938709398a5c1f295457e79516dca6",
+        "src/gradscf/gw/pbc/__init__.py": "0972983ac5abcdd95dd986d29cba41e8f33d57483df91f6ff8f209bba7ba9df7",
+        "src/gradscf/gw/pbc/product_basis.py": "4fef3859ed64c2d7f1d28576e717d22535977edcff69f163bee69dd8097575aa"
+      }
+    },
+    {
+      "job": "green-hydrogen",
+      "resources": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-u",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_query.py",
+          "-k",
+          "allocation or joint_gap or real_offmesh or source_domain",
+          "-x"
+        ],
+        "return_code": 1,
+        "peak_rss_kib": 1481140,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": false,
+        "elapsed_seconds": 30.79011474899744,
+        "allowed_cpu_ids": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ]
+      },
+      "uploaded_source_sha256": {
+        "src/gradscf_tools/periodic_gw_reference.py": "810bcc612d56d51003cfc193eb437afde6df1d03e25c2111fa5ce52c7f15380d"
+      }
+    },
+    {
+      "job": "green-hydrogen-v3",
+      "resources": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-u",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_query.py",
+          "-k",
+          "real_offmesh or source_domain",
+          "-x"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 2158096,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 76.6840236240023,
+        "allowed_cpu_ids": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ]
+      },
+      "uploaded_source_sha256": {
+        "src/gradscf/gw/pbc/query.py": "077672eb4be0ed57d6237ce085fe046b0324422640e6cacdddde7c54b9e2d54f",
+        "src/gradscf_tools/periodic_gw_reference.py": "d7c2acc7100440c632009f2f459f78867e1001c4e2dbc50bfd10111fba136b44"
+      }
+    },
+    {
+      "job": "final-degeneracy-guards",
+      "resources": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-u",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_query.py",
+          "-k",
+          "gapped_selected_degeneracy"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 670100,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 2.504116326002986,
+        "allowed_cpu_ids": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ]
+      },
+      "uploaded_source_sha256": {
+        "src/gradscf/gw/pbc/query.py": "7d4f73d48a313ea764d8057bbbc7c5be7d26edd384b89399b6a415de80dc36e8",
+        "tests/gw/pbc/test_query.py": "b9467e3ff9cba591c9dbc0c19844453fb9cb7eb73aa0245edc151de403e226df"
+      }
+    },
+    {
+      "job": "green-direct-preflight",
+      "resources": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-u",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/gw/pbc/test_query.py",
+          "-k",
+          "direct_real_capacity"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 620084,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 2.0030617250013165,
+        "allowed_cpu_ids": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ]
+      },
+      "uploaded_source_sha256": {
+        "src/gradscf/gw/pbc/query.py": "cae03b9436fbdd609427d52bdcff0e668fdba96a9263d57bc911aafa55405d0c"
+      }
+    },
+    {
+      "job": "hydrogen-path",
+      "resources": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-u",
+          "examples/gw/periodic_bands.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 2442216,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 84.64491063199966,
+        "allowed_cpu_ids": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ]
+      },
+      "uploaded_source_sha256": {
+        "examples/gw/periodic_bands.py": "e56c43a0ff603eb716436ecca407b8ebda8d9c02429b38878b1741d8bb40dca1",
+        "examples/gw/compare_periodic_bands.py": "0fb6b0b708c4371a6d2280808ac820881276dadda5c671634380b9421ae86816",
+        "src/gradscf_tools/periodic_gw_plot.py": "149600421aca48aab830dbc0c58fe04d0dcd359b7368be1771870f67cabb34e5"
+      }
+    },
+    {
+      "job": "hydrogen-path-numpy",
+      "resources": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-u",
+          "examples/gw/compare_periodic_bands.py"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 1470724,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 29.79188166899985,
+        "allowed_cpu_ids": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ]
+      },
+      "uploaded_source_sha256": {}
+    },
+    {
+      "job": "plot-display-floor",
+      "resources": {
+        "command": [
+          "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+          "-u",
+          "-c",
+          "from gradscf_tools.periodic_gw_plot import plot_query; plot_query('reproducibility/ad_showcase/periodic_gw_query')"
+        ],
+        "return_code": 0,
+        "peak_rss_kib": 237304,
+        "budget_kib": 16777216,
+        "budget_exceeded": false,
+        "polling_seconds": 0.25,
+        "accepted": true,
+        "elapsed_seconds": 3.7550118020008085,
+        "allowed_cpu_ids": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ]
+      },
+      "uploaded_source_sha256": {
+        "src/gradscf_tools/periodic_gw_plot.py": "897ea39efd4502d24e25366e7da626c207cb5310f8d723016472fd380c16dfd2"
+      }
+    }
+  ],
+  "retained_failures": [
+    "red-api",
+    "green-hydrogen (oracle SyntaxError after 2 guard passes)",
+    "green-hydrogen-v2 (keyword-only XC helper call)",
+    "red-direct-preflight"
+  ],
+  "delivery_changes_after_h2": [
+    "Clarify SCF versus query mesh metadata and selected-degenerate subspace message; new two-branch guard passed",
+    "Explicit identical direct solver defaults and preflight real capacity/workspace accounting; one RED-to-GREEN gate, no physics change",
+    "Optional Si input declaration and per-directory overwrite protection; H2 record not recomputed",
+    "Plot labels a 1e-16 display floor; original residual data unchanged"
+  ],
+  "development_archive": "artifacts/ad_showcase/development/completion_20261016/query"
+}

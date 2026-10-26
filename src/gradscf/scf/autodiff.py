@@ -9,11 +9,12 @@ from jaxtyping import Array, PyTree
 from ..solvers.nonlinear import ImplicitFixedPointConfig, implicit_fixed_point_solution
 
 
-def normalize_scf_gradient_mode(mode: str) -> Literal['implicit', 'unrolled']:
+def normalize_scf_gradient_mode(mode: str) -> Literal['implicit', 'explicit']:
     """Normalize canonical names and the historical DFT ``impl``/``expl`` aliases."""
-    modes = {'implicit': 'implicit', 'impl': 'implicit', 'unrolled': 'unrolled', 'expl': 'unrolled'}
+    modes = {'implicit': 'implicit', 'impl': 'implicit', 'explicit': 'explicit',
+             'expl': 'explicit', 'unrolled': 'explicit'}
     if mode not in modes:
-        raise ValueError(f"gradient_mode must be one of 'implicit', 'unrolled', 'impl', or 'expl'; got {mode!r}.")
+        raise ValueError(f"gradient_mode must be 'implicit' or 'explicit' (legacy aliases: 'impl', 'expl', 'unrolled'); got {mode!r}.")
     return modes[mode]
 
 
@@ -21,13 +22,13 @@ def normalize_scf_gradient_mode(mode: str) -> Literal['implicit', 'unrolled']:
 class SCFDifferentiationConfig:
     """Backward policy, independent of the algorithm producing the SCF solution.
 
-    ``unrolled`` differentiates the actual supplied iterates. ``implicit`` uses
+    ``explicit`` differentiates the supplied JAX computation (SCF uses lax.scan). ``implicit`` uses
     the local residual Jacobian; unconverged forward states (when required) and
     unsuccessful adjoint solves produce NaN cotangents, also under JIT.
     Regularization changes the adjoint system and therefore biases the response.
     """
 
-    mode: Literal['implicit', 'unrolled', 'impl', 'expl'] = 'implicit'
+    mode: Literal['implicit', 'explicit', 'impl', 'expl', 'unrolled'] = 'implicit'
     tolerance: float = 1e-9
     max_iter: int = 20
     restart: int | None = 40
@@ -57,6 +58,9 @@ def attach_scf_backward(
     residual: Callable[[Array, PyTree], Array],
     config: SCFDifferentiationConfig | None = None,
     converged: Array | bool = True,
+    max_memory=None,
+    reserved_bytes=0,
+    operator_min_bytes=0,
 ) -> Array:
     """Attach a backward rule for ``residual(solution, params) = 0``.
 
@@ -67,11 +71,13 @@ def attach_scf_backward(
     The supplied convergence flag refers to the forward stationarity criterion.
     """
     cfg = SCFDifferentiationConfig() if config is None else config
-    if cfg.mode == 'unrolled':
+    if cfg.mode == 'explicit':
         return solution
     return implicit_fixed_point_solution(
         params, solution=solution,
         fixed_point=lambda state, inputs: state - residual(state, inputs),
         config=cfg.as_implicit_config(), converged=converged,
         require_converged=cfg.require_converged,
+        max_memory=max_memory, reserved_bytes=reserved_bytes,
+        operator_min_bytes=operator_min_bytes,
     )

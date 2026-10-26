@@ -1,0 +1,399 @@
+{
+  "complete": true,
+  "passed": true,
+  "folding_passed": true,
+  "native_sha256": "a933b10f13dc61598369fb308364e0480c6de521e2e53c544ca1508d14f6d73a",
+  "script_sha256": "a19e88607d0e757bd2ff6c3ca8e5e5e3336d642d892fe1a09b7866c1b195833d",
+  "primitive_reference": {
+    "energy_hartree": -8.007631878665087,
+    "gradient_hartree_per_bohr": [
+      [
+        2.369823635593076e-15,
+        -1.6939517708918322e-14,
+        -1.3885244537928278e-14
+      ],
+      [
+        2.0543422111944352e-16,
+        7.577771718976891e-17,
+        1.645582701268737e-16
+      ]
+    ],
+    "converged": true,
+    "orbital_gradient_norm": 2.298123973260519e-12,
+    "sampled_indirect_gap_hartree": 0.14272639802081938,
+    "electron_number": 3.9999999999999987,
+    "elapsed_seconds": 203.94711898700916
+  },
+  "reference": {
+    "energy_hartree": -16.015263757330178,
+    "gradient_hartree_per_bohr": [
+      [
+        3.0873693597193246e-13,
+        3.1902335367386004e-13,
+        -2.9863940124131934e-13
+      ],
+      [
+        -1.5378983464512958e-13,
+        -1.5317106706480818e-13,
+        1.5352088621088614e-13
+      ],
+      [
+        -3.2906922273608506e-13,
+        -3.3281371720742867e-13,
+        3.401134242208796e-13
+      ],
+      [
+        1.5299903246526628e-13,
+        1.531289424144646e-13,
+        -1.5303282894082094e-13
+      ]
+    ],
+    "converged": true,
+    "electron_number": 7.999999999999998,
+    "orbital_gradient_norm": 1.754318497596802e-11,
+    "sampled_indirect_gap_hartree": 0.1427263980203783,
+    "minimum_overlap_eigenvalue": 0.01542980327115797,
+    "mesh": [
+      31,
+      31,
+      62
+    ],
+    "fractional_kpoints": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.5,
+        0.0
+      ],
+      [
+        0.5,
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.5,
+        0.0
+      ]
+    ],
+    "elapsed_seconds": 689.8691455450025
+  },
+  "reference_input_sha256": {
+    "reproducibility/ad_showcase/P03_lih_gamma_phonons/pbe_szv_k2_fft31.json": "6356e9e23e6df18c019fba1c8dcaa9aa240ee6a1fa5c714e3903086012f7e571",
+    "reproducibility/ad_showcase/P03_lih_gamma_phonons/pyscf_pbe_szv_k2_fft31.json": "b0fc121285eeeae58a464fced761917a3cb8baee3452bfec0d4515e029788b8f",
+    "reproducibility/ad_showcase/P03_lih_gamma_phonons/pyscf_pbe_szv_k2_fft31_state.npz": "9bca7e7f745240e77ba0138f4068cedfe17920453b73f49f7047e84c68ae2278"
+  },
+  "errors": {
+    "folding_energy_hartree_per_cell": 1.7763568394002505e-15,
+    "folding_relative_density": 1.8460569361347862e-11,
+    "native_energy_hartree": 5.379891732104625e-08,
+    "hessian_hartree_per_bohr2": 1.4654668598242104e-07,
+    "fd_step_change_hartree_per_bohr2": 1.4653047438611955e-09,
+    "rayleigh_hartree_per_bohr2": 2.07247314632647e-07,
+    "rayleigh_step_change_hartree_per_bohr2": 2.0706969108136297e-09
+  },
+  "gates": {
+    "folding_energy_hartree_per_cell": 1e-08,
+    "folding_relative_density": 1e-07,
+    "native_energy_hartree": 2e-06,
+    "hessian_hartree_per_bohr2": 5e-06,
+    "fd_step_change_hartree_per_bohr2": 5e-06,
+    "rayleigh_hartree_per_bohr2": 5e-06,
+    "rayleigh_step_change_hartree_per_bohr2": 5e-06
+  },
+  "steps_bohr": [
+    0.0003,
+    0.0001
+  ],
+  "columns": [
+    {
+      "step_bohr": 0.0003,
+      "column": 0,
+      "plus": {
+        "energy_hartree": -16.01526375799037,
+        "gradient_hartree_per_bohr": [
+          [
+            1.4991227700881477e-14,
+            -2.3425115227523467e-14,
+            1.074586760207579e-14
+          ],
+          [
+            -1.5560833816045249e-06,
+            1.556083378749004e-06,
+            1.9958161529180167e-15
+          ],
+          [
+            -6.214103622411196e-15,
+            -1.5730246644986285e-14,
+            -1.1081530177877805e-16
+          ],
+          [
+            1.556083382054716e-06,
+            -1.5560833787325919e-06,
+            -1.2230440418896415e-15
+          ]
+        ],
+        "converged": true,
+        "electron_number": 8.0,
+        "orbital_gradient_norm": 3.688668544819213e-13,
+        "sampled_indirect_gap_hartree": 0.142726397598801,
+        "minimum_overlap_eigenvalue": 0.015429803162392262,
+        "mesh": [
+          31,
+          31,
+          62
+        ],
+        "fractional_kpoints": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "elapsed_seconds": 303.6805801219889
+      },
+      "minus": {
+        "energy_hartree": -16.015263757990365,
+        "gradient_hartree_per_bohr": [
+          [
+            -1.280485456286334e-14,
+            -1.3535828807983536e-14,
+            7.513849295469421e-15
+          ],
+          [
+            1.5560833786592829e-06,
+            -1.5560833820464965e-06,
+            2.2597485953462795e-15
+          ],
+          [
+            2.0013581466545037e-14,
+            -2.52477825751322e-14,
+            5.593904511236974e-15
+          ],
+          [
+            -1.5560833781972196e-06,
+            1.5560833819429077e-06,
+            -1.8382298069448178e-15
+          ]
+        ],
+        "converged": true,
+        "electron_number": 7.999999999999997,
+        "orbital_gradient_norm": 3.678442788829866e-13,
+        "sampled_indirect_gap_hartree": 0.14272639759880112,
+        "minimum_overlap_eigenvalue": 0.01542980316239214,
+        "mesh": [
+          31,
+          31,
+          62
+        ],
+        "fractional_kpoints": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "elapsed_seconds": 244.26731722399973
+      },
+      "finite_difference_hartree_per_bohr2": [
+        4.5019806127250875e-11,
+        -1.617235195807154e-11,
+        7.447281766351768e-12,
+        -0.005186944600429786,
+        0.005186944601225834,
+        -7.325985062361993e-13
+      ],
+      "max_native_error_hartree_per_bohr2": 1.4508217422576353e-07,
+      "rayleigh_hartree_per_bohr2": -0.007335447401768588
+    },
+    {
+      "step_bohr": 0.0001,
+      "column": 0,
+      "plus": {
+        "energy_hartree": -16.01526375740353,
+        "gradient_hartree_per_bohr": [
+          [
+            2.3958707709903106e-15,
+            1.1841641624813708e-14,
+            2.605727805568e-14
+          ],
+          [
+            -5.186946083508272e-07,
+            5.186946048250458e-07,
+            1.980031230849377e-15
+          ],
+          [
+            -3.2643402210855665e-15,
+            -6.027828405888219e-15,
+            -1.5421176552180703e-15
+          ],
+          [
+            5.186946082361457e-07,
+            -5.186946049839238e-07,
+            -1.3317285920854813e-15
+          ]
+        ],
+        "converged": true,
+        "electron_number": 7.999999999999998,
+        "orbital_gradient_norm": 1.5536123227297552e-13,
+        "sampled_indirect_gap_hartree": 0.14272639797411202,
+        "minimum_overlap_eigenvalue": 0.015429803259074264,
+        "mesh": [
+          31,
+          31,
+          62
+        ],
+        "fractional_kpoints": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "elapsed_seconds": 295.155811182
+      },
+      "minus": {
+        "energy_hartree": -16.015263757403535,
+        "gradient_hartree_per_bohr": [
+          [
+            -4.308658205129195e-15,
+            -5.27723408208634e-15,
+            -3.613481216624592e-17
+          ],
+          [
+            5.186946048790272e-07,
+            -5.186946080068912e-07,
+            1.9188610268852774e-15
+          ],
+          [
+            6.668814187677689e-15,
+            7.896603408475208e-15,
+            2.320875448095114e-14
+          ],
+          [
+            -5.186946048278122e-07,
+            5.186946079156369e-07,
+            -1.5773164066455126e-15
+          ]
+        ],
+        "converged": true,
+        "electron_number": 7.999999999999997,
+        "orbital_gradient_norm": 1.5475303896483292e-13,
+        "sampled_indirect_gap_hartree": 0.1427263979741108,
+        "minimum_overlap_eigenvalue": 0.015429803259074268,
+        "mesh": [
+          31,
+          31,
+          62
+        ],
+        "fractional_kpoints": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "elapsed_seconds": 325.40633858599995
+      },
+      "finite_difference_hartree_per_bohr2": [
+        4.15942084622069e-11,
+        7.760826880315868e-11,
+        1.2711071251003865e-10,
+        -0.00518694606573453,
+        0.005186946064328744,
+        -4.610440264898294e-13
+      ],
+      "max_native_error_hartree_per_bohr2": 1.4654668598242104e-07,
+      "rayleigh_hartree_per_bohr2": -0.007335449472465499
+    }
+  ],
+  "convention": "u_l=(-1)^l u; Phi(q)u=(g_prime_0-g_prime_1)/2; lattice-translation phase, no atomic-position phase.",
+  "elapsed_seconds_this_invocation": 864.8802187709998,
+  "peak_rss_kib": 876124,
+  "note": "The doubled FFT z dimension is even; its Nyquist support differs from a finite primitive G-window. Failed folding gates are retained.",
+  "state_sha256": "0dad3b21a397a26cb4d518ea024bfaa9eb145aed7cb1e17405e1442bd12153b7",
+  "probe": false,
+  "hostname": "c20",
+  "python": "3.11.15",
+  "pyscf": "2.13.0",
+  "scope": "Independent self-inverse q action check; no general conjugacy or dispersion claim.",
+  "requested_direction": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.7071067811865475,
+      -0.7071067811865475,
+      0.0
+    ]
+  ],
+  "parent_probe_sha256": "06eb127b59a9cad04532dd29b00afd4eb990ee31cb588d773ef56c22324f04f6",
+  "reference_native_sha256": "c84c2b452655a140081d9408ac1a1d6d7c874f8130a926f1521521dc380d8781",
+  "native_rayleigh_hartree_per_bohr2": -0.007335242225150866
+}

@@ -1,0 +1,98 @@
+{
+  "symbols": [
+    "H",
+    "H"
+  ],
+  "basis": "6-31g",
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      -0.7
+    ],
+    [
+      0.0,
+      0.0,
+      0.7
+    ]
+  ],
+  "direction": [
+    [
+      0.0,
+      0.0,
+      -0.5
+    ],
+    [
+      0.0,
+      0.0,
+      0.5
+    ]
+  ],
+  "coordinate_definition": "q is the H-H bond-length change in bohr",
+  "case": "h2",
+  "method": "RHF",
+  "cart": true,
+  "field": null,
+  "derivative_method": "reverse first derivative, then nested forward JVP; native integrals and implicit SCF",
+  "derivative_units": [
+    "Eh",
+    "Eh/bohr",
+    "Eh/bohr^2",
+    "Eh/bohr^3",
+    "Eh/bohr^4"
+  ],
+  "derivatives": [
+    -1.1267427044518366,
+    0.00817775927184454,
+    0.3835480137045453,
+    -1.3194748777505771,
+    4.428751185658882
+  ],
+  "seconds_including_compilation": [
+    4.932031433010707,
+    5.722750302986242,
+    7.606713484012289,
+    12.5751294149959,
+    20.428406419989187
+  ],
+  "native_curvature_differences": [
+    {
+      "step_bohr": 0.003,
+      "cubic": -1.3194996607399923,
+      "quartic": 4.428806905722017,
+      "cubic_error": 2.478298941510637e-05,
+      "quartic_error": 5.572006313503408e-05
+    },
+    {
+      "step_bohr": 0.001,
+      "cubic": -1.319477631388788,
+      "quartic": 4.428757378494019,
+      "cubic_error": 2.753638210784004e-06,
+      "quartic_error": 6.192835137142083e-06
+    },
+    {
+      "step_bohr": 0.0003,
+      "cubic": -1.3194751255775814,
+      "quartic": 4.428751761616686,
+      "cubic_error": 2.4782700425163284e-07,
+      "quartic_error": 5.759578041164559e-07
+    }
+  ],
+  "density_directional_derivative_norm": 0.2703029365534485,
+  "center_orbital_gradient_norm": 4.577566798522237e-16,
+  "orbital_stability_eigenvalues": [
+    2.5291151973969903,
+    4.667179870985521,
+    7.0267383408938215
+  ],
+  "orbital_stability_residuals": [
+    2.5272916105098907e-15,
+    9.861605848141023e-16,
+    1.5045957590992378e-15
+  ],
+  "scf_energy_tolerance": 1e-13,
+  "scf_gradient_tolerance": 1e-11,
+  "implicit_response_tolerance": 1e-10,
+  "backend": "CPU float64",
+  "threads": 2
+}

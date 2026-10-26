@@ -27,7 +27,7 @@ from . import _intermediates as imd
 einsum = partial(np.einsum, precision="highest")
 
 
-def residual_full(t1, t2, eris, *, cc2=False):
+def residual_full(t1, t2, eris, *, cc2=False, doubles=True):
     # Ref: Hirata et al., J. Chem. Phys. 120, 2581 (2004) Eqs.(35)-(36)
     nocc, nvir = t1.shape
     fock = eris.fock
@@ -67,6 +67,10 @@ def residual_full(t1, t2, eris, *, cc2=False):
     t1new += -2 * einsum("lcki,lc,ka->ia", eris_ovoo, t1, t1)
     t1new += einsum("kcli,lc,ka->ia", eris_ovoo, t1, t1)
 
+    if not doubles:
+        eia = mo_e_o[:, None] - mo_e_v
+        return t1new - eia * t1, np.zeros_like(t2)
+
     # T2 equation
     tmp2 = einsum("kibc,ka->abic", eris.oovv, -t1)
     tmp2 += np.asarray(eris_ovvv).conj().transpose(1, 3, 0, 2)
@@ -83,10 +87,7 @@ def residual_full(t1, t2, eris, *, cc2=False):
         Woooo2 += einsum("kclj,ic->klij", eris_ovoo, t1)
         Woooo2 += einsum("kcld,ic,jd->klij", eris.ovov, t1, t1)
         t2new += einsum("klij,ka,lb->ijab", Woooo2, t1, t1)
-        Wvvvv = einsum("kcbd,ka->abcd", eris_ovvv, -t1)
-        Wvvvv = Wvvvv + Wvvvv.transpose(1, 0, 3, 2)
-        Wvvvv += np.asarray(eris.vvvv).transpose(0, 2, 1, 3)
-        t2new += einsum("abcd,ic,jd->ijab", Wvvvv, t1, t1)
+        t2new += imd.contract_Wvvvv(t1, eris, (t1, t1))
         Lvv2 = fvv - einsum("kc,ka->ac", fov, t1)
         Lvv2 -= np.diag(np.diag(fvv))
         tmp = einsum("ac,ijcb->ijab", Lvv2, t2)
@@ -104,11 +105,9 @@ def residual_full(t1, t2, eris, *, cc2=False):
         Woooo = imd.cc_Woooo(t1, t2, eris)
         Wvoov = imd.cc_Wvoov(t1, t2, eris)
         Wvovo = imd.cc_Wvovo(t1, t2, eris)
-        Wvvvv = imd.cc_Wvvvv(t1, t2, eris)
-
         tau = t2 + einsum("ia,jb->ijab", t1, t1)
         t2new += einsum("klij,klab->ijab", Woooo, tau)
-        t2new += einsum("abcd,ijcd->ijab", Wvvvv, tau)
+        t2new += imd.contract_Wvvvv(t1, eris, tau)
         tmp = einsum("ac,ijcb->ijab", Lvv, t2)
         t2new += tmp + tmp.transpose(1, 0, 3, 2)
         tmp = einsum("ki,kjab->ijab", Loo, t2)

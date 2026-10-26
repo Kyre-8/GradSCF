@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field, fields, is_dataclass
+from dataclasses import dataclass, field, fields, is_dataclass, replace
 from typing import Any, Literal
 
 import numpy as np
+import jax
+import jax.numpy as jnp
 
+from .._memory import DEFAULT_MAX_MEMORY_MB, validate_memory_mb
 from ..data.molecule import MoleculeSpec
 from ..tools.jax_runtime import configure_jax_persistent_cache
 from .builders import (
@@ -12,17 +15,17 @@ from .builders import (
     build_restricted_scf_result_from_facade,
     complete_restricted_response_inputs,
     build_unrestricted_reference_from_facade,
-    restricted_molecule_from_spec_with_jax_rks,
-    unrestricted_molecule_from_spec_with_jax_uks,
+    _build_restricted_reference,
+    _build_unrestricted_reference,
 )
-from .core import _contains_jax_tracer
-from gradscf.integrals.assembly import build_rks_integral_inputs
-from .rks import RKSConfig, run_rks_from_integrals
-from .uks import UKSConfig
+from .core import _contains_jax_tracer, _build_density_from_occ
+from gradscf.scf.inputs.assembly import build_rks_integral_inputs
+from .rks import RKSConfig, RKSResult, run_rks_from_integrals
+from .uks import UKSConfig, UKSResult
 
 
 _SCF_RESULT_FIELDS = (
-    'reference', 'scf_result', '_scf_inputs', '_cached_scf_key', '_cached_response_key',
+    'reference', 'scf_result', '_scf_inputs', '_cached_scf_key', '_cached_response_key', '_cached_orbital_key',
     'e_tot', 'mo_energy', 'mo_coeff', 'mo_occ', 'cycles', 'converged',
 )
 
@@ -51,7 +54,9 @@ def _cache_signature(value):
 @dataclass
 class _BaseKS:
     mol: Any
-    xc: str = "pbe"
+    xc: Any = "pbe"
+    # External Functional parameters stay explicit and participate in freshness.
+    params: Any | None = field(default=None, kw_only=True)
     conv_tol: float = 1e-10
     conv_tol_density: float = 1e-8
     conv_tol_grad: float = 1e-7
@@ -63,6 +68,9 @@ class _BaseKS:
     integral_backend: Literal["native", "jax", "cpu", "libcint"] = "cpu"
     geometry_grad_policy: Literal["analytic", "error", "zero"] = "analytic"
     grid_ao_backend: Literal["jax"] = "jax"
+    grid_block_size: int = 0
+    grid_max_memory: float | None = None
+    max_memory: float = field(default=DEFAULT_MAX_MEMORY_MB, kw_only=True)
     execution_device: Literal["auto", "cpu", "gpu"] = "auto"
     init_guess: Any = "hcore"
     chkfile: str | None = None
@@ -83,15 +91,129 @@ class _BaseKS:
     _scf_inputs: Any | None = field(default=None,init=False,repr=False)
     _cached_scf_key: Any | None = field(default=None,init=False,repr=False)
     _cached_response_key: Any | None = field(default=None,init=False,repr=False)
+    _cached_orbital_key: Any | None = field(default=None, init=False, repr=False)
+
+    def __post_init__(self):
+        self.max_memory = validate_memory_mb(self.max_memory)
+        if self.grid_max_memory is not None:
+            self.grid_max_memory = validate_memory_mb(self.grid_max_memory, name="grid_max_memory")
+
+    def _orbital_signature(self):
+        from .reference import _array_signature
+
+        return tuple(None if value is None else _array_signature(value)
+                     for value in (self.mo_coeff, self.mo_occ, self.mo_energy))
 
     def _scf_signature(self):
-        return _cache_signature((self._spec(), self.mol.basis, self._config(), self.grids_level,
+        return _cache_signature((self._spec(), self.mol.basis, self._config(), self.xc, self.params, self.grids_level,
             self.max_l, self.integral_backend, self.geometry_grad_policy, self.grid_ao_backend,
             self.init_guess, self.chkfile, self.sap_basis, self.init_guess_chkfile_project))
+
+    def _is_external_xc(self):
+        from ..dft.functional import Functional
+        return isinstance(self.xc, Functional)
+
+    def _standard_xc_spec(self):
+        if self._is_external_xc():
+            return "hf"  # Only the initialization uses this standard solver.
+        spec = getattr(self.xc, "spec", self.xc)
+        if not isinstance(spec, str):
+            raise TypeError("xc must be a standard specification, TraditionalXCFunctional, or Functional.")
+        return spec
+
+    def _run_external_xc(self):
+        """Eager facade over the existing full-energy differentiable SCF solver.
+
+        Training and parameter AD keep using Functional and DifferentiableSCF;
+        this facade supplies molecular inputs, status, and the same TD binding.
+        """
+        from .differentiable import DifferentiableSCF, DifferentiableSCFConfig
+        from .energy import XCContribution, unrestricted_energy
+        from .uks import _spin_jk_matrices
+        from ..integrals.backends.native.jk import _selected_jk
+
+        if self.params is None:
+            raise ValueError("External XC requires explicit params; use {} for a parameter-free Functional.")
+        initial_options = dict(xc="hf", params=None, max_cycle=1)
+        if isinstance(self, RKS):
+            initial_options.update(compute_local_hfx_features=False, compute_local_hfx_aux=False)
+        initializer = _fresh_scf_like(self, type(self), **initial_options)
+        spec = self._spec()
+        if isinstance(self, RKS):
+            initializer._sync_from_scf_result(initializer._build_scf_result(spec))
+        initial = initializer._build_reference(spec)
+        if isinstance(self, RKS):
+            self._scf_inputs = initializer._scf_inputs
+        if initial.ao_laplacian is None and getattr(initial, "grid_ao", None) is None:
+            from ..integrals import basis_from_molecule_spec, evaluate_cartesian_ao_with_derivatives
+            basis = basis_from_molecule_spec(spec, basis=self.mol.basis,
+                max_l=self.max_l, precompute_eri_groups=False)
+            derivatives = evaluate_cartesian_ao_with_derivatives(basis, initial.grid.coords, deriv=2)[1]
+            initial = replace(initial, ao_laplacian=derivatives[4])
+        if isinstance(self, RKS):
+            self._scf_inputs = replace(self._scf_inputs, ao_laplacian=initial.ao_laplacian)
+        initial = self._put_on_requested_device(initial)
+        solver = DifferentiableSCF(DifferentiableSCFConfig(
+            mode="self_consistent", gradient_mode="implicit", max_cycle=self.max_cycle,
+            damping=self.damp, level_shift=self.level_shift, conv_tol_energy=self.conv_tol,
+            conv_tol_density=self.conv_tol_density, conv_tol_grad=self.conv_tol_grad,
+            eigenvalue_jitter=0., vxc_clip=float("inf")))
+        state, info = solver.run(initial, self.xc, self.params)
+        density_spin = jnp.asarray(state.rdm1)
+        direct_basis = getattr(state, "direct_basis", None)
+        if callable(getattr(direct_basis, "get_jk", None)):
+            coulomb, _ = _selected_jk(direct_basis, density_spin.sum(axis=0), with_k=False)
+            ka = kb = jnp.zeros_like(coulomb)
+        else:
+            eri = getattr(state, "eri_pair_matrix", None)
+            if eri is None or not int(jnp.asarray(eri).size):
+                eri = state.rep_tensor
+            _, coulomb, ka, kb = _spin_jk_matrices(
+                eri, density_spin[0], density_spin[1],
+                df_factors=getattr(state, "df_factors", None), with_k=False)
+        xc_energy = self.xc.energy_from_molecule(self.params, state)
+        potential_spin = self.xc.potential(self.params, state, density_spin)
+        total = unrestricted_energy(density_spin, state.h1e, coulomb, jnp.stack([ka, kb]),
+            XCContribution(xc_energy, potential_spin, 0.), nuclear_repulsion=state.nuclear_repulsion)
+        restricted = isinstance(self, RKS)
+        potential = potential_spin.mean(axis=0) if restricted else potential_spin
+        fock = state.h1e+coulomb+potential
+        converged = bool(info.converged) and bool(jnp.isfinite(total))
+        cycles = int(info.cycles)
+        state = replace(state, fock_matrix=fock, mf_energy=total, exact_exchange_fraction=0.,
+                        scf_converged=converged, scf_cycles=cycles, xc_spec=None)
+        common = dict(converged=converged, total_energy=total,
+            electronic_energy=total-state.nuclear_repulsion, nuclear_repulsion=state.nuclear_repulsion,
+            xc_energy=xc_energy, exact_exchange_fraction=0., overlap_matrix=state.overlap_matrix,
+            hcore_matrix=state.h1e, cycles=cycles)
+        if restricted:
+            result = RKSResult(**common, mo_coeff=state.mo_coeff[0], mo_occ=2*state.mo_occ[0],
+                mo_energy=state.mo_energy[0], density_matrix=density_spin.sum(axis=0), fock_matrix=fock)
+            self._sync_from_scf_result(result)
+            self.reference = state
+        else:
+            result = UKSResult(**common, mo_coeff_alpha=state.mo_coeff[0], mo_coeff_beta=state.mo_coeff[1],
+                mo_occ_alpha=state.mo_occ[0], mo_occ_beta=state.mo_occ[1],
+                mo_energy_alpha=state.mo_energy[0], mo_energy_beta=state.mo_energy[1],
+                density_matrix_alpha=density_spin[0], density_matrix_beta=density_spin[1],
+                fock_matrix_alpha=fock[0], fock_matrix_beta=fock[1])
+            self._sync_from_reference(state)
+            self.scf_result = result
+        self._cached_scf_key = self._scf_signature()
+        self._cached_response_key = self._response_signature()
+        return self.e_tot
 
     def run(self) -> "_BaseKS":
         self.kernel()
         return self
+
+    def make_rdm1(self):
+        """Density in the facade convention: total RKS or alpha/beta UKS."""
+        if self.mo_coeff is None or self.mo_occ is None:
+            raise RuntimeError('Run ground-state SCF before make_rdm1().')
+        coefficients, occupations = jnp.asarray(self.mo_coeff), jnp.asarray(self.mo_occ)
+        build = _build_density_from_occ if coefficients.ndim == 2 else jax.vmap(_build_density_from_occ)
+        return build(coefficients, occupations)
 
     def TDA(self, **kwargs: Any) -> Any:
         from .. import tdscf
@@ -158,6 +280,8 @@ class _BaseKS:
         converged = getattr(reference,"scf_converged",None)
         self.converged = bool(getattr(reference,"converged",True) if converged is None else converged)
 
+        self._cached_orbital_key = self._orbital_signature()
+
     def _sync_from_scf_result(self, result: Any) -> None:
         self.scf_result = result
         self.reference = None
@@ -167,6 +291,8 @@ class _BaseKS:
         self.mo_occ = getattr(result, "mo_occ", None)
         self.cycles = getattr(result, "cycles", None)
         self.converged = bool(getattr(result, "converged", True))
+
+        self._cached_orbital_key = self._orbital_signature()
 
     def _configure_jax_cache(self) -> None:
         configure_jax_persistent_cache(
@@ -183,18 +309,29 @@ class _BaseKS:
         device = resolve_execution_device(self.execution_device)
         return put_molecule_on_device(reference, device=device)
 
+    def to_reference(self) -> Any:
+        """Return reusable AO/grid state from this solved, current SCF source.
+
+        Eager conversion only: reuse solved inputs/orbitals and complete missing
+        response data. Never implicitly run an unconverged or stale SCF source.
+        """
+        from .rsh import reject_rsh_response
+        reject_rsh_response(self)
+        return self._ensure_reference()
+
+    def _check_reference_source(self) -> None:
+        if self.e_tot is None or not self.converged:
+            raise RuntimeError('Run and converge ground-state SCF before preparing a reference.')
+        if self._cached_scf_key is None or self._cached_scf_key != self._scf_signature():
+            raise RuntimeError('Molecule or SCF configuration changed; run kernel() before preparing a reference.')
+        if self._cached_orbital_key != self._orbital_signature():
+            raise RuntimeError('Orbital state changed; run kernel() before preparing a reference.')
+
     def _ensure_reference(self) -> Any:
-        response_key = None
-        if self._cached_scf_key is not None:
-            if self._cached_scf_key != self._scf_signature():
-                raise RuntimeError('Molecule or SCF configuration changed; run kernel() before preparing a reference.')
-            response_key = self._response_signature()
-        if self.reference is not None and (self._cached_scf_key is None or response_key == self._cached_response_key):
+        self._check_reference_source()
+        response_key = self._response_signature()
+        if self.reference is not None and response_key == self._cached_response_key:
             return self.reference
-        if self.e_tot is None:
-            raise RuntimeError(
-                "Run ground-state mf.kernel() or mf.run() before launching TD-SCF."
-            )
         reference = self._build_reference(self._spec())
         reference = self._put_on_requested_device(reference)
         if self.scf_result is None:
@@ -214,6 +351,7 @@ class RKS(_BaseKS):
     df_max_rank: int | None = None
     auxbasis: str | None = None
     direct_scf_tol: float = 0.0
+    direct_scf_workers: int = 1
     compute_local_hfx_features: bool = False
     compute_local_hfx_aux: bool = False
     hfx_omega_values: tuple[float, ...] = (0.0, 0.4)
@@ -221,7 +359,7 @@ class RKS(_BaseKS):
 
     def _config(self) -> RKSConfig:
         return RKSConfig(
-            xc_spec=self.xc,
+            xc_spec=self._standard_xc_spec(),
             max_cycle=self.max_cycle,
             conv_tol=self.conv_tol,
             conv_tol_density=self.conv_tol_density,
@@ -233,12 +371,16 @@ class RKS(_BaseKS):
             df_max_rank=self.df_max_rank,
             auxbasis=self.auxbasis,
             direct_scf_tol=self.direct_scf_tol,
+            direct_scf_workers=self.direct_scf_workers,
+            max_memory=self.max_memory,
+            grid_block_size=self.grid_block_size,
+            grid_max_memory=self.grid_max_memory,
         )
 
     def _build_reference(self, spec: MoleculeSpec) -> Any:
         if self._scf_inputs is not None:
             self._scf_inputs = complete_restricted_response_inputs(self._scf_inputs,spec,self.mol.basis)
-        return build_restricted_reference_from_facade(
+        reference = build_restricted_reference_from_facade(
             spec,
             **self._build_options(spec),
             compute_local_hfx_features=self.compute_local_hfx_features,
@@ -246,10 +388,14 @@ class RKS(_BaseKS):
             hfx_omega_values=self.hfx_omega_values,
             hfx_chunk_size=self.hfx_chunk_size,
             include_dipole_integrals=True,
-            reference_builder=restricted_molecule_from_spec_with_jax_rks,
+            reference_builder=_build_restricted_reference,
             scf_inputs=self._scf_inputs,
             scf_result=self.scf_result,
         )
+        if self._is_external_xc() and self.scf_result is not None:
+            reference = replace(reference, fock_matrix=self.scf_result.fock_matrix,
+                mf_energy=self.scf_result.total_energy, exact_exchange_fraction=0., xc_spec=None)
+        return reference
 
     def _build_scf_result(self, spec: MoleculeSpec) -> Any:
         result, inputs = build_restricted_scf_result_from_facade(
@@ -263,7 +409,7 @@ class RKS(_BaseKS):
         return result
 
     def _build_options(self, spec):
-        return dict(mol=self.mol,xc=self.xc,grids_level=self.grids_level,max_l=self.max_l,
+        return dict(mol=self.mol,xc=self._standard_xc_spec(),grids_level=self.grids_level,max_l=self.max_l,
             integral_backend=self.integral_backend,geometry_grad_policy=self.geometry_grad_policy,
             grid_ao_backend=self.grid_ao_backend,rks_config=self._config(),init_guess=self.init_guess,
             chkfile=self.chkfile,sap_basis=self.sap_basis,init_guess_chkfile_project=self.init_guess_chkfile_project,
@@ -294,6 +440,8 @@ class RKS(_BaseKS):
         self._configure_jax_cache()
         for name in _SCF_RESULT_FIELDS:
             setattr(self,name,None)
+        if self._is_external_xc():
+            return self._run_external_xc()
         result = self._build_scf_result(self._spec())
         self._sync_from_scf_result(result)
         self._cached_scf_key = self._scf_signature()
@@ -315,19 +463,47 @@ class RKS(_BaseKS):
 
 
 @dataclass
+class RHF(RKS):
+    """Restricted Hartree-Fock using the shared RKS solver and reference flow.
+
+    Full exact exchange and zero semilocal XC are fixed by the method. SCF
+    controls, integral backends and differentiation retain the RKS contracts.
+    """
+
+    xc: str = field(default="hf", init=False)
+
+    def _config(self) -> RKSConfig:
+        if self.xc != "hf":
+            raise ValueError("RHF requires xc='hf'; use RKS for a DFT functional.")
+        return super()._config()
+
+
+@dataclass
 class UKS(_BaseKS):
     conv_tol_grad: float = 1e-7
-    jk_backend: Literal['full','df'] = 'full'
+    jk_backend: Literal['full','df','direct'] = 'full'
     auxbasis: str | None = None
+    direct_scf_tol: float = 0.0
+    direct_scf_workers: int = 1
 
     def _response_signature(self):
         # UKS builds the response container during SCF, without the optional
         # restricted local-HFX feature controls.
         return _cache_signature((self.execution_device,))
 
+    def _ensure_reference(self) -> Any:
+        self._check_reference_source()
+        if self.reference is None:
+            raise RuntimeError('Solved UKS reference is missing; run kernel() again.')
+        response_key = self._response_signature()
+        if self._cached_response_key != response_key:
+            self.reference = self._put_on_requested_device(self.reference)
+            self._cached_response_key = response_key
+        return self.reference
+
     def _config(self) -> UKSConfig:
         return UKSConfig(
-            xc_spec=self.xc,
+            xc_spec=self._standard_xc_spec(),
             max_cycle=self.max_cycle,
             conv_tol=self.conv_tol,
             conv_tol_density=self.conv_tol_density,
@@ -336,13 +512,18 @@ class UKS(_BaseKS):
             level_shift=self.level_shift,
             jk_backend=self.jk_backend,
             auxbasis=self.auxbasis,
+            direct_scf_tol=self.direct_scf_tol,
+            direct_scf_workers=self.direct_scf_workers,
+            max_memory=self.max_memory,
+            grid_block_size=self.grid_block_size,
+            grid_max_memory=self.grid_max_memory,
         )
 
     def _build_reference(self, spec: MoleculeSpec) -> Any:
         return build_unrestricted_reference_from_facade(
             spec,
             mol=self.mol,
-            xc=self.xc,
+            xc=self._standard_xc_spec(),
             grids_level=self.grids_level,
             max_l=self.max_l,
             integral_backend=self.integral_backend,
@@ -353,12 +534,14 @@ class UKS(_BaseKS):
             chkfile=self.chkfile,
             sap_basis=self.sap_basis,
             init_guess_chkfile_project=self.init_guess_chkfile_project,
-            reference_builder=unrestricted_molecule_from_spec_with_jax_uks,
+            reference_builder=_build_unrestricted_reference,
         )
 
     def kernel(self) -> Any:
         self._configure_jax_cache()
         self.converged = False
+        if self._is_external_xc():
+            return self._run_external_xc()
         reference = self._build_reference(self._spec())
         reference = self._put_on_requested_device(reference)
         self._sync_from_reference(reference)
@@ -382,7 +565,8 @@ class UKS(_BaseKS):
         return self
 
     def direct_scf(self) -> "UKS":
-        raise NotImplementedError("UKS direct SCF is not exposed by the current core solver.")
+        self.jk_backend = "direct"
+        return self
 
 
 @dataclass(frozen=True)

@@ -1,0 +1,161 @@
+{
+  "complete": true,
+  "settings": {
+    "a_bohr": 7.6,
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pade",
+    "mesh": [
+      31,
+      31,
+      31
+    ],
+    "kmesh": [
+      2,
+      2,
+      2
+    ],
+    "precision": 1e-10,
+    "displacement_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ]
+    ]
+  },
+  "bracket_bohr": [
+    7.6,
+    7.9,
+    8.2
+  ],
+  "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+  "script_sha256": "0f771978e46555fd633b48afc21cfef9a0ef0a20864be750c1e108aedf3b3855",
+  "helper_script_sha256": "4431a8c0439a2b60b4d4befb9c8c1792fd65d2bd0b1107937aa5f75a03bc8d68",
+  "points": [
+    {
+      "a_bohr": 7.6,
+      "energy_hartree": -8.007241003231696,
+      "derivative_hartree_per_bohr": -0.004465674300846459,
+      "pressure_hartree_per_bohr3": 0.0001030857410167696,
+      "volume_bohr3": 109.74399999999999,
+      "gap_hartree": 0.1501316628175535,
+      "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+      "state_file": "cubic_eos_000.json",
+      "state_sha256": "0d5525da859442bdb4cc5f14a7a0ebabb164b60d2a9f8239a520931fdde4271a"
+    },
+    {
+      "a_bohr": 7.9,
+      "energy_hartree": -8.007473828508116,
+      "derivative_hartree_per_bohr": 0.002585231698685295,
+      "pressure_hartree_per_bohr3": -5.523114241703348e-05,
+      "volume_bohr3": 123.25975000000001,
+      "gap_hartree": 0.1380047160299757,
+      "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+      "state_file": "cubic_eos_001.json",
+      "state_sha256": "17ed1094b713fb396a186e820f27658bbd6a110671ae3bdedbdbe7e9f7074d12"
+    },
+    {
+      "a_bohr": 8.2,
+      "energy_hartree": -8.005864636391612,
+      "derivative_hartree_per_bohr": 0.007884867888621168,
+      "pressure_hartree_per_bohr3": -0.00015635272434307292,
+      "volume_bohr3": 137.84199999999998,
+      "gap_hartree": 0.12682534227364825,
+      "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+      "state_file": "cubic_eos_002.json",
+      "state_sha256": "e41692732589246ad51d8e946750727a66c12b42c4527a19c518d1e21f81001e"
+    },
+    {
+      "a_bohr": 7.816946312105458,
+      "energy_hartree": -8.00761647612666,
+      "derivative_hartree_per_bohr": 0.0008268217544789582,
+      "pressure_hartree_per_bohr3": -1.8041654969835717e-05,
+      "volume_bohr3": 119.41294142636164,
+      "gap_hartree": 0.14125657406890962,
+      "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+      "state_file": "cubic_eos_003.json",
+      "state_sha256": "22434242224aa6ebe81320345a4c274a92a4b6057dc68428bb64e2bfb67ea6d7"
+    },
+    {
+      "a_bohr": 7.783053810622668,
+      "energy_hartree": -8.007631720938805,
+      "derivative_hartree_per_bohr": 6.87585464630497e-05,
+      "pressure_hartree_per_bohr3": -1.5134405211377298e-06,
+      "volume_bohr3": 117.86642412609524,
+      "gap_hartree": 0.1426054924810164,
+      "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+      "state_file": "cubic_eos_004.json",
+      "state_sha256": "5f779f4a42adc9da58cd6b39e2754a2fea56099d74ee4d3fac2748dbea29f7cc"
+    },
+    {
+      "a_bohr": 7.780026277087241,
+      "energy_hartree": -8.007631824865758,
+      "derivative_hartree_per_bohr": -1.3652822804061287e-07,
+      "pressure_hartree_per_bohr3": 3.0074544796004975e-09,
+      "volume_bohr3": 117.72893088656448,
+      "gap_hartree": 0.1427266279055135,
+      "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+      "state_file": "cubic_eos_005.json",
+      "state_sha256": "5e5ced2bd6928905602b11060b85843b616a3366ba85564fd81dc1be3760026f"
+    },
+    {
+      "a_bohr": 7.780032276700287,
+      "energy_hartree": -8.00763182486617,
+      "derivative_hartree_per_bohr": 1.9316686802947564e-10,
+      "pressure_hartree_per_bohr3": -4.255088306005135e-12,
+      "volume_bohr3": 117.72920324884807,
+      "gap_hartree": 0.14272638774851443,
+      "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+      "state_file": "cubic_eos_006.json",
+      "state_sha256": "5557a1f35ded779c4e87060dbdc44352408372159967196a40fdb6af36262b14"
+    },
+    {
+      "a_bohr": 7.775032276700287,
+      "energy_hartree": -8.007631539568646,
+      "derivative_hartree_per_bohr": -0.0001142082476073784,
+      "pressure_hartree_per_bohr3": 2.519021088209117e-06,
+      "volume_bohr3": 117.50236570985389,
+      "gap_hartree": 0.1429266763800937,
+      "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+      "state_file": "cubic_eos_007.json",
+      "state_sha256": "716bac0cb74f2d05aeb699824d70f3e1c869f10f1736d53f5a983c1afb23c848"
+    },
+    {
+      "a_bohr": 7.785032276700287,
+      "energy_hartree": -8.007631540455318,
+      "derivative_hartree_per_bohr": 0.00011367548008453487,
+      "pressure_hartree_per_bohr3": -2.5008330412853207e-06,
+      "volume_bohr3": 117.95633253905261,
+      "gap_hartree": 0.1425263888087058,
+      "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+      "state_file": "cubic_eos_008.json",
+      "state_sha256": "04286021eeb233ecdaf69394e0db7e34ef0bf304edd196e3092a51fb2a9c2f04"
+    }
+  ],
+  "passed": true,
+  "minimum": {
+    "a_bohr": 7.780032276700287,
+    "energy_hartree": -8.00763182486617,
+    "derivative_hartree_per_bohr": 1.9316686802947564e-10,
+    "pressure_hartree_per_bohr3": -4.255088306005135e-12,
+    "volume_bohr3": 117.72920324884807,
+    "gap_hartree": 0.14272638774851443,
+    "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+    "state_file": "cubic_eos_006.json",
+    "state_sha256": "5557a1f35ded779c4e87060dbdc44352408372159967196a40fdb6af36262b14"
+  },
+  "optimizer": "SciPy brentq of AD dE/da=V Tr(stress)/a after a measured energy/stress bracket",
+  "optimizer_iterations": 5,
+  "curvature_step_bohr": 0.005,
+  "curvature_from_energy_hartree_per_bohr2": 0.022788335058976372,
+  "curvature_from_stress_hartree_per_bohr2": 0.022788372769191323,
+  "cubic_bulk_modulus_hartree_per_bohr3": 0.0013018132229814354,
+  "scope": "Cubic zero-pressure minimum of this finite-basis/FFT/k model only; no cell-shape or phonon-stability claim.",
+  "elapsed_seconds_this_invocation": 903.0579310619796
+}

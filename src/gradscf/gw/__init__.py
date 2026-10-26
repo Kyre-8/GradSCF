@@ -1,9 +1,10 @@
 """Differentiable GW (Hedin) module for molecular and periodic systems.
 
 Molecular restricted/unrestricted G0W0 uses contour-deformation (CD)
-self-energies and implicit/unrolled quasiparticle differentiation. evGW
-and real restricted qsGW provide eager self-consistency loops; their outer
-fixed points do not yet have AD rules. Periodic Gamma/k-point drivers are
+self-energies and implicit/unrolled quasiparticle differentiation. Restricted
+GW additionally exposes independent G/W windows and fixed-W evGW0. evGW
+and real restricted qsGW provide eager self-consistency loops with opt-in
+molecular outer implicit response. Periodic Gamma/k-point drivers are
 available with the staged AD coverage documented in their modules.
 Restricted scGW provides an eager full-matrix finite-temperature Matsubara
 loop with explicit beta and grid controls and opt-in implicit differentiation
@@ -40,35 +41,39 @@ from .evgw import evgw_cd_restricted, evgw_cd_unrestricted
 from .freq import scaled_legendre_grid
 from .g0w0 import g0w0_cd_restricted, g0w0_cd_unrestricted
 from .polarizability import rho_response_iw, rho_response_real
-from .qp import qp_residual, solve_qp_orbital
+from .qp import (
+    solve_qp_orbital,
+)
 from .qsgw import qsgw_cd_restricted
 from .rgw import GW
 from .scgw import SCGWResult, scgw_cd_restricted, scgw_matsubara_restricted
-from .screened import screened_w_imag_axis, StaticScreening, build_static_screening, apply_static_screening
-from .self_energy import sigma_cd, sigma_imag_part, sigma_residue_part
+from .screened import screened_w_imag_axis, StaticScreening, build_static_screening, apply_static_screening, solve_static_screening
+from .self_energy import (
+    sigma_cd,
+)
 from .types import GWResult
 from .ugw import UGW
 
 __all__ = [
-    "GW",
-    "UGW",
-    "GWResult",
-    "g0w0_cd_restricted",
-    "g0w0_cd_unrestricted",
-    "evgw_cd_restricted",
-    "evgw_cd_unrestricted",
-    "qsgw_cd_restricted",
-    "scgw_cd_restricted",
-    "scgw_matsubara_restricted",
-    "SCGWResult",
-    "scaled_legendre_grid",
-    "rho_response_iw",
-    "rho_response_real",
-    "screened_w_imag_axis",
-    "StaticScreening", "build_static_screening", "apply_static_screening",
-    "sigma_cd",
-    "sigma_imag_part",
-    "sigma_residue_part",
-    "qp_residual",
-    "solve_qp_orbital",
+    'GW',
+    'UGW',
+    'GWResult',
+    'g0w0_cd_restricted',
+    'g0w0_cd_unrestricted',
+    'evgw_cd_restricted',
+    'evgw_cd_unrestricted',
+    'qsgw_cd_restricted',
+    'scgw_cd_restricted',
+    'scgw_matsubara_restricted',
+    'SCGWResult',
+    'scaled_legendre_grid',
+    'rho_response_iw',
+    'rho_response_real',
+    'screened_w_imag_axis',
+    'StaticScreening',
+    'build_static_screening',
+    'apply_static_screening',
+    'solve_static_screening',
+    'sigma_cd',
+    'solve_qp_orbital',
 ]

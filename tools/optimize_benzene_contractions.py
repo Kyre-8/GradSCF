@@ -24,8 +24,8 @@ from scipy.linalg import null_space
 from scipy.optimize import minimize
 
 from gradscf import integrals, scf
-from gradscf.integrals.normalization import normalized_shell_coefficients, radial_primitive_norm
-from gradscf.integrals.contraction import exchange_matrix
+from gradscf.integrals.basis.normalization import normalized_shell_coefficients, radial_primitive_norm
+from gradscf.integrals.molecular.jk import exchange_matrix
 from gradscf.scf.core import _diagonalize_fock, _orthogonalizer
 from gradscf.scf.rks import RKSConfig, run_rks_from_integrals_traceable
 

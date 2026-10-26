@@ -28,7 +28,7 @@ import jax.numpy as jnp
 import numpy as np
 from jaxtyping import Array
 
-from ..df import build_jk_from_df
+from gradscf.integrals.molecular.jk import build_jk_from_df
 from ..scf._pytree import pytree_dataclass
 from ..scf.autodiff import SCFDifferentiationConfig
 from .g0w0 import _mo_factors
@@ -57,13 +57,18 @@ class SCGWResult:
     from the Dyson inputs is bounded by the convergence residual. The GM
     energy is the GW functional of this returned G, with analytic reference
     tails in its bosonic Pi Wc sum.
+
+    With fixed phonons, fock_mo includes DW and self_energy_iw/sigma_moment
+    include Fan. total_energy is None because no coupled energy functional
+    is supplied. electronic_energy excludes nuclear repulsion and all EP/
+    phonon contributions; correlation_energy remains electronic GW only.
     """
 
     mo_energy: jnp.ndarray | None
     mo_coeff: jnp.ndarray
     chemical_potential: jnp.ndarray
     correlation_energy: jnp.ndarray
-    total_energy: jnp.ndarray
+    total_energy: jnp.ndarray | None
     density_matrix: jnp.ndarray
     density_mo: jnp.ndarray
     green_iw: jnp.ndarray
@@ -81,6 +86,27 @@ class SCGWResult:
     nw: int
     n_iter: int | jnp.ndarray
     beta: float
+    electronic_energy: jnp.ndarray | None = None
+    phonon_self_energy_iw: jnp.ndarray | None = None
+    phonon_sigma_moment: jnp.ndarray | None = None
+    debye_waller: jnp.ndarray | None = None
+
+
+def _scgw_step(green, fock, mu, b, hcore, density, grid, moment, phonons=None):
+    """One physical map shared by eager iteration and its implicit residual."""
+    step = gw_matsubara_step(green, fock, mu, b, grid, moment)
+    jmat, kmat = build_jk_from_df(b, density)
+    step['fock'] = hcore + jmat - .5 * kmat
+    if phonons is not None:
+        from .ep_coupling import fan_self_energy, debye_waller
+        ep = fan_self_energy(step['green_tau'], fock, mu, phonons, grid)
+        dw = debye_waller(phonons, grid.beta)
+        step['sigma_iw'] = step['sigma_iw'] + ep['sigma_iw']
+        step['sigma_moment'] = step['sigma_moment'] + ep['sigma_moment']
+        step['fock'] = step['fock'] + dw
+        step.update(phonon_self_energy_iw=ep['sigma_iw'],
+                    phonon_sigma_moment=ep['sigma_moment'], debye_waller=dw)
+    return step
 
 
 def _solve_chemical_potential(fock, sigma, guess, grid, target, particle_tol):
@@ -120,13 +146,13 @@ def _solve_chemical_potential(fock, sigma, guess, grid, target, particle_tol):
 
 
 def _assemble_scgw_result(*, coeff, hcore, b, nuclear_repulsion, fock, sigma, moment,
-                          mu, grid, nocc, n_iter, converged):
+                          mu, grid, nocc, n_iter, converged, phonons=None):
     """Recompute all observables from one state, retaining explicit input AD."""
     green, per_spin_density = dyson_green_and_density(fock, sigma, mu, grid)
     density = 2 * per_spin_density
-    step = gw_matsubara_step(green, fock, mu, b, grid, moment)
+    step = _scgw_step(green, fock, mu, b, hcore, density, grid, moment, phonons)
     jmat, kmat = build_jk_from_df(b, density)
-    new_fock = hcore + jmat - 0.5 * kmat
+    new_fock = step['fock']
     residual = jnp.maximum(jnp.max(jnp.abs(new_fock - fock)), jnp.max(jnp.abs(step["sigma_iw"] - sigma)))
     residual = jnp.maximum(residual, jnp.max(jnp.abs(step["sigma_moment"] - moment)) / (jnp.pi / grid.beta))
     ec = step["correlation_energy"]
@@ -136,13 +162,18 @@ def _assemble_scgw_result(*, coeff, hcore, b, nuclear_repulsion, fock, sigma, mo
     static_energy, static_rotation = jnp.linalg.eigh(fock)
     return SCGWResult(
         mo_energy=None, mo_coeff=coeff, chemical_potential=jnp.asarray(mu),
-        correlation_energy=ec, total_energy=e_one + e_h + e_x + ec + nuclear_repulsion,
+        correlation_energy=ec,
+        total_energy=(e_one + e_h + e_x + ec + nuclear_repulsion) if phonons is None else None,
         density_matrix=coeff @ density @ coeff.T, density_mo=density,
         green_iw=green, self_energy_iw=sigma, sigma_moment=moment, fock_mo=fock,
         mapped_fock_mo=new_fock, mapped_self_energy_iw=step["sigma_iw"],
         static_mo_energy=static_energy, static_mo_coeff=coeff @ static_rotation,
         fixed_point_residual=jax.lax.stop_gradient(residual), particle_number_error=jnp.trace(density) - 2 * nocc,
         grid=grid, converged=converged, nw=grid.nw, n_iter=n_iter, beta=grid.beta,
+        electronic_energy=e_one + e_h + e_x + ec,
+        phonon_self_energy_iw=step.get('phonon_self_energy_iw'),
+        phonon_sigma_moment=step.get('phonon_sigma_moment'),
+        debye_waller=step.get('debye_waller'),
     )
 
 
@@ -162,6 +193,7 @@ def scgw_matsubara_restricted(
     particle_tol: float = 1e-9,
     differentiation: SCFDifferentiationConfig | None = None,
     charge_response_tol: float = 1e-10,
+    phonons=None,
 ) -> SCGWResult:
     """Solve the restricted matrix scGW equations at finite inverse temperature.
 
@@ -181,16 +213,27 @@ def scgw_matsubara_restricted(
     to enable JIT, JVP and VJP with respect to real symmetric physical inputs.
     beta/nw/nocc and solver controls remain static. A failed response solve
     returns NaNs. charge_response_tol is the minimum resolved self-consistent
-    charge susceptibility (electrons/Ha); mu is differentiated, never frozen.
+    positive charge susceptibility (electrons/Ha) for a stable finite-T branch;
+    negative or unresolved charge response returns NaNs. mu is differentiated,
+    never frozen.
+
+    phonons optionally supplies ep_coupling.PhononModel in the fixed initial
+    orthonormal MO frame (not AO). Mode energies, linear and quadratic vertices
+    stay fixed during iteration but retain external-parameter response. Fan
+    self-energy and tail moments join the dynamical state; Debye-Waller joins
+    the static Fock. Mean nuclear positions and the phonon propagator are fixed.
+    With phonons supplied, total_energy is None: no coupled energy functional
+    is claimed. electronic_energy reports only the electronic Hamiltonian
+    part, excluding nuclear repulsion, electron-phonon and phonon energies.
     """
-    physical = (mo_energy, mo_coeff, df_factors, hcore_matrix, nuclear_repulsion)
+    physical = (mo_energy, mo_coeff, df_factors, hcore_matrix, nuclear_repulsion, phonons)
     if isinstance(beta, jax.core.Tracer) or (differentiation is None and any(
         isinstance(x, jax.core.Tracer) for x in jax.tree_util.tree_leaves(physical)
     )):
         raise NotImplementedError(
             "scGW default evaluation is eager; supply differentiation for implicit AD. beta must remain static."
         )
-    if any(jnp.iscomplexobj(x) for x in physical):
+    if any(jnp.iscomplexobj(x) for x in jax.tree_util.tree_leaves(physical)):
         raise NotImplementedError("scGW currently supports real restricted molecular inputs only.")
     if max_iter < 1 or not np.isfinite(tol) or tol <= 0 or not np.isfinite(particle_tol) or particle_tol <= 0:
         raise ValueError("max_iter, tol and particle_tol must be positive and finite.")
@@ -204,6 +247,9 @@ def scgw_matsubara_restricted(
         raise ValueError("mo_energy and mo_coeff shapes must describe the same orbital basis.")
     if not 0 < nocc < energy.size:
         raise ValueError("scGW requires both occupied and virtual orbitals: 0 < nocc < nmo.")
+    if phonons is not None:
+        from .ep_coupling import validate_model
+        validate_model(phonons, norb=energy.size)
     hcore = coeff.T @ jnp.asarray(hcore_matrix, dtype=jnp.float64) @ coeff
     b = _mo_factors(jnp.asarray(df_factors, dtype=jnp.float64), coeff)
     # Physical real Hamiltonians and pair vertices are symmetric. This also
@@ -217,6 +263,7 @@ def scgw_matsubara_restricted(
             nuclear_repulsion=nuclear_repulsion, grid=grid, max_iter=int(max_iter),
             tol=float(tol), mixing=float(mixing), particle_tol=float(particle_tol),
             config=differentiation, charge_response_tol=charge_response_tol,
+            phonons=phonons,
         )
     density = jnp.diag(jnp.where(jnp.arange(energy.size) < nocc, 2.0, 0.0))
     jmat, kmat = build_jk_from_df(b, density)
@@ -231,11 +278,10 @@ def scgw_matsubara_restricted(
             fock, sigma, mu, grid, 2 * nocc, particle_tol
         )
         density = 2 * per_spin_density
-        step = gw_matsubara_step(green, fock, mu, b, grid, moment)
+        step = _scgw_step(green, fock, mu, b, hcore, density, grid, moment, phonons)
         new_sigma = step["sigma_iw"]
         new_moment = step["sigma_moment"]
-        jmat, kmat = build_jk_from_df(b, density)
-        new_fock = hcore + jmat - 0.5 * kmat
+        new_fock = step['fock']
         residual = jnp.maximum(jnp.max(jnp.abs(new_fock - fock)), jnp.max(jnp.abs(new_sigma - sigma)))
         # The tail moment is part of the state: scale to its contribution
         # at the lowest Matsubara frequency so the residual is in Ha.
@@ -248,6 +294,7 @@ def scgw_matsubara_restricted(
                 coeff=coeff, hcore=hcore, b=b, nuclear_repulsion=nuclear_repulsion,
                 fock=fock, sigma=sigma, moment=moment, mu=mu, grid=grid,
                 nocc=nocc, n_iter=iteration, converged=True,
+                phonons=phonons,
             )
         fock = (1 - mixing) * fock + mixing * new_fock
         sigma = (1 - mixing) * sigma + mixing * new_sigma

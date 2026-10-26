@@ -40,7 +40,7 @@ def test_ucisd_energy_and_gradient(radical, solver):
 
 
 def test_unrestricted_transform_layouts(radical):
-    from gradscf.integrals.mo import transform_unrestricted_integrals
+    from gradscf.ao2mo import transform_unrestricted_integrals
     from pyscf import ao2mo
     mf, h, g = radical
     ao = mf.mol.intor("int2e")
@@ -91,7 +91,7 @@ def test_ucis_against_uhf_tda(radical):
 
 def test_uci_nonempty_triples_against_full_fci():
     from gradscf import ci
-    from gradscf.integrals.mo import transform_unrestricted_integrals
+    from gradscf.ao2mo import transform_unrestricted_integrals
     from pyscf.fci import direct_uhf, cistring
     rng = np.random.default_rng(32)
     factors = rng.normal(size=(6, 4, 4))*.1

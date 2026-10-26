@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from numbers import Integral
 from typing import Any, NamedTuple
 
@@ -11,13 +11,13 @@ import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
 
-from ..dft.libxc_jax.jax_libxc import hybrid_coeff, xc_type
+from ..dft.xc import grid_value_and_grad, hybrid_coeff, parse_recipe, xc_type
 from .core import _contains_jax_tracer, _host_float_unless_traced
 from .facade import _BaseKS
-from gradscf.integrals.assembly import build_uks_integral_inputs
+from gradscf.scf.inputs.assembly import build_uks_integral_inputs
 from .convergence import convergence_reached
 from .rks import RKSResult, _PYSCF_LIKE_DIIS_SPACE, _diis_extrapolate
-from .uks import UKSConfig, _point_unrestricted_xc_value_and_grad_kernel
+from .uks import UKSConfig
 from .uks import _unrestricted_vxc_matrices, _unrestricted_xc_energy_and_potential_on_grid
 
 
@@ -55,6 +55,10 @@ def _validate_hermitian(a: Array, shape: tuple[int, int], name: str) -> None:
 
 
 def _validate_mode(config: GKSConfig) -> str:
+    recipe = parse_recipe(config.xc_spec)
+    recipe.require_complete_support()
+    if recipe.exact_exchange.omega is not None:
+        raise NotImplementedError("GKS range-separated exchange operators are not implemented.")
     if config.collinear not in {"col", "ncol"}:
         raise NotImplementedError("GKS supports col and ncol; mcol is not implemented.")
     kind = xc_type(config.xc_spec)
@@ -78,14 +82,14 @@ def generalized_jk(eri: Array, density: Array) -> tuple[Array, Array]:
     n = density.shape[0]//2
     total = density[:n, :n] + density[n:, n:]
     if eri.ndim in (1,2):
-        from ..integrals.layouts import build_jk_from_packed
+        from gradscf.integrals.molecular.jk import build_jk_from_packed
         coulomb,_=build_jk_from_packed(eri,total.T)
         _,exchange=build_jk_from_packed(eri,density.reshape(2,n,2,n).transpose(0,2,1,3))
         exchange=exchange.transpose(0,2,1,3).reshape(2*n,2*n)
         return _hermitian(_spin_diagonal(coulomb)),_hermitian(exchange)
     coulomb = jnp.einsum("pqrs,sr->pq", eri, total, precision=Precision.HIGHEST)
     blocks = density.reshape(2, n, 2, n)
-    from ..integrals.contraction import exchange_matrix
+    from gradscf.integrals.molecular.jk import exchange_matrix
     exchange = exchange_matrix(eri, blocks.transpose(0,2,1,3)).transpose(0,2,1,3)
     return _hermitian(_spin_diagonal(coulomb)), _hermitian(exchange.reshape(2*n, 2*n))
 
@@ -120,9 +124,7 @@ def _generalized_xc(density, ao, deriv, weights, cfg, kind):
     safe_norm = jnp.sqrt(jnp.maximum(norm2, cutoff**2))
     magnitude = jnp.where(norm2 >= cutoff**2, safe_norm, 0.)
     rho = jnp.stack([(total + magnitude) * .5, (total - magnitude) * .5], axis=1)
-    values, potentials = _point_unrestricted_xc_value_and_grad_kernel(cfg.xc_spec, "LDA")(rho)
-    values = jnp.nan_to_num(values, nan=0., posinf=0., neginf=0.)
-    potentials = jnp.nan_to_num(potentials, nan=0., posinf=0., neginf=0.)
+    values, potentials = grid_value_and_grad(cfg.xc_spec, "LDA")(rho)
     potentials = jnp.where((total > cfg.density_floor)[:, None], potentials, 0.)
     if cfg.potential_clip is not None:
         potentials = jnp.clip(potentials, -cfg.potential_clip, cfg.potential_clip)
@@ -189,7 +191,7 @@ def run_gks_from_integrals(
     _validate_mode(cfg)
     s, h, eri = map(jnp.asarray, (overlap, hcore, eri))
     n = s.shape[0]
-    from ..integrals.layouts import packed_eri_shape
+    from gradscf.integrals.molecular.eri import packed_eri_shape
     if s.shape != (n,n) or eri.shape not in {(n,n,n,n),packed_eri_shape(n,1),packed_eri_shape(n,2)}:
         raise ValueError("Generalized SCF requires spatial overlap and full/s4/s8 ERIs.")
     if jnp.iscomplexobj(s) or jnp.iscomplexobj(eri) or jnp.iscomplexobj(ao) or jnp.iscomplexobj(ao_deriv1):
@@ -302,15 +304,19 @@ class GKS(_BaseKS):
     def _config(self) -> GKSConfig:
         return GKSConfig(xc_spec=self.xc, collinear=self.collinear, max_cycle=self.max_cycle,
                          conv_tol=self.conv_tol, conv_tol_density=self.conv_tol_density,
-                         conv_tol_grad=self.conv_tol_grad, damping=self.damp, level_shift=self.level_shift)
+                         conv_tol_grad=self.conv_tol_grad, damping=self.damp, level_shift=self.level_shift,
+                         max_memory=self.max_memory,
+                         grid_block_size=self.grid_block_size, grid_max_memory=self.grid_max_memory)
 
     def kernel(self, dm0: Array | None = None) -> Any:
         cfg = self._config()
         _validate_mode(cfg)
+        if cfg.grid_block_size > 0:
+            raise NotImplementedError('Generalized SCF does not support streamed grid AO data; use grid_block_size=-1.')
         self._configure_jax_cache()
         supplied = dm0 if dm0 is not None else (None if isinstance(self.init_guess, str) else self.init_guess)
         inputs = build_uks_integral_inputs(
-            atom=self._spec(), basis=self.mol.basis, config=UKSConfig(xc_spec=self.xc),
+            atom=self._spec(), basis=self.mol.basis, config=replace(cfg, grid_block_size=-1),
             xc_spec=self.xc, unit=self.mol.unit, charge=self.mol.charge, spin=self.mol.spin,
             cart=self.mol.cart, grids_level=self.grids_level, max_l=self.max_l,
             integral_backend=self.integral_backend, grid_ao_backend=self.grid_ao_backend,

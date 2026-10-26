@@ -1,7 +1,7 @@
-"""Mixed parameter/geometry AD through native first-geometry derivatives.
+"""Mixed parameter/geometry AD and second-coordinate derivative composition.
 
-H2/STO-3G, CPU float64; geometry variables are in bohr. These tests do not
-request a coordinate Hessian: model parameters only change integral weights.
+H2/STO-3G, CPU float64; geometry variables are in bohr. Model parameters
+change integral weights; geometry probes also exercise coordinate Hessians.
 """
 from dataclasses import replace
 
@@ -70,13 +70,12 @@ def test_native_derivative_maps_vector_ad_and_adjoint(operator):
 
 
 @pytest.mark.parametrize("zero_direction", [False, True])
-def test_native_actual_second_geometry_derivative_is_explicitly_unsupported(zero_direction):
+def test_native_second_geometry_derivative_including_zero_direction(zero_direction):
     value, coords = _geometry_value("overlap")
     force = jax.grad(lambda r: jnp.sum(value(r)))
-    direction = jnp.zeros_like(coords) if zero_direction else jnp.ones_like(coords)
-    # A numerically zero but active tangent is not a symbolic zero and must
-    # not bypass the missing coordinate-Hessian contract.
-    with pytest.raises(NotImplementedError, match="(?i)(second.*geometry|geometry.*second)"):
-        jax.jvp(force, (coords,), (direction,))
-    with pytest.raises(NotImplementedError, match="(?i)(second.*geometry|geometry.*second)"):
-        jax.jit(jax.jacrev(force))(coords)
+    direction = jnp.zeros_like(coords) if zero_direction else jnp.arange(coords.size).reshape(coords.shape)*.1
+    actual = jax.jvp(force, (coords,), (direction,))[1]
+    hessian = jax.jit(jax.jacrev(force))(coords).reshape(coords.size,coords.size)
+    np.testing.assert_allclose(actual.ravel(),hessian@direction.ravel(),atol=2e-12)
+    if zero_direction:
+        np.testing.assert_array_equal(actual,0.)

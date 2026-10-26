@@ -1,6 +1,7 @@
 """Reusable static integral plans with freshly bound basis parameters."""
 from dataclasses import dataclass, replace
 from functools import lru_cache
+from numbers import Real
 
 import jax
 import jax.numpy as jnp
@@ -8,22 +9,22 @@ import numpy as np
 
 from .basis import (BasisTopology, BasisParameters, CartesianAO, CartesianBasis,
                     ContractedShell, cartesian_angular_tuples)
-from .normalization import normalized_shell_coefficients, radial_primitive_norm
+from .basis.normalization import normalized_shell_coefficients, radial_primitive_norm
 from .capabilities import backend_capabilities
+from .backends.native import packing as native_packing
+from .basis.types import check_parameter_shapes
 
 
-def _check_shapes(topology, parameters):
-    n = len(topology.angular_momenta)
-    if len(parameters.exponents) != n or len(parameters.coefficients) != n:
-        raise ValueError("Basis parameter shell counts do not match the topology.")
-    if parameters.centers.shape != (n, 3):
-        raise ValueError("Basis centers must have shape (nshell,3).")
-    if parameters.nuclear_coords.shape != (len(topology.nuclear_charges), 3):
-        raise ValueError("Nuclear coordinates do not match the topology.")
-    for a, c, np_, nc in zip(parameters.exponents, parameters.coefficients,
-                             topology.primitive_counts, topology.contraction_counts):
-        if a.shape != (np_,) or c.shape != (np_, nc):
-            raise ValueError("Exponent/coefficient shape does not match shell topology.")
+def _validate_omega(omega):
+    """Static nonnegative erf-Coulomb range parameter, in inverse Bohr."""
+    if isinstance(omega, jax.core.Tracer):
+        raise NotImplementedError("omega must be static; omega differentiation is not supported.")
+    if isinstance(omega, (bool, np.bool_)) or not isinstance(omega, Real):
+        raise TypeError("omega must be a static real scalar.")
+    omega = float(omega)
+    if not np.isfinite(omega) or omega < 0 or omega > np.sqrt(np.finfo(np.float64).max) / 2:
+        raise ValueError("omega must be finite, nonnegative and at most sqrt(float64.max)/2.")
+    return omega
 
 
 def _reference_basis(topology, parameters, *, precompute_eri_groups=True):
@@ -55,69 +56,94 @@ class IntegralPlan:
     env_size: int
 
     def pack(self, parameters, *, origin=None):
-        """Pack libcint ATM/BAS/ENV without freezing dynamic numerical values.
+        """Pack native tables with current differentiable basis parameters."""
+        return native_packing.pack(self, parameters, origin=origin)
 
-        Nuclear atoms and zero-charge basis-center atoms are separate. This
-        permits floating centers without spuriously moving nuclear potentials.
+    def _pack(self, parameters, coefficients, *, origin=None):
+        return native_packing.pack_environment(self, parameters, coefficients, origin=origin)
+
+    def coefficient_data(self, parameters, *, active_shells=None, separate_exponents=False):
+        """Separate normalized coefficients and optional exponents from ENV."""
+        return native_packing.coefficient_data(
+            self, parameters, active_shells=active_shells,
+            separate_exponents=separate_exponents)
+
+    def get_jk(self, parameters, density, *, screening_threshold=0., workers=1,
+               with_j=True, with_k=True, omega=0.):
+        """Native shell-direct J/K with density and coordinate response.
+
+        Coordinate AD requires zero screening cutoff. Numerical exponents
+        and coefficients remain separate unsupported differentiation inputs.
+        A static positive omega selects erf(omega*r12)/r12 in inverse Bohr;
+        omega=0 retains ordinary Coulomb, including its exact density response.
         """
-        _check_shapes(self.topology, parameters)
-        if not jax.config.x64_enabled:
-            raise ValueError("The native integral backend requires JAX float64 enabled.")
-        env = jnp.zeros(self.env_size, dtype=jnp.float64)
-        if origin is not None:
-            origin = jnp.asarray(origin)
-            if origin.shape != (3,):
-                raise ValueError("Integral origin must have shape (3,).")
-            env = env.at[1:4].set(origin)
-        coords = jnp.concatenate([parameters.nuclear_coords, parameters.centers], axis=0)
-        for i in range(len(self.atm)):
-            offset = int(self.atm[i, 1])
-            env = env.at[offset:offset+3].set(coords[i])
-        for i, (l, a, c) in enumerate(zip(self.topology.angular_momenta,
-                                         parameters.exponents, parameters.coefficients)):
-            ae, ce = int(self.bas[i, 5]), int(self.bas[i, 6])
-            coeff = normalized_shell_coefficients(l, a, c)
-            env = env.at[ae:ae+a.size].set(a)
-            env = env.at[ce:ce+c.size].set(coeff.T.ravel())
-        return self.atm, self.bas, env
-
-    def get_jk(self, parameters, density, *, screening_threshold=0.):
-        """Native shell-direct J/K, with JVP/VJP in density at fixed basis.
-
-        The Schwarz cutoff depends only on the basis, so the density map
-        stays linear. Basis/geometry AD is explicitly unsupported here.
-        """
+        omega = _validate_omega(omega)
         if self.backend!='native':raise NotImplementedError('get_jk requires the native backend.')
-        from .backends.native_compact import direct_jk
-        atm,bas,env=self.pack(parameters)
+        from .backends.native.jk import direct_jk
+        fixed=replace(parameters,centers=jnp.zeros_like(parameters.centers),
+                      nuclear_coords=jnp.zeros_like(parameters.nuclear_coords))
+        atm,bas,env=self.pack(fixed)
+        if omega:
+            env=env.at[8].set(omega)  # libcint PTR_RANGE_OMEGA
+        coordinates=jnp.concatenate((parameters.nuclear_coords,parameters.centers))
         if density.shape[-2:]!=(self.topology.nao,)*2:raise ValueError('Density AO dimensions do not match the plan.')
-        return direct_jk(atm,bas,env,density,cart=self.topology.cart,cutoff=screening_threshold)
+        return direct_jk(atm,bas,env,density,cart=self.topology.cart,
+                         cutoff=screening_threshold,workers=workers,
+                         with_j=with_j,with_k=with_k,coordinates=coordinates)
 
-    def evaluate(self, operator, parameters, *, origin=None, ecps=None, aosym='s1'):
+    def evaluate(self, operator, parameters, *, origin=None, ecps=None, aosym='s1', omega=0.0,
+                 shell_slice=None):
         """Bind current values and evaluate an operator.
 
         Reference one-electron calls skip ERI layouts. Reference eager ERI
         calls still rebuild their layouts when binding the current parameters.
+        For native ERIs, fixed ``omega > 0`` selects ``erf(omega*r12)/r12``;
+        zero retains ordinary Coulomb. Omega is a static nonnegative scalar
+        in inverse Bohr; its derivatives and short-range ERIs are unsupported.
+        Long-range s4/s8 values and geometry AD currently gather from the full
+        ERI, so their temporary storage remains O(nao**4).
+        A static eight-endpoint ``shell_slice`` selects four half-open native
+        s1 ERI shell ranges, with local AO axes and geometry AD through order
+        two. On CUDA, bounded windows/products use the CPU shell engine.
         """
+        omega = _validate_omega(omega)
+        if shell_slice is not None:
+            if operator != "eri":
+                raise ValueError("shell_slice applies only to ERI.")
+            if aosym != "s1":
+                raise ValueError("shell_slice requires the s1 ERI layout.")
+            if self.backend != "native":
+                raise NotImplementedError("shell_slice requires the native backend.")
+            from .backends.native.ffi import _eri_shell_slice
+            shell_slice, _ = _eri_shell_slice(self.bas, self.topology.cart, shell_slice)
+        if omega and operator != "eri":
+            raise ValueError("Nonzero omega applies only to the eri operator.")
+        if omega and self.backend != "native":
+            raise NotImplementedError("Long-range omega requires the native backend.")
         if aosym not in {'s1','s4','s8'}:raise ValueError('aosym must be s1, s4 or s8.')
         if aosym!='s1':
             if operator!='eri' or origin is not None or ecps is not None:
                 raise ValueError('Packed layouts apply only to ordinary ERI.')
             if self.backend!='native':raise NotImplementedError('Packed plans require the native backend.')
-            from .backends.native_compact import evaluate
+            if omega:
+                full = self.evaluate("eri", parameters, omega=omega)
+                rows, cols = np.tril_indices(self.topology.nao)
+                pair = full[rows[:, None], cols[:, None], rows[None, :], cols[None, :]]
+                return pair if aosym == 's4' else pair[np.tril_indices(len(rows))]
+            from .backends.native.eri import evaluate
             atm,bas,env=self.pack(parameters)
             npair=self.topology.nao*(self.topology.nao+1)//2
             shape=(npair,npair) if aosym=='s4' else (npair*(npair+1)//2,)
             return evaluate(atm,bas,env,shape,layout=0 if aosym=='s4' else 1,cart=self.topology.cart)
         if operator == "ecp":
             if origin is not None: raise ValueError("origin is not used for ECP integrals.")
-            from .ecp import evaluate_ecp
+            from .basis.ecp import evaluate_ecp
             return evaluate_ecp(self, parameters, ecps)
         if ecps is not None: raise ValueError("ecps is only used for the ecp operator.")
         caps = backend_capabilities(self.backend)
         if not caps.supports(operator):
             raise NotImplementedError(f"{operator!r} is not supported by {self.backend}.")
-        _check_shapes(self.topology, parameters)
+        check_parameter_shapes(self.topology, parameters)
         if origin is not None and operator != "dipole":
             raise ValueError("origin is only meaningful for the dipole operator.")
         if origin is not None:
@@ -130,16 +156,23 @@ class IntegralPlan:
             origin = (jnp.einsum("a,ar->r", charges, parameters.nuclear_coords) / total
                       if total else jnp.zeros(3))
         if self.backend == "native":
-            from .backends.native_geometry import evaluate_geometry
-            # Keep basis/environment values separate from geometry, allowing
-            # unsupported exponent/coefficient AD to fail explicitly.
             fixed = replace(parameters, centers=jnp.zeros_like(parameters.centers),
                             nuclear_coords=jnp.zeros_like(parameters.nuclear_coords))
-            atm, bas, env = self.pack(fixed)
             coords = jnp.concatenate([parameters.nuclear_coords, parameters.centers], axis=0)
-            origin = jnp.zeros(3, dtype=env.dtype) if origin is None else origin
+            origin = jnp.zeros(3, dtype=jnp.float64) if origin is None else origin
+            if operator != "eri":
+                from .backends.native.autodiff.evaluation import evaluate_differentiable
+                atm, bas, env, coefficients, exponents = self.coefficient_data(fixed,separate_exponents=True)
+                return evaluate_differentiable(operator, atm, bas, env, coefficients,
+                                             coords, origin, self.topology.nao,
+                                             cart=self.topology.cart,exponents=exponents)
+            from .backends.native.autodiff.geometry import evaluate_geometry
+            atm, bas, env = self.pack(fixed)
+            if omega:
+                env = env.at[8].set(omega)  # libcint PTR_RANGE_OMEGA
             return evaluate_geometry(operator, atm, bas, env, coords, origin,
-                                     self.topology.nao, cart=self.topology.cart)
+                                     self.topology.nao, cart=self.topology.cart,
+                                     shell_slice=shell_slice)
         from .backends import jax_reference
         names = {"overlap": "overlap_matrix", "kinetic": "kinetic_matrix",
                  "nuclear": "nuclear_attraction_matrix", "dipole": "dipole_matrix", "eri": "eri_tensor"}
@@ -153,20 +186,5 @@ def make_plan(topology, *, backend="native"):
     """Cache only topology, index/pointer arrays and backend identity."""
     if backend not in {"native", "jax_reference"}:
         raise ValueError("Integral plans support native or jax_reference backends.")
-    nnuc = len(topology.nuclear_charges)
-    nsh = len(topology.angular_momenta)
-    atm = np.zeros((nnuc+nsh, 6), dtype=np.int32)
-    atm[:nnuc, 0] = topology.nuclear_charges
-    atm[:, 2] = 1  # point nuclear model; basis-center atoms have zero charge
-    atm[:, 1] = 20 + np.arange(nnuc+nsh)*3
-    offset = 20 + 3*(nnuc+nsh)
-    bas = np.zeros((nsh, 8), dtype=np.int32)
-    for i, (l, np_, nc) in enumerate(zip(topology.angular_momenta,
-                                        topology.primitive_counts, topology.contraction_counts)):
-        bas[i, :4] = (nnuc+i, l, np_, nc)
-        bas[i, 5] = offset
-        bas[i, 6] = offset + np_
-        offset += np_ + np_*nc
-    atm.setflags(write=False)
-    bas.setflags(write=False)
+    atm, bas, offset = native_packing.build_tables(topology)
     return IntegralPlan(topology, backend, atm, bas, offset)

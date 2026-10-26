@@ -1,0 +1,287 @@
+{
+  "calculations": [
+    {
+      "settings": {
+        "a_angstrom": 2.46,
+        "c_angstrom": 6.708,
+        "basis": "gth-szv",
+        "pseudo": "gth-pbe",
+        "xc": "pbe",
+        "fft_mesh": [
+          15,
+          15,
+          31
+        ],
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "scf_controls": {
+          "max_cycle": 200,
+          "damping": 0.25,
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10
+        },
+        "geometry": "fixed AB graphite, not relaxed",
+        "exxdiv": null
+      },
+      "electron_temperature_K": 300.0,
+      "kpoints_bohr_inverse": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5202283407771993,
+          0.0
+        ],
+        [
+          0.0,
+          -0.5202283407771994,
+          0.0
+        ],
+        [
+          0.4505309588816825,
+          0.26011417038859963,
+          0.0
+        ],
+        [
+          0.4505309588816825,
+          0.7803425111657989,
+          0.0
+        ],
+        [
+          0.4505309588816825,
+          -0.2601141703885997,
+          0.0
+        ],
+        [
+          -0.4505309588816826,
+          -0.2601141703885997,
+          0.0
+        ],
+        [
+          -0.4505309588816826,
+          0.2601141703885995,
+          0.0
+        ],
+        [
+          -0.4505309588816826,
+          -0.780342511165799,
+          0.0
+        ]
+      ],
+      "pyscf_controls": {
+        "conv_tol": 1e-12,
+        "max_cycle": 180,
+        "maximum_attempts": 2
+      },
+      "native_converged": true,
+      "pyscf_converged": true,
+      "pyscf_initial_converged": true,
+      "pyscf_self_restart": false,
+      "native_energy_Eh_cell": -22.472858173664125,
+      "native_free_energy_Eh_cell": -22.473441428470178,
+      "pyscf_energy_Eh_cell": -22.47782081794097,
+      "pyscf_free_energy_Eh_cell": -22.478401245399947,
+      "energy_difference_Eh_cell": 0.00496264427684423,
+      "free_energy_difference_Eh_cell": 0.004959816929769545,
+      "native_seconds": 33.93171420501312,
+      "pyscf_seconds": 32.919842851988506
+    },
+    {
+      "settings": {
+        "a_angstrom": 2.46,
+        "c_angstrom": 6.708,
+        "basis": "gth-szv",
+        "pseudo": "gth-pbe",
+        "xc": "pbe",
+        "fft_mesh": [
+          21,
+          21,
+          41
+        ],
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "scf_controls": {
+          "max_cycle": 200,
+          "damping": 0.25,
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10
+        },
+        "geometry": "fixed AB graphite, not relaxed",
+        "exxdiv": null
+      },
+      "electron_temperature_K": 300.0,
+      "kpoints_bohr_inverse": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5202283407771993,
+          0.0
+        ],
+        [
+          0.0,
+          -0.5202283407771994,
+          0.0
+        ],
+        [
+          0.4505309588816825,
+          0.26011417038859963,
+          0.0
+        ],
+        [
+          0.4505309588816825,
+          0.7803425111657989,
+          0.0
+        ],
+        [
+          0.4505309588816825,
+          -0.2601141703885997,
+          0.0
+        ],
+        [
+          -0.4505309588816826,
+          -0.2601141703885997,
+          0.0
+        ],
+        [
+          -0.4505309588816826,
+          0.2601141703885995,
+          0.0
+        ],
+        [
+          -0.4505309588816826,
+          -0.780342511165799,
+          0.0
+        ]
+      ],
+      "pyscf_controls": {
+        "conv_tol": 1e-12,
+        "max_cycle": 180,
+        "maximum_attempts": 2
+      },
+      "native_converged": true,
+      "pyscf_converged": true,
+      "pyscf_initial_converged": true,
+      "pyscf_self_restart": false,
+      "native_energy_Eh_cell": -22.47503556628685,
+      "native_free_energy_Eh_cell": -22.475620909761393,
+      "pyscf_energy_Eh_cell": -22.475173586112486,
+      "pyscf_free_energy_Eh_cell": -22.475758925741157,
+      "energy_difference_Eh_cell": 0.0001380198256377696,
+      "free_energy_difference_Eh_cell": 0.00013801597976481617,
+      "native_seconds": 22.524488037015544,
+      "pyscf_seconds": 120.26766740399762
+    },
+    {
+      "settings": {
+        "a_angstrom": 2.46,
+        "c_angstrom": 6.708,
+        "basis": "gth-szv",
+        "pseudo": "gth-pbe",
+        "xc": "pbe",
+        "fft_mesh": [
+          27,
+          27,
+          51
+        ],
+        "k_mesh": [
+          3,
+          3,
+          1
+        ],
+        "scf_controls": {
+          "max_cycle": 200,
+          "damping": 0.25,
+          "conv_tol": 1e-12,
+          "conv_tol_density": 1e-11,
+          "conv_tol_grad": 1e-10
+        },
+        "geometry": "fixed AB graphite, not relaxed",
+        "exxdiv": null
+      },
+      "electron_temperature_K": 300.0,
+      "kpoints_bohr_inverse": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5202283407771993,
+          0.0
+        ],
+        [
+          0.0,
+          -0.5202283407771994,
+          0.0
+        ],
+        [
+          0.4505309588816825,
+          0.26011417038859963,
+          0.0
+        ],
+        [
+          0.4505309588816825,
+          0.7803425111657989,
+          0.0
+        ],
+        [
+          0.4505309588816825,
+          -0.2601141703885997,
+          0.0
+        ],
+        [
+          -0.4505309588816826,
+          -0.2601141703885997,
+          0.0
+        ],
+        [
+          -0.4505309588816826,
+          0.2601141703885995,
+          0.0
+        ],
+        [
+          -0.4505309588816826,
+          -0.780342511165799,
+          0.0
+        ]
+      ],
+      "pyscf_controls": {
+        "conv_tol": 1e-12,
+        "max_cycle": 180,
+        "maximum_attempts": 2
+      },
+      "native_converged": true,
+      "pyscf_converged": true,
+      "pyscf_initial_converged": false,
+      "pyscf_self_restart": true,
+      "native_energy_Eh_cell": -22.474971531695907,
+      "native_free_energy_Eh_cell": -22.475556882778235,
+      "pyscf_energy_Eh_cell": -22.474972314692216,
+      "pyscf_free_energy_Eh_cell": -22.475557665773163,
+      "energy_difference_Eh_cell": 7.82996309567352e-07,
+      "free_energy_difference_Eh_cell": 7.829949275617309e-07,
+      "native_seconds": 24.8067045249918,
+      "pyscf_seconds": 240.63151181300054
+    }
+  ],
+  "jax_version": "0.10.0",
+  "pyscf_version": "2.13.0",
+  "backend": "cpu",
+  "scope": "fixed-geometry electronic free energies only; no phonon convergence claim"
+}

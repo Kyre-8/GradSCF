@@ -9,7 +9,7 @@
       "commit": "c72d30662ba08048940c9000cc352a220c867712",
       "directory": "libcint",
       "license": "LICENSE",
-      "selection": "Ordinary one-electron and Coulomb two-electron C kernels, two-/three-center Coulomb drivers, intor1 and int3c2e generated kernels and shared source/header dependencies. Excludes range-separated polynomial fit tables, F12, tests and build systems. The int3c2e generated file includes unexposed spinor helper dependencies required by the driver. Source blob hashes checked against GitHub recursive tree for fixed commit. Includes grad1/grad2 kernels for coordinate derivatives.",
+      "selection": "Ordinary one-electron and Coulomb two-electron C kernels, two-/three-center Coulomb drivers, intor1 and int3c2e generated kernels and shared source/header dependencies. Excludes range-separated polynomial fit tables, F12, tests and build systems. The int3c2e generated file includes unexposed spinor helper dependencies required by the driver. Source blob hashes checked against GitHub recursive tree for fixed commit. Includes grad1/grad2 and hess kernels for first and second coordinate derivatives.",
       "files": [
         {
           "path": "src/autocode/int3c2e.c",
@@ -230,6 +230,11 @@
           "path": "src/autocode/grad2.c",
           "git_blob_sha1": "0141f88937649ffd7f505d2dc3b72864f24068d7",
           "sha256": "e59db62db78d78001daf2693b413ad2cf404803bbd8bd70c93db102123efeafb"
+        },
+        {
+          "path": "src/autocode/hess.c",
+          "git_blob_sha1": "c7d3f789a44563b68fdadf91510ddc6ea4b10a93",
+          "sha256": "c306218818a8e6f92785894e95b95ffa341dc663c56f1e28d6c8756761b613b2"
         }
       ]
     },

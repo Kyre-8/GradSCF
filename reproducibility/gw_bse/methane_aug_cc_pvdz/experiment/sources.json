@@ -1,0 +1,34 @@
+{
+  "atlas_doi": "10.5194/essd-5-365-2013",
+  "columns": [
+    "wavelength_nm",
+    "absorption_cross_section_cm2_per_molecule"
+  ],
+  "datasets": [
+    {
+      "file": "CH4_Kameta(2002)_298K_52-125nm.txt",
+      "doi": "10.1016/S0368-2048(02)00022-1",
+      "sha256": "fe2afe7b5d0ca396148395d6e1040f118041c8704ab19f5d67467915cc2cde9b",
+      "retrieved": "2026-09-30",
+      "url": "https://uvvis.mpch-mainz.gwdg.de/uvvis_data/cross_sections/Alkanes%2Balkyl%20radicals/Alkanes/CH4_Kameta(2002)_298K_52-125nm.txt",
+      "metadata_url": "https://uvvis.mpch-mainz.gwdg.de/uvvis/cross_sections/Alkanes%2Balkyl%20radicals/Alkanes/CH4_Kameta(2002)_298K_52-125nm.txt"
+    },
+    {
+      "file": "CH4_Samson(1989)_298K_10-95nm.txt",
+      "doi": "10.1063/1.456267",
+      "sha256": "1363697b5f25fc5e55e2d8521fd91915c7de12d1a57ca3e05d5ec14c46b38f9c",
+      "retrieved": "2026-09-30",
+      "url": "https://uvvis.mpch-mainz.gwdg.de/uvvis_data/cross_sections/Alkanes%2Balkyl%20radicals/Alkanes/CH4_Samson(1989)_298K_10-95nm.txt",
+      "metadata_url": "https://uvvis.mpch-mainz.gwdg.de/uvvis/cross_sections/Alkanes%2Balkyl%20radicals/Alkanes/CH4_Samson(1989)_298K_10-95nm.txt"
+    },
+    {
+      "file": "CH4_LeeChiang(1983)_293K_106.0-141.6nm.txt",
+      "doi": "10.1063/1.444812",
+      "sha256": "9706acc09b23e0ba86ed6ad9a605830fb1c3d1994e57fcb79c11672e57fa11c6",
+      "retrieved": "2026-09-30",
+      "url": "https://uvvis.mpch-mainz.gwdg.de/uvvis_data/cross_sections/Alkanes%2Balkyl%20radicals/Alkanes/CH4_LeeChiang(1983)_293K_106.0-141.6nm.txt",
+      "metadata_url": "https://uvvis.mpch-mainz.gwdg.de/uvvis/cross_sections/Alkanes%2Balkyl%20radicals/Alkanes/CH4_LeeChiang(1983)_293K_106.0-141.6nm.txt"
+    }
+  ],
+  "download_note": "Public atlas TLS certificate was expired; validation disabled only on the specific download requests. Raw-file SHA256 recorded."
+}

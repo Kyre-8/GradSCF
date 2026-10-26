@@ -28,6 +28,7 @@ References
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import replace
 
 import numpy as np
 import jax.numpy as jnp
@@ -37,12 +38,28 @@ from jaxtyping import Array
 from ...integrals.periodic.fft import get_jk
 from ..evgw import _evgw_loop
 from ..freq import scaled_legendre_grid
-from ..g0w0 import _qp_loop
+from ..g0w0 import _qp_loop, _requested_orbitals
+from ..outer_response import require_occupation_gap
 from ..polarizability import rho_response_iw
 from ..screened import screened_w_imag_axis
 from ..types import GWResult
-from .product_basis import gamma_product_factors
+from .product_basis import gamma_product_factors, _require_paired_lehmann
 from .q0 import screened_w_imag_axis_head_wing, transition_moments_gamma
+
+
+def _validate_gw_reference(mf):
+    from ...dft.xc import hybrid_coeff, parse_recipe
+    from ...pbc.scf import validate_reference
+
+    validate_reference(mf)
+    recipe = parse_recipe(mf.xc)
+    recipe.require_complete_support()
+    if recipe.exact_exchange.omega is not None:
+        raise NotImplementedError('Periodic GW range-separated starting potentials are not implemented.')
+    if mf.exxdiv != "ewald" and hybrid_coeff(mf.xc) != 0:
+        raise NotImplementedError(
+            "Periodic GW currently requires Ewald exchange for HF/hybrid references."
+        )
 
 
 def g0w0_cd_gamma(
@@ -87,6 +104,12 @@ def g0w0_cd_gamma(
     Returns
     -------
     :class:`gradscf.gw.types.GWResult`
+
+    Notes
+    -----
+    Folded contour screening requires paired OV/VO transition covariances.
+    This is checked explicitly. Parameter derivatives are supported along
+    paths preserving that condition; generic complex orbital AD is not.
     """
     mo_energy = jnp.asarray(mo_energy, dtype=jnp.float64)
     poles = (
@@ -97,11 +120,20 @@ def g0w0_cd_gamma(
     mo_coeff = jnp.asarray(mo_coeff, dtype=jnp.complex128)
     nocc = int(nocc)
     nmo = mo_energy.shape[0]
-    if orbs is None:
-        orbs = range(nmo)
+    if not 0 < nocc < nmo:
+        raise ValueError('Restricted periodic GW requires occupied and virtual orbitals.')
+    if poles.shape != mo_energy.shape:
+        raise ValueError('G/W spectra must match the mean-field spectrum.')
+    require_occupation_gap(poles, nocc, 'Gamma GW')
+    orbs = _requested_orbitals(orbs, nmo)
 
     b = gamma_product_factors(inputs, mo_coeff, mesh=mesh)  # (nG, nmo, nmo) complex
     b_ov = b[:, :nocc, nocc:]
+    pairs = np.array([(i, a) for i in range(nocc) for a in range(nocc, nmo)])
+    differences = poles[pairs[:, 0]]-poles[pairs[:, 1]]
+    _require_paired_lehmann(jnp.concatenate((b[:, pairs[:, 0], pairs[:, 1]],
+        b[:, pairs[:, 1], pairs[:, 0]]), axis=1), jnp.r_[differences, -differences],
+        jnp.r_[jnp.ones(len(pairs)), -jnp.ones(len(pairs))], label='Gamma GW')
 
     density_spin = jnp.asarray(density_spin)
     j_mat, k_ewald = get_jk(inputs, density_spin, exxdiv="ewald", with_k=True)
@@ -112,16 +144,22 @@ def g0w0_cd_gamma(
     delta_v = jnp.diag(-(vk_mo + v_mf_mo)).real
     # delta_v = v^x - v^mf = -K - (F - h - J) = -(K + v_mf_mo)
 
-    ef = 0.5 * (poles[nocc - 1] + poles[nocc])
+    ef = 0.5 * (jnp.max(poles[:nocc]) + jnp.min(poles[nocc:]))
     freqs, wts = scaled_legendre_grid(nw)
 
     if fc:
         # q -> 0 head/wing finite-size correction (PRB 83, 245122 (2011)).
-        qij, q_abs = transition_moments_gamma(inputs, poles, mo_coeff, nocc)
+        # The frozen orbital frame retains its MF k.p vertex; only the
+        # independent-particle response denominators use updated G/W poles.
+        qij, q_abs = transition_moments_gamma(inputs, mo_energy, mo_coeff, nocc)
         volume = float(jnp.asarray(inputs.weights[0])) * b.shape[0]
         wmn, del00, delP0 = screened_w_imag_axis_head_wing(
             b, b_ov, poles, qij, q_abs, volume, freqs
         )
+        static, head0, wing0 = screened_w_imag_axis_head_wing(
+            b, b_ov, poles, qij, q_abs, volume, jnp.zeros(1)
+        )
+        del_w_static = head0[0]+wing0[0]
         delP0 = delP0.T  # (nw, nmo) -> (nmo, nw)
         q0 = {"qij": qij, "q_abs": q_abs, "volume": volume, "nkpts": 1}
     else:
@@ -129,9 +167,11 @@ def g0w0_cd_gamma(
             return rho_response_iw(omega, poles, b_ov, spin_factor=4.0, conjugate=True)
 
         wmn = screened_w_imag_axis(b, response_fn, freqs, conjugate=True)
+        static = screened_w_imag_axis(b, response_fn, jnp.zeros(1), conjugate=True)
         del00 = delP0 = q0 = None
+        del_w_static = None
 
-    qp_energy, sigma_qp, converged_mask, converged, residual = _qp_loop(
+    qp_energy, sigma_qp, converged_mask, converged, residual, weight, diagnostics = _qp_loop(
         mo_energy=poles,
         b_mn=b,
         channels=((poles, b_ov, 2.0),),
@@ -151,6 +191,9 @@ def g0w0_cd_gamma(
         delP0=delP0,
         q0=q0,
         e_mf=mo_energy,
+        wmn_static=static[0],
+        del_w_static=del_w_static,
+        return_diagnostics=True,
     )
     return GWResult(
         mo_energy=qp_energy,
@@ -160,6 +203,11 @@ def g0w0_cd_gamma(
         converged_mask=converged_mask,
         nw=int(nw),
         qp_residual=residual,
+        qp_weight=weight,
+        qp_computed_mask=jnp.zeros_like(qp_energy, dtype=bool).at[jnp.asarray(orbs)].set(not evaluate_only),
+        screening_energy=poles,
+        method='periodic_gamma_cd',
+        **diagnostics,
     )
 
 
@@ -192,6 +240,7 @@ class KRGW:
 
     def kernel(self, orbs: Sequence[int] | None = None):
         mf = self._scf
+        _validate_gw_reference(mf)
         result = mf.result
         kpts = np.asarray(mf.kpts)
         if kpts.shape == (1, 3) and not np.any(kpts):
@@ -272,7 +321,7 @@ def evgw_cd_gamma(
     References: M. Shishkin and G. Kresse, Phys. Rev. B 75, 235102 (2007).
     DOI:10.1103/PhysRevB.75.235102
     """
-    return _evgw_loop(
+    result = _evgw_loop(
         g0w0_cd_gamma,
         mo_energy,
         mo_energy=mo_energy,
@@ -292,3 +341,4 @@ def evgw_cd_gamma(
         tol=float(tol),
         damping=float(damping),
     )
+    return replace(result, method='periodic_gamma_evgw')

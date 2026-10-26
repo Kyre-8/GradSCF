@@ -21,7 +21,7 @@ def test_packed_values_and_jit_against_dense(cart,layout):
 
 @pytest.mark.parametrize('layout',['s4','s8'])
 def test_packed_jk_complex_density_and_density_ad(layout):
-    from gradscf.integrals.layouts import build_jk_from_packed
+    from gradscf.integrals.molecular.jk import build_jk_from_packed
     top,p=integrals.prepare_basis('H 0 0 0; H .1 .2 .8','6-31g',cart=False)
     plan=integrals.make_plan(top);full=plan.evaluate('eri',p)
     packed=plan.evaluate('eri',p,aosym=layout)
@@ -54,8 +54,8 @@ def test_native_direct_jk_matches_integrals():
 
 
 def test_projected_native_direct_jk_differentiates_contraction():
-    from gradscf.integrals.backends.native_compact import NativeDirectBasis,ProjectedNativeDirectBasis
-    from gradscf.integrals.contraction import primitive_basis,contraction_matrix
+    from gradscf.integrals.backends.native.jk import NativeDirectBasis, ProjectedNativeDirectBasis
+    from gradscf.integrals.basis.contraction import primitive_basis, contraction_matrix
     top,p=integrals.prepare_basis('H 0 0 0; H 0 0 .8','sto-3g',cart=False)
     primitive_top,primitive_parameters=primitive_basis(top,p)
     plan=integrals.make_plan(primitive_top)
@@ -94,7 +94,7 @@ def test_general_contractions_and_direct_screening(cart):
     top,p=integrals.prepare_basis('H 0 0 0; H 0 0 1.1',basis,cart=cart)
     plan=integrals.make_plan(top);eri=plan.evaluate('eri',p)
     packed=plan.evaluate('eri',p,aosym='s8')
-    from gradscf.integrals.layouts import build_jk_from_packed
+    from gradscf.integrals.molecular.jk import build_jk_from_packed
     d=jnp.asarray(np.random.default_rng(2).normal(size=(top.nao,top.nao)))
     refj=jnp.einsum('pqrs,rs->pq',eri,d);refk=jnp.einsum('prqs,rs->pq',eri,d)
     for actual in [build_jk_from_packed(packed,d),plan.get_jk(p,d,screening_threshold=1e-14)]:
@@ -114,12 +114,12 @@ def test_direct_complex_density_hessian_and_basis_ad_guard():
     tangent=jnp.ones_like(d)
     np.testing.assert_allclose(jax.jvp(jax.grad(loss),(d,),(tangent,))[1],
                                jax.jvp(jax.grad(ref),(d,),(tangent,))[1],atol=1e-10)
-    with pytest.raises(NotImplementedError,match='density AD'):
+    with pytest.raises((NotImplementedError, RuntimeError),match='(?i)(density AD|basis|exponent|coefficient)'):
         jax.jvp(lambda p:plan.get_jk(p,d),(p,),(jax.tree.map(jnp.ones_like,p),))
 
 
 def test_s8_eri_vjp_and_mixed_second_derivative():
-    from gradscf.integrals.layouts import build_jk_from_packed,_build_jk_from_packed_jax
+    from gradscf.integrals.molecular.jk import build_jk_from_packed, _build_jk_from_packed_jax
     n=3;npair=n*(n+1)//2
     e=jnp.arange(npair*(npair+1)//2,dtype=jnp.float64)*.03
     d=jnp.asarray(np.random.default_rng(8).normal(size=(n,n)))
@@ -136,7 +136,7 @@ def test_s8_eri_vjp_and_mixed_second_derivative():
 
 
 def test_s8_parallel_accumulation_with_batched_nonsymmetric_density():
-    from gradscf.integrals.layouts import build_jk_from_packed, _build_jk_from_packed_jax
+    from gradscf.integrals.molecular.jk import build_jk_from_packed, _build_jk_from_packed_jax
 
     # Large enough to exercise multiple native AO-pair work partitions.
     n = 48

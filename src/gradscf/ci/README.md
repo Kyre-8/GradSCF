@@ -36,10 +36,10 @@ Quadratic CI is a separate nonlinear approximation: restricted `QCISD` and
 nonlinear amplitude solver. They are not aliases of variational `CISD` or `CCSD`.
 
 ```python
-from gradscf import gto, dft, ci
+from gradscf import gto, scf, ci
 
 mol = gto.M(atom="H 0 0 0; H 0 0 0.74", basis="sto-3g")
-mf = dft.RKS(mol, xc="hf").run()
+mf = scf.RHF(mol).run()
 myci = ci.CISD(mf).run()  # equivalently mf.CISD().run()
 print(myci.e_tot, myci.e_corr, myci.converged)
 
@@ -95,9 +95,27 @@ of supplied integrals and the reference is the caller's responsibility.
 
 For explicit inputs to a facade use
 `CIReference(h1_mo, eri_mo, nocc, nuclear_repulsion=..., mo_energy=...)`.
-For AO inputs, `integrals.mo.transform_integrals` supports full ERIs, an s4
+SCF-backed restricted non-DF `CIS` instead shares the AO single-excitation
+action with TD response, avoiding a complete MO-ERI transformation. Native
+direct references retain their J/K provider without constructing an AO-pair
+matrix. `CIS(..., max_memory=1024.)` budgets this path in decimal MB; frozen
+spaces, singlet/triplet selection and unit-norm CIS amplitudes are preserved.
+Explicit-integral CI, CIS, UCIS and CIS(D) facades pass the same budget through
+their source arrays, preparation, action and common solver. The pure
+`solve_ci`, `solve_cis` and `solve_ucis` functions accept `max_memory` and
+`reserved_bytes`; their default `max_memory=None` preserves the original
+unplanned call. `cis_d_correction` instead defaults to the shared 60000 MB
+planning budget. Supply the encompassing workflow budget and caller reservation
+explicitly when composing these routines. Existing MO tensors remain part of that budget;
+passing them does not provide an out-of-core integral representation.
+AO-CIS reserves the existing TD action's planned share during its eigensolve.
+These are known-array estimates, with runtime headroom, rather than a bound on
+XLA compilation, arbitrary external AD state or total process RSS.
+See [direct response and validation](../tddft/DIRECT_RESPONSE.md) for its
+fixed-basis AD contract, cache format, device behavior and measured limits.
+For AO inputs, `ao2mo.transform_integrals` supports full ERIs, an s4
 AO-pair matrix, or density-fitting factors with shape `(naux, nao, nao)`.
-The SCF facade adapter is eager and accepts converged GradSCF `RKS(xc="hf")`,
+The SCF facade adapter is eager and accepts converged GradSCF `scf.RHF` (or `RKS(xc="hf")`),
 `UHF` and `ROHF`; the latter two use `UnrestrictedReference` and `make_uci_space`.
 use functional kernels inside `jax.jit`, `jax.grad`, and `jax.jvp`.
 
@@ -105,11 +123,33 @@ The default `gradient_mode="eigenvalue_only"` stops the iterative Ritz vectors
 and differentiates their Rayleigh energies. At convergence and for an isolated
 root, dE = c.T (dH) c. Coefficient derivatives are disabled in this mode.
 `gradient_mode="implicit_eigenvector"` additionally solves the constrained
-eigenvector response using the existing TD-SCF adjoint implementation. This
+eigenvector response using the shared Hermitian response implementation. This
 mode is necessary for coefficient-dependent objectives, including CIS(D).
-These rules implement **first-order** derivatives of converged, nondegenerate
-roots. Higher derivatives and differentiable root tracking at degeneracies
-are not supported contracts.
+The general CI/CIS(D) method-level validation covers **first-order** derivatives
+of converged, nondegenerate roots. Isolated singlet CIS has separate small-system
+second-response checks described below. Differentiable root tracking through
+degeneracies is not a supported contract.
+
+`solve_cis(..., response=EigenResponseConfig(...))` accepts the existing shared
+energy/eigenpair response policy. For a bounded small problem it can explicitly
+select `LinearSolverConfig(method="direct", max_dense=..., rtol=...)`; the
+default remains the legacy GMRES response. Explicit policy and nondefault
+legacy `gradient_mode`, `adjoint_tol`, or `adjoint_max_cycle` controls cannot be
+combined. The `CISResult` represents individual roots, so `target="subspace"`
+is rejected rather than returning a partial subspace result. First energy
+derivatives use stationarity and require no response linear solve; second
+derivatives and first amplitude derivatives do require one, including its
+capacity and true-residual checks.
+
+The dedicated H2/Cartesian 6-31G* tests compare a fixed-MO CIS parameter Hessian
+with independent PySCF matrices and dense eigenvalue differentiation, and a
+relaxed native-integral geometry HVP with reconverged native/PySCF gradient
+differences. These checks do not extend the general CI, UCIS or CIS(D)
+higher-response contract. For a multiroot request, every response branch that
+AD evaluates must converge: an unused root's failed response can still produce
+NaNs in a composed derivative. The caller must use a suitable shared response
+solver, without weakening the convergence guard or silently replacing failed
+responses.
 
 Unconverged roots remain available for diagnostics; `residual_norms` and
 `converged` are per-root arrays. Their energy derivatives are NaN. Check all
@@ -117,6 +157,14 @@ requested roots before differentiation. CI AD is with respect to its numerical
 inputs; complete nuclear gradients also require SCF orbital response and the
 chosen integral backend's derivative support. No automatic backend fallback is
 introduced here.
+
+Degenerate molecular orbitals inside an isolated occupied or virtual subspace
+do not by themselves invalidate a CISD energy gradient. The nuclear-response
+path uses a smooth transported HF frame and differentiates the CI Hamiltonian;
+it does not differentiate individual canonical orbitals. This differs from a
+true degeneracy of the selected many-electron CI root, which retains the
+individual-root restrictions above. Native N2 checks and their basis/size
+limits are recorded in [VALIDATION.md](VALIDATION.md).
 
 ## CIS(D) theory and validation
 
@@ -148,16 +196,29 @@ the Fock matrix is diagonal and consistent with the supplied orbital energies.
 
 ## Scope and computational limits
 
-- The Hamiltonian is applied through stored Slater–Condon connections; Davidson
-  does not construct a dense determinant Hamiltonian. Static connections are
-  cached on the host, while integral contractions and vector actions use JAX.
-- This generic implementation targets small reference calculations. Full MO
-  ERIs still require O(nmo^4) storage (dense spin embedding for UCI), and the connection table can be large.
-  It is not an optimized production CISD/FCI engine.
-- The default space limit is 5000 determinants (configurable); connection
-  construction stops at 1,000,000 stored diagonal/undirected connections.
-  Dense verification is limited to 2048 determinants. Reducing the orbital
-  space or excitation rank is preferable to simply increasing these limits.
+- Variational solves use compact alpha/beta excitation-rank blocks. Increasing
+  particle/hole strings, one-group removal/creation maps and tiled integral
+  contractions replace stored determinant-pair Hamiltonian connections. The
+  complete one-/two-body operator is projected into the retained space; an
+  intermediate single-excitation projection is not introduced.
+- Full MO ERIs still require O(nmo^4) storage. Restricted and unrestricted
+  Hamiltonian actions retain spatial/spin integral blocks without constructing
+  a full spin-orbital ERI. The coefficient vector and Davidson subspace remain
+  combinatorial; this does not turn high-rank CI into a polynomial method.
+- The default vector capacity is 1,000,000 determinants (configurable). Creator
+  and spectator string contractions are tiled, and vector columns are processed
+  in batches. The default Davidson basis capacity is
+  `min(ndet, max(40, 4*(nroots+1)))`. Initial guesses retain exact reference/low
+  diagonal unit vectors and add separate full-support random columns. The old
+  Slater–Condon connection implementation remains a small
+  independent oracle, with its 1,000,000-connection bound; dense verification
+  remains limited to 2048 determinants. These exported
+  `hamiltonian_action`/`hamiltonian_matrix` oracle functions retain their static
+  connection/dimension guards and do not accept a caller memory budget.
+  `spin_square` contracts compressed exchange/sigma kernels without exporting
+  a complete RDM. The facade forwards its budget and caller reservation;
+  the compressed kernels and action still have their own required storage.
+  Iterative solver and explicit density/expectation controls are described above.
 - GHF, complex orbitals, periodic CI, and automatic
   spin selection for general CI roots are not implemented.
 - Named `CISD(T)` / `CISDT(Q)` corrections are not exported. They need a specific
@@ -185,10 +246,29 @@ derivatives. Their trace and contraction are `Tr(dm1)=N` and
 Use `gradient_mode="implicit_eigenvector"` for integral derivatives of a density;
 the default energy-only mode intentionally stops CI coefficient response.
 
-The implementation stores static operator connections (up to 4,000,000 per
-density rank) and full MO density arrays. It remains a small-system reference
-implementation; transition densities, AO output and automatic total-spin selection
-are future work. See [forward parity and remaining gaps](../cc/FORWARD_PARITY.md).
+An affordable small spatial export uses the original fermionic connection and
+scatter formula. A conservative connection-count bound checks its construction,
+array-cache and output storage before building the table. Otherwise the shared
+physical sigma action supplies these coefficients, including its raw-integral
+normal-ordering correction, without a density connection table. Neither route
+builds a full spin-orbital 2-RDM. Requested spatial outputs retain their explicit
+quadratic/quartic size.
+`max_memory` (decimal MB) is shared with the action's creator/spectator/RHS
+tiles; a bound facade also reserves its source, integral payload and other roots.
+Functional calls accept `reserved_bytes` for additional caller-owned arrays.
+
+When only an observable is needed, `expectation_value(c, space, h1, eri)`
+contracts it directly without exporting either density. Its real unrestricted
+input conventions and half/unity/half spin weights match those above.
+Transition CI densities, AO output and automatic total-spin selection remain
+future work. See [forward parity and remaining gaps](../cc/FORWARD_PARITY.md).
+
+The array-bearing static CI/FCI caches have finite entry and byte limits (a
+combined 288,000,000-byte payload envelope). The direct sigma factory is charged
+for its known topology/map arrays even if another cache releases them. These
+limits cover declared array payload, not Python integer keys/headers or JAX
+compiled executables. Numerical integrals, amplitudes and CI vectors are not
+cached. Computation budgets do not constitute a process-RSS or complete AD cap.
 
 ## Reproduce the checks
 
@@ -209,3 +289,9 @@ for the electronic-structure approximation.
 
 For theoretical citations, numerical-method references, software attribution,
 and the limits of these validations, see [REFERENCES.md](REFERENCES.md).
+
+
+Full determinant spaces for active-space work are implemented separately in
+[`gradscf.fci`](../fci/README.md), using alpha/beta string contractions and the
+same shared numerical solvers. The CI module retains the reference/rank-truncated
+hierarchy; its fermionic phase helper is shared with FCI.

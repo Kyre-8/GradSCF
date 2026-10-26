@@ -34,7 +34,7 @@ def test_ground_state_matches_full_eri(method,aosym):
 
 
 def test_rks_native_direct_uses_no_eri_array():
-    from gradscf.integrals.backends.native_compact import NativeDirectBasis
+    from gradscf.integrals.backends.native.jk import NativeDirectBasis
     top,p=integrals.prepare_basis('H 0 0 0; H 0 0 .8','sto-3g',cart=False)
     plan=integrals.make_plan(top);n=top.nao
     kwargs=dict(overlap=plan.evaluate('overlap',p),hcore=plan.evaluate('kinetic',p)+plan.evaluate('nuclear',p),

@@ -1,0 +1,68 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-crystal-ir-20261016",
+  "source_python_sha256": "11604abdb93693160e16e57ba0fc3a5971c23edffa3cf5f7faffde19c86622dd",
+  "production_source_archive_sha256": "529568fea03397660868d65e5856d5f5d4c08ab17d70bb692b29b3fff166aac0",
+  "production_source_archive": "artifacts/ad_showcase/P07_strain/strain-source.tar.gz",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "numpy": "2.4.4",
+  "scipy": "1.17.1",
+  "cpu": "model name\t: Intel(R) Xeon(R) Platinum 8457C",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONPATH": "src"
+  },
+  "command": "python examples/pbc/lih_infrared.py",
+  "source_sha256": {
+    "examples/pbc/lih_infrared.py": "0312792d9dd43c53900fb90d3620da28e3b5fcba9dc32939f35440ef9063174b",
+    "examples/pbc/plot_lih_infrared.py": "42a8582e278bc4c768a126a064cbeecdcad4bf81faa28770278b6c8b18a744e1",
+    "src/gradscf/pbc/vibrational.py": "42a875fbe498acb5a3c39971522c3ff1a31f4a17fd27cbd6c9838a85200a3941"
+  },
+  "dependency_validation_sha256": {
+    "reproducibility/ad_showcase/P04_lih_dielectric/fft71_finite_field.json": "c4fa5bfddd57c217dfa6c1db53afb4b47f5359c00c824aad845e5cf6130c8fe1",
+    "reproducibility/ad_showcase/P03_lih_gamma_phonons/grid_extension_to71.json": "4dee8a582976057f527d05f94822829771507eda4939f75903701f0e460654f1"
+  },
+  "input_sha256": {
+    "reproducibility/ad_showcase/P03_lih_gamma_phonons/pbe_szv_k2_fft71_gmres.json": "936f06cedacfd6d4d17d077e7efc8c033d71b239210a65f7119c805179757c46",
+    "reproducibility/ad_showcase/P04_lih_born/fft71.json": "46ca742e81c7cff106f720cf0969e8a1daa7fc05a3f17077a7ae826b4a71ce01",
+    "reproducibility/ad_showcase/P04_lih_dielectric/fft71.json": "3f97bb176c2dd9d802b57f5dfce5575c5fc4f0ea663b2899e0c48db251a83b2d"
+  },
+  "all_prerequisites_passed": true,
+  "files_sha256": {
+    "executed/lih_infrared.py": "0312792d9dd43c53900fb90d3620da28e3b5fcba9dc32939f35440ef9063174b",
+    "executed/plot_lih_infrared.py": "42a8582e278bc4c768a126a064cbeecdcad4bf81faa28770278b6c8b18a744e1",
+    "fft31.json": "9096416742c8bf3ef6c2fbcf29824df550dfd6785f6c8f7d3da441bb97d51182",
+    "fft31.npz": "dc8ebd7f8f67ee6aace23828ff119d94f473bb7f006b88eefb0d2ebee8cd41c0",
+    "fft71.json": "0ab2234cd3c94f65c1a393d6fa71313738c2f91dc0e03c2a7db2ac9cbafb6cea",
+    "fft71.npz": "99543663564b77ef7cb43cf763023989c0d1cd2fd1a3545085c9e75c7c1d802d",
+    "lih_infrared_checks_fft31.pdf": "354ff4c1ee222e0f012a1000189a6de73fdc657cac10d4df2ae7a15bb5240827",
+    "lih_infrared_checks_fft31.png": "05bc1bde6cdafafbb6499d7998c7d093eea34a2eb80a10272a54f87300ec0922",
+    "lih_infrared_checks_fft71.pdf": "b8932e640264c2fe9672b6d37e5d43dc894a6197a1b6e719773dd36c01e1c582",
+    "lih_infrared_checks_fft71.png": "37dddfcdf9a2e33003e0346aebcc5dc2fe0f5832655a2725fc118d7b4b520128",
+    "lih_infrared_fft31.pdf": "d69f0ed98752da47356cf63012c46c9ada16a70d42e31ca6b64b99507d5318b9",
+    "lih_infrared_fft31.png": "94d9303e8f415f9f424bcb14b7c9260ce0644881681da2ece1bf8a04862b58cd",
+    "lih_infrared_fft71.pdf": "b86eb1b7cad5f9953fc79e951ec3c5f63550123499437dd0e5966465b64111c6",
+    "lih_infrared_fft71.png": "395b54cc437c905ce2ae566c8edde50eccd83e08f00dab4c36fd600c61870118",
+    "validation/lih-fft31-diagnostic/executed.py": "b97ad73b8e1a9308918232347b7abf19c2a3a82a7181b958d17cc1bb59a9ba46",
+    "validation/lih-fft31-diagnostic/exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "validation/lih-fft31-diagnostic/resources.log": "479e59415208d528937136202f261c5d2a40366cbb521ce7ac5ac0a0ce242949",
+    "validation/lih-fft31-diagnostic/run.log": "75cfea93b9e69230487e1e55b1e221c33093936a75b557f710fe7b7d2a33d4b7",
+    "validation/lih-fft31-diagnostic-v2/exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "validation/lih-fft31-diagnostic-v2/resources.log": "1c980b6c7ae50b0d367ae8fa3af61b7ee627a069b3e9a2963a08b1df8a7aa299",
+    "validation/lih-fft31-diagnostic-v2/run.log": "40dbb343f1fec0d63d761b79b3d91a70bedfef1ca94f48d38fcfb3c8ebd9f4c3",
+    "validation/lih-fft31-plot-v2/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/lih-fft31-plot-v2/run.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "validation/lih-fft71/executed.py": "0312792d9dd43c53900fb90d3620da28e3b5fcba9dc32939f35440ef9063174b",
+    "validation/lih-fft71/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/lih-fft71/resources.log": "b8ed9d7bb1c81174e4f68efbc81e5b9972ce463e6894f98bc6289803945c2333",
+    "validation/lih-fft71/run.log": "0c157cec068aa92e597772f44d83932e8d274727bd0a1b7b4e0d77b83e079506",
+    "validation/lih-fft71-plot/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "validation/lih-fft71-plot/run.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

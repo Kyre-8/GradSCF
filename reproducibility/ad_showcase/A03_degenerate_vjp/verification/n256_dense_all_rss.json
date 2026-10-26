@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "examples/solvers/degenerate_vjp.py",
+    "--dimension",
+    "256",
+    "--method",
+    "dense",
+    "--sweep",
+    "all"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 2116296,
+  "budget_kib": 33554432,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true
+}

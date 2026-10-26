@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "errors": {
+    "translation": 3.3602287619061144e-12,
+    "moment_rotation": 8.471556789402257e-13,
+    "strength_rotation": 7.4495964952348e-14
+  },
+  "tolerance": 2e-07,
+  "native_sha256": "de482855eabf4e5c3708d56cb568c59db56480cf4a7963d529c9c541885c7be1",
+  "scope": "Contractions of saved AD Cartesian Jacobians; independent FD checks span all six internal modes",
+  "script_sha256": "396290406cfcc7a9e37f537c864e4e2a5d695394ccd5625494b37af4f4db0b2b"
+}

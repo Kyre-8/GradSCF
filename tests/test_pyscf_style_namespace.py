@@ -4,7 +4,7 @@ import importlib
 def test_gradscf_dir_lists_recommended_namespaces():
     import gradscf
 
-    for name in ("gto", "scf", "dft", "tdscf", "model"):
+    for name in ("gto", "scf", "dft", "tdscf", "model", "training"):
         assert name in gradscf.__all__
         assert name in dir(gradscf)
         assert getattr(gradscf, name) is importlib.import_module(f"gradscf.{name}")
@@ -12,7 +12,7 @@ def test_gradscf_dir_lists_recommended_namespaces():
     # neural model namespaces moved to gradscf.model (hard switch)
     from gradscf import model
 
-    for name in ("neural_xc", "neural_d", "training", "nnao"):
+    for name in ("neural_xc", "neural_d", "nnao"):
         assert getattr(model, name) is importlib.import_module(f"gradscf.model.{name}")
 
 
@@ -42,10 +42,13 @@ def test_dft_namespace_exposes_ks_facades():
     assert dft.UKS is scf.UKS
 
 
-def test_top_level_exposes_recommended_neural_xc_facades():
+def test_generic_and_model_functionals_have_distinct_owners():
     import gradscf
 
-    assert gradscf.Functional is gradscf.model.neural_xc.Functional
+    assert gradscf.dft.Functional is not gradscf.model.neural_xc.Functional
+    assert gradscf.dft.Functional.__module__ == 'gradscf.dft.functional'
+    assert not hasattr(gradscf, 'Functional')
+    assert not hasattr(gradscf.model, 'training')
 
 
 def test_top_level_removes_legacy_neural_xc_exports():
@@ -67,8 +70,8 @@ def test_gradscf_pyscf_style_submodules_import():
     for name in (
         "gradscf.gto.basis",
         "gradscf.gto.grid",
-        "gradscf.dft.rks",
-        "gradscf.dft.uks",
+        "gradscf.scf.rks",
+        "gradscf.scf.uks",
         "gradscf.dft.xc",
     ):
         module = importlib.import_module(name)

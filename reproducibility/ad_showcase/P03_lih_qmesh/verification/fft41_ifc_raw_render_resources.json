@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "examples/pbc/lih_ifc_bands.py",
+    "--input",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41",
+    "--qmesh",
+    "2",
+    "2",
+    "3"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 1222312,
+  "budget_kib": 8388608,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true,
+  "elapsed_seconds": 32.62939745699987
+}

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import inspect
-
+import jax
 import jax.numpy as jnp
 import numpy as np
 
-from gradscf.integrals.backends.jax_reference import packed_eri
+from gradscf.integrals.molecular import jk as packed_eri
 
 
 def _pair_index(nao: int) -> np.ndarray:
@@ -17,10 +16,19 @@ def _pair_index(nao: int) -> np.ndarray:
     return out
 
 
-def test_packed_exchange_contraction_uses_single_vmap_layer():
-    source = inspect.getsource(packed_eri.build_jk_from_eri_pair_matrix)
-
-    assert source.count("jax.vmap") == 1
+def test_packed_exchange_density_gradient_matches_dense_reference():
+    nao = 3
+    npair = nao*(nao+1)//2
+    pair_index = _pair_index(nao)
+    raw = np.arange(npair*npair, dtype=float).reshape(npair, npair)/17
+    pair = (raw+raw.T)/2
+    density = jnp.arange(nao*nao, dtype=float).reshape(nao, nao)/13
+    cotangent = jnp.sin(density+1.)
+    gradient = jax.grad(lambda d: jnp.sum(
+        packed_eri.build_jk_from_eri_pair_matrix(jnp.asarray(pair), d)[1]*cotangent))(density)
+    eri = pair[pair_index[:, :, None, None], pair_index[None, None, :, :]]
+    expected = np.einsum('pq,prqs->rs', np.asarray(cotangent), eri)
+    np.testing.assert_allclose(gradient, expected, atol=1e-12, rtol=1e-12)
 
 
 def test_packed_exchange_contraction_matches_explicit_reference():

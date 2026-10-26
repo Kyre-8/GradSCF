@@ -1,6 +1,7 @@
 """Real matrix-free RPA with metric-constrained first-order vector response."""
 
 from dataclasses import replace
+from functools import partial
 from math import isfinite
 from numbers import Integral
 
@@ -14,6 +15,7 @@ from ..diagnostics import require_converged_derivative
 from ..linear import solve_linear
 from .api import solve_hermitian
 from .rpa import _davidson_lowest_tdhf
+from .response import _spectral_inputs
 from .stable_rpa import solve_stable_rpa
 
 
@@ -34,7 +36,8 @@ def _metric(values):
     return jnp.concatenate([values[:n], -values[n:]], axis=0)
 
 
-def _attach_response(apply_h, values, vectors, diagonal, config):
+def _response_vectors(apply_h, values, vectors, diagonal, config, response_config):
+    """Existing first-order metric-gauge expression, evaluated only under AD."""
     z0 = jax.lax.stop_gradient(vectors)
     w0 = jax.lax.stop_gradient(values)
 
@@ -59,7 +62,7 @@ def _attach_response(apply_h, values, vectors, diagonal, config):
         dz = solve_linear(
             op,
             rhs,
-            config=LinearSolverConfig(
+            config=response_config or LinearSolverConfig(
                 rtol=config.adjoint_tol,
                 maxiter=config.adjoint_maxiter,
                 restart=min(20, z.size),
@@ -72,7 +75,36 @@ def _attach_response(apply_h, values, vectors, diagonal, config):
     return jax.lax.map(root, jnp.arange(values.size)).T
 
 
-def solve_rpa(a, b, *, config=None, gap_tol=1e-8, stability_tol=1e-10, seed=0):
+@partial(jax.custom_jvp, nondiff_argnums=(0, 5, 6))
+def _lazy_response(operator, parameters, values, vectors, diagonal, config, response_config, valid):
+    return vectors
+
+
+@_lazy_response.defjvp
+def _lazy_response_jvp(operator, config, response_config, primals, tangents):
+    parameters, values, vectors, diagonal, valid = primals
+    dparameters, _, _, _, _ = tangents
+    attached = lambda physical: _response_vectors(
+        lambda v: require_converged_derivative(operator(v, *physical), valid),
+        values, vectors, diagonal, config, response_config)
+    tangent = jax.jvp(attached, (parameters,), (dparameters,))[1]
+    return _lazy_response(operator, parameters, values, vectors, diagonal,
+                          config, response_config, valid), tangent
+
+
+def _attach_response(apply_h, values, vectors, diagonal, config, response_config, valid):
+    if (response_config is not None and response_config.method == "direct"
+            and vectors.shape[0] > response_config.max_dense):
+        raise ValueError("Direct response solve exceeds max_dense (requires 2*n)")
+    # The metric-gauge solver acts on vectors, so convert that input signature.
+    # Keep validity explicit: captured bool tracers do not lift through nested JIT.
+    operator, parameters, _ = _spectral_inputs(apply_h, vectors[:, 0])
+    return _lazy_response(operator, parameters, values, jax.lax.stop_gradient(vectors),
+                          diagonal, config, response_config, valid)
+
+
+def solve_rpa(a, b, *, config=None, gap_tol=1e-8, stability_tol=1e-10, seed=0,
+              response_config=None):
     """Real symmetric A/B RPA, matrix-free Davidson or bounded dense reference.
 
     Operator callers assert symmetry. Davidson screens A-B and A+B using
@@ -81,12 +113,18 @@ def solve_rpa(a, b, *, config=None, gap_tol=1e-8, stability_tol=1e-10, seed=0):
     global stability certificate: stability_certified is False for this path.
     Requested/guard physical residuals and positive metric norm are checked.
     First-order AD applies only to an entirely isolated requested root set.
+    Vector-response solves are attached lazily and run only under AD.
+    response_config optionally configures the shared response linear solve.
+    Its direct capacity is n for dense reduction and 2*n for the structured
+    metric equation; it does not change the forward eigensolver or gaps.
     """
     cfg = (
         EigenSolverConfig(gradient_mode="implicit_eigenvector")
         if config is None
         else config
     )
+    if response_config is not None and not isinstance(response_config, LinearSolverConfig):
+        raise TypeError("response_config must be a LinearSolverConfig")
     if cfg.value_min is not None:
         raise ValueError("value_min is a Hermitian interval control, not an RPA frequency window")
 
@@ -113,6 +151,7 @@ def solve_rpa(a, b, *, config=None, gap_tol=1e-8, stability_tol=1e-10, seed=0):
             config=cfg,
             gap_tol=gap_tol,
             stability_tol=stability_tol,
+            response_config=response_config,
         )
     if ao.diagonal is None or bo.diagonal is None:
         raise ValueError("RPA Davidson requires diagonals of A and B")
@@ -207,11 +246,13 @@ def solve_rpa(a, b, *, config=None, gap_tol=1e-8, stability_tol=1e-10, seed=0):
     response = jnp.all(converged) & isolated
     if cfg.gradient_mode == "implicit_eigenvector":
         z = _attach_response(
-            lambda v: require_converged_derivative(h(v), response),
+            h,
             values[: cfg.nroots],
             z[:, : cfg.nroots],
             ao.diagonal,
             cfg,
+            response_config,
+            response,
         )
         z = require_converged_derivative(z, response)
     else:

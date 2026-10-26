@@ -1,0 +1,90 @@
+{
+  "validation_passed": true,
+  "source": "reproducibility/ad_showcase/X02_water_gw_bse_response/primary/g0w0_full_nw200_continued.json",
+  "source_sha256": "bef771dae8ea17f3c3d5dcf926c21ba1793fc58028f4fde3fca8cafe5c366bdb",
+  "script_sha256": "e6166ec3497bce4cc8d0f41aacf4bbd4529abb1df321007b95df99f2a7dfccd3",
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "backend": "cpu",
+  "dtype": "float64",
+  "postprocessing_seconds": 1.4264448210014962,
+  "binding_energy_ev": [
+    546.7871372448881,
+    32.56325141862999,
+    18.611437608808803,
+    14.456527538450922,
+    12.178483639793862
+  ],
+  "weights_2Z": [
+    1.7509784744782184,
+    1.0761641158987603,
+    1.9125882073727487,
+    1.9013762580650566,
+    1.8995225641502083
+  ],
+  "binding_energy_derivative_ev_per_bohr": [
+    -0.5579189384447567,
+    0.9742520296859672,
+    1.7410353372078955,
+    -0.22246578489682847,
+    0.20765917145910848
+  ],
+  "weight_derivative_per_bohr": [
+    0.008388126857828939,
+    -0.2966920715754478,
+    0.003089445083793278,
+    0.006825537494066814,
+    0.009684230245147212
+  ],
+  "imposed_hwhm_ev": 0.15,
+  "window_ev": [
+    0.0,
+    600.0
+  ],
+  "model_all_real_axis_weight": 8.540629619964992,
+  "exact_window_weight": 8.518137821035012,
+  "missing_model_tails": 0.022491798929980433,
+  "exact_window_weight_derivative_per_bohr": -0.2677708187148472,
+  "quadrature_checks": [
+    {
+      "points": 60001,
+      "spacing_ev": 0.01,
+      "integrated_weight": 8.518137819427569,
+      "integrated_derivative": -0.2677708186260636,
+      "area_error": 1.6074430675416806e-09,
+      "derivative_area_error": 8.878359158970284e-11
+    },
+    {
+      "points": 120001,
+      "spacing_ev": 0.005,
+      "integrated_weight": 8.518137820633152,
+      "integrated_derivative": -0.2677708186926516,
+      "area_error": 4.0185987870700046e-10,
+      "derivative_area_error": 2.219557870830613e-11
+    }
+  ],
+  "geometry_checks": [
+    {
+      "step_bohr": 0.001,
+      "max_spectrum_derivative_error": 0.005853565454447818
+    },
+    {
+      "step_bohr": 0.0003,
+      "max_spectrum_derivative_error": 0.0005268780049512145
+    },
+    {
+      "step_bohr": 0.0001,
+      "max_spectrum_derivative_error": 5.855859651404671e-05
+    },
+    {
+      "step_bohr": 3e-05,
+      "max_spectrum_derivative_error": 5.370963698680953e-06
+    },
+    {
+      "step_bohr": 1e-05,
+      "max_spectrum_derivative_error": 7.663209302677387e-07
+    }
+  ],
+  "scope": "Occupied QP spectral trace with spin factor two, no satellites or photoionization matrix elements; not a normalized experimental PES."
+}

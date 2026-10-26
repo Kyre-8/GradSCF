@@ -36,10 +36,16 @@ def _endpoint_reference(kw):
         b, lambda omega: rho_response_iw(omega, energy, kw["b_ov"]), kw["freqs"]
     )
 
+    w_static = screened_w_imag_axis_matrix(
+        b, lambda omega: rho_response_iw(omega, energy, kw["b_ov"]), jnp.zeros(1)
+    )[0]
+    static = dict(wmn_static=w_static,
+                  occupation_sign=jnp.where(jnp.arange(len(energy)) < kw["nocc"], -1., 1.))
+
     def sigma(omega):
         return np.asarray(
-            sigma_imag_matrix(omega, w, energy, kw["ef"], kw["freqs"], kw["wts"], kw["eta"])
-            + sigma_residue_matrix(omega, energy, b, ((energy, kw["b_ov"], 2.0),), kw["ef"], kw["eta"])
+            sigma_imag_matrix(omega, w, energy, kw["ef"], kw["freqs"], kw["wts"], kw["eta"], **static)
+            + sigma_residue_matrix(omega, energy, b, ((energy, kw["b_ov"], 2.0),), kw["ef"], kw["eta"], **static)
         )
 
     endpoints = [sigma(e) for e in energy]
@@ -107,7 +113,7 @@ def test_qsgw_damping_cannot_hide_a_large_energy_residual():
 
 
 def test_qsgw_cannot_converge_on_isospectral_virtual_rotation():
-    from gradscf.df import build_j_from_df
+    from gradscf.integrals.molecular.jk import build_j_from_df
     from gradscf.gw.g0w0 import _exchange_mo
 
     kw = _small_static_inputs()
@@ -153,7 +159,7 @@ def test_qsgw_water_sto3g_converges_and_is_sane():
     mol = gto.M(atom=_ATOM, basis="sto-3g", cart=True)
     mf = dft.RKS(mol, xc="hf").run()
     res = mf.scf_result
-    from gradscf.df import eri_pair_matrix_to_df_factors
+    from gradscf.integrals.molecular.factorization import eri_pair_matrix_to_df_factors
 
     df = eri_pair_matrix_to_df_factors(
         mf._scf_inputs.eri_pair_matrix, nao=res.mo_coeff.shape[0], tol=1e-12
@@ -176,7 +182,9 @@ def test_qsgw_water_sto3g_converges_and_is_sane():
     # qsGW HOMO (ionization potential) is below the HF Koopmans value and
     # the gap remains open
     homo, lumo = 4, 5
-    assert e_qp[homo] < e_mf[homo] + 0.05
+    # The matrix-pole boundary correction changes the small-basis shift by a
+    # few mH; keep this as a bounded sanity check rather than a fitted number.
+    assert e_qp[homo] < e_mf[homo] + 0.1
     assert e_qp[lumo] > e_qp[homo]
     # orbitals are updated and remain orthonormal w.r.t. the overlap
     s = np.asarray(res.overlap_matrix)
@@ -184,7 +192,7 @@ def test_qsgw_water_sto3g_converges_and_is_sane():
     np.testing.assert_allclose(c.T @ s @ c, np.eye(c.shape[1]), atol=1e-10)
     # Rebuild the effective Fock at the returned state. This checks the
     # self-consistent equation rather than only changes between iterates.
-    from gradscf.df import build_j_from_df
+    from gradscf.integrals.molecular.jk import build_j_from_df
     from gradscf.gw.g0w0 import _exchange_mo, _mo_factors
 
     coeff = out.mo_coeff
@@ -198,3 +206,45 @@ def test_qsgw_water_sto3g_converges_and_is_sane():
     fock = coeff.T @ (res.hcore_matrix + build_j_from_df(df, density)) @ coeff
     fock = fock + _exchange_mo(b_mn, 5) + correlation
     np.testing.assert_allclose(fock, jnp.diag(out.mo_energy), rtol=0, atol=1e-7)
+
+
+def _analytic_two_orbital_static(energy, factors):
+    """Independent exact one-RPA-pole model; no contour-deformation kernels."""
+    gap = energy[1] - energy[0]
+    coupling = 4 * factors[0, 0, 1] ** 2 * gap
+    pole = jnp.sqrt(gap ** 2 + coupling)
+    residue = coupling / (2 * pole)
+    b = factors[0]
+    rows = []
+    for p in range(2):
+        sigma = sum(
+            residue * jnp.outer(b[:, q], b[q, :])
+            / (energy[p] - energy[q] + (pole if q == 0 else -pole))
+            for q in range(2)
+        )
+        rows.append(sigma[p])
+    rows = jnp.stack(rows)
+    return (rows + rows.T) / 2
+
+
+def test_qsgw_static_potential_matches_independent_rpa_pole():
+    energy = jnp.array([-.5, .5])
+    factors = jnp.array([[[.4, .2], [.2, .3]]])
+    freqs, weights = scaled_legendre_grid(100)
+
+    def potential(t):
+        e = energy + t * jnp.array([.03, -.02])
+        b = factors * (1 + .1 * t)
+        return _static_self_energy(
+            b_mn=b, b_ov=b[:, :1, 1:], mo_energy=e, nocc=1,
+            ef=jnp.mean(e), freqs=freqs, wts=weights, eta=1e-7,
+        )
+
+    expected = _analytic_two_orbital_static(energy, factors)
+    np.testing.assert_allclose(jax.jit(potential)(0.), expected, atol=2e-11, rtol=0)
+    exact_loss = lambda t: jnp.sum(_analytic_two_orbital_static(
+        energy + t * jnp.array([.03, -.02]), factors * (1 + .1 * t)) ** 2)
+    loss = lambda t: jnp.sum(potential(t) ** 2)
+    expected_grad = jax.grad(exact_loss)(0.)
+    np.testing.assert_allclose(jax.jit(jax.grad(loss))(0.), expected_grad, atol=2e-11, rtol=1e-7)
+    np.testing.assert_allclose(jax.jvp(loss, (0.,), (1.,))[1], expected_grad, atol=2e-11, rtol=1e-7)

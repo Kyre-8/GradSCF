@@ -4,10 +4,10 @@ import numpy as np
 import pytest
 
 from gradscf.scf import UKSConfig
-from gradscf.scf.builders import unrestricted_molecule_from_spec_with_jax_uks
+from gradscf.scf.builders import _build_unrestricted_reference
 from gradscf.scf.differentiable import _is_unrestricted_reference
-from gradscf.workflows.core import run_molecule_from_spec
-from gradscf.workflows.types import MoleculeSpecConfig, SimulationConfig
+from gradscf.model.neural_xc.workflows.core import run_molecule_from_spec
+from gradscf.model.neural_xc.workflows.types import MoleculeSpecConfig, SimulationConfig
 
 
 def test_spin_resolved_charged_state_overrides_restricted_nocc_marker():
@@ -24,7 +24,7 @@ def test_spin_resolved_charged_state_overrides_restricted_nocc_marker():
 
 
 def test_unrestricted_molecule_from_spec_with_jax_uks_h_atom_smoke():
-    ref = unrestricted_molecule_from_spec_with_jax_uks(
+    ref = _build_unrestricted_reference(
         atom="H 0.0 0.0 0.0",
         basis="sto-3g",
         xc_spec="hf",
@@ -59,7 +59,7 @@ def test_unrestricted_molecule_from_spec_with_jax_uks_h_atom_smoke():
 
 
 def test_unrestricted_molecule_from_spec_with_jax_uks_builds_zero_local_pt2_for_h_atom():
-    ref = unrestricted_molecule_from_spec_with_jax_uks(
+    ref = _build_unrestricted_reference(
         atom="H 0.0 0.0 0.0",
         basis="sto-3g",
         xc_spec="hf",
@@ -89,7 +89,7 @@ def test_unrestricted_molecule_from_spec_with_jax_uks_builds_zero_local_pt2_for_
 
 def test_unrestricted_molecule_from_spec_with_jax_uks_invalid_spin_parity_raises():
     with pytest.raises(ValueError, match="N \\+ spin must be even"):
-        _ = unrestricted_molecule_from_spec_with_jax_uks(
+        _ = _build_unrestricted_reference(
             atom="H 0.0 0.0 0.0",
             basis="sto-3g",
             xc_spec="hf",

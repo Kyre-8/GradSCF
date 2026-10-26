@@ -2,26 +2,29 @@
 import jax
 import jax.numpy as jnp
 import numpy as np
-from ._kpoint import energy_and_fock
+from ._kpoint import energy_and_fock,_named_xc_spec
+from .scf import validate_reference as _validate_reference
+from ..dft.xc import parse_recipe
 from ..solvers.eigen.davidson import _davidson_lowest_symmetric
 from ..solvers.eigen.rpa import _davidson_lowest_tdhf, solve_dense_rpa
 
 
-def _validate_reference(mf):
-    if mf.result is None or not mf.converged:
-        raise ValueError('Periodic response requires a converged SCF reference.')
-    if (mf.xc!=mf._computed_xc or mf.cell.mesh!=mf._computed_mesh or mf.cell._version!=mf._cell_version):
-        raise ValueError('Run kernel() again after changing the periodic reference.')
-
-
 def response_operators(mf,*,singlet=True):
-    _validate_reference(mf)
+    _validate_reference(mf,external=True)
+    functional=getattr(mf,'functional',None)
+    exchange=None if functional is not None else parse_recipe(_named_xc_spec(mf.xc)).exact_exchange
+    # Removing the Ewald term shifts occupied energies only. Spherical
+    # truncation changes the entire kernel and cannot use that construction.
+    if (mf.exxdiv == 'vcut_sph' and exchange is not None
+            and any((exchange.full_range,exchange.short_range,exchange.long_range))):
+        raise NotImplementedError('Periodic TD response does not support vcut_sph HF/hybrid references.')
     inputs=mf.inputs;result=mf.result
     coeff=result.mo_coeff_spin.astype(complex);density=result.density_spin.astype(complex)
     nk=coeff.shape[1];n=coeff.shape[-1]
     # G=0 exchange corrections must be removed consistently from both the
     # response kernel and its orbital-energy differences (PySCF convention).
-    fock=lambda d:energy_and_fock(d,inputs,mesh=mf.cell.mesh,xc=mf.xc,exxdiv=None)[1]
+    fock=lambda d:energy_and_fock(d,inputs,mesh=mf.cell.mesh,xc=mf.xc,exxdiv=None,
+                                functional=functional,params=getattr(mf,'params',None))[1]
     f0,derivative=jax.linearize(fock,density)
     energies=jnp.einsum('skpi,skpq,skqi->ski',coeff.conj(),f0,coeff).real
     blocks=[];gaps=[];dimension=0
@@ -69,7 +72,7 @@ class TDA:
         self._operators=None
 
     def _get_operators(self):
-        _validate_reference(self._scf)
+        _validate_reference(self._scf,external=True)
         # Cache only for the current completed reference object.
         signature=(id(self._scf.result),self.singlet,self._scf.xc,id(self._scf.inputs))
         if self._operators is None or self._reference != signature:

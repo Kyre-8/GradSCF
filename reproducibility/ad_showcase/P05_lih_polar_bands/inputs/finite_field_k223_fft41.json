@@ -1,0 +1,517 @@
+{
+  "complete": true,
+  "linear_result_sha256": "c00f5a4ab17b1cbe858e95243a7ac62828011bceab4a3c26216ab9a8f8e6fbf3",
+  "settings": {
+    "a_bohr": 7.780032276700287,
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pade",
+    "mesh": [
+      41,
+      41,
+      41
+    ],
+    "kmesh": [
+      2,
+      2,
+      3
+    ],
+    "precision": 1e-10
+  },
+  "field_steps": [
+    0.0001,
+    3e-05
+  ],
+  "gate_chi_absolute": 2e-07,
+  "gate_chi_relative": 2e-05,
+  "boundary": "Small local fields, fixed ions/cell. Effective Fock gap is an endpoint diagnostic, not a quasiparticle gap or a full stability proof.",
+  "source_sha256": {
+    "src/gradscf/dfpt/electric.py": "61aeb686bb38c047c719240d1a39e79bbc41b08f0e3e11853fe295ae186fd5f2",
+    "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+    "src/gradscf/dfpt/ks.py": "f5dc7b4ba7ba70a3a704359f98f9609ee51db18ddccbb5e6f1406d0f45104e93",
+    "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+    "examples/pbc/lih_born_charges.py": "a51b175f918383c5032d7dacadaee76358d1f3186fd74fc7e5167624e0bef81e"
+  },
+  "script_sha256": "95d057d0144bc51ca25241abf6dbcdebf9efd31675d1c846b9dd0b4d13cfd175",
+  "endpoints": [
+    {
+      "axis": 0,
+      "field_au": [
+        0.0001,
+        0.0,
+        0.0
+      ],
+      "converged": true,
+      "residual": 1.566660430681963e-13,
+      "iterations": 6,
+      "electric_enthalpy": -8.036642043267936,
+      "polarization": [
+        0.07159759366610498,
+        0.016521847729930934,
+        0.022028561321634672
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 2.220446049250313e-16,
+        "density_idempotency_error": 1.6942003361474405e-12,
+        "maximum_block_occupation_error": 8.964262306733397e-16,
+        "electron_number": 4.0,
+        "electron_number_error": 0.0,
+        "minimum_chart_gram_eigenvalue": 0.9999997154895774,
+        "minimum_reference_subspace_overlap": 0.9999998577449204,
+        "effective_fock_indirect_gap_hartree": 0.15770611921627808,
+        "effective_fock_occupied_empty_residual": 1.838249216601223e-13,
+        "minimum_link_singular_value": 0.5095251712531097,
+        "minimum_branch_clearance_radian": 3.140712833501859,
+        "maximum_local_phase_change_radian": 0.0008798200879343021,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 131.55357484500018
+    },
+    {
+      "axis": 0,
+      "field_au": [
+        -0.0001,
+        -0.0,
+        -0.0
+      ],
+      "converged": true,
+      "residual": 1.5693673043270665e-13,
+      "iterations": 6,
+      "electric_enthalpy": -8.034956369608038,
+      "polarization": [
+        0.07158469360281207,
+        0.016520218562896084,
+        0.022027527068801366
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 3.3306690738754696e-16,
+        "density_idempotency_error": 1.6948664792378022e-12,
+        "maximum_block_occupation_error": 8.963201855768602e-16,
+        "electron_number": 4.0,
+        "electron_number_error": 0.0,
+        "minimum_chart_gram_eigenvalue": 0.9999997154895769,
+        "minimum_reference_subspace_overlap": 0.9999998577449203,
+        "effective_fock_indirect_gap_hartree": 0.15770611921627803,
+        "effective_fock_occupied_empty_residual": 1.8356863652268978e-13,
+        "minimum_link_singular_value": 0.5095251712531095,
+        "minimum_branch_clearance_radian": 3.140712833501859,
+        "maximum_local_phase_change_radian": 0.0008798200879343021,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 4.9641316550005286
+    },
+    {
+      "axis": 0,
+      "field_au": [
+        3e-05,
+        0.0,
+        0.0
+      ],
+      "converged": true,
+      "residual": 3.063181363088482e-14,
+      "iterations": 6,
+      "electric_enthalpy": -8.036052022936243,
+      "polarization": [
+        0.0715930786426586,
+        0.01652127752111024,
+        0.022028199333067974
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 2.482534153247273e-16,
+        "density_idempotency_error": 1.1368689428647261e-13,
+        "maximum_block_occupation_error": 8.89123443943101e-16,
+        "electron_number": 4.0,
+        "electron_number_error": 0.0,
+        "minimum_chart_gram_eigenvalue": 0.9999999743940968,
+        "minimum_reference_subspace_overlap": 0.9999999871970562,
+        "effective_fock_indirect_gap_hartree": 0.15770609530346982,
+        "effective_fock_occupied_empty_residual": 3.346969783734416e-14,
+        "minimum_link_singular_value": 0.5095252831391955,
+        "minimum_branch_clearance_radian": 3.1413287077204273,
+        "maximum_local_phase_change_radian": 0.00026394586936584474,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 5.066215345999808
+    },
+    {
+      "axis": 0,
+      "field_au": [
+        -3e-05,
+        -0.0,
+        -0.0
+      ],
+      "converged": true,
+      "residual": 3.066215604512136e-14,
+      "iterations": 6,
+      "electric_enthalpy": -8.035546320838284,
+      "polarization": [
+        0.07158920862625846,
+        0.01652078877171678,
+        0.022027889057368067
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 2.220446049250313e-16,
+        "density_idempotency_error": 1.139088844042103e-13,
+        "maximum_block_occupation_error": 8.881784197001252e-16,
+        "electron_number": 3.999999999999999,
+        "electron_number_error": 8.881784197001252e-16,
+        "minimum_chart_gram_eigenvalue": 0.9999999743940964,
+        "minimum_reference_subspace_overlap": 0.9999999871970563,
+        "effective_fock_indirect_gap_hartree": 0.1577060953034697,
+        "effective_fock_occupied_empty_residual": 3.4040370714376004e-14,
+        "minimum_link_singular_value": 0.5095252831391958,
+        "minimum_branch_clearance_radian": 3.141328707720427,
+        "maximum_local_phase_change_radian": 0.00026394586936628883,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 5.058417841000846
+    },
+    {
+      "axis": 1,
+      "field_au": [
+        0.0,
+        0.0001,
+        0.0
+      ],
+      "converged": true,
+      "residual": 1.569024317310599e-13,
+      "iterations": 6,
+      "electric_enthalpy": -8.035993707244945,
+      "polarization": [
+        0.07159195821797594,
+        0.016527483178059958,
+        0.02202856132163467
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 2.220446049250313e-16,
+        "density_idempotency_error": 1.6946444247879078e-12,
+        "maximum_block_occupation_error": 8.88655358137868e-16,
+        "electron_number": 3.999999999999999,
+        "electron_number_error": 8.881784197001252e-16,
+        "minimum_chart_gram_eigenvalue": 0.999999715489576,
+        "minimum_reference_subspace_overlap": 0.9999998577449201,
+        "effective_fock_indirect_gap_hartree": 0.15770611921627925,
+        "effective_fock_occupied_empty_residual": 1.8363759398564582e-13,
+        "minimum_link_singular_value": 0.5095251712531096,
+        "minimum_branch_clearance_radian": 3.140712833501859,
+        "maximum_local_phase_change_radian": 0.0008798200879343021,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 5.153747881999152
+    },
+    {
+      "axis": 1,
+      "field_au": [
+        -0.0,
+        -0.0001,
+        -0.0
+      ],
+      "converged": true,
+      "residual": 1.567833674785933e-13,
+      "iterations": 6,
+      "electric_enthalpy": -8.035604705631071,
+      "polarization": [
+        0.0715903290509411,
+        0.016514583114767053,
+        0.022027527068801362
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 2.2887833992611187e-16,
+        "density_idempotency_error": 1.6948664719552807e-12,
+        "maximum_block_occupation_error": 4.477136060248833e-16,
+        "electron_number": 3.999999999999999,
+        "electron_number_error": 8.881784197001252e-16,
+        "minimum_chart_gram_eigenvalue": 0.999999715489576,
+        "minimum_reference_subspace_overlap": 0.9999998577449203,
+        "effective_fock_indirect_gap_hartree": 0.15770611921627906,
+        "effective_fock_occupied_empty_residual": 1.8363284584182269e-13,
+        "minimum_link_singular_value": 0.5095251712531095,
+        "minimum_branch_clearance_radian": 3.1407128335018597,
+        "maximum_local_phase_change_radian": 0.0008798200879334139,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 5.020697328000097
+    },
+    {
+      "axis": 1,
+      "field_au": [
+        0.0,
+        3e-05,
+        0.0
+      ],
+      "converged": true,
+      "residual": 3.067133661172018e-14,
+      "iterations": 6,
+      "electric_enthalpy": -8.035857522129353,
+      "polarization": [
+        0.07159138800915525,
+        0.016522968154613567,
+        0.022028199333067964
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 2.220446049250313e-16,
+        "density_idempotency_error": 1.139089446595085e-13,
+        "maximum_block_occupation_error": 6.661338147750939e-16,
+        "electron_number": 3.999999999999999,
+        "electron_number_error": 8.881784197001252e-16,
+        "minimum_chart_gram_eigenvalue": 0.9999999743940968,
+        "minimum_reference_subspace_overlap": 0.999999987197056,
+        "effective_fock_indirect_gap_hartree": 0.1577060953034706,
+        "effective_fock_occupied_empty_residual": 3.374957277185509e-14,
+        "minimum_link_singular_value": 0.5095252831391955,
+        "minimum_branch_clearance_radian": 3.141328707720427,
+        "maximum_local_phase_change_radian": 0.00026394586936628883,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 5.170596789001138
+    },
+    {
+      "axis": 1,
+      "field_au": [
+        -0.0,
+        -3e-05,
+        -0.0
+      ],
+      "converged": true,
+      "residual": 3.0681384963573456e-14,
+      "iterations": 6,
+      "electric_enthalpy": -8.035740821645183,
+      "polarization": [
+        0.0715908992597618,
+        0.016519098138213447,
+        0.02202788905736807
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 2.2887833992611187e-16,
+        "density_idempotency_error": 1.1390891292972714e-13,
+        "maximum_block_occupation_error": 8.903201910000074e-16,
+        "electron_number": 4.0,
+        "electron_number_error": 0.0,
+        "minimum_chart_gram_eigenvalue": 0.9999999743940968,
+        "minimum_reference_subspace_overlap": 0.999999987197056,
+        "effective_fock_indirect_gap_hartree": 0.15770609530347066,
+        "effective_fock_occupied_empty_residual": 3.36390404758095e-14,
+        "minimum_link_singular_value": 0.5095252831391958,
+        "minimum_branch_clearance_radian": 3.1413287077204273,
+        "maximum_local_phase_change_radian": 0.00026394586936584474,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 5.060052659999201
+    },
+    {
+      "axis": 2,
+      "field_au": [
+        0.0,
+        0.0,
+        0.0001
+      ],
+      "converged": true,
+      "residual": 3.742666986012686e-13,
+      "iterations": 6,
+      "electric_enthalpy": -8.036058530811014,
+      "polarization": [
+        0.0715916607602254,
+        0.01652155027218039,
+        0.022032789248218325
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 2.220446049250313e-16,
+        "density_idempotency_error": 8.250622416964806e-13,
+        "maximum_block_occupation_error": 8.925042325340822e-16,
+        "electron_number": 4.000000000000002,
+        "electron_number_error": 1.7763568394002505e-15,
+        "minimum_chart_gram_eigenvalue": 0.999999893222741,
+        "minimum_reference_subspace_overlap": 0.9999999466114555,
+        "effective_fock_indirect_gap_hartree": 0.1577061256344761,
+        "effective_fock_occupied_empty_residual": 3.743116929257861e-13,
+        "minimum_link_singular_value": 0.5095252287565014,
+        "minimum_branch_clearance_radian": 3.140977160281434,
+        "maximum_local_phase_change_radian": 0.000615493308359305,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 4.980754386999251
+    },
+    {
+      "axis": 2,
+      "field_au": [
+        -0.0,
+        -0.0,
+        -0.0001
+      ],
+      "converged": true,
+      "residual": 3.73886483853149e-13,
+      "iterations": 6,
+      "electric_enthalpy": -8.035539861992433,
+      "polarization": [
+        0.07159062650869165,
+        0.01652051602064663,
+        0.022023299142217706
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 2.7755575615628914e-16,
+        "density_idempotency_error": 8.25062241456378e-13,
+        "maximum_block_occupation_error": 8.90701175653398e-16,
+        "electron_number": 4.0,
+        "electron_number_error": 0.0,
+        "minimum_chart_gram_eigenvalue": 0.999999893222741,
+        "minimum_reference_subspace_overlap": 0.9999999466114556,
+        "effective_fock_indirect_gap_hartree": 0.15770612563447609,
+        "effective_fock_occupied_empty_residual": 3.7389535913291406e-13,
+        "minimum_link_singular_value": 0.5095252287565014,
+        "minimum_branch_clearance_radian": 3.1409771602814334,
+        "maximum_local_phase_change_radian": 0.0006154933083597491,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 4.946599131000767
+    },
+    {
+      "axis": 2,
+      "field_au": [
+        0.0,
+        0.0,
+        3e-05
+      ],
+      "converged": true,
+      "residual": 4.4665875389294295e-12,
+      "iterations": 4,
+      "electric_enthalpy": -8.035876971307076,
+      "polarization": [
+        0.07159129877227305,
+        0.01652118828422803,
+        0.022029467710502675
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 3.376611507232129e-16,
+        "density_idempotency_error": 6.039179783156028e-12,
+        "maximum_block_occupation_error": 4.576893763170985e-16,
+        "electron_number": 4.0,
+        "electron_number_error": 0.0,
+        "minimum_chart_gram_eigenvalue": 0.9999999903900714,
+        "minimum_reference_subspace_overlap": 0.9999999951950328,
+        "effective_fock_indirect_gap_hartree": 0.15770609588087645,
+        "effective_fock_occupied_empty_residual": 4.4666353949339895e-12,
+        "minimum_link_singular_value": 0.5095252883185433,
+        "minimum_branch_clearance_radian": 3.1414080056626195,
+        "maximum_local_phase_change_radian": 0.00018464792717365341,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 3.629912766000416
+    },
+    {
+      "axis": 2,
+      "field_au": [
+        -0.0,
+        -0.0,
+        -3e-05
+      ],
+      "converged": true,
+      "residual": 1.0651569888805133e-13,
+      "iterations": 6,
+      "electric_enthalpy": -8.035721370661316,
+      "polarization": [
+        0.07159098849662625,
+        0.016520878008581236,
+        0.022026620679925075
+      ],
+      "diagnostics": {
+        "density_hermiticity_error": 3.3306690738754696e-16,
+        "density_idempotency_error": 1.0056032070417109e-13,
+        "maximum_block_occupation_error": 4.545902364027965e-16,
+        "electron_number": 4.0,
+        "electron_number_error": 0.0,
+        "minimum_chart_gram_eigenvalue": 0.9999999903900598,
+        "minimum_reference_subspace_overlap": 0.9999999951950329,
+        "effective_fock_indirect_gap_hartree": 0.15770609588110512,
+        "effective_fock_occupied_empty_residual": 1.06470388099723e-13,
+        "minimum_link_singular_value": 0.5095252883145528,
+        "minimum_branch_clearance_radian": 3.1414080056726106,
+        "maximum_local_phase_change_radian": 0.00018464791718253437,
+        "berry_valid": true,
+        "passed": true
+      },
+      "seconds": 4.86961271600012
+    }
+  ],
+  "finite_differences": [
+    {
+      "axis": 0,
+      "step_au": 0.0001,
+      "chi_column": [
+        0.06450031646454413,
+        0.00814583517425374,
+        0.005171264166534129
+      ],
+      "maximum_error": 4.738933066794626e-08,
+      "passed": true
+    },
+    {
+      "axis": 0,
+      "step_au": 3e-05,
+      "chi_column": [
+        0.06450027333557151,
+        0.008145823224339302,
+        0.005171261665120701
+      ],
+      "maximum_error": 4.260358052454727e-09,
+      "passed": true
+    },
+    {
+      "axis": 1,
+      "step_au": 0.0001,
+      "chi_column": [
+        0.008145835174167004,
+        0.06450031646452678,
+        0.005171264166534129
+      ],
+      "maximum_error": 4.7389313112544684e-08,
+      "passed": true
+    },
+    {
+      "axis": 1,
+      "step_au": 3e-05,
+      "chi_column": [
+        0.008145823224281479,
+        0.06450027333534021,
+        0.005171261664889404
+      ],
+      "maximum_error": 4.260126543198517e-09,
+      "passed": true
+    },
+    {
+      "axis": 2,
+      "step_au": 0.0001,
+      "chi_column": [
+        0.00517125766874571,
+        0.005171257668797752,
+        0.04745053000309446
+      ],
+      "maximum_error": 2.2232808052913278e-08,
+      "passed": true
+    },
+    {
+      "axis": 2,
+      "step_au": 3e-05,
+      "chi_column": [
+        0.005171260780006959,
+        0.005171260779891311,
+        0.04745050962666243
+      ],
+      "maximum_error": 1.8563760251222305e-09,
+      "passed": true
+    }
+  ],
+  "validation_passed": true,
+  "elapsed_seconds": 229.92703819100097,
+  "peak_rss_kib": 17768704
+}

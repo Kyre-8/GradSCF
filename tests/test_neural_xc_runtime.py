@@ -7,11 +7,11 @@ import optax
 import pytest
 from flax import linen as nn
 
-from gradscf.dft.libxc_jax.jax_libxc import (
+from gradscf.dft.xc import (
     RestrictedFeatureBundle,
     b3lyp_component_basis,
 )
-from gradscf.dft.libxc_jax import jax_xc_adapter
+from gradscf.dft.xc import _jax_xc as jax_xc_adapter
 from gradscf.model.neural_xc import (
     ResidualMixingMLP,
     available_semilocal_components,
@@ -20,17 +20,15 @@ from gradscf.model.neural_xc import (
     make_neural_xc_functional,
 )
 from gradscf.model.neural_xc.factory import NeuralXCFunctional
-from gradscf.model.neural_xc.inputs import (
-    ChunkedHFXNu,
-    canonical_input_features,
-)
+from gradscf.dft.hfx import ChunkedHFXNu
+from gradscf.model.neural_xc.inputs import canonical_input_features
 import gradscf.model.neural_xc.model as neural_xc_model
 import gradscf.model.neural_xc.binding as neural_xc_binding
 import gradscf.model.neural_xc.components as neural_xc_components
 import gradscf.model.neural_xc.projection as neural_xc_projection
 from gradscf.tools.features import has_explicit_spin_axis, restricted_grid_features
 import gradscf.scf.differentiable as scf_differentiable
-from gradscf.scf.xc_energy import xc_energy_and_potential_from_density
+from gradscf.dft.derivatives import xc_energy_and_potential_from_density
 from pyscf_reference import restricted_reference_from_pyscf
 from gradscf.tools.spectra import HARTREE_TO_EV, oscillator_strengths
 from gradscf.tddft import (
@@ -47,15 +45,14 @@ from gradscf.tddft.response import (
 )
 import gradscf.tddft.response as response_module
 from gradscf.tddft.unrestricted import build_unrestricted_tda_operator
-from gradscf.model.training import (
+from gradscf.model.neural_xc.training import (
     MolecularTrainingDatum,
     MolecularTrainingConfig,
-    create_train_state_from_molecule,
     molecular_loss,
-    make_molecular_train_step,
     predict_excitation_energies,
     predict_ground_state_total_energy,
 )
+from gradscf.model.neural_xc.training.trainer import create_train_state_from_molecule, make_molecular_train_step
 
 
 def test_libxc_module_uses_polarized_channels_for_unrestricted_features(monkeypatch):
@@ -987,13 +984,13 @@ def test_semilocal_xc_alias_expands_to_component_channels_for_neural_basis():
 
 
 def test_neural_xc_rejects_experimental_jax_xc_semilocal_by_default(monkeypatch):
-    import gradscf.dft.libxc_jax.jax_xc_adapter as jax_xc_adapter
+    import gradscf.dft.xc._jax_xc as jax_xc_adapter
 
     class FakeModule:
         __version__ = "fake"
 
         @staticmethod
-        def hyb_gga_xc_b97(*, polarized=False):
+        def gga_x_rpbe(*, polarized=False):
             del polarized
             return lambda rho_fn, r, mo_fn=None: rho_fn(r)
 
@@ -1005,13 +1002,13 @@ def test_neural_xc_rejects_experimental_jax_xc_semilocal_by_default(monkeypatch)
 
     with pytest.raises(ValueError, match="allow_experimental_jax_xc=True"):
         make_neural_xc_functional(
-            semilocal_xc="hyb_gga_xc_b97",
+            semilocal_xc="gga_x_rpbe",
             hidden_dims=(8,),
         )
 
 
 def test_neural_xc_accepts_experimental_jax_xc_with_explicit_opt_in(monkeypatch):
-    import gradscf.dft.libxc_jax.jax_xc_adapter as jax_xc_adapter
+    import gradscf.dft.xc._jax_xc as jax_xc_adapter
 
     class FakeModule:
         __version__ = "fake"
@@ -1038,7 +1035,7 @@ def test_neural_xc_accepts_experimental_jax_xc_with_explicit_opt_in(monkeypatch)
 
 
 def test_neural_xc_accepts_dynamic_mgga_with_explicit_opt_in(monkeypatch):
-    import gradscf.dft.libxc_jax.jax_xc_adapter as jax_xc_adapter
+    import gradscf.dft.xc._jax_xc as jax_xc_adapter
 
     class FakeModule:
         __version__ = "fake"
@@ -1873,7 +1870,7 @@ def test_reference_can_cache_local_pt2_feature_and_functional_reuses_it():
 
 
 def test_local_pt2_feature_supports_packed_eri_pair_matrix():
-    from gradscf.model.neural_xc.inputs import _local_pt2_feature_from_restricted_orbitals
+    from gradscf.dft.pt2 import _local_pt2_feature_from_restricted_orbitals
 
     ao = jnp.asarray(
         [
@@ -3260,7 +3257,7 @@ def test_strict_response_mode_matches_pyscf_b3lyp_tolerance():
             name=f"b3lyp_like_{mode}",
         )
         params = functional.init_from_molecule(jax.random.PRNGKey(30), reference)
-        bound = functional.bind_to_molecule(params, reference)
+        bound = functional.bind_to_molecule_for_response(params, reference)
         solver = RestrictedCasidaTDDFT(molecule=reference, xc_functional=bound)
         result = solver.kernel(nstates=6)
         pred_energies = jnp.asarray(result.excitation_energies)

@@ -298,7 +298,7 @@ def build_graddft_ground_atom_molecule(
         molecule = _require_converged_atom_reference(molecule, record, basis=basis)
         if chunked_hfx:
             from gradscf.integrals.basis import basis_from_spec
-            from gradscf.model.neural_xc.inputs import ChunkedHFXNu
+            from gradscf.dft.hfx import ChunkedHFXNu
 
             basis_cart = basis_from_spec(
                 record.atom, basis=basis, unit=record.unit, charge=record.charge,
@@ -315,9 +315,10 @@ def build_graddft_ground_atom_molecule(
         return molecule
 
     if int(record.spin) == 0:
-        from gradscf.scf import RKSConfig, restricted_molecule_from_spec_with_jax_rks
+        from gradscf.scf import RKSConfig
+        from gradscf.scf.builders import _build_restricted_reference
 
-        molecule = restricted_molecule_from_spec_with_jax_rks(
+        molecule = _build_restricted_reference(
             atom=record.atom,
             basis=str(basis),
             xc_spec=str(xc_spec),
@@ -348,9 +349,10 @@ def build_graddft_ground_atom_molecule(
 
         return finalize(molecule)
 
-    from gradscf.scf import UKSConfig, unrestricted_molecule_from_spec_with_jax_uks
+    from gradscf.scf import UKSConfig
+    from gradscf.scf.builders import _build_unrestricted_reference
 
-    molecule = unrestricted_molecule_from_spec_with_jax_uks(
+    molecule = _build_unrestricted_reference(
         atom=record.atom,
         basis=str(basis),
         xc_spec=str(xc_spec),
@@ -400,7 +402,7 @@ def build_graddft_ground_atom_datum(
 ) -> Any:
     """Build one molecular datum from a GradDFT ground-state atom record."""
 
-    from gradscf.model.training import MolecularTrainingDatum
+    from gradscf.model.neural_xc.training import MolecularTrainingDatum
 
     molecule = build_graddft_ground_atom_molecule(record, basis=basis, **molecule_kwargs)
     return MolecularTrainingDatum(

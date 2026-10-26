@@ -1,0 +1,46 @@
+{
+  "complete": true,
+  "fixed_settings": {
+    "a_angstrom": 5.43,
+    "mesh": [
+      15,
+      15,
+      15
+    ],
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "xc": "pbe",
+    "precision": 1e-10
+  },
+  "kmesh_sides": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "raw_forbidden_over_allowed": [
+    [
+      0.0011886704611070364,
+      0.18178833567115
+    ],
+    [
+      0.0015969461543154974,
+      0.0003697134792995643
+    ],
+    [
+      0.0016344654677001645,
+      0.04457038268696144
+    ],
+    [
+      0.001634299243168086,
+      0.06819442131893758
+    ]
+  ],
+  "input_sha256": {
+    "gamma_fft15": "9597c7a962a617be400417155f4229a29fd2f0da55df297327634898917eef1e",
+    "k2_fft15": "c2437df493000b96459b3feba5477e52dabca1b35c209953a4f900dff23c533f",
+    "k3_fft15": "b63ce6a60f46e7bc31549167696fb9f87ac2c8f416f4cee93ce01ba75cddf0d0",
+    "k4_fft15_dynamic": "2f171f056fe14506d39dbacc09727f3a748b791011a419573e448288d38eb002"
+  },
+  "interpretation": "Sampling sensitivity of raw finite-model derivatives; no extrapolation or symmetry projection."
+}

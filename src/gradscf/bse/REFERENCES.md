@@ -32,6 +32,15 @@
    Installed PySCF 2.9.0 supplies the HF/CIS and HF/TDHF unscreened-limit oracles, not a BSE
    oracle. Its version has no `pyscf.gw.bse`; the newer online BSE code was
    inspected during planning but is not the executed acceptance reference.
+6. E. Monino and P.-F. Loos, “Spin-Conserved and Spin-Flip Optical Excitations
+   from the Bethe–Salpeter Equation Formalism,” *J. Chem. Theory Comput.*
+   **17**, 2852–2867 (2021),
+   [doi:10.1021/acs.jctc.1c00074](https://doi.org/10.1021/acs.jctc.1c00074).
+   Spin-resolved GW screening and unrestricted spin-conserving A/B blocks.
+   This implementation does not include the paper's spin-flip or dynamical
+   extensions. Tests use an independent NumPy contraction oracle and the
+   restricted singlet/triplet limit; no unrestricted external BSE executable
+   was used for this extension.
 
 The production JAX BSE code is a new implementation of the stated equations.
 No QuAcK, MOLGW, VOTCA or newer PySCF BSE source is vendored or executed by it.

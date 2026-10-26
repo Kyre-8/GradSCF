@@ -5,12 +5,12 @@ from typing import Any, Literal
 import numpy as np
 import jax.numpy as jnp
 
-from gradscf.integrals.auxbasis import minimal_ris_auxbasis_for_mol
+from gradscf.integrals.basis.auxiliary import minimal_ris_auxbasis_for_mol
 from reference_scf_features import (
     _charge_center,
 )
-from gradscf.model.neural_xc.inputs import (
-    ChunkedHFXNu,
+from gradscf.dft.hfx import ChunkedHFXNu
+from gradscf.dft.pt2 import (
     _local_pt2_feature_and_fock_response_from_restricted_orbitals,
     _local_pt2_feature_from_unrestricted_orbitals,
 )

@@ -1,0 +1,2 @@
+Saved X07 intensity_modulation.png/.pdf and four CSV tables
+Rigid-response covariance checks: {'translation': 3.3602287619061144e-12, 'moment_rotation': 8.471556789402257e-13, 'strength_rotation': 7.4495964952348e-14}

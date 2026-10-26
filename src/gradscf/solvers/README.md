@@ -17,9 +17,12 @@ historical solver forwarding modules have been removed.
 | Bounded complex dense RPA and metric energy derivatives | `eigen/rpa.py` | Small non-Gamma periodic response |
 | Regularized full-spectrum and inverse-square-root derivatives | `eigen/spectral.py` | SCF orbital diagonalization and overlap response |
 | Checked GMRES/direct solves and transpose response | `linear/` | Eigenvector response, SCF/GW implicit derivatives |
+| Checked repeated shifted solves | `linear/shifted.py` | Molecular RPA resolvents and full signed periodic GW screening |
+| Complex-to-real linear adapter | `linear/complex.py` | Exciton–vibration retarded response |
 | Scalar-bordered Schur solve | `linear/schur.py` | scGW charge-constrained response |
 | Fixed-point/root implicit differentiation | `nonlinear/` | SCF and scGW |
 | DIIS and callback-based orbital minimization | `nonlinear/` | SCF families |
+| Moment-anchored causal matrix realization | `poles.py` | Periodic scGW spectral continuation |
 
 `tddft/eigensolvers.py`, `tddft/eigenvector_differentiation.py`, `scf/implicit.py`,
 `scf/diis.py`, `scf/_orbital_solver.py`, and `ci/response.py` have been removed.
@@ -83,8 +86,55 @@ Construct `LinearOperator` inside a transformed function, or close over it;
 the callable container itself is not a dynamic JIT argument. Captured numerical
 parameters remain differentiable. With `method="direct"`, `solve_linear` accepts
 RHS shape `(n,nrhs)` and solves all columns together with a shared bounded dense
-matrix and checked implicit transpose response. Iterative solves retain vector
-RHS; multiple iterative RHS can use caller-side `vmap`.
+matrix and checked implicit transpose response. GMRES also accepts block RHS;
+its column loop stays inside the opaque implicit solve for transpose response.
+
+`solve_complex(A,b,config=...)` accepts complex square matrices/operators and
+vector or block RHS. It represents the problem by a real operator of size
+`2*n`, and delegates forward/backward to the same checked `solve_linear`.
+GMRES keeps this representation matrix-free; the direct `max_dense` bound
+applies to `2*n`. The true residual norm, NaN/status failure policy, JVP/VJP
+and higher response are retained. This does not change the real input contract
+of `solve_linear`. No separate complex numerical algorithm is implemented.
+
+`solvers.linear.factor_shifted(M, symmetric=True)` prepares a local numerical
+cache for repeated `(M-shift*I) x = b` solves. The default requires algebraic
+transpose symmetry, including complex symmetric matrices; it does not assert
+Hermiticity. Use `symmetric=False` for a general real or complex matrix. The
+general real path promotes its spectral cache and output to complex dtype.
+Rebuild the cache whenever the physical matrix changes.
+
+`solve_shifted(cache, b, shift, rtol=1e-11, atol=1e-13)` accepts vector or block
+RHS and returns the solution array. Eigenvectors are stopped primal data;
+JVP/VJP differentiate the original matrix equation, including repeated
+eigenvalues. Its explicit transpose solve uses the algebraic transpose, never
+the adjoint. A defective or poorly conditioned eigenbasis falls back to the
+original dense equation. Both primal and transpose solutions must pass the
+shared true-residual check against `cache.matrix`; failed checks return NaNs.
+The fallback and residual certificate do not regularize a singular shift.
+Molecular real/complex symmetric RPA matrices retain the default contract;
+periodic full signed screening explicitly requests the general path. Choosing
+the matrix and shift, including the finite-frequency broadening convention,
+remains the caller's physical responsibility.
+
+`solvers.poles.interpolate_causal(z, values, moment=M1, tolerance=...,`
+`rank_tolerance=1e-12)` constructs a PSD matrix pole measure from upper-half-plane
+samples. It first checks the original moment-anchored Gram without causal
+projection, then whitens the moment support and scales frequency columns.
+A Hermitian least-squares completion minimizes `||H X-T||_F`; its unconstrained
+block is set to zero. Numerical ranks, discarded modes, compatibility residuals
+and original-sample errors remain in `PoleFit.diagnostics`. Rank truncation
+makes this a controlled approximation; the original sample and constraint
+errors must pass the requested tolerance, with relative first-moment error
+at most `1e-9`. A failed certificate raises rather than returning a usable fit.
+The zero moment and zero dynamic function produce an empty, usable bath.
+
+`evaluate_poles` evaluates this measure, and `auxiliary_spectrum` gives the
+complete Dyson poles and physical spectral weights, including satellites.
+The completion is a deterministic choice among finite-data continuations;
+it does not establish a unique real-axis spectrum. Clients retain independent
+holdout, particle-number and forward-frequency convergence checks. This eager
+reduction has no differentiation contract or iterative fitting backend.
 
 The new `solve_hermitian` and `solve_linear` APIs accept real floating-point
 data. Dense symmetric inputs are checked rather than silently repaired;
@@ -109,23 +159,31 @@ Linear `maxiter` counts GMRES restart cycles, not individual Krylov steps.
   tiny RHS are handled by scaling inside the opaque numerical solve. Forward
   and transposed solves are independently checked using the true residual.
 - `solve_hermitian` has one explicit `EigenResponseConfig`: `eigenvalues`
-  differentiates isolated energies with stopped vectors; `eigenpairs` also
+  differentiates isolated energies while returning stopped diagnostic vectors; `eigenpairs` also
   supplies isolated vector response; `subspace` returns the projector action
   on optional probes and the selected energy sum, including internal degeneracy.
-  All targets share one forward solve and one Sylvester response core (rank one
-  for an individual state). They promise first-order JVP/VJP only.
+  All targets share one forward solve and one implicit invariant-space response
+  core (rank one for an individual state). Its first tangent is the projected
+  Sylvester equation; the nonlinear local residual preserves nested response.
+  Isolated energies and invariant cluster observables have small-matrix
+  second/third/fourth-order tests, including exact internal degeneracy. This
+  does not extend the derivative contract of RPA, non-Hermitian EOM, or every
+  downstream electronic-structure method.
+  Forward values/vectors and first energy derivatives do not invoke a response
+  solve. A frame derivative or second energy derivative activates the implicit
+  root and its configured linear-solver capacity/convergence checks.
 - Subspace requests expose `projection` and `eigenvalue_sum`; their `values` and
   `vectors` are None. Stopped `raw_*` fields include guard diagnostics. Individual
   state requests check all internal and boundary gaps; subspace requests check
   only the external boundary. Unresolved prerequisites produce NaN derivatives.
   See [the derivation and boundary policy](DEGENERACY.md),
   [migration plan](UNIFIED_EIGEN.md), and
-  [example](../../../examples/degenerate_subspace.py).
+  [example](../../../examples/solvers/degenerate_subspace.py).
 - Legacy `EigenSolverConfig` AD fields (also used by RPA) remain honored when
   the explicit `response` argument is omitted. Mixing nondefault legacy controls
   with an explicit response raises an error. No independent projector or
   isolated-vector AD entry point/forwarding module remains.
-- Failed eigenpairs remain inspectable; their derivatives are NaN. Failed
+- Failed eigenpairs remain inspectable; their first derivatives are NaN. Failed
   linear or adjoint solves return NaNs. Residual predicates stay inside opaque
   linear solves so that the tangent map can still be transposed correctly.
 - Legacy RPA energy response uses the indefinite metric. The real structured
@@ -152,6 +210,11 @@ Linear `maxiter` counts GMRES restart cycles, not individual Krylov steps.
   when AD is requested and failure produces NaN. Dense dispatch reuses
   `solve_stable_rpa` and enforces its dimension cap. See the
   [metric derivation and limitations](../bse/MATRIX_FREE_BSE.md).
+- Always check `response_valid` and convergence before nested differentiation.
+  Differentiating a structurally constant invalid tangent can yield zero at
+  higher order; a finite higher derivative alone is not a validity certificate.
+  This preserves the existing invalid first-response policy without inventing
+  derivatives for cut clusters or nonconverged eigenstates.
 - `regularized_eigh` preserves the existing SCF gap-broadening policy near
   degeneracy. `inverse_sqrt` differentiates the matrix function through a
   Sylvester equation at repeated positive eigenvalues. Existing SCF second,
@@ -161,6 +224,18 @@ Linear `maxiter` counts GMRES restart cycles, not individual Krylov steps.
   its actual unrolled trajectory; domain-level policy chooses between implicit
   and unrolled modes. Regularization changes the response problem and remains
   explicit rather than a silent numerical fallback.
+- `stationary_value(function, solution, parameters)` evaluates a variational
+  scalar objective with its envelope derivative. The caller supplies a
+  stationary coordinate chart: if `dE/dz=0`, then `dE/dp=partial E/partial p`.
+  The state is still differentiable inside that partial derivative, so higher
+  response includes `E_pz dz/dp`. Constraints depending on p must be in the
+  callback; raw constrained AO orbitals/densities are not stationary coordinates.
+  Checked implicit orbital SCF applies this rule only to the final total energy,
+  keeping overlap transport/Pulay terms in the callback. It avoids a spurious
+  first-energy adjoint driven by numerical stationarity noise near a zero mode.
+  Optimizer callbacks, density/orbital response, explicit trajectories and
+  unchecked implicit behavior are unchanged. Higher or nonvariational state
+  observables still require successful, physically defined response solves.
 
 TD-SCF signatures, thresholds, positive-root selection and tuple layouts are
 preserved. Unified Hermitian guesses also explore disconnected invariant sectors
@@ -184,8 +259,10 @@ python -m pytest -q tests/solvers tests/ci tests/test_tddft_eigensolvers.py \
   tests/test_scf_higher_order.py tests/test_scf_implicit_and_xc_energy.py
 ```
 
-Biorthogonal non-Hermitian vector response,
-variable-metric subspace response, and higher-order projector derivatives are future work.
+Real isolated non-Hermitian pair response and the invariant-cluster mode
+below use shared implicit solves. Variable-metric subspace response remains
+outside these contracts. Hermitian higher response assumes a fixed real
+Euclidean metric, fixed selected rank and a resolved external spectral gap.
 The present RPA implementation is not a generic non-Hermitian EOM solver.
 GPU behavior has not been validated in this migration.
 
@@ -233,8 +310,9 @@ Isolated real eigenvalue JVP/VJP uses `d omega = L.T (dA) R`. Numerical vectors
 and raw spectra have stopped AD. Complex selected roots have NaN real outputs;
 negative real roots remain selectable. Failed requested/guard residuals,
 observed unresolved gaps or excessive conditioning invalidate derivatives for
-the complete requested set. Vector/cluster and higher-order response are not
-provided. The caller owns CC amplitude response and sector interpretation;
+the complete requested set. The default rule provides only first-order energy
+response. Opt-in isolated-pair and invariant-subspace responses use shared
+implicit solves. The caller owns CC amplitude response and sector interpretation;
 see [EOM-CCSD](../cc/eom/README.md).
 
 Real clusters unresolved at matrix-scaled roundoff are represented by real
@@ -244,3 +322,47 @@ rank merely by taking real parts. This repair occurs in the projected matrix for
 Davidson and the bounded physical matrix for dense solving. It preserves the
 original eigenvalues and all physical residual/conditioning checks; it is not
 Hermitianization, a pseudoinverse, or a new degenerate-root AD policy.
+
+
+## Independent scalar roots
+
+`solvers.nonlinear.solve_scalar_roots(function, x0, config=ScalarRootConfig(...))`
+provides bounded secant, AD-Newton and hybrid forward iterations. Each residual
+component must depend only on its corresponding trial component; for coupled
+systems use the general nonlinear interfaces. The result includes per-lane
+convergence/iterations and batch evaluation counters. `scan=True` permits
+explicit trajectory AD; an implicit physical root rule can wrap the default
+while-loop solver, as GW does. Rejected nonfinite trials do not enter the
+explicit derivative graph. See [QP usage and validation](../gw/QP_SOLVERS.md).
+
+## Real non-Hermitian invariant clusters
+
+`solve_nonhermitian(A, response=EigenResponseConfig(target="subspace"),
+probes=q)` returns a `NonHermitianSubspaceResult`. Its differentiated outputs
+are `projection=P@q` and `eigenvalue_sum`; `probes=None` requests only the trace.
+The probe can be a vector or a column matrix. The oblique projector P need not
+be symmetric. `values`, `right_vectors` and `left_vectors` are None; numerical
+eigenpairs remain available in the entirely stopped `raw_result` for proper-
+subspace requests. The existing
+result layout and isolated-root defaults are unchanged when response is omitted.
+Mixing explicit response with `vector_response`/`response_config` raises.
+
+A proper selected cluster must be complete, real and semisimple, with a resolved
+external boundary. Internal degeneracy is allowed. The numerical left/right
+spans, overlap conditioning and QR-rebased block residuals must pass before
+response is valid. Davidson's boundary uses converged local Ritz/guard roots;
+it is not a global spectral certificate. Complex, rank-deficient, defective or
+cut clusters retain inspectable numerical diagnostics and invalid derivatives.
+The full space instead gives P=I and trace(A), using bounded true operator
+actions without an eigenvector chart, including finite Jordan examples. Its
+raw spectral arrays are empty, `spectrum_complete=False`, and iteration/subspace
+counts are zero because no numerical eigensolve is performed.
+
+The shared coupled implicit roots retain first and second response. Direct
+capacity in `response.linear_config.max_dense` is n*k+k*k for each coupled
+root, rather than n per requested state;
+GMRES avoids that dense Jacobian. Required frames, arbitrary probe batches,
+known operator scratch and both root phases share the caller's original MB
+budget. This is declared-array planning, not an RSS/VRAM cap. See the
+[derivation](DEGENERACY.md#non-hermitian-invariant-subspaces) and
+[executed example](../../../examples/solvers/nonhermitian_subspace.py).

@@ -22,7 +22,7 @@ class MACEBasisModel(nnx.Module):
             from mace_jax.modules.models import MACE
             from mace_jax.modules.blocks import RealAgnosticInteractionBlock,RealAgnosticResidualInteractionBlock
         except ImportError as exc:
-            raise ImportError('MACEBasisModel requires the pinned mace_jax stack; install GradSCF[nnao] or the vendored src/nnao project in a compatible environment.') from exc
+            raise ImportError('MACEBasisModel requires the pinned mace_jax stack; install GradSCF[nnao] or the vendored src/gradscf/model/nnao/vendor/mace-jax project in a compatible environment.') from exc
         if basis_family not in {'szp3','szp3_direct','szp442_direct','szp663_direct','qvszps'}:raise ValueError('Unknown basis_family.')
         self.basis_family=basis_family
         self.output_shape={'szp3':(2,2),'szp3_direct':(2,3),'szp442_direct':(3,4),'szp663_direct':(3,6),'qvszps':(3,5)}[basis_family]
@@ -57,7 +57,7 @@ class MACEBasisModel(nnx.Module):
                     bias[i,l,:len(c)]=c/np.linalg.norm(c)
                     mask[i,l,:len(c)]=1.
         elif basis_family in {'szp3_direct','szp442_direct','szp663_direct'}:
-            from .basis import _direct_templates,_direct_slot
+            from .initialization import _direct_templates,_direct_slot
             by_z={atomic_number(s):data['shells'] for s,data in _direct_templates(basis_family).items()}
             for i,z in enumerate(self.elements):
                 for shell in by_z[z]:

@@ -7,7 +7,8 @@ import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
 
-from gradscf.integrals.layouts import _metadata_arrays, _mo_pair_products
+from gradscf.integrals.molecular.eri import _metadata_arrays
+from gradscf.ao2mo.blocks import _mo_pair_products
 from ._utils import _restricted_channel
 from .types import TDDFTResult, TDAResult
 
@@ -367,6 +368,7 @@ def restricted_cisd_second_order_correction(
     *,
     ac: Array | float = 1.0,
     occupation_tolerance: float = 1e-8,
+    _blocks=None,
 ) -> Array:
     """Return the unscaled/SCS-free CIS(D) doubles correction for restricted roots.
 
@@ -387,25 +389,64 @@ def restricted_cisd_second_order_correction(
     if nocc <= 0 or nvir <= 0:
         raise ValueError("CIS(D) correction requires at least one occupied and one virtual orbital.")
 
-    mo_eri = _restricted_mo_eri_tensor(molecule, mo_coeff)
-    occ_spatial, occ_spin = _spin_orbital_labels(jnp.arange(nocc, dtype=jnp.int32))
-    vir_spatial, vir_spin = _spin_orbital_labels(
-        jnp.arange(nocc, nmo, dtype=jnp.int32)
-    )
-    occ_eps = jnp.repeat(jnp.asarray(mo_energy[:nocc]), 2)
-    vir_eps = jnp.repeat(jnp.asarray(mo_energy[nocc:]), 2)
+    if _blocks is None:
+        mo_eri = _restricted_mo_eri_tensor(molecule, mo_coeff)
+        occ_spatial, occ_spin = _spin_orbital_labels(jnp.arange(nocc, dtype=jnp.int32))
+        vir_spatial, vir_spin = _spin_orbital_labels(
+            jnp.arange(nocc, nmo, dtype=jnp.int32)
+        )
+        occ_eps = jnp.repeat(jnp.asarray(mo_energy[:nocc]), 2)
+        vir_eps = jnp.repeat(jnp.asarray(mo_energy[nocc:]), 2)
 
-    ij_ab = _antisymmetrized_block(
-        mo_eri,
-        occ_spatial,
-        occ_spin,
-        occ_spatial,
-        occ_spin,
-        vir_spatial,
-        vir_spin,
-        vir_spatial,
-        vir_spin,
-    )
+        ij_ab = _antisymmetrized_block(
+            mo_eri,
+            occ_spatial,
+            occ_spin,
+            occ_spatial,
+            occ_spin,
+            vir_spatial,
+            vir_spin,
+            vir_spatial,
+            vir_spin,
+        )
+
+        ab_cj = _antisymmetrized_block(
+            mo_eri,
+            vir_spatial,
+            vir_spin,
+            vir_spatial,
+            vir_spin,
+            vir_spatial,
+            vir_spin,
+            occ_spatial,
+            occ_spin,
+        )
+        ka_ij = _antisymmetrized_block(
+            mo_eri,
+            occ_spatial,
+            occ_spin,
+            vir_spatial,
+            vir_spin,
+            occ_spatial,
+            occ_spin,
+            occ_spatial,
+            occ_spin,
+        )
+        jc_kb = _chemist_block(
+            mo_eri,
+            occ_spatial,
+            occ_spin,
+            vir_spatial,
+            vir_spin,
+            occ_spatial,
+            occ_spin,
+            vir_spatial,
+            vir_spin,
+        )
+    else:
+        ij_ab,ab_cj,ka_ij,jc_kb = _blocks
+        occ_eps = jnp.repeat(jnp.asarray(mo_energy[:nocc]),2)
+        vir_eps = jnp.repeat(jnp.asarray(mo_energy[nocc:]),2)
 
     denom_mp2 = (
         vir_eps[None, None, :, None]
@@ -414,39 +455,6 @@ def restricted_cisd_second_order_correction(
         - occ_eps[None, :, None, None]
     )
     mp2_amplitudes = -ij_ab / denom_mp2
-    ab_cj = _antisymmetrized_block(
-        mo_eri,
-        vir_spatial,
-        vir_spin,
-        vir_spatial,
-        vir_spin,
-        vir_spatial,
-        vir_spin,
-        occ_spatial,
-        occ_spin,
-    )
-    ka_ij = _antisymmetrized_block(
-        mo_eri,
-        occ_spatial,
-        occ_spin,
-        vir_spatial,
-        vir_spin,
-        occ_spatial,
-        occ_spin,
-        occ_spatial,
-        occ_spin,
-    )
-    jc_kb = _chemist_block(
-        mo_eri,
-        occ_spatial,
-        occ_spin,
-        vir_spatial,
-        vir_spin,
-        occ_spatial,
-        occ_spin,
-        vir_spatial,
-        vir_spin,
-    )
     jk_bc = ij_ab
     r_ab = -jnp.einsum(
         "jckb,jkca->ab",

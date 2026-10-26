@@ -1,0 +1,59 @@
+{
+  "results_sha256": "3e04fafa607e835782a2f6be64ecd0000f72bccedcb655dd18807209f0d0177b",
+  "arrays_sha256": "91fbc32a231ad4e4981446ae33c78bb19f4b9a4a480e398ab0e18596f4f2dacc",
+  "plot_script_sha256": "4366b5c287d9d43aebbb94adec6cc9b692349be7acfbf870e9323d13729b615f",
+  "qp_computed_mask": [
+    [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  ],
+  "plotted_qp_mask": [
+    [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  ],
+  "nrequested": 4,
+  "nplotted": 3,
+  "all_requested_qp_passed": false,
+  "failed_requested": [
+    {
+      "k_index": 1,
+      "band_index": 3,
+      "residual_hartree": -0.004304493678315702
+    }
+  ]
+}

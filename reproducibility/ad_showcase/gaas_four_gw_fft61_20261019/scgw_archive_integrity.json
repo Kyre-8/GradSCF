@@ -1,0 +1,55 @@
+{
+  "512": {
+    "runtime_accepted": true,
+    "files": {
+      "scgw.npz": {
+        "sha256": "caa88f3c75c3fe01ea369b5aa82b66d673b515fbf80af60f8781184a446f0da9",
+        "zip_crc_passed": true
+      },
+      "scgw_dyson_diagnostics.npz": {
+        "sha256": "cb46a4b71825fbf2762b700964b558f2bed24098c1a998a59bd839c059573034",
+        "zip_crc_passed": true
+      },
+      "scgw.json": {
+        "sha256": "553abf1ece171e38c1939785bd737eba6d1bc07184986bb8f0b512d54b04d31f"
+      },
+      "run.json": {
+        "sha256": "7bdd63c8a334fc343384ff366d78a43f527e87f695ae16a221c1d09ebf3c75c6"
+      },
+      "phases.json": {
+        "sha256": "309caa0e81822aa28cd831a5e3137ed87a279c8ac948ac9247d9bbe13fd4ed7f"
+      },
+      "run.stdout": {
+        "sha256": "694acfc4ab3b8a904291796afd806135fc63fd36917cc45ce7726bc28f114192"
+      }
+    }
+  },
+  "1024": {
+    "runtime_accepted": true,
+    "files": {
+      "scgw.npz": {
+        "sha256": "dd683f57b9bb0064328e4f1df280a18ed6a1fe49fd9a6f39e64ca6affa2dee24",
+        "zip_crc_passed": true
+      },
+      "scgw_dyson_diagnostics.npz": {
+        "sha256": "09a6c79b266949db4c74780d5369d32074ebabea3fac52e55a1d10ff04b731ac",
+        "zip_crc_passed": true
+      },
+      "scgw.json": {
+        "sha256": "05b4d3678741204fd38c99c45e5c1a0274ac6ccfb75bc00d7b35dee5597b163c"
+      },
+      "run.json": {
+        "sha256": "35ccfd7b3f10e9a328f9a80cf9771ddaebe5ed639d28686ad8c7f9928090e100"
+      },
+      "phases.json": {
+        "sha256": "7df77a21c54de20740b1d8c629be012578cb1f644669062cf46aa5f58ee0e69a"
+      },
+      "run.stdout": {
+        "sha256": "c88f33f33440ecec0d0164cae071085212745a524de32d666db38a1bebe3229c"
+      }
+    }
+  },
+  "raw_comparison.json": {
+    "sha256": "d25a27ddd44967388febc8eccd35b9f09273ba317e3a06b8d648e6e0c4f62d30"
+  }
+}

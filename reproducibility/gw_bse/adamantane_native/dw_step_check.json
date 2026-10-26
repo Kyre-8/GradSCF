@@ -1,0 +1,9 @@
+{
+  "mode": 45,
+  "frequency_cm1": 1650.7537473878,
+  "original_step_bohr": 0.002,
+  "checked_step_bohr": 0.001,
+  "max_valence_vertex_difference_ev": 4.596305100869633e-06,
+  "max_homo_vertex_difference_ev": 1.5133290896425248e-06,
+  "vertex_relative_frobenius_difference": 8.962750733816192e-05
+}

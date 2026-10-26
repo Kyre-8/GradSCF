@@ -1,5 +1,9 @@
 # Matrix-free full BSE and metric response
 
+The 2026-09-24 screening update removes full screened-factor caches and adds
+optional matrix-free auxiliary screening. Current configuration and storage
+boundaries are in [README.md](README.md#storage-and-solver-boundaries).
+
 2026-09-23. Continuation from `210cfee`, for real closed-shell static BSE.
 The BSE module constructs A/B actions; all eigensolving and linear response
 remain owned by `gradscf.solvers`. Public use:

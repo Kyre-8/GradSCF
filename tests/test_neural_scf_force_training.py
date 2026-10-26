@@ -5,9 +5,9 @@ import runpy
 import pytest
 
 
-@pytest.mark.parametrize('mode', ['implicit','unrolled'])
+@pytest.mark.parametrize('mode', ['implicit','explicit'])
 def test_neural_scf_force_loss_gradient_and_training_step(mode):
-    example = runpy.run_path(str(Path('examples/train_neural_scf_forces.py')))
+    example = runpy.run_path(str(Path('examples/training/train_neural_scf_forces.py')))
     result = example['validate_and_train'](mode)
     assert result['converged']
     assert result['max_force_fd_error'] < 2e-8

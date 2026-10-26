@@ -1,0 +1,65 @@
+{
+  "scope": "Finite Gaussian source2 comparison; no bulk convergence claim",
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "fft_mesh": [
+    21,
+    21,
+    21
+  ],
+  "nw_cd": 64,
+  "eta_cd_hartree": 0.001,
+  "screening_cutoff_rydberg": 16.0,
+  "diis_space": 8,
+  "exxdiv": null,
+  "fc": false,
+  "implementation_sha256": {
+    "src/gradscf/gw/pbc/source.py": "f021849276aea5af49a27b9ff1bfc74c9950feda2da0028899d66eae370f3b3a",
+    "src/gradscf/gw/pbc/evgw.py": "426ec450f1f23ad8118dc0f6c18af999d1b0784178f3de0c57160b0c17488aad",
+    "src/gradscf/gw/pbc/qsgw.py": "b6a0b814a32f300d7700a19791cb26d1bc69629a110da2eed19c9d670808f599",
+    "src/gradscf/solvers/linear/shifted.py": "8acaaf63261a86e6afee676a40284a12eb2f566de11fe11be28a1f4df0c321e3",
+    "examples/pbc/band_structures/gaas_self_consistent_gw.py": "fdf9589ec23798d5dfd04dc283467bc322716ba6a24a9846c1466314deaa2f5a"
+  },
+  "sc1024_endpoint_recomputed": false,
+  "methods": {
+    "g0w0": {
+      "converged": true,
+      "wall_seconds": 25.953441323013976
+    },
+    "evgw": {
+      "converged": true,
+      "wall_seconds": 24.9488689310092
+    },
+    "qsgw": {
+      "converged": true,
+      "wall_seconds": 25.19368031999329
+    }
+  },
+  "sc1024_originals": {
+    "scgw.npz": {
+      "original": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/sc1024_gauss_t4/scgw.npz",
+      "sha256": "eb98b81662f79052e305e436593216c1575b8acd3c8e82e0c2c1da721a47128f",
+      "byte_identical": true
+    },
+    "scgw.json": {
+      "original": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/sc1024_gauss_t4/scgw.json",
+      "sha256": "778d1ac71a5685bb18fd10656441ebbbe4eece3f1e32096888f0b980f30805f8",
+      "byte_identical": true
+    }
+  },
+  "elapsed_seconds": 76.1332372269826,
+  "output_sha256": {
+    "evgw.json": "1a93237b2a63cb5110749ef13466498461d72701528963f9fa2247aa577e4bf5",
+    "evgw.npz": "a99100d2b065c4655f7c1ee2ed500e6befc63323dc37b2dcec638d3493236abd",
+    "g0w0.json": "30ff948bb13d3ca273378dec471e2155aecc44120080b37110b5eaca349bbe6e",
+    "g0w0.npz": "6984dfb2b7d8adb5e80ea9ec4b598a92a5270da8e88b38ed4a4724892391bf74",
+    "qsgw.json": "5e94580769ce4b80c5a04682cbdb6fc143ca161a6fc81254a6d4f73ec75c82c0",
+    "qsgw.npz": "010f03060b0724ca278a5ebc4bf60098488be5445355410c7f7187b99b1e17c1",
+    "scgw.json": "778d1ac71a5685bb18fd10656441ebbbe4eece3f1e32096888f0b980f30805f8",
+    "scgw.npz": "eb98b81662f79052e305e436593216c1575b8acd3c8e82e0c2c1da721a47128f"
+  },
+  "complete": true
+}

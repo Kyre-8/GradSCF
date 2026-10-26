@@ -6,10 +6,7 @@ from pyscf import dft, gto
 
 from gradscf import tdscf
 from gradscf.scf import RKSConfig, UKSConfig
-from gradscf.scf.builders import (
-    restricted_molecule_from_spec_with_jax_rks,
-    unrestricted_molecule_from_spec_with_jax_uks,
-)
+from gradscf.scf.builders import _build_restricted_reference, _build_unrestricted_reference
 
 
 def _matched_scf_controls(mf):
@@ -35,7 +32,7 @@ def _build_restricted_pair():
     mf.grids.level = 2
     mf.kernel()
     assert mf.converged
-    molecule = restricted_molecule_from_spec_with_jax_rks(
+    molecule = _build_restricted_reference(
         atom=atom,
         basis="def2-svp",
         xc_spec="b3lyp",
@@ -66,7 +63,7 @@ def _build_unrestricted_pair():
     mf.grids.level = 2
     mf.kernel()
     assert mf.converged
-    molecule = unrestricted_molecule_from_spec_with_jax_uks(
+    molecule = _build_unrestricted_reference(
         atom=atom,
         basis="def2-svp",
         xc_spec="b3lyp",

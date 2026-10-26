@@ -1,0 +1,85 @@
+{
+  "complete": true,
+  "validation_passed": true,
+  "checks": {
+    "optical": {
+      "chi_column": [
+        0.007302227004265548,
+        0.36150115248618,
+        0.0073022270042650845
+      ],
+      "derivative": [
+        -0.0013502837575375772,
+        2.1563304538343133e-06,
+        -4.99218106040907e-07
+      ],
+      "field_residual": 1.0804468431047098e-11,
+      "mixed_residual": 6.243269790040529e-14,
+      "reference_residual": 4.440892098500626e-16
+    },
+    "zero": {
+      "chi_column": [
+        0.007302227004265548,
+        0.36150115248618,
+        0.0073022270042650845
+      ],
+      "derivative": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "field_residual": 1.0804468431047098e-11,
+      "mixed_residual": 0.0,
+      "reference_residual": 4.440892098500626e-16
+    },
+    "translation": {
+      "chi_column": [
+        0.007302227004265548,
+        0.36150115248618,
+        0.0073022270042650845
+      ],
+      "derivative": [
+        -1.2133872346317212e-18,
+        -7.882756075875985e-19,
+        -8.387514676992366e-19
+      ],
+      "field_residual": 1.0804468431047098e-11,
+      "mixed_residual": 1.903670919307207e-14,
+      "reference_residual": 4.440892098500626e-16
+    }
+  },
+  "probe_parity_error": 0.0,
+  "zero_error": 0.0,
+  "translation_error": 1.2133872346317212e-18,
+  "baseline_polarization": [
+    0.03324073752835333,
+    0.009497353579529523,
+    0.014246030369294282
+  ],
+  "reference_checkpoint_sha256": "11011d9c5b9b50066a2ade5ee98aad156f317567461d3f4378f67fe19ad2dda0",
+  "settings": {
+    "a_angstrom": 5.43,
+    "mesh": [
+      15,
+      15,
+      15
+    ],
+    "kmesh": [
+      2,
+      2,
+      2
+    ],
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "xc": "pbe",
+    "precision": 1e-10
+  },
+  "elapsed_seconds": 417.7378454179998,
+  "peak_rss_kib": 11335596,
+  "source_sha256": {
+    "src/gradscf/dfpt/electric.py": "c1f42df314bc6a646b975b0f44e6188097884b8095f86f30017f5fcd25cd2c1d",
+    "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+    "examples/pbc/silicon_raman.py": "4157e35f94bd6428396dd100b3ecd21afba0934621cdcb599e07e7005012220c",
+    "examples/pbc/check_silicon_raman.py": "c1a46c1c644e8c62ba6cfac90b86a56833256339cf6d08e72c2d43bdd471bb66"
+  }
+}

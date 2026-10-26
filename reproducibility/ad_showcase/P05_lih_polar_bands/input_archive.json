@@ -1,0 +1,22 @@
+{
+  "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/ifc_raw/results.json": {
+    "archive": "inputs/mechanical_results.json",
+    "sha256": "20dcf445c98ed117cd9dc35454acf8fa2e987ff80fd5c33ecec706fe8dbb769f"
+  },
+  "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/ifc_raw/ifc_data.npz": {
+    "archive": "inputs/mechanical_ifc_data.npz",
+    "sha256": "5012f43bfc2ab2b99a439b86341347b1aa9586a061c7f58cf713f1908081e0c8"
+  },
+  "reproducibility/ad_showcase/P04_lih_born/k223_fft41.json": {
+    "archive": "inputs/born_k223_fft41.json",
+    "sha256": "bc6ef0c7898553516603c366039673e587a4d4af4a1e21490f3aecd6d74ace6a"
+  },
+  "reproducibility/ad_showcase/P04_lih_dielectric/k223_fft41.json": {
+    "archive": "inputs/dielectric_k223_fft41.json",
+    "sha256": "c00f5a4ab17b1cbe858e95243a7ac62828011bceab4a3c26216ab9a8f8e6fbf3"
+  },
+  "reproducibility/ad_showcase/P04_lih_dielectric/k223_fft41_finite_field.json": {
+    "archive": "inputs/finite_field_k223_fft41.json",
+    "sha256": "b945b5b900cfe4f709c885537e6bd9ddda05945d5b9c3af2f020201f723ea4ed"
+  }
+}

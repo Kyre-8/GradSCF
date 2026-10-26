@@ -4,7 +4,8 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 from .dense import dense_vectors
-from .davidson import _davidson_lowest_symmetric
+from .davidson import _davidson_lowest_symmetric, _davidson_max_subspace
+from ..memory import apply_columns
 
 
 class RitzResult(NamedTuple):
@@ -18,11 +19,13 @@ class RitzResult(NamedTuple):
     lower_residual: object
 
 
-def solve_ritz(operator, config, *, initial_vectors=None, structure_valid=True):
+def solve_ritz(operator, config, *, initial_vectors=None, structure_valid=True,
+               batch_size=None):
     n, k = operator.shape[0], config.nroots
     count = min(k + 1, n)
     if k > n:
         raise ValueError("nroots exceeds operator dimension")
+    apply = lambda v: apply_columns(operator, v, batch_size)
     complete = jnp.asarray(False)
     present = jnp.ones(count, dtype=bool)
     lower_gap, lower_residual = jnp.asarray(jnp.inf, operator.dtype), jnp.asarray(
@@ -35,10 +38,11 @@ def solve_ritz(operator, config, *, initial_vectors=None, structure_valid=True):
             operator,
             nroots=count if config.value_min is None else n,
             max_dense=config.max_dense,
+            batch_size=batch_size,
         )
         complete = jnp.asarray(True)
         if config.value_min is not None:
-            all_applied = operator.apply(x)
+            all_applied = apply(x)
             theta = jnp.sum(x * all_applied, axis=0)
             nearest = jnp.argmin(jnp.abs(theta - config.value_min))
             lower_gap = jnp.abs(theta[nearest] - config.value_min)
@@ -53,11 +57,11 @@ def solve_ritz(operator, config, *, initial_vectors=None, structure_valid=True):
     else:
         if operator.diagonal is None:
             raise ValueError("Davidson requires an operator diagonal approximation")
-        width = n if config.max_subspace is None else min(n, config.max_subspace)
-        if width < min(n, count + 2):
+        if config.max_subspace is not None and config.max_subspace < min(n, count + 2):
             raise ValueError(
                 "max_subspace must include nroots plus one boundary root and two expansion slots (or the full dimension)"
             )
+        width = _davidson_max_subspace(count, n, config.max_subspace)
         if initial_vectors is None:
             guess_count = min(
                 width,
@@ -81,7 +85,7 @@ def solve_ritz(operator, config, *, initial_vectors=None, structure_valid=True):
             raise NotImplementedError("Public solvers require real initial vectors")
         scale = jnp.maximum(1.0, jnp.max(jnp.abs(operator.diagonal)))
         numerical = _davidson_lowest_symmetric(
-            lambda v: jax.lax.stop_gradient(operator.apply(v)),
+            lambda v: jax.lax.stop_gradient(apply(v)),
             nroots=count,
             size=n,
             diag=operator.diagonal,
@@ -124,7 +128,7 @@ def solve_ritz(operator, config, *, initial_vectors=None, structure_valid=True):
             x = (basis @ coeff[:, order]) * present[None, :]
             complete = jnp.all(active) & (width == n)
     x = jax.lax.stop_gradient(x)
-    ax = operator.apply(x)
+    ax = apply(x)
     values = jnp.sum(x * ax, axis=0)
     residual = jnp.linalg.norm(ax - x * values[None, :], axis=0)
     orth = jnp.linalg.norm(x.T @ x - jnp.diag(present.astype(x.dtype)))

@@ -1,0 +1,7 @@
+{
+  "src/gradscf/dfpt/ks.py": "79b68cf3de98343aa5b490422387f41107dbe2be77778c4619d1d6f09777b9df",
+  "tests/dfpt/test_ks_batching.py": "eaf03bbb4819fd25e413fd9b89cf4531ab88927371516beb32e5aaea9c7ac66b",
+  "examples/pbc/silicon_raman.py": "c6728c307ffa457348ddead7fc77c36b9d683ce9c0a0f7a7651f2747bfec5e36",
+  "artifacts/ad_showcase/P06_raman/audit_dynamic_jit.py": "a34624a5a6113aac7249a98f5586dad2c4354a24f34d538a731bd0c27de49b63",
+  "old_ks_sha256": "f5dc7b4ba7ba70a3a704359f98f9609ee51db18ddccbb5e6f1406d0f45104e93"
+}

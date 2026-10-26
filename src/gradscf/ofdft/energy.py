@@ -2,8 +2,8 @@
 import jax.numpy as jnp
 from ..integrals.periodic.ao import reciprocal_grid
 from ..integrals import build_jk_from_packed, build_j_from_eri_pair_matrix
-from ..df import build_j_from_df
-from ..dft.libxc_jax.jax_libxc import (
+from gradscf.integrals.molecular.jk import build_j_from_df
+from ..dft.xc import (
     restricted_feature_bundle_from_rho_grad_tau, eval_xc_energy_density,
 )
 from .types import KineticFeatures, EnergyComponents

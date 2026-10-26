@@ -1,0 +1,20 @@
+{
+  "complete": true,
+  "passed": true,
+  "errors_hartree_per_bohr2": {
+    "non_gamma": 1.8111044797400594e-17,
+    "gamma_short_circuit": 9.486769009248164e-20,
+    "gamma_directional": 6.938893903907228e-18
+  },
+  "gate_hartree_per_bohr2": 1e-11,
+  "versions": {
+    "phonopy": "2.44.0",
+    "spglib": "2.5.0",
+    "symfc": "1.5.0"
+  },
+  "native_json_sha256": "3c0a9a4761281f03a195051c9f9aa1b23a4abd91a905fb0f3f05b8af3e5f8c76",
+  "native_arrays_sha256": "4b34ad62ef8320c269ac3567305267beb6e672e1db5be664a3f46b5bd20e6a20",
+  "script_sha256": "c77dbe6cb8e49d6445086ab6c2eace5eba45bf0e631e431753b8191ffd8c9213",
+  "elapsed_seconds": 0.05184900399945036,
+  "scope": "Actual matched LiH reciprocal dipole model versus independent Phonopy C kernel. Raw IFC interpolation is independently checked in the P03 capsule; electronic SCF is not repeated here."
+}

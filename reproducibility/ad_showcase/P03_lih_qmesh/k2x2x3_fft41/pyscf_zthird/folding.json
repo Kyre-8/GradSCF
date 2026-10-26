@@ -1,0 +1,208 @@
+{
+  "complete": true,
+  "passed": true,
+  "identity": {
+    "native_sha256": "c9cfed30effa25eba88b4a800c2d456dddd1bd7b4457a24716da5c8d369ab68c",
+    "script_sha256": "f7e0214d8c7d8256881b49ee55fef8e71ecbabf35696f4f2f8c4887429c1b2e5",
+    "q_evaluated": [
+      0.0,
+      0.0,
+      0.3333333333333333
+    ]
+  },
+  "primitive": {
+    "energy_hartree": -8.035799168467678,
+    "converged": true,
+    "electron_number": 4.0,
+    "orbital_gradient_norm": 7.807181295919736e-12,
+    "sampled_indirect_gap_hartree": 0.15770609293993285,
+    "minimum_overlap_eigenvalue": 0.015429803271158152,
+    "mesh": [
+      41,
+      41,
+      41
+    ],
+    "fractional_kpoints": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        -1.3188084371957864e-17,
+        -1.3188084371957864e-17,
+        0.3333333333333333
+      ],
+      [
+        1.22163907995804e-17,
+        1.22163907995804e-17,
+        -0.33333333333333337
+      ],
+      [
+        -3.842356836066713e-17,
+        -0.49999999999999994,
+        -3.128373098836689e-17
+      ],
+      [
+        -8.695114919333072e-17,
+        -0.49999999999999994,
+        0.3333333333333333
+      ],
+      [
+        -2.620717756108673e-17,
+        -0.49999999999999994,
+        -0.3333333333333334
+      ],
+      [
+        -0.49999999999999994,
+        -3.842356836066713e-17,
+        -3.842356836066713e-17
+      ],
+      [
+        -0.49999999999999994,
+        -8.695114919333072e-17,
+        0.33333333333333326
+      ],
+      [
+        -0.49999999999999994,
+        -2.620717756108673e-17,
+        -0.3333333333333334
+      ],
+      [
+        -0.5,
+        -0.5,
+        -6.873560577665656e-17
+      ],
+      [
+        -0.5000000000000001,
+        -0.5000000000000001,
+        0.33333333333333326
+      ],
+      [
+        -0.49999999999999994,
+        -0.49999999999999994,
+        -0.3333333333333334
+      ]
+    ],
+    "coordinates_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        3.8900161383501435,
+        3.8900161383501435,
+        3.8900161383501435
+      ]
+    ],
+    "gradient_hartree_per_bohr": null,
+    "gradient_calculated": false,
+    "pyscf": "2.13.0",
+    "elapsed_seconds": 189.64618317599889
+  },
+  "supercell": {
+    "energy_hartree": -24.107397505403036,
+    "converged": true,
+    "electron_number": 11.999999999999996,
+    "orbital_gradient_norm": 1.806230398303784e-11,
+    "sampled_indirect_gap_hartree": 0.15770609293996388,
+    "minimum_overlap_eigenvalue": 0.015429803271158948,
+    "mesh": [
+      41,
+      41,
+      123
+    ],
+    "fractional_kpoints": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.5,
+        0.0
+      ],
+      [
+        0.5,
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.5,
+        0.0
+      ]
+    ],
+    "coordinates_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        3.8900161383501435,
+        3.8900161383501435,
+        3.8900161383501435
+      ],
+      [
+        3.8900161383501435,
+        3.8900161383501435,
+        0.0
+      ],
+      [
+        7.780032276700287,
+        7.780032276700287,
+        3.8900161383501435
+      ],
+      [
+        7.780032276700287,
+        7.780032276700287,
+        0.0
+      ],
+      [
+        11.670048415050431,
+        11.670048415050431,
+        3.8900161383501435
+      ]
+    ],
+    "gradient_hartree_per_bohr": null,
+    "gradient_calculated": false,
+    "pyscf": "2.13.0",
+    "elapsed_seconds": 610.5153609940007
+  },
+  "errors": {
+    "folding_energy_hartree_per_cell": 0.0,
+    "folding_relative_density": 1.3386668137407591e-11,
+    "native_energy_hartree": 2.4993340730361524e-12
+  },
+  "gates": {
+    "folding_energy_hartree_per_cell": 1e-08,
+    "folding_relative_density": 1e-07,
+    "native_energy_hartree": 2e-06
+  },
+  "super_density_sha256": "6f53de6b578c562dade0506ccd219e258d0ec8c3d9812a49beed6b8faa50fc72",
+  "warm_start": {
+    "native_path": "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft31/q_0_0_1.json",
+    "native_sha256": "8f0f6fc77b13f026057fc931cda0808fe658b555997085fc71ffa4e3805162ad",
+    "folding_path": "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft31/pyscf_zthird/folding.json",
+    "folding_sha256": "d8bccc38a09bce3398111401e90830f0e9993c1396091d3865205806ecb2d539",
+    "density_sha256": {
+      "primitive": "c1568a0dd0c86def8e190d29476b456769006e600cb8d24414639e3e3b585418",
+      "supercell": "99ac08be086c52841d83ccafca349ef94ab0e166a73403d2a882db962097f99d"
+    },
+    "previous_fft": [
+      31,
+      31,
+      31
+    ],
+    "current_fft": [
+      41,
+      41,
+      41
+    ],
+    "use": "Independent PySCF densities used only as initial guesses; both new-grid SCFs are fully reconverged."
+  },
+  "scope": "Independent primitive/three-cell SCF and density/energy folding; no gradient FD yet."
+}

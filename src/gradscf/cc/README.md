@@ -22,10 +22,10 @@ No PySCF runtime calls are made by the CC kernels.
 ## Public facade
 
 ```python
-from gradscf import gto, dft, cc
+from gradscf import gto, scf, cc
 
 mol = gto.M(atom="H 0 0 0; H 0 0 0.74", basis="sto-3g")
-mf = dft.RKS(mol, xc="hf").run()
+mf = scf.RHF(mol).run()
 mycc = cc.CCSD(mf).run()  # also mf.CCSD().run()
 print(mycc.e_tot, mycc.e_corr, mycc.converged)
 e_corr, t1, t2 = mycc.kernel()
@@ -45,7 +45,7 @@ the quadratic CI residual. Its `.qcisd_t()` adds the QCI triples correction.
 `CCS`, `CCD`, `CC2`, `LCCD`, and `LCCSD` use the same constructor convention;
 `RCCSD` explicitly requires a restricted reference. `CC(mf, method="cc2")` selects a model
 explicitly. Unsupported names are rejected, not mapped to CCSD. The facade
-accepts converged closed-shell GradSCF `RKS(xc="hf")` or explicit
+accepts converged closed-shell GradSCF `scf.RHF` (or `RKS(xc="hf")`) or explicit
 `CCReference(h1_mo, eri_mo, nocc, nuclear_repulsion=...)` data for restricted models.
 CCSD/CCD additionally accept UHF/ROHF and explicit `UnrestrictedReference`.
 GHF, complex orbitals and DFT references are not accepted.
@@ -85,7 +85,7 @@ energy_and_gradient = jax.jit(jax.value_and_grad(total_energy, argnums=(0, 1)))
 
 MO integrals use chemists' notation `(pq|rs)` and an orthonormal orbital basis;
 occupied orbitals must precede virtual orbitals. Orbital counts, frozen indices
-and configuration are static. `integrals.mo.transform_integrals` handles full
+and configuration are static. `ao2mo.transform_integrals` handles full
 AO ERIs, s4 pair matrices and density-fitting factors. This implementation
 materializes full MO integrals even for DF inputs; it is not a low-memory DF-CC
 implementation. The reference facade adapter is eager; use the functional API
@@ -165,6 +165,12 @@ that remains defined at within-block orbital degeneracies. It is algebraically
 equivalent to explicit semicanonicalization, without differentiating individual
 orbital eigenvectors. The opt-in reference implementation stores six-index
 moments with `max_triples_elements=2_000_000` per tensor; it is not streamed.
+The additional `algorithm="streamed"` option uses bounded moment panels with
+full Fock-block JVP/VJP through second order, controlled by `max_workspace_elements`.
+`CorrelatedEnergy(mf, "ccsd(t)")` reuses the molecular HF response and this
+correction for complete nuclear gradients and Hessian-vector products. The
+streamed option explicitly rejects third-order AD; its remaining spin-block memory costs
+are documented with the formulation.
 Its Cartesian-spectrum singularity guard is conservative. See
 [the formulation and limits](SEMICANONICAL.md).
 See [the forward comparison and roadmap](FORWARD_PARITY.md).
@@ -182,10 +188,11 @@ default canonical path explicitly.
 
 This is an in-core reference implementation for small systems. Full MO integrals,
 CC intermediates and DIIS histories can be large. GPU performance, large-basis
-scaling, orbital optimization and complete nuclear coordinate gradients are not
-validated here. The tested contract is first-order parameter response of a
-converged nonsingular branch; root crossings and strong-correlation failures
-are not regularized into a different method.
+scaling and orbital optimization are not validated here. Native N2/STO-3G
+CCSD(T) has separate complete-gradient and two-direction nuclear HVP checks;
+these do not establish general large-system or unrestricted nuclear Hessians.
+Response requires a converged nonsingular branch; root crossings and
+strong-correlation failures are not regularized into a different method.
 
 Tests use H2 (0.74 Angstrom), asymmetric H4 (z = 0, 0.8, 1.9, 3.1 Angstrom),
 and H2O (H at y = +/-0.757, z = 0.587 Angstrom), with RHF/STO-3G, CPU and

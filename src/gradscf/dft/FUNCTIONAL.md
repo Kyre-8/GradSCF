@@ -1,6 +1,7 @@
 # Generic XC functional interface
 
-`dft.Functional` connects an external feature builder and external network
+`dft.custom_xc(input_fn=..., energy_fn=...)` constructs the existing
+`dft.Functional`, connecting an external feature builder and external formula or network
 energy to the existing GradSCF SCF, AD, response and training code. It does not
 choose the network architecture, prescribe a feature vector, or add an XC
 baseline automatically. It introduces no separate SCF solver or trainer.
@@ -17,25 +18,37 @@ gradscf/
     functional.py      # generic energy-callback adapter and current-density inputs
     derivatives.py     # shared XC potential and Hessian actions
     hfx.py, pt2.py      # shared physical ingredients and bounded-memory caches
-  training/            # Sample / Trainer, losses and optimization
+  model/neural_xc/training/  # Sample / Trainer, XC losses and optimization
   model/neural_xc/     # one concrete built-in model, its input transforms and presets
 ```
 
-The generic DFT, SCF, response, data and training paths do not import the
-concrete model. The built-in model imports shared physical implementations
-from DFT. A subprocess test blocks every `gradscf.model` import while computing
+The generic DFT, SCF and response paths do not import concrete neural models. The built-in model imports shared physical implementations
+from DFT. A subprocess test blocks built-in neural network imports while computing
 an external functional's potential/kernel and taking an implicit SCF training
 step. The old locations have been removed, with no forwarding files.
 
 ```python
 from gradscf import dft
 
-functional = dft.Functional(
+functional = dft.custom_xc(
     input_fn=make_inputs,         # DensityInputs -> array PyTree
     energy_fn=energy,             # (params, inputs) -> scalar XC energy, Ha
     init_fn=initialize,           # optional (key, inputs) -> parameter mapping
 )
 ```
+
+For direct SCF, use `dft.RKS(mol, xc=functional, params=params).run()` or
+`dft.UKS` with the same arguments. The periodic RKS/KRKS/UKS/KUKS facades
+accept the same `xc` object and explicit parameters. Molecular adiabatic
+response uses the full energy Hessian and the current SCF parameters;
+changing parameters requires rerunning SCF before response.
+
+`dft.custom_xc(spec)` is the other form: it constructs a
+`TraditionalXCFunctional` with complete semilocal, HF/RSH and extra-term
+metadata. It cannot be mixed with energy callbacks. See the
+[traditional XC library](xc/README.md) for its operator and availability
+contracts. Both forms use existing implementations, with no extra solver or
+trainer and no dependency on the built-in neural model.
 
 `make_inputs` and `energy` must be JAX differentiable to the order required by
 the requested loss. Flax, Haiku or pure-JAX networks can be called inside
@@ -110,7 +123,7 @@ projection routines. Parameter derivatives remain available through the kernel.
 ## Training API
 
 ```python
-from gradscf import training
+from gradscf.model.neural_xc import training
 
 data = [training.Sample(reference, energy=e_fci)]
 trainer = training.Trainer(functional, params=params)
@@ -159,7 +172,7 @@ updates and can differ from the attempted `step` after a rejection.
 The new facade rejects density/orbital-energy supervision in fixed-density
 mode instead of silently running SCF. Low-level loss helpers retain their
 existing behavior for advanced callers. See
-[the training API guide](../training/README.md) for migration and metric names.
+[the training API guide](../model/neural_xc/training/README.md) for migration and metric names.
 
 ## Executed demonstration and validation
 
@@ -232,7 +245,7 @@ FCI cross-checks and limitations are in
 [h2_fci_results/README.md](../../../examples/training/h2_fci_results/README.md).
 
 Earlier short-API/explicit-name validation: 106 passed, 3 skipped, 1 known
-baseline failure deselected; see [training/README.md](../training/README.md#validation).
+baseline failure deselected; see [training/README.md](../model/neural_xc/training/README.md#validation).
 
 ## Module-layout validation
 
@@ -240,7 +253,7 @@ After relocation: **123 regression tests passed** (43.55 s), plus **9 targeted
 HFX/PT2 tests passed** (4.97 s; 79 unrelated runtime tests deselected).
 CPU float64, JAX 0.8.1. Existing deprecation/version warnings were retained;
 no full-repository or GPU run is claimed. Package discovery includes
-`gradscf.training` and excludes the removed `gradscf.model.training` package.
+`gradscf.model.neural_xc.training` and excludes the removed `gradscf.model.training` package.
 
 The 9 HFX and 3 PT2 function/class definitions have identical ASTs to the
 previous implementation. Seven training modules are unchanged except imports,

@@ -10,7 +10,7 @@ from time import perf_counter
 import jax
 
 jax.config.update("jax_enable_x64", True)
-from gradscf import dft, gto
+from gradscf import gto, scf
 
 start = perf_counter()
 report = {"dtype": "float64", "devices": [str(d) for d in jax.devices()], "cases": {}}
@@ -19,9 +19,8 @@ for name, atom, channel in (
     ("N2", "N 0 0 0; N 0 0 1.1", "internal"),
     ("F2_stretched", "F 0 0 0; F 0 0 2.2", "internal"),
 ):
-    mf = dft.RKS(
+    mf = scf.RHF(
         gto.M(atom=atom, basis="sto-3g", unit="Angstrom"),
-        xc="hf",
         conv_tol=1e-12,
         conv_tol_density=1e-10,
         conv_tol_grad=1e-9,

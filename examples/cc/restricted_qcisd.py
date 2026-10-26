@@ -5,11 +5,11 @@ QCISD amplitudes are not interchangeable with converged CCSD amplitudes.
 """
 import jax
 import numpy as np
-from gradscf import cc, dft, gto
+from gradscf import cc, gto, scf
 
 jax.config.update("jax_enable_x64", True)
 mol = gto.M(atom="O 0 0 0; H 0 -.757 .587; H 0 .757 .587", basis="sto-3g")
-mf = dft.RKS(mol, xc="hf", conv_tol=1e-12).run()
+mf = scf.RHF(mol, conv_tol=1e-12).run()
 myqci = cc.QCISD(mf, conv_tol=1e-12, residual_tol=1e-11).run()
 triples = myqci.triples()
 dm1 = myqci.make_rdm1()

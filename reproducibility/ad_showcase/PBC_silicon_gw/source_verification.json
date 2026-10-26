@@ -1,0 +1,34 @@
+{
+  "numerical_run_prefix_ast_equal": true,
+  "plot_inputs_unchanged": true,
+  "plotted_only_three_accepted_qp": true,
+  "actual_executed_source_matches": {
+    "examples/gw/pbc_silicon_qp.py": true,
+    "examples/pbc/band_structures/systems.py": true,
+    "src/gradscf/pbc/scf.py": true,
+    "src/gradscf/pbc/_kpoint.py": true,
+    "src/gradscf/pbc/gto.py": true,
+    "src/gradscf/integrals/periodic/fft.py": true,
+    "src/gradscf/gw/pbc/ksigma.py": true,
+    "src/gradscf/gw/pbc/product_basis.py": true,
+    "src/gradscf/gw/pbc/q0.py": true,
+    "src/gradscf/gw/screened.py": true,
+    "src/gradscf/solvers/nonlinear/scalar.py": true,
+    "src/gradscf/solvers/linear/complex.py": true
+  },
+  "local_current_source_matches": {
+    "examples/gw/pbc_silicon_qp.py": false,
+    "examples/pbc/band_structures/systems.py": true,
+    "src/gradscf/pbc/scf.py": false,
+    "src/gradscf/pbc/_kpoint.py": true,
+    "src/gradscf/pbc/gto.py": false,
+    "src/gradscf/integrals/periodic/fft.py": false,
+    "src/gradscf/gw/pbc/ksigma.py": true,
+    "src/gradscf/gw/pbc/product_basis.py": true,
+    "src/gradscf/gw/pbc/q0.py": true,
+    "src/gradscf/gw/screened.py": true,
+    "src/gradscf/solvers/nonlinear/scalar.py": true,
+    "src/gradscf/solvers/linear/complex.py": true
+  },
+  "source_boundary": "Frozen 3D SCF/FFT source predates current local low-dimensional integration; use executed copies to reproduce this numerical evidence."
+}

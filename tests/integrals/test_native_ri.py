@@ -8,7 +8,7 @@ from gradscf import integrals
 
 @pytest.mark.parametrize('cart',[False,True])
 def test_native_ri_integrals_match_pyscf(cart):
-    from gradscf.integrals.density_fitting import make_auxiliary_plan
+    from gradscf.integrals.molecular.density_fitting import make_auxiliary_plan
     pyscf=pytest.importorskip('pyscf')
     from pyscf import gto,df
     atom='O 0 0 0; H 0 .75 .58; H 0 -.75 .58'
@@ -24,8 +24,8 @@ def test_native_ri_integrals_match_pyscf(cart):
 
 
 def test_ri_coefficient_gradient_matches_finite_difference():
-    from gradscf.integrals.density_fitting import make_auxiliary_plan,project_factors
-    from gradscf.integrals.contraction import primitive_basis,contraction_matrix
+    from gradscf.integrals.molecular.density_fitting import make_auxiliary_plan, project_factors
+    from gradscf.integrals.basis.contraction import primitive_basis, contraction_matrix
     from dataclasses import replace
     atom='H 0 0 0; H 0 0 .8'
     top,p=integrals.prepare_basis(atom,'3-21g',cart=False)

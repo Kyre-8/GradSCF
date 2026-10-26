@@ -1,0 +1,24 @@
+{
+  "carbon_masses_amu": [
+    12.0,
+    13.00335483507
+  ],
+  "oxygen_mass_amu": 15.99491461957,
+  "frequencies_cm1": [
+    [
+      745.8062764355944,
+      745.8062764592833,
+      1518.4957817029313,
+      2585.031479024272
+    ],
+    [
+      724.579722728029,
+      724.579722751073,
+      1518.4957817029313,
+      2511.4583391098627
+    ]
+  ],
+  "ungerade_expected_ratio": 0.9715387837589528,
+  "source_hessian": "reproducibility/ad_showcase/V03_co2_selection_rules/gradscf.json",
+  "approximation": "fixed electronic force constants; isotope masses only"
+}

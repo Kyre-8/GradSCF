@@ -5,11 +5,11 @@ Effective multiplicity is diagnostic: mixed-spin states need not give integers.
 No PySCF or CLI.
 """
 import jax
-from gradscf import ci, dft, gto, scf
+from gradscf import ci, gto, scf
 
 jax.config.update("jax_enable_x64", True)
 mol = gto.M(atom="H 0 0 0; H 0 0 .8; H 0 0 1.9; H 0 0 3.1", basis="sto-3g")
-mf = dft.RKS(mol, xc="hf", conv_tol=1e-12).run()
+mf = scf.RHF(mol, conv_tol=1e-12).run()
 for method in (ci.CID, ci.CISD):
     calculation = method(mf, nroots=2, conv_tol=1e-11).run()
     for root in range(2):

@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "source_unchanged": true,
+  "source_python_sha256": "4879dbbf932aa068c3dcb108f20640dce1a67a7f6ddc8d9716ca040b4d19fb88",
+  "tests": {
+    "focused": "12 passed, 27 deselected, 75.61 s",
+    "spectral_regression": "67 passed, 396.31 s",
+    "mp2_production_mixed_raman": "1 passed, 5 deselected, 175.97 s"
+  },
+  "artifacts": {
+    "source_manifest.json": "347b5ba756e4b996a90289524462d8d4ff45cd62a18c05d360a4eaf2ae1ad9ca",
+    "spectral-final-guard-focused.log": "847d81f393e6bc89f9ada8eef34091f56675ca1788b906feb13e8039cafbdc24",
+    "spectral-final-guard-mp2.log": "83e12d26c5f394019e7ed1a3db23fa88060d53f51468f06a2d5532d661f912ac",
+    "spectral-final-guard-regression.log": "057a426edd9b528111403257e4324e36f3ecb585420bdb54c4062165f087ef54",
+    "spectral-final-regression-complete.log": "e563ef5563b58a38fce0f1dce118e260f09d02d0d3149ecd2e623f2eca77fb2b",
+    "spectral-invalid-red.log": "cf836adc6564d83cd18112ac2aa8530cb4aa598bdc68de31867f6ff56aebc3aa",
+    "spectral-roots-red.log": "06ed558456516d6748e20b23aba87dc9f2fef62841f252262063bacf41be1e0d",
+    "spectral-unmapped-diagnostic.log": "b8de7f6dc3d13b519d5363c52f11fe29e209b3b18ecf2004bf1ca4988ddf1e5a",
+    "spectral-validity-diagnostic.log": "305b9303dcf650c933af6982ebb8ad7807618c40d5680f2a739678931670dc24"
+  }
+}

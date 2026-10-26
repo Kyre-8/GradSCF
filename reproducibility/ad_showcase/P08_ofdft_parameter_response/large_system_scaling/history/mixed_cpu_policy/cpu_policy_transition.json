@@ -1,0 +1,11 @@
+{
+  "transition_approximate": "2026-10-16T13:35:37+08:00",
+  "shared_project_logical_cpus": "0-63",
+  "ofdft_pool": "48-63",
+  "authority": "Project coordinator applied user-authorized affinity to all threads and wrappers; 49-process audit reported no violations",
+  "mixed_policy_processes": [
+    439304,
+    464624
+  ],
+  "timing_use": "Numerics retained; do not use mixed-policy timings in the final uniform-pool curve"
+}

@@ -1,0 +1,63 @@
+{
+  "status": "Isolated CPU installation complete; matched-Hamiltonian HF map and MPI one-map consistency validated; native GW comparison and full scGW pending",
+  "host": "jy_gpu_1",
+  "authorized_root": "/home/yjiao/gradscf_checks/gw-reference",
+  "cpu_affinity": "32-47",
+  "stage_timeout_seconds": 1800,
+  "stage_process_tree_rss_limit_bytes": 68719476736,
+  "backend": "CPU, complex128; no GPU dependencies",
+  "license": "MIT for the pinned GREEN repositories",
+  "repositories": {
+    "green-mbpt": "3e7d6cbed2ce28c66a7353fc6d4ac3cf6ef6d3d2",
+    "green-mbtools": "3b5821a85b38db38f97599ee4963a8cb3198c6fb",
+    "green-utils": "440f1d521e25c754c1bcbf0df74f9fc6abd889dc",
+    "green-ndarray": "17d9805aed28d30c345875901de0b2cd944134ef",
+    "green-h5pp": "ec30bfefbc4968d3f0df135dde0db20a9d5a6f51",
+    "green-params": "b40eae5b78e18d560c8b7aaf8698a1f124d83dbf",
+    "green-grids": "e9e4b144e72307640de5bd1192f02a8cb5a7a2e3",
+    "green-symmetry": "1dac18d4baac2494daec359b40bedc7bc8b63720",
+    "green-sc": "2a14dc26c48d68f936421f1a8c263a378bbf0bfb",
+    "green-impurity": "8a744d5be89a077fe6a72a0b2db630b57ddeab8b",
+    "green-opt": "f76d8d98cfe945c1d14d49624515d20fe3d0afef"
+  },
+  "upstream_base": "https://github.com/Green-Phys/",
+  "dependency_lock_status": "Conda requests are version constraints, not a solved lock. Save conda-explicit.txt and pip-freeze.txt before running any reference calculation.",
+  "comparison": {
+    "system": "zincblende GaAs, a=5.6533 Angstrom",
+    "basis": "gth-szv, Cartesian",
+    "pseudopotential": "gth-pbe",
+    "reference": "PBE",
+    "source_kmesh": [
+      2,
+      1,
+      1
+    ],
+    "fft_mesh": [
+      61,
+      61,
+      61
+    ],
+    "electrons_per_cell": 18,
+    "beta_hartree_inverse": 400.0,
+    "native_screening_cutoff_rydberg": 16.0,
+    "native_fc": false,
+    "native_exxdiv": null,
+    "scope": "Source-mesh imaginary-axis G/Sigma and tail checks first; no analytic continuation or interpolated-band claims",
+    "strict_match_status": "Hamiltonian-preserving SRC export and external HF contraction validated; original strict Hermiticity gate failed at IR endpoint noise ~1e-10; native dynamic GW map comparison pending"
+  },
+  "external_dependencies": {
+    "magic_enum": {
+      "repository": "https://github.com/Neargye/magic_enum.git",
+      "tag": "v0.9.3",
+      "revision": "e1ea11a93d0bdf6aae415124ded6126220fa4f28",
+      "license": "MIT"
+    },
+    "lsqcpp": {
+      "repository": "https://github.com/Green-Phys/green-impurity.git",
+      "revision": "8a744d5be89a077fe6a72a0b2db630b57ddeab8b",
+      "path": "deps/lsqcpp",
+      "license": "MIT"
+    }
+  },
+  "binary_sha256": "a7083772d3627721b43ac45faeeaeb5a39d8287680e56d934afc45121b179431"
+}

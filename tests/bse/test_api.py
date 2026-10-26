@@ -1,5 +1,7 @@
 """Native GW/BSE integration, provenance, partial QP coverage and limits."""
 
+from gradscf.bse.reference import reference_from_source
+
 from dataclasses import replace
 import jax
 import jax.numpy as jnp
@@ -25,7 +27,7 @@ def test_native_g0w0_bse_and_explicit_snapshot(h2):
 
     _, gw = h2
     np.testing.assert_array_equal(gw.result.qp_computed_mask, [True, True])
-    reference = bse.reference_from_source(gw)
+    reference = reference_from_source(gw)
     obj = bse.BSE(gw, nroots=1).run()
     explicit = bse.BSE(reference, nroots=1).run()
     assert obj.converged.all()
@@ -66,7 +68,7 @@ def test_stale_gw_and_bse_sources(h2):
             obj.oscillator_strength()
     finally:
         gw.eta = old
-    ref = bse.reference_from_source(gw)
+    ref = reference_from_source(gw)
     obj = bse.BSE(ref, nroots=1).run()
     obj.source = replace(ref, qp_energy=ref.qp_energy + 0.01)
     with pytest.raises(RuntimeError, match="changed"):

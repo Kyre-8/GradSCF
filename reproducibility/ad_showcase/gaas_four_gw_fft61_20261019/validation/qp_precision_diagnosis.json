@@ -1,0 +1,960 @@
+{
+  "scope": "Exact saved Gamma (F,R,Eref) equation replay; no new SCF/GW/continuation",
+  "frame_scope": "Gamma baseline contains all matrices in one self-contained MO frame. Main comparison lacks query F/C; only its saved roots/masks are compared, not claimed an exact matrix replay.",
+  "input_sha256": {
+    "gamma_baseline": "561e23acb21f3c4bab692db6a757a7eeab6852b7a1ad571c78ac9d78d64765e4",
+    "source_state": "dd683f57b9bb0064328e4f1df280a18ed6a1fe49fd9a6f39e64ca6affa2dee24",
+    "main_comparison": "a0b5f22ed9ee3c4422b9569fdb1771a4cbc99d4bbd5f971abc907420bf344323"
+  },
+  "expected_source_sha256": "dd683f57b9bb0064328e4f1df280a18ed6a1fe49fd9a6f39e64ca6affa2dee24",
+  "implementation_sha256": {
+    "src/gradscf/gw/pbc/query.py": "32da4ca526e8ff3bbd78d877f1c51515c0fad8adf5b8695df899b554d9857d6c",
+    "src/gradscf/gw/qp.py": "65ec34064a7272cdc72c700ff4ab656e5f1c4fc898f01cb5d0ebdd318fda12b7",
+    "src/gradscf/solvers/nonlinear/scalar.py": "f20e5f681cbde7ab0f159d7daadc29cc45931f0649a79f14927362b37d44464b"
+  },
+  "config": {
+    "method": "hybrid",
+    "ftol": 1e-08,
+    "xtol": 1e-08,
+    "maxiter": 100,
+    "step_cap": 0.05,
+    "slope_floor": 1e-10,
+    "hybrid_every": 4,
+    "max_backtrack": 4
+  },
+  "root_eta_hartree": 0.001,
+  "band_indexing": "zero-based; one-based indices also explicit",
+  "replay_final": {
+    "roots": [
+      -0.21323345458848048,
+      -0.0928287543177319,
+      -0.08645345064221169,
+      -0.08445438144076219,
+      -0.08445434852098582,
+      -0.03232773438001047,
+      0.45052588464416055,
+      0.4505258896656,
+      0.47239092455191356,
+      0.5102801831392132,
+      0.6196370355334905,
+      0.6248411078149925,
+      0.6248411352690811,
+      5.788646722133882
+    ],
+    "residual": [
+      4.718447854656915e-16,
+      5.370093258960651e-12,
+      -4.0245584642661925e-16,
+      1.1102230246251565e-16,
+      -1.3877787807814457e-17,
+      -1.2975731600306517e-15,
+      -4.3021142204224816e-14,
+      -4.3520742565306136e-14,
+      1.8721690864254015e-12,
+      4.440892098500626e-16,
+      1.4432899320127035e-15,
+      9.403589018575076e-14,
+      9.536815781530095e-14,
+      1.3322676295501878e-14
+    ],
+    "projected_residual": [
+      2.9343519429949464e-15,
+      5.370191441592188e-12,
+      7.451757244522877e-16,
+      8.170708264989415e-16,
+      3.4040029529602776e-16,
+      1.591962984102083e-15,
+      4.313702641667879e-14,
+      4.370172329652304e-14,
+      1.8729859748496403e-12,
+      9.984693795869281e-16,
+      1.409731122827109e-15,
+      9.440724078264539e-14,
+      9.548078386761668e-14,
+      5.948516878452874e-15
+    ],
+    "converged": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "weight": [
+      0.16238161486242209,
+      0.23087244112831942,
+      0.5932850191292564,
+      0.8448790264845442,
+      0.8448802817199897,
+      0.11652114237096699,
+      NaN,
+      NaN,
+      2.646735458400464,
+      0.9914548429532,
+      0.8875936714596258,
+      0.9077337182798534,
+      0.907744890019386,
+      0.9559276562770099
+    ],
+    "on_shell": [
+      -0.07796775185001811,
+      0.02944004681713308,
+      0.029443893678018196,
+      0.02645211115243623,
+      0.027334781327393587,
+      0.35528273096615004,
+      0.44786617638449894,
+      0.44787187047688737,
+      0.4857301719736351,
+      0.5118572778098626,
+      0.6339432133967229,
+      0.6399214903423145,
+      0.6399214906181554,
+      5.808830780934786
+    ],
+    "linearized": [
+      -0.17961962719419325,
+      -0.19860850552339718,
+      -0.19861184856950015,
+      -0.19830556583990716,
+      -0.19487670415755948,
+      -0.021717452830823686,
+      0.30999904875557627,
+      0.3099922532478252,
+      0.4319539557060246,
+      0.2986037657733378,
+      0.6083726416285988,
+      0.6217368637426773,
+      0.621736296464827,
+      5.794239348719787
+    ],
+    "candidate_count": [
+      2,
+      2,
+      3,
+      2,
+      1,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "branch_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "saved_gamma_control": {
+    "energy": [
+      [
+        -0.21323345458848048,
+        -0.0928287543189447,
+        -0.08645345064221135,
+        -0.08445438144076219,
+        -0.08445434852098582,
+        -0.03232773438001047,
+        0.45052588464419935,
+        0.45052588966563933,
+        0.47239092454695847,
+        0.5102801831392132,
+        0.6196370355334905,
+        0.6248411078149073,
+        0.6248411352689949,
+        5.788646722133882
+      ]
+    ],
+    "weight": [
+      [
+        0.16238161486242209,
+        0.23087244121924932,
+        0.5932850191292747,
+        0.8448790264845442,
+        0.8448802817199897,
+        0.11652114237096699,
+        0.9066888082839416,
+        0.9066873868715914,
+        2.646735493059169,
+        0.9914548429532,
+        0.8875936714596258,
+        0.9077337182802625,
+        0.9077448900198024,
+        0.9559276562770099
+      ]
+    ],
+    "converged_mask": [
+      [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    ],
+    "branch_valid": [
+      [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    ],
+    "candidate_count": [
+      [
+        2,
+        2,
+        3,
+        2,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    ],
+    "residual": [
+      [
+        4.718447854656915e-16,
+        1.1722567361260872e-13,
+        0.0,
+        1.1102230246251565e-16,
+        -1.3877787807814457e-17,
+        -1.2975731600306517e-15,
+        -2.220446049250313e-16,
+        -7.216449660063518e-16,
+        1.27675647831893e-15,
+        4.440892098500626e-16,
+        1.4432899320127035e-15,
+        3.3306690738754696e-16,
+        4.440892098500626e-16,
+        1.3322676295501878e-14
+      ]
+    ]
+  },
+  "records": [
+    {
+      "band_zero_based": 5,
+      "band_one_based": 6,
+      "omega_hartree": -0.03232773438001047,
+      "scalar_selector_before_cluster": {
+        "roots": [
+          -0.03232773438001047
+        ],
+        "residual": [
+          -1.2975731600306517e-15
+        ],
+        "converged": [
+          true
+        ],
+        "weight": [
+          0.11652114237096699
+        ],
+        "on_shell": [
+          0.35528273096615004
+        ],
+        "linearized": [
+          -0.021717452830823686
+        ],
+        "candidate_count": [
+          2
+        ],
+        "branch_valid": [
+          true
+        ]
+      },
+      "scalar_equation_slope": 8.582133505148033,
+      "scalar_equation_residual_hartree": -1.2975731600306517e-15,
+      "final_converged": true,
+      "final_weight": 0.11652114237096699,
+      "final_branch_valid": true,
+      "hprime_finite": true,
+      "hprime_frobenius": 33.10573682810293,
+      "eigenvalues_hartree": [
+        -0.11462553651167288,
+        -0.11462275676436125,
+        -0.09459629412539816,
+        -0.09337301152011916,
+        -0.09337275858877477,
+        -0.032327734380009174,
+        0.4115468962653624,
+        0.4115565717503493,
+        0.5257684808188328,
+        0.5398382244977922,
+        0.5398571235738808,
+        0.6008457906771467,
+        0.7135825605824327,
+        5.8380133065526545
+      ],
+      "distances_to_branch_hartree": [
+        0.08229780213166371,
+        0.08229502238435207,
+        0.06226855974538899,
+        0.06104527714010999,
+        0.06104502420876559,
+        0.0,
+        0.4438746306453716,
+        0.4438843061303585,
+        0.5580962151988419,
+        0.5721659588778013,
+        0.57218485795389,
+        0.6331735250571559,
+        0.7459102949624419,
+        5.870341040932663
+      ],
+      "vector_residual_hartree": 1.5972042682215315e-15,
+      "cluster_checks": [
+        {
+          "eigenvalue_tolerance_hartree": 1e-08,
+          "indices_zero_based": [
+            5
+          ],
+          "spread_hartree": 0.0,
+          "hprime_cluster_eigenvalues": [
+            -7.582133505148033
+          ],
+          "residual_slope_eigenvalues": [
+            8.582133505148033
+          ],
+          "hprime_nonscalar_frobenius": 4.0389678347315804e-28,
+          "slope_floor_threshold": 3.3105736828102927e-09,
+          "threshold_ratio": 1.220020522637323e-19,
+          "predicate_passed": true
+        },
+        {
+          "eigenvalue_tolerance_hartree": 1e-09,
+          "indices_zero_based": [
+            5
+          ],
+          "spread_hartree": 0.0,
+          "hprime_cluster_eigenvalues": [
+            -7.582133505148033
+          ],
+          "residual_slope_eigenvalues": [
+            8.582133505148033
+          ],
+          "hprime_nonscalar_frobenius": 4.0389678347315804e-28,
+          "slope_floor_threshold": 3.3105736828102927e-09,
+          "threshold_ratio": 1.220020522637323e-19,
+          "predicate_passed": true
+        }
+      ]
+    },
+    {
+      "band_zero_based": 6,
+      "band_one_based": 7,
+      "omega_hartree": 0.45052588464416055,
+      "scalar_selector_before_cluster": {
+        "roots": [
+          0.45052588464416055
+        ],
+        "residual": [
+          -4.3021142204224816e-14
+        ],
+        "converged": [
+          true
+        ],
+        "weight": [
+          0.9066888082838753
+        ],
+        "on_shell": [
+          0.44786617638449894
+        ],
+        "linearized": [
+          0.30999904875557627
+        ],
+        "candidate_count": [
+          1
+        ],
+        "branch_valid": [
+          true
+        ]
+      },
+      "scalar_equation_slope": 1.102914242310698,
+      "scalar_equation_residual_hartree": -4.3021142204224816e-14,
+      "final_converged": false,
+      "final_weight": NaN,
+      "final_branch_valid": false,
+      "hprime_finite": true,
+      "hprime_frobenius": 0.5101763493613393,
+      "eigenvalues_hartree": [
+        -0.136771253426438,
+        -0.1367712533984364,
+        -0.13499919424293289,
+        -0.1307555390564118,
+        -0.130755539043973,
+        -0.11973494844670743,
+        0.45052588464420357,
+        0.4505258901824301,
+        0.4739700489425195,
+        0.5210921740424295,
+        0.6319086558778327,
+        0.6381638312089108,
+        0.6381638313061518,
+        5.833415218226355
+      ],
+      "distances_to_branch_hartree": [
+        0.5872971380706415,
+        0.5872971380426399,
+        0.5855250788871365,
+        0.5812814237006154,
+        0.5812814236881766,
+        0.570260833090911,
+        0.0,
+        5.538226544032909e-09,
+        0.023444164298315917,
+        0.0705662893982259,
+        0.18138277123362917,
+        0.18763794656470728,
+        0.18763794666194827,
+        5.382889333582151
+      ],
+      "vector_residual_hartree": 4.3191950671752604e-14,
+      "cluster_checks": [
+        {
+          "eigenvalue_tolerance_hartree": 1e-08,
+          "indices_zero_based": [
+            6,
+            7
+          ],
+          "spread_hartree": 5.538226544032909e-09,
+          "hprime_cluster_eigenvalues": [
+            -0.10291598184922768,
+            -0.10291424215305262
+          ],
+          "residual_slope_eigenvalues": [
+            1.1029159818492276,
+            1.1029142421530527
+          ],
+          "hprime_nonscalar_frobenius": 1.2301509625492046e-06,
+          "slope_floor_threshold": 1e-10,
+          "threshold_ratio": 12301.509625492046,
+          "predicate_passed": false
+        },
+        {
+          "eigenvalue_tolerance_hartree": 1e-09,
+          "indices_zero_based": [
+            6
+          ],
+          "spread_hartree": 0.0,
+          "hprime_cluster_eigenvalues": [
+            -0.10291424231069791
+          ],
+          "residual_slope_eigenvalues": [
+            1.102914242310698
+          ],
+          "hprime_nonscalar_frobenius": 1.6940658945086007e-21,
+          "slope_floor_threshold": 1e-10,
+          "threshold_ratio": 1.6940658945086007e-11,
+          "predicate_passed": true
+        }
+      ]
+    },
+    {
+      "band_zero_based": 7,
+      "band_one_based": 8,
+      "omega_hartree": 0.4505258896656,
+      "scalar_selector_before_cluster": {
+        "roots": [
+          0.4505258896656
+        ],
+        "residual": [
+          -4.3520742565306136e-14
+        ],
+        "converged": [
+          true
+        ],
+        "weight": [
+          0.9066873868715257
+        ],
+        "on_shell": [
+          0.44787187047688737
+        ],
+        "linearized": [
+          0.3099922532478252
+        ],
+        "candidate_count": [
+          1
+        ],
+        "branch_valid": [
+          true
+        ]
+      },
+      "scalar_equation_slope": 1.1029159713475714,
+      "scalar_equation_residual_hartree": -4.3520742565306136e-14,
+      "final_converged": false,
+      "final_weight": NaN,
+      "final_branch_valid": false,
+      "hprime_finite": true,
+      "hprime_frobenius": 0.5101762732014361,
+      "eigenvalues_hartree": [
+        -0.13677125369055396,
+        -0.13677125366255238,
+        -0.1349991945011555,
+        -0.13075553931324574,
+        -0.13075553930080708,
+        -0.11973494951585752,
+        0.45052588412742556,
+        0.4505258896656435,
+        0.47397004850609326,
+        0.5210921725339633,
+        0.6319086554728607,
+        0.6381638307824934,
+        0.6381638308797342,
+        5.833415218177805
+      ],
+      "distances_to_branch_hartree": [
+        0.5872971433561974,
+        0.5872971433281959,
+        0.5855250841667989,
+        0.5812814289788892,
+        0.5812814289664505,
+        0.5702608391815011,
+        5.5382179398044684e-09,
+        0.0,
+        0.023444158840449758,
+        0.07056628286831984,
+        0.18138276580721718,
+        0.1876379411168499,
+        0.18763794121409066,
+        5.382889328512162
+      ],
+      "vector_residual_hartree": 4.3756810685494714e-14,
+      "cluster_checks": [
+        {
+          "eigenvalue_tolerance_hartree": 1e-08,
+          "indices_zero_based": [
+            6,
+            7
+          ],
+          "spread_hartree": 5.5382179398044684e-09,
+          "hprime_cluster_eigenvalues": [
+            -0.10291597150521649,
+            -0.10291423181262041
+          ],
+          "residual_slope_eigenvalues": [
+            1.1029159715052166,
+            1.1029142318126204
+          ],
+          "hprime_nonscalar_frobenius": 1.2301484318111583e-06,
+          "slope_floor_threshold": 1e-10,
+          "threshold_ratio": 12301.484318111583,
+          "predicate_passed": false
+        },
+        {
+          "eigenvalue_tolerance_hartree": 1e-09,
+          "indices_zero_based": [
+            7
+          ],
+          "spread_hartree": 0.0,
+          "hprime_cluster_eigenvalues": [
+            -0.10291597134757136
+          ],
+          "residual_slope_eigenvalues": [
+            1.1029159713475714
+          ],
+          "hprime_nonscalar_frobenius": 2.117582368135751e-22,
+          "slope_floor_threshold": 1e-10,
+          "threshold_ratio": 2.117582368135751e-12,
+          "predicate_passed": true
+        }
+      ]
+    },
+    {
+      "band_zero_based": 8,
+      "band_one_based": 9,
+      "omega_hartree": 0.47239092455191356,
+      "scalar_selector_before_cluster": {
+        "roots": [
+          0.47239092455191356
+        ],
+        "residual": [
+          1.8721690864254015e-12
+        ],
+        "converged": [
+          true
+        ],
+        "weight": [
+          2.646735458400464
+        ],
+        "on_shell": [
+          0.4857301719736351
+        ],
+        "linearized": [
+          0.4319539557060246
+        ],
+        "candidate_count": [
+          1
+        ],
+        "branch_valid": [
+          true
+        ]
+      },
+      "scalar_equation_slope": 0.3778239328097954,
+      "scalar_equation_residual_hartree": 1.8722245975766327e-12,
+      "final_converged": true,
+      "final_weight": 2.646735458400464,
+      "final_branch_valid": true,
+      "hprime_finite": true,
+      "hprime_frobenius": 0.7807693323724086,
+      "eigenvalues_hartree": [
+        -0.1378924093841723,
+        -0.13789240935070776,
+        -0.13607864931120653,
+        -0.13184765167403167,
+        -0.13184765166789816,
+        -0.1235504056841609,
+        0.44840094338788855,
+        0.4484009434757418,
+        0.47239092455004134,
+        0.5161156096786457,
+        0.6302709527818434,
+        0.6363823522604851,
+        0.6363823522652416,
+        5.8332095099202546
+      ],
+      "distances_to_branch_hartree": [
+        0.6102833339342136,
+        0.6102833339007491,
+        0.6084695738612479,
+        0.604238576224073,
+        0.6042385762179395,
+        0.5959413302342023,
+        0.023989981162152785,
+        0.02398998107429956,
+        0.0,
+        0.043724685128604335,
+        0.15788002823180208,
+        0.16399142771044378,
+        0.1639914277152003,
+        5.360818585370213
+      ],
+      "vector_residual_hartree": 1.872986180110407e-12,
+      "cluster_checks": [
+        {
+          "eigenvalue_tolerance_hartree": 1e-08,
+          "indices_zero_based": [
+            8
+          ],
+          "spread_hartree": 0.0,
+          "hprime_cluster_eigenvalues": [
+            0.6221760671902046
+          ],
+          "residual_slope_eigenvalues": [
+            0.3778239328097954
+          ],
+          "hprime_nonscalar_frobenius": 6.310887241768095e-30,
+          "slope_floor_threshold": 1e-10,
+          "threshold_ratio": 6.310887241768094e-20,
+          "predicate_passed": true
+        },
+        {
+          "eigenvalue_tolerance_hartree": 1e-09,
+          "indices_zero_based": [
+            8
+          ],
+          "spread_hartree": 0.0,
+          "hprime_cluster_eigenvalues": [
+            0.6221760671902046
+          ],
+          "residual_slope_eigenvalues": [
+            0.3778239328097954
+          ],
+          "hprime_nonscalar_frobenius": 6.310887241768095e-30,
+          "slope_floor_threshold": 1e-10,
+          "threshold_ratio": 6.310887241768094e-20,
+          "predicate_passed": true
+        }
+      ]
+    },
+    {
+      "band_zero_based": 9,
+      "band_one_based": 10,
+      "omega_hartree": 0.5102801831392132,
+      "scalar_selector_before_cluster": {
+        "roots": [
+          0.5102801831392132
+        ],
+        "residual": [
+          4.440892098500626e-16
+        ],
+        "converged": [
+          true
+        ],
+        "weight": [
+          0.9914548429532
+        ],
+        "on_shell": [
+          0.5118572778098626
+        ],
+        "linearized": [
+          0.2986037657733378
+        ],
+        "candidate_count": [
+          1
+        ],
+        "branch_valid": [
+          true
+        ]
+      },
+      "scalar_equation_slope": 1.0086188060984673,
+      "scalar_equation_residual_hartree": 4.440892098500626e-16,
+      "final_converged": true,
+      "final_weight": 0.9914548429532,
+      "final_branch_valid": true,
+      "hprime_finite": true,
+      "hprime_frobenius": 0.29360633329805236,
+      "eigenvalues_hartree": [
+        -0.13973766343222147,
+        -0.13973766339725263,
+        -0.137857749155991,
+        -0.13365209081048723,
+        -0.13365209080412016,
+        -0.12886608162361254,
+        0.4445687288928811,
+        0.44456872908359235,
+        0.46820221548295055,
+        0.5102801831392128,
+        0.6276821429064652,
+        0.6335150468143775,
+        0.6335150468302014,
+        5.832848378276518
+      ],
+      "distances_to_branch_hartree": [
+        0.6500178465714342,
+        0.6500178465364654,
+        0.6481379322952038,
+        0.6439322739497,
+        0.6439322739433329,
+        0.6391462647628253,
+        0.06571145424633162,
+        0.0657114540556204,
+        0.042077967656262205,
+        0.0,
+        0.11740195976725243,
+        0.12323486367516479,
+        0.12323486369098868,
+        5.322568195137305
+      ],
+      "vector_residual_hartree": 9.98469668023387e-16,
+      "cluster_checks": [
+        {
+          "eigenvalue_tolerance_hartree": 1e-08,
+          "indices_zero_based": [
+            9
+          ],
+          "spread_hartree": 0.0,
+          "hprime_cluster_eigenvalues": [
+            -0.008618806098467404
+          ],
+          "residual_slope_eigenvalues": [
+            1.0086188060984673
+          ],
+          "hprime_nonscalar_frobenius": 7.888609052210118e-31,
+          "slope_floor_threshold": 1e-10,
+          "threshold_ratio": 7.888609052210118e-21,
+          "predicate_passed": true
+        },
+        {
+          "eigenvalue_tolerance_hartree": 1e-09,
+          "indices_zero_based": [
+            9
+          ],
+          "spread_hartree": 0.0,
+          "hprime_cluster_eigenvalues": [
+            -0.008618806098467404
+          ],
+          "residual_slope_eigenvalues": [
+            1.0086188060984673
+          ],
+          "hprime_nonscalar_frobenius": 7.888609052210118e-31,
+          "slope_floor_threshold": 1e-10,
+          "threshold_ratio": 7.888609052210118e-21,
+          "predicate_passed": true
+        }
+      ]
+    }
+  ],
+  "main_gamma": {
+    "scgw_qp_raw_energy": [
+      -0.21323345458848048,
+      -0.09282875431773221,
+      -0.08645345064221231,
+      -0.08445438144075962,
+      -0.08445434852098845,
+      -0.03232773438001043,
+      0.4505258846441614,
+      0.4505258896656016,
+      0.47239092455191584,
+      0.5102801831392136,
+      0.6196370355334916,
+      0.6248411078149899,
+      0.6248411352690807,
+      5.788646722133876
+    ],
+    "scgw_qp_weight": [
+      0.16238161486242192,
+      0.23087244112834396,
+      0.5932850191292215,
+      0.8448790264845414,
+      0.8448802817199856,
+      0.11652114237096699,
+      NaN,
+      NaN,
+      2.646735458384532,
+      0.99145484295341,
+      0.8875936714596276,
+      0.9077337182798594,
+      0.9077448900193941,
+      0.9559276562770104
+    ],
+    "scgw_qp_converged_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scgw_qp_branch_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "scgw_qp_candidate_count": [
+      2,
+      2,
+      3,
+      2,
+      1,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "scgw_qp_residual": [
+      4.440892098500626e-16,
+      5.36984345878011e-12,
+      -4.440892098500626e-16,
+      1.1102230246251565e-16,
+      9.71445146547012e-17,
+      -1.2836953722228372e-15,
+      -4.2577052994374753e-14,
+      -4.285460875053104e-14,
+      1.873168287147564e-12,
+      2.220446049250313e-16,
+      6.661338147750939e-16,
+      9.43689570931383e-14,
+      9.592326932761353e-14,
+      -8.881784197001252e-15
+    ]
+  },
+  "main_saved_keys": [
+    "g0w0_bands",
+    "g0w0_dos",
+    "evgw_bands",
+    "evgw_dos",
+    "qsgw_bands",
+    "qsgw_dos",
+    "scgw_bands",
+    "scgw_dos",
+    "scgw_spectral",
+    "axis_ev",
+    "path_distance",
+    "path_ticks",
+    "path_labels",
+    "pbe_bands",
+    "query_kpoints",
+    "dos_kpoints",
+    "scgw_poles",
+    "scgw_source_residues",
+    "scgw_qp_raw_energy",
+    "scgw_qp_energy",
+    "scgw_qp_converged_mask",
+    "scgw_qp_residual",
+    "scgw_qp_weight",
+    "scgw_qp_candidate_count",
+    "scgw_qp_branch_valid",
+    "scgw_qp_certified_mask",
+    "g0w0_source_qp_weight",
+    "g0w0_source_qp_branch_valid",
+    "g0w0_source_qp_candidate_count",
+    "evgw_source_qp_weight",
+    "evgw_source_qp_branch_valid",
+    "evgw_source_qp_candidate_count"
+  ],
+  "maximum_root_difference_from_control_hartree": 4.9550918923557674e-12,
+  "elapsed_seconds": 7.975610070978291
+}

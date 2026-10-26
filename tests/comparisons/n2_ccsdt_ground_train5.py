@@ -43,18 +43,20 @@ from gradscf.model.neural_xc import (
     DEFAULT_NETWORK_ARCHITECTURE,
     DEFAULT_NETWORK_HIDDEN_DIMS,
 )
-from gradscf.model.training import (
+from gradscf.model.neural_xc.training import (
     MolecularTrainingDatum,
     MolecularTrainingConfig,
-    create_train_state_from_molecule,
     molecular_loss,
-    make_molecular_loss_and_grad,
-    make_molecular_train_step,
     predict_ground_state_total_energy,
     load_params_checkpoint,
     save_params_checkpoint,
 )
-from gradscf.model.training.targets import (
+from gradscf.model.neural_xc.training.trainer import (
+    create_train_state_from_molecule,
+    make_molecular_loss_and_grad,
+    make_molecular_train_step,
+)
+from gradscf.model.neural_xc.training.targets import (
     _predict_ground_state_total_energy_from_molecule,
     _resolve_training_molecule_and_info_with_mode,
 )

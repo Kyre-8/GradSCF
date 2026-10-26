@@ -1,0 +1,291 @@
+{
+  "schema_version": 1,
+  "dataset": "S22",
+  "coordinate_units": "angstrom",
+  "geometry_selection": "Original S22 equilibrium coordinates: ase.data.s22.data[name]['positions']; not the separately transformed S22x5 'positions 1.0' field.",
+  "atom_indexing": "Zero-based; each fragment is a contiguous block in the original ASE atom ordering.",
+  "provenance": {
+    "extracted_on": "2026-10-08",
+    "python_executable": "/opt/anaconda3/bin/python",
+    "ase_version": "3.26.0",
+    "source_path": "/Users/jiaoyuan/.local/lib/python3.12/site-packages/ase/data/s22.py",
+    "source_sha256": "8a365c11d592091fe88880873d95162c4962b9fbcfc26190efce1f06d48fff6c",
+    "upstream_source_url": "https://gitlab.com/ase/ase/-/raw/master/ase/data/s22.py",
+    "source_fields": [
+      "symbols",
+      "positions",
+      "dimer atoms",
+      "s26_number"
+    ],
+    "geometry_reference": {
+      "authors": [
+        "Petr Jurečka",
+        "Jiří Šponer",
+        "Jiří Černý",
+        "Pavel Hobza"
+      ],
+      "title": "Benchmark database of accurate (MP2 and CCSD(T) complete basis set limit) interaction energies of small model complexes, DNA base pairs, and amino acid pairs",
+      "journal": "Physical Chemistry Chemical Physics",
+      "year": 2006,
+      "volume": 8,
+      "issue": 17,
+      "pages": "1985-1993",
+      "doi": "10.1039/B600027D"
+    },
+    "note": "ASE maintains the geometry transcription. No interaction-energy reference values are imported; ASE's current energy fields are a later revision and are not needed for this fixed-geometry BSSE demonstration."
+  },
+  "systems": {
+    "Water_dimer": {
+      "symbols": [
+        "O",
+        "H",
+        "H",
+        "O",
+        "H",
+        "H"
+      ],
+      "positions_angstrom": [
+        [
+          -1.551007,
+          -0.11452,
+          0
+        ],
+        [
+          -1.934259,
+          0.762503,
+          0
+        ],
+        [
+          -0.599677,
+          0.040712,
+          0
+        ],
+        [
+          1.350625,
+          0.111469,
+          0
+        ],
+        [
+          1.680398,
+          -0.373741,
+          -0.758561
+        ],
+        [
+          1.680398,
+          -0.373741,
+          0.758561
+        ]
+      ],
+      "fragment_sizes": [
+        3,
+        3
+      ],
+      "s22_number": "02",
+      "fragments": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          3,
+          4,
+          5
+        ]
+      ],
+      "total_charge": 0,
+      "spin_2s": 0,
+      "fragment_charges": [
+        0,
+        0
+      ],
+      "fragment_spins_2s": [
+        0,
+        0
+      ],
+      "geometry_optimization_level_as_recorded_by_ase": "CCSD(T)/cc-pVQZ"
+    },
+    "Ammonia_dimer": {
+      "symbols": [
+        "N",
+        "H",
+        "H",
+        "H",
+        "N",
+        "H",
+        "H",
+        "H"
+      ],
+      "positions_angstrom": [
+        [
+          -1.578718,
+          -0.046611,
+          0
+        ],
+        [
+          -2.158621,
+          0.136396,
+          -0.809565
+        ],
+        [
+          -2.158621,
+          0.136396,
+          0.809565
+        ],
+        [
+          -0.849471,
+          0.658193,
+          0
+        ],
+        [
+          1.578718,
+          0.046611,
+          0
+        ],
+        [
+          2.158621,
+          -0.136396,
+          -0.809565
+        ],
+        [
+          0.849471,
+          -0.658193,
+          0
+        ],
+        [
+          2.158621,
+          -0.136396,
+          0.809565
+        ]
+      ],
+      "fragment_sizes": [
+        4,
+        4
+      ],
+      "s22_number": "01",
+      "fragments": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ],
+      "total_charge": 0,
+      "spin_2s": 0,
+      "fragment_charges": [
+        0,
+        0
+      ],
+      "fragment_spins_2s": [
+        0,
+        0
+      ],
+      "geometry_optimization_level_as_recorded_by_ase": "CCSD(T)/cc-pVQZ"
+    },
+    "Formic_acid_dimer": {
+      "symbols": [
+        "C",
+        "O",
+        "O",
+        "H",
+        "H",
+        "C",
+        "O",
+        "O",
+        "H",
+        "H"
+      ],
+      "positions_angstrom": [
+        [
+          -1.888896,
+          -0.179692,
+          0
+        ],
+        [
+          -1.49328,
+          1.073689,
+          0
+        ],
+        [
+          -1.170435,
+          -1.16659,
+          0
+        ],
+        [
+          -2.979488,
+          -0.258829,
+          0
+        ],
+        [
+          -0.498833,
+          1.107195,
+          0
+        ],
+        [
+          1.888896,
+          0.179692,
+          0
+        ],
+        [
+          1.49328,
+          -1.073689,
+          0
+        ],
+        [
+          1.170435,
+          1.16659,
+          0
+        ],
+        [
+          2.979488,
+          0.258829,
+          0
+        ],
+        [
+          0.498833,
+          -1.107195,
+          0
+        ]
+      ],
+      "fragment_sizes": [
+        5,
+        5
+      ],
+      "s22_number": "03",
+      "fragments": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        [
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      ],
+      "total_charge": 0,
+      "spin_2s": 0,
+      "fragment_charges": [
+        0,
+        0
+      ],
+      "fragment_spins_2s": [
+        0,
+        0
+      ],
+      "geometry_optimization_level_as_recorded_by_ase": "CCSD(T)/cc-pVTZ"
+    }
+  }
+}

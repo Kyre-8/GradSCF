@@ -1,8 +1,10 @@
 #pragma once
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <limits>
+#include <map>
 #include <stdexcept>
 #include <vector>
 #include "xla/ffi/api/ffi.h"
@@ -17,13 +19,24 @@ namespace ffi = xla::ffi;
 using Intor = int (*)(double*, int*, int*, int*, int, int*, int,
                      double*, CINTOpt*, double*);
 
+// Explicit scalar comparison also supports older compilers with newer SDK headers.
+struct ShellShapeLess {
+  bool operator()(const std::array<int,13>& a,const std::array<int,13>& b) const {
+    for (size_t i=0;i<a.size();++i) if (a[i]!=b[i]) return a[i]<b[i];
+    return false;
+  }
+};
+
 // Owned libcint buffers shared by value and derivative drivers.
 struct IntegralTables {
   int natm, nbas, n;
   std::vector<int> atm, bas, ao;
   std::vector<double> env;
+  Intor cached_intor=nullptr;
+  std::map<std::array<int,13>,int,ShellShapeLess> cache_sizes;
   IntegralTables(ffi::BufferR2<ffi::S32> atoms, ffi::BufferR2<ffi::S32> basis,
-                 ffi::BufferR1<ffi::F64> environment, int op, int cart) {
+                 ffi::BufferR1<ffi::F64> environment, int op, int cart,
+                 bool allow_long_range=false) {
     if (atoms.dimensions()[1] != ATM_SLOTS || basis.dimensions()[1] != BAS_SLOTS ||
         environment.element_count() < 20 || op < 0 || op > 4 || (cart != 0 && cart != 1))
       throw std::invalid_argument("Invalid libcint table dimensions or operator");
@@ -33,8 +46,11 @@ struct IntegralTables {
     env.assign(environment.typed_data(), environment.typed_data()+environment.element_count());
     for (double v : env)
       if (!std::isfinite(v)) throw std::invalid_argument("Native integral env must be finite");
-    if (env[PTR_RANGE_OMEGA] != 0.)
-      throw std::invalid_argument("Range-separated integrals are not supported");
+    if (env[PTR_RANGE_OMEGA] > std::sqrt(std::numeric_limits<double>::max()) / 2.)
+      throw std::invalid_argument("omega exceeds the safe float64 squared range");
+    if (env[PTR_RANGE_OMEGA] != 0. &&
+        (!allow_long_range || op != 4 || env[PTR_RANGE_OMEGA] < 0.))
+      throw std::invalid_argument("Range-separated integrals require the full ERI path and nonnegative omega");
     auto inside = [&](int ptr, int64_t count) {
       return ptr >= PTR_ENV_START && count > 0 && int64_t(ptr)+count <= int64_t(env.size());
     };
@@ -67,11 +83,29 @@ struct IntegralTables {
         throw std::invalid_argument("AO count does not match basis table");
   }
   void shell(Intor intor, int* shells, size_t size, std::vector<double>& block,
-             std::vector<double>& cache) {
+             std::vector<double>& cache, int legs=0) {
     if (size>size_t(std::numeric_limits<int>::max()))
       throw std::invalid_argument("Derivative shell workspace exceeds int32 indexing");
-    int nc=intor(nullptr,nullptr,shells,atm.data(),natm,bas.data(),nbas,env.data(),nullptr,nullptr);
+    // Opt in only for real 1e/3c parameter products. With fixed global ENV
+    // controls, libcint scratch size depends on the intor and shell shapes,
+    // not on coordinates, exponents, coefficients, or their storage pointers.
+    // Other derivative drivers retain their original per-call size query.
+    std::array<int,13> key{};
+    if (legs) {
+      if (legs!=2 && legs!=3) throw std::invalid_argument("Invalid cached shell rank");
+      if (cached_intor!=intor) {cache_sizes.clear();cached_intor=intor;}
+      key[0]=legs;
+      for (int a=0;a<legs;++a) {
+        const int* row=bas.data()+shells[a]*BAS_SLOTS;
+        key[1+4*a]=row[ANG_OF];key[2+4*a]=row[NPRIM_OF];
+        key[3+4*a]=row[NCTR_OF];key[4+4*a]=row[KAPPA_OF];
+      }
+    }
+    auto found=cache_sizes.find(key);
+    int nc=legs && found!=cache_sizes.end() ? found->second
+      : intor(nullptr,nullptr,shells,atm.data(),natm,bas.data(),nbas,env.data(),nullptr,nullptr);
     if (nc<=0) throw std::invalid_argument("libcint derivative cache query failed or exceeded int32 indexing");
+    if (legs) cache_sizes.emplace(key,nc);
     block.assign(size,0.); cache.resize(nc);
     intor(block.data(),nullptr,shells,atm.data(),natm,bas.data(),nbas,env.data(),nullptr,cache.data());
   }

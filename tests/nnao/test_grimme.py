@@ -1,3 +1,4 @@
+from importlib import import_module
 import importlib
 import jax
 import jax.numpy as jnp
@@ -44,7 +45,7 @@ def test_native_ecp_matches_pyscf(symbol,cart):
     np.testing.assert_allclose(actual,mol.intor('ECPscalar'),atol=2e-9,rtol=1e-10)
     np.testing.assert_allclose(plan.evaluate('nuclear',p),mol.intor('int1e_nuc'),atol=2e-10,rtol=1e-11)
     np.testing.assert_allclose(jax.jit(lambda p:plan.evaluate('ecp',p,ecps=b.ecps))(p),actual,atol=1e-12)
-    from gradscf.integrals.contraction import primitive_basis,contraction_matrix,contract_integrals
+    from gradscf.integrals.basis.contraction import primitive_basis, contraction_matrix, contract_integrals
     pt,pp=primitive_basis(b.topology,p)
     ep=integrals.make_plan(pt).evaluate('ecp',pp,ecps=b.ecps)
     def value(raw):
@@ -83,7 +84,7 @@ def test_real_mace_predicts_direct_coefficients():
 def test_grimme_methane_implicit_gradient():
     from pathlib import Path
     import runpy
-    cls=runpy.run_path(str(Path('tools/optimize_methane_nnao.py')))['MethaneRHF']
+    cls=vars(import_module("gradscf.model.nnao.training.objective"))['BasisRHF']
     experiment=cls(basis_family='qvszps')
     x=experiment.layout.reference_outputs()
     energy,gradient,info=experiment.evaluate(x)

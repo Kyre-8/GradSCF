@@ -1,4 +1,7 @@
 {
-  global: GradSCFECP; GradSCFIntegrals; GradSCFGeometryJVP; GradSCFGeometryVJP; GradSCFCompact; GradSCFDirectJK; GradSCFPackedJK;
+  global: GradSCFECP; GradSCFIntegrals; GradSCFGeometryJVP; GradSCFGeometryVJP; GradSCFGeometryHessianJVP; GradSCFGeometryHessianVJP; GradSCFGeometryHigherJVP; GradSCFGeometryHigherVJP; GradSCFCoefficientJVP; GradSCFCoefficientVJP; GradSCFCoefficientHessianJVP; GradSCFCoefficientHessianVJP; GradSCFExponentJVP; GradSCFExponentVJP; GradSCFCompact; GradSCFDirectJK; GradSCFPackedJK; GradSCFDirectJKGeometryJVP; GradSCFDirectJKGeometryVJP;
+          GradSCFDirectJKGeometryVJPParallel;
+          GradSCFERISlice; GradSCFERISliceGeometryJVP; GradSCFERISliceGeometryVJP; GradSCFERISliceGeometryHessianJVP; GradSCFERISliceGeometryHessianVJP;
+          GradSCFERISlab; GradSCFERISlabGeometryJVP; GradSCFERISlabGeometryVJP; GradSCFERISlabGeometryHessianJVP; GradSCFERISlabGeometryHessianVJP;
   local: *;
 };

@@ -1,0 +1,79 @@
+{
+  "system": {
+    "n": 3,
+    "formula": "C3H6",
+    "smiles": "C1CC1",
+    "atom": "C -0.301636710249 0.813148191685 -0.005975279668; C -0.553364939497 -0.667715679513 0.013200480154; C 0.855001628328 -0.145433315588 -0.007225228893; H -0.515411620873 1.353827463013 -0.920747135445; H -0.496550731391 1.374208250185 0.900700895327; H -0.937672315814 -1.130251327851 -0.888581286420; H -0.918814590144 -1.109870162336 0.932867462364; H 1.443653908770 -0.233766815743 0.898604333924; H 1.424795370869 -0.254146603852 -0.922844241343",
+    "unit": "Angstrom",
+    "seed": 20261001,
+    "rdkit": "2025.03.3",
+    "geometry_method": "ETKDGv3; lowest MMFF94 energy among 5 optimized conformers",
+    "mmff_energy_kcal_mol": 15.550734237707655
+  },
+  "backend": "cpu",
+  "device": "TFRT_CPU_0",
+  "jax": "0.8.1",
+  "python": "3.12.2",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "basis": "sto-3g",
+  "auxbasis": "weigend",
+  "nw": 64,
+  "eta_ha": 1e-05,
+  "conv_tol_ha": 1e-07,
+  "damping": 0.3,
+  "nmo": 21,
+  "naux": 255,
+  "repeats": 3,
+  "threads": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "note": "Serial in one process; first call per method/path is not a fresh-process cold start. Warm timings are repeats 2 and 3. No BSE or SCF included in GW timings.",
+  "results": {
+    "dense_reference": {
+      "evgw0": {
+        "seconds": [
+          15.813283916999353,
+          12.811892083991552,
+          12.85270266700536
+        ],
+        "warm_median_s": 12.832297375498456,
+        "max_energy_difference_ha": 0.0,
+        "qp_residual_max_ha": 4.008069298677697e-08
+      },
+      "evgw": {
+        "seconds": [
+          13.222341582993977,
+          13.23370620800415,
+          13.325373708008556
+        ],
+        "warm_median_s": 13.279539958006353,
+        "max_energy_difference_ha": 0.0,
+        "qp_residual_max_ha": 9.680694418312541e-08
+      }
+    },
+    "reused_factorization": {
+      "evgw0": {
+        "seconds": [
+          1.926273332996061,
+          0.697726332989987,
+          0.6574227499950211
+        ],
+        "warm_median_s": 0.6775745414925041,
+        "max_energy_difference_ha": 1.7763568394002505e-15,
+        "qp_residual_max_ha": 4.0080692487176606e-08
+      },
+      "evgw": {
+        "seconds": [
+          0.8926817500032485,
+          0.8792324159876443,
+          0.9055656249984168
+        ],
+        "warm_median_s": 0.8923990204930305,
+        "max_energy_difference_ha": 3.552713678800501e-15,
+        "qp_residual_max_ha": 9.680694229574627e-08
+      }
+    }
+  }
+}

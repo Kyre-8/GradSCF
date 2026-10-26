@@ -47,3 +47,12 @@ def test_h2_native_coordinate_backward_matches_finite_difference(mode):
     result = calculate(distance)
     assert result.stationary
     np.testing.assert_allclose(actual,finite_difference,atol=3e-7,rtol=0)
+    if mode == 'implicit':
+        # Differentiate the converged orbitals as well as the native integrals.
+        # A frozen-density second derivative would omit this orbital response.
+        energy = lambda r: calculate(r).total_energy
+        gradient = jax.jit(jax.grad(energy))
+        curvature = jax.jit(jax.grad(jax.grad(energy)))(distance)
+        fd_curvature = (8*(gradient(distance+step)-gradient(distance-step))
+                        -gradient(distance+2*step)+gradient(distance-2*step))/(12*step)
+        np.testing.assert_allclose(curvature,fd_curvature,atol=2e-6,rtol=0)

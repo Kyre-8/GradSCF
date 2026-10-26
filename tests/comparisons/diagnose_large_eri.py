@@ -8,7 +8,7 @@ import jax.numpy as jnp
 import numpy as np
 from pyscf import gto
 from gradscf import integrals
-from gradscf.integrals.contraction import primitive_basis
+from gradscf.integrals.basis.contraction import primitive_basis
 from gradscf.model.nnao import prepare_direct_basis
 from gradscf.scf.rks import _build_jk
 

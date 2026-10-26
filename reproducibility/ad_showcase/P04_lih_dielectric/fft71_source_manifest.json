@@ -1,0 +1,262 @@
+{
+  "runtime": {
+    "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-lih-electric-fft71-20261016",
+    "parent_snapshot": "ad-showcase-lih-field-20261016 verified pre-mixed source",
+    "hostname": "c20",
+    "python": "3.11.15",
+    "source_python_sha256": "b2e96cd4daadaf04ae8ba1c90b8c31209dd73aa0a5c3b2d63619c527f298cabf",
+    "selected_source_sha256": {
+      "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096",
+      "src/gradscf/dfpt/electric.py": "61aeb686bb38c047c719240d1a39e79bbc41b08f0e3e11853fe295ae186fd5f2",
+      "src/gradscf/dfpt/core.py": "4765b5e80c2804f07e22ebcec7584bbed1d271fecdf4dd89949895b307e054bb",
+      "src/gradscf/dfpt/ks.py": "f5dc7b4ba7ba70a3a704359f98f9609ee51db18ddccbb5e6f1406d0f45104e93",
+      "src/gradscf/dfpt/periodic.py": "ab00412522f45c0c65ce2660291f56c4881239550063663ebc8d6d8accf29bcc",
+      "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+      "src/gradscf/integrals/periodic/fft.py": "70e593e5690a1ca50c69ccd068d14d5da68366f2d7e3a452d2662b5823b1993c",
+      "examples/pbc/lih_born_charges.py": "411860077b0dda6a0c8f2111b01aed5e1031f24f0f30b9a20d1da3d8d2930e86",
+      "examples/pbc/lih_dielectric.py": "66682e0cd7ab074a89233d3144eaf8db2e600b98af55ed368932a9601971ddbd",
+      "examples/pbc/check_lih_finite_field.py": "1919d8623408a83caf752a3144384ae896a51f6fb60629c53d32044a9e3ef470",
+      "artifacts/fft71/rss_budget.py": "673d449cb2f334b1fd4e6b4c04302039d54e4ef4ca822f336e45cb0a8e4a44d5",
+      "artifacts/fft71/run_budget.py": "285f835d962599283e67185a5cf0d04ca8b35350ad133326658751413277134f"
+    },
+    "archive_sha256": "45d8743e4111085b38629d346e5182772a522526e5d67d1b3add2792f4aa089b",
+    "physical_settings": {
+      "a_bohr": 7.780032276700287,
+      "mesh": [
+        71,
+        71,
+        71
+      ],
+      "kmesh": [
+        2,
+        2,
+        2
+      ],
+      "xc": "pbe",
+      "basis": "gth-szv",
+      "pseudo": "gth-pade",
+      "nelec": [
+        2,
+        2
+      ]
+    },
+    "resource_policy": {
+      "max_single_process_rss_kib": 67108864,
+      "timeout_seconds": 3600,
+      "monitor": "Inspected and previously validated P03 monitor() only; old k8 __main__ never executed"
+    },
+    "scope": "Matched final P03 FFT71 finite model. Probe must pass before complete tensor. FFT31 source/results untouched. No finite-q long-range claim."
+  },
+  "environment": {
+    "hostname": "c20",
+    "python": "3.11.15",
+    "versions": {
+      "jax": "0.10.0",
+      "jaxlib": "0.10.0",
+      "numpy": "2.4.4",
+      "scipy": "1.17.1",
+      "jax-xc": "0.0.9",
+      "pyscf": "2.13.0"
+    },
+    "scope": "Recorded at the completed-result archival stage; no dependencies were installed or changed by this task."
+  },
+  "physical_model_metadata_equal": [
+    "settings",
+    "coordinates_bohr",
+    "lattice_bohr",
+    "occupations",
+    "pseudopotential_charges",
+    "volume_bohr3"
+  ],
+  "physical_model": {
+    "settings": {
+      "a_bohr": 7.780032276700287,
+      "xc": "pbe",
+      "basis": "gth-szv",
+      "pseudo": "gth-pade",
+      "mesh": [
+        71,
+        71,
+        71
+      ],
+      "kmesh": [
+        2,
+        2,
+        2
+      ],
+      "precision": 1e-10
+    },
+    "coordinates_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        3.8900161383501435,
+        3.8900161383501435,
+        3.8900161383501435
+      ]
+    ],
+    "lattice_bohr": [
+      [
+        0.0,
+        3.8900161383501435,
+        3.8900161383501435
+      ],
+      [
+        3.8900161383501435,
+        0.0,
+        3.8900161383501435
+      ],
+      [
+        3.8900161383501435,
+        3.8900161383501435,
+        0.0
+      ]
+    ],
+    "occupations": [
+      2,
+      2
+    ],
+    "pseudopotential_charges": [
+      3,
+      1
+    ],
+    "volume_bohr3": 117.72920324884807
+  },
+  "source_stage": "Frozen pre-mixed field31 source61aeb/0c43. Subsequent joint-input mixed wrapper5bc3 is separately verified and not attributed to these runs.",
+  "native_example_ast_identical_to_executed": true,
+  "presented_example_sha256": {
+    "examples/pbc/lih_born_charges.py": "a3dba6b46f13fd533c68e7b62c6b1c55016771a5f0d5cc52382f281e033e85b0",
+    "examples/pbc/lih_dielectric.py": "a6a36184ca5479b579283f3e1c80fcfffa2b225b490d92fd3f63923db57d14d7",
+    "examples/pbc/check_lih_finite_field.py": "1919d8623408a83caf752a3144384ae896a51f6fb60629c53d32044a9e3ef470",
+    "examples/pbc/plot_lih_born_charges.py": "07771a0fdf7cb31a6a78db6b0286bcc947d525a4d2dfa3ff13d7b7ac426e2ddc",
+    "examples/pbc/plot_lih_dielectric.py": "085e5b2feea66cbde4c3e7ce32aec965f5f8b545335e0ca7b72762631d587cf9"
+  },
+  "original_fft31_json_sha256": {
+    "Born": "0b854012630e16f8cec1a88f80a85053c7213631da92670944fd6a8a961180a4",
+    "electric": "6599d045022b3a52476c4a39203f18ade7891fe150d175427dfc3034a95e9a1a"
+  },
+  "numerical_scope": "Matched FFT71/fullk2/PBE/GTH-Pade/SZV finite model. No projection. No new independent PySCF71, basis/k convergence, finite-q polar correction or experimental claim.",
+  "runs": {
+    "born-probe": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "-c",
+        "from lih_born_charges import SETTINGS, run; SETTINGS['mesh']=[71]*3; run('fft71_probe', directions=((1,0),), steps=())"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 16895088,
+      "budget_kib": 67108864,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true
+    },
+    "born-full": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "-c",
+        "from lih_born_charges import SETTINGS, run; SETTINGS['mesh']=[71]*3; run('fft71')"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 18810928,
+      "budget_kib": 67108864,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true
+    },
+    "chi-probe": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "-c",
+        "from lih_born_charges import SETTINGS; SETTINGS['mesh']=[71]*3; from lih_dielectric import run; run('fft71_probe', axes=(0,))"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 19114420,
+      "budget_kib": 67108864,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true
+    },
+    "chi-full": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "-c",
+        "from lih_born_charges import SETTINGS; SETTINGS['mesh']=[71]*3; from lih_dielectric import run; run('fft71')"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 18960976,
+      "budget_kib": 67108864,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true
+    },
+    "chi-finite": {
+      "command": [
+        "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+        "-u",
+        "-c",
+        "from lih_born_charges import SETTINGS; SETTINGS['mesh']=[71]*3; from check_lih_finite_field import run; run('fft71_finite_field', reference='fft71')"
+      ],
+      "return_code": 0,
+      "peak_rss_kib": 45789376,
+      "budget_kib": 67108864,
+      "budget_exceeded": false,
+      "polling_seconds": 0.25,
+      "accepted": true
+    }
+  },
+  "artifacts": {
+    "P04_lih_born/fft71.json": "46ca742e81c7cff106f720cf0969e8a1daa7fc05a3f17077a7ae826b4a71ce01",
+    "P04_lih_born/fft71_born_displacement_validation.pdf": "71a93d12a8444a23373e8598f841547a6c1aa6451e102898a2d88a19c544b1fe",
+    "P04_lih_born/fft71_born_displacement_validation.png": "3598cd2fa56a27841f1c7d2bbcdb0204290d93766c168b28387b94ac492d8dc5",
+    "P04_lih_born/fft71_born_tensors.pdf": "e545387a7af5e79291cfd7b07a8f7c2211bb9cbd065adfd9902af0aa8b9d69ad",
+    "P04_lih_born/fft71_born_tensors.png": "0ca07e79334340197a46733b653245ece8632a8ea3318ff99d16335149d1e003",
+    "P04_lih_born/fft71_probe.json": "07a176cae3e48a58b3515cc9cadaa344d872d352d5a08bb54214c3e39f547061",
+    "P04_lih_born/fft71_probe_response.npz": "71961f6374670cfb288b039c556765399632ab3beccb2a0bda47068c6c0f512c",
+    "P04_lih_born/fft71_response.npz": "8eaca5e3235c7a29f238cf26a8abbee22ecce7bff7f8b12d4ad405784cf1d3b5",
+    "P04_lih_dielectric/fft71.json": "3f97bb176c2dd9d802b57f5dfce5575c5fc4f0ea663b2899e0c48db251a83b2d",
+    "P04_lih_dielectric/fft71_dielectric_validation.pdf": "ed83e2a8825d3cf87fb0c5f7c428dcdbd44842a147fea405b407ec639e37b2c5",
+    "P04_lih_dielectric/fft71_dielectric_validation.png": "129da3dee6191fe97660ee09d4b2b6b3cd868b3cca9864652a8a1c85778a686d",
+    "P04_lih_dielectric/fft71_finite_field.json": "c4fa5bfddd57c217dfa6c1db53afb4b47f5359c00c824aad845e5cf6130c8fe1",
+    "P04_lih_dielectric/fft71_probe.json": "60989a0e8af451a1a600b53c941dc2b2ae22f34feff3f51351ad545205cf12fc",
+    "P04_lih_dielectric/fft71_probe_response.npz": "43ae1bd0a8de613f374080b694b6a3680bd1a162655a2b1940dba58da2c403b3",
+    "P04_lih_dielectric/fft71_response.npz": "cd3b82aa8ecfc3ae9f8a4bf33d6c44478fbd0d00a70f8e9848acd1f05e735a0f",
+    "P04_lih_dielectric/verification_fft71/born-full-resources.txt": "2081df492f64e79a8cb05801130686f6b9a78ad835faebeda775379ef1ba1144",
+    "P04_lih_dielectric/verification_fft71/born-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "P04_lih_dielectric/verification_fft71/born-full.txt": "8e36dbf9fb983d524ccb54de057d251642cbca5dd0e2537ca36dc1bcd8192fd0",
+    "P04_lih_dielectric/verification_fft71/born-full_resource_budget.json": "d11394b87c4917eb9bdcf8edbae2f130f6e35b6e661302d166b3cdb5ac701b61",
+    "P04_lih_dielectric/verification_fft71/born-plot.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "P04_lih_dielectric/verification_fft71/born-plot.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "P04_lih_dielectric/verification_fft71/born-probe-resources.txt": "e67cbf24deb45e1e60d43599d30ec99dc3b6dc1191dd4b5b4b952f3d7d0faef2",
+    "P04_lih_dielectric/verification_fft71/born-probe.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "P04_lih_dielectric/verification_fft71/born-probe.txt": "c11f7f03b4a4a5d0bb7190d8f9efd0a94832febaa4df148cc6b7d003b86618e1",
+    "P04_lih_dielectric/verification_fft71/born-probe_resource_budget.json": "ae345e4780eee89dd0bb49563bbaa2d195736d150ff614c271e5b057bfbd7791",
+    "P04_lih_dielectric/verification_fft71/calculation_runtime.json": "7b30019eb7c3c879266a6494c0ae42280402438569b126b9e9ef9b1d4db1288c",
+    "P04_lih_dielectric/verification_fft71/calculation_sources.tar.gz": "45d8743e4111085b38629d346e5182772a522526e5d67d1b3add2792f4aa089b",
+    "P04_lih_dielectric/verification_fft71/chi-finite-resources.txt": "b7897f001aeb26b33d6d58054bbf51a4d05dbdb6d167be8f03b1bf6466fcb974",
+    "P04_lih_dielectric/verification_fft71/chi-finite.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "P04_lih_dielectric/verification_fft71/chi-finite.txt": "a238754e308d730deb59ae2a993a2638b8b8b29c54fe90b07700850b3a252acd",
+    "P04_lih_dielectric/verification_fft71/chi-finite_resource_budget.json": "f80532d0d33c4bbdcdf89ee2530ad7cf8e8d27b23fac0c3076a2efb9ee9fa5de",
+    "P04_lih_dielectric/verification_fft71/chi-full-resources.txt": "d336feb1ff0274610bc6ffdbaf1d611af0a144e6636be8fb10220619b06ddfe6",
+    "P04_lih_dielectric/verification_fft71/chi-full.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "P04_lih_dielectric/verification_fft71/chi-full.txt": "2cd4b31f4f5a4571da91afa948dca6b32f9cdf5cccda536b7ae755105296f33f",
+    "P04_lih_dielectric/verification_fft71/chi-full_resource_budget.json": "0c724418914c2bcbaea5ea7e03df4de3591fbeabc332b6237c1c633139f0d04e",
+    "P04_lih_dielectric/verification_fft71/chi-plot.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "P04_lih_dielectric/verification_fft71/chi-plot.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "P04_lih_dielectric/verification_fft71/chi-probe-resources.txt": "85c9119446d1338636d5417a6f05022d50b2d3b14d71405558fa27f2e9e30846",
+    "P04_lih_dielectric/verification_fft71/chi-probe.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "P04_lih_dielectric/verification_fft71/chi-probe.txt": "e1fd6d9819999649fa22cfb04e108b949e04e193724c6af4244af619ceb37596",
+    "P04_lih_dielectric/verification_fft71/chi-probe_resource_budget.json": "d78e299c12f09a9c0be1a0c2adfc5ae21d867a0ff21d6cf1a54d55ebbdd8b913",
+    "P04_lih_dielectric/verification_fft71/environment.json": "25b2647dabcfc45d94056e8591546d9e9a8d51b6b3d3a9a661185e50dfe5a006",
+    "P04_lih_dielectric/verification_fft71/lih_born_charges_executed.py": "411860077b0dda6a0c8f2111b01aed5e1031f24f0f30b9a20d1da3d8d2930e86",
+    "P04_lih_dielectric/verification_fft71/lih_dielectric_executed.py": "66682e0cd7ab074a89233d3144eaf8db2e600b98af55ed368932a9601971ddbd",
+    "P04_lih_dielectric/verification_fft71/rss_budget.py": "673d449cb2f334b1fd4e6b4c04302039d54e4ef4ca822f336e45cb0a8e4a44d5",
+    "P04_lih_dielectric/verification_fft71/run_budget.py": "285f835d962599283e67185a5cf0d04ca8b35350ad133326658751413277134f"
+  }
+}

@@ -26,17 +26,18 @@ dependencies = [
 Repository = "https://github.com/STOKES-DOT/GradSCF"
 
 [project.optional-dependencies]
+symmetry = ["spglib>=2.0"]
 nnao = ["mace_jax @ git+https://github.com/ACEsuit/mace-jax.git@19cf364a405fcf9f2f82590a98d61bc870e05881"]
 comparison-tests = ["pytest>=8.0", "pyscf>=2.3.0"]
 dev = [
   "pytest>=8.0",
 ]
 upstreams = [
-  "jax-xc>=0.0.12",
+  "jax-xc>=0.0.9",
 ]
 reproducibility = [
   "h5py>=3.8",
-  "jax-xc>=0.0.12",
+  "jax-xc>=0.0.9",
   "matplotlib>=3.7",
   "scipy>=1.10",
 ]
@@ -50,14 +51,23 @@ pythonpath = ["src"]
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["gradscf*"]
-exclude = ["gradscf.integrals._native.*", "gradscf.integrals.basis_data.pyscf_basis_snapshot*",
-           "gradscf.model.nnao.mace_jax*", "gradscf.model.nnao.tests*",
-           "gradscf.model.nnao.examples*", "gradscf.model.nnao.scripts*"]
+exclude = ["gradscf.integrals._native.*", "gradscf.integrals.basis.data.pyscf_basis_snapshot*",
+           "gradscf.model.nnao.tests*", "gradscf.model.nnao.vendor*"]
 
 [tool.setuptools.package-data]
+"gradscf.model" = ["README.md"]
+"gradscf.dft" = ["*.md"]
+"gradscf.dft.xc" = ["_catalog.json", "*.md"]
+"gradscf.dfpt" = ["*.md"]
+"gradscf.pbc" = ["*.md"]
+"gradscf.model.neural_xc.training" = ["*.md"]
+"gradscf.ofdft" = ["*.md", "LICENSE.libKEDF"]
+"gradscf.fci" = ["*.md", "references.bib"]
+"gradscf.mp" = ["*.md"]
 "gradscf.cc" = ["LICENSE.pyscf", "*.md", "references.bib"]
-"gradscf.model.nnao" = ["data/szp3.json", "data/qvszps/**/*", "NNAO.md"]
-"gradscf.integrals.basis_data" = [
+"gradscf.model.nnao" = ["data/szp3.json", "data/qvszps/**/*", "NNAO.md", "README.md"]
+"gradscf.integrals" = ["*.md"]
+"gradscf.integrals.basis.data" = [
   "_pyscf_basis_bundle.json",
   "pyscf_basis_snapshot/**/*",
 ]

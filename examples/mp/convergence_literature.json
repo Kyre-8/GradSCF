@@ -1,0 +1,22 @@
+{
+  "he2": {
+    "source": "https://doi.org/10.1016/0009-2614(86)80686-8",
+    "location": "Table 3, minimal (3s)->[1s] basis contracted from 3-21G at 0.7 Angstrom",
+    "orders": [2, 3, 4, 10, 20],
+    "rmp_barrier_kj_mol": [312.5, 145.1, 96.3, 105.0, 102.3],
+    "ump_barrier_kj_mol": [228.3, 250.4, 251.8, 209.3, 167.5],
+    "fci_barrier_kj_mol": 102.3,
+    "ump20_rmax_angstrom": 1.1146
+  },
+  "ne": {
+    "source": "https://trygvehelgaker.no/Publications/JChemPhys_112_09736_2000.pdf",
+    "location": "Table III, second column, E2--E25 in milli-Hartree; spherical aug-cc-pVDZ, frozen 1s",
+    "corrections_millihartree": [-206.8735085, -1.5474433, -5.6862074, 2.0136991, -1.5823848, 0.9591255, -0.7074207, 0.5379288, -0.4398023, 0.3755002, -0.3344628, 0.3084214, -0.2932434, 0.2863686, -0.2863549, 0.2924294, -0.3042885, 0.3219796, -0.3458413, 0.3764782, -0.4147587, 0.4618314, -0.5191559, 0.5885481]
+  },
+  "atomic_fci": {
+    "source": "https://s3.smu.edu/dedman/catco/publications/pdf/IJQC_76_306_2000.pdf",
+    "location": "Table II, aug-cc-pVDZ rows; total energies in Hartree, six decimals",
+    "Ne": -128.709476,
+    "F": -99.669369
+  }
+}

@@ -83,3 +83,39 @@ def _orthogonalizer_jvp(eps, primals, tangents):
 
 regularized_eigh = _safe_symmetric_eigh
 inverse_sqrt = _orthogonalizer
+
+
+def matrix_function(matrix, params, function, *, divided_difference=None):
+    """Smooth Hermitian matrix function with its first Frechet derivative.
+
+    function(eigenvalues, params) acts elementwise and is real-valued. Repeated
+    eigenvalues use f'(lambda), without choosing eigenvector derivatives.
+    Supply divided_difference(values, params) for analytic stable secants of
+    rapidly varying functions. The default uses averaged slopes for gaps below
+    sqrt(machine epsilon) times the spectral scale. Higher derivatives at
+    degeneracy are not guaranteed by this first-order interface.
+    """
+    adjoint = lambda a:a.conj().swapaxes(-1,-2)
+    @jax.custom_jvp
+    def apply(a, p):
+        values, vectors = jnp.linalg.eigh(a)
+        return (vectors*function(values,p))@adjoint(vectors)
+    @apply.defjvp
+    def derivative(primals, tangents):
+        a,p = primals
+        da,dp = tangents
+        values,vectors = jnp.linalg.eigh(a)
+        f = function(values,p)
+        slope = jax.jvp(lambda x:function(x,p), (values,), (jnp.ones_like(values),))[1]
+        df = jax.jvp(lambda q:function(values,q), (p,), (dp,))[1]
+        gap = values[:,None]-values[None,:]
+        if divided_difference is None:
+            same = jnp.abs(gap) <= jnp.sqrt(jnp.finfo(values.dtype).eps)*jnp.maximum(1.,jnp.max(jnp.abs(values)))
+            divided = (f[:,None]-f[None,:])/jnp.where(same,1.,gap)
+            divided = jnp.where(same,.5*(slope[:,None]+slope[None,:]),divided)
+        else:
+            divided = divided_difference(values,p)
+        inner = adjoint(vectors)@(.5*(da+adjoint(da)))@vectors
+        response = divided*inner+jnp.diag(df)
+        return (vectors*f)@adjoint(vectors), vectors@response@adjoint(vectors)
+    return apply(jnp.asarray(matrix), params)

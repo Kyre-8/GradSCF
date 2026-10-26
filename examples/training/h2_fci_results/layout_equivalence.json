@@ -1,0 +1,26 @@
+{
+  "baseline_commit": "b5af8ed",
+  "baseline_path": "examples/neural_xc/h2_fci_results",
+  "current_path": "examples/training/h2_fci_results",
+  "steps_per_mode": 100,
+  "maximum_absolute_differences": {
+    "fixed_density": {
+      "loss": 0.0,
+      "mse": 0.0,
+      "mae": 0.0,
+      "energy_hartree": 0.0
+    },
+    "explicit": {
+      "loss": 0.0,
+      "mse": 0.0,
+      "mae": 0.0,
+      "energy_hartree": 0.0
+    },
+    "implicit": {
+      "loss": 0.0,
+      "mse": 0.0,
+      "mae": 0.0,
+      "energy_hartree": 0.0
+    }
+  }
+}

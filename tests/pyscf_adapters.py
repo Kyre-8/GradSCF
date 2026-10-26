@@ -4,7 +4,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from gradscf.integrals.basis import CartesianAO, CartesianBasis, ContractedShell, cartesian_angular_tuples
-from gradscf.model.neural_xc.inputs import ChunkedHFXNu
+from gradscf.dft.hfx import ChunkedHFXNu
 
 def _int1e_grids_name(mol: Any) -> str:
     return "int1e_grids_cart" if bool(getattr(mol, "cart", False)) else "int1e_grids_sph"

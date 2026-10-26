@@ -1,0 +1,23 @@
+	Command being timed: "timeout 3600 /home/yjiao/opt/miniconda3/envs/jax_scf/bin/python -u -c from run_budget import run; run('chi-full', "from lih_born_charges import SETTINGS; SETTINGS['mesh']=[71]*3; from lih_dielectric import run; run('fft71')")"
+	User time (seconds): 1240.38
+	System time (seconds): 60.50
+	Percent of CPU this job got: 617%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 3:30.65
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 18960976
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 2816516
+	Voluntary context switches: 413480
+	Involuntary context switches: 27849
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 88
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

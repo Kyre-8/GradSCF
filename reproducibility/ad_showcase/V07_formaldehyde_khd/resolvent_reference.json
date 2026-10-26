@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "method": "Independent padded ground-HO Hamiltonian and SciPy direct complex resolvents",
+  "gamma_hartree": 0.04,
+  "laser_hartree": [
+    2.1,
+    3.7,
+    4.7
+  ],
+  "convergence": [
+    {
+      "basis_per_axis": 8,
+      "dimension": 64,
+      "relative_resolvent_residual": 1.3801003144498411e-15,
+      "resonant_max_error": 0.03908804605804162,
+      "antiresonant_max_error": 1.904553302710555e-09
+    },
+    {
+      "basis_per_axis": 12,
+      "dimension": 144,
+      "relative_resolvent_residual": 1.1964816168890885e-15,
+      "resonant_max_error": 0.0007252128144190099,
+      "antiresonant_max_error": 2.240586203557344e-12
+    },
+    {
+      "basis_per_axis": 18,
+      "dimension": 324,
+      "relative_resolvent_residual": 8.843250784681386e-16,
+      "resonant_max_error": 1.1221039753350713e-06,
+      "antiresonant_max_error": 2.1012135698563466e-16
+    },
+    {
+      "basis_per_axis": 24,
+      "dimension": 576,
+      "relative_resolvent_residual": 9.22155086702226e-16,
+      "resonant_max_error": 1.304410755919604e-09,
+      "antiresonant_max_error": 6.1773364295275765e-18
+    }
+  ],
+  "wall_seconds": 3.2000729590072297,
+  "scope": "Synthetic two-mode fixed harmonic/linear-dipole model; not an independent HCHO electronic calculation"
+}

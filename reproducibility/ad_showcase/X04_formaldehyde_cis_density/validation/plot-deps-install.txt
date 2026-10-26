@@ -1,0 +1,7 @@
+Processing ./plot_wheels/imageio-2.38.1-py3-none-any.whl
+Processing ./plot_wheels/lazy_loader-0.4-py3-none-any.whl
+Processing ./plot_wheels/scikit_image-0.25.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+Processing ./plot_wheels/tifffile-2026.3.3-py3-none-any.whl
+Installing collected packages: tifffile, scikit-image, lazy-loader, imageio
+
+Successfully installed imageio-2.38.1 lazy-loader-0.4 scikit-image-0.25.2 tifffile-2026.3.3

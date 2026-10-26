@@ -1,0 +1,12 @@
+{
+  "code": "PySCF direct_spin1",
+  "energy_hartree": -1.1516725449612382,
+  "absolute_energy_error_hartree": 3.1086244689504383e-15,
+  "rdm1_max_abs_error": 4.440892098500626e-16,
+  "pyscf_version": "2.9.0",
+  "independent_ao_integrals_check": {
+    "energy_hartree": -1.1516725449612377,
+    "energy_difference_hartree": 3.552713678800501e-15,
+    "ao_density_max_error": 8.881784197001252e-16
+  }
+}

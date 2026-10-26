@@ -1,0 +1,118 @@
+{
+  "complete": true,
+  "passed": true,
+  "model": "Silicon generic segment",
+  "system": "silicon",
+  "xc": "pbe",
+  "basis": "gth-szv",
+  "pseudo": "gth-pbe",
+  "lattice_bohr": [
+    [
+      0.0,
+      5.131551291256425,
+      5.131551291256425
+    ],
+    [
+      5.131551291256425,
+      0.0,
+      5.131551291256425
+    ],
+    [
+      5.131551291256425,
+      5.131551291256425,
+      0.0
+    ]
+  ],
+  "coordinates_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      2.5657756456282126,
+      2.5657756456282126,
+      2.5657756456282126
+    ]
+  ],
+  "mesh": [
+    21,
+    21,
+    21
+  ],
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "query_fractional": [
+    [
+      0.07,
+      0.11,
+      0.13
+    ],
+    [
+      0.18,
+      0.17,
+      0.15000000000000002
+    ],
+    [
+      0.29,
+      0.23,
+      0.17
+    ]
+  ],
+  "output_bands": [
+    3,
+    4
+  ],
+  "full_internal_bands": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "full_screening_occupied": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "full_screening_virtual": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "lehmann_channels": "OV+VO",
+  "nw": 16,
+  "eta_hartree": 0.001,
+  "fc": false,
+  "exxdiv": "ewald",
+  "method": "periodic_query_full_cd",
+  "scf_energy_hartree": -7.41142105705312,
+  "scf_converged": true,
+  "computed_count": 6,
+  "converged_computed_count": 6,
+  "max_qp_residual_hartree": 1.687538997430238e-14,
+  "elapsed_seconds": 80.67085089199827,
+  "backend": "cpu",
+  "dtype": "float64/complex128",
+  "jax_version": "0.10.0",
+  "python_version": "3.11.15",
+  "source_sha256": {
+    "/home/yjiao/gradscf_checks/ad-showcase-query-20261016/examples/gw/periodic_bands.py": "b2d04c4ba47e397cb511ae1c7838cc977c0f42eacaf4cfb4fc4d1e6da143210f",
+    "src/gradscf/gw/pbc/query.py": "cae03b9436fbdd609427d52bdcff0e668fdba96a9263d57bc911aafa55405d0c",
+    "src/gradscf/gw/pbc/product_basis.py": "4fef3859ed64c2d7f1d28576e717d22535977edcff69f163bee69dd8097575aa",
+    "src/gradscf/gw/screened.py": "308493c8837febc20df005ffd8dcd5131fd4c9de12f80fde59c493ca90ab13e2",
+    "src/gradscf/gw/self_energy.py": "98564a4e79e6a15d94177925a2b769dd156c93aff95d5135c7ac5d3a66b0b871",
+    "src/gradscf/solvers/nonlinear/scalar.py": "f20e5f681cbde7ab0f159d7daadc29cc45931f0649a79f14927362b37d44464b",
+    "src/gradscf_tools/periodic_gw_plot.py": "60efef2a80adea20f60f7d75af8af426c1a9ff4b874aef90d27f7b00dcf85eab",
+    "examples/pbc/band_structures/systems.py": "9d5fd37d3a8323378ff63da03c77604e32b171e95af1a6824c5376a68ef98870"
+  },
+  "boundary": "Canonical G-q finite FFT model, fixed SCF W0, body only, eager forward; not material convergence"
+}

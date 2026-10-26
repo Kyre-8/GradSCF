@@ -7,13 +7,8 @@ import numpy as np
 from jaxtyping import Array
 
 from gradscf.integrals.basis import CartesianAO, CartesianBasis, ContractedShell
-from gradscf.integrals.backends.jax_reference._common import (
-    SUPPORTED_CARTESIAN_MAX_L,
-    apply_cartesian_derivatives_4c,
-    boys0,
-    primitive_cartesian_norm,
-    validate_cartesian_angular,
-)
+from gradscf.integrals.backends.jax_reference._common import SUPPORTED_CARTESIAN_MAX_L, apply_cartesian_derivatives_4c, boys0, validate_cartesian_angular
+from gradscf.integrals.basis.normalization import primitive_cartesian_norm
 
 QUARTET_BATCH_CHUNK = 512
 

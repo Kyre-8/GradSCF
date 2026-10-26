@@ -6,7 +6,7 @@ import types
 import numpy as np
 
 import pyscf_data_reference as reference_module
-from gradscf.model.neural_xc.inputs import ChunkedHFXNu
+from gradscf.dft.hfx import ChunkedHFXNu
 from gradscf.scf.molecules import UnrestrictedMolecule
 
 

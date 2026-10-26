@@ -1,0 +1,1008 @@
+{
+  "records": [
+    {
+      "case": "h2_sto3g",
+      "method": "secant",
+      "atom": "H 0 0 0; H 0 0 .74",
+      "basis": "sto-3g",
+      "orbs": [
+        0,
+        1
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.16696891699393746,
+      "steady_median_seconds": 6.012499216012657e-05,
+      "steady_seconds": [
+        9.500001033302397e-05,
+        6.083399057388306e-05,
+        5.8416000683791935e-05,
+        6.433299859054387e-05,
+        6.012499216012657e-05,
+        4.8000001697801054e-05,
+        5.687499651685357e-05
+      ],
+      "peak_rss_bytes": 505135104,
+      "xla_temporary_bytes": 14096,
+      "roots": [
+        -0.5969576712539982,
+        0.6895473033367193
+      ],
+      "residual": [
+        6.938893903907228e-18,
+        -3.8163916471489756e-17
+      ],
+      "converged": [
+        true,
+        true
+      ],
+      "iterations": [
+        3,
+        3
+      ],
+      "function_evaluations": 5,
+      "derivative_evaluations": 0,
+      "backtracks": 0,
+      "newton_steps": [
+        0,
+        0
+      ]
+    },
+    {
+      "case": "h2_sto3g",
+      "method": "newton",
+      "atom": "H 0 0 0; H 0 0 .74",
+      "basis": "sto-3g",
+      "orbs": [
+        0,
+        1
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.28972041700035334,
+      "steady_median_seconds": 9.537499863654375e-05,
+      "steady_seconds": [
+        0.00014383300731424242,
+        9.537499863654375e-05,
+        9.033300739247352e-05,
+        9.208399569615722e-05,
+        9.712499740999192e-05,
+        0.00010266700701322407,
+        9.099999442696571e-05
+      ],
+      "peak_rss_bytes": 527073280,
+      "xla_temporary_bytes": 21280,
+      "roots": [
+        -0.5969576712539982,
+        0.6895473033367193
+      ],
+      "residual": [
+        6.938893903907228e-18,
+        -3.8163916471489756e-17
+      ],
+      "converged": [
+        true,
+        true
+      ],
+      "iterations": [
+        3,
+        3
+      ],
+      "function_evaluations": 5,
+      "derivative_evaluations": 4,
+      "backtracks": 0,
+      "newton_steps": [
+        3,
+        3
+      ]
+    },
+    {
+      "case": "h2_sto3g",
+      "method": "hybrid",
+      "atom": "H 0 0 0; H 0 0 .74",
+      "basis": "sto-3g",
+      "orbs": [
+        0,
+        1
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.2757007079926552,
+      "steady_median_seconds": 8.970800263341516e-05,
+      "steady_seconds": [
+        0.0001119579974329099,
+        0.00011495899525471032,
+        8.800000068731606e-05,
+        8.420899393968284e-05,
+        0.00012066599447280169,
+        7.675000233575702e-05,
+        8.970800263341516e-05
+      ],
+      "peak_rss_bytes": 522649600,
+      "xla_temporary_bytes": 15200,
+      "roots": [
+        -0.5969576712539982,
+        0.6895473033367193
+      ],
+      "residual": [
+        6.938893903907228e-18,
+        -3.8163916471489756e-17
+      ],
+      "converged": [
+        true,
+        true
+      ],
+      "iterations": [
+        3,
+        3
+      ],
+      "function_evaluations": 6,
+      "derivative_evaluations": 1,
+      "backtracks": 0,
+      "newton_steps": [
+        1,
+        1
+      ]
+    },
+    {
+      "case": "water_sto3g",
+      "method": "secant",
+      "atom": "O 0 0 0; H 0 -.757 .587; H 0 .757 .587",
+      "basis": "sto-3g",
+      "orbs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.21766137500526384,
+      "steady_median_seconds": 0.0059779170114779845,
+      "steady_seconds": [
+        0.006212457999936305,
+        0.005794249998871237,
+        0.006201458003488369,
+        0.005780667008366436,
+        0.0056964590039569885,
+        0.0059779170114779845,
+        0.005981125010293908
+      ],
+      "peak_rss_bytes": 546668544,
+      "xla_temporary_bytes": 3115296,
+      "roots": [
+        -20.036515387518328,
+        -1.1860140807129251,
+        -0.6160259732352544,
+        -0.4172981806529649,
+        -0.33074392728715324,
+        0.6088336103001973,
+        0.7435758831647777
+      ],
+      "residual": [
+        -1.304512053934559e-15,
+        -1.249000902703301e-16,
+        1.717376241217039e-16,
+        6.938893903907228e-18,
+        -4.100886297209172e-15,
+        4.163336342344337e-17,
+        5.551115123125783e-17
+      ],
+      "converged": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "iterations": [
+        8,
+        6,
+        3,
+        4,
+        4,
+        3,
+        3
+      ],
+      "function_evaluations": 10,
+      "derivative_evaluations": 0,
+      "backtracks": 0,
+      "newton_steps": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "water_sto3g",
+      "method": "newton",
+      "atom": "O 0 0 0; H 0 -.757 .587; H 0 .757 .587",
+      "basis": "sto-3g",
+      "orbs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.3471430000063265,
+      "steady_median_seconds": 0.010612833008053713,
+      "steady_seconds": [
+        0.010612833008053713,
+        0.010534082990488969,
+        0.010303000002750196,
+        0.01063854199310299,
+        0.010723874991526827,
+        0.010693208008888178,
+        0.01060545799555257
+      ],
+      "peak_rss_bytes": 581746688,
+      "xla_temporary_bytes": 4333344,
+      "roots": [
+        -20.036515387518328,
+        -1.1860140807129251,
+        -0.6160259732352547,
+        -0.4172981806529649,
+        -0.3307439272871493,
+        0.6088336103001973,
+        0.7435758831647777
+      ],
+      "residual": [
+        -1.304512053934559e-15,
+        -1.249000902703301e-16,
+        -6.245004513516506e-17,
+        6.938893903907228e-18,
+        6.938893903907228e-18,
+        4.163336342344337e-17,
+        5.551115123125783e-17
+      ],
+      "converged": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "iterations": [
+        7,
+        5,
+        3,
+        3,
+        4,
+        3,
+        3
+      ],
+      "function_evaluations": 9,
+      "derivative_evaluations": 8,
+      "backtracks": 0,
+      "newton_steps": [
+        7,
+        5,
+        3,
+        3,
+        4,
+        3,
+        3
+      ]
+    },
+    {
+      "case": "water_sto3g",
+      "method": "hybrid",
+      "atom": "O 0 0 0; H 0 -.757 .587; H 0 .757 .587",
+      "basis": "sto-3g",
+      "orbs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.3278196250030305,
+      "steady_median_seconds": 0.007854833005694672,
+      "steady_seconds": [
+        0.007917708993772976,
+        0.007854833005694672,
+        0.007709999990765937,
+        0.007761708999169059,
+        0.007750292003038339,
+        0.008056542006670497,
+        0.007928375009214506
+      ],
+      "peak_rss_bytes": 569327616,
+      "xla_temporary_bytes": 3712992,
+      "roots": [
+        -20.03651538751833,
+        -1.1860140807129251,
+        -0.6160259732352544,
+        -0.4172981806529649,
+        -0.33074392728715324,
+        0.6088336103001972,
+        0.7435758831647777
+      ],
+      "residual": [
+        -5.245803791353865e-15,
+        -1.249000902703301e-16,
+        1.717376241217039e-16,
+        6.938893903907228e-18,
+        -4.100886297209172e-15,
+        -6.938893903907228e-17,
+        5.551115123125783e-17
+      ],
+      "converged": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "iterations": [
+        7,
+        6,
+        3,
+        4,
+        4,
+        3,
+        3
+      ],
+      "function_evaluations": 11,
+      "derivative_evaluations": 2,
+      "backtracks": 0,
+      "newton_steps": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "case": "lih_sto3g",
+      "method": "secant",
+      "atom": "Li 0 0 0; H 0 0 1.6",
+      "basis": "sto-3g",
+      "orbs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.1782678329909686,
+      "steady_median_seconds": 0.0015110420063138008,
+      "steady_seconds": [
+        0.0015047500055516139,
+        0.0015531249955529347,
+        0.0015949160006130114,
+        0.0015449159982381389,
+        0.0015110420063138008,
+        0.0014557500107912347,
+        0.0014340839989017695
+      ],
+      "peak_rss_bytes": 526680064,
+      "xla_temporary_bytes": 1294240,
+      "roots": [
+        -2.3284723764475044,
+        -0.27262576116614123,
+        0.07586711444530135,
+        0.16207467232318284,
+        0.16207467232318293,
+        0.5193486020505501
+      ],
+      "residual": [
+        -2.220446049250313e-16,
+        1.0408340855860843e-17,
+        4.336808689942018e-19,
+        -8.239936510889834e-18,
+        -1.0842021724855044e-18,
+        5.784955847687456e-14
+      ],
+      "converged": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "iterations": [
+        3,
+        4,
+        3,
+        3,
+        3,
+        4
+      ],
+      "function_evaluations": 6,
+      "derivative_evaluations": 0,
+      "backtracks": 0,
+      "newton_steps": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "lih_sto3g",
+      "method": "newton",
+      "atom": "Li 0 0 0; H 0 0 1.6",
+      "basis": "sto-3g",
+      "orbs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.30550224999024067,
+      "steady_median_seconds": 0.002791332997730933,
+      "steady_seconds": [
+        0.002888292001443915,
+        0.0027767499996116385,
+        0.00273145800747443,
+        0.0027811250038212165,
+        0.002879625011701137,
+        0.002791332997730933,
+        0.002812791004544124
+      ],
+      "peak_rss_bytes": 553746432,
+      "xla_temporary_bytes": 1796256,
+      "roots": [
+        -2.3284723764475044,
+        -0.27262576116614123,
+        0.07586711444530135,
+        0.16207467232318284,
+        0.16207467232318293,
+        0.519348602050499
+      ],
+      "residual": [
+        -2.220446049250313e-16,
+        1.0408340855860843e-17,
+        4.336808689942018e-19,
+        -8.239936510889834e-18,
+        -1.0842021724855044e-18,
+        -6.938893903907228e-17
+      ],
+      "converged": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "iterations": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        4
+      ],
+      "function_evaluations": 6,
+      "derivative_evaluations": 5,
+      "backtracks": 0,
+      "newton_steps": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        4
+      ]
+    },
+    {
+      "case": "lih_sto3g",
+      "method": "hybrid",
+      "atom": "Li 0 0 0; H 0 0 1.6",
+      "basis": "sto-3g",
+      "orbs": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.2949468330043601,
+      "steady_median_seconds": 0.002014458004850894,
+      "steady_seconds": [
+        0.002044749999186024,
+        0.002014458004850894,
+        0.0020547919993987307,
+        0.0020230829977663234,
+        0.001958458000444807,
+        0.0019646669970825315,
+        0.0019532919977791607
+      ],
+      "peak_rss_bytes": 542932992,
+      "xla_temporary_bytes": 1539232,
+      "roots": [
+        -2.3284723764475044,
+        -0.27262576116614123,
+        0.07586711444530135,
+        0.16207467232318284,
+        0.16207467232318293,
+        0.5193486020505507
+      ],
+      "residual": [
+        -2.220446049250313e-16,
+        1.0408340855860843e-17,
+        4.336808689942018e-19,
+        -8.239936510889834e-18,
+        -1.0842021724855044e-18,
+        5.847405892822621e-14
+      ],
+      "converged": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "iterations": [
+        3,
+        4,
+        3,
+        3,
+        3,
+        4
+      ],
+      "function_evaluations": 7,
+      "derivative_evaluations": 1,
+      "backtracks": 0,
+      "newton_steps": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "case": "water_631g",
+      "method": "secant",
+      "atom": "O 0 0 0; H 0 -.757 .587; H 0 .757 .587",
+      "basis": "6-31g",
+      "orbs": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.22074008300842252,
+      "steady_median_seconds": 0.03497620900452603,
+      "steady_seconds": [
+        0.03574970900081098,
+        0.03575112498947419,
+        0.03392854098638054,
+        0.03567204199498519,
+        0.033734917000401765,
+        0.03497620900452603,
+        0.033663499998510815
+      ],
+      "peak_rss_bytes": 715112448,
+      "xla_temporary_bytes": 32432480,
+      "roots": [
+        -0.5142941523695931,
+        -0.4429565080273066,
+        0.19663941511544092,
+        0.2908552059972145
+      ],
+      "residual": [
+        -6.938893903907228e-17,
+        -3.837208328860697e-15,
+        8.673617379884035e-19,
+        6.938893903907228e-18
+      ],
+      "converged": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "iterations": [
+        4,
+        4,
+        3,
+        3
+      ],
+      "function_evaluations": 6,
+      "derivative_evaluations": 0,
+      "backtracks": 0,
+      "newton_steps": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "case": "water_631g",
+      "method": "newton",
+      "atom": "O 0 0 0; H 0 -.757 .587; H 0 .757 .587",
+      "basis": "6-31g",
+      "orbs": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.3830639999941923,
+      "steady_median_seconds": 0.06802966599934734,
+      "steady_seconds": [
+        0.068193583007087,
+        0.0675415829900885,
+        0.06827504099055659,
+        0.06753054200089537,
+        0.06717641600698698,
+        0.0691247919894522,
+        0.06802966599934734
+      ],
+      "peak_rss_bytes": 784891904,
+      "xla_temporary_bytes": 45195232,
+      "roots": [
+        -0.5142941523695931,
+        -0.44295650802730285,
+        0.19663941511544092,
+        0.2908552059972145
+      ],
+      "residual": [
+        -6.938893903907228e-17,
+        0.0,
+        8.673617379884035e-19,
+        6.938893903907228e-18
+      ],
+      "converged": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "iterations": [
+        4,
+        4,
+        3,
+        3
+      ],
+      "function_evaluations": 6,
+      "derivative_evaluations": 5,
+      "backtracks": 0,
+      "newton_steps": [
+        4,
+        4,
+        3,
+        3
+      ]
+    },
+    {
+      "case": "water_631g",
+      "method": "hybrid",
+      "atom": "O 0 0 0; H 0 -.757 .587; H 0 .757 .587",
+      "basis": "6-31g",
+      "orbs": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "nw": 100,
+      "eta_hartree": 0.001,
+      "backend": "cpu",
+      "jax": "0.8.1",
+      "python": "3.12.2",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "dtype": "float64",
+      "ftol": 1e-08,
+      "xtol": 1e-08,
+      "maxiter": 100,
+      "step_cap": 0.05,
+      "hybrid_every": 4,
+      "max_backtrack": 4,
+      "compile_and_first_solve_seconds": 0.3602053749928018,
+      "steady_median_seconds": 0.047560374994645827,
+      "steady_seconds": [
+        0.04894862500077579,
+        0.046764541999436915,
+        0.04877683300583158,
+        0.04974641698936466,
+        0.047053750007762574,
+        0.047241334003047086,
+        0.047560374994645827
+      ],
+      "peak_rss_bytes": 736133120,
+      "xla_temporary_bytes": 38734112,
+      "roots": [
+        -0.5142941523695931,
+        -0.4429565080273066,
+        0.19663941511544092,
+        0.2908552059972145
+      ],
+      "residual": [
+        -6.938893903907228e-17,
+        -3.837208328860697e-15,
+        8.673617379884035e-19,
+        6.938893903907228e-18
+      ],
+      "converged": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "iterations": [
+        4,
+        4,
+        3,
+        3
+      ],
+      "function_evaluations": 7,
+      "derivative_evaluations": 1,
+      "backtracks": 0,
+      "newton_steps": [
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "case": "h2_sto3g",
+      "method": "secant",
+      "all_converged": true,
+      "max_root_difference_hartree": 0.0,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.0
+    },
+    {
+      "case": "h2_sto3g",
+      "method": "newton",
+      "all_converged": true,
+      "max_root_difference_hartree": 0.0,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.5862787704410568
+    },
+    {
+      "case": "h2_sto3g",
+      "method": "hybrid",
+      "all_converged": true,
+      "max_root_difference_hartree": 0.0,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.4920251863734517
+    },
+    {
+      "case": "water_sto3g",
+      "method": "secant",
+      "all_converged": true,
+      "max_root_difference_hartree": 0.0,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.0
+    },
+    {
+      "case": "water_sto3g",
+      "method": "newton",
+      "all_converged": true,
+      "max_root_difference_hartree": 3.941291737419306e-15,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.7753396354744289
+    },
+    {
+      "case": "water_sto3g",
+      "method": "hybrid",
+      "all_converged": true,
+      "max_root_difference_hartree": 3.552713678800501e-15,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.3139749164488046
+    },
+    {
+      "case": "lih_sto3g",
+      "method": "secant",
+      "all_converged": true,
+      "max_root_difference_hartree": 0.0,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.0
+    },
+    {
+      "case": "lih_sto3g",
+      "method": "newton",
+      "all_converged": true,
+      "max_root_difference_hartree": 5.10702591327572e-14,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.8472901389024998
+    },
+    {
+      "case": "lih_sto3g",
+      "method": "hybrid",
+      "all_converged": true,
+      "max_root_difference_hartree": 5.551115123125783e-16,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.333158175903515
+    },
+    {
+      "case": "water_631g",
+      "method": "secant",
+      "all_converged": true,
+      "max_root_difference_hartree": 0.0,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.0
+    },
+    {
+      "case": "water_631g",
+      "method": "newton",
+      "all_converged": true,
+      "max_root_difference_hartree": 3.7192471324942744e-15,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.9450268607024879
+    },
+    {
+      "case": "water_631g",
+      "method": "hybrid",
+      "all_converged": true,
+      "max_root_difference_hartree": 0.0,
+      "same_roots": true,
+      "time_ratio_to_secant": 1.3597921658259582
+    }
+  ]
+}

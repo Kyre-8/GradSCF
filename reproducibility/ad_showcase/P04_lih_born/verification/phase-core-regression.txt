@@ -1,0 +1,4 @@
+.....................FFT 31 native/PySCF same-grid cross-k AO error 3.673587040782455e-10
+FFT 61 native/PySCF same-grid cross-k AO error 2.8098637688642344e-14
+.
+22 passed in 59.60s

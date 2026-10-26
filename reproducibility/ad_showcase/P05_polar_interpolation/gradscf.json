@@ -1,0 +1,251 @@
+{
+  "complete": true,
+  "passed": true,
+  "lattice_bohr": [
+    [
+      5.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      6.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      7.0
+    ]
+  ],
+  "positions_bohr": [
+    [
+      0.2,
+      0.3,
+      0.4
+    ],
+    [
+      0.7,
+      1.0,
+      1.2
+    ]
+  ],
+  "born_charges": [
+    [
+      [
+        1.1,
+        0.2,
+        -0.1
+      ],
+      [
+        0.3,
+        1.4,
+        0.2
+      ],
+      [
+        0.1,
+        -0.2,
+        0.9
+      ]
+    ],
+    [
+      [
+        -1.1,
+        -0.2,
+        0.1
+      ],
+      [
+        -0.3,
+        -1.4,
+        -0.2
+      ],
+      [
+        -0.1,
+        0.2,
+        -0.9
+      ]
+    ]
+  ],
+  "epsilon_infinity": [
+    [
+      2.4,
+      0.1,
+      0.2
+    ],
+    [
+      0.1,
+      3.1,
+      -0.1
+    ],
+    [
+      0.2,
+      -0.1,
+      2.8
+    ]
+  ],
+  "smearing_inverse_bohr": 0.35,
+  "cutoff": 5,
+  "spring": [
+    [
+      0.2,
+      0.0,
+      0.0,
+      -0.2,
+      -0.0,
+      -0.0
+    ],
+    [
+      0.0,
+      0.2,
+      0.0,
+      -0.0,
+      -0.2,
+      -0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.2,
+      -0.0,
+      -0.0,
+      -0.2
+    ],
+    [
+      -0.2,
+      -0.0,
+      -0.0,
+      0.2,
+      0.0,
+      0.0
+    ],
+    [
+      -0.0,
+      -0.2,
+      -0.0,
+      0.0,
+      0.2,
+      0.0
+    ],
+    [
+      -0.0,
+      -0.0,
+      -0.2,
+      0.0,
+      0.0,
+      0.2
+    ]
+  ],
+  "onsite": [
+    [
+      0.1,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.2,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.4,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5
+    ]
+  ],
+  "short_range_cosine_coefficient": 0.03,
+  "cutoff_records": [
+    {
+      "cutoff": 1,
+      "error": 4.08571771510699e-09,
+      "periodic_error": 9.87630659481627e-05,
+      "self_inverse_imaginary": 4.845997827080298e-07
+    },
+    {
+      "cutoff": 2,
+      "error": 2.602085340342836e-18,
+      "periodic_error": 3.0630272623844314e-13,
+      "self_inverse_imaginary": 5.41086742436607e-15
+    },
+    {
+      "cutoff": 3,
+      "error": 1.788112030672749e-18,
+      "periodic_error": 5.254670456849164e-18,
+      "self_inverse_imaginary": 4.1522244023912285e-19
+    },
+    {
+      "cutoff": 4,
+      "error": 2.0963535942673412e-47,
+      "periodic_error": 5.686248446760901e-18,
+      "self_inverse_imaginary": 5.676869300144258e-20
+    },
+    {
+      "cutoff": 5,
+      "error": 2.0963376004807163e-47,
+      "periodic_error": 5.694509459776365e-18,
+      "self_inverse_imaginary": 5.676869300144338e-20
+    }
+  ],
+  "qmesh_records": [
+    {
+      "qmesh": 3,
+      "same_model_error": 2.7791197517219895e-17,
+      "changed_smearing_error": 0.00020572505328442106,
+      "sample_reconstruction_error": 1.6653345369574815e-16,
+      "total_raw_asr": 0.7998923539858602,
+      "short_range_raw_asr": 0.8007985880749897
+    },
+    {
+      "qmesh": 5,
+      "same_model_error": 5.551365280111014e-17,
+      "changed_smearing_error": 5.572139128129228e-07,
+      "sample_reconstruction_error": 4.996003886654953e-16,
+      "total_raw_asr": 0.7998923539858602,
+      "short_range_raw_asr": 0.8007985880749897
+    },
+    {
+      "qmesh": 7,
+      "same_model_error": 5.551251648001678e-17,
+      "changed_smearing_error": 5.0489276546220394e-11,
+      "sample_reconstruction_error": 9.992008366623944e-16,
+      "total_raw_asr": 0.7998923539858602,
+      "short_range_raw_asr": 0.8007985880749897
+    }
+  ],
+  "elapsed_seconds": 24.135838785000033,
+  "source_sha256": "3aa119b84c4f223a8409f2ed2dbf27609cfecb0a97a8abc7a0a3c09e2b76a889",
+  "script_sha256": "f27e567290ddca2d42e58d88aee8aa75395e85d81c858bd5c5b49b90106b2d8c",
+  "scope": "Manufactured unweighted force constants, not a material. No ASR projection; smearing and reciprocal/q-mesh convergence are distinct."
+}

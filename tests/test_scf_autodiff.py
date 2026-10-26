@@ -70,11 +70,11 @@ def test_failed_adjoint_rejects_approximate_gradient():
     assert jnp.all(jnp.isnan(jax.grad(loss)(jnp.zeros(3))))
 
 
-@pytest.mark.parametrize('mode, expected', [('implicit', 'implicit'), ('impl', 'implicit'), ('unrolled', 'unrolled'), ('expl', 'unrolled')])
+@pytest.mark.parametrize('mode, expected', [('implicit', 'implicit'), ('impl', 'implicit'), ('explicit', 'explicit'), ('unrolled', 'explicit'), ('expl', 'explicit')])
 def test_mode_normalization_and_legacy_configuration(mode, expected):
     from gradscf.scf.autodiff import SCFDifferentiationConfig, normalize_scf_gradient_mode
     from gradscf.scf.differentiable import DifferentiableSCFConfig
-    from gradscf.model.training.config import MolecularTrainingConfig
+    from gradscf.model.neural_xc.training.config import MolecularTrainingConfig
     assert normalize_scf_gradient_mode(mode) == expected
     assert SCFDifferentiationConfig(mode=mode).mode == expected
     assert DifferentiableSCFConfig(gradient_mode=mode).differentiation_config().mode == expected

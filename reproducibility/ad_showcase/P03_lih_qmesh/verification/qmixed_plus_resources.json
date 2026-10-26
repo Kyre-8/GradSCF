@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "examples/pbc/lih_qmesh_phonons.py",
+    "--q",
+    "0.5",
+    "0",
+    "0.3333333333333333"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 9263448,
+  "budget_kib": 33554432,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true,
+  "elapsed_seconds": 273.95619620699927
+}

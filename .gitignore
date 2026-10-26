@@ -10,6 +10,7 @@ __pycache__/
 
 .venv/
 .claude/
+.vscode/
 build/
 dist/
 *.egg-info/
@@ -18,6 +19,7 @@ artifacts/
 datasets/
 docs/
 outputs/
+/graphite_results/
 paper/
 tmp/
 .tmp_*

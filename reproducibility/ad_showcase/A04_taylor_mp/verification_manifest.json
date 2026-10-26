@@ -1,0 +1,19 @@
+{
+  "source_unchanged": true,
+  "source_python_sha256": "ca37f375d0e4cc673d1ca2e5b50f189b9047ad8bce56e00f7f397156fac3e43f",
+  "hostname": "c20",
+  "status": "current_small_gates_pass_full_mp30_resource_failure_retained",
+  "executed_script_hashes": {
+    "examples/mp/he2_convergence.py": "cde97e4bc6a7a6529f83bf5bc8ede6695eb658df8d6e06eebbafa9d4fbf424df",
+    "examples/mp/taylor_series.py": "bbbadb117173094f4041e40389c287448b99aadbfc903d4c3433602737430b3c",
+    "examples/mp/compare_water_pyscf.py": "b8e97669dfa4a74afc69e644e4552b5975e552fbcd6076be65902931ff75ff16",
+    "examples/mp/_pyscf_reference.py": "27864fda5373b7bf0e89d76883b7d1b44117bdd3f8c2049f0971b8af040e2cc2"
+  },
+  "artifacts": {
+    "A04_native.log": "b1af6f6378d79c17aa3381c1e48abd520a6c62830c4dd5f0e819463fb14d0069",
+    "A04_taylor_small.log": "0f6cf11f9944de2da272aac3a05cac1359cb45ca1edda7798091a0a3c3dcb8b5",
+    "A04_water_pyscf.log": "325a0369024f9fd1c4ad9dd83b51b7bc0a8f1a3f5a99213783e1b8f2c652ec9d",
+    "historical_artifacts.json": "9ccdc3377d5599f3ca7382145d6bb46d2d0a966c2fe52589294b435af6627cce",
+    "source_manifest.json": "91a0b5092e40e236b34ffaae239cf74964d21c3f3665f59bcb1f06645a309f38"
+  }
+}

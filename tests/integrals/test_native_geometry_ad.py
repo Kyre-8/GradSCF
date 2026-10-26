@@ -43,13 +43,13 @@ def test_native_dipole_origin_gradient():
     np.testing.assert_allclose(actual, expected, atol=1e-12)
 
 
-@pytest.mark.parametrize("field", ["exponents", "coefficients"])
-def test_native_unimplemented_basis_derivatives_raise(field):
+@pytest.mark.parametrize("operator,field", [("eri", "exponents"), ("eri", "coefficients")])
+def test_native_unimplemented_basis_derivatives_raise(operator, field):
     top, p = integrals.prepare_basis("H 0 0 0; H 0 0 .74", basis="3-21g")
     plan = integrals.make_plan(top, backend="native")
     values = getattr(p, field)
     def f(v):
-        return plan.evaluate("kinetic", replace(p, **{field:(v, *values[1:])})).sum()
+        return plan.evaluate(operator, replace(p, **{field:(v, *values[1:])})).sum()
     with pytest.raises(NotImplementedError, match="(?i)(exponent|coefficient|basis)"):
         jax.grad(f)(values[0])
 
@@ -108,6 +108,8 @@ for op in ["overlap","kinetic","nuclear","dipole","eri"]:
     g=jax.jit(jax.grad(f))(p.centers)
     _,v=jax.jit(lambda r,d:jax.jvp(f,(r,),(d,)))(p.centers,jnp.ones_like(p.centers))
     assert bool(jnp.all(jnp.isfinite(g))) and bool(jnp.isfinite(v))
+    h=jax.jit(jax.hessian(f))(p.centers)
+    assert bool(jnp.all(jnp.isfinite(h)))
 assert not any(m=="pyscf" or m.startswith("pyscf.") for m in sys.modules)
 '''
     env = dict(os.environ, JAX_PLATFORMS="cpu", JAX_ENABLE_X64="1",

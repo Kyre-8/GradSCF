@@ -1,0 +1,32 @@
+{
+  "final_snapshot": "/home/yjiao/gradscf_checks/ad-showcase-h3-nac-20261016",
+  "final_source_python_sha256": "6502174e3de905383418b17f91130b987067a2ea0f1c02fc0c9ce335100ae9a5",
+  "before_guardfix_snapshot": "/home/yjiao/gradscf_checks/ad-showcase-h3-nac-single-jit-20261016",
+  "before_guardfix_source_python_sha256": "a9dd3aa620253823e7e93a4b215584096757992db9735a25594f71364848cd3b",
+  "before_guardfix_executed_working_directory": "/home/yjiao/gradscf_checks/ad-showcase-h3-nac-20261016",
+  "python": "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+  "environment": {
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "PYTHONPATH": "src"
+  },
+  "commands": [
+    "timeout 600 python -m pytest -q tests/fci/test_nested_response.py tests/fci/test_overlap.py tests/fci/test_response.py",
+    "timeout 180 python subspace_nested_jit_probe.py",
+    "timeout 600 python examples/fci/h3_nonadiabatic_coupling.py",
+    "timeout 600 python examples/fci/compare_h3_nac_pyscf.py",
+    "timeout 120 python examples/fci/plot_h3_nac.py"
+  ],
+  "boundary": "The old single-layer science result and failing nested composition were retained. The final FCI wrapper only changes a boolean operator closure to an explicit inexact 0/1 leaf; original NaN and final validity gates remain.",
+  "output_sha256": {
+    "native.json": "f319293bc214645c58ae992acf8ead1c2e821dad9ba5ca10a49495aad198e701",
+    "gap_coupling.csv": "2ac1005bfc5cd2d103eecc59d48874a8c3d98129886ef34cc2c64bd6a0051093",
+    "pyscf.json": "833e7b5987bd36c304c6eb51f9631b3f705a05a28175e1c3ed2ce040217bde90",
+    "h3_nonadiabatic_coupling.png": "19ee95ad8175306bf0905a5f94586bab4c1527d23d4538050de93989f25ac4ca",
+    "h3_nonadiabatic_coupling.pdf": "7a9a894c1fb6bca6af794edba6ef7606bd7b361982fc7c06c1fd5f7881f7a94f",
+    "provenance.json": "e369cf53e09b158a39fdfe4d6d8e7bd45b8145545fed57c49e7410aecb50875e"
+  }
+}

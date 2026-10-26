@@ -4,7 +4,7 @@ import jax
 import jax.numpy as jnp
 
 from gradscf.scf import UKSConfig, run_uks_from_integrals
-from gradscf.integrals.assembly import build_uks_integral_inputs
+from gradscf.scf.inputs.assembly import build_uks_integral_inputs
 from gradscf.scf.uks import (
     _point_unrestricted_xc_value_and_grad_kernel,
     run_unrestricted_scf_scan,

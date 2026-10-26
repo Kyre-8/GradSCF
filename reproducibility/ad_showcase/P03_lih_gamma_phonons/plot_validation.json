@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "native_sha256": "6356e9e23e6df18c019fba1c8dcaa9aa240ee6a1fa5c714e3903086012f7e571",
+  "independent_sha256": "b0fc121285eeeae58a464fced761917a3cb8baee3452bfec0d4515e029788b8f",
+  "rotation_sha256": "469f51acbb6838f18f9f9cad9683b6d3ce5284b4ac3315074586d215be586ce6",
+  "script_sha256": "a4592f9c23911f6bf2965f4a55708998d1ee5b7cb3a26348516adb22a18ceebb",
+  "interpretation": "Signed raw \u0393 frequencies retain finite-grid acoustic errors. No ASR, full-dispersion, LO-TO or converged-material claim.",
+  "grid_convergence_passed": true,
+  "grid_validation_file": "grid_extension_to71.json",
+  "grid_validation_sha256": "4dee8a582976057f527d05f94822829771507eda4939f75903701f0e460654f1"
+}

@@ -4,7 +4,7 @@ from importlib.resources import files
 
 import pytest
 
-from gradscf.integrals.basis_data import load_basis_from_snapshot
+from gradscf.integrals.basis.data import load_basis_from_snapshot
 
 
 @pytest.mark.parametrize("name,symbol", [
@@ -24,6 +24,6 @@ def test_basis_loader_does_not_share_mutable_coefficients():
 
 
 def test_all_supplemental_basis_families_are_retained():
-    bundle = json.loads(files("gradscf.integrals.basis_data").joinpath("_pyscf_basis_bundle.json").read_text())
+    bundle = json.loads(files("gradscf.integrals.basis.data").joinpath("_pyscf_basis_bundle.json").read_text())
     assert set(bundle) == {"sto-3g", "6-31g", "6-31g*", "def2-svp", "cc-pvdz"}
     assert all(bundle[name] for name in bundle)

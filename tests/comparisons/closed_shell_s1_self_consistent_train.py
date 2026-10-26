@@ -42,7 +42,7 @@ from pyscf import dft, gto
 
 from gradscf.model import neural_xc
 from gradscf.data.hdf5_cache import read_restricted_molecule, write_restricted_molecule
-from gradscf.dft.libxc_jax.jax_libxc import b3lyp_component_basis
+from gradscf.dft.xc import b3lyp_component_basis
 from gradscf.model.neural_xc import (
     DEFAULT_INPUT_FEATURE_MODE,
     DEFAULT_NETWORK_ARCHITECTURE,
@@ -51,20 +51,22 @@ from gradscf.model.neural_xc import (
 )
 from pyscf_adapters import build_chunked_hfx_nu_from_mol
 from pyscf_data_reference import restricted_reference_from_pyscf
-from gradscf.model.neural_xc.inputs import ChunkedHFXNu
+from gradscf.dft.hfx import ChunkedHFXNu
 from gradscf.tools.spectra import HARTREE_TO_EV
-from gradscf.model.training import (
+from gradscf.model.neural_xc.training import (
     MolecularTrainingDatum,
     MolecularTrainingConfig,
-    create_train_state_from_molecule,
     molecular_loss,
-    make_molecular_loss_and_grad,
-    make_molecular_train_step,
     predict_excitation_energies,
     predict_ground_state_molecule,
     predict_ground_state_total_energy,
     load_params_checkpoint,
     save_params_checkpoint,
+)
+from gradscf.model.neural_xc.training.trainer import (
+    create_train_state_from_molecule,
+    make_molecular_loss_and_grad,
+    make_molecular_train_step,
 )
 
 

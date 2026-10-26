@@ -12,14 +12,14 @@ import numpy as np
 
 jax.config.update("jax_enable_x64", True)
 
-from gradscf import ci, dft, gto
+from gradscf import ci, gto, scf
 
 
 def main():
     atom = "H 0 0 0; H 0 0 0.8; H 0 0 1.9; H 0 0 3.1"
     start = perf_counter()
     mol = gto.M(atom=atom, basis="sto-3g", unit="Angstrom")
-    mf = dft.RKS(mol, xc="hf", conv_tol=1e-12).run()
+    mf = scf.RHF(mol, conv_tol=1e-12).run()
     if not mf.converged:
         raise RuntimeError("HF did not converge")
     report = {

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/summarize_bgw.py", line 53, in <module>
+    assert len(spectra) == len(rows)*frequencies_per_state and all(len(row) == 15 for row in spectra)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

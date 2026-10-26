@@ -122,7 +122,7 @@ def test_vendor_checksums():
 
 
 def test_eri_rejects_overflowing_shell_workspace_before_loading(monkeypatch):
-    from gradscf.integrals.backends import native
+    from gradscf.integrals.backends.native import ffi as native
     atm, bas, env = _primitive_tables()
     bas[0, 1], bas[0, 3] = 12, 3  # 273 AOs in one Cartesian shell.
     def unexpected_load():
@@ -133,7 +133,7 @@ def test_eri_rejects_overflowing_shell_workspace_before_loading(monkeypatch):
 
 
 def test_spherical_eri_rejects_internal_cartesian_cache_overflow_before_loading(monkeypatch):
-    from gradscf.integrals.backends import native
+    from gradscf.integrals.backends.native import ffi as native
     atm, bas, env = _primitive_tables()
     bas[0, 1], bas[0, 3] = 12, 2
     # Output shell dimension is only 50, but libcint internally contracts 91

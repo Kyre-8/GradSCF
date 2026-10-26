@@ -1,0 +1,137 @@
+{
+  "scope": "Saved 2x2x2 source-grid validation of three CD methods; no GW recomputation, no SC2 mixing, no dense-BZ/bulk-convergence claim",
+  "controls": {
+    "source_kmesh": [
+      2,
+      2,
+      2
+    ],
+    "fft_mesh": [
+      21,
+      21,
+      21
+    ],
+    "nocc": 9,
+    "nmo": 14,
+    "source_points": 8,
+    "bands_per_method": 112,
+    "nw": 64,
+    "fc": false,
+    "exxdiv": null,
+    "screening_cutoff_rydberg": 16.0,
+    "eta_hartree": 0.001,
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "xc": "pbe",
+    "soc": false,
+    "hartree_to_ev": 27.211386245988
+  },
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "gap_helper_source_sha256": "f1558be076b41ab61c00c1f689a188f2ccfbb5397fb457bd70bc6acfa5ac84bb",
+  "methods": {
+    "g0w0": {
+      "source": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/cubic_screen16_refined_nw64/g0w0.npz",
+      "source_sha256": "99e60d901c954b15ae00a254aa4d7ad962d4aacd5907b567afb1c111a21cbe0e",
+      "metadata_sha256": "062c3f7b41068aa5587e2f506994c56c1dfa4419995edcfc14f511d5406993f9",
+      "method": "periodic_g0w0_full_cd_diagonal",
+      "metadata_converged": true,
+      "computed_count": 112,
+      "converged_count": 112,
+      "finite_energy_count": 112,
+      "all_112_masks_passed": true,
+      "reference_energy_max_difference_hartree": 0.0,
+      "reference_coeff_max_difference": 0.0,
+      "source_kpoint_max_difference": 0.0,
+      "gaps": {
+        "sampled_gap_hartree": 0.02897112344521341,
+        "sampled_gap_ev": 0.7883444300479007,
+        "minimum_direct_gap_hartree": 0.02897112344521341,
+        "minimum_direct_gap_ev": 0.7883444300479007,
+        "gamma_direct_gap_hartree": 0.02897112344521341,
+        "gamma_direct_gap_ev": 0.7883444300479007,
+        "vbm_source_index": 0,
+        "cbm_source_index": 0
+      },
+      "positive_finite_branch_count": 112
+    },
+    "evgw": {
+      "source": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/cubic_screen16_refined_nw64/evgw.npz",
+      "source_sha256": "fa36a181202becc2c5c8e6f5fee99f0c0b3bc5825a79a4fbcd6c3d37abf65b68",
+      "metadata_sha256": "a220b019b9d1d3ec5a784c5d5c09f984af78fc772cb10861045fddf55674aab2",
+      "method": "periodic_evgw_full_cd_diagonal",
+      "metadata_converged": true,
+      "computed_count": 112,
+      "converged_count": 112,
+      "finite_energy_count": 112,
+      "all_112_masks_passed": true,
+      "reference_energy_max_difference_hartree": 0.0,
+      "reference_coeff_max_difference": 0.0,
+      "source_kpoint_max_difference": 0.0,
+      "gaps": {
+        "sampled_gap_hartree": 0.04424571045885095,
+        "sampled_gap_ev": 1.203987117023944,
+        "minimum_direct_gap_hartree": 0.04424571045885095,
+        "minimum_direct_gap_ev": 1.203987117023944,
+        "gamma_direct_gap_hartree": 0.04424571045885095,
+        "gamma_direct_gap_ev": 1.203987117023944,
+        "vbm_source_index": 0,
+        "cbm_source_index": 0
+      },
+      "positive_finite_branch_count": 112
+    },
+    "qsgw": {
+      "source": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/cubic_screen16_cached_nw64/qsgw.npz",
+      "source_sha256": "463f0e5819d158110e3dedb3157e1637803a57179b3d87db55a63414af84bab0",
+      "metadata_sha256": "4835235091cb206e4a6803a02f2865863faf263db4e883d8ce9cf98d731c1e9b",
+      "method": "periodic_qsgw_full_cd_matrix_mode_a",
+      "metadata_converged": true,
+      "computed_count": 112,
+      "converged_count": 112,
+      "finite_energy_count": 112,
+      "all_112_masks_passed": true,
+      "reference_energy_max_difference_hartree": 0.0,
+      "reference_coeff_max_difference": 0.0,
+      "source_kpoint_max_difference": 0.0,
+      "gaps": {
+        "sampled_gap_hartree": 0.048409647186563765,
+        "sampled_gap_ev": 1.3172936076255928,
+        "minimum_direct_gap_hartree": 0.048409647186563765,
+        "minimum_direct_gap_ev": 1.3172936076255928,
+        "gamma_direct_gap_hartree": 0.048409647186563765,
+        "gamma_direct_gap_ev": 1.3172936076255928,
+        "vbm_source_index": 0,
+        "cbm_source_index": 0
+      }
+    }
+  },
+  "gamma_source_index": 0,
+  "pbe": {
+    "sampled_gap_hartree": 0.009655216748141904,
+    "sampled_gap_ev": 0.2627318322224216,
+    "minimum_direct_gap_hartree": 0.009655216748141904,
+    "minimum_direct_gap_ev": 0.2627318322224216,
+    "gamma_direct_gap_hartree": 0.009655216748141904,
+    "gamma_direct_gap_ev": 0.2627318322224216,
+    "vbm_source_index": 0,
+    "cbm_source_index": 0
+  },
+  "elapsed_seconds": 0.004653918003896251,
+  "cpu_seconds": 0.0046356449999999105
+}

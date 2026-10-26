@@ -1,0 +1,129 @@
+{
+  "symbols": [
+    "O",
+    "H",
+    "H"
+  ],
+  "basis": "6-31g*",
+  "coordinates_bohr": [
+    [
+      4.857910654423621e-16,
+      -4.620046916292872e-16,
+      0.017610465331195143
+    ],
+    [
+      3.5992222290585285e-16,
+      1.4249790874094932,
+      1.1011947673343991
+    ],
+    [
+      -8.457132883473369e-16,
+      -1.4249790874094956,
+      1.1011947673343803
+    ]
+  ],
+  "direction": [
+    [
+      -4.598431969495307e-17,
+      1.52482054728616e-16,
+      0.07049032526189888
+    ],
+    [
+      5.770814867525946e-16,
+      0.42967998660535167,
+      -0.5593663076491627
+    ],
+    [
+      1.5272303668965562e-16,
+      -0.42967998660535345,
+      -0.5593663076491665
+    ]
+  ],
+  "coordinate_definition": "q is a bohr displacement along the unit-norm H2O bend mode",
+  "source_harmonic": "reproducibility/ad_showcase/G05_water_rhf_hessian/gradscf.json",
+  "source_mode_index": 0,
+  "source_mass_normalized_direction": [
+    [
+      -1.035278166625599e-18,
+      3.4329385127354977e-18,
+      0.0015869995508488582
+    ],
+    [
+      1.2992251871117103e-17,
+      0.009673695549253129,
+      -0.012593417262596019
+    ],
+    [
+      3.4383639134910148e-18,
+      -0.009673695549253169,
+      -0.012593417262596102
+    ]
+  ],
+  "dq_dQ_inverse_sqrt_electron_mass": 0.022513721492311744,
+  "case": "water_631gstar",
+  "method": "RHF",
+  "cart": true,
+  "field": null,
+  "derivative_method": "reverse first derivative, then nested forward JVP; native integrals and implicit SCF",
+  "derivative_units": [
+    "Eh",
+    "Eh/bohr",
+    "Eh/bohr^2",
+    "Eh/bohr^3",
+    "Eh/bohr^4"
+  ],
+  "derivatives": [
+    -76.01074650846026,
+    4.107425982611153e-08,
+    0.13664744523662964,
+    -0.09036361875890028,
+    -0.06870162780723287
+  ],
+  "seconds_including_compilation": [
+    7.789079143985873,
+    8.821810498979175,
+    13.027456807001727,
+    21.78890013298951,
+    39.871510438009864
+  ],
+  "native_curvature_differences": [
+    {
+      "step_bohr": 0.003,
+      "cubic": -0.09036255834348379,
+      "quartic": -0.06870253678305084,
+      "cubic_error": 1.0604154164900459e-06,
+      "quartic_error": 9.089758179758878e-07
+    },
+    {
+      "step_bohr": 0.001,
+      "cubic": -0.09036350094081269,
+      "quartic": -0.06870173127615509,
+      "cubic_error": 1.178180875915924e-07,
+      "quartic_error": 1.0346892222179438e-07
+    },
+    {
+      "step_bohr": 0.0003,
+      "cubic": -0.09036360814497954,
+      "quartic": -0.06870152718323969,
+      "cubic_error": 1.061392074230838e-08,
+      "quartic_error": 1.0062399317944948e-07
+    }
+  ],
+  "density_directional_derivative_norm": 0.3009648153301714,
+  "center_orbital_gradient_norm": 2.4889934981610697e-14,
+  "orbital_stability_eigenvalues": [
+    1.4730591552134835,
+    1.7329933616438442,
+    1.8473651754833627
+  ],
+  "orbital_stability_residuals": [
+    1.333005785830736e-14,
+    7.759481752238259e-15,
+    7.5895302426997e-14
+  ],
+  "scf_energy_tolerance": 1e-13,
+  "scf_gradient_tolerance": 1e-11,
+  "implicit_response_tolerance": 1e-10,
+  "backend": "CPU float64",
+  "threads": 2
+}

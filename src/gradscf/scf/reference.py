@@ -1,12 +1,11 @@
-"""Shared eager conversion from converged HF references to MO Hamiltonians."""
+"""SCF reference preparation: AO snapshots and distinct post-HF Hamiltonians."""
 
 from dataclasses import dataclass
 import hashlib
 import numpy as np
 import jax.numpy as jnp
-from ..integrals.mo import (transform_integrals, validate_integrals,
-                            validate_unrestricted_integrals, unrestricted_frozen_indices,
-                            transform_unrestricted_integrals)
+from gradscf._memory import resolve_memory_mb, validate_reserved_bytes
+from gradscf.ao2mo import transform_integrals, validate_integrals, validate_unrestricted_integrals, unrestricted_frozen_indices, transform_unrestricted_integrals
 
 
 @dataclass(frozen=True)
@@ -32,7 +31,9 @@ class UnrestrictedReference:
     mo_energy: object = None
 
 
-def unrestricted_reference_from_source(source):
+def unrestricted_reference_from_source(source, *, max_memory=None, reserved_bytes=0):
+    max_memory = resolve_memory_mb(max_memory, source)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     if isinstance(source, UnrestrictedReference):
         h, g = validate_unrestricted_integrals(source.h1, source.eri)
         unrestricted_frozen_indices(h[0].shape[0], source.nocc)
@@ -72,7 +73,8 @@ def unrestricted_reference_from_source(source):
         kwargs = {"eri" if jnp.ndim(eri) == 4 else "eri_pair_matrix": eri}
     else:
         raise ValueError("HF reference does not supply post-HF two-electron integrals")
-    h, g = transform_unrestricted_integrals(hcore, coeff, **kwargs)
+    h, g = transform_unrestricted_integrals(hcore, coeff, max_memory=max_memory,
+                                           reserved_bytes=reserved_bytes, **kwargs)
     return UnrestrictedReference(h, g, nocc, enuc, source.mo_energy)
 
 
@@ -82,7 +84,9 @@ def is_unrestricted_source(source):
     return isinstance(source, (UnrestrictedReference, UKS, ROKS))
 
 
-def reference_from_source(source):
+def reference_from_source(source, *, max_memory=None, reserved_bytes=0):
+    max_memory = resolve_memory_mb(max_memory, source)
+    reserved_bytes = validate_reserved_bytes(reserved_bytes)
     if isinstance(source, RestrictedReference):
         h, g = validate_integrals(source.h1, source.eri)
         if not isinstance(source.nocc, int) or not 0 <= source.nocc <= h.shape[0]:
@@ -123,7 +127,8 @@ def reference_from_source(source):
                 "SCF reference does not supply post-HF two-electron integrals"
             )
         kwargs = {"eri_pair_matrix": pair}
-    h, g = transform_integrals(inputs.hcore, c, **kwargs)
+    h, g = transform_integrals(inputs.hcore, c, max_memory=max_memory,
+                                reserved_bytes=reserved_bytes, **kwargs)
     return RestrictedReference(h, g, nocc, inputs.nuclear_repulsion, source.mo_energy)
 
 
@@ -132,8 +137,11 @@ def _array_signature(value):
     return array.shape, array.dtype.str, hashlib.sha256(array.tobytes()).digest()
 
 
-def reference_state_signature(source):
+def reference_state_signature(source, *, allow_range_separated=False):
     """Fingerprint a validated eager post-HF input, including mutable arrays."""
+    from .rsh import reject_rsh_response
+    if not allow_range_separated:
+        reject_rsh_response(source)
     if isinstance(source, UnrestrictedReference):
         return (source.nocc, tuple(_array_signature(a) for a in (*source.h1, *source.eri)),
                 _array_signature(source.nuclear_repulsion))
@@ -152,3 +160,40 @@ def reference_state_signature(source):
         _array_signature(source.mo_coeff),
         _array_signature(source.mo_occ),
     )
+
+
+def as_reference(source, *, allow_range_separated=False):
+    """Resolve an AO/grid state from an SCF facade or an explicit array state.
+
+    This is an eager source adapter, not the MO Hamiltonian adapter used by
+    CI/CC and not a GW/BSE reference conversion. The source owns freshness,
+    convergence and spin/representation validation.
+    """
+    from .rsh import reject_rsh_response
+    if not allow_range_separated:
+        reject_rsh_response(source)
+    else:
+        ensure = getattr(source, '_ensure_reference', None)
+        if callable(ensure):
+            return ensure()  # Source freshness checks remain in force.
+    convert = getattr(source, 'to_reference', None)
+    if callable(convert):
+        return convert()
+    if hasattr(source, 'molecule'):
+        molecule = source.molecule
+        if molecule is not None:
+            return molecule
+        ensure = getattr(source, '_ensure_molecule', None)
+        if callable(ensure):
+            return ensure()
+    if hasattr(source, 'reference'):
+        ensure = getattr(source, '_ensure_reference', None)
+        if callable(ensure):
+            return ensure()
+        if source.reference is not None:
+            return source.reference
+        ensure = getattr(source, '_ensure_molecule', None)
+        if callable(ensure):
+            return ensure()
+        raise RuntimeError('Run ground-state mf.kernel() or mf.run() before requesting a reference.')
+    return source

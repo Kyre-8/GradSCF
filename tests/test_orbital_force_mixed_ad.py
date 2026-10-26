@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from gradscf import integrals
 from gradscf.scf import minimize_uks_from_integrals, nuclear_repulsion_energy
-from gradscf.model.training import energy_and_forces, make_force_loss_and_grad
+from gradscf.model.neural_xc.training import energy_and_forces, make_force_loss_and_grad
 
 
 @pytest.mark.parametrize('mode',['implicit','unrolled'])

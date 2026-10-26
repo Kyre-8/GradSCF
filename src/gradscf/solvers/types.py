@@ -228,3 +228,29 @@ class NonHermitianResult(NamedTuple):
     spectral_gaps: Array
     guard_residual_norms: Array
     restarts: Array
+
+
+class NonHermitianSubspaceResult(NamedTuple):
+    """Invariant AD outputs and a stopped legacy-shaped diagnostic result.
+
+    Proper subspaces require a complete isolated real semisimple cluster.
+    The full space instead has P=I and trace(A), even at a finite Jordan block;
+    its raw_result has empty spectral arrays because no eigensolve is needed.
+    """
+    projection: Array | None
+    eigenvalue_sum: Array
+    response_valid: Array
+    boundary_gap: Array
+    raw_result: NonHermitianResult
+
+    @property
+    def values(self):
+        return None
+
+    @property
+    def right_vectors(self):
+        return None
+
+    @property
+    def left_vectors(self):
+        return None

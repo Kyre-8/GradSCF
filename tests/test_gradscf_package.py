@@ -11,7 +11,7 @@ import numpy as np
 def test_distribution_uses_gradscf_name_and_package_data():
     metadata = tomllib.loads(Path("pyproject.toml").read_text())
     assert metadata["project"]["name"] == "gradscf"
-    assert "gradscf.integrals.basis_data" in metadata["tool"]["setuptools"]["package-data"]
+    assert "gradscf.integrals.basis.data" in metadata["tool"]["setuptools"]["package-data"]
     assert not Path("src/td_graddft").exists()
     assert not Path("src/td_graddft_tools").exists()
 
@@ -20,7 +20,7 @@ def test_gradscf_exposes_existing_scientific_namespaces():
     assert importlib.util.find_spec("gradscf") is not None
     package = importlib.import_module("gradscf")
     assert Path(package.__file__).resolve() == Path("src/gradscf/__init__.py").resolve()
-    for name in ("gto", "scf", "dft", "tdscf", "neural_xc", "training"):
+    for name in ("gto", "scf", "dft", "tdscf", "model", "training"):
         assert getattr(package, name) is importlib.import_module(f"gradscf.{name}")
     for name in ("UHF", "ROHF", "GHF", "RKS", "UKS", "ROKS", "GKS"):
         cls = getattr(package.scf, name)
@@ -33,7 +33,7 @@ def test_gradscf_loads_bundled_basis_resources():
     assert importlib.util.find_spec("gradscf") is not None
     from importlib.resources import files
 
-    basis = files("gradscf.integrals.basis_data").joinpath("pyscf_basis_snapshot/sto-3g.dat")
+    basis = files("gradscf.integrals.basis.data").joinpath("pyscf_basis_snapshot/sto-3g.dat")
     assert basis.is_file()
     assert "BASIS" in basis.read_text()
 

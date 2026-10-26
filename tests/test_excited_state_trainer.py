@@ -5,13 +5,13 @@ from types import SimpleNamespace
 import jax.numpy as jnp
 import pytest
 
-from gradscf.model.training import (
+from gradscf.model.neural_xc.training import (
     ExcitedStateFineTuneConfig,
     ExcitedStateFineTuner,
     MolecularTrainingConfig,
     MolecularTrainingDatum,
 )
-from gradscf.model.training.excited_state_trainer import (
+from gradscf.model.neural_xc.training.excited_state_trainer import (
     _label_tree_for_trainable_prefixes,
 )
 
@@ -44,7 +44,7 @@ def test_trainable_prefix_labels_only_selected_parameter_subtree():
 
 
 def test_fine_tuner_reuses_molecular_loss_and_freezes_ground_params(monkeypatch):
-    import gradscf.model.training.excited_state_trainer as module
+    import gradscf.model.neural_xc.training.excited_state_trainer as module
 
     calls = []
 

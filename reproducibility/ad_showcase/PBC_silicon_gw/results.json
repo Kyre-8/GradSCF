@@ -1,0 +1,380 @@
+{
+  "complete": true,
+  "passed": false,
+  "stage": "complete",
+  "settings": {
+    "a_angstrom": 5.431,
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pbe",
+    "kmesh": [
+      2,
+      1,
+      1
+    ],
+    "mesh": [
+      21,
+      21,
+      21
+    ],
+    "eta_hartree": 0.001,
+    "nw": 8,
+    "fc": true
+  },
+  "source_sha256": {
+    "/home/yjiao/gradscf_checks/ad-showcase-periodic-gw-transition-20261016-agent/examples/gw/pbc_silicon_qp.py": "fecb7ac185a7990f1033c62c01be540d8fdf6ad02a34a29da9d72fcaf08c7fff",
+    "examples/pbc/band_structures/systems.py": "9d5fd37d3a8323378ff63da03c77604e32b171e95af1a6824c5376a68ef98870",
+    "src/gradscf/pbc/scf.py": "755a83038262d0c8c3b45ee32bbbeb4d640d094445c890c4c437bc21ea55d648",
+    "src/gradscf/pbc/_kpoint.py": "5bd5f47ad9ca291e5748f321e64cf36d9ec88126f1147958bbfac53e962c4b9a",
+    "src/gradscf/pbc/gto.py": "7424680d5eb56f9c98e2f4272ca0f13e29f07205891256c5243a692c32b8ad20",
+    "src/gradscf/integrals/periodic/fft.py": "70e593e5690a1ca50c69ccd068d14d5da68366f2d7e3a452d2662b5823b1993c",
+    "src/gradscf/gw/pbc/ksigma.py": "5f888ef9cde7bbe431e9714b4c61bf7259ab78801eb4a03561461fedc78a4c23",
+    "src/gradscf/gw/pbc/product_basis.py": "b7e69e1e24f5c916c622ac53704b414ec621cfd1c14346134f809f8f6bc3305d",
+    "src/gradscf/gw/pbc/q0.py": "321a18704159533cab308700ae71b1925e6ebb86f8751d7d6bcf497df0dcfeed",
+    "src/gradscf/gw/screened.py": "308493c8837febc20df005ffd8dcd5131fd4c9de12f80fde59c493ca90ab13e2",
+    "src/gradscf/solvers/nonlinear/scalar.py": "f20e5f681cbde7ab0f159d7daadc29cc45931f0649a79f14927362b37d44464b",
+    "src/gradscf/solvers/linear/complex.py": "5c272a7da13e41299fec71b3a2a78a27733ec51834792af3805accba78d8a5e5"
+  },
+  "hostname": "c20",
+  "jax": "0.10.0",
+  "dtype": "float64/complex128",
+  "backend": "cpu",
+  "allowed_cpu_ids": [
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31
+  ],
+  "threads": {
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "MKL_NUM_THREADS": "2",
+    "NUMEXPR_NUM_THREADS": "2"
+  },
+  "discretization_converged": false,
+  "periodic_ad_supported": false,
+  "scope": "Direct diagonal G0W0 in the converged KS basis, two sampled k points. No off-mesh GW interpolation, bulk gap, or degenerate-subspace self-energy diagonalization claim.",
+  "q0_convention": "Existing finite-eta head/wing prescription; compression parity is not an independent physical validation of opposite-wing conjugation.",
+  "elapsed_seconds": 46.45711369199853,
+  "peak_rss_kib": 2000808,
+  "scf_converged": true,
+  "energy_hartree": -7.41142105705312,
+  "scf_seconds": 26.60635262299911,
+  "nocc": 4,
+  "nmo": 8,
+  "fractional_kpoints": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      -0.5,
+      1.503632475918254e-17,
+      1.503632475918254e-17
+    ]
+  ],
+  "ks_gap_hartree": 0.08198841607873208,
+  "lattice_bohr": [
+    [
+      0.0,
+      5.131551291256425,
+      5.131551291256425
+    ],
+    [
+      5.131551291256425,
+      0.0,
+      5.131551291256425
+    ],
+    [
+      5.131551291256425,
+      5.131551291256425,
+      0.0
+    ]
+  ],
+  "coordinates_angstrom": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      1.35775,
+      1.35775,
+      1.35775
+    ]
+  ],
+  "basis_data": {
+    "Si": [
+      [
+        0,
+        [
+          1.20324036,
+          0.3290356759
+        ],
+        [
+          0.468838597,
+          -0.2533162616
+        ],
+        [
+          0.167985391,
+          -0.7870936517
+        ],
+        [
+          0.057561689,
+          -0.1909870193
+        ]
+      ],
+      [
+        1,
+        [
+          1.20324036,
+          0.0474536439
+        ],
+        [
+          0.468838597,
+          -0.2594495462
+        ],
+        [
+          0.167985391,
+          -0.5440932235
+        ],
+        [
+          0.057561689,
+          -0.3623984652
+        ]
+      ]
+    ]
+  },
+  "pseudopotential_data": [
+    [
+      [
+        2,
+        2
+      ],
+      0.44,
+      1,
+      [
+        -6.26928833
+      ],
+      2,
+      [
+        0.43563383,
+        2,
+        [
+          [
+            8.9517415,
+            -2.70627082
+          ],
+          [
+            -2.70627082,
+            3.4937806
+          ]
+        ]
+      ],
+      [
+        0.49794218,
+        1,
+        [
+          [
+            2.43127673
+          ]
+        ]
+      ]
+    ],
+    [
+      [
+        2,
+        2
+      ],
+      0.44,
+      1,
+      [
+        -6.26928833
+      ],
+      2,
+      [
+        0.43563383,
+        2,
+        [
+          [
+            8.9517415,
+            -2.70627082
+          ],
+          [
+            -2.70627082,
+            3.4937806
+          ]
+        ]
+      ],
+      [
+        0.49794218,
+        1,
+        [
+          [
+            2.43127673
+          ]
+        ]
+      ]
+    ]
+  ],
+  "qp_orbitals": [
+    3,
+    4
+  ],
+  "qp_kpoints": [
+    0,
+    1
+  ],
+  "complete_screening_transitions": 32,
+  "estimated_gw_primary_bytes": 31240352,
+  "primary_array_limit_bytes": 268435456,
+  "qp_residual_gate_hartree": 1e-06,
+  "gw_seconds": 19.846982315997593,
+  "qp_computed_mask": [
+    [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  ],
+  "converged_mask": [
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  ],
+  "ks_hartree": [
+    [
+      -0.1945979078326597,
+      0.26140415991530547,
+      0.26140416091783225,
+      0.26553646115579665,
+      0.36108871188728187,
+      0.36394373148821707,
+      0.3639437329849213,
+      0.39016598940219477
+    ],
+    [
+      -0.11112455223065325,
+      -0.006837827297250128,
+      0.20262350177968555,
+      0.20262350251392391,
+      0.34752487723452874,
+      0.4545358100142305,
+      0.4545358121156013,
+      0.7496835262571876
+    ]
+  ],
+  "qp_hartree": [
+    [
+      -0.1945979078326597,
+      0.26140415991530547,
+      0.26140416091783225,
+      0.29349215776725646,
+      0.41978323466624157,
+      0.36394373148821707,
+      0.3639437329849213,
+      0.39016598940219477
+    ],
+    [
+      -0.11112455223065325,
+      -0.006837827297250128,
+      0.20262350177968555,
+      0.19126506128080156,
+      0.41169235716669367,
+      0.4545358100142305,
+      0.4545358121156013,
+      0.7496835262571876
+    ]
+  ],
+  "qp_residual_hartree": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      -2.500777362968165e-14,
+      2.220446049250313e-15,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      -0.004304493678315702,
+      3.709113571837008e-11,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "max_qp_residual_hartree": 0.004304493678315702,
+  "internal_g_orbitals": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "screening_occupied": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "screening_virtual": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "error": "RuntimeError: The requested QP levels did not all pass their residual/convergence gates"
+}

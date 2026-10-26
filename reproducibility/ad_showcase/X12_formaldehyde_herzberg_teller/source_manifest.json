@@ -1,0 +1,42 @@
+{
+  "source_python_sha256": "1da8d8ca5202f761c9390d241d64a708c6d95bd2a424fe8de43dd054e7cc11e5",
+  "files": {
+    "src/gradscf_tools/franck_condon.py": "64e862a2b295389eeacc44ef3c35ac230a2a73b092213dce5291a4db99ed9210",
+    "examples/tdscf/formaldehyde_herzberg_teller.py": "39c32b79c6488b9ae22c347c4f5ae83914cb5e283e5f6c68807f00e17c3ad1b7",
+    "examples/tdscf/plot_formaldehyde_herzberg_teller.py": "4079bf00651dd814d774d43c12b361ba89e2733815dce8f5bb66097b417d89f3",
+    "tests/test_herzberg_teller.py": "f6a29636cc4b47c68a3125948e8ffc91d5be94df67488e3cd776169beeff87cb",
+    "tests/test_franck_condon.py": "4bc82a55d039c604dea3b59c584cefd3ebdc56799099e2e88e0e2df8dd591146",
+    "examples/tdscf/formaldehyde_franck_condon.py": "a8da59e93b1bd9749b790c39d7a2472fccd5f829e6685d18dd74af7f9058d207"
+  },
+  "input_checks": {
+    "coordinate_max_error_bohr": 0.0,
+    "converted_mode_max_error": 1.734723475976807e-18,
+    "cartesian_contraction_max_error": 8.673617379884035e-19,
+    "input_mode_coordinate_units": "Bohr sqrt(amu); R=R0+Q*mode, with mode.T M_amu mode=1",
+    "derivative_units": "(e bohr)/(bohr sqrt(electron mass))",
+    "amu_to_electron_mass": 1822.8884862827601,
+    "original_electronic_oscillator_strength": 2.889818133684066e-31,
+    "input_hashes": {
+      "X07/gradscf.json": "de482855eabf4e5c3708d56cb568c59db56480cf4a7963d529c9c541885c7be1",
+      "X07/pyscf.json": "f0b210dff42cbe1edad222c6a097fdaba59329a19b14ea98f7c3b97748199a57",
+      "X11/gradscf.json": "1e87fea9be33f261e45b8c7ced7f3255f76623b5440b936739f159f4404fd58a",
+      "emission.json": "0a33ef395c89dbb6f52a7fb9bb216f603c1829d35e9f1e49d18222e1d33da28b",
+      "excited_ad.json": "c0dc6f69e82f1cdd564979412d806ae46378ad070d62d1a6bde5ea66d9a57668"
+    },
+    "electronic_source_python_sha256": "2bf58e608f290fbf3b3ef1fcee483a336ef94740be3c269bf622cf92f217502a",
+    "harmonic_source_python_sha256": "f5630d7d21019689822a63ce0867ef0e6abec33ee5d75aac16845e012389569f",
+    "electronic_response": "Full relaxed HF orbital, CIS eigenpair and moving AO dipole response from validated X07",
+    "phase": "Signed dipole and derivatives share the same X07 baseline; harmonic surfaces carry no electronic phase."
+  },
+  "hostname": "c20",
+  "python": "3.11.15",
+  "source_origin": "Frozen X11 source plus the coordinate-overlap extension; X07 electronic response data and X11 surfaces remain unchanged.",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2"
+  }
+}

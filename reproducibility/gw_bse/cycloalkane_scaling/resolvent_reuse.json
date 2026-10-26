@@ -1,0 +1,84 @@
+{
+  "system": {
+    "n": 3,
+    "formula": "C3H6",
+    "smiles": "C1CC1",
+    "atom": "C -0.301636710249 0.813148191685 -0.005975279668; C -0.553364939497 -0.667715679513 0.013200480154; C 0.855001628328 -0.145433315588 -0.007225228893; H -0.515411620873 1.353827463013 -0.920747135445; H -0.496550731391 1.374208250185 0.900700895327; H -0.937672315814 -1.130251327851 -0.888581286420; H -0.918814590144 -1.109870162336 0.932867462364; H 1.443653908770 -0.233766815743 0.898604333924; H 1.424795370869 -0.254146603852 -0.922844241343",
+    "unit": "Angstrom",
+    "seed": 20261001,
+    "rdkit": "2025.03.3",
+    "geometry_method": "ETKDGv3; lowest MMFF94 energy among 5 optimized conformers",
+    "mmff_energy_kcal_mol": 15.550734237707655
+  },
+  "backend": "cpu",
+  "device": "TFRT_CPU_0",
+  "jax": "0.8.1",
+  "python": "3.12.2",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "basis": "sto-3g",
+  "auxbasis": "weigend",
+  "nw": 64,
+  "eta_ha": 1e-05,
+  "conv_tol_ha": 1e-07,
+  "damping": 0.3,
+  "nmo": 21,
+  "naux": 255,
+  "repeats": 3,
+  "threads": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "response_convention": "Legacy CD real-axis 2i*eta; separate real imaginary-axis and complex retarded RPA models",
+  "source_sha256": {
+    "src/gradscf/gw/poles.py": "59518d578772a4bf22782671189f7b01f397ca23e35f1f5113a6faeadf2fac13",
+    "src/gradscf/solvers/linear/shifted.py": "2f8012f82e7b44108021fe378c523b3c14f890aed2cdc6d1270aea9bec708c8b"
+  },
+  "note": "Serial in one process; first call per method/path is not a fresh-process cold start. Warm timings are repeats 2 and 3. No BSE or SCF included in GW timings.",
+  "results": {
+    "dense_reference": {
+      "evgw0": {
+        "seconds": [
+          16.199551541008987,
+          12.841073667019373,
+          12.576012125005946
+        ],
+        "warm_median_s": 12.70854289601266,
+        "max_energy_difference_ha": 0.0,
+        "qp_residual_max_ha": 4.00806923761543e-08
+      },
+      "evgw": {
+        "seconds": [
+          13.3310655420064,
+          13.294668749993434,
+          13.320003041997552
+        ],
+        "warm_median_s": 13.307335895995493,
+        "max_energy_difference_ha": 0.0,
+        "qp_residual_max_ha": 9.680694379454735e-08
+      }
+    },
+    "reused_factorization": {
+      "evgw0": {
+        "seconds": [
+          1.8836779170087539,
+          0.45763300001272,
+          0.4454857079836074
+        ],
+        "warm_median_s": 0.4515593539981637,
+        "max_energy_difference_ha": 1.7763568394002505e-15,
+        "qp_residual_max_ha": 4.00806923761543e-08
+      },
+      "evgw": {
+        "seconds": [
+          0.6980726250039879,
+          0.7241901670058724,
+          0.7186584160081111
+        ],
+        "warm_median_s": 0.7214242915069917,
+        "max_energy_difference_ha": 1.7763568394002505e-15,
+        "qp_residual_max_ha": 9.680694068592288e-08
+      }
+    }
+  }
+}

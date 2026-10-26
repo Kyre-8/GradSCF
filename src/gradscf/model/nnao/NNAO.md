@@ -2,7 +2,7 @@
 
 This module connects an upstream MACE-JAX encoder to per-atom contracted
 Gaussian basis parameters. The methane tool validates training against converged RHF energies.
-The upstream snapshot remains unchanged; `UPSTREAM.json` identifies its commit
+The upstream snapshot remains unchanged; `vendor/mace-jax/UPSTREAM.json` identifies its commit
 and checksums. Our adapter files are `basis.py`, `graph.py`, and `encoder.py`.
 
 
@@ -136,13 +136,35 @@ Element order, atom order, and cutoff must agree with the model/layout.
 
 ## Coefficient derivatives and validation
 
-`gradscf.integrals.contraction` exposes `primitive_basis`,
+`gradscf.integrals.basis.contraction` exposes `primitive_basis`,
 `contraction_matrix`, and `contract_integrals`. With fixed exponents and
 coordinates, compute native primitive tensors once, then differentiate JAX
 contraction/normalization with respect to network outputs or model weights.
-Direct coefficient AD through native `plan.evaluate` is still unsupported.
-A full primitive ERI cache costs O(N_primitive^4); use it only for bounded
-validation, not as the eventual large-system training architecture.
+Native `plan.evaluate` supports coefficient JVP/VJP and second products for
+overlap, kinetic, nuclear-attraction and dipole integrals. Fixed-auxiliary
+three-center RI supports coefficient products when a metric is prepared before
+AD; these paths also support first-order orbital exponent derivatives.
+`tools/train_nnao_joint_ad.py` uses contracted native integrals and strict
+implicit SCF to optimize MACE coefficients and shared log-exponent scales.
+Its DF-RHF primal checks real internal orbital stability and follows negative
+curvature with bounded SCF restarts before attaching the implicit response.
+Unresolved or unstable candidates are rejected without advancing parameters
+or Adam moments. Small orbital spaces use a Hessian; larger ones use the
+shared HVP/Davidson solver. This does not test spin/complex instabilities or
+certify a global minimum. Density-only guesses use a density-consistent J/K.
+The initial checkpoint parity check retains the pre-stabilization SCF energy;
+`parent-parity.json` records stable energies separately as the new loss baseline.
+Older checkpoints must be revalidated under this policy before resuming training.
+The joint trainer bounds resident CPU integral JIT kernels with
+`--cpu-jit-cache-size` (default 8), retaining GPU model/SCF kernels when possible.
+Linux executable-map pressure triggers additional eviction before dispatch.
+Disk compilation caching is enabled under the output directory by default;
+`--compilation-cache-dir` selects another root, always namespaced by the native
+library hash. Cache eviction does not modify basis parameters or optimizer state.
+Four-center ERI, ECP and direct-J/K basis derivatives, exponent Hessians and
+basis/geometry mixed second derivatives are not provided by this path.
+A full primitive ERI cache costs O(N_primitive^4) and is confined to bounded
+reference checks; the joint native trainer creates no such cache.
 
 Tests cover all template layouts, per-atom/per-shell mapping, native versus
 PySCF integrals for HF/HCl/HBr/HI, Cartesian/spherical representations, JIT,

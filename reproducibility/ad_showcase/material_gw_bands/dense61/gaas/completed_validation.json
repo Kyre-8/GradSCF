@@ -1,0 +1,99 @@
+{
+  "system": "gaas",
+  "computed": 366,
+  "accepted": 363,
+  "failed": [
+    {
+      "point": 9,
+      "band": 10,
+      "residual_hartree": -0.0005662361921108527,
+      "candidate_hartree": 0.608863814142766
+    },
+    {
+      "point": 21,
+      "band": 11,
+      "residual_hartree": -0.12356809674149812,
+      "candidate_hartree": 0.6572850181235544
+    },
+    {
+      "point": 49,
+      "band": 6,
+      "residual_hartree": 0.0012754113303621029,
+      "candidate_hartree": 0.13081045908096267
+    }
+  ],
+  "max_accepted_residual_hartree": 1.0885875534327738e-12,
+  "neighbor_correction_step": {
+    "hartree_to_ev": 27.211386245988,
+    "eligible_adjacent_pairs": 354,
+    "max_abs_correction_step_ev": 2.088419465211995,
+    "from_point": 24,
+    "to_point": 25,
+    "band": 11,
+    "signed_correction_step_ev": 2.088419465211995,
+    "from_correction_ev": 2.986773491070358,
+    "to_correction_ev": 5.075192956282353
+  },
+  "source_count": 22,
+  "native_count": 65,
+  "executed": {
+    "src/gradscf/gw/pbc/query.py": "fd8062efcaeeb6a98215d64e7a105c2353619f345a0a5199cb0317b631e71763",
+    "examples/pbc/band_structures/gw_bands.py": "ebbbb63da512bd0690664f5c00456b5b0ca7b9fe49384f5ba6384e8d8835286e",
+    "src/gradscf_tools/periodic_gw_plot.py": "1a67fecd9266d8276ae592c5f81b3eac22046bcf9cb802dbde26904fa7d9ed2d"
+  },
+  "resource": {
+    "command": [
+      "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+      "-u",
+      "-c",
+      "from examples.pbc.band_structures.gw_bands import run; run('gaas', case='gaas_szv_qp_dense61_20261017', path_points=61, checkpoint='reproducibility/ad_showcase/material_gw_bands/gaas_szv_reference_20261017/scf_reference.npz')"
+    ],
+    "return_code": 0,
+    "peak_rss_kib": 5762796,
+    "budget_kib": 16777216,
+    "budget_exceeded": false,
+    "polling_seconds": 0.25,
+    "accepted": true,
+    "elapsed_seconds": 2388.133377956001,
+    "allowed_cpu_ids": [
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47
+    ],
+    "cpu_model": "Intel(R) Xeon(R) Platinum 8457C"
+  },
+  "gw_seconds": 2348.5863988269994,
+  "native_elapsed_seconds": 2384.7783363069975,
+  "file_sha256": {
+    "data/native.json": "b66875552deb5bbca30fbcb140abdf74d7ec1a3b579194309432d9e3cc38ec76",
+    "data/bands.npz": "9a1bda7109c42b6e9b279299741488130c9772bfe81b2146801bbb4fa5feb78c",
+    "data/scf_reference.npz": "12c2cc9183e6cbc2a603b7a238c2c8a443607887ee88a305a36c64f82f0b341c",
+    "data/bands.png": "3a39da22501753957579ad250f9c7ef66e596d98466ab89f2a3d2e8252184562",
+    "data/bands.pdf": "fc3958f9f07546142c7b01c703294e8da8eff93f730e36c1b1b69b327fcdf69c",
+    "job/budget.json": "2d84e3308d388cea0dbc16f36f3ff8cb66f48500de577729da9998c009a933c4",
+    "job/source_verification.json": "8f06f845be0de41b1e673ca3f81ae3a449f0b9d54a3d3cfedaceed51aa990716",
+    "job/native_verification.json": "8c2162912a71a665eb85e91d2151ef64dfc1772338e13c5e533e1a61b76b9395",
+    "job/exit_code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  }
+}

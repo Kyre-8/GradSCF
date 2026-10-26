@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "-c",
+    "from lih_born_charges import SETTINGS, run; SETTINGS['mesh']=[71]*3; run('fft71')"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 18810928,
+  "budget_kib": 67108864,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true
+}

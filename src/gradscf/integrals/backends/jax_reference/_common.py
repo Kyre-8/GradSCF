@@ -10,39 +10,8 @@ from jaxtyping import Array
 SUPPORTED_CARTESIAN_MAX_L = 3
 
 
-def _double_factorial(n: int) -> int:
-    if n <= 0:
-        return 1
-    out = 1
-    for k in range(n, 0, -2):
-        out *= k
-    return out
 
 
-def primitive_cartesian_norm(alpha: Array, angular: tuple[int, int, int]) -> Array:
-    """Normalization factor for a primitive Cartesian Gaussian.
-
-    This follows PySCF/libcint cartesian convention (`normalized='sp'`):
-    s and p are cartesian-normalized; d/f and above use shell radial norm.
-    """
-
-    lx, ly, lz = angular
-    ltot = lx + ly + lz
-    pref = (2.0 * alpha / jnp.pi) ** 0.75
-    if ltot <= 1:
-        denom = (
-            _double_factorial(2 * lx - 1)
-            * _double_factorial(2 * ly - 1)
-            * _double_factorial(2 * lz - 1)
-        )
-        return pref * jnp.sqrt((4.0 * alpha) ** ltot / denom)
-
-    # Radial norm of g(r)=r^l exp(-a r^2), consistent with pyscf.gto.gto_norm.
-    # N = sqrt(2^(2l+3) (l+1)! (2a)^(l+1.5) / ((2l+2)! sqrt(pi)))
-    l = int(ltot)
-    numerator = (2.0 ** (2 * l + 3)) * float(math.factorial(l + 1))
-    denominator = float(math.factorial(2 * l + 2)) * jnp.sqrt(jnp.pi)
-    return jnp.sqrt(numerator * (2.0 * alpha) ** (l + 1.5) / denominator)
 
 
 def boys0(t: Array) -> Array:

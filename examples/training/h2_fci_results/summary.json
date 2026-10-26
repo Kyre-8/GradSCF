@@ -1,0 +1,138 @@
+{
+  "atom": "H 0 0 0; H 0 0 .74",
+  "unit": "Angstrom",
+  "basis": "6-31g*",
+  "grid_level": 0,
+  "backend": "cpu",
+  "dtype": "float64",
+  "jax": "0.8.1",
+  "python": "3.12.2",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "architecture": [
+    16,
+    16,
+    16,
+    16,
+    1
+  ],
+  "dense_layers": 4,
+  "activation": "tanh",
+  "output_scale": 0.05,
+  "seed": 0,
+  "steps": 100,
+  "optimizer": "Adam",
+  "learning_rate": 0.002,
+  "loss": "delta_E**2 + abs(delta_E), delta_E=(E-E_FCI)/(1 Ha)",
+  "fixed_density": "initial GradSCF HF density, held fixed",
+  "supervision": "FCI total energy only; FCI density is diagnostic",
+  "fci_energy_hartree": -1.1516725449612413,
+  "fci_determinants": 16,
+  "nuclear_repulsion_hartree": 0.7151043390810812,
+  "scf": {
+    "max_cycle": 80,
+    "damping": 0.2,
+    "energy_tolerance": 1e-11,
+    "density_tolerance": 1e-09
+  },
+  "implicit": {
+    "tolerance": 1e-09,
+    "max_iter": 40
+  },
+  "command": "PYTHONPATH=src JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 python examples/training/h2_fci_training.py",
+  "row_semantics": "step k is loss after k completed attempts; next_update_accepted refers to k -> k+1",
+  "runs": {
+    "fixed_density": {
+      "initial": {
+        "step": 0,
+        "energy_hartree": -0.48434131553205995,
+        "energy_error_hartree": 0.6673312294291813,
+        "mse": 0.44533096977146264,
+        "mae": 0.6673312294291813,
+        "loss": 1.112662199200644,
+        "next_update_accepted": true,
+        "scf_converged": null,
+        "scf_cycles": 0
+      },
+      "final": {
+        "step": 100,
+        "energy_hartree": -0.8224500632756725,
+        "energy_error_hartree": 0.3292224816855688,
+        "mse": 0.10838744244720468,
+        "mae": 0.3292224816855688,
+        "loss": 0.43760992413277344,
+        "next_update_accepted": null,
+        "scf_converged": null,
+        "scf_cycles": 0
+      },
+      "accepted_updates": 100,
+      "optimizer_step": 100,
+      "seconds_including_compile": 0.6880871670000488,
+      "self_consistent_final_energy_hartree": -0.8646459294310493,
+      "self_consistent_final_loss": 0.369410893552908,
+      "self_consistent_final_converged": true,
+      "self_consistent_density_relative_l2_to_fci": 0.23632939492389113
+    },
+    "explicit": {
+      "initial": {
+        "step": 0,
+        "energy_hartree": -0.5242379517221755,
+        "energy_error_hartree": 0.6274345932390658,
+        "mse": 0.393674168793072,
+        "mae": 0.6274345932390658,
+        "loss": 1.0211087620321377,
+        "next_update_accepted": true,
+        "scf_converged": true,
+        "scf_cycles": 7
+      },
+      "final": {
+        "step": 100,
+        "energy_hartree": -0.8612615939155804,
+        "energy_error_hartree": 0.29041095104566084,
+        "mse": 0.08433852048724522,
+        "mae": 0.29041095104566084,
+        "loss": 0.37474947153290605,
+        "next_update_accepted": null,
+        "scf_converged": true,
+        "scf_cycles": 7
+      },
+      "accepted_updates": 100,
+      "optimizer_step": 100,
+      "seconds_including_compile": 1.2657197499997892,
+      "self_consistent_final_energy_hartree": -0.8612615939155804,
+      "self_consistent_final_loss": 0.37474947153290605,
+      "self_consistent_final_converged": true,
+      "self_consistent_density_relative_l2_to_fci": 0.23803414630262404
+    },
+    "implicit": {
+      "initial": {
+        "step": 0,
+        "energy_hartree": -0.5242379517221755,
+        "energy_error_hartree": 0.6274345932390658,
+        "mse": 0.393674168793072,
+        "mae": 0.6274345932390658,
+        "loss": 1.0211087620321377,
+        "next_update_accepted": true,
+        "scf_converged": true,
+        "scf_cycles": 7
+      },
+      "final": {
+        "step": 100,
+        "energy_hartree": -0.8612615939188534,
+        "energy_error_hartree": 0.2904109510423879,
+        "mse": 0.08433852048534422,
+        "mae": 0.2904109510423879,
+        "loss": 0.37474947152773214,
+        "next_update_accepted": null,
+        "scf_converged": true,
+        "scf_cycles": 7
+      },
+      "accepted_updates": 100,
+      "optimizer_step": 100,
+      "seconds_including_compile": 1.8779562920003627,
+      "self_consistent_final_energy_hartree": -0.8612615939188538,
+      "self_consistent_final_loss": 0.37474947152773214,
+      "self_consistent_final_converged": true,
+      "self_consistent_density_relative_l2_to_fci": 0.2380341463013098
+    }
+  }
+}

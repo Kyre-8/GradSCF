@@ -1,0 +1,13 @@
+{
+  "hostname": "c20",
+  "python": "3.11.15",
+  "versions": {
+    "jax": "0.10.0",
+    "jaxlib": "0.10.0",
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "jax-xc": "0.0.9",
+    "pyscf": "2.13.0"
+  },
+  "scope": "Recorded at the completed-result archival stage; no dependencies were installed or changed by this task."
+}

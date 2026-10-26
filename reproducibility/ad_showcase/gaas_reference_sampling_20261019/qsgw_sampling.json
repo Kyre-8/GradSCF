@@ -1,0 +1,162 @@
+{
+  "source_revision": "8810de8fc6761aa06247121aba0674986e7fe462",
+  "iterations": [
+    {
+      "iteration": 1,
+      "gap_ev": 1.867917,
+      "sigma_unmixed_rms_ry": 0.00257,
+      "qpu_starting_hamiltonian_change_ev": null,
+      "density_energy_residual_ry": -0.0,
+      "density_residual_native_norm": 9e-06,
+      "density_converged": true
+    },
+    {
+      "iteration": 2,
+      "gap_ev": 2.056496,
+      "sigma_unmixed_rms_ry": 0.000812,
+      "qpu_starting_hamiltonian_change_ev": 0.71,
+      "density_energy_residual_ry": -4e-06,
+      "density_residual_native_norm": 5e-06,
+      "density_converged": true
+    },
+    {
+      "iteration": 3,
+      "gap_ev": 2.082984,
+      "sigma_unmixed_rms_ry": 0.000168,
+      "qpu_starting_hamiltonian_change_ev": 0.15100000000000025,
+      "density_energy_residual_ry": -3e-06,
+      "density_residual_native_norm": 7e-06,
+      "density_converged": true
+    },
+    {
+      "iteration": 4,
+      "gap_ev": 2.073125,
+      "sigma_unmixed_rms_ry": 4.63e-05,
+      "qpu_starting_hamiltonian_change_ev": 0.02400000000000002,
+      "density_energy_residual_ry": -4e-06,
+      "density_residual_native_norm": 1e-05,
+      "density_converged": true
+    },
+    {
+      "iteration": 5,
+      "gap_ev": 2.071663,
+      "sigma_unmixed_rms_ry": 2.01e-05,
+      "qpu_starting_hamiltonian_change_ev": 0.013000000000000123,
+      "density_energy_residual_ry": -1e-06,
+      "density_residual_native_norm": 8e-06,
+      "density_converged": true
+    },
+    {
+      "iteration": 6,
+      "gap_ev": 2.070848,
+      "sigma_unmixed_rms_ry": 2.07e-05,
+      "qpu_starting_hamiltonian_change_ev": 0.002000000000000224,
+      "density_energy_residual_ry": 0.0,
+      "density_residual_native_norm": 9e-06,
+      "density_converged": true
+    },
+    {
+      "iteration": 7,
+      "gap_ev": 2.069649,
+      "sigma_unmixed_rms_ry": 2.05e-05,
+      "qpu_starting_hamiltonian_change_ev": 0.0020000000000000018,
+      "density_energy_residual_ry": -0.0,
+      "density_residual_native_norm": 2e-06,
+      "density_converged": true
+    },
+    {
+      "iteration": 8,
+      "gap_ev": 2.068129,
+      "sigma_unmixed_rms_ry": 1.14e-05,
+      "qpu_starting_hamiltonian_change_ev": 0.0020000000000000018,
+      "density_energy_residual_ry": -1e-06,
+      "density_residual_native_norm": 2e-06,
+      "density_converged": true
+    },
+    {
+      "iteration": 9,
+      "gap_ev": 2.066488,
+      "sigma_unmixed_rms_ry": 3.72e-06,
+      "qpu_starting_hamiltonian_change_ev": 0.001000000000000112,
+      "density_energy_residual_ry": -0.0,
+      "density_residual_native_norm": 5e-06,
+      "density_converged": true
+    },
+    {
+      "iteration": 10,
+      "gap_ev": 2.066143,
+      "sigma_unmixed_rms_ry": 1.4e-06,
+      "qpu_starting_hamiltonian_change_ev": 0.001000000000000334,
+      "density_energy_residual_ry": 0.0,
+      "density_residual_native_norm": 2e-06,
+      "density_converged": true
+    },
+    {
+      "iteration": 11,
+      "gap_ev": 2.066089,
+      "sigma_unmixed_rms_ry": 3.95e-07,
+      "qpu_starting_hamiltonian_change_ev": 0.0009999999999998899,
+      "density_energy_residual_ry": -0.0,
+      "density_residual_native_norm": 1e-06,
+      "density_converged": true
+    },
+    {
+      "iteration": 12,
+      "gap_ev": 2.066103,
+      "sigma_unmixed_rms_ry": 1.92e-07,
+      "qpu_starting_hamiltonian_change_ev": 0.0009999999999998899,
+      "density_energy_residual_ry": 0.0,
+      "density_residual_native_norm": 0.0,
+      "density_converged": true
+    }
+  ],
+  "convergence_criteria": {
+    "sigma_unmixed_rms_ry": 1e-05,
+    "last_three_gap_range_ev": 0.001,
+    "qpu_starting_hamiltonian_change_ev": 0.001,
+    "density_energy_residual_ry": 1e-05,
+    "density_residual_native_norm": 1e-05
+  },
+  "converged": true,
+  "queries": {
+    "4": {
+      "npoints": 64,
+      "gamma_direct_gap_ev": 2.0661,
+      "sampled_gap_ev": 2.0661,
+      "minimum_direct_gap_ev": 2.0661,
+      "vbm_cartesian_2pi_over_alat": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "cbm_cartesian_2pi_over_alat": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "energy_output_precision_ev": 1e-05
+    },
+    "8": {
+      "npoints": 512,
+      "gamma_direct_gap_ev": 2.0661,
+      "sampled_gap_ev": 2.0661,
+      "minimum_direct_gap_ev": 2.0661,
+      "vbm_cartesian_2pi_over_alat": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "cbm_cartesian_2pi_over_alat": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "energy_output_precision_ev": 1e-05
+    }
+  },
+  "common_points": {
+    "npoints": 64,
+    "compared_bands": 10,
+    "max_abs_energy_difference_ev": 0.0
+  }
+}

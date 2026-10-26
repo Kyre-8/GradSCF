@@ -1,0 +1,50 @@
+{
+  "dimension": 2,
+  "energy_hartree": -1.1304553395985697,
+  "electron_number": 2.0,
+  "mesh": [
+    25,
+    31,
+    91
+  ],
+  "lattice_bohr": [
+    [
+      5.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      6.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      18.0
+    ]
+  ],
+  "query_kpoints_bohr_inverse": [
+    [
+      0.13,
+      -0.04,
+      0.0
+    ],
+    [
+      0.31,
+      0.07,
+      0.0
+    ]
+  ],
+  "bands_hartree": [
+    [
+      -0.4479139998289413,
+      0.2846904130753213
+    ],
+    [
+      -0.421738264232805,
+      0.16423651880890108
+    ]
+  ],
+  "scope": "Neutral finite wire/slab model; no material convergence claim."
+}

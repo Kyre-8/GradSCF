@@ -8,14 +8,15 @@ import jax.numpy as jnp
 
 jax.config.update("jax_enable_x64", True)
 
-from gradscf import gto, dft, cc
+from gradscf import gto, scf, cc
 from gradscf.cc.integrals import prepare_integrals
+from gradscf.scf.reference import reference_from_source
 
 
 def main():
     atom = "H 0 0 0; H 0 0 .8; H 0 0 1.9; H 0 0 3.1"
-    mf = dft.RKS(
-        gto.M(atom=atom, basis="sto-3g", unit="Angstrom"), xc="hf", conv_tol=1e-12
+    mf = scf.RHF(
+        gto.M(atom=atom, basis="sto-3g", unit="Angstrom"), conv_tol=1e-12
     ).run()
     report = {
         "atom": atom,
@@ -58,7 +59,9 @@ def main():
             density = obj.make_rdm1()
             row["rdm1_trace"] = float(jnp.trace(density))
             row["rdm1_symmetry_error"] = float(jnp.max(jnp.abs(density - density.T)))
-            reference = obj.reference
+            # The fixed-integral response below explicitly needs a small full-MO
+            # reference; the CC object's selected-block source does not own it.
+            reference = reference_from_source(mf, max_memory=mf.max_memory)
     h, g = reference.h1, reference.eri
     potential = prepare_integrals(h, g, nocc=reference.nocc).fock - h
     cfg = cc.CCConfig(conv_tol=1e-12, residual_tol=1e-11)

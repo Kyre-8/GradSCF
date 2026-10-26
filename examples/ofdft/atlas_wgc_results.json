@@ -1,0 +1,220 @@
+{
+  "reference": "arXiv:1507.07373",
+  "scope": "fcc Al / ideal-c/a hcp Mg at fixed reference volumes",
+  "kinetic": "wgc",
+  "dftpy_kinetic": "independent NumPy WGC adapter",
+  "xc": "unpolarized PZ81 LDA + Dirac exchange",
+  "hardware": "arm64",
+  "backend": "cpu",
+  "jax": "0.8.1",
+  "pseudopotentials": {
+    "Al": {
+      "file": "Al_lda.oe01.recpot",
+      "sha256": "7104d4d2c41f2564e31cc6c6fd6e077125147cd099a27271133230b45d094375",
+      "source_commit": "fbc47b4e1df3def1a2206e58c5a1a1a4d51db1d0",
+      "source_path": "examples/DATA/Al_lda.oe01.recpot"
+    },
+    "Mg": {
+      "file": "Mg_lda.oe01.recpot",
+      "sha256": "4547542aedd7101b44b27c45f18de344158df83464261598fa1b437cce09fae9",
+      "source_commit": "fbc47b4e1df3def1a2206e58c5a1a1a4d51db1d0",
+      "source_path": "examples/DATA/Mg_lda.oe01.recpot"
+    }
+  },
+  "calculations": [
+    {
+      "symbol": "Al",
+      "spacing_angstrom": 0.18,
+      "mesh": [
+        17,
+        17,
+        17
+      ],
+      "lambda_vw": 1.0,
+      "lattice_angstrom": [
+        [
+          0.0,
+          2.0967068566528266,
+          2.0967068566528266
+        ],
+        [
+          2.0967068566528266,
+          0.0,
+          2.0967068566528266
+        ],
+        [
+          2.0967068566528266,
+          2.0967068566528266,
+          0.0
+        ]
+      ],
+      "fractional_positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "gradscf_energy_ha_per_atom": -2.087391936818386,
+      "dftpy_energy_ha_per_atom": -2.087391936817966,
+      "energy_error_ha_per_atom": 4.2010839251815923e-13,
+      "relative_density_l2_error": 4.44326164021185e-07,
+      "gradscf_residual": 3.4707289370004717e-13,
+      "dftpy_residual": 8.380691743164019e-06,
+      "gradscf_electrons": 3.000000000000018,
+      "dftpy_electrons": 3.000000000000002,
+      "potential_max_error_ha": 1.1102230246251565e-15,
+      "ewald_error_ha": 8.881784197001252e-16,
+      "gradscf_seconds": 26.160508417058736,
+      "dftpy_seconds": 0.5597092079697177
+    },
+    {
+      "symbol": "Al",
+      "spacing_angstrom": 0.14,
+      "mesh": [
+        23,
+        23,
+        23
+      ],
+      "lambda_vw": 1.0,
+      "lattice_angstrom": [
+        [
+          0.0,
+          2.0967068566528266,
+          2.0967068566528266
+        ],
+        [
+          2.0967068566528266,
+          0.0,
+          2.0967068566528266
+        ],
+        [
+          2.0967068566528266,
+          2.0967068566528266,
+          0.0
+        ]
+      ],
+      "fractional_positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "gradscf_energy_ha_per_atom": -2.087392047529254,
+      "dftpy_energy_ha_per_atom": -2.087392047528099,
+      "energy_error_ha_per_atom": 1.1546319456101628e-12,
+      "relative_density_l2_error": 5.80710768421932e-07,
+      "gradscf_residual": 3.6681987553772336e-13,
+      "dftpy_residual": 1.8938664512154196e-05,
+      "gradscf_electrons": 2.999999999999992,
+      "dftpy_electrons": 3.0000000000000018,
+      "potential_max_error_ha": 1.1102230246251565e-15,
+      "ewald_error_ha": 1.7763568394002505e-15,
+      "gradscf_seconds": 36.69805720902514,
+      "dftpy_seconds": 1.4367045830003917
+    },
+    {
+      "symbol": "Mg",
+      "spacing_angstrom": 0.18,
+      "mesh": [
+        19,
+        19,
+        29
+      ],
+      "lambda_vw": 1.0,
+      "lattice_angstrom": [
+        [
+          3.1558686739233854,
+          0.0,
+          0.0
+        ],
+        [
+          -1.5779343369616927,
+          2.733062442625161,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          5.153511964230722
+        ]
+      ],
+      "fractional_positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.6666666666666666,
+          0.33333333333333326,
+          0.5
+        ]
+      ],
+      "gradscf_energy_ha_per_atom": -0.9058876627004355,
+      "dftpy_energy_ha_per_atom": -0.9058876626997975,
+      "energy_error_ha_per_atom": 6.380451722520775e-13,
+      "relative_density_l2_error": 1.3669482285923679e-06,
+      "gradscf_residual": 3.7716815970051803e-13,
+      "dftpy_residual": 1.2113250420413444e-05,
+      "gradscf_electrons": 3.9999999999999942,
+      "dftpy_electrons": 3.9999999999999964,
+      "potential_max_error_ha": 1.1102230246251565e-15,
+      "ewald_error_ha": 4.440892098500626e-16,
+      "gradscf_seconds": 33.92627979198005,
+      "dftpy_seconds": 1.140136166010052
+    },
+    {
+      "symbol": "Mg",
+      "spacing_angstrom": 0.14,
+      "mesh": [
+        23,
+        23,
+        37
+      ],
+      "lambda_vw": 1.0,
+      "lattice_angstrom": [
+        [
+          3.1558686739233854,
+          0.0,
+          0.0
+        ],
+        [
+          -1.5779343369616927,
+          2.733062442625161,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          5.153511964230722
+        ]
+      ],
+      "fractional_positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.6666666666666666,
+          0.33333333333333326,
+          0.5
+        ]
+      ],
+      "gradscf_energy_ha_per_atom": -0.9058876638204062,
+      "dftpy_energy_ha_per_atom": -0.9058876638199755,
+      "energy_error_ha_per_atom": 4.306555112520982e-13,
+      "relative_density_l2_error": 7.490243674939353e-07,
+      "gradscf_residual": 2.5975402575155723e-13,
+      "dftpy_residual": 1.6571994025302274e-05,
+      "gradscf_electrons": 4.000000000000009,
+      "dftpy_electrons": 3.999999999999995,
+      "potential_max_error_ha": 8.881784197001252e-16,
+      "ewald_error_ha": 8.881784197001252e-16,
+      "gradscf_seconds": 50.85057991708163,
+      "dftpy_seconds": 2.6741300839930773
+    }
+  ]
+}

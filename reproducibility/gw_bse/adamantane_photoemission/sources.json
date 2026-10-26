@@ -1,0 +1,27 @@
+{
+  "title": "Electron-vibration coupling induced renormalization in the photoemission spectrum of diamondoids",
+  "authors": "A. Gali et al.",
+  "doi": "10.1038/ncomms11327",
+  "year": 2016,
+  "pdf_url": "https://www.nature.com/articles/ncomms11327.pdf",
+  "pdf_sha256": "06876fc88abd7021b34a916a313ffd61ae62832021330bf3ab58f8a767179366",
+  "page": 3,
+  "panel": "Figure 1(b), adamantane",
+  "pymupdf_version": "1.27.2.3",
+  "method": "Original vector curves; cubic Bezier segments sampled with 21 points. No fitting.",
+  "labels": {
+    "experiment": "Published experimental PES, attributed by Gali et al. to W. Schmidt, Tetrahedron 29, 2129 (1973).",
+    "qp_hr": "Published G0W0 quasiparticle levels convolved with Huang-Rhys broadening; already includes static vibrational effects.",
+    "dynamic_sf_hr": "Published dynamical electron-vibration spectral functions convolved with Huang-Rhys broadening."
+  },
+  "normalization": "Original common vertical scale preserved, divided by the experimental maximum. No new energy alignment.",
+  "pole_warning": "Vertical markers copied from panel b for position only; no spectral weights inferred.",
+  "attribution": "Adapted/vector-redrawn from Gali et al., Nature Communications 7, 11327 (2016), CC BY 4.0. Source figure attributes experimental curve to Schmidt (1973).",
+  "scope": "Literature illustration only, not a GradSCF calculation. Supplementary peak residuals are not electron-vibration matrix elements.",
+  "csv_sha256": {
+    "experiment.csv": "c262aaa86eda929860b403d6bfaf993243654e7a2e5d9c2878c6aa84e6c34288",
+    "qp_hr.csv": "7f8886ca55965a76b7451df6c614e38b562c4efe339f80a05be9812abfe08105",
+    "dynamic_sf_hr.csv": "c2053900ffdcee60117f745e029dfb60ac949afc1ba85c0523681a672265f020",
+    "qp_positions.csv": "bae622052436c04c351869ec93931ee65c97b16e156b236efc36e37fe3cc6101"
+  }
+}

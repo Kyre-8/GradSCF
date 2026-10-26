@@ -1,12 +1,14 @@
-"""Simplified strict-JAX public API.
+"""Legacy config-driven reporting workflows.
 
-This module provides short, stable entry points for the pure-JAX runtime path.
-New scripts should prefer these helpers over legacy bridge-style imports.
+These helpers execute calculations; build_molecule runs SCF and optional TD
+and returns MoleculeRun, not a bare gto.M molecule. Ordinary calculations use
+mol/mf facades; full experiments use workflows.ExperimentPipeline. The helpers
+remain here for explicit legacy callers with their original I/O/return types.
 """
 
 from __future__ import annotations
 
-from ..workflows.types import (
+from gradscf.model.neural_xc.workflows.types import (
     MoleculeSpecConfig,
     NeuralXCTrainingConfig,
     OutputConfig,
@@ -22,9 +24,9 @@ def build_molecule(
     *,
     simulation: SimulationConfig,
 ):
-    """Build a strict-JAX ground-state molecule from molecule specs."""
+    """Run SCF and optional TD calculations from specs; return a MoleculeRun."""
 
-    from ..workflows.core import run_molecule_from_spec
+    from gradscf.model.neural_xc.workflows.core import run_molecule_from_spec
 
     return run_molecule_from_spec(molecule, simulation=simulation)
 
@@ -38,9 +40,9 @@ def run_pipeline(
 ):
     """Run strict-JAX molecule -> training -> TDDFT spectrum core pipeline."""
 
-    from ..workflows.core import run_pipeline_core_from_molecule_spec
+    from gradscf.model.neural_xc.workflows.core import run_pipeline_core
 
-    return run_pipeline_core_from_molecule_spec(
+    return run_pipeline_core(
         molecule_spec=molecule,
         training_config=training,
         simulation_config=simulation,
@@ -59,9 +61,9 @@ def run_spectrum_pipeline(
 ):
     """Run the strict-JAX molecule spectrum pipeline and write outputs."""
 
-    from ..workflows.pipeline import run_neural_xc_spectrum_pipeline_from_molecule_spec
+    from gradscf.model.neural_xc.workflows.pipeline import run_neural_xc_spectrum_pipeline
 
-    return run_neural_xc_spectrum_pipeline_from_molecule_spec(
+    return run_neural_xc_spectrum_pipeline(
         system_label=system_label,
         molecule_spec=molecule,
         training_config=training,

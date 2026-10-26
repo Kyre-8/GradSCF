@@ -44,14 +44,43 @@ References
 
 from __future__ import annotations
 
+from numbers import Integral
+
 import jax
 import jax.numpy as jnp
+import numpy as np
 from jax.lax import Precision
 from jaxtyping import Array
 
 from ..polarizability import rho_response_iw
 
 _Q_ABS = 1e-3
+
+
+def gamma_cell_quadrature(lattice, kmesh, *, order=2):
+    """Nonzero Gauss nodes in the reciprocal parallelepiped around Gamma.
+
+    Cartesian points are in inverse Bohr. Weights integrate a normalized
+    Brillouin-zone sum and add to 1/prod(kmesh). Only even orders are used,
+    so the singular Coulomb origin is never sampled. This is a numerical
+    cell integral, requiring order convergence; it is neither the exact-zero
+    finite part of a slab/wire kernel nor the folded-OV k.p approximation.
+    """
+    if (isinstance(order, bool) or not isinstance(order, Integral)
+            or order < 2 or order % 2):
+        raise ValueError('Gamma-cell quadrature order must be a positive even integer >= 2')
+    lattice, mesh = np.asarray(lattice), np.asarray(kmesh)
+    if (lattice.shape != (3, 3) or np.iscomplexobj(lattice)
+            or not np.isfinite(lattice).all() or np.linalg.det(lattice) <= 0
+            or mesh.shape != (3,) or not np.issubdtype(mesh.dtype, np.integer)
+            or np.any(mesh < 1)):
+        raise ValueError('Use a finite positive-volume lattice and three positive k-mesh dimensions')
+    nodes, weights = np.polynomial.legendre.leggauss(order)
+    indices = np.stack(np.meshgrid(*(np.arange(order),)*3, indexing='ij'), axis=-1).reshape(-1, 3)
+    fractions = nodes[indices]/(2*mesh[None, :])
+    normalized_weights = np.prod(weights[indices]/(2*mesh[None, :]), axis=1)
+    reciprocal = 2*np.pi*np.linalg.inv(lattice).T
+    return fractions@reciprocal, normalized_weights
 
 
 def transition_moments_kpoints(
@@ -147,7 +176,7 @@ def screened_w_imag_axis_head_wing(
     del00:
         Head correction term, shape ``(nw,)``.
     delP0:
-        Wing correction per band, shape ``(nmo, nw)``.
+        Wing correction per band, shape ``(nw, nmo)``.
     """
     b = jnp.asarray(b)
     b_ov = jnp.asarray(b_ov)
@@ -279,6 +308,7 @@ def q0_residue_correction(
 
 
 __all__ = [
+    "gamma_cell_quadrature",
     "transition_moments_gamma",
     "transition_moments_kpoints",
     "screened_w_imag_axis_head_wing",

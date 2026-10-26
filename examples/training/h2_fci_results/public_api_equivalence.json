@@ -1,0 +1,34 @@
+{
+  "reference_commit": "517b943",
+  "backend": "cpu",
+  "dtype": "float64",
+  "runs": {
+    "fixed_density": {
+      "rows": 101,
+      "maximum_absolute_difference": {
+        "loss": 0.0,
+        "energy_hartree": 0.0,
+        "mse": 0.0,
+        "mae": 0.0
+      }
+    },
+    "explicit": {
+      "rows": 101,
+      "maximum_absolute_difference": {
+        "loss": 0.0,
+        "energy_hartree": 0.0,
+        "mse": 0.0,
+        "mae": 0.0
+      }
+    },
+    "implicit": {
+      "rows": 101,
+      "maximum_absolute_difference": {
+        "loss": 0.0,
+        "energy_hartree": 0.0,
+        "mse": 0.0,
+        "mae": 0.0
+      }
+    }
+  }
+}

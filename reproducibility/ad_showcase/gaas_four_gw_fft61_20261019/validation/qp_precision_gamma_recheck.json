@@ -1,0 +1,166 @@
+{
+  "scope": "One self-contained saved Gamma ROOT replay only; no SCF/GW/pole construction",
+  "input_sha256": "561e23acb21f3c4bab692db6a757a7eeab6852b7a1ad571c78ac9d78d64765e4",
+  "source_state_sha256": "dd683f57b9bb0064328e4f1df280a18ed6a1fe49fd9a6f39e64ca6affa2dee24",
+  "implementation_sha256": {
+    "src/gradscf/gw/pbc/query.py": "f4b1c73c9e616809ae249b28837a92a8a7012639db8bc4e673221b0b07100494",
+    "src/gradscf/gw/qp.py": "65ec34064a7272cdc72c700ff4ab656e5f1c4fc898f01cb5d0ebdd318fda12b7",
+    "src/gradscf/gw/pbc/spectrum.py": "89262a39dc4d584cbc156e773c6a4cd244609dc61582de5223427ab7dbcc3111",
+    "src/gradscf/solvers/nonlinear/scalar.py": "f20e5f681cbde7ab0f159d7daadc29cc45931f0649a79f14927362b37d44464b",
+    "src/gradscf/solvers/eigen/dense.py": "4083a14b36f631c55c503c9b5aa1b713f10aba2130fd4107f113434d91671781"
+  },
+  "config": {
+    "method": "hybrid",
+    "ftol": 1e-08,
+    "xtol": 1e-08,
+    "maxiter": 100,
+    "step_cap": 0.05,
+    "slope_floor": 1e-10,
+    "hybrid_every": 4,
+    "max_backtrack": 4
+  },
+  "eta_hartree": 0.001,
+  "requested": 14,
+  "certified": 14,
+  "all_valid": true,
+  "maximum_scalar_residual_hartree": 5.370093258960651e-12,
+  "maximum_true_matrix_residual_hartree": 5.369871214355726e-12,
+  "maximum_root_difference_from_frozen_control_hartree": 4.9550918923557674e-12,
+  "bands6_7_zero_based": {
+    "energy": [
+      0.45052588464416055,
+      0.4505258896656
+    ],
+    "converged_mask": [
+      true,
+      true
+    ],
+    "residual": [
+      -4.3021142204224816e-14,
+      -4.3520742565306136e-14
+    ],
+    "weight": [
+      0.9066888082838753,
+      0.9066873868715257
+    ],
+    "candidate_count": [
+      1,
+      1
+    ],
+    "branch_valid": [
+      true,
+      true
+    ]
+  },
+  "result": {
+    "energy": [
+      [
+        -0.21323345458848048,
+        -0.0928287543177319,
+        -0.08645345064221169,
+        -0.08445438144076219,
+        -0.08445434852098582,
+        -0.03232773438001047,
+        0.45052588464416055,
+        0.4505258896656,
+        0.47239092455191356,
+        0.5102801831392132,
+        0.6196370355334905,
+        0.6248411078149929,
+        0.6248411352690811,
+        5.788646722133882
+      ]
+    ],
+    "converged_mask": [
+      [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    ],
+    "residual": [
+      [
+        4.718447854656915e-16,
+        5.370093258960651e-12,
+        -4.0245584642661925e-16,
+        1.1102230246251565e-16,
+        -1.3877787807814457e-17,
+        -1.2975731600306517e-15,
+        -4.3021142204224816e-14,
+        -4.3520742565306136e-14,
+        1.8721690864254015e-12,
+        4.440892098500626e-16,
+        1.4432899320127035e-15,
+        9.470202400052585e-14,
+        9.536815781530095e-14,
+        1.3322676295501878e-14
+      ]
+    ],
+    "weight": [
+      [
+        0.16238161486242209,
+        0.23087244112831942,
+        0.5932850191292564,
+        0.8448790264845442,
+        0.8448802817199897,
+        0.11652114237096699,
+        0.9066888082838753,
+        0.9066873868715257,
+        2.646735458400464,
+        0.9914548429532,
+        0.8875936714596258,
+        0.9077337182798508,
+        0.907744890019386,
+        0.9559276562770099
+      ]
+    ],
+    "candidate_count": [
+      [
+        2,
+        2,
+        3,
+        2,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    ],
+    "branch_valid": [
+      [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    ]
+  },
+  "elapsed_seconds": 4.667624265013728
+}

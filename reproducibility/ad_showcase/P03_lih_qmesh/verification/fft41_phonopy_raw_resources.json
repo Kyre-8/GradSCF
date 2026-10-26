@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "examples/pbc/compare_lih_ifc_phonopy.py",
+    "--input",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/ifc_raw"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 68964,
+  "budget_kib": 2097152,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true,
+  "elapsed_seconds": 0.7516966380007943
+}

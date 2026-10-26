@@ -1,0 +1,2 @@
+Independent paired-minimum errors: {'ground_energy_hartree': 1.1368683772161603e-13, 'ground_gradient_hartree_per_bohr': 5.144287773539702e-13, 'ground_hessian_hartree_per_bohr2': 1.7857241550039982e-08, 'ground_frequencies_cm1': 2.4047094029810978e-05, 'electronic_gaps_hartree': 1.8474111129762605e-13, 'harmonic_zero_zero_hartree': 1.8009177482625205e-11}
+Independent paired-minimum gates passed in 5.52 s

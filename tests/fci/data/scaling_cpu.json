@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-26",
+  "command": "PYTHONPATH=src JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 /opt/anaconda3/bin/python tests/comparisons/compare_fci_pyscf.py",
+  "model": "Seeded real symmetric synthetic integrals, fixed electron sector; scalar parameter multiplies h1 only",
+  "notes": [
+    "Fresh process per case. Peak RSS includes Python, JAX, compilation and reference computation.",
+    "max_workspace_elements is a per-array capacity, not total process memory.",
+    "Times are observations on a shared host, not an isolated throughput benchmark."
+  ],
+  "results": [
+    {
+      "norb": 8,
+      "nelec": [
+        4,
+        4
+      ],
+      "determinants": 4900,
+      "strings": [
+        70,
+        70
+      ],
+      "energy_hartree": -8.939825310600673,
+      "pyscf_energy_hartree": -8.939825310600671,
+      "energy_error_hartree": 1.7763568394002505e-15,
+      "derivative": -8.920971020088007,
+      "finite_difference": -8.920971020112134,
+      "derivative_error": 2.4126478592734202e-11,
+      "compile_first_gradient_seconds": 1.2891090419143438,
+      "steady_seconds": 0.03682562499307096,
+      "peak_rss_bytes": 456523776,
+      "xla_temporary_bytes": 50021456,
+      "backend": "cpu",
+      "dtype": "float64",
+      "seed": 20260926,
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "python": "3.12.2",
+      "jax": "0.8.1",
+      "pyscf": "2.9.0",
+      "max_space": 20,
+      "conv_tol_hartree": 1e-09,
+      "max_cycle": 120
+    },
+    {
+      "norb": 10,
+      "nelec": [
+        5,
+        5
+      ],
+      "determinants": 63504,
+      "strings": [
+        252,
+        252
+      ],
+      "energy_hartree": -10.939220439367174,
+      "pyscf_energy_hartree": -10.939220439367178,
+      "energy_error_hartree": 3.552713678800501e-15,
+      "derivative": -10.809162517425658,
+      "finite_difference": -10.809162517384507,
+      "derivative_error": 4.11510825415462e-11,
+      "compile_first_gradient_seconds": 1.8117639169795439,
+      "steady_seconds": 0.48094204196240753,
+      "peak_rss_bytes": 1139703808,
+      "xla_temporary_bytes": 721280912,
+      "backend": "cpu",
+      "dtype": "float64",
+      "seed": 20260926,
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "python": "3.12.2",
+      "jax": "0.8.1",
+      "pyscf": "2.9.0",
+      "max_space": 20,
+      "conv_tol_hartree": 1e-09,
+      "max_cycle": 120
+    }
+  ]
+}

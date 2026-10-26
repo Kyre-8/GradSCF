@@ -1,0 +1,144 @@
+{
+  "software": "MolGW 3.4",
+  "source_revision": "b831818d7a845c36f295d036dc8ceef59daf9991",
+  "binary_sha256": "a3cb4799eaa416885b2969d5e2b219ec5f9e03a9ea2b063ab685731f663c8b58",
+  "basis": "STO-3G",
+  "cart": true,
+  "geometry_angstrom": [
+    [
+      "O",
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      "H",
+      0.0,
+      -0.757,
+      0.587
+    ],
+    [
+      "H",
+      0.0,
+      0.757,
+      0.587
+    ]
+  ],
+  "charge": 0,
+  "spin": 0,
+  "reference": "RHF",
+  "ri": false,
+  "ev_per_hartree": 27.21138505,
+  "precision_note": "MolGW YAML energies rounded to 6 or 7 decimal places in eV; use this version's own conversion constant.",
+  "cases": {
+    "tda_singlet": {
+      "hf_energy_hartree": -74.9630631302,
+      "excitation_energy_hartree": [
+        0.4845841391671461,
+        0.5562783765760574,
+        0.6164208793186733,
+        0.70484402630582,
+        0.8105575647646058,
+        1.0686783618902926,
+        1.4774474590737525,
+        1.5105664715144664,
+        20.106988526848248,
+        20.157328963304643
+      ],
+      "oscillator_strength": [
+        0.00353731955,
+        7.36713379e-32,
+        0.0773302786,
+        0.0597051735,
+        1.166208,
+        0.701966976,
+        0.125994801,
+        0.0165886319,
+        0.053416734,
+        0.0868183671
+      ],
+      "input_sha256": "0ee6b96af60ce8c6c42793ad1cb0f2e0cb590867c8ced3106f4fa3311d86d2ab",
+      "outputs_sha256": {
+        "response.in": "0ee6b96af60ce8c6c42793ad1cb0f2e0cb590867c8ced3106f4fa3311d86d2ab",
+        "response.out": "61fbfe985976b6d0c49cfd10900513a6f1a3757ecdfa7b668d80de67f5d0372f",
+        "time.txt": "e8a5259b7d84b71481e9170ff959f7c87e34dd3ccc9c63b8235b79e4bd715953",
+        "molgw.yaml": "84e684da59af7afb539ecd29920e9f0ecb9722b70a8bef4187ab490bea866ead",
+        "dynamical_dipole_polarizability.dat": "fb67ec5df6bae6fe9384bfc32e6faa62377444abcfce4f5decdde3c0c9e4104c",
+        "photoabsorption_cross_section.dat": "6f21c016974aa5839d7fb0d51629547fefbc0ed4bbea754b774a3745f5dead64"
+      },
+      "input_text": "&molgw\nscf='HF'\npostscf='TD'\nbasis='STO-3G'\nbasis_path='/home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/molgw-stock/basis/'\nauxil_basis=''\ngaussian_type='CART'\nlength_unit='angstrom'\ncharge=0\nnspin=1\ntolscf=1.0e-12\nnscf=200\nintegral_quality='insane'\nfrozencore='no'\nncoreg=0\nncorew=0\nnvirtualg=100000\nnvirtualw=100000\nnexcitation=0\nread_restart='no'\nprint_restart='no'\nprint_bigrestart='no'\nprint_transition_dipole='yes'\nprint_yaml='yes'\nnatom=3\ntda='yes'\ntriplet='no'\n/\nO 0.000000 0.000000 0.000000\nH 0.000000 0.757000 0.587000\nH 0.000000 -0.757000 0.587000\n"
+    },
+    "tda_triplet": {
+      "hf_energy_hartree": -74.9630631302,
+      "excitation_energy_hartree": [
+        0.4074170417870736,
+        0.4921419389491899,
+        0.5075844862222476,
+        0.5594712937995048,
+        0.6643539851713649,
+        0.7434610132055736,
+        1.2805425168903704,
+        1.3986890424748886,
+        20.044330599040933,
+        20.11441508744517
+      ],
+      "oscillator_strength": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "input_sha256": "cf7db7b2a45cd8b2927654be988f1736a4c17dff38e65fd3a9612525a288b4de",
+      "outputs_sha256": {
+        "response.in": "cf7db7b2a45cd8b2927654be988f1736a4c17dff38e65fd3a9612525a288b4de",
+        "response.out": "6d8a0df557f85448a553827e0f9c582d46c8a948dddf3c0fde8c5a27362dd600",
+        "time.txt": "d24165e5e9d0e0a5d0bb8ae042f7581ffc2116f7fcf39d2b4f2adfc324120e54",
+        "molgw.yaml": "de12d66b7f1b478410d6d718e93dd50ec7f92a86208333f1edfcbe522ab176df"
+      },
+      "input_text": "&molgw\nscf='HF'\npostscf='TD'\nbasis='STO-3G'\nbasis_path='/home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/molgw-stock/basis/'\nauxil_basis=''\ngaussian_type='CART'\nlength_unit='angstrom'\ncharge=0\nnspin=1\ntolscf=1.0e-12\nnscf=200\nintegral_quality='insane'\nfrozencore='no'\nncoreg=0\nncorew=0\nnvirtualg=100000\nnvirtualw=100000\nnexcitation=0\nread_restart='no'\nprint_restart='no'\nprint_bigrestart='no'\nprint_transition_dipole='yes'\nprint_yaml='yes'\nnatom=3\ntda='yes'\ntriplet='yes'\n/\nO 0.000000 0.000000 0.000000\nH 0.000000 0.757000 0.587000\nH 0.000000 -0.757000 0.587000\n"
+    },
+    "tdhf_singlet": {
+      "hf_energy_hartree": -74.9630631302,
+      "excitation_energy_hartree": [
+        0.483045647101304,
+        0.555745316609674,
+        0.6123687665799283,
+        0.7020727597987519,
+        0.8067702933776243,
+        1.046164245138268,
+        1.4616180810686077,
+        1.5090782267990435,
+        20.106946669368455,
+        20.157282989900583
+      ],
+      "oscillator_strength": [
+        0.00325567117,
+        7.63283648e-32,
+        0.0665653645,
+        0.0554679264,
+        1.05134021,
+        0.555395536,
+        0.0541209389,
+        0.0191672944,
+        0.0520904856,
+        0.0875881609
+      ],
+      "input_sha256": "ed0730cf26140366adb184fb777096be2ead9b1e3d3b934b9de5380b74dd59f3",
+      "outputs_sha256": {
+        "response.in": "ed0730cf26140366adb184fb777096be2ead9b1e3d3b934b9de5380b74dd59f3",
+        "response.out": "952c8169b95b47427fc3b3991bb6901541a38676ed3f344c55eb81950ad4896c",
+        "time.txt": "fc53eff53aae7923a5f8664f1e2d86bd82a40b8dd76e77464a280a7b4bddbeff",
+        "molgw.yaml": "3857cddbff18c7302e2e59f762223b3b36035b4322637e361efda91b369ec0fd",
+        "dynamical_dipole_polarizability.dat": "79ef0b9fb656004376f77c31f3c30c907a24ecc72015001a426fe57e43d76b19",
+        "photoabsorption_cross_section.dat": "04f6acf7aea76ab2d63e22b908ab31bb1be8cb18b6b743faa4b18e7ae834820c"
+      },
+      "input_text": "&molgw\nscf='HF'\npostscf='TD'\nbasis='STO-3G'\nbasis_path='/home/yjiao/gradscf_checks/ad-showcase-molgw-reference-20261016/molgw-stock/basis/'\nauxil_basis=''\ngaussian_type='CART'\nlength_unit='angstrom'\ncharge=0\nnspin=1\ntolscf=1.0e-12\nnscf=200\nintegral_quality='insane'\nfrozencore='no'\nncoreg=0\nncorew=0\nnvirtualg=100000\nnvirtualw=100000\nnexcitation=0\nread_restart='no'\nprint_restart='no'\nprint_bigrestart='no'\nprint_transition_dipole='yes'\nprint_yaml='yes'\nnatom=3\ntda='no'\ntriplet='no'\n/\nO 0.000000 0.000000 0.000000\nH 0.000000 0.757000 0.587000\nH 0.000000 -0.757000 0.587000\n"
+    }
+  }
+}

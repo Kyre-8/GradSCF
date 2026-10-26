@@ -5,13 +5,13 @@ import numpy as np
 import pytest
 from types import SimpleNamespace
 
-import gradscf.model.training.targets as training_targets
-import gradscf.model.training.trainer as training_trainer
+import gradscf.model.neural_xc.training.targets as training_targets
+import gradscf.model.neural_xc.training.trainer as training_trainer
 import gradscf.scf.differentiable as scf_differentiable
 import gradscf.scf.rks as scf_rks
-from gradscf.dft.libxc_jax.jax_libxc import b3lyp_component_basis
+from gradscf.dft.xc import b3lyp_component_basis
 from gradscf.model.neural_xc import make_neural_xc_functional
-from gradscf.model.neural_xc.inputs import ChunkedHFXNu
+from gradscf.dft.hfx import ChunkedHFXNu
 from pyscf_reference import restricted_reference_from_pyscf
 from gradscf.scf import DifferentiableSCF, DifferentiableSCFConfig
 from gradscf.scf.molecules import QuadratureGrid, RestrictedMolecule, UnrestrictedMolecule
@@ -21,14 +21,14 @@ from gradscf.scf.differentiable import (
     _restricted_total_occupations,
     _unrestricted_channel,
 )
-from gradscf.model.training import (
+from gradscf.model.neural_xc.training import (
     MolecularTrainingDatum,
     MolecularTrainingConfig,
     density_on_grid,
     molecular_loss,
-    make_molecular_loss_and_grad,
     predict_ground_state_total_energy,
 )
+from gradscf.model.neural_xc.training.trainer import make_molecular_loss_and_grad
 
 
 def _pyscf_or_skip():
@@ -1015,7 +1015,7 @@ def test_restricted_impl_delegates_to_generic_fixed_point_wrapper(monkeypatch):
 
 
 def test_training_config_builds_implicit_scf_without_forward_mode_switch():
-    import gradscf.model.training.targets as targets_mod
+    import gradscf.model.neural_xc.training.targets as targets_mod
 
     cfg = MolecularTrainingConfig(
         mode="self_consistent",

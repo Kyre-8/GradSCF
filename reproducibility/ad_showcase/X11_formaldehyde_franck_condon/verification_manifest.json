@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "source_unchanged": true,
+  "tests": "8 passed, 14.51s",
+  "molecular": "complete; full quadratic/frame/gauge/probability/moment/cutoff/AD gates passed",
+  "remote_raw_artifact": {
+    "path": "/home/yjiao/gradscf_checks/ad-showcase-x11-20261015/reproducibility/ad_showcase/X11_formaldehyde_franck_condon/franck_condon_states.npz",
+    "bytes": 34714158,
+    "sha256": "cb91e20f8259e764befb8abb84cf7b3a8a8bf5cbc8a623d3c5c68aa121a474ae",
+    "local_bundle": "Not copied into the compact local bundle; all raw weights remain in this remote file without renormalization."
+  },
+  "curated_artifacts": {
+    "franck_condon_model.pdf": "e4dc8378ab84c36bb7dc9435b9de5fd5e85882276fd3a5fc9ef09d8e90db5618",
+    "franck_condon_model.png": "8392442bb9531bbf5568f326299015605342d264e3bebd041231f64aa392c4e5",
+    "gradscf.json": "1e87fea9be33f261e45b8c7ced7f3255f76623b5440b936739f159f4404fd58a",
+    "plot_settings.json": "adfd54e0ecc50b924097e194c4395f94a08d51bedae136c53e7079f21d1ee092",
+    "source_manifest.json": "4c27cd4810cb84d940d6f36a197b099e9a1fe76feb724c9ecf746f695b68e475",
+    "spectrum.csv": "59850656a0b620a6c5ba50f5f9fe424e511f3a8dad1c27c8811ffebf2fe0cfb5",
+    "x11-fc-converged-green.log": "2fa87806f86cfe53da67e3f4c97939806d11dd3f56a6220e976f66b1785b4505",
+    "x11-fc-eight-red.log": "98a64c5f0eb463538f833c9e23970579532816c35eebb7330402fba308028959",
+    "x11-fc-green.log": "d3fcbf92a1c94b19d57fb0a771afb5ceb9e39464079f1fe6c1fa16d85aaf585a",
+    "x11-formaldehyde-final.log": "83b52b997c64b68f1890004199fafbb7604110f74009c89f85f6739a05ffa71e",
+    "x11-plot.log": "33536fe567cdeaba32221045130611196dcfefcbd25b396d6e5eb232e39f87ef"
+  }
+}

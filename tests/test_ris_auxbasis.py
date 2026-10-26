@@ -1,6 +1,6 @@
 import pytest
 
-from gradscf.integrals.auxbasis import minimal_ris_auxbasis_for_mol
+from gradscf.integrals.basis.auxiliary import minimal_ris_auxbasis_for_mol
 
 
 class _FakeMol:

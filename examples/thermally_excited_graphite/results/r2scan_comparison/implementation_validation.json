@@ -1,0 +1,93 @@
+{
+  "implementation_commit": "89005fb842a40aa403778c6d97f9bed5b2ce62a7",
+  "baseline_commit": "8509c603218ffc92f059bf3a3e096a6f6a80f0e3",
+  "verified_date": "2026-10-15",
+  "hostname": "c20",
+  "hardware": "Intel Xeon Platinum 8457C",
+  "backend": "cpu",
+  "float64": true,
+  "python": "3.11.15",
+  "versions": {
+    "jax": "0.10.0",
+    "jaxlib": "0.10.0",
+    "jax-xc": "0.0.9",
+    "pyscf": "2.13.0",
+    "numpy": "2.4.4",
+    "scipy": "1.17.1"
+  },
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "XLA_FLAGS_override": null
+  },
+  "distinct_repository_tests": 36,
+  "gates": [
+    {
+      "log": "final-regressions.log",
+      "passed": 32,
+      "seconds": 232.27,
+      "exit_code": 0
+    },
+    {
+      "log": "final-finite-q.log",
+      "passed": 2,
+      "seconds": 165.51,
+      "exit_code": 0
+    },
+    {
+      "log": "final-curvature.log",
+      "passed": 1,
+      "seconds": 369.42,
+      "exit_code": 0
+    },
+    {
+      "log": "gradient.log",
+      "passed": 1,
+      "seconds": 517.05,
+      "exit_code": 0
+    }
+  ],
+  "full_jit_gradient": {
+    "ad": 2.9926929804712596,
+    "finite_difference": 2.992692980496869,
+    "absolute_error": 2.560929246442356e-11,
+    "parameter_step": 1e-05,
+    "atol": 1e-07,
+    "rtol": 2e-05,
+    "cold_process_wall_seconds": 530.29,
+    "max_rss_KiB": 21943724,
+    "logged_gradient_compilation_seconds": 162.430952967
+  },
+  "source_sha256": {
+    "src/gradscf/dft/libxc_jax/jax_libxc.py": "7705041b88b320c2d5247180403d9ef26bd4f6ba187217ed3eb3c0d4fdccccbc",
+    "src/gradscf/dft/libxc_jax/jax_xc_adapter.py": "202081b5afaa290ac1a99a1514fc53f162439adecb94eb2cac101b39505eb0c7",
+    "src/gradscf/scf/uks.py": "777d53f743789947c726d82dc0bb76e94fd4f1dec930af1a86b809bac82e51fa",
+    "src/gradscf/pbc/_kpoint.py": "f9720aca9f53e3074f559232814e810f15eb4518790d744b7e8fd253c5aa73bc",
+    "src/gradscf/pbc/response.py": "8d6b8978d683fe4582023a51d8ad2ab38d41e371f23ab65b90d9bcacbadfd2e7",
+    "src/gradscf/pbc/scf.py": "142c46df6a23dc8060a9ee2f6211c01c06a46ce28ab0a88581717c34124fb419",
+    "src/gradscf/pbc/bands.py": "1f51471620ac057af73ff7b50459cccf39172dceb4e5babf60223ac1ce12e48d",
+    "src/gradscf/dfpt/displacement.py": "3df2d3b60d4a1c344cb28b78b07126f1d1240e160b8fa217708fbba287d486ce",
+    "src/gradscf/dfpt/force_constants.py": "54db8fc14634b5eeef20da2af88539bf2be0792e4780b5fb0c7386e703f10ee7",
+    "tests/pbc/test_mgga.py": "b26bdbf6e15cc38d4a2520cbe75ac3c96f2d53b4476807f5e17809cc1e5eb1e9",
+    "tests/dfpt/test_displacement.py": "dd1cb1d7857aa5e66143f77be6fb168a12cec6ffe203ac8fd4b53d7831e9e9d6",
+    "tests/dfpt/test_finite_q.py": "6c220cf2f05a88564885da09283cb2c97497850d1054c16a81802b3ea54e2361",
+    "tests/dfpt/test_primitive_hessian.py": "e040ff5a7daf00a02ee98bfc9b21a9edf4d94531bffa95376c60e463d74d21fe"
+  },
+  "material_archive": {
+    "name": "r2scan-calculations.tar.gz",
+    "sha256": "93017d4a53c946efc3ee6da823e17245e340a101ff621387d44e57b471b9904f",
+    "scope": "Material data were generated before local-Hessian reuse; their original numerical sources are archived."
+  },
+  "limitations": [
+    "Focused CPU checks, not the complete repository suite or a complete GPU regression.",
+    "Concurrent jobs on the same host: these are execution records, not an exclusive-machine speedup benchmark.",
+    "The original full-JIT loss gradient timed out at 1800 seconds; the original small-grid diagnostic timed out at 1200 seconds.",
+    "Obsolete extended original CPU and GPU compilation runs were cancelled after the optimized identical CPU test passed.",
+    "The original eager diagnostic passed but emitted persistent CPU-cache target-feature warnings.",
+    "Graphite basis/k/FFT convergence and anharmonic EELS physics remain unresolved."
+  ]
+}

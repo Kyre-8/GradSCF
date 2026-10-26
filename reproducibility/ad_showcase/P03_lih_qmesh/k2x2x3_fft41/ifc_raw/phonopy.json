@@ -1,0 +1,28 @@
+{
+  "complete": true,
+  "passed": true,
+  "versions": {
+    "phonopy": "2.44.0",
+    "spglib": "2.5.0",
+    "symfc": "1.5.0"
+  },
+  "errors": {
+    "sample_matrix_hartree_per_bohr2": 1.427646953899109e-11,
+    "offgrid_matrix_hartree_per_bohr2": 2.4297991424544115e-17,
+    "band_frequency_hartree": 1.1063439525399107e-14,
+    "raw_ifft_imaginary_hartree_per_bohr2": 3.0627687163063224e-12
+  },
+  "band_frequency_error_cm1": 2.428144311445374e-09,
+  "native_json_sha256": "20dcf445c98ed117cd9dc35454acf8fa2e987ff80fd5c33ecec706fe8dbb769f",
+  "native_arrays_sha256": "5012f43bfc2ab2b99a439b86341347b1aa9586a061c7f58cf713f1908081e0c8",
+  "script_sha256": "8a105b63e3972d912865d7a9f5a173b8ebd7aad60a3b7ef5cf5b2f297ab03538",
+  "elapsed_seconds": 0.044139956999060814,
+  "supercell_atoms": 24,
+  "is_symmetry": false,
+  "hermitianize_dynamical_matrix": false,
+  "asr_projected": false,
+  "force_constant_units": "Eh/bohr^2",
+  "masses_units": "amu",
+  "phase": "Phonopy atomic-position gauge converted by U=exp(2*pi*i*q.tau); unweighted Phi compared.",
+  "scope": "Independent Fourier/shortest-image interpolation and bands from shared raw electronic IFC samples; not independent electronic-structure validation."
+}

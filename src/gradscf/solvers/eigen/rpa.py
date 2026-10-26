@@ -1,6 +1,7 @@
 """Structured real RPA Davidson and metric eigenvalue response."""
 from __future__ import annotations
 from collections.abc import Callable
+from numbers import Integral
 import jax
 import jax.numpy as jnp
 from jax.scipy.linalg import solve_triangular
@@ -34,12 +35,20 @@ def _davidson_lowest_tdhf(
     preconditioner_level_shift: float = 0.0,
     orth_eps: float = 1e-10,
     initial_vectors: Array | None = None,
+    initial_guess_count: int | None = None,
 ) -> tuple[Array, Array, Array, Array]:
     """Real structured Davidson for stable TDHF/TDDFT problems in JAX.
 
     ``vind`` follows PySCF ``gen_tdhf_operation``: input rows are ``[X, Y]`` and
     output rows are ``[AX + BY, -(BX + AY)]``.
     """
+
+    if initial_guess_count is not None and (
+        isinstance(initial_guess_count, bool)
+        or not isinstance(initial_guess_count, Integral)
+        or initial_guess_count < 1
+    ):
+        raise ValueError("initial_guess_count must be a positive integer")
 
     diag = jnp.asarray(diag)
     dim = int(size)
@@ -64,7 +73,8 @@ def _davidson_lowest_tdhf(
         return applied[:, :dim].T, -applied[:, dim:].T
 
     if initial_vectors is None:
-        guess_dim = min(dim, max_subspace, nroots)
+        guess_dim = nroots if initial_guess_count is None else max(nroots, int(initial_guess_count))
+        guess_dim = min(dim, max_subspace, guess_dim)
         guess_idx = jnp.argsort(diag)[:guess_dim]
         guess_v = jax.nn.one_hot(guess_idx, dim, dtype=dtype).T
     else:
@@ -485,8 +495,14 @@ def implicit_differential_davidson_lowest_tdhf(
     preconditioner_floor: float = 1e-8,
     preconditioner_level_shift: float = 0.0,
     orth_eps: float = 1e-10,
+    initial_guess_count: int | None = None,
 ) -> tuple[Array, Array, Array, Array]:
-    """Return TDHF Davidson roots with implicit eigenvalue differentiation."""
+    """Return TDHF Davidson roots with implicit eigenvalue differentiation.
+
+    An explicit initial count broadens the diagonal seed independently of the
+    requested root count. Residual convergence alone does not certify that the
+    initial space reaches every lower-energy symmetry sector.
+    """
 
     dim = int(size)
 
@@ -505,6 +521,7 @@ def implicit_differential_davidson_lowest_tdhf(
         preconditioner_floor=preconditioner_floor,
         preconditioner_level_shift=preconditioner_level_shift,
         orth_eps=orth_eps,
+        initial_guess_count=initial_guess_count,
     )
     x_vecs = jax.lax.stop_gradient(x_vecs)
     y_vecs = jax.lax.stop_gradient(y_vecs)

@@ -1,7 +1,10 @@
+from dataclasses import fields, replace
+
 import jax.numpy as jnp
+import pytest
 
 import gradscf.tools.device as device_module
-from gradscf.scf.molecules import QuadratureGrid, RestrictedMolecule
+from gradscf.scf.molecules import QuadratureGrid, RestrictedMolecule, UnrestrictedMolecule
 
 
 def _restricted_molecule_with_packed_eri() -> RestrictedMolecule:
@@ -40,3 +43,36 @@ def test_put_restricted_molecule_on_device_moves_packed_eri(monkeypatch):
     assert moved.hfx_fxx is molecule.hfx_fxx
     assert any(value is molecule.eri_pair_matrix and device is marker_device for value, device in calls)
     assert any(value is molecule.hfx_fxx and device is marker_device for value, device in calls)
+
+
+@pytest.mark.parametrize("unrestricted", [False, True])
+def test_put_molecule_moves_dynamic_scf_and_response_inputs(monkeypatch, unrestricted):
+    molecule = replace(
+        _restricted_molecule_with_packed_eri(),
+        overlap_matrix=jnp.array([[1.0, 0.1], [0.1, 1.0]]),
+        ao_laplacian=jnp.array([[0.2, -0.1], [0.3, 0.4]]),
+        fock_matrix=jnp.array([[-0.7, 0.04], [0.04, 0.8]]),
+    )
+    if unrestricted:
+        molecule = UnrestrictedMolecule(**{
+            field.name: getattr(molecule, field.name)
+            for field in fields(UnrestrictedMolecule) if hasattr(molecule, field.name)
+        })
+    field_names = ("overlap_matrix", "ao_laplacian", "fock_matrix")
+    transferred = {name: object() for name in field_names}
+    marker_device = object()
+    calls = []
+
+    def fake_device_put(value, device):
+        assert device is marker_device
+        calls.append(value)
+        for name in field_names:
+            if value is getattr(molecule, name):
+                return transferred[name]
+        return value
+
+    monkeypatch.setattr(device_module.jax, "device_put", fake_device_put)
+    moved = device_module.put_molecule_on_device(molecule, marker_device)
+    for name in field_names:
+        assert any(value is getattr(molecule, name) for value in calls), name
+        assert getattr(moved, name) is transferred[name], name

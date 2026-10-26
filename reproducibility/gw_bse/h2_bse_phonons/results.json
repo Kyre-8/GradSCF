@@ -1,0 +1,51 @@
+{
+  "basis": "3-21g",
+  "method": "native RHF -> G0W0 -> TDA-BSE; frozen electronic kernel",
+  "backend": "cpu",
+  "jax_version": "0.8.1",
+  "dtype": "float64",
+  "temperature_k": 300.0,
+  "bond_length_bohr": 1.3886142448271075,
+  "hf_energy_ha": -1.1229598355236154,
+  "maximum_gradient_ha_bohr": 8.179669455654626e-09,
+  "mode_frequency_cm1": 4657.106164344072,
+  "qp_max_residual_ha": 8.008897711686558e-11,
+  "excitation_energies_ev": [
+    16.2660620794592,
+    32.47146941008201,
+    46.326591735684545
+  ],
+  "oscillator_strengths": [
+    0.8103778074204807,
+    5.103113054552955e-30,
+    0.09384781016884895
+  ],
+  "debye_waller_ev": [
+    [
+      -0.0207662778526248,
+      -2.8899281770308724e-11,
+      0.041920871518725596
+    ],
+    [
+      -2.889928177030872e-11,
+      -0.03228954997681787,
+      -1.1149502687036743e-10
+    ],
+    [
+      0.041920871518725596,
+      -1.1149502687036743e-10,
+      0.3094430160263834
+    ]
+  ],
+  "numerical_eta_ev": 0.01,
+  "spectral_range_ev": [
+    11.20803866416647,
+    51.384615150977275
+  ],
+  "maximum_coupling_over_mode_energy": 6.205381784002731,
+  "probe_energy_ev": 16.43928435190055,
+  "probe_absorption_mb": 0.1557420625840397,
+  "coupling_scale_derivative_mb": -0.31212720798362176,
+  "coupling_scale_finite_difference_mb": -0.31212720805057215,
+  "wall_seconds": 10.624034209002275
+}

@@ -1,0 +1,175 @@
+{
+  "accepted": true,
+  "rows": [
+    {
+      "band": 6,
+      "component_max_differences_ev": {
+        "sigma_total_hartree": 0.0,
+        "sigma_correlation_hartree": 0.0,
+        "sigma_residue_hartree": 0.0,
+        "sigma_integral_hartree": 0.0
+      },
+      "shared_roots": [
+        {
+          "root_hartree": 0.4578626650418331,
+          "candidates": 2,
+          "branch_valid": true,
+          "residual_hartree": 0.0
+        },
+        {
+          "root_hartree": 0.4578626650418331,
+          "candidates": 2,
+          "branch_valid": true,
+          "residual_hartree": 0.0
+        }
+      ],
+      "root_change_ev": 0.0,
+      "reported_flags": [
+        "MULT:5",
+        "MULT:5"
+      ]
+    },
+    {
+      "band": 7,
+      "component_max_differences_ev": {
+        "sigma_total_hartree": 0.0,
+        "sigma_correlation_hartree": 0.0,
+        "sigma_residue_hartree": 0.0,
+        "sigma_integral_hartree": 0.0
+      },
+      "shared_roots": [
+        {
+          "root_hartree": 0.4750290075833279,
+          "candidates": 1,
+          "branch_valid": true,
+          "residual_hartree": 0.0
+        },
+        {
+          "root_hartree": 0.4750290075833279,
+          "candidates": 1,
+          "branch_valid": true,
+          "residual_hartree": 0.0
+        }
+      ],
+      "root_change_ev": 0.0,
+      "reported_flags": [
+        "MULT:2",
+        "MULT:2"
+      ]
+    },
+    {
+      "band": 8,
+      "component_max_differences_ev": {
+        "sigma_total_hartree": 0.0,
+        "sigma_correlation_hartree": 0.0,
+        "sigma_residue_hartree": 0.0,
+        "sigma_integral_hartree": 0.0
+      },
+      "shared_roots": [
+        {
+          "root_hartree": 0.4632276002144671,
+          "candidates": 1,
+          "branch_valid": true,
+          "residual_hartree": 0.0
+        },
+        {
+          "root_hartree": 0.4632276002144671,
+          "candidates": 1,
+          "branch_valid": true,
+          "residual_hartree": 0.0
+        }
+      ],
+      "root_change_ev": 0.0,
+      "reported_flags": [
+        "MULT:3",
+        "MULT:3"
+      ]
+    },
+    {
+      "band": 9,
+      "component_max_differences_ev": {
+        "sigma_total_hartree": 0.0,
+        "sigma_correlation_hartree": 0.0,
+        "sigma_residue_hartree": 0.0,
+        "sigma_integral_hartree": 0.0
+      },
+      "shared_roots": [
+        {
+          "root_hartree": 0.48645073895106167,
+          "candidates": 1,
+          "branch_valid": true,
+          "residual_hartree": 0.0
+        },
+        {
+          "root_hartree": 0.48645073895106167,
+          "candidates": 1,
+          "branch_valid": true,
+          "residual_hartree": 0.0
+        }
+      ],
+      "root_change_ev": 0.0,
+      "reported_flags": [
+        "MULT:4",
+        "MULT:4"
+      ]
+    },
+    {
+      "band": 10,
+      "component_max_differences_ev": {
+        "sigma_total_hartree": 0.0,
+        "sigma_correlation_hartree": 0.0,
+        "sigma_residue_hartree": 0.0,
+        "sigma_integral_hartree": 0.0
+      },
+      "shared_roots": [
+        {
+          "root_hartree": 0.612335983333752,
+          "candidates": 2,
+          "branch_valid": true,
+          "residual_hartree": 0.0
+        },
+        {
+          "root_hartree": 0.612335983333752,
+          "candidates": 2,
+          "branch_valid": true,
+          "residual_hartree": 0.0
+        }
+      ],
+      "root_change_ev": 0.0,
+      "reported_flags": [
+        "MULT:4",
+        "MULT:4"
+      ]
+    },
+    {
+      "band": 11,
+      "component_max_differences_ev": {
+        "sigma_total_hartree": 0.0,
+        "sigma_correlation_hartree": 0.0,
+        "sigma_residue_hartree": 0.0,
+        "sigma_integral_hartree": 0.0
+      },
+      "shared_roots": [
+        {
+          "root_hartree": 0.6138939074021375,
+          "candidates": 2,
+          "branch_valid": true,
+          "residual_hartree": -5.551115123125783e-17
+        },
+        {
+          "root_hartree": 0.6138939074021375,
+          "candidates": 2,
+          "branch_valid": true,
+          "residual_hartree": -5.551115123125783e-17
+        }
+      ],
+      "root_change_ev": 0.0,
+      "reported_flags": [
+        "MULT:4",
+        "MULT:4"
+      ]
+    }
+  ],
+  "all_printed_complex_sigma_components_identical": true,
+  "scope": "Only real-frequency range changed 200->60eV at fixed .05eV spacing; all active real-W arguments certified below23.606eV; no complete-W-spectrum claim"
+}

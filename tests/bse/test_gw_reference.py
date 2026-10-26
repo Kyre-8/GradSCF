@@ -9,7 +9,7 @@ import pytest
 @pytest.fixture(scope="module")
 def inputs():
     from gradscf import gto, dft
-    from gradscf.df import eri_pair_matrix_to_df_factors
+    from gradscf.integrals.molecular.factorization import eri_pair_matrix_to_df_factors
 
     mf = dft.RKS(gto.M(atom="H 0 0 0; H 0 0 .74", basis="sto-3g"), xc="hf").run()
     r = mf.scf_result

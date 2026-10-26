@@ -1,22 +1,46 @@
 from pathlib import Path
+import ast
+from importlib.util import resolve_name
 import re
+
+
+def _removed_adapter_imports(text, package):
+    removed = {"gradscf.reference", "gradscf.reference_legacy", "gradscf.pyscf_adapter"}
+    def forbidden(name):
+        return any(name == old or name.startswith(old+".") for old in removed)
+    names = []
+    for node in ast.walk(ast.parse(text)):
+        if isinstance(node, ast.Import):
+            names.extend(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            base = node.module or ""
+            if node.level:
+                base = resolve_name("."*node.level+base, package)
+            names.append(base)
+            names.extend(base+"."+alias.name for alias in node.names)
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+            # Also catch a literal dynamic import of a removed module.
+            names.append(node.value)
+    return any(forbidden(name) for name in names)
 
 
 def test_production_code_does_not_depend_on_removed_reference_adapters():
     root = Path("src/gradscf")
     offenders = []
     for path in root.rglob("*.py"):
-        text = path.read_text()
-        if (
-            "reference_legacy" in text
-            or "pyscf_adapter" in text
-            or "gradscf.reference" in text
-            or "from .reference import" in text
-            or "from ..reference import" in text
-        ):
+        package = ".".join(("gradscf", *path.relative_to(root).parts[:-1]))
+        if _removed_adapter_imports(path.read_text(), package):
             offenders.append(str(path))
-
     assert offenders == []
+
+
+def test_adapter_boundary_resolves_relative_imports():
+    assert not _removed_adapter_imports("from .reference import FCIReference", "gradscf.fci")
+    assert not _removed_adapter_imports("from ..reference import Something", "gradscf.fci.internal")
+    assert _removed_adapter_imports("from ..reference import Something", "gradscf.fci")
+    assert _removed_adapter_imports("from gradscf import reference", "gradscf.fci")
+    assert _removed_adapter_imports("import gradscf.reference_legacy", "gradscf.fci")
+    assert _removed_adapter_imports("importlib.import_module('gradscf.pyscf_adapter')", "gradscf.fci")
 
 
 def test_reference_legacy_and_pyscf_adapter_are_not_runtime_modules():
@@ -90,7 +114,7 @@ def test_pyscf_runtime_imports_are_limited_to_integral_modules():
     }
     allowed_prefixes = (
         Path("src/gradscf/integrals"),
-        Path("src/gradscf/integrals/basis_data/pyscf_basis_snapshot"),
+        Path("src/gradscf/integrals/basis/data/pyscf_basis_snapshot"),
     )
     pattern = re.compile(r"^\s*(from\s+pyscf\b|import\s+pyscf\b)", re.MULTILINE)
 
@@ -117,18 +141,17 @@ def test_legacy_mean_field_tddft_calls_are_not_in_runtime_code():
     assert offenders == []
 
 
-def test_scf_features_do_not_expose_neural_training_only_hf_pt2_helpers():
+def test_physical_hf_pt2_helpers_are_owned_by_dft_not_a_neural_model():
     import reference_scf_features as scf_features
     from gradscf.model.neural_xc import inputs
-
-    hidden = (
-        "_local_hfx_features_from_basis_dm",
-        "_local_pt2_feature_from_restricted_orbitals",
-    )
-    for name in hidden:
+    from gradscf.dft import hfx, pt2
+    for name, owner in (
+        ('_local_hfx_features_from_basis_dm', hfx),
+        ('_local_pt2_feature_from_restricted_orbitals', pt2),
+    ):
         assert not hasattr(scf_features, name)
-        assert hasattr(inputs, name)
-    assert not hasattr(inputs, "_local_hfx_features_from_dm")
+        assert not hasattr(inputs, name)
+        assert hasattr(owner, name)
 
 
 def test_restricted_response_hvp_uses_factorized_transition_features():
@@ -160,48 +183,16 @@ def test_restricted_response_feature_kind_helpers_are_owned_by_features_module()
     assert features_module.infer_response_feature_kind(jnp.ones((5, 5, 2))) == "MGGA"
 
 
-def test_public_api_prefers_molecule_naming_over_reference_naming():
+def test_public_api_prefers_owned_namespaces_and_object_conversion():
     import gradscf
-    from gradscf import scf, workflows
-
-    scf_preferred = {
-        "QuadratureGrid",
-        "RestrictedMolecule",
-        "UnrestrictedMolecule",
-        "restricted_molecule_from_spec_with_jax_rks",
-        "unrestricted_molecule_from_spec_with_jax_uks",
-    }
-    public_preferred = {
-        "MoleculeRun",
-        "MoleculeSpecConfig",
-        "build_molecule",
-        "put_molecule_on_device",
-        "put_restricted_molecule_on_device",
-        "run_molecule_from_spec",
-    }
-    scf_legacy = {
-        "GridReference",
-        "RestrictedMoleculeReference",
-        "UnrestrictedMoleculeReference",
-        "restricted_reference_from_spec_with_jax_rks",
-        "unrestricted_reference_from_spec_with_jax_uks",
-    }
-    public_legacy = {
-        "ReferenceRun",
-        "ReferenceSpecConfig",
-        "build_reference",
-        "put_reference_on_device",
-        "put_restricted_reference_on_device",
-        "run_reference_from_spec",
-    }
-
-    assert scf_preferred.issubset(set(scf.__all__))
-    assert public_preferred.issubset(set(gradscf.__all__))
-    assert scf_legacy.isdisjoint(set(scf.__all__))
-    assert public_legacy.isdisjoint(set(gradscf.__all__))
-    assert {"MoleculeRun", "MoleculeSpecConfig", "run_molecule_from_spec"}.issubset(
-        set(workflows.__all__)
-    )
-    assert {"ReferenceRun", "ReferenceSpecConfig", "run_reference_from_spec"}.isdisjoint(
-        set(workflows.__all__)
-    )
+    from gradscf import scf
+    from gradscf.model.neural_xc import workflows
+    from gradscf.scf import builders
+    assert {'QuadratureGrid','RestrictedMolecule','UnrestrictedMolecule','as_reference'}.issubset(scf.__all__)
+    assert {'MoleculeRun','MoleculeSpecConfig','ExperimentPipeline'}.issubset(workflows.__all__)
+    for name in ('_build_restricted_reference','_build_unrestricted_reference'):
+        assert name not in scf.__all__
+        assert callable(getattr(builders,name))
+    for name in ('build_molecule','run_molecule_from_spec','put_molecule_on_device'):
+        assert name not in gradscf.__all__
+    assert callable(scf.RKS.to_reference)

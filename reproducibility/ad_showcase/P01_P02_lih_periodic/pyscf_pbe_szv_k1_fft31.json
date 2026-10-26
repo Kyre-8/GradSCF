@@ -1,0 +1,247 @@
+{
+  "complete": true,
+  "native_sha256": "b1914da5f0965ab369b346b061380abc0c8baffc835206d55595e15374139e92",
+  "script_sha256": "41cc88549a36c541fb1a27b67532f76a7ab927e6e91cb410b3df286c71d543cb",
+  "reference": {
+    "settings": {
+      "a_bohr": 7.6,
+      "xc": "pbe",
+      "basis": "gth-szv",
+      "pseudo": "gth-pade",
+      "mesh": [
+        31,
+        31,
+        31
+      ],
+      "kmesh": [
+        1,
+        1,
+        1
+      ],
+      "precision": 1e-10,
+      "displacement_bohr": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.025,
+          -0.015,
+          0.01
+        ]
+      ]
+    },
+    "energy_hartree": -8.306566138125344,
+    "converged": true,
+    "orbital_gradient_norm": 1.0256074411718851e-11,
+    "sampled_indirect_gap_hartree": 0.7907258411718486,
+    "occupation_values": [
+      0.0,
+      2.0
+    ],
+    "electron_number": 4.0,
+    "explicit_nelectron": 4,
+    "pseudopotential_valence_charges": [
+      3,
+      1
+    ],
+    "nao": 3,
+    "volume_bohr3": 109.744,
+    "coordinates_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        3.8249999999999997,
+        3.7849999999999997,
+        3.8099999999999996
+      ]
+    ],
+    "lattice_bohr": [
+      [
+        0.0,
+        3.8,
+        3.8
+      ],
+      [
+        3.8,
+        0.0,
+        3.8
+      ],
+      [
+        3.8,
+        3.8,
+        0.0
+      ]
+    ],
+    "kpoints_inverse_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "fractional_kpoints": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "basis_data": {
+      "Li": [
+        [
+          0,
+          [
+            7.2610457926,
+            -0.2798628497,
+            0.0501840556
+          ],
+          [
+            2.1056583087,
+            -0.447742079,
+            0.1084202571
+          ],
+          [
+            0.6439906571,
+            -0.3912929157,
+            0.1448363201
+          ],
+          [
+            0.0797152017,
+            -0.0282408543,
+            -0.4643021689
+          ],
+          [
+            0.029402959,
+            0.0106542324,
+            -0.6220213304
+          ]
+        ]
+      ],
+      "H": [
+        [
+          0,
+          [
+            8.3744350009,
+            -0.0283380461
+          ],
+          [
+            1.805868146,
+            -0.1333810052
+          ],
+          [
+            0.4852528328,
+            -0.3995676063
+          ],
+          [
+            0.1658236932,
+            -0.5531027541
+          ]
+        ]
+      ]
+    },
+    "pseudopotential_data": [
+      [
+        [
+          3
+        ],
+        0.4,
+        4,
+        [
+          -14.03486849,
+          9.55347627,
+          -1.76648817,
+          0.08436998
+        ],
+        0
+      ],
+      [
+        [
+          1
+        ],
+        0.2,
+        2,
+        [
+          -4.1802368,
+          0.72507482
+        ],
+        0
+      ]
+    ],
+    "minimum_overlap_eigenvalue": 0.24232684255798076,
+    "elapsed_seconds": 154.64565830299398,
+    "forces_hartree_per_bohr": [
+      [
+        0.0008861740186555272,
+        -0.0005314271154725164,
+        0.0003542269964269478
+      ],
+      [
+        -0.0008859833108166414,
+        0.0005313325356416632,
+        -0.00035416957109575835
+      ]
+    ],
+    "raw_public_stress_hartree_per_bohr3": [
+      [
+        0.0011236761076239116,
+        -3.114636823408643e-07,
+        2.0825560087447987e-07
+      ],
+      [
+        -3.114648647745767e-07,
+        0.0011241779551200918,
+        -1.2433500070235555e-07
+      ],
+      [
+        2.0825715999840973e-07,
+        -1.243349464193249e-07,
+        0.001124334767284498
+      ]
+    ],
+    "symmetric_public_stress_hartree_per_bohr3": [
+      [
+        0.0011236761076239116,
+        -3.114642735577205e-07,
+        2.082563804364448e-07
+      ],
+      [
+        -3.114642735577205e-07,
+        0.0011241779551200918,
+        -1.2433497356084022e-07
+      ],
+      [
+        2.082563804364448e-07,
+        -1.2433497356084022e-07,
+        0.001124334767284498
+      ]
+    ],
+    "raw_stress_asymmetry": 1.5591239298576987e-12,
+    "property_seconds": 29.65329498099163,
+    "total_seconds": 184.2993654840102
+  },
+  "finite_difference_checks": [],
+  "passed": true,
+  "errors": {
+    "energy_hartree": 1.1822875123357335e-08,
+    "forces_hartree_per_bohr": 1.113899809738507e-09,
+    "stress_hartree_per_bohr3": 1.6665699048654808e-09
+  },
+  "gates": {
+    "energy_hartree": 2e-06,
+    "forces_hartree_per_bohr": 3e-06,
+    "stress_hartree_per_bohr3": 3e-07,
+    "coordinate_direction_hartree_per_bohr": 3e-06,
+    "strain_direction_hartree": 5e-06
+  },
+  "finite_difference_validation": false,
+  "scope": "Matched energy/atomic gradient and public PBE stress; requested FD reconverges all electrons at fixed fractional k.",
+  "elapsed_seconds_this_invocation": 184.30350270701456,
+  "pyscf_version": "2.13.0",
+  "hostname": "c20",
+  "python": "3.11.15"
+}

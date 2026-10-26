@@ -1,0 +1,266 @@
+{
+  "complete": true,
+  "passed": true,
+  "settings": {
+    "a_bohr": 7.780032276700287,
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pade",
+    "mesh": [
+      41,
+      41,
+      41
+    ],
+    "kmesh": [
+      2,
+      2,
+      3
+    ],
+    "precision": 1e-10
+  },
+  "qmesh": [
+    2,
+    2,
+    3
+  ],
+  "lattice_bohr": [
+    [
+      0.0,
+      3.8900161383501435,
+      3.8900161383501435
+    ],
+    [
+      3.8900161383501435,
+      0.0,
+      3.8900161383501435
+    ],
+    [
+      3.8900161383501435,
+      3.8900161383501435,
+      0.0
+    ]
+  ],
+  "positions_bohr": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      3.8900161383501435,
+      3.8900161383501435,
+      3.8900161383501435
+    ]
+  ],
+  "masses_amu": [
+    7.0160034366,
+    1.00782503223
+  ],
+  "born_charges": [
+    [
+      [
+        0.9991635845978374,
+        -0.041016901485883536,
+        0.036916748197176524
+      ],
+      [
+        -0.04101690148588409,
+        0.9991635845978374,
+        0.03691674819717724
+      ],
+      [
+        0.037452565876845374,
+        0.037452565876845284,
+        0.959402724853536
+      ]
+    ],
+    [
+      [
+        -0.9991599449054052,
+        0.04101644525963911,
+        -0.03691630135318964
+      ],
+      [
+        0.04101644525963937,
+        -0.9991599449054058,
+        -0.036916301353190066
+      ],
+      [
+        -0.03745198334106149,
+        -0.03745198334106112,
+        -0.9593994819135715
+      ]
+    ]
+  ],
+  "epsilon_infinity": [
+    [
+      1.810534285925022,
+      0.10236341880907829,
+      0.06498398760018696
+    ],
+    [
+      0.10236341880907822,
+      1.8105342859250246,
+      0.06498398760018625
+    ],
+    [
+      0.06498398760018706,
+      0.06498398760018621,
+      1.5962806664809488
+    ]
+  ],
+  "smearing_inverse_bohr": 0.35,
+  "cutoff": 5,
+  "cutoff_records": [
+    {
+      "cutoff": 1,
+      "max_error_hartree_per_bohr2": 6.174920197873912e-07,
+      "reciprocal_periodicity_error": 0.02636404286929516,
+      "self_inverse_imaginary": 2.847307176914641e-07
+    },
+    {
+      "cutoff": 2,
+      "max_error_hartree_per_bohr2": 2.735659021927194e-15,
+      "reciprocal_periodicity_error": 0.0002460024769064652,
+      "self_inverse_imaginary": 5.1981890791309265e-15
+    },
+    {
+      "cutoff": 3,
+      "max_error_hartree_per_bohr2": 1.5612511283791264e-17,
+      "reciprocal_periodicity_error": 2.277887272902901e-09,
+      "self_inverse_imaginary": 2.2219647303458576e-18
+    },
+    {
+      "cutoff": 4,
+      "max_error_hartree_per_bohr2": 3.576224061345498e-18,
+      "reciprocal_periodicity_error": 3.628499266494338e-17,
+      "self_inverse_imaginary": 1.1746323965109075e-18
+    },
+    {
+      "cutoff": 5,
+      "max_error_hartree_per_bohr2": 6.938893903907228e-18,
+      "reciprocal_periodicity_error": 3.628499266494338e-17,
+      "self_inverse_imaginary": 1.5449598510325104e-18
+    }
+  ],
+  "width_sensitivity_records": [
+    {
+      "smearing_inverse_bohr": 0.25,
+      "change_from_035_hartree_per_bohr2": 0.0074211862738655454,
+      "sample_reconstruction_error": 1.427647095609007e-11
+    },
+    {
+      "smearing_inverse_bohr": 0.35,
+      "change_from_035_hartree_per_bohr2": 0.0,
+      "sample_reconstruction_error": 1.427647073926286e-11
+    },
+    {
+      "smearing_inverse_bohr": 0.45,
+      "change_from_035_hartree_per_bohr2": 0.0019466789979460592,
+      "sample_reconstruction_error": 1.4276471591126528e-11
+    }
+  ],
+  "gamma_limits": [
+    {
+      "cartesian_direction": [
+        1.6653345369377348e-16,
+        0.8076040154738854,
+        -1.1102230246251565e-16
+      ],
+      "frequencies_cm1": [
+        19.235678745296795,
+        19.23868805854696,
+        19.24155332306118,
+        377.6236405186374,
+        559.0333632465455,
+        1409.500118322869
+      ]
+    },
+    {
+      "cartesian_direction": [
+        -0.6057030116054142,
+        -0.6057030116054142,
+        1.6653345369377348e-16
+      ],
+      "frequencies_cm1": [
+        19.23724463380596,
+        19.238520740005324,
+        19.24161755777532,
+        508.14646227470087,
+        537.3274301695193,
+        1290.4587922121982
+      ]
+    },
+    {
+      "cartesian_direction": [
+        0.4038020077369428,
+        0.4038020077369428,
+        0.4038020077369425
+      ],
+      "frequencies_cm1": [
+        19.236214792276122,
+        19.237244633805172,
+        19.241712264225523,
+        350.0756985814089,
+        537.3274301695197,
+        1406.5458645101849
+      ]
+    }
+  ],
+  "gamma_dos_convention": "G=0 excluded short-circuit value at the single sampled Gamma point",
+  "sample_reconstruction_error": 1.427647073926286e-11,
+  "raw_total_asr_residual": 0.00019479383593315824,
+  "short_range_asr_residual": 0.000736062001472758,
+  "raw_born_charge_sum_e": [
+    [
+      3.6396924322223967e-06,
+      -4.5622624442881454e-07,
+      4.46843986881551e-07
+    ],
+    [
+      -4.562262447202481e-07,
+      3.639692431556263e-06,
+      4.4684398717298457e-07
+    ],
+    [
+      5.825357838815104e-07,
+      5.82535784166005e-07,
+      3.242939964454017e-06
+    ]
+  ],
+  "asr_projected": false,
+  "charge_projected": false,
+  "path_ticks": [
+    0.0,
+    0.8076040154738854,
+    1.0931351534014202,
+    1.949728567184025,
+    2.649134160782731,
+    3.2201964366378006
+  ],
+  "path_source": "https://phonopy.github.io/phonopy/phonopy-module.html#band-structure",
+  "dos_sampling": [
+    10,
+    10,
+    10
+  ],
+  "dos_width_cm1": 25.0,
+  "dos_integrals_states_per_cell": [
+    6.000000000000002,
+    6.000000000000001
+  ],
+  "source_python_sha256": "acc255538482dbbd7b243b5e3a577e2bd820086936fe29d67f6aaa28c66ef9b5",
+  "source_sha256": "3aa119b84c4f223a8409f2ed2dbf27609cfecb0a97a8abc7a0a3c09e2b76a889",
+  "script_sha256": "1fbc434a18f4dcd15f903f7467471489db0c3617c5a6d5cc6122986bafc60aac",
+  "arrays_sha256": "4b34ad62ef8320c269ac3567305267beb6e672e1db5be664a3f46b5bd20e6a20",
+  "input_sha256": {
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/ifc_raw/results.json": "20dcf445c98ed117cd9dc35454acf8fa2e987ff80fd5c33ecec706fe8dbb769f",
+    "reproducibility/ad_showcase/P03_lih_qmesh/k2x2x3_fft41/ifc_raw/ifc_data.npz": "5012f43bfc2ab2b99a439b86341347b1aa9586a061c7f58cf713f1908081e0c8",
+    "reproducibility/ad_showcase/P04_lih_born/k223_fft41.json": "bc6ef0c7898553516603c366039673e587a4d4af4a1e21490f3aecd6d74ace6a",
+    "reproducibility/ad_showcase/P04_lih_dielectric/k223_fft41.json": "c00f5a4ab17b1cbe858e95243a7ac62828011bceab4a3c26216ab9a8f8e6fbf3",
+    "reproducibility/ad_showcase/P04_lih_dielectric/k223_fft41_finite_field.json": "b945b5b900cfe4f709c885537e6bd9ddda05945d5b9c3af2f020201f723ea4ed"
+  },
+  "interpolation_convergence_established": false,
+  "scope": "Matched GradSCF finite-model raw/polar interpolation. Negative modes and anisotropic tensors retained; no ASR/charge projection or bulk-convergence claim.",
+  "elapsed_seconds": 28.285481131999404
+}

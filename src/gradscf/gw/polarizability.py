@@ -2,7 +2,7 @@
 
 Given low-rank ERI factors ``B_P[p,q]`` with
 ``(pq|rs) ~= sum_P B_P[p,q] B_P[r,s]`` (spectral factorization of the full
-ERI, see :mod:`gradscf.df`), the independent-particle density response in
+ERI, see :mod:`gradscf.integrals.molecular.factorization`), the independent-particle density response in
 the auxiliary channel basis is
 
     Pi_PQ(iw) = spin_factor * sum_ia B_P[i,a] e_ia / (w^2 + e_ia^2) B_Q[i,a]

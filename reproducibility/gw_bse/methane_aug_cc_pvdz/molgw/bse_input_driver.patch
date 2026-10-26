@@ -1,0 +1,29 @@
+--- src/molgw.f90
++++ src/molgw.f90
+@@ -752,6 +752,26 @@
+   ! (only if the SCF cycles were converged)
+   if( ( TRIM(postscf) == 'TD' .OR. calc_type%is_bse ) .AND. (scf_has_converged .AND. .NOT. TRIM(postscf) == 'BSE-I') ) then
+     call wpol%init(nstate, occupation, 0)
++    ! Comparison-only input adapter; all numerical modules are unmodified.
++    block
++      character(len=16) :: request
++      integer :: env_status, qp_status, optical_last, k
++      request = ''
++      call get_environment_variable('MOLGW_COMPARE_OPTICAL_LAST', request, status=env_status)
++      if( env_status == 0 ) then
++        read(request, *) optical_last
++        wpol%transition_table = wpol%transition_table(:, &
++          PACK([(k,k=1,wpol%npole_reso)], wpol%transition_table(2,:) <= optical_last))
++        wpol%npole_reso = SIZE(wpol%transition_table, DIM=2)
++        write(stdout, *) 'Comparison adapter optical transitions:', wpol%npole_reso
++      end if
++      request = ''
++      call get_environment_variable('MOLGW_COMPARE_QP_SCREENING', request, status=env_status)
++      if( env_status == 0 .AND. TRIM(request) == 'yes' ) then
++        call read_energy_qp(nstate, energy, qp_status)
++        if( qp_status /= 0 ) call die('Comparison adapter: missing screening QP energies')
++      end if
++    end block
+     call polarizability(.FALSE., .FALSE., basis, occupation, energy, c_matrix, erpa_tmp, egw_tmp, wpol)
+     call wpol%destroy()
+   end if

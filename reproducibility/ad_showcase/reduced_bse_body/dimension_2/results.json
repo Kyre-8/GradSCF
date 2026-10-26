@@ -1,0 +1,98 @@
+{
+  "complete": true,
+  "dimension": 2,
+  "xc": "svwn",
+  "basis": "gth-szv",
+  "pseudo": "gth-pade",
+  "exxdiv": null,
+  "mesh": [
+    25,
+    31,
+    91
+  ],
+  "kmesh": [
+    2,
+    1,
+    1
+  ],
+  "lattice_bohr": [
+    [
+      5.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      6.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      18.0
+    ]
+  ],
+  "coordinates_bohr": [
+    [
+      0.4,
+      0.5,
+      8.7
+    ],
+    [
+      1.8,
+      0.7,
+      9.2
+    ]
+  ],
+  "scf_energy_hartree": -1.1304553395985697,
+  "raw_finite_head_hartree": -0.9424777960769379,
+  "gw_method": "periodic_query_full_cd",
+  "gw_nw": 16,
+  "gw_eta_hartree": 0.001,
+  "gw_fc": false,
+  "qp_energies_hartree": [
+    [
+      -0.1995519711599314,
+      0.6002841793742336
+    ],
+    [
+      -0.11524562296200272,
+      0.24515421612198765
+    ]
+  ],
+  "qp_max_residual_hartree": 4.5102810375396984e-17,
+  "bse_max_residual_hartree": 7.24375326297288e-16,
+  "raw_hermiticity_error": 2.7763769378222946e-17,
+  "independent_matrix_error_hartree": 2.8088644455520303e-14,
+  "independent_alpha_error": 3.552713678800501e-15,
+  "ip_energies_ev": [
+    21.764650425689364,
+    9.806979224306383
+  ],
+  "bse_energies_ev": [
+    14.52345165101776,
+    26.992714328354534
+  ],
+  "broadening_eta_ev": 0.1,
+  "optical_units": "bohr^1",
+  "scope": "Finite-part Coulomb gauge; no q-cell averaging, 3D finite-size correction, material convergence or AD.",
+  "reference_scope": "Shared SCF/raw Coulomb boundary; independent NumPy Fourier, full Lehmann, signed-v Dyson and BSE assembly.",
+  "elapsed_seconds": 62.709124526998494,
+  "hostname": "c20",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "backend": "cpu",
+  "dtype": "float64/complex128",
+  "source_sha256": {
+    "examples/bse/reduced_hydrogen.py": "83e88014acc7807aa874ca1683c15c7e64a7cefeeb1be7f4cbc02cdbcd1f75f0",
+    "src/gradscf/gw/pbc/query.py": "67f8777c7d2f50b9da25e5df3dd2d3897d11908bd25a462e8bc41b50b9cc223b",
+    "src/gradscf/gw/pbc/interaction.py": "53ab962a0f22466a168b3c7525af5d598a50617f064b427912a8fc4d0ff9b29a",
+    "src/gradscf/gw/pbc/product_basis.py": "3c8819a167dfed28a5f176248958cf6f04f8918cf2b0b5305adfb1bf497ab189",
+    "src/gradscf/gw/screened.py": "308493c8837febc20df005ffd8dcd5131fd4c9de12f80fde59c493ca90ab13e2",
+    "src/gradscf/bse/pbc/kernel.py": "15fbab2bf2d67346a2046e267d9773114c460b445c6c0ccf1abc87e991539f41",
+    "src/gradscf/bse/pbc/properties.py": "441612af643149cc0d2a86855fcefc6dc5d33fa5d37c6ec0fa86f999633dae94",
+    "src/gradscf/bse/pbc/response.py": "2899a61c29a1785e4b323c30b7124607052cbed3180f44dad6e57add75319d1c",
+    "src/gradscf/pbc/optics.py": "2f76c64c507830cb74229b382c5000f2b2a0a16a40d92fde1512fde505842504",
+    "src/gradscf_tools/periodic_bse_reference.py": "06273b861af2866ac4a1f5a868daf2dd24f3d1d1a161c2c9d4798d5011d1e9af"
+  }
+}

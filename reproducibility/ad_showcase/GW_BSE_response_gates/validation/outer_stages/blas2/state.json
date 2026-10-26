@@ -1,0 +1,8 @@
+{
+  "omp": "2",
+  "blas": "2",
+  "phase": "before standalone GW",
+  "completed": false,
+  "hf_energy": -76.01049281824507,
+  "hf_seconds": 8.228399184008595
+}

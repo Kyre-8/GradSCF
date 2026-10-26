@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "a9f15f4",
+  "mode_rename": "unrolled -> explicit",
+  "steps_per_mode": 100,
+  "comparisons": {
+    "fixed_density": {
+      "loss": 0.0,
+      "mse": 0.0,
+      "mae": 0.0,
+      "energy_hartree": 0.0
+    },
+    "explicit": {
+      "loss": 0.0,
+      "mse": 1.3877787807814457e-17,
+      "mae": 0.0,
+      "energy_hartree": 0.0
+    },
+    "implicit": {
+      "loss": 0.0,
+      "mse": 2.7755575615628914e-17,
+      "mae": 0.0,
+      "energy_hartree": 0.0
+    }
+  }
+}

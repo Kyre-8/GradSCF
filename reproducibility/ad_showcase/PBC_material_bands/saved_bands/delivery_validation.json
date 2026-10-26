@@ -1,0 +1,66 @@
+{
+  "passed": true,
+  "remote_snapshot": "/home/yjiao/gradscf_checks/ad-showcase-saved-band-plots-20261016",
+  "final_source_sha256": "90b57c555ef479c454030c3e39de6e338b33208a0b984e92839f9c82c6d322b2",
+  "remote_local_output_sha256": {
+    "gaas_all.pdf": "6ca22294aff8bb16b567685516bf38843c610ad4e73eb575843f0deeb5b75224",
+    "gaas_all.png": "a6657594d8b189b88b2db13ee25ec33075afbc8f2da5cd87b1a8cda4f81ba9c2",
+    "gan_all.pdf": "90b3deb935a2662efb1cadec05a0c670537aa7e240d59d05a4a50a8da9d6b4d9",
+    "gan_all.png": "aab79601558cbc51056e98bbce0243fba6bb68cff462273e719b02cfa7d2f8a9",
+    "graphene_all.pdf": "20d0b6b76ce0628eac0cfa322abb8398070f1a82eb5d3d6ed12ab079f8bf1200",
+    "graphene_all.png": "4343ba1f11056c6bc1177da3fe568a6fbaa672bfeba051fbe85f1b9e74d15ad9",
+    "materials_overview.pdf": "d6b21b43bce718090d57e9ae1bcff16f7b290c662ee6bfadac7f8ce72b5462eb",
+    "materials_overview.png": "c5f629448c73766425641491a669c4be0ebed8640bb171ae09b74c4d649d1dd7",
+    "plot_manifest.json": "ed284cc37945a6ed0e0ff08e770143b117cdf80c0efae0c7bcf846aa08fe82ae",
+    "plot_resources.json": "b81a0d79e7a47fa894b85342fbb18d23b2abb0cba6266d61d87d20571b07a355",
+    "silicon_all.pdf": "f28b1b4122f2b9ef0f05e6024a647e8ba970cd2bcf2798148d6fca211f05698f",
+    "silicon_all.png": "f9cc3db1435185085c8845705ea7a1b87f5fc93fb507f54847e8c18ba7d2b341"
+  },
+  "original_numerical_input_hashes_match": true,
+  "files_hash_checked": 12,
+  "numerical_input_files_checked": 75,
+  "material_cases_plotted": 17,
+  "independent_checks": {
+    "passed": 13,
+    "missing": 3,
+    "mismatch": 1
+  },
+  "incomplete_cases_without_curves": 3,
+  "gw_requested": [
+    4,
+    6
+  ],
+  "gw_accepted": [
+    3,
+    6
+  ],
+  "physical_calculations_started": 0,
+  "visual_qa": {
+    "png": 5,
+    "pdf_remote_raster": 5,
+    "passed": true,
+    "note": "All five PNGs and remote pdftoppm previews inspected. Independent second review of Si/GaN PDF previews passed. Failed QP candidate omitted; GaN reference mismatch is prominent."
+  },
+  "final_plot_seconds": 4.761764559996664,
+  "plot_and_pdf_render_wall_seconds": 7.57,
+  "peak_rss_kib": 191348,
+  "cpu_affinity": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "archive": "artifacts/ad_showcase/development/completion_20261016/band_plots"
+}

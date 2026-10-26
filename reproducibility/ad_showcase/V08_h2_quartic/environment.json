@@ -1,0 +1,21 @@
+{
+  "snapshot": "/home/yjiao/gradscf_checks/ad-showcase-v08-20261016",
+  "frozen_utc": "2026-10-15T21:02:09.045516+00:00",
+  "cpu": "Intel(R) Xeon(R) Platinum 8457C",
+  "python": "3.11.15",
+  "jax": "0.10.0",
+  "jaxlib": "0.10.0",
+  "numpy": "2.4.4",
+  "scipy": "1.17.1",
+  "pyscf": "2.13.0",
+  "matplotlib": "3.10.9",
+  "backend": "cpu",
+  "float64": true,
+  "OMP_NUM_THREADS": "2",
+  "OPENBLAS_NUM_THREADS": "2",
+  "jax_threads_globally_limited": false,
+  "JAX_ENABLE_COMPILATION_CACHE": "false",
+  "native_library_sha256": "8176ca97f9758ba3810b727c5a2e90572ac4f8f205e4a16e0d7a7177221b1829",
+  "source": "Verified G08 source/library snapshot plus the V08 workflow helper; no new integral/solver core changes",
+  "base_commit": "8f8c93d25fcc150aace9ad5c6a8e070c4f2937af with uncommitted showcase development sources"
+}

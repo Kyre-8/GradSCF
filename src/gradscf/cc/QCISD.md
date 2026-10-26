@@ -15,10 +15,10 @@ Tests compare against PySCF's separate optimized `qcisd.QCISD` implementation.
 ## Public interface
 
 ```python
-from gradscf import cc, dft, gto
+from gradscf import cc, gto, scf
 
 mol = gto.M(atom="O 0 0 0; H 0 -.757 .587; H 0 .757 .587", basis="sto-3g")
-mf = dft.RKS(mol, xc="hf").run()
+mf = scf.RHF(mol).run()
 myqci = cc.QCISD(mf).run()  # also mf.QCISD().run()
 print(myqci.e_tot, myqci.e_corr, myqci.converged)
 print(myqci.e_tot + myqci.qcisd_t())

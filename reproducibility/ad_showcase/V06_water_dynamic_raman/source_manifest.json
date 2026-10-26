@@ -1,0 +1,35 @@
+{
+  "source_python_sha256": "fcc5487b0791943005011b8bb4e1186d165ee2ea8e4945245ecef6f8a15e73bd",
+  "source_origin": "/home/yjiao/gradscf_checks/ad-showcase-integration-20261015/src, frozen before V06; three V06 implementation files added/updated. Later field=None MolecularEnergy optimization is not present.",
+  "files": {
+    "src/gradscf/scf/molecules.py": "8842c72c8247ce61f5c62beb58841c94eb463dc6f4ede05fb1cf596f7efb32c8",
+    "src/gradscf/tddft/response.py": "70ebfa0a8351cbf8b0d47a6fa3a8979108adaac30ae215ea4f9599360178876c",
+    "src/gradscf_tools/dynamic_response.py": "be0b003bbc33477af823721a1d96b58cdece6e121a1ba6d3a803516862f098d3",
+    "src/gradscf_tools/molecular_response.py": "c815909cbc61b8fb2f12240636c22c35701b7b94391783250fc3cb921a5a3b1a",
+    "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+    "src/gradscf/solvers/linear/complex.py": "5c272a7da13e41299fec71b3a2a78a27733ec51834792af3805accba78d8a5e5",
+    "src/gradscf/solvers/linear/implicit.py": "238fc7ece16897cd3beac424955a3995401ac812540bd5580b8843342c29104e",
+    "tests/test_molecular_dynamic_response.py": "387608d4723b0f9fda52176d287762d4e2c753c8bdfddbe658aa9f92a6eea13d",
+    "examples/vibrations/water_dynamic_raman.py": "a6e3b1f97ae1f12b160009965022f4137db1abb35fd16c1978c5379d8be9003c",
+    "examples/vibrations/compare_water_dynamic_raman_pyscf.py": "733e2547c4ca2d783557e15f76f47c41ee9908f704c3576a683a01667bc4943f",
+    "examples/vibrations/plot_water_dynamic_raman.py": "0729de657740d47a94a6d66b299edef84dbf2c6c4e75b16458b32374867d6212"
+  },
+  "native_libraries": {
+    "src/gradscf/integrals/_native/lib/libgradscf_integrals.so": "e02844ce6c1b5eebc2dc00a6eec5f1803fd33ad4150aa82e9858d5c0890b9904"
+  },
+  "input_sha256": {
+    "reproducibility/ad_showcase/G05_water_rhf_hessian/gradscf.json": "8a585999b7a3f2aaf1d8f16ceee4544eca643057c4ca75dc50feeef681065d8c",
+    "reproducibility/ad_showcase/V01_V02_water_rhf_spectra/gradscf.json": "80cce6840ce1d27f782533739034252df1d6be3a74647c996f3816a9835d18b3"
+  },
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "JAX_PLATFORMS": "cpu",
+    "JAX_ENABLE_X64": "1",
+    "JAX_ENABLE_COMPILATION_CACHE": "false",
+    "OMP_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2"
+  },
+  "hostname": "c20",
+  "python": "3.11.15",
+  "focused_test_history": "Algebra4, HF2 and DFT2 executed as separate groups on the same unchanged production source; HF parametrization was subsequently extended to PBE/PBE0 with the same HF assertions."
+}

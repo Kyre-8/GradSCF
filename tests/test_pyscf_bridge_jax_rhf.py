@@ -3,8 +3,8 @@ import pytest
 
 from pyscf_reference import restricted_reference_from_pyscf_with_jax_rhf
 from gradscf.scf import RHFConfig
-from gradscf.workflows.core import run_reference
-from gradscf.workflows.types import SimulationConfig
+from gradscf.model.neural_xc.workflows.core import run_reference
+from gradscf.model.neural_xc.workflows.types import SimulationConfig
 
 
 def _pyscf_or_skip():

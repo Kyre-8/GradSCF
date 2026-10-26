@@ -3,11 +3,8 @@
 import numpy as np
 import jax.numpy as jnp
 
-from gradscf.df import (
-    build_jk_from_df,
-    eri_pair_matrix_to_df_factors_traceable,
-    eri_to_df_factors,
-)
+from gradscf.integrals.molecular.jk import build_jk_from_df
+from gradscf.integrals.molecular.factorization import eri_pair_matrix_to_df_factors_traceable, eri_to_df_factors
 from gradscf.integrals.basis import prepare_basis
 from gradscf.integrals.plan import make_plan
 

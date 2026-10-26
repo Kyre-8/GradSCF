@@ -1,0 +1,25 @@
+&molgw
+scf='HF'
+basis='6-31Gs'
+gaussian_type='CART'
+tolscf=1.0e-12
+nscf=100
+frozencore='no'
+ncoreg=0
+ncorew=0
+nvirtualg=20
+nvirtualw=20
+selfenergy_state_min=1
+selfenergy_state_max=19
+nomega_sigma=4000001
+step_sigma=0.0000005
+length_unit='bohr'
+natom=3
+postscf='G0W0'
+eta=0.00001
+print_w='yes'
+nstep_gw=1
+/
+O 0.0 0.0 0.0
+H 0.0 1.43 1.11
+H 0.0 -1.43 1.11

@@ -1,0 +1,925 @@
+{
+  "physical_calculations_started": 0,
+  "material_complete_cases": 17,
+  "material_records": 20,
+  "material_cases": [
+    {
+      "case": "gaas_lda_pilot",
+      "material": "gaas",
+      "method": "lda",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          41,
+          41,
+          41
+        ],
+        "kmesh": [
+          2,
+          2,
+          2
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "Maximum occupied band on the SCF mesh and displayed path",
+      "hashes": {
+        "native.json": "bf68d299af7c9ec8df45c80c98c675a6f27af721af6451225354c7d6a5032f7b",
+        "pyscf.json": "af356fc15e77aa8d324a0a52e35e8b883605e74b07baee186ade379eebb86064",
+        "bands.npz": "d3114c2594b235e6aa6d6fb07559dc1f83e89b4e239a84da414de11f98fe640d"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 1.1900716103241393e-05,
+        "frontier_band_error_hartree": 5.952658982399939e-08,
+        "all_band_error_hartree": 9.569244369345142e-06,
+        "path_gap_error_hartree": 4.910986939332673e-08
+      },
+      "path_points": 121,
+      "bands": 44,
+      "plotted": true
+    },
+    {
+      "case": "gaas_pbe_pilot",
+      "material": "gaas",
+      "method": "pbe",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          41,
+          41,
+          41
+        ],
+        "kmesh": [
+          2,
+          2,
+          2
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "Maximum occupied band on the SCF mesh and displayed path",
+      "hashes": {
+        "native.json": "d38e461aa938bb0e8af6274ee661c78148280762f6a6936f840ea13ffd03b5c0",
+        "pyscf.json": "cfa9c8ebb4669679e90ff74da01be748f8cce352478e158b831a3bfd6340eac8",
+        "bands.npz": "efd04e6801c3b892ead8664559dd11742dce4465e59d74933dcb099c5a3b85b3"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 1.86102072916583e-05,
+        "frontier_band_error_hartree": 5.8334755026479e-08,
+        "all_band_error_hartree": 1.4465111689787591e-05,
+        "path_gap_error_hartree": 6.04043532415055e-08
+      },
+      "path_points": 121,
+      "bands": 44,
+      "plotted": true
+    },
+    {
+      "case": "gaas_r2scan_cpu16",
+      "material": "gaas",
+      "method": "r2scan",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          41,
+          41,
+          41
+        ],
+        "kmesh": [
+          2,
+          2,
+          2
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "Maximum occupied band on the SCF mesh and displayed path",
+      "hashes": {
+        "native.json": "1a2987a14ddb714b5a03a4547b6c507c5b5dd250aadf334a60959f08592c7216",
+        "pyscf.json": "05fb105acdd8f813c17f2f5092f7a2fcee98f676669d618c6abe023dec1a15a8",
+        "bands.npz": "58e0ab3b6dafd9fdd8dade807b76310871a08bf781ba9ff343bac3d9799ba6d5"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 7.188378958744579e-07,
+        "frontier_band_error_hartree": 1.5506960068800701e-07,
+        "all_band_error_hartree": 9.94916267771373e-06,
+        "path_gap_error_hartree": 1.939404514761378e-08
+      },
+      "path_points": 121,
+      "bands": 44,
+      "plotted": true
+    },
+    {
+      "case": "gaas_r2scan_pilot",
+      "material": "gaas",
+      "method": "r2scan",
+      "complete": false,
+      "native_passed": false,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          41,
+          41,
+          41
+        ],
+        "kmesh": [
+          2,
+          2,
+          2
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": null,
+      "hashes": {
+        "native.json": "47d182b56b5b6246db1f1829e5268c6a7dec00c85b77ce3898c3474ca2fbebb0"
+      },
+      "reference_status": "not available",
+      "plotted": false
+    },
+    {
+      "case": "gan_lda_cpu16",
+      "material": "gan",
+      "method": "lda",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          41,
+          41,
+          65
+        ],
+        "kmesh": [
+          2,
+          2,
+          2
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "Maximum occupied band on the SCF mesh and displayed path",
+      "hashes": {
+        "native.json": "9af9fce401c26612c535d756d156aeb635f8461f43f0e321e6cd552c1925eb2e",
+        "bands.npz": "c026fd76d2dfb882e3e8df74244203d5ff73b393b1d18088d98eb5e6a4388d06"
+      },
+      "reference_status": "not available",
+      "path_points": 121,
+      "bands": 88,
+      "plotted": true
+    },
+    {
+      "case": "gan_pbe_memory_probe",
+      "material": "gan",
+      "method": "pbe",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          41,
+          41,
+          65
+        ],
+        "kmesh": [
+          2,
+          2,
+          2
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "Maximum occupied band on the SCF mesh and displayed path",
+      "hashes": {
+        "native.json": "385583c6927c8cd244bd0380ba413ef11e1c27351cacf4781b43c6e1fb64e11d",
+        "pyscf.json": "d83c6f02f35f10821b1c71a00c1efacc5cfa5f17304b4edcc443a528a5ca2966",
+        "bands.npz": "f061f799fee0e65972e0428e2d416d8bc586115d8ee95e8d6b077cec6381c579"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 1.0376291470493015e-07,
+        "frontier_band_error_hartree": 1.4722080776685686e-09,
+        "all_band_error_hartree": 4.242546935984137e-08,
+        "path_gap_error_hartree": 3.5941133402772607e-10
+      },
+      "path_points": 121,
+      "bands": 88,
+      "plotted": true
+    },
+    {
+      "case": "gan_pbe_pilot",
+      "material": "gan",
+      "method": "pbe",
+      "complete": false,
+      "native_passed": false,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          41,
+          41,
+          65
+        ],
+        "kmesh": [
+          2,
+          2,
+          2
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": null,
+      "hashes": {
+        "native.json": "b39a31795298e99339cada07b540482347a3dd4c43e492fc4e7691109d658a91"
+      },
+      "reference_status": "not available",
+      "plotted": false
+    },
+    {
+      "case": "gan_r2scan_compact",
+      "material": "gan",
+      "method": "r2scan",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          21,
+          21,
+          33
+        ],
+        "kmesh": [
+          2,
+          1,
+          1
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 61,
+        "chunk_size": 2
+      },
+      "exxdiv": "ewald",
+      "energy_alignment": "Maximum occupied band on the SCF mesh and displayed path",
+      "hashes": {
+        "native.json": "0e0fa0a839bc6d89f27c3423bea8b2a7b81c91d972b52cb49cb49ff2a1eec55a",
+        "pyscf.json": "9dec87696c565954338435d0df54ab865867978aad5424ba029aa986d7958f8b",
+        "bands.npz": "cfd675e173d0e58bbe59c4cc3ed66efa02ee6df5e3d1c532337cd6ed15aac223"
+      },
+      "reference_status": "mismatch",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 0.4651318544462981,
+        "frontier_band_error_hartree": 0.0033549097188770305,
+        "all_band_error_hartree": 0.1464319000672969,
+        "path_gap_error_hartree": 0.004387362268778949
+      },
+      "path_points": 61,
+      "bands": 88,
+      "plotted": true
+    },
+    {
+      "case": "gan_r2scan_cpu16",
+      "material": "gan",
+      "method": "r2scan",
+      "complete": false,
+      "native_passed": false,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          41,
+          41,
+          65
+        ],
+        "kmesh": [
+          2,
+          2,
+          2
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": null,
+      "hashes": {
+        "native.json": "1d862fe0bb971d84fe40331c15f135d43444c3a763a67c33b385b17022d1ca32"
+      },
+      "reference_status": "not available",
+      "plotted": false
+    },
+    {
+      "case": "graphene_lda_pilot",
+      "material": "graphene",
+      "method": "lda",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          25,
+          25,
+          161
+        ],
+        "kmesh": [
+          3,
+          3,
+          1
+        ],
+        "temperature": 0.0002,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "SCF chemical potential at the declared electronic temperature",
+      "hashes": {
+        "native.json": "87db1bc5209083078b04163b9c45aac8a48aa4ab312a881f80b6f8bbca0b51b9",
+        "pyscf.json": "c9e65eea83a93869d24d69ae915a5724f8a7af6b84b0e600e5aa87a3c3dd54a9",
+        "bands.npz": "39c241471c5b6750a577a777a66407ef7a19c04a4cc1980839a41831c5329b1c"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 3.010441226081184e-06,
+        "frontier_band_error_hartree": 3.1158904930106424e-06,
+        "all_band_error_hartree": 1.3606450416148164e-05,
+        "path_gap_error_hartree": 2.220687606024896e-09
+      },
+      "path_points": 121,
+      "bands": 28,
+      "plotted": true
+    },
+    {
+      "case": "graphene_pbe_pilot",
+      "material": "graphene",
+      "method": "pbe",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          25,
+          25,
+          161
+        ],
+        "kmesh": [
+          3,
+          3,
+          1
+        ],
+        "temperature": 0.0002,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "SCF chemical potential at the declared electronic temperature",
+      "hashes": {
+        "native.json": "a018abcb94ce241b2a40b99b55ccfc734b5bd51d905c3a14ad832df679907cf1",
+        "pyscf.json": "7cd23ef4844527fed1858e363a4564c523d172bc34b47735d532493afcce39d8",
+        "bands.npz": "79fb5de0bcd0217220263311ae392d7a78cd7eda8436e266daeafc4aa7663a94"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 3.290401110689345e-06,
+        "frontier_band_error_hartree": 2.9650342558973364e-06,
+        "all_band_error_hartree": 3.667176329535948e-05,
+        "path_gap_error_hartree": 1.8339013641011093e-09
+      },
+      "path_points": 121,
+      "bands": 28,
+      "plotted": true
+    },
+    {
+      "case": "graphene_pbe_slab12",
+      "material": "graphene",
+      "method": "pbe",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          25,
+          25,
+          97
+        ],
+        "kmesh": [
+          3,
+          3,
+          1
+        ],
+        "temperature": 0.0002,
+        "vacuum": 12.0,
+        "path_points": 121,
+        "chunk_size": 2,
+        "dimension": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "SCF chemical potential at the declared electronic temperature",
+      "hashes": {
+        "native.json": "24784875c39819c5b143b81f3f53caf9f9fb1d0d319e668accb765e77bdcf3f9",
+        "bands.npz": "2de5a2c4c66df02eed2b68592ad6f4d4f5948493cb6d0360b61e454f2514fb35"
+      },
+      "reference_status": "not available",
+      "path_points": 121,
+      "bands": 28,
+      "plotted": true
+    },
+    {
+      "case": "graphene_pbe_slab16",
+      "material": "graphene",
+      "method": "pbe",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          25,
+          25,
+          129
+        ],
+        "kmesh": [
+          3,
+          3,
+          1
+        ],
+        "temperature": 0.0002,
+        "vacuum": 16.0,
+        "path_points": 121,
+        "chunk_size": 2,
+        "dimension": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "SCF chemical potential at the declared electronic temperature",
+      "hashes": {
+        "native.json": "6677249339ae0e0eac1266a2c19a5fa53a6e13bf3eefca4e102a7dfab5108e24",
+        "bands.npz": "2e74a82193bf536c79a887196ed033675e315d6eb643b4bfce67b99a400fb364"
+      },
+      "reference_status": "not available",
+      "path_points": 121,
+      "bands": 28,
+      "plotted": true
+    },
+    {
+      "case": "graphene_pbe_slab20",
+      "material": "graphene",
+      "method": "pbe",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          25,
+          25,
+          161
+        ],
+        "kmesh": [
+          3,
+          3,
+          1
+        ],
+        "temperature": 0.0002,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2,
+        "dimension": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "SCF chemical potential at the declared electronic temperature",
+      "hashes": {
+        "native.json": "e75fbf5e9e62ca2d65c0c83e4c577137106eba1bc7840741f32d237d10c909e3",
+        "pyscf.json": "c511acb80e346d1c4d39a76edd2bb6a5c0bcbb3c1d4c7d9c67729ea270510e9a",
+        "bands.npz": "2610f02c71275954c1d033578065e606593d85b3ee976f5a72014d0c88ace4b8"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 3.291314012443536e-06,
+        "frontier_band_error_hartree": 2.80580275097142e-06,
+        "all_band_error_hartree": 3.682900525703303e-05,
+        "path_gap_error_hartree": 1.7355928083606642e-09
+      },
+      "path_points": 121,
+      "bands": 28,
+      "plotted": true
+    },
+    {
+      "case": "graphene_r2scan_pilot",
+      "material": "graphene",
+      "method": "r2scan",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          25,
+          25,
+          161
+        ],
+        "kmesh": [
+          3,
+          3,
+          1
+        ],
+        "temperature": 0.0002,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "SCF chemical potential at the declared electronic temperature",
+      "hashes": {
+        "native.json": "244dd1d18dbcc45fa4efaf1ebd8ad851d86b73d2accd3029d28ea033372bf73a",
+        "pyscf.json": "368470b797cf8a18a4829a3cfe61fb195b042caef35d3b3aac90bf0bc23796c4",
+        "bands.npz": "cc087b501182ae96d680a69c8e3d62136628e49e7626653fee695c636c18072e"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 3.0682465634868095e-06,
+        "frontier_band_error_hartree": 3.301279925538303e-06,
+        "all_band_error_hartree": 1.5888519815376867e-05,
+        "path_gap_error_hartree": 3.2158435442353195e-08
+      },
+      "path_points": 121,
+      "bands": 28,
+      "plotted": true
+    },
+    {
+      "case": "silicon_lda_pilot",
+      "material": "silicon",
+      "method": "lda",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          31,
+          31,
+          31
+        ],
+        "kmesh": [
+          2,
+          2,
+          2
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "Maximum occupied band on the SCF mesh and displayed path",
+      "hashes": {
+        "native.json": "1979f862232c34a33fae942a74e2bda507028ef819513c43d1cb9116a11efa8f",
+        "pyscf.json": "72d663bb184057aa595beb33b5f2e339cbc184c02960ed6bce07d3ae88f0b137",
+        "bands.npz": "4e7b5e09df6bb0e019284ed80fbd976321a907989daf379193d2ad7d66828fe8"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 1.1191048088221578e-13,
+        "frontier_band_error_hartree": 3.6994157737169076e-12,
+        "all_band_error_hartree": 3.643751966819764e-10,
+        "path_gap_error_hartree": 3.622102617839573e-14
+      },
+      "path_points": 121,
+      "bands": 28,
+      "plotted": true
+    },
+    {
+      "case": "silicon_pbe0_compact",
+      "material": "silicon",
+      "method": "pbe0",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          21,
+          21,
+          21
+        ],
+        "kmesh": [
+          2,
+          1,
+          1
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 61,
+        "chunk_size": 2
+      },
+      "exxdiv": "vcut_sph",
+      "energy_alignment": "Maximum occupied band on the SCF mesh and displayed path",
+      "hashes": {
+        "native.json": "c2c75055b346bf432c47da55a1ff495276e4b7aee4b576140914e036dd0424f1",
+        "pyscf.json": "27e37503b600903c7aa72b0731eba31696e7fb27f4e1fe4b8a8fc7e96662f382",
+        "bands.npz": "aaf15572d11771c160ff333f1d5c21d54580a4bbe4d430422d265f0567399dc4"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 1.723332587744153e-10,
+        "frontier_band_error_hartree": 3.6860724472731476e-09,
+        "all_band_error_hartree": 1.2609684088005224e-06,
+        "path_gap_error_hartree": 9.434125702867391e-11
+      },
+      "path_points": 61,
+      "bands": 28,
+      "plotted": true
+    },
+    {
+      "case": "silicon_pbe_compact",
+      "material": "silicon",
+      "method": "pbe",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          21,
+          21,
+          21
+        ],
+        "kmesh": [
+          2,
+          1,
+          1
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 61,
+        "chunk_size": 2
+      },
+      "exxdiv": "ewald",
+      "energy_alignment": "Maximum occupied band on the SCF mesh and displayed path",
+      "hashes": {
+        "native.json": "c61bc52507d4d03a6f16deb9390379e1c5740dedbbf587b8f6544cc69488dc5b",
+        "pyscf.json": "f2990a109b53c385eddcfcd5ca002bbb04b6c62d5e1fa3aba92b7b7a5aa05125",
+        "bands.npz": "da39f135d667b7bdffb6d367d74f1b67eea752b120105a13bd27e4c7c5c1b655"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 1.425295437229579e-10,
+        "frontier_band_error_hartree": 3.0573166220904113e-09,
+        "all_band_error_hartree": 1.2691648141327505e-06,
+        "path_gap_error_hartree": 1.5193996061313442e-10
+      },
+      "path_points": 61,
+      "bands": 28,
+      "plotted": true
+    },
+    {
+      "case": "silicon_pbe_pilot",
+      "material": "silicon",
+      "method": "pbe",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          31,
+          31,
+          31
+        ],
+        "kmesh": [
+          2,
+          2,
+          2
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "Maximum occupied band on the SCF mesh and displayed path",
+      "hashes": {
+        "native.json": "38cc99db4b3a29fd17ad0508df84b5263608f17da56f61e79cb0b1081b67440a",
+        "pyscf.json": "8b9c1ecd7de80dd55309806ebd3e4f0470e6e18642435b8e2c0233ed890fdddf",
+        "bands.npz": "6d6c8eb027512c373e95e51a1f84100d20261705d8e26e8d4e520aa88821e7c8"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 1.4797052472204086e-12,
+        "frontier_band_error_hartree": 6.057931933867167e-13,
+        "all_band_error_hartree": 3.623128463914327e-10,
+        "path_gap_error_hartree": 2.402800181044995e-13
+      },
+      "path_points": 121,
+      "bands": 28,
+      "plotted": true
+    },
+    {
+      "case": "silicon_r2scan_pilot",
+      "material": "silicon",
+      "method": "r2scan",
+      "complete": true,
+      "native_passed": true,
+      "settings": {
+        "basis": "gth-dzvp-molopt-sr",
+        "pseudo": "gth-pbe",
+        "mesh": [
+          31,
+          31,
+          31
+        ],
+        "kmesh": [
+          2,
+          2,
+          2
+        ],
+        "temperature": null,
+        "vacuum": 20.0,
+        "path_points": 121,
+        "chunk_size": 2
+      },
+      "exxdiv": "not recorded",
+      "energy_alignment": "Maximum occupied band on the SCF mesh and displayed path",
+      "hashes": {
+        "native.json": "fa52012c40eec3589391c4bd5629c0bd77b3a8d041f5d5fdde097722ac50002b",
+        "pyscf.json": "76c4b4890ff04de4195437989f9da00642314210d58c997923deda91378bc5ce",
+        "bands.npz": "c52fb52e276c3349cd618159c18ce09d91610f0779d486ef318bac2673ce37cb"
+      },
+      "reference_status": "passed",
+      "reference_errors_hartree": {
+        "total_energy_error_hartree": 1.5205614545266144e-12,
+        "frontier_band_error_hartree": 2.1663726368359448e-11,
+        "all_band_error_hartree": 3.6997249708292657e-10,
+        "path_gap_error_hartree": 1.6958656701149266e-13
+      },
+      "path_points": 121,
+      "bands": 28,
+      "plotted": true
+    }
+  ],
+  "figures": {
+    "silicon_all": [
+      "silicon_lda_pilot",
+      "silicon_pbe_pilot",
+      "silicon_r2scan_pilot",
+      "silicon_pbe_compact",
+      "silicon_pbe0_compact"
+    ],
+    "gaas_all": [
+      "gaas_lda_pilot",
+      "gaas_pbe_pilot",
+      "gaas_r2scan_cpu16"
+    ],
+    "gan_all": [
+      "gan_lda_cpu16",
+      "gan_pbe_memory_probe",
+      "gan_r2scan_compact"
+    ],
+    "graphene_all": [
+      "graphene_lda_pilot",
+      "graphene_pbe_pilot",
+      "graphene_r2scan_pilot",
+      "graphene_pbe_slab12",
+      "graphene_pbe_slab16",
+      "graphene_pbe_slab20"
+    ],
+    "materials_overview": [
+      "silicon_lda_pilot",
+      "silicon_pbe_pilot",
+      "silicon_r2scan_pilot",
+      "gaas_lda_pilot",
+      "gaas_pbe_pilot",
+      "gaas_r2scan_cpu16",
+      "gan_lda_cpu16",
+      "gan_pbe_memory_probe",
+      "graphene_lda_pilot",
+      "graphene_pbe_pilot",
+      "graphene_r2scan_pilot"
+    ]
+  },
+  "gw": [
+    {
+      "path": "reproducibility/ad_showcase/PBC_silicon_gw",
+      "requested": 4,
+      "accepted": 3,
+      "passed": false,
+      "plotted_mask": [
+        [
+          false,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false
+        ]
+      ],
+      "independent_material_gw_benchmark": false,
+      "hashes": {
+        "results.json": "3e04fafa607e835782a2f6be64ecd0000f72bccedcb655dd18807209f0d0177b",
+        "levels.npz": "91fbc32a231ad4e4981446ae33c78bb19f4b9a4a480e398ab0e18596f4f2dacc"
+      }
+    },
+    {
+      "path": "reproducibility/ad_showcase/periodic_gw_query/silicon",
+      "requested": 6,
+      "accepted": 6,
+      "passed": true,
+      "plotted_mask": [
+        [
+          false,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false
+        ]
+      ],
+      "independent_material_gw_benchmark": false,
+      "hashes": {
+        "native.json": "0d36904b2234bf9bef92952356cd204df77cb54a105ad921bf4ff20a0970ba8a",
+        "bands.npz": "b709e56de1e36c01ca7dd962d742f991a7fd8fa2ffeedb18b507931f4dbeb9be"
+      }
+    }
+  ],
+  "energy_window_ev": [
+    -12,
+    10
+  ],
+  "alignment": "Each semiconductor uses its saved occupied-band maximum; graphene uses its saved chemical potential.",
+  "interpolation": "None beyond straight segments joining saved KS/GKS path samples; GW uses unconnected markers.",
+  "historical_exxdiv": "Unrecorded for the semilocal pilots; explicit values are retained where present.",
+  "plot_source_sha256": "90b57c555ef479c454030c3e39de6e338b33208a0b984e92839f9c82c6d322b2"
+}

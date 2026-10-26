@@ -1,0 +1,279 @@
+{
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "python": "3.12.2",
+  "jax": "0.8.1",
+  "backend": "cpu",
+  "float64": true,
+  "basis": "sto-3g",
+  "auxbasis": "weigend",
+  "nw_gradscf": 64,
+  "molgw_sigma_points": 1001,
+  "molgw_sigma_step_ha": 0.002,
+  "nroots": 10,
+  "methods": {
+    "3": {
+      "n": 3,
+      "formula": "C3H6",
+      "geometry": {
+        "n": 3,
+        "formula": "C3H6",
+        "smiles": "C1CC1",
+        "atom": "C -0.301636710249 0.813148191685 -0.005975279668; C -0.553364939497 -0.667715679513 0.013200480154; C 0.855001628328 -0.145433315588 -0.007225228893; H -0.515411620873 1.353827463013 -0.920747135445; H -0.496550731391 1.374208250185 0.900700895327; H -0.937672315814 -1.130251327851 -0.888581286420; H -0.918814590144 -1.109870162336 0.932867462364; H 1.443653908770 -0.233766815743 0.898604333924; H 1.424795370869 -0.254146603852 -0.922844241343",
+        "unit": "Angstrom",
+        "seed": 20261001,
+        "rdkit": "2025.03.3",
+        "geometry_method": "ETKDGv3; lowest MMFF94 energy among 5 optimized conformers",
+        "mmff_energy_kcal_mol": 15.550734237707655
+      },
+      "gradscf": {
+        "g0w0": {
+          "nmo": 21,
+          "nocc": 12,
+          "scf_seconds": 2.468348042020807,
+          "gw_seconds": 14.447909500013338,
+          "bse_seconds": 10.982517083000857,
+          "total_seconds": 27.898774625035003,
+          "gw_converged": true,
+          "qp_residual_max_ha": 2.3815685534778197e-11,
+          "bse_converged": true,
+          "bse_residual_max_ha": 8.775878801061831e-08,
+          "naux": 255,
+          "nroots": 10,
+          "first_excitation_ev": 15.651399024701531
+        },
+        "evgw0": {
+          "nmo": 21,
+          "nocc": 12,
+          "scf_seconds": 0.2956608340027742,
+          "gw_seconds": 43.895471958006965,
+          "bse_seconds": 4.0525847090175375,
+          "total_seconds": 48.24371750102728,
+          "gw_converged": true,
+          "qp_residual_max_ha": 4.00806923761543e-08,
+          "bse_converged": true,
+          "bse_residual_max_ha": 6.654067919561167e-08,
+          "naux": 255,
+          "nroots": 10,
+          "first_excitation_ev": 15.624146042560497
+        },
+        "evgw": {
+          "nmo": 21,
+          "nocc": 12,
+          "scf_seconds": 0.2939011249982286,
+          "gw_seconds": 41.50946341699455,
+          "bse_seconds": 4.290500750008505,
+          "total_seconds": 46.09386529200128,
+          "gw_converged": true,
+          "qp_residual_max_ha": 9.680694346148044e-08,
+          "bse_converged": true,
+          "bse_residual_max_ha": 6.170869067476576e-08,
+          "naux": 255,
+          "nroots": 10,
+          "first_excitation_ev": 15.601208178973758
+        },
+        "qsgw": {
+          "nmo": 21,
+          "nocc": 12,
+          "scf_seconds": 2.503807749977568,
+          "gw_seconds": 15.298410250019515,
+          "bse_seconds": 12.371598291007103,
+          "total_seconds": 30.173816291004186,
+          "gw_converged": true,
+          "qp_residual_max_ha": null,
+          "bse_converged": true,
+          "bse_residual_max_ha": 9.297257426872026e-08,
+          "naux": 255,
+          "nroots": 10,
+          "first_excitation_ev": 15.556273992627357
+        }
+      },
+      "molgw": {
+        "g0w0": {
+          "gw_seconds": 0.3103620839829091,
+          "bse_seconds": 0.07693470799131319,
+          "total_seconds": 0.3872967919742223,
+          "bse_supported": true,
+          "output_dir": "/private/tmp/cycloalkane-scaling/molgw_runs/C3H6_g0w0"
+        },
+        "evgw0": {
+          "gw_seconds": 0.16327545899548568,
+          "bse_seconds": 0.06584104101057164,
+          "total_seconds": 0.22911650000605732,
+          "bse_supported": true,
+          "output_dir": "/private/tmp/cycloalkane-scaling/molgw_runs/C3H6_evgw0"
+        },
+        "evgw": {
+          "gw_seconds": 0.26519991699024104,
+          "bse_seconds": 0.07556437500170432,
+          "total_seconds": 0.34076429199194536,
+          "bse_supported": true,
+          "output_dir": "/private/tmp/cycloalkane-scaling/molgw_runs/C3H6_evgw"
+        },
+        "qsgw": {
+          "gw_seconds": 0.25017783301882446,
+          "bse_seconds": null,
+          "bse_supported": false,
+          "output_dir": "/private/tmp/cycloalkane-scaling/molgw_runs/C3H6_qsgw"
+        }
+      }
+    },
+    "4": {
+      "n": 4,
+      "formula": "C4H8",
+      "geometry": {
+        "n": 4,
+        "formula": "C4H8",
+        "smiles": "C1CCC1",
+        "atom": "C 0.984103563342 -0.275018628733 -0.341747136412; C -0.232504758727 -1.024115813491 0.240862742088; C -1.043917830935 0.266661008091 0.003751442288; C 0.292318830455 1.032473242747 0.097132885516; H 1.945907131400 -0.487405464044 0.131243354976; H 1.087259049634 -0.377268312069 -1.428126613562; H -0.562495605869 -1.903810470082 -0.316934519087; H -0.123107784126 -1.289264522676 1.298711935773; H -1.514290243802 0.317600280585 -0.984920140069; H -1.786915470389 0.509622404125 0.767177110503; H 0.403507175615 1.881594696448 -0.581486405191; H 0.550135943404 1.348931579098 1.114335343177",
+        "unit": "Angstrom",
+        "seed": 20261001,
+        "rdkit": "2025.03.3",
+        "geometry_method": "ETKDGv3; lowest MMFF94 energy among 5 optimized conformers",
+        "mmff_energy_kcal_mol": 10.283252779839206
+      },
+      "gradscf": {
+        "g0w0": {
+          "nmo": 28,
+          "nocc": 16,
+          "scf_seconds": 1.652669875009451,
+          "gw_seconds": 45.2927576660004,
+          "bse_seconds": 10.672402374999365,
+          "total_seconds": 57.617829916009214,
+          "gw_converged": true,
+          "qp_residual_max_ha": 2.4254404040746635e-11,
+          "bse_converged": true,
+          "bse_residual_max_ha": 7.609330493447751e-08,
+          "naux": 340,
+          "nroots": 10,
+          "first_excitation_ev": 16.16591773147027
+        },
+        "evgw0": {
+          "nmo": 28,
+          "nocc": 16,
+          "scf_seconds": 0.37305354099953547,
+          "gw_seconds": 181.59053758298978,
+          "bse_seconds": 5.518212790979305,
+          "total_seconds": 187.48180391496862,
+          "gw_converged": true,
+          "qp_residual_max_ha": 4.106199386066933e-08,
+          "bse_converged": true,
+          "bse_residual_max_ha": 4.964957649319672e-08,
+          "naux": 340,
+          "nroots": 10,
+          "first_excitation_ev": 16.115487147955413
+        },
+        "evgw": {
+          "nmo": 28,
+          "nocc": 16,
+          "scf_seconds": 0.3569703329994809,
+          "gw_seconds": 190.01273025001865,
+          "bse_seconds": 5.269283375004306,
+          "total_seconds": 195.63898395802244,
+          "gw_converged": true,
+          "qp_residual_max_ha": 3.706165668804218e-08,
+          "bse_converged": true,
+          "bse_residual_max_ha": 8.252352316678756e-08,
+          "naux": 340,
+          "nroots": 10,
+          "first_excitation_ev": 16.095128824798813
+        }
+      },
+      "molgw": {
+        "g0w0": {
+          "gw_seconds": 0.8080841250193771,
+          "bse_seconds": 0.1316917500225827,
+          "total_seconds": 0.9397758750419598,
+          "bse_supported": true,
+          "output_dir": "/private/tmp/cycloalkane-scaling/molgw_runs/C4H8_g0w0"
+        },
+        "evgw0": {
+          "gw_seconds": 0.3239022910129279,
+          "bse_seconds": 0.1246625000203494,
+          "total_seconds": 0.4485647910332773,
+          "bse_supported": true,
+          "output_dir": "/private/tmp/cycloalkane-scaling/molgw_runs/C4H8_evgw0"
+        },
+        "evgw": {
+          "gw_seconds": 0.6669920000131242,
+          "bse_seconds": 0.1289629579987377,
+          "total_seconds": 0.7959549580118619,
+          "bse_supported": true,
+          "output_dir": "/private/tmp/cycloalkane-scaling/molgw_runs/C4H8_evgw"
+        }
+      }
+    },
+    "6": {
+      "n": 6,
+      "formula": "C6H12",
+      "gradscf": {},
+      "molgw": {
+        "g0w0": {
+          "gw_seconds": 3.4465062920062337,
+          "bse_seconds": 0.39352487499127164,
+          "total_seconds": 3.8400311669975054,
+          "bse_supported": true,
+          "source": "molgw-only bounded follow-up"
+        },
+        "evgw0": {
+          "gw_seconds": 1.186192791996291,
+          "bse_seconds": 0.3892497080087196,
+          "total_seconds": 1.5754425000050105,
+          "bse_supported": true,
+          "source": "molgw-only bounded follow-up"
+        },
+        "evgw": {
+          "gw_seconds": 3.5194873749860562,
+          "bse_seconds": 0.39069270799518563,
+          "total_seconds": 3.910180082981242,
+          "bse_supported": true,
+          "source": "molgw-only bounded follow-up"
+        }
+      }
+    },
+    "8": {
+      "n": 8,
+      "formula": "C8H16",
+      "gradscf": {},
+      "molgw": {
+        "g0w0": {
+          "gw_seconds": 10.891415124991909,
+          "bse_seconds": 0.8730316250002943,
+          "total_seconds": 11.764446749992203,
+          "bse_supported": true,
+          "source": "molgw-only bounded follow-up"
+        },
+        "evgw0": {
+          "gw_seconds": 3.28823466700851,
+          "bse_seconds": 0.8766174170013983,
+          "total_seconds": 4.164852084009908,
+          "bse_supported": true,
+          "source": "molgw-only bounded follow-up"
+        },
+        "evgw": {
+          "gw_seconds": 12.617804417008301,
+          "bse_seconds": 0.8742262499872595,
+          "total_seconds": 13.49203066699556,
+          "bse_supported": true,
+          "source": "molgw-only bounded follow-up"
+        }
+      }
+    }
+  },
+  "limitations": {
+    "gradscf_full_gw_bse_completed_n": [
+      3,
+      4
+    ],
+    "molgw_full_gw_bse_completed_n": [
+      3,
+      4,
+      6,
+      8
+    ],
+    "gradscf_n6_n8_status": "aborted after n=6 G0W0 exceeded 12 min and 1.9 GB with nw=16; n=8 was not started",
+    "qsgw_gradscf_completed_n": [
+      3
+    ],
+    "qsgw_molgw_bse": "MolGW QSGW ground-state time recorded; stock QSGW path does not emit ENERGY_QP for an independent BSE restart, so BSE is marked unsupported in this benchmark"
+  }
+}

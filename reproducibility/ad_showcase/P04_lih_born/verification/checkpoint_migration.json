@@ -1,0 +1,25 @@
+{
+  "scientific_function_exactly_unchanged": true,
+  "input_sha256": "0b854012630e16f8cec1a88f80a85053c7213631da92670944fd6a8a961180a4",
+  "old_script_sha256": "b05716f2a88e91d1d48cf0c7d2aebdf3d42aa8c3ca93951ff96f73261d2a33c7",
+  "new_script_sha256": "f8bb5b045a38c41d184ca3558393ffa8d4a71bbf93ea311dd1d8dbeedba97f12",
+  "calculate_sha256": "b53903f07a9d591d65dd47185e3bb77a4f98f72c1facf943df4f78d621b713bf",
+  "imported_endpoints": [
+    {
+      "path": "reproducibility/ad_showcase/P04_lih_born/pyscf_endpoints/0b854012630e16f8/reference.json",
+      "file_sha256": "9342047e987b1e3b8c21db538d85b99d8c34f47ba84987ce3a265c4582a2dd98",
+      "record_sha256": "c4b1b9cc3ab3e9019566d70978d99c4dab35fe84f756eac4be4db5aeaab799b2"
+    },
+    {
+      "path": "reproducibility/ad_showcase/P04_lih_born/pyscf_endpoints/0b854012630e16f8/atom0_axis0_step0.0003_plus.json",
+      "file_sha256": "e65994b9bffedecc0ae382d8d54bf8bb73daaf8f3ea45b76e989e248a38ca9e1",
+      "record_sha256": "dfec390b6adc24ccc6769fb14e184cfc3ca4a8fdcbb7429cdb4ec455d1a63b61"
+    },
+    {
+      "path": "reproducibility/ad_showcase/P04_lih_born/pyscf_endpoints/0b854012630e16f8/atom0_axis0_step0.0003_minus.json",
+      "file_sha256": "7723908da9a460fc4d9a41d7e9c26c042e403a8913cf3af20a0f563250391899",
+      "record_sha256": "ab4eddc72f055f9866dee60646506d427bddfa964f68c38f5866171f9eac97ac"
+    }
+  ],
+  "calculations_run": 0
+}

@@ -1,0 +1,51 @@
+{
+  "display_gaussian_sigma_ev": 0.05,
+  "comparison_area_window_ev": [
+    8.0,
+    15.8
+  ],
+  "experimental_first_band_peak_ev": 9.455,
+  "homo": {
+    "gw": {
+      "integrated_weight_7_19_ev": 2.9943449715549564,
+      "q10_ev": 9.011917438773745,
+      "q90_ev": 9.07356904347731,
+      "central_80_percent_width_ev": 0.0616516047035649,
+      "displayed_peak_ev": 9.045
+    },
+    "fan": {
+      "integrated_weight_7_19_ev": 2.960023212708923,
+      "q10_ev": 8.194239830691174,
+      "q90_ev": 9.376578272119191,
+      "central_80_percent_width_ev": 1.1823384414280174,
+      "displayed_peak_ev": 8.22
+    },
+    "fan_dw": {
+      "integrated_weight_7_19_ev": 2.9617868616156793,
+      "q10_ev": 8.511024588029064,
+      "q90_ev": 9.54944496995945,
+      "central_80_percent_width_ev": 1.0384203819303863,
+      "displayed_peak_ev": 8.535
+    }
+  },
+  "resolution": {
+    "eta_5_mev": {
+      "integrated_weight_7_19_ev": 2.9590968068388954,
+      "q10_ev": 8.521273937098131,
+      "q90_ev": 9.544662576687111,
+      "central_80_percent_width_ev": 1.0233886395889797
+    },
+    "eta_10_mev": {
+      "integrated_weight_7_19_ev": 2.9617868616156793,
+      "q10_ev": 8.511024588029064,
+      "q90_ev": 9.54944496995945,
+      "central_80_percent_width_ev": 1.0384203819303863
+    },
+    "eta_20_mev": {
+      "integrated_weight_7_19_ev": 2.9554651566444394,
+      "q10_ev": 8.490223248065867,
+      "q90_ev": 9.563482708015114,
+      "central_80_percent_width_ev": 1.0732594599492469
+    }
+  }
+}

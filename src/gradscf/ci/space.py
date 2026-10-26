@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from itertools import combinations
 from math import comb
 from numbers import Integral
-from ..integrals.mo import frozen_indices, unrestricted_frozen_indices
+from gradscf.ao2mo import frozen_indices, unrestricted_frozen_indices
 
 
 @dataclass(frozen=True)
@@ -52,7 +52,7 @@ def _selected_ranks(max_excitation, excitation_ranks):
     return tuple(sorted(map(int, ranks)))
 
 
-def make_uci_space(nmo, nocc, *, max_excitation=2, frozen=None, max_determinants=5000,
+def make_uci_space(nmo, nocc, *, max_excitation=2, frozen=None, max_determinants=1_000_000,
                    excitation_ranks=None):
     """Rank-truncated alpha/beta space; frozen electrons remain explicit."""
     if not isinstance(nmo, Integral) or nmo < 1:
@@ -88,7 +88,7 @@ def make_uci_space(nmo, nocc, *, max_excitation=2, frozen=None, max_determinants
                     tuple(d for _, d in entries), tuple(r for r, _ in entries))
 
 
-def make_ci_space(nmo, nocc, *, max_excitation=2, frozen=None, max_determinants=5000,
+def make_ci_space(nmo, nocc, *, max_excitation=2, frozen=None, max_determinants=1_000_000,
                   excitation_ranks=None):
     """Generate only retained excitations, without enumerating the FCI space.
 
@@ -129,19 +129,3 @@ def make_ci_space(nmo, nocc, *, max_excitation=2, frozen=None, max_determinants=
     entries.sort()
     return CISpace(int(nmo), int(nocc), int(max_excitation), frozen,
                    tuple(d for _, d in entries), tuple(r for r, _ in entries))
-
-
-def excite(det, holes, particles):
-    """Apply a_p^+ a_r^+ ... a_s a_q; ordered holes/particles, fermion phase."""
-    phase = 1
-    for orbital in holes:
-        if not det & (1 << orbital):
-            return None, 0
-        phase *= -1 if (det & ((1 << orbital) - 1)).bit_count() % 2 else 1
-        det ^= 1 << orbital
-    for orbital in reversed(particles):
-        if det & (1 << orbital):
-            return None, 0
-        phase *= -1 if (det & ((1 << orbital) - 1)).bit_count() % 2 else 1
-        det ^= 1 << orbital
-    return det, phase

@@ -1,0 +1,126 @@
+{
+  "comparison_interval_ev": [
+    10.0,
+    23.8
+  ],
+  "theory_hwhm_ev": 0.15,
+  "energy_shift_ev": 0.0,
+  "intensity_scale": 1.0,
+  "reference": {
+    "file": "CH4_Kameta(2002)_298K_52-125nm.txt",
+    "doi": "10.1016/S0368-2048(02)00022-1",
+    "sha256": "fe2afe7b5d0ca396148395d6e1040f118041c8704ab19f5d67467915cc2cde9b",
+    "retrieved": "2026-09-30",
+    "url": "https://uvvis.mpch-mainz.gwdg.de/uvvis_data/cross_sections/Alkanes%2Balkyl%20radicals/Alkanes/CH4_Kameta(2002)_298K_52-125nm.txt",
+    "metadata_url": "https://uvvis.mpch-mainz.gwdg.de/uvvis/cross_sections/Alkanes%2Balkyl%20radicals/Alkanes/CH4_Kameta(2002)_298K_52-125nm.txt"
+  },
+  "methods": {
+    "g0w0": {
+      "rmse_mb": 65.87119375895972,
+      "mae_mb": 34.568000830052526,
+      "point_cross_sections_mb": [
+        4.181522456725401,
+        16.24353105902102,
+        528.8948350658203,
+        7.13284914275633
+      ],
+      "maximum_energy_ev": 16.505,
+      "maximum_cross_section_mb": 529.2178675786023,
+      "integrated_intervals_mb_ev": {
+        "10.0-12.5": {
+          "experiment": 64.94943416437425,
+          "theory": 40.38884142961462,
+          "ratio": 0.6218505511133231
+        },
+        "12.61-23.8": {
+          "experiment": 438.95601118164905,
+          "theory": 433.84507948897976,
+          "ratio": 0.9883566198833662
+        },
+        "10.0-23.8": {
+          "experiment": 508.4682941583616,
+          "theory": 474.6469352646949,
+          "ratio": 0.9334838390471342
+        }
+      }
+    },
+    "evgw0": {
+      "rmse_mb": 65.64644561117346,
+      "mae_mb": 34.4480374619313,
+      "point_cross_sections_mb": [
+        4.465973751288274,
+        17.991137130144494,
+        512.7639563825214,
+        8.09538168882488
+      ],
+      "maximum_energy_ev": 16.475,
+      "maximum_cross_section_mb": 527.7954437944687,
+      "integrated_intervals_mb_ev": {
+        "10.0-12.5": {
+          "experiment": 64.94943416437425,
+          "theory": 40.35892050780364,
+          "ratio": 0.6213898708595851
+        },
+        "12.61-23.8": {
+          "experiment": 438.95601118164905,
+          "theory": 433.68166670222683,
+          "ratio": 0.9879843438862498
+        },
+        "10.0-23.8": {
+          "experiment": 508.4682941583616,
+          "theory": 474.4505123145715,
+          "ratio": 0.9330975358058504
+        }
+      }
+    },
+    "evgw": {
+      "rmse_mb": 65.45415845835106,
+      "mae_mb": 34.315017040641926,
+      "point_cross_sections_mb": [
+        4.758985903186958,
+        20.24382581843114,
+        466.3468186436345,
+        9.408477685440323
+      ],
+      "maximum_energy_ev": 16.445,
+      "maximum_cross_section_mb": 526.819767680819,
+      "integrated_intervals_mb_ev": {
+        "10.0-12.5": {
+          "experiment": 64.94943416437425,
+          "theory": 40.10189128882854,
+          "ratio": 0.6174324965994089
+        },
+        "12.61-23.8": {
+          "experiment": 438.95601118164905,
+          "theory": 433.66153077515384,
+          "ratio": 0.9879384715743095
+        },
+        "10.0-23.8": {
+          "experiment": 508.4682941583616,
+          "theory": 474.1706017613404,
+          "ratio": 0.9325470382498634
+        }
+      }
+    }
+  },
+  "experimental_maximum": {
+    "energy_ev": 13.499286671370271,
+    "cross_section_mb": 52.74
+  },
+  "point_energies_ev": [
+    10.2,
+    13.5,
+    16.5,
+    21.2
+  ],
+  "experimental_cross_sections_mb": [
+    18.948795398806386,
+    52.712008298098844,
+    44.94164874104707,
+    31.216640009315356
+  ],
+  "samson_vs_kameta_overlap": {
+    "number_of_points": 42,
+    "mean_absolute_difference_mb": 0.47615006997858
+  }
+}

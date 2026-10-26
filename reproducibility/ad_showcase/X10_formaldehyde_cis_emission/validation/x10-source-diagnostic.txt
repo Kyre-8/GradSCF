@@ -1,0 +1,6 @@
+relaxed MO input tangent finite: True elapsed 21.44023484797799
+pure CIS curvature 6 100 -0.08676493587834055 elapsed 7.2646005999995396
+pure CIS curvature 1 100 -0.08676493587834067 elapsed 5.584794653987046
+pure CIS curvature 1 500 -0.08676493587834067 elapsed 6.538254290993791
+pure CIS curvature 6 500 -0.08676493587834055 elapsed 5.611779163999017
+HF-only HVP finite True elapsed 47.907989931991324

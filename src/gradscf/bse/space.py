@@ -15,10 +15,10 @@ class BSESpace:
         if (
             not isinstance(self.nmo, Integral)
             or not isinstance(self.nocc, Integral)
-            or not 0 < self.nocc < self.nmo
+            or self.nmo < 1 or not 0 <= self.nocc <= self.nmo
         ):
             raise ValueError(
-                "BSE requires occupied and virtual orbitals in a finite closed-shell space"
+                "BSE requires valid occupations in a finite orbital space"
             )
         if not isinstance(self.occupied, tuple) or not isinstance(self.virtual, tuple):
             raise TypeError("BSESpace indices must be static tuples")
@@ -38,7 +38,45 @@ class BSESpace:
         return len(self.occupied) * len(self.virtual)
 
 
+@dataclass(frozen=True)
+class SpinBSESpace:
+    """Two collinear, spin-conserving transition blocks, alpha then beta."""
+
+    channels: tuple[BSESpace, BSESpace]
+
+    def __post_init__(self):
+        if len(self.channels) != 2 or self.channels[0].nmo != self.channels[1].nmo:
+            raise ValueError("Spin BSE requires two channels with the same MO dimension")
+
+    @property
+    def nmo(self):
+        return self.channels[0].nmo
+
+    @property
+    def nocc(self):
+        return tuple(c.nocc for c in self.channels)
+
+    @property
+    def occupied(self):
+        return tuple(c.occupied for c in self.channels)
+
+    @property
+    def virtual(self):
+        return tuple(c.virtual for c in self.channels)
+
+    @property
+    def size(self):
+        return sum(c.size for c in self.channels)
+
+
 def make_bse_space(nmo, nocc, *, occupied=None, virtual=None):
+    if isinstance(nocc, tuple):
+        if len(nocc) != 2 or any(x is not None and len(x) != 2 for x in (occupied, virtual)):
+            raise ValueError("Spin occupations and windows require alpha/beta pairs")
+        return SpinBSESpace(tuple(make_bse_space(
+            nmo, count, occupied=None if occupied is None else occupied[s],
+            virtual=None if virtual is None else virtual[s],
+        ) for s, count in enumerate(nocc)))
     return BSESpace(
         nmo,
         nocc,

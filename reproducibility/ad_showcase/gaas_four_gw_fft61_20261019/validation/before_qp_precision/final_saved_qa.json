@@ -1,0 +1,135 @@
+{
+  "source_and_output_sha256_match_manifest": true,
+  "comparison_crc_pass": true,
+  "comparison_only_npy_members": true,
+  "static_bands_and_dos_all_finite": true,
+  "scgw_spectral_and_dos_all_finite": true,
+  "invalid_qp_energy_and_bands_remain_nan": true,
+  "raw_diagnostics_preserved": true,
+  "coverage": {
+    "requested": 2604,
+    "certified": 2596,
+    "incomplete_query_indices": [
+      0,
+      91,
+      121,
+      185
+    ],
+    "gamma_complete": false,
+    "dos_complete": false,
+    "gap_policy": "Report each gap only with complete certified roots for its own sample; missing roots stay NaN and unavailable gaps/changes are null. The retarded spectral map and DOS do not require a unique QP root."
+  },
+  "invalid_qp": [
+    {
+      "query_index": 0,
+      "band_zero_based": 6,
+      "raw_energy_hartree": 0.4505258846441614,
+      "converged": false,
+      "branch_valid": false,
+      "weight": null,
+      "residual_hartree": -4.2577052994374753e-14,
+      "candidate_count": 1
+    },
+    {
+      "query_index": 0,
+      "band_zero_based": 7,
+      "raw_energy_hartree": 0.4505258896656016,
+      "converged": false,
+      "branch_valid": false,
+      "weight": null,
+      "residual_hartree": -4.285460875053104e-14,
+      "candidate_count": 1
+    },
+    {
+      "query_index": 91,
+      "band_zero_based": 6,
+      "raw_energy_hartree": 0.4505258846441614,
+      "converged": false,
+      "branch_valid": false,
+      "weight": null,
+      "residual_hartree": -4.2577052994374753e-14,
+      "candidate_count": 1
+    },
+    {
+      "query_index": 91,
+      "band_zero_based": 7,
+      "raw_energy_hartree": 0.4505258896656016,
+      "converged": false,
+      "branch_valid": false,
+      "weight": null,
+      "residual_hartree": -4.285460875053104e-14,
+      "candidate_count": 1
+    },
+    {
+      "query_index": 121,
+      "band_zero_based": 6,
+      "raw_energy_hartree": 0.4505258846441614,
+      "converged": false,
+      "branch_valid": false,
+      "weight": null,
+      "residual_hartree": -4.2577052994374753e-14,
+      "candidate_count": 1
+    },
+    {
+      "query_index": 121,
+      "band_zero_based": 7,
+      "raw_energy_hartree": 0.4505258896656016,
+      "converged": false,
+      "branch_valid": false,
+      "weight": null,
+      "residual_hartree": -4.285460875053104e-14,
+      "candidate_count": 1
+    },
+    {
+      "query_index": 185,
+      "band_zero_based": 6,
+      "raw_energy_hartree": 0.4505258846441614,
+      "converged": false,
+      "branch_valid": false,
+      "weight": null,
+      "residual_hartree": -4.2577052994374753e-14,
+      "candidate_count": 1
+    },
+    {
+      "query_index": 185,
+      "band_zero_based": 7,
+      "raw_energy_hartree": 0.4505258896656016,
+      "converged": false,
+      "branch_valid": false,
+      "weight": null,
+      "residual_hartree": -4.285460875053104e-14,
+      "candidate_count": 1
+    }
+  ],
+  "path_point_count": 121,
+  "dos_point_count": 64,
+  "energy_point_count": 10001,
+  "unwrapped_path_fractional_min": -6.6886465044441795e-34,
+  "unwrapped_path_fractional_max": 0.75,
+  "input_sha256": {
+    "g0w0.npz": "bb59c475b4ba61b9171a6d08ee7b2d25c901b5c1c632ae690e25fca82ca0b669",
+    "g0w0.json": "46ac1f724658eaf5211aec666ba186fa499ca064f817836a692b475ad334452e",
+    "evgw.npz": "7981aab1c1d839906cdcde36a2f11a7113e9a59007db886d8c70738cb260e916",
+    "evgw.json": "ff2d4e2a50f81afcc3d6ca5db7380f458e68d57110af63497a5e0040a1cfd604",
+    "qsgw.npz": "d548b176b3aa6f1b27a1dc318ceb1b95ea4def38e32b4bc10c4c0f972a6bccf5",
+    "qsgw.json": "82de94bd6ef5748c11713d2faa057576482194d6bee5686de9f831d93b0fe048",
+    "scgw.npz": "dd683f57b9bb0064328e4f1df280a18ed6a1fe49fd9a6f39e64ca6affa2dee24",
+    "scgw.json": "05b4d3678741204fd38c99c45e5c1a0274ac6ccfb75bc00d7b35dee5597b163c"
+  },
+  "output_sha256": {
+    "comparison.npz": "a0b5f22ed9ee3c4422b9569fdb1771a4cbc99d4bbd5f971abc907420bf344323",
+    "comparison.json": "21b294b7c55ab0e8c4b70691e638d226c38197b8883cd615aff92af90e0bd4f5",
+    "gaas_four_gw.png": "f1b2be5a33eda473fe89f6266149886150efe6e50db5ca79082e6b8707691913",
+    "gaas_four_gw.pdf": "df0376b586b07a5321c9cc79c68bdd032e2711597445a12666a469f0f25689bc",
+    "gaps.csv": "970d78ef70b7c27c971833b4de76daeb82b04f68587c9d9397f59f84f3ba6769"
+  },
+  "postprocessing_source_sha256": {
+    "examples/pbc/band_structures/gaas_gw_spectra.py": "2f7cda11cc4c4f324ac74f59338e171e3d27036e8945c62c57fcdc7c7df05078",
+    "examples/pbc/band_structures/gaas_self_consistent_gw.py": "b17bb3c678ccc66dd3e4b9a8eb22f18f9671416ab43035f02b4bd01a341f3594",
+    "src/gradscf/gw/pbc/spectrum.py": "89262a39dc4d584cbc156e773c6a4cd244609dc61582de5223427ab7dbcc3111",
+    "src/gradscf/gw/pbc/interpolation.py": "f1558be076b41ab61c00c1f689a188f2ccfbb5397fb457bd70bc6acfa5ac84bb",
+    "src/gradscf/solvers/poles.py": "82328417587ebb50cc144729ee40f64559f2318a488c34a3c9865f5dc38936a9",
+    "src/gradscf_tools/gaas_gw_plot.py": "a864d0a05dcc59f9ff13eda2fa637d865a75b657c565f85f696dd3321a01e40c"
+  },
+  "elapsed_seconds": 0.24461144898668863
+}

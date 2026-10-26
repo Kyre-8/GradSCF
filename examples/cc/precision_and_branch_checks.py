@@ -6,11 +6,10 @@ import jax
 import numpy as np
 
 jax.config.update("jax_enable_x64", True)
-from gradscf import gto, dft, cc
+from gradscf import gto, scf, cc
 
-mf = dft.RKS(
+mf = scf.RHF(
     gto.M(atom="F 0 0 0; F 0 0 2.2", basis="sto-3g"),
-    xc="hf",
     conv_tol=1e-12,
     conv_tol_density=1e-10,
     conv_tol_grad=1e-9,
@@ -30,8 +29,8 @@ report["branch_search"]["stability"] = float(
     search.selected.stability().minimum_curvature
 )
 
-helium = dft.RKS(
-    gto.M(atom="He 0 0 0; He 0 0 3", basis="6-31g"), xc="hf", conv_tol=1e-12
+helium = scf.RHF(
+    gto.M(atom="He 0 0 0; He 0 0 3", basis="6-31g"), conv_tol=1e-12
 )
 report["precision"] = {}
 for label, source in (

@@ -1,0 +1,126 @@
+{
+  "OH_hf": {
+    "native_snapshot": "ad-showcase-stationary-20261015",
+    "native_sha256": "ca0a43250b2c9f41022c5592a95433f9c0a761a2f435c54b941212f3d5a47e33",
+    "recorded_runtime_source_hashes": {
+      "src/gradscf_tools/molecular_response.py": "9fd769a26c1f70e40b78d0752336299544df481f9acfbca7209a1e233ff76a02",
+      "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+      "src/gradscf/scf/stability.py": "6d362cb0f22574f5386c193c3c698531892fda1264b85ce352b7f1e64dd03da5",
+      "src/gradscf/solvers/nonlinear/root.py": "8ae5e282594f7601a60f92a15a98c771c687c847c17a8de689e78c6c2bf84512",
+      "examples/geometry/open_shell_forces.py": "41fad9dbd018f1528c469f70bc536d3e59dd0ca13f238219a8abb95eaa2491d2"
+    },
+    "reference_snapshot": "ad-showcase-stationary-20261015",
+    "reference_sha256": "ebb1df438f26767bc8c118e0d916f7e2ae1db0f00cfe4b96393f3f42d748335e",
+    "reference_executed_script_sha256": null,
+    "provenance_boundary": "Named execution snapshots and selected hashes recorded by each native run; not a complete source-tree hash."
+  },
+  "NO_hf": {
+    "native_snapshot": "ad-showcase-stationary-20261015",
+    "native_sha256": "80448a69453dfbffab6fcc1a0c865bd475a5c3b644b6da22a0f2f93496af6bcc",
+    "recorded_runtime_source_hashes": {
+      "src/gradscf_tools/molecular_response.py": "9fd769a26c1f70e40b78d0752336299544df481f9acfbca7209a1e233ff76a02",
+      "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+      "src/gradscf/scf/stability.py": "6d362cb0f22574f5386c193c3c698531892fda1264b85ce352b7f1e64dd03da5",
+      "src/gradscf/solvers/nonlinear/root.py": "8ae5e282594f7601a60f92a15a98c771c687c847c17a8de689e78c6c2bf84512",
+      "examples/geometry/open_shell_forces.py": "41fad9dbd018f1528c469f70bc536d3e59dd0ca13f238219a8abb95eaa2491d2"
+    },
+    "reference_snapshot": "ad-showcase-stationary-20261015",
+    "reference_sha256": "f7d890b1b15aca28c0ac860a771cf247701134dacab50e12d67edf234ba9fb6e",
+    "reference_executed_script_sha256": null,
+    "provenance_boundary": "Named execution snapshots and selected hashes recorded by each native run; not a complete source-tree hash."
+  },
+  "OH_pbe": {
+    "native_snapshot": "ad-showcase-stationary-20261015",
+    "native_sha256": "6df6f35ee9344703ab1989f71dee38462419109f405420258af01ef267af34f2",
+    "recorded_runtime_source_hashes": {
+      "src/gradscf_tools/molecular_response.py": "9fd769a26c1f70e40b78d0752336299544df481f9acfbca7209a1e233ff76a02",
+      "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+      "src/gradscf/scf/stability.py": "6d362cb0f22574f5386c193c3c698531892fda1264b85ce352b7f1e64dd03da5",
+      "src/gradscf/solvers/nonlinear/root.py": "8ae5e282594f7601a60f92a15a98c771c687c847c17a8de689e78c6c2bf84512",
+      "examples/geometry/open_shell_forces.py": "41fad9dbd018f1528c469f70bc536d3e59dd0ca13f238219a8abb95eaa2491d2"
+    },
+    "reference_snapshot": "ad-showcase-stationary-20261015",
+    "reference_sha256": "fef0c84ed625aaf0a0f8c837dc02181f8d6fd548783b1d47756f45ff9cf85bd9",
+    "reference_executed_script_sha256": null,
+    "provenance_boundary": "Named execution snapshots and selected hashes recorded by each native run; not a complete source-tree hash."
+  },
+  "NO_pbe": {
+    "native_snapshot": "ad-showcase-stationary-20261015",
+    "native_sha256": "24c04ed3c1d107d7252ae9cff2b40d8bf717b3fd9ad6828e5c1e8a23ce850c13",
+    "recorded_runtime_source_hashes": {
+      "src/gradscf_tools/molecular_response.py": "9fd769a26c1f70e40b78d0752336299544df481f9acfbca7209a1e233ff76a02",
+      "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+      "src/gradscf/scf/stability.py": "6d362cb0f22574f5386c193c3c698531892fda1264b85ce352b7f1e64dd03da5",
+      "src/gradscf/solvers/nonlinear/root.py": "8ae5e282594f7601a60f92a15a98c771c687c847c17a8de689e78c6c2bf84512",
+      "examples/geometry/open_shell_forces.py": "41fad9dbd018f1528c469f70bc536d3e59dd0ca13f238219a8abb95eaa2491d2"
+    },
+    "reference_snapshot": "ad-showcase-stationary-20261015",
+    "reference_sha256": "a96f0dfc9affead31d4990da26d12cb9e94afdd3ab38d59dce0f1c279cd18096",
+    "reference_executed_script_sha256": null,
+    "provenance_boundary": "Named execution snapshots and selected hashes recorded by each native run; not a complete source-tree hash."
+  },
+  "OH_mp2": {
+    "native_snapshot": "ad-showcase-integration-20261015",
+    "native_sha256": "42a3267e3181e91b5af8c1d10c133c5ce73d0e9a530a8f3282e09fd6a522237d",
+    "recorded_runtime_source_hashes": {
+      "src/gradscf_tools/molecular_response.py": "c815909cbc61b8fb2f12240636c22c35701b7b94391783250fc3cb921a5a3b1a",
+      "src/gradscf_tools/correlated_response.py": "2aef64387e3a788f7ddb9aadc78f76a3898f3ddb34872276189c547180eb86a1",
+      "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+      "src/gradscf/scf/stability.py": "6d362cb0f22574f5386c193c3c698531892fda1264b85ce352b7f1e64dd03da5",
+      "src/gradscf/solvers/nonlinear/root.py": "6896011c23957975ad5420cbd14edd47a69d2b837189723841484f07f6108981",
+      "examples/geometry/open_shell_forces.py": "c10e961110fb1942664e6bbbb2e433b44a9129e73d41129b5ef5a5d9e7e029a4"
+    },
+    "reference_snapshot": "ad-showcase-open-shell-reference-20261015",
+    "reference_sha256": "e08de668c353e4b5a6868423a834d148022e440aac54ea97d482248aa181a016",
+    "reference_executed_script_sha256": "a85081a5fa0f6698a11a84421eceedfd255eede2070c174326ef3c58a76b55a8",
+    "provenance_boundary": "Named execution snapshots and selected hashes recorded by each native run; not a complete source-tree hash."
+  },
+  "NO_mp2": {
+    "native_snapshot": "ad-showcase-integration-20261015",
+    "native_sha256": "ddb28598a0b45d7fa65fa671f0b3a839bb4b718951b7126a832b54549ae0866a",
+    "recorded_runtime_source_hashes": {
+      "src/gradscf_tools/molecular_response.py": "c815909cbc61b8fb2f12240636c22c35701b7b94391783250fc3cb921a5a3b1a",
+      "src/gradscf_tools/correlated_response.py": "2aef64387e3a788f7ddb9aadc78f76a3898f3ddb34872276189c547180eb86a1",
+      "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+      "src/gradscf/scf/stability.py": "6d362cb0f22574f5386c193c3c698531892fda1264b85ce352b7f1e64dd03da5",
+      "src/gradscf/solvers/nonlinear/root.py": "6896011c23957975ad5420cbd14edd47a69d2b837189723841484f07f6108981",
+      "examples/geometry/open_shell_forces.py": "c10e961110fb1942664e6bbbb2e433b44a9129e73d41129b5ef5a5d9e7e029a4"
+    },
+    "reference_snapshot": "ad-showcase-open-shell-reference-20261015",
+    "reference_sha256": "df2dd064799431bd21bbede4411d3a03f32475b391abe9acce2076ecc72f7755",
+    "reference_executed_script_sha256": "a85081a5fa0f6698a11a84421eceedfd255eede2070c174326ef3c58a76b55a8",
+    "provenance_boundary": "Named execution snapshots and selected hashes recorded by each native run; not a complete source-tree hash."
+  },
+  "OH_ccsd": {
+    "native_snapshot": "ad-showcase-integration-20261015",
+    "native_sha256": "15b1253b19f7b623f30b824b4fd1b8a4a7ee88cc0dc64a3bae6ce8f856082110",
+    "recorded_runtime_source_hashes": {
+      "src/gradscf_tools/molecular_response.py": "c815909cbc61b8fb2f12240636c22c35701b7b94391783250fc3cb921a5a3b1a",
+      "src/gradscf_tools/correlated_response.py": "2aef64387e3a788f7ddb9aadc78f76a3898f3ddb34872276189c547180eb86a1",
+      "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+      "src/gradscf/scf/stability.py": "6d362cb0f22574f5386c193c3c698531892fda1264b85ce352b7f1e64dd03da5",
+      "src/gradscf/solvers/nonlinear/root.py": "6896011c23957975ad5420cbd14edd47a69d2b837189723841484f07f6108981",
+      "examples/geometry/open_shell_forces.py": "c10e961110fb1942664e6bbbb2e433b44a9129e73d41129b5ef5a5d9e7e029a4"
+    },
+    "reference_snapshot": "ad-showcase-open-shell-reference-20261015",
+    "reference_sha256": "d2781898881bfd56e57bb904132b9bede9ea983dc45a62ca5090e501511cd549",
+    "reference_executed_script_sha256": "a85081a5fa0f6698a11a84421eceedfd255eede2070c174326ef3c58a76b55a8",
+    "provenance_boundary": "Named execution snapshots and selected hashes recorded by each native run; not a complete source-tree hash."
+  },
+  "NO_ccsd": {
+    "native_snapshot": "ad-showcase-integration-20261015",
+    "native_sha256": "4732d5516219d96b8d10196309b6fa94896e1657a04522ceec52d4d4c47293e7",
+    "recorded_runtime_source_hashes": {
+      "src/gradscf_tools/molecular_response.py": "c815909cbc61b8fb2f12240636c22c35701b7b94391783250fc3cb921a5a3b1a",
+      "src/gradscf_tools/correlated_response.py": "2aef64387e3a788f7ddb9aadc78f76a3898f3ddb34872276189c547180eb86a1",
+      "src/gradscf/scf/orbital_optimization.py": "e782c7c2f5a3681b66ce591a03b7e43883edfb7c71510de85501c90e290e66d7",
+      "src/gradscf/scf/stability.py": "6d362cb0f22574f5386c193c3c698531892fda1264b85ce352b7f1e64dd03da5",
+      "src/gradscf/solvers/nonlinear/root.py": "6896011c23957975ad5420cbd14edd47a69d2b837189723841484f07f6108981",
+      "examples/geometry/open_shell_forces.py": "c10e961110fb1942664e6bbbb2e433b44a9129e73d41129b5ef5a5d9e7e029a4"
+    },
+    "reference_snapshot": "ad-showcase-open-shell-reference-20261015",
+    "reference_sha256": "9e78b116da6b7a5e7a45d94cc3a31f64f4da14c55abb9e8430d17d683be19216",
+    "reference_executed_script_sha256": "a85081a5fa0f6698a11a84421eceedfd255eede2070c174326ef3c58a76b55a8",
+    "provenance_boundary": "Named execution snapshots and selected hashes recorded by each native run; not a complete source-tree hash."
+  }
+}

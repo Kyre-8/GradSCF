@@ -1,0 +1,18 @@
+{
+  "backend": "cpu",
+  "jax_version": "0.8.1",
+  "dtype": "float64",
+  "zero_temperature_ep_mev": 6.8865497851390405,
+  "extracted_lambda": 0.16290646001210235,
+  "quadrature_max_difference_mev": 0.0006936922300155857,
+  "independent_continuum_error_mev": 1.0328495108069546e-06,
+  "experiment_rmse_mev": 2.4032875511434026,
+  "widths_mev": {
+    "55": 22.02590834009446,
+    "160": 29.416925203035362,
+    "285": 39.88765154889685
+  },
+  "input_scope": "Published alpha2F and electronic baseline; no new slab GW/DFPT or experimental width fit.",
+  "approximation": "Local flat electronic continuum, Fan on-shell FWHM, Lorentzian quasiparticle line plus 3 meV Gaussian.",
+  "experimental_data": "Vector-digitized published markers, not original instrument files."
+}

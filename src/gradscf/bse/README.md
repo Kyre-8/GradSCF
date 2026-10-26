@@ -1,7 +1,7 @@
 # Static molecular GW-BSE
 
 `gradscf.bse` implements static GW-BSE for finite molecules, real closed-shell
-orbitals and integer occupations. Both TDA and full BSE have matrix-free
+orbitals or real collinear unrestricted references, with integer occupations. Both TDA and full BSE have matrix-free
 Davidson paths and bounded dense reference paths. Singlet
 and triplet energies, transition moments and length-gauge oscillator strengths
 are supported. First-order response of isolated roots includes QP energies,
@@ -12,16 +12,21 @@ This implements P0/P1 and real full-BSE forward/amplitude response from
 [the development plan](../gw/BSE_PLAN.md). The dense reference is described in
 [FULL_BSE_PLAN.md](FULL_BSE_PLAN.md); the matrix-free metric-response extension
 is described in [MATRIX_FREE_BSE.md](MATRIX_FREE_BSE.md).
-Open-shell/complex/periodic references, dynamic kernels and degenerate-cluster
-properties are not exposed as implemented methods.
+Spin-flip, complex/periodic static references, general dynamical BSE kernels
+and degenerate-cluster properties are not exposed by the static solver.
+[Exciton–vibration response](ep_coupling/README.md) is a separate fixed-bath
+effective-Hamiltonian layer: restricted TDA projection, neutral Fan/DW,
+spectral matrices and dynamic absorption. Its full-matrix resolvent can be
+differentiated at internal degeneracy without individual eigenvector AD;
+the BSE-result adapter retains the static solver's amplitude-response guards.
 
 ## Public workflow
 
 ```python
-from gradscf import bse, dft, gto, gw
+from gradscf import bse, gto, scf, gw
 
 mol = gto.M(atom="O 0 0 0; H 0 -.757 .587; H 0 .757 .587", basis="sto-3g")
-mf = dft.RKS(mol, xc="hf", conv_tol=1e-12).run()
+mf = scf.RHF(mol, conv_tol=1e-12).run()
 mygw = gw.GW(mf, nw=100).run()
 response = bse.BSE(mygw, nroots=3, singlet=True).run()
 print(response.e)                     # Hartree
@@ -44,18 +49,20 @@ one common orthonormal orbital frame; they are not verified by running GW.
 all occupied/virtual orbitals. Omitting core transitions from the optical
 window does not automatically remove their screening contributions.
 
-GW-backed input uses G0W0's original MF spectrum for W0. No QP re-screening is
+For G0W0 and evGW0, GW-backed input uses the original MF spectrum for W0. No QP re-screening is
 silently introduced. QP energies of every selected level must be covered by
 both `qp_computed_mask` and `converged_mask`; the legacy GW result marks
 unrequested MF-filled levels converged, so that flag alone is insufficient.
 `GWResult.screening_energy` records the actual pole spectrum used in W by the
-restricted/unrestricted CD drivers. A restricted result can be converted with
+restricted/unrestricted CD drivers. A restricted or unrestricted result can be converted with
 `BSEReference.from_gw_result(result, mo_factors=..., nocc=..., dipole_mo=...)`.
 This preserves QP coverage/convergence masks and the recorded screening spectrum;
 missing metadata is rejected. For converged evGW, that spectrum equals the final
 QP spectrum, including any frozen unrequested MF levels. Factors and dipoles
-must be in the returned orbital frame. This supports fixed-frame evGW output as
-BSE input; it does not differentiate the evGW outer fixed point. qsGW/scGW
+must be in the returned orbital frame. The GW facade now accepts `method="g0w0"`, `"evgw"`, or `"evgw0"`. This supports fixed-frame evGW output as
+BSE input. The low-level evGW drivers also offer opt-in
+[outer implicit response](../gw/OUTER_RESPONSE.md); their resulting arrays can
+be passed directly to `run_bse` without stopping this dependence. qsGW/scGW
 results without this provenance still require a separately justified explicit
 reference and are not automatically adapted.
 
@@ -151,18 +158,50 @@ invalidates derivatives for the **whole requested root set**, consistently for
 JVP and VJP. A smaller isolated prefix can still be differentiated. Forward
 values for stable degenerate roots remain available.
 
-The verified contract is first-order fixed-MO response and a G0W0+BSE composition
-on a valid QP branch. It is not a full nuclear/basis derivative, a full evGW/qsGW
-fixed-point derivative, a Matsubara-to-real-axis continuation, or a root-tracking
-rule across GW residue/pole crossings.
+The numerical contract is first-order response in the supplied MO data and
+GW+BSE composition on valid locally isolated branches. Eager facades use host
+validation; use the functional drivers inside JAX transformations. Nuclear/basis
+response also requires differentiable upstream inputs. This does not provide a
+Matsubara-to-real-axis continuation or root tracking across GW pole crossings.
 
 ## Storage and solver boundaries
 
-The default Davidson path does not form the transition-space A matrix or a
-four-index W tensor. Screened virtual-pair factors are prepared in slabs and
-the direct-kernel action is accumulated in auxiliary blocks. Static blocks are
-used so the action supports the linear transpose needed by the common adjoint.
-There is still a dense auxiliary dielectric and stored full MO/screened factors.
+The default Davidson path does not form the transition-space A/B matrices or
+four-index W. A/B actions screen contracted trial vectors in orbital blocks;
+for wider trial blocks they instead screen a bare factor slab and contract it
+in auxiliary blocks. Neither path caches full screened virtual-pair or
+occupied-virtual factors. Reverse mode rematerializes these block intermediates.
+The bare MO factor input remains resident.
+
+Static screening defaults to the bounded dense/direct solve. Select a
+matrix-free auxiliary dielectric explicitly with the shared linear config:
+
+```python
+from gradscf.solvers import LinearSolverConfig
+
+response = bse.BSE(
+    mygw, tda=False, nroots=3,
+    screening_config=LinearSolverConfig(
+        method="gmres", rtol=1e-11, atol=1e-13, restart=20, maxiter=100,
+    ),
+).run()
+```
+
+This applies `epsilon v = v + 4 L_ov ((L_ov.T v)/gaps)` without an
+`naux x naux` array. GMRES uses the unpreconditioned physical residual metric. Multiple RHS columns are solved
+sequentially inside the shared implicit solve, bounding Krylov storage by the
+restart size rather than the number of RHS. True primal/transpose residuals
+are checked; failed screening does not trigger a dense fallback. The screening
+config is independent of the dense/Davidson excitation-solver choice. Its
+`maxiter` counts restart cycles. `gw.solve_static_screening` exposes the
+screening solution, residual norm and convergence/status for explicit callers;
+`screening_valid` in BSEResult continues to describe input validity.
+
+The direct method and all existing auxiliary/factor capacity limits remain
+available. GMRES saves dielectric storage but introduces repeated inner solves;
+its runtime and convergence depend on the screening spectrum and RHS. Neither
+this path nor orbital blocking removes the full bare MO factor input or the
+cost of the preceding GW calculation.
 
 Defaults: `max_aux=1024`, `max_factor_elements=20_000_000`, `max_space=40`,
 `block_size=16`. The first two are checked before the GW facade transforms AO
@@ -180,12 +219,124 @@ correction slots (unless it already spans the full transition dimension).
 Increase `max_space` or `max_cycle` if a requested or guard root fails; there
 is no hidden dense fallback or automatic relaxation of tolerances. Davidson requires
 space for the requested roots plus its guard root and uses deterministic
-full-support guesses (seed 0 by default). Shared direct linear solves now accept
-multiple RHS columns, allowing one factorization per screening slab with checked
-implicit and transposed solves. Large-auxiliary matrix-free screening, true RI
-versus spectral-ERI-factor benchmarks, GPU scaling and out-of-core operation
-remain future work.
+full-support guesses (seed 0 by default). Shared direct solves factor once per RHS block; shared GMRES solves RHS columns
+sequentially, with checked implicit and transposed solves in both modes. True RI
+versus spectral-ERI-factor benchmarks, GPU scaling and out-of-core bare factor
+storage remain future work.
 
 Run [water_tda.py](../../../examples/bse/water_tda.py) or
 [water_full.py](../../../examples/bse/water_full.py) for native examples.
 Executed checks and limitations are in [VALIDATION.md](VALIDATION.md).
+
+
+## Frequency-dependent optical properties
+
+After a successful calculation with dipoles:
+
+```python
+alpha = response.polarizability(omega, eta=.01)  # a0^3, (...,3,3)
+sigma = response.absorption_cross_section(omega, eta=.01, unit='Mb')
+sigma_z = response.absorption_cross_section(
+    omega, eta=.01, polarization=(0., 0., 1.), unit='Mb')
+alpha_static = response.polarizability()  # omega=eta=0
+```
+
+`omega` is a real scalar or 1D array in Hartree; `eta` is a Lorentzian
+half-width in Hartree. Polarizability includes both signs of the poles:
+
+```text
+alpha_ab(w) = sum_s mu_sa mu_sb [1/(Omega_s-w-i eta) + 1/(Omega_s+w+i eta)]
+sigma(w) = (4 pi w/c) Im Tr(alpha(w))/3
+```
+
+A polarization selects a normalized real direction instead of the average.
+Cross sections use a0^2 by default (`unit='au'`); `Mb` denotes 1e-18 cm^2.
+The low-level functions with the same names accept `(result,dipole_mo,space,omega)`
+and retain the validated isolated-root JVP/VJP contract. Only computed roots
+contribute: a truncated spectrum is not a complete polarizability or a TRK
+sum-rule certificate. Triplet electric-dipole strengths remain zero without SOC.
+
+Default screening windows are inherited from the GW snapshot; an explicitly
+supplied BSE screening window intentionally selects a different screening model.
+Optical windows never implicitly remove screening transitions. Mutable input
+lists are copied into immutable reference-window tuples.
+
+See [the native spectrum example](../../../examples/bse/molecular_spectrum.py),
+[GW controls](../gw/README.md), and the MolGW numerical comparison in
+[VALIDATION.md](VALIDATION.md). MolGW uses the same resonant/antiresonant optical
+construction in [m_spectra.f90](https://github.com/molgw/molgw/blob/b831818d7a845c36f295d036dc8ceef59daf9991/src/m_spectra.f90).
+
+## Unrestricted spin-conserving response
+
+`BSE(ugw).run()` selects spin-conserving response (`singlet=None`) automatically.
+Explicit `singlet=True/False` is reserved for restricted spin adaptation.
+The same facade accepts `BSEReference(..., nocc=(nalpha, nbeta))`, with energies
+shaped `(2,nmo)`, MO factors `(2,naux,nmo,nmo)` and dipoles `(2,3,nmo,nmo)`.
+Both channels must use the **same AO auxiliary metric**; separately factorized
+spin ERIs do not define the cross-spin Coulomb vertices.
+
+The functional entry point remains `run_bse`; construct its static space with
+`make_bse_space(nmo, (nalpha, nbeta))` and use `BSEConfig(singlet=None, ...)`.
+Occupied/virtual windows are paired tuples, e.g. `occupied=((4,), (3,))`.
+Amplitudes are `(X_alpha, X_beta)` and `(Y_alpha, Y_beta)`, each block shaped
+`(nroots, nocc_window_spin, nvir_window_spin)`. Empty transition channels are
+supported for explicit references, although UGW currently requires occupied
+and virtual orbitals in each spin.
+
+The common static dielectric is
+
+```text
+epsilon_PQ = delta_PQ + 2 sum_(sigma,ia) L^sigma_Pia L^sigma_Qia / gap^sigma_ia
+A_ia(s),jb(t) = delta_st delta_ij delta_ab gap^QP_ia(s)
+               + (ia_s|jb_t) - delta_st W(ij_s,ab_s)
+B_ia(s),jb(t) = (ia_s|jb_t) - delta_st W(ib_s,aj_s)
+```
+
+Same-spin direct actions reuse the restricted factorized kernels. One joint
+low-rank charge action supplies the intra- and inter-spin exchange terms.
+The screening state is shared; neither full spin-orbital factors nor dense A/B
+are built for Davidson. Dense/GMRES screening and dense/Davidson eigen-solves
+retain their existing residual and first-order response contracts.
+
+Transition moments sum the two spin amplitudes **without** an extra sqrt(2).
+In the closed-shell limit, symmetric/antisymmetric spin combinations reproduce
+the restricted singlet/triplet spectra and strengths. Unrestricted roots
+conserve M_S and are not automatically eigenstates of S^2; this interface does
+not claim spin-pure multiplicities or supply an excited-state S^2 diagnostic.
+
+See [the OH example](../../../examples/bse/oh_unrestricted.py) and
+`tests/bse/test_unrestricted.py` for the independent scalar-loop oracle,
+closed-shell reduction, optical JVP/VJP, windows and QP provenance checks.
+The spin-resolved static kernel follows Monino and Loos, JCTC **17**,
+2852–2867 (2021), DOI: [10.1021/acs.jctc.1c00074](https://doi.org/10.1021/acs.jctc.1c00074).
+
+## Response linear-solver controls
+
+The forward eigenproblem and its differentiated state equations have separate
+convergence checks. `BSEConfig.response_config` accepts the existing shared
+`LinearSolverConfig`; the facade accepts the same keyword:
+
+```python
+from gradscf import bse
+from gradscf.solvers import LinearSolverConfig
+
+response = bse.BSE(
+    mygw, tda=False, solver="dense", nroots=6,
+    response_config=LinearSolverConfig(method="direct", rtol=1e-10, max_dense=256),
+).run()
+```
+
+This configures state response for both TDA and full BSE. `screening_config`
+continues to configure W, and `solver` continues to select the forward
+eigensolver. Omitting `response_config` preserves the previous checked GMRES
+settings. Its `max_dense` bounds the actual response equation: N for TDA or
+the dense stable-RPA reduction, and 2N for the structured RPA metric equation,
+where N is the optical excitation-space dimension. It is not multiplied by
+the number of requested roots.
+
+The same keyword is available on shared `solve_rpa` and `solve_stable_rpa`.
+No BSE-local linear solver is introduced. Both primal and transpose solves
+retain true-residual checks; failed solves still invalidate derivatives.
+Changing this setting on a completed facade invalidates its cached optical
+properties. A converged forward eigenpair and a valid isolated-root gap alone
+do not certify that the subsequently requested response solve will converge.

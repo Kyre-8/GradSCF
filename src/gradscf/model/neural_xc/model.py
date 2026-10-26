@@ -18,7 +18,7 @@ from ...tddft._unrestricted_semilocal_response import (
     pack_spin_grid_tangents,
     unpack_spin_grid_response,
 )
-from ...dft.libxc_jax.jax_libxc import RestrictedFeatureBundle
+from ...dft.xc import RestrictedFeatureBundle
 from .components import (
     SemilocalEnergyDensityFn,
     SemilocalEnergyDensityModule,
@@ -33,9 +33,9 @@ from .defaults import (
 from .inputs import (
     assemble_basis_channels,
     build_coefficient_inputs,
-    has_hfx_nu_source,
     resolve_canonical_hfx_feature_channels,
 )
+from gradscf.dft.hfx import has_hfx_nu_source
 from .projection import NeuralXCProjectionMixin
 from .binding import NeuralXCBindingMixin
 

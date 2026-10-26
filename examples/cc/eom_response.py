@@ -9,11 +9,10 @@ import jax.numpy as jnp
 
 jax.config.update("jax_enable_x64", True)
 
-from gradscf import gto, dft, cc
+from gradscf import gto, scf, cc
 
-mf = dft.RKS(
+mf = scf.RHF(
     gto.M(atom="H 0 0 0; H 0 0 .74", basis="sto-3g", unit="Angstrom"),
-    xc="hf",
     conv_tol=1e-12,
 ).run()
 reference = cc.CCSD(mf).run().reference

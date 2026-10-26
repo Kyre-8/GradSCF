@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/home/yjiao/opt/miniconda3/envs/jax_scf/bin/python",
+    "-u",
+    "examples/solvers/compare_degenerate_benzene_vjp.py"
+  ],
+  "return_code": 0,
+  "peak_rss_kib": 753604,
+  "budget_kib": 33554432,
+  "budget_exceeded": false,
+  "polling_seconds": 0.25,
+  "accepted": true
+}

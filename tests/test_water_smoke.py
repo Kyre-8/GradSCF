@@ -6,14 +6,13 @@ pytestmark = []
 
 from gradscf.model import neural_xc
 from pyscf_reference import restricted_reference_from_pyscf
-from gradscf.model.training import (
+from gradscf.model.neural_xc.training import (
     MolecularTrainingConfig,
     MolecularTrainingDatum,
-    create_train_state_from_molecule,
-    make_molecular_train_step,
     predict_excitation_energies,
     predict_ground_state_total_energy,
 )
+from gradscf.model.neural_xc.training.trainer import create_train_state_from_molecule, make_molecular_train_step
 
 
 def _make_water_reference():

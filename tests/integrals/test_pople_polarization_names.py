@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from gradscf.integrals import prepare_basis
-from gradscf.integrals.basis_data import load_basis_from_snapshot
+from gradscf.integrals.basis.data import load_basis_from_snapshot
 
 
 @pytest.mark.parametrize('name,equivalent,nao',[

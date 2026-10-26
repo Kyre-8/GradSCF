@@ -30,7 +30,7 @@ def _h2_inputs():
     inputs = mf._scf_inputs
     df_factors = getattr(inputs, "df_factors", None)
     if df_factors is None:
-        from gradscf.df import eri_pair_matrix_to_df_factors
+        from gradscf.integrals.molecular.factorization import eri_pair_matrix_to_df_factors
 
         df_factors = eri_pair_matrix_to_df_factors(
             inputs.eri_pair_matrix, nao=res.mo_coeff.shape[0], tol=1e-12

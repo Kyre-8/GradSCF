@@ -40,16 +40,16 @@ from gradscf.model.neural_xc import (
     DEFAULT_NETWORK_ARCHITECTURE,
     DEFAULT_NETWORK_HIDDEN_DIMS,
 )
-from gradscf.scf import UKSConfig, unrestricted_molecule_from_spec_with_jax_uks
-from gradscf.model.training import (
+from gradscf.scf import UKSConfig
+from gradscf.scf.builders import _build_unrestricted_reference
+from gradscf.model.neural_xc.training import (
     MolecularTrainingDatum,
     MolecularTrainingConfig,
-    create_train_state_from_molecule,
     molecular_loss,
-    make_molecular_train_step,
     make_ground_state_predictor,
     save_params_checkpoint,
 )
+from gradscf.model.neural_xc.training.trainer import create_train_state_from_molecule, make_molecular_train_step
 
 HARTREE_TO_EV = 27.211386245988
 _DEFAULT_SEMILOCAL_XC = ("lda_x", "gga_x_b88", "lda_c_vwn_rpa", "gga_c_lyp")
@@ -130,7 +130,7 @@ def build_reference_point(
         basis=str(args.basis),
         nroots=max(1, int(args.nroots)),
     )
-    reference = unrestricted_molecule_from_spec_with_jax_uks(
+    reference = _build_unrestricted_reference(
         atom=atom,
         basis=str(args.basis),
         xc_spec=str(args.xc),

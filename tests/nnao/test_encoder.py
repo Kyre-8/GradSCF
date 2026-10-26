@@ -23,7 +23,7 @@ def test_real_mace_equivariance_basis_and_backward():
     pytest.importorskip('mace_jax')
     from flax import nnx
     from gradscf.model.nnao import MACEBasisModel,build_graph,prepare_basis
-    from gradscf.integrals.contraction import primitive_basis,contraction_matrix
+    from gradscf.integrals.basis.contraction import primitive_basis, contraction_matrix
     from gradscf import integrals
     z=[1,9,17,35,53]
     r=np.array([[0,0,0],[0,0,1.0],[1.7,.2,0],[.3,2.3,.5],[-2,.1,.2]])

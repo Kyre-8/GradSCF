@@ -43,9 +43,9 @@ and neural energy consumers recognize this representation. Restricted
 provider is not exposed yet; its exact packed route is supported.
 
 Existing traced-coordinate assembly still uses the established dense native
-geometry rule before packing the output. The new packed integral producer
-and auxiliary integral producer are forward-only for integral parameters;
-they do not silently discard coordinate or exponent derivatives.
+geometry rule before packing the output. The packed four-center producer
+remains forward-only for integral parameters. Auxiliary orbital-parameter AD
+uses a fixed metric, as described below; unsupported derivatives fail explicitly.
 
 ## True RI/DF
 
@@ -60,8 +60,9 @@ packed_factors = ri.factors(parameters, aux_parameters)
 The native calls compute `(P|Q)` and `(pq|P)` directly. The latter has shape
 `(naux, nao*(nao+1)//2)`. Whitening uses the Coulomb metric's Cholesky factor;
 if numerical linear dependence prevents Cholesky factorization, a spectral
-projection drops eigenvalues below `lindep`. Factor construction is a host
-setup/cache operation. `evaluate` itself is JIT-compatible.
+projection drops eigenvalues below `lindep`. Metric construction is a host
+setup/cache operation. With a precomputed metric, three-center evaluation and
+whitening are JIT-compatible and support orbital coefficient/exponent AD.
 
 `RKS.density_fit(auxbasis=...)` and `UKS.density_fit(auxbasis=...)` select this
 path, defaulting to `def2-universal-jkfit`. The same auxiliary setting is
@@ -83,7 +84,7 @@ The optional DF backend caches packed primitive factors and projects them
 through the normalized contraction matrix:
 
 ```python
-from gradscf.integrals.density_fitting import project_factors
+from gradscf.integrals.molecular.density_fitting import project_factors
 contracted_factors = project_factors(primitive_factors, transform)
 ```
 
@@ -96,7 +97,18 @@ Run the experiment with
 `--jk-backend df --auxbasis def2-universal-jkfit`. DF factors remain in memory;
 HDF5 out-of-core storage is not implemented by this interface yet.
 
-RI is an approximation. Validate auxiliary-basis energy and coefficient-
-gradient errors against exact contracted integrals. If centers/exponents
-become training variables, derivatives of the native auxiliary integrals
-must be added; reusing a fixed cache would not supply those derivatives.
+For joint orbital exponent/coefficient optimization, use contracted native
+integrals with a fixed auxiliary metric instead of reusing primitive factors:
+
+```python
+metric = ri.metric_factor(parameters, aux_parameters)  # before JIT/AD
+def factors(bound_parameters):
+    return ri.factors(bound_parameters, aux_parameters, metric_factor=metric)
+```
+
+This path supplies native coefficient JVP/VJP/HVP and first-order exponent
+JVP/VJP, with JAX normalization and whitening. Only the auxiliary metric is
+cached: contracted three-center integrals change with orbital exponents.
+Geometry, auxiliary-parameter and mixed exponent derivatives are unsupported.
+RI is an approximation; validate auxiliary-basis energy and gradient errors
+against exact contracted calculations. See `_native/README.md` for AD limits.

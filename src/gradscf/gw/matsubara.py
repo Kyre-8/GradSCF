@@ -22,6 +22,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from ..scf._pytree import pytree_dataclass
+from ..solvers.eigen.spectral import matrix_function
 
 
 @pytree_dataclass(static_fields=("beta", "nw"))
@@ -47,15 +48,28 @@ def matsubara_grid(*, nw: int, beta: float) -> MatsubaraGrid:
     return MatsubaraGrid(beta, nw, tau, fermion, boson, weights)
 
 
+def _reference_green(fock, mu, grid):
+    """Static-reference matrices with smooth first response at degeneracy."""
+    density = matrix_function(
+        fock, mu, lambda energy, chemical: jax.nn.sigmoid(-grid.beta * (energy - chemical))
+    )
+    eye = jnp.eye(fock.shape[0], dtype=jnp.complex128)
+    inverse = (1j * grid.fermion[:, None, None] + mu) * eye - fock
+    giw = jnp.linalg.solve(inverse, jnp.broadcast_to(eye, inverse.shape))
+
+    def time_matrix(tau):
+        # The log form stays stable for deep occupied states and large beta.
+        return matrix_function(fock, (mu, tau), lambda energy, params:
+            -jnp.exp(-params[1] * (energy - params[0])
+                     - jnp.logaddexp(0.0, -grid.beta * (energy - params[0]))))
+
+    return density, giw, jax.vmap(time_matrix)(grid.tau)
+
+
 def _reference(fock, mu, grid):
     energy, coeff = jnp.linalg.eigh(fock)
-    xi = energy - mu
-    occupation = jax.nn.sigmoid(-grid.beta * xi)
-    density = (coeff * occupation[None, :]) @ coeff.T
-    giw = jnp.einsum("pi,wi,qi->wpq", coeff, 1 / (1j * grid.fermion[:, None] - xi), coeff)
-    # log form is stable for deep occupied states and large beta.
-    gtime = -jnp.exp(-grid.tau[:, None] * xi - jnp.logaddexp(0.0, -grid.beta * xi))
-    gtau = jnp.einsum("pi,ti,qi->tpq", coeff, gtime, coeff)
+    occupation = jax.nn.sigmoid(-grid.beta * (energy - mu))
+    density, giw, gtau = _reference_green(fock, mu, grid)
     return energy, coeff, occupation, density, giw, gtau
 
 
@@ -65,7 +79,7 @@ def dyson_green_and_density(fock, sigma_iw, mu, grid):
     eye = jnp.eye(fock.shape[0], dtype=jnp.complex128)
     inverse = (1j * grid.fermion[:, None, None] + mu) * eye - fock - sigma_iw
     green = jnp.linalg.solve(inverse, jnp.broadcast_to(eye, inverse.shape))
-    _, _, _, dref, gref, _ = _reference(fock, mu, grid)
+    dref, gref, _ = _reference_green(fock, mu, grid)
     density = dref + jnp.sum(green - gref, axis=0).real / grid.beta
     return green, 0.5 * (density + density.T)
 
@@ -169,10 +183,13 @@ def gw_matsubara_step(green_iw, fock, mu, b, grid, sigma_moment=None):
     sigma_moment is the 1/(iw) moment of the self-energy used for G.
     Supplying it improves G(tau)'s third-order tail; the driver mixes this
     moment together with Sigma. Omit only when it is zero or unavailable.
-    Kernels are differentiable away from reference-spectrum degeneracies;
-    this is not an implicit derivative of the outer self-consistent state.
+    Thermal reference density/G have smooth first matrix response at repeated
+    static levels. The exact B=0 branch supports first response; fourth-order
+    interaction derivatives at that branch are not supplied. Interacting
+    reference/RPA tails still require nondegenerate resolved spectra. This
+    kernel is not an implicit derivative of the outer self-consistent state.
     """
-    energy, coeff, occupation, _, gref_iw, gref_tau = _reference(fock, mu, grid)
+    _, gref_iw, gref_tau = _reference_green(fock, mu, grid)
     residual_g = green_iw - gref_iw
     phase_f = jnp.exp(-1j * grid.tau[:, None] * grid.fermion)
     g_tau = gref_tau + jnp.einsum("tw,wij->tij", phase_f, residual_g).real / grid.beta
@@ -180,7 +197,7 @@ def gw_matsubara_step(green_iw, fock, mu, b, grid, sigma_moment=None):
         # A bounded rational reference with the same 1/(iw)^3 G tail.
         # R(z)=1/[z(z^2-a^2)] avoids the large beta^2 cancellations of a
         # bare third-order pole. Its equal-time limit is zero.
-        scale = jnp.maximum(1.0, jnp.max(jnp.abs(energy - mu)))
+        scale = jnp.maximum(1.0, jnp.max(jnp.abs(jnp.linalg.eigvalsh(fock) - mu)))
         riw = -1 / (1j * grid.fermion * (grid.fermion**2 + scale**2))
         xi = jnp.array([-1.0, 1.0]) * scale
         scalar_g = -jnp.exp(-grid.tau[:, None] * xi - jnp.logaddexp(0.0, -grid.beta * xi))
@@ -188,6 +205,27 @@ def gw_matsubara_step(green_iw, fock, mu, b, grid, sigma_moment=None):
         correction = rtau - (phase_f @ riw).real / grid.beta
         g_tau = g_tau + correction[:, None, None] * sigma_moment
 
+    def zero_correlation(_):
+        # Sigma_c and Pi vanish identically at B=0. Keep the Hartree/Fock
+        # terms in the driver: they still carry the quadratic B dependence.
+        # This exact branch supplies first response at the noninteracting
+        # limit; it does not claim fourth-order interaction derivatives.
+        zero_aux = jnp.zeros((2 * grid.nw + 1, b.shape[0], b.shape[0]), dtype=b.dtype)
+        zero_time_aux = jnp.zeros((2 * grid.nw, b.shape[0], b.shape[0]), dtype=b.dtype)
+        return dict(green_tau=g_tau, polarizability_inu=zero_aux, screened_inu=zero_aux,
+                    screened_tau=zero_time_aux, sigma_iw=jnp.zeros_like(green_iw),
+                    sigma_tau=jnp.zeros_like(g_tau), sigma_moment=jnp.zeros_like(fock),
+                    correlation_energy=jnp.asarray(0.0, dtype=fock.dtype))
+
+    return jax.lax.cond(jnp.any(b != 0), lambda _: _gw_correlation(
+        g_tau, gref_iw, gref_tau, fock, mu, b, grid, phase_f
+    ), zero_correlation, operand=None)
+
+
+def _gw_correlation(g_tau, gref_iw, gref_tau, fock, mu, b, grid, phase_f):
+    """Interacting reference/RPA tail path, separated from the exact B=0 limit."""
+    energy, coeff = jnp.linalg.eigh(fock)
+    occupation = jax.nn.sigmoid(-grid.beta * (energy - mu))
     b_ref = jnp.einsum("Ppq,pi,qj->Pij", b, coeff, coeff)
     pi_ref = _reference_polarizability(b_ref, energy, occupation, grid)
     bubble_delta = _bubble(g_tau, b) - _bubble(gref_tau, b)

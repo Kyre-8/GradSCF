@@ -11,6 +11,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from ._nonhermitian_ritz import paired_eigenvectors
+from ..memory import apply_columns
 
 
 class IterativeRitz(NamedTuple):
@@ -44,7 +45,7 @@ def _append(basis, count, candidates):
     return jax.lax.fori_loop(0, candidates.shape[1], add, (basis, count))
 
 
-def davidson_ritz(op, cfg, initial_vectors=None):
+def davidson_ritz(op, cfg, initial_vectors=None, *, batch_size=None):
     n = op.shape[0]
     width = min(n, cfg.max_space)
     count = min(n, cfg.nroots + cfg.guard_roots)
@@ -53,8 +54,8 @@ def davidson_ritz(op, cfg, initial_vectors=None):
     if cfg.nroots > width:
         raise ValueError("nroots exceeds max_space")
     transpose = op.T
-    apply = lambda x: jax.lax.stop_gradient(op.apply(x))
-    apply_transpose = lambda x: jax.lax.stop_gradient(transpose.apply(x))
+    apply = lambda x: jax.lax.stop_gradient(apply_columns(op, x, batch_size))
+    apply_transpose = lambda x: jax.lax.stop_gradient(apply_columns(transpose, x, batch_size))
     rng = np.random.default_rng(cfg.seed)
     random = jnp.asarray(
         rng.normal(size=(n, min(width, count))),

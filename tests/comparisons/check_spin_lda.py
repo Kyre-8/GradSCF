@@ -8,7 +8,7 @@ import jax.numpy as jnp
 import jax_xc
 import numpy as np
 from pyscf.dft import libxc
-from gradscf.dft.libxc_jax.jax_xc_adapter import eval_jax_xc_energy_density_from_unrestricted_density_gradients as evaluate
+from gradscf.dft.xc._jax_xc import eval_jax_xc_energy_density_from_unrestricted_density_gradients as evaluate
 
 
 def check():

@@ -1,0 +1,100 @@
+[
+  {
+    "symbol": "Al",
+    "code": "PySCF Gaussian KRKS",
+    "pyscf_version": "2.9.0",
+    "backend": "CPU",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "density_dtype": "float64",
+    "xc": "LDA_X,LDA_C_PZ",
+    "pseudopotential": {
+      "file": "Al_lda.oe01.recpot",
+      "sha256": "7104d4d2c41f2564e31cc6c6fd6e077125147cd099a27271133230b45d094375",
+      "source_commit": "fbc47b4e1df3def1a2206e58c5a1a1a4d51db1d0",
+      "source_path": "examples/DATA/Al_lda.oe01.recpot"
+    },
+    "spacing_angstrom": 0.18,
+    "mesh": [
+      17,
+      17,
+      17
+    ],
+    "kmesh": [
+      10,
+      10,
+      10
+    ],
+    "basis_level": 3,
+    "nao": 58,
+    "sigma_hartree": 0.005,
+    "overlap_cutoff": 1e-07,
+    "converged": true,
+    "energy_hartree": -2.0862808705965477,
+    "free_energy_hartree": -2.087309971426293,
+    "extrapolated_energy_hartree": -2.0867954210114203,
+    "ewald_hartree": -2.603587697477896,
+    "ewald_pyscf_hartree": -2.6035876992302223,
+    "nelectron": 3,
+    "orbital_electrons": 2.9999999999914015,
+    "grid_electrons": 3.000000000000525,
+    "density_min_bohr3": 0.007260029555844688,
+    "density_max_bohr3": 0.030041469078875893,
+    "overlap_min_eigenvalue": 1.3986278112398359e-10,
+    "overlap_grid_max_error": 7.527578560484471e-11,
+    "elapsed_seconds": 284.38848804100417,
+    "warning": "Finite Gaussian basis, k sampling and smearing; not CASTEP or converged Fig. 4.",
+    "case": "b3k10s005",
+    "density_comparison": "b3k8s005",
+    "density_relative_l2": 0.005710324628821604,
+    "energy_change_hartree": -0.0005930487491370151,
+    "extrapolated_energy_change_hartree": -0.0005437053262293823,
+    "free_energy_change_hartree": -0.0004943619033217495
+  },
+  {
+    "symbol": "Mg",
+    "code": "PySCF Gaussian KRKS",
+    "pyscf_version": "2.9.0",
+    "backend": "CPU",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "density_dtype": "float64",
+    "xc": "LDA_X,LDA_C_PZ",
+    "pseudopotential": {
+      "file": "Mg_lda.oe01.recpot",
+      "sha256": "4547542aedd7101b44b27c45f18de344158df83464261598fa1b437cce09fae9",
+      "source_commit": "fbc47b4e1df3def1a2206e58c5a1a1a4d51db1d0",
+      "source_path": "examples/DATA/Mg_lda.oe01.recpot"
+    },
+    "spacing_angstrom": 0.18,
+    "mesh": [
+      19,
+      19,
+      29
+    ],
+    "kmesh": [
+      8,
+      8,
+      8
+    ],
+    "basis_level": 3,
+    "nao": 116,
+    "sigma_hartree": 0.005,
+    "overlap_cutoff": 1e-07,
+    "converged": true,
+    "energy_hartree": -1.8127957317071637,
+    "free_energy_hartree": -1.8141908214917943,
+    "extrapolated_energy_hartree": -1.813493276599479,
+    "ewald_hartree": -2.1743841410680713,
+    "ewald_pyscf_hartree": -2.174384142531525,
+    "nelectron": 4,
+    "orbital_electrons": 3.9999999999999702,
+    "grid_electrons": 3.99999999999832,
+    "density_min_bohr3": 0.0031575415076587937,
+    "density_max_bohr3": 0.01599699522200946,
+    "overlap_min_eigenvalue": 4.947103224513627e-09,
+    "overlap_grid_max_error": 3.786748692391484e-11,
+    "elapsed_seconds": 612.1575390840881,
+    "warning": "Finite Gaussian basis, k sampling and smearing; not CASTEP or converged Fig. 4.",
+    "density_comparison": "Mg basis3 k6 spacing.18 sigma.005",
+    "density_relative_l2": 0.002511867006181138
+  }
+]

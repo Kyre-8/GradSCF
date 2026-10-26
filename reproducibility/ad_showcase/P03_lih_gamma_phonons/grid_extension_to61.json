@@ -1,0 +1,114 @@
+{
+  "complete": true,
+  "passed": false,
+  "rows": [
+    {
+      "mesh": 51,
+      "case": "pbe_szv_k2_fft51_gmres",
+      "acoustic_modes": [
+        2,
+        0,
+        1
+      ],
+      "optical_modes": [
+        3,
+        4,
+        5
+      ],
+      "translation_weights": [
+        0.9999999979217529,
+        0.9999999979217529,
+        0.999999997921752,
+        2.078248033326006e-09,
+        2.078248030502118e-09,
+        2.078248027408348e-09
+      ],
+      "translation_weight_gap": 0.999999995843504,
+      "acoustic_frequencies_signed_cm1": [
+        4.758887843911862,
+        4.758887846380716,
+        4.758887847781693
+      ],
+      "optical_frequencies_signed_cm1": [
+        441.4133062571156,
+        441.4133062571711,
+        441.41330625742444
+      ],
+      "raw_asr_frobenius_hartree_per_bohr2": 1.1963171044083952e-05,
+      "peak_rss_kib": 15375864,
+      "elapsed_seconds": 144.1245680700231
+    },
+    {
+      "mesh": 61,
+      "case": "pbe_szv_k2_fft61_gmres",
+      "acoustic_modes": [
+        0,
+        2,
+        1
+      ],
+      "optical_modes": [
+        3,
+        4,
+        5
+      ],
+      "translation_weights": [
+        0.9999999999890818,
+        0.9999999999890818,
+        0.9999999999890818,
+        1.0918631953805535e-11,
+        1.091863159491883e-11,
+        1.0918631456385656e-11
+      ],
+      "translation_weight_gap": 0.9999999999781632,
+      "acoustic_frequencies_signed_cm1": [
+        1.1509715492323516,
+        1.1509715595469536,
+        1.1509715674885526
+      ],
+      "optical_frequencies_signed_cm1": [
+        441.41047257789984,
+        441.41047257793764,
+        441.4104725782108
+      ],
+      "raw_asr_frobenius_hartree_per_bohr2": 7.218557913674675e-07,
+      "peak_rss_kib": 22645868,
+      "elapsed_seconds": 176.90590995000093
+    }
+  ],
+  "metrics": {
+    "last_force_constant_increment_hartree_per_bohr2": 6.483399243403798e-06,
+    "last_optical_frequency_increment_cm1": 0.0028336792334471284,
+    "final_raw_asr_frobenius_hartree_per_bohr2": 7.218557913674675e-07,
+    "final_max_absolute_acoustic_frequency_cm1": 1.1509715674885526
+  },
+  "gates": {
+    "last_force_constant_increment_hartree_per_bohr2": 2e-06,
+    "last_optical_frequency_increment_cm1": 1.0,
+    "final_raw_asr_frobenius_hartree_per_bohr2": 1e-06,
+    "final_max_absolute_acoustic_frequency_cm1": 1.0
+  },
+  "checks": {
+    "last_force_constant_increment_hartree_per_bohr2": false,
+    "last_optical_frequency_increment_cm1": true,
+    "final_raw_asr_frobenius_hartree_per_bohr2": true,
+    "final_max_absolute_acoustic_frequency_cm1": false
+  },
+  "input_sha256": {
+    "pbe_szv_k2_fft51_gmres": {
+      "json": "7c0d3a5431d7ef197844b587e1bdc2c600aded5dea183e7a2f1aaf332fcbddae",
+      "npz": "cb03ae69021fd401eb24ff70a4f7a07f9f00934249ea319bd0d10bdff3aaaefe"
+    },
+    "pbe_szv_k2_fft61_gmres": {
+      "json": "dbaa5e53f46055d4389826df1dcd5a51e2298a1b4ceb2fef113cb0c942581249",
+      "npz": "7b599601c31016b6ae59601e5f0336222cfba8b3b957946a073ac7c955dd8b3d"
+    }
+  },
+  "meshes": [
+    51,
+    61
+  ],
+  "method": "gmres",
+  "figure_stem": "lih_gamma_grid_extension_to61",
+  "script_sha256": "4042b31210d35939057a14404ea461e03e558a0a74102428e5febc2014360f3f",
+  "scope": "Fixed a=7.780032276700287 bohr, PBE/GTH-Pade/SZV, k2^3. Raw Gamma FFT convergence only; no ASR, k/basis convergence, finite-q or LO-TO claim."
+}

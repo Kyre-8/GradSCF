@@ -1,35 +1,113 @@
 """Complex k-mesh SCF; common DIIS, convergence, XC and AD infrastructure."""
 import jax
 import jax.numpy as jnp
-from ..integrals.periodic.fft import get_kpoint_jk
+from ..integrals.periodic.fft import get_kpoint_jk,_kpoint_exchange
 from ..solvers.nonlinear.diis import diis_extrapolate,DIIS_SPACE
 from ..scf.convergence import convergence_reached
-from ..scf.uks import _point_unrestricted_xc_value_and_grad_kernel
 from ..scf.autodiff import SCFDifferentiationConfig,attach_scf_backward
-from ..dft.libxc_jax.jax_libxc import hybrid_coeff,xc_type
+from ..dft.xc import parse_recipe
+from ..dft.xc.evaluate import grid_value_and_grad
+from .kpoints import weights_for
+
+# Retain the old private test hook while its implementation lives in XC core.
+_point_unrestricted_xc_value_and_grad_kernel=grid_value_and_grad
 
 
-def energy_and_fock(density,inputs,*,mesh,xc='hf',exxdiv='ewald'):
-    nk=density.shape[1];alpha=hybrid_coeff(xc);kind=xc_type(xc)
-    j,k=get_kpoint_jk(inputs,density,mesh=mesh,exxdiv=exxdiv,with_k=alpha!=0)
-    exc,potential=grid_xc_potential(density,inputs,xc=xc)
-    vxc=project_xc_potential(inputs.ao,inputs.weights,potential,kind)
+def _named_xc_spec(xc):
+    """Keep a custom_xc named object on the complete traditional recipe path."""
+    return getattr(xc,'spec',xc)
+
+
+def _validate_external_baseline(xc,functional):
+    if (functional is not None and xc is not None
+            and not (isinstance(xc,str) and xc.strip().lower()=='hf')):
+        raise ValueError('External functional supplies the complete XC energy; omit the named XC baseline.')
+
+
+def exchange_matrix(density,inputs,*,mesh,recipe,exxdiv,**options):
+    """Recipe-weighted physical full/SR/LR exchange on periodic AO blocks."""
+    exchange=recipe.exact_exchange
+    result=None
+    for coefficient,part in ((exchange.full_range,'full'),
+                             (exchange.short_range,'short'),
+                             (exchange.long_range,'long')):
+        if coefficient:
+            matrix=_kpoint_exchange(inputs,density,mesh=mesh,exxdiv=exxdiv,
+                omega=None if part=='full' else exchange.omega,range_part=part,**options)
+            result=coefficient*matrix if result is None else result+coefficient*matrix
+    if result is not None:return result
+    target=options.get('query',None)
+    ao=inputs.ao if target is None else target.ao
+    targets=options.get('targets',None)
+    nk=ao.shape[0] if targets is None else len(targets)
+    return jnp.zeros((density.shape[0],nk,ao.shape[-1],ao.shape[-1]),
+                     dtype=jnp.result_type(density,ao))
+
+
+def energy_and_fock(density,inputs,*,mesh,xc='hf',exxdiv='ewald',functional=None,params=None,integration=None):
+    """Energy and Fock; optional IBZ targets retain complete source-k sums.
+
+    With an external functional, legacy xc='hf' is a default placeholder and
+    adds no HF XC. The callback supplies its entire XC energy.
+    """
+    xc=_named_xc_spec(xc)
+    _validate_external_baseline(xc,functional)
+    recipe=None if functional is not None else parse_recipe(xc)
+    if recipe is not None:recipe.require_complete_support()
+    targets=None if integration is None else integration.representatives
+    j,k=get_kpoint_jk(inputs,density,mesh=mesh,exxdiv=exxdiv,with_k=False,targets=targets)
+    if recipe is not None:
+        k=exchange_matrix(density,inputs,mesh=mesh,recipe=recipe,exxdiv=exxdiv,targets=targets)
+    valid=jnp.asarray(True)
+    if integration is not None:
+        valid=(integration.sampling_consistent(inputs)&integration.consistent_density(density)
+               &integration.consistent(inputs.overlap)&integration.consistent(inputs.hcore))
+    if functional is None:
+        exc,potential=grid_xc_potential(density,inputs,xc=xc)
+        ao=inputs.ao if targets is None else inputs.ao[targets]
+        vxc=project_xc_potential(ao,inputs.weights,potential,recipe.kind)
+    else:
+        from ..dft.derivatives import xc_energy_and_potential_from_density
+        result=xc_energy_and_potential_from_density(params,molecule=inputs,density=density,
+            xc_energy_fn=functional.energy_for_density,density_weights=weights_for(inputs))
+        exc,vxc=result.xc_energy,result.vxc_matrix
+        if integration is not None:
+            valid &= integration.consistent(vxc)
+            vxc=vxc[:,targets]
     h=inputs.hcore
-    energy=jnp.einsum('skpq,kqp->',density,h+.5*j).real/nk
-    energy-=.5*alpha*jnp.einsum('skpq,skqp->',density,k).real/nk
-    return energy+exc+inputs.nuclear_repulsion,h+j-alpha*k+vxc
+    kw=weights_for(inputs)
+    if integration is not None:
+        h=h[targets];density=density[:,targets];kw=integration.reduce_weights(kw)
+    energy=jnp.einsum('k,skpq,kqp->',kw,density,h+.5*j).real
+    energy-=.5*jnp.einsum('k,skpq,skqp->',kw,density,k).real
+    energy=energy+exc+inputs.nuclear_repulsion;fock=h+j-k+vxc
+    if integration is not None:
+        fock=integration.expand_operator(fock)
+    return jnp.where(valid,energy,jnp.nan),jnp.where(valid,fock,jnp.nan)
 
 
 def grid_xc_potential(density,inputs,*,xc):
     """XC fields on the SCF grid, reused for non-self-consistent band queries."""
-    kind=xc_type(xc);nk=density.shape[1]
+    xc=_named_xc_spec(xc)
+    kind=parse_recipe(xc).kind
     if kind=='HF':return jnp.array(0.),None
-    ao=inputs.ao[:,0];deriv=inputs.ao[:,1:4]
-    rho=jnp.einsum('kgp,skpq,kgq->sg',ao,density,ao.conj()).real/nk
-    grad=2*jnp.einsum('kgp,skpq,kxgq->sgx',ao,density,deriv.conj()).real/nk
-    variables=rho.T if kind=='LDA' else jnp.concatenate([rho.T,grad[0],grad[1]],axis=1)
+    variables=grid_xc_variables(density,inputs,kind)
     energies,potential=_point_unrestricted_xc_value_and_grad_kernel(xc,kind)(variables)
     return jnp.dot(inputs.weights,energies),potential
+
+
+def grid_xc_variables(density,inputs,kind):
+    """Real spin density/gradient variables shared by ground-state and q response."""
+    ao=inputs.ao[:,0];deriv=inputs.ao[:,1:4]
+    kw=weights_for(inputs)
+    rho=jnp.einsum('k,kgp,skpq,kgq->sg',kw,ao,density,ao.conj()).real
+    grad=2*jnp.einsum('k,kgp,skpq,kxgq->sgx',kw,ao,density,deriv.conj()).real
+    if kind=='LDA':return rho.T
+    fields=jnp.concatenate([rho.T,grad[0],grad[1]],axis=1)
+    if kind=='MGGA':
+        tau=.5*jnp.einsum('k,kxgp,skpq,kxgq->sg',kw,deriv,density,deriv.conj()).real
+        fields=jnp.concatenate([fields,tau.T],axis=1)
+    return fields
 
 
 def project_xc_potential(ao_channels,weights,potential,kind):
@@ -39,37 +117,84 @@ def project_xc_potential(ao_channels,weights,potential,kind):
     for spin in range(2):
         vr=potential[:,spin]
         block=jnp.einsum('g,kgp,kgq->kpq',weights*vr,ao.conj(),ao)
-        if kind=='GGA':
+        if kind in ('GGA','MGGA'):
             vg=potential[:,2+3*spin:5+3*spin]
             term=jnp.einsum('gx,kxgp,kgq->kpq',weights[:,None]*vg,deriv.conj(),ao)
             block=block+term+term.conj().swapaxes(-1,-2)
+        if kind=='MGGA':
+            block+=.5*jnp.einsum('g,kxgp,kxgq->kpq',weights*potential[:,8+spin],deriv.conj(),deriv)
         blocks.append(block)
     return jnp.stack(blocks)
 
 
 def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
                    conv_tol=1e-10,conv_tol_density=1e-8,conv_tol_grad=1e-7,
-                   damping=0.,level_shift=0.,init_density=None,differentiation=None):
+                   damping=0.,level_shift=0.,init_density=None,differentiation=None,
+                   temperature=None,functional=None,params=None,reduction=None):
+    """Common periodic SCF; callback xc='hf' is a placeholder, with no added HF."""
     from .scf import PeriodicSCFResult
-    if xc_type(xc) not in ('HF','LDA','GGA'):raise NotImplementedError('Unsupported periodic XC.')
+    from .occupations import fermi_density, fermi_occupations, density_entropy
+    xc=_named_xc_spec(xc)
+    _validate_external_baseline(xc,functional)
+    if functional is None:
+        if params is not None:raise ValueError('params requires an external functional')
+        recipe=parse_recipe(xc);recipe.require_complete_support()
+        if recipe.kind not in ('HF','LDA','GGA','MGGA'):raise NotImplementedError('Unsupported periodic XC.')
+    else:
+        from ..dft import Functional
+        if not isinstance(functional,Functional):raise TypeError('Use dft.Functional for external periodic XC')
     nk,n,_=inputs.overlap.shape
-    if max_cycle<1 or any(v<0 or v>n for v in nelec):raise ValueError('Invalid occupations or cycles.')
-    config=differentiation or SCFDifferentiationConfig(mode='unrolled')
-    s=inputs.overlap
+    if reduction is not None and len(reduction.full_to_ir)!=nk:
+        raise ValueError('Reduction map must cover the full SCF k mesh')
+    integration=reduction if getattr(reduction,'integrates',False) else None
+    thermal=temperature is not None
+    if max_cycle<1 or not 0<=damping<1:raise ValueError('Invalid cycles or damping.')
+    if not thermal and any(v<0 or v>n or v!=int(v) for v in nelec):
+        raise ValueError('Zero-temperature SCF requires integer spin populations in [0,nao].')
+    if thermal and level_shift!=0:
+        raise ValueError('Finite-temperature SCF does not support projector level shifts.')
+    config=differentiation or SCFDifferentiationConfig(mode='explicit')
+    args=(inputs,jnp.asarray(temperature if thermal else 0.),jnp.asarray(nelec,dtype=float),params)
+    # The implicit response uses live args below, not the numerical trajectory.
+    # Stop before scan linearization so eager AD does not allocate its unused tape.
+    forward_args=args
+    if config.mode=='implicit':
+        forward_args,init_density=jax.tree.map(jax.lax.stop_gradient,(args,init_density))
+    s=forward_args[0].overlap
     def transform(s):
         return jnp.linalg.inv(jnp.linalg.cholesky(s)).conj().swapaxes(-1,-2)
     x=transform(s)
-    occ=jnp.stack([jnp.broadcast_to((jnp.arange(n)<count).astype(float),(nk,n)) for count in nelec])
+    occ=jnp.stack([jnp.broadcast_to((jnp.arange(n)<count).astype(float),(nk,n)) for count in nelec]) if not thermal else None
     def diagonalize(f,metric=x):
         orth=metric.conj().swapaxes(-1,-2)@f@metric
         eps,c=jnp.linalg.eigh(orth)
         return eps,metric@c
-    def density_from(c):return jnp.einsum('skpi,ski,skqi->skpq',c,occ,c.conj())
-    evaluate=lambda d,args:energy_and_fock(d,args,mesh=mesh,xc=xc,exxdiv=exxdiv)
-    eps,c=diagonalize(jnp.broadcast_to(inputs.hcore,(2,nk,n,n)))
-    d=density_from(c) if init_density is None else jnp.asarray(init_density,dtype=c.dtype)
+    def density_from(c,occupation=occ):return jnp.einsum('skpi,ski,skqi->skpq',c,occupation,c.conj())
+    def mapped(f,a,*,reduce=False):
+        weights=weights_for(a[0]);overlap=a[0].overlap
+        use_reduction=reduce and reduction is not None
+        valid=True
+        if use_reduction:
+            valid=(reduction.consistent(f)&reduction.consistent(overlap)
+                   &reduction.weights_consistent(weights))
+            f=f[:,reduction.representatives];overlap=overlap[reduction.representatives]
+            weights=reduction.reduce_weights(weights)
+        if thermal:
+            density=fermi_density(f,overlap,a[2],a[1],weights)[0]
+        else:
+            occupation=occ[:,reduction.representatives] if use_reduction else occ
+            density=density_from(diagonalize(f,transform(overlap))[1],occupation)
+        return reduction.expand(density)*jnp.where(valid,1.,jnp.nan) if use_reduction else density
+    def evaluate(d,a,*,reduce=False):
+        energy,fock=energy_and_fock(d,a[0],mesh=mesh,xc=xc,exxdiv=exxdiv,functional=functional,params=a[3],
+                                   integration=integration if reduce else None)
+        entropy=density_entropy(d,a[0].overlap,weights_for(a[0])) if thermal else jnp.array(0.)
+        return energy-a[1]*entropy,fock,energy,entropy
+    initial_fock=jnp.broadcast_to(forward_args[0].hcore,(2,nk,n,n)).astype(jnp.complex128)
+    eps,c=diagonalize(initial_fock)
+    d=mapped(initial_fock,forward_args,reduce=True) if init_density is None else jnp.asarray(init_density,dtype=c.dtype)
     if d.shape!=(2,nk,n,n):raise ValueError('Spin density must have shape (2,nk,nao,nao).')
-    e,f=evaluate(d,inputs)
+    e,f,_,_=evaluate(d,forward_args,reduce=True)
     def error(f,d):return x.conj().swapaxes(-1,-2)@(f@d@s-s@d@f)@x
     def pack(a):return jnp.stack([a.real,a.imag])
     history=jnp.zeros((DIIS_SPACE,2,2,nk,n,n))
@@ -79,11 +204,16 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
             d,e,f,c,eps,fh,eh,head,count,done,cycles=state
             feff,fh,eh,head,count=diis_extrapolate(pack(f),pack(error(f,d)).reshape(-1),fh,eh,head,count)
             feff=feff[0]+1j*feff[1]+level_shift*(s-s@d@s)
-            eps,c=diagonalize(feff)
-            dn=(1-damping)*density_from(c)+damping*d
-            en,fn=evaluate(dn,inputs)
+            if thermal or reduction is not None:
+                target=mapped(feff,forward_args,reduce=True)
+            else:
+                eps,c=diagonalize(feff)
+                target=density_from(c)
+            dn=(1-damping)*target+damping*d
+            en,fn,_,_=evaluate(dn,forward_args,reduce=True)
             rms=jnp.sqrt(jnp.mean(jnp.abs(dn-d)**2))
-            residual=jnp.linalg.norm(error(fn,dn))/jnp.sqrt(2*nk)
+            residual=(jnp.linalg.norm(mapped(fn,forward_args,reduce=True)-dn)/jnp.sqrt(dn.size) if thermal
+                      else jnp.linalg.norm(error(fn,dn))/jnp.sqrt(2*nk))
             done=convergence_reached(jnp.abs(en-e),rms,residual,conv_tol=conv_tol,
                 conv_tol_density=conv_tol_density,conv_tol_grad=conv_tol_grad,has_prior_cycle=index>0)
             return dn,en,fn,c,eps,fh,eh,head,count,done,index+1
@@ -92,11 +222,23 @@ def run_kpoint_scf(inputs,*,mesh,nelec,xc='hf',exxdiv='ewald',max_cycle=100,
     initial=(d,e,f,c,eps,history,errors,jnp.array(0),jnp.array(0),jnp.array(False),jnp.array(0))
     (d,e,f,c,eps,*rest),_=jax.lax.scan(step,initial,jnp.arange(max_cycle))
     converged,cycles=rest[-2:]
+    if reduction is not None:
+        # Certify the ORIGINAL full fixed point, including symmetry-breaking
+        # directions. Implicit backward below also deliberately uses that space.
+        full_e,full_f,_,_=evaluate(d,forward_args)
+        converged &= jnp.max(jnp.abs(full_f-f))<=max(conv_tol_grad,1e-8)
+        converged &= jnp.abs(full_e-e)<=max(conv_tol,1e-8)
+        converged &= jnp.linalg.norm(mapped(full_f,forward_args)-d)/jnp.sqrt(d.size)<=max(conv_tol_density,conv_tol_grad)
     if config.mode=='implicit':
-        def residual(d,args):
-            _,f=evaluate(d,args)
-            _,c=diagonalize(f,transform(args.overlap))
-            return density_from(c)-d
-        d=attach_scf_backward(inputs,solution=d,residual=residual,config=config,converged=converged)
-        e,f=evaluate(d,inputs);eps,c=diagonalize(f)
-    return PeriodicSCFResult(e,d,c,eps,occ,f,converged,cycles)
+        def residual(d,a):
+            _,f,_,_=evaluate(d,a)
+            return mapped(f,a)-d
+        d=attach_scf_backward(args,solution=d,residual=residual,config=config,converged=converged)
+    free,f,energy,entropy=evaluate(d,args)
+    eps,c=diagonalize(f,transform(inputs.overlap) if config.mode=='implicit' else x)
+    mu=None
+    if thermal:
+        population=fermi_occupations(eps,args[2],args[1],weights_for(inputs))
+        occ,mu=population.occupations,population.chemical_potential
+        converged &= population.converged
+    return PeriodicSCFResult(energy,d,c,eps,occ,f,converged,cycles,free,entropy,mu)

@@ -1,9 +1,10 @@
 """Analytic Cartesian Gaussian Fourier coefficients for Bloch AO grids."""
 import numpy as np
+import jax
 import jax.numpy as jnp
 from ..basis import cartesian_angular_tuples
-from ..normalization import normalized_shell_coefficients, radial_primitive_norm
-from ..backends.jax_reference._common import primitive_cartesian_norm
+from gradscf.integrals.basis.normalization import normalized_shell_coefficients, radial_primitive_norm
+from gradscf.integrals.basis.normalization import primitive_cartesian_norm
 
 
 def reciprocal_grid(lattice,mesh):
@@ -37,10 +38,11 @@ def bloch_grid(topology,parameters,lattice,mesh,kpoints):
     gv=reciprocal_grid(lattice,mesh);volume=jnp.linalg.det(lattice);ngrid=np.prod(mesh)
     frac=np.stack(np.meshgrid(*[np.arange(n)/n for n in mesh],indexing='ij'),axis=-1).reshape(-1,3)
     coords=jnp.asarray(frac)@lattice
-    grids=[];fourier=[]
-    for k in kpoints:
-        q=gv+k;ft=fourier_ao(topology,parameters,q);fourier.append(ft)
+    def at_k(k):
+        q=gv+k;ft=fourier_ao(topology,parameters,q)
         phase=jnp.exp(1j*coords@k)
         channels=[ft]+[1j*q[:,axis,None]*ft for axis in range(3)]
-        grids.append(jnp.stack([jnp.fft.ifftn((values*ngrid/volume).reshape(tuple(mesh)+(-1,)),axes=(0,1,2)).reshape(values.shape)*phase[:,None] for values in channels]))
-    return jnp.stack(grids),jnp.stack(fourier),gv,coords
+        grid=jnp.stack([jnp.fft.ifftn((values*ngrid/volume).reshape(tuple(mesh)+(-1,)),axes=(0,1,2)).reshape(values.shape)*phase[:,None] for values in channels])
+        return grid,ft
+    grids,fourier=jax.vmap(at_k)(kpoints)
+    return grids,fourier,gv,coords

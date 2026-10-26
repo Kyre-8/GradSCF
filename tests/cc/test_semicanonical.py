@@ -20,7 +20,7 @@ def oh_rohf():
 def _pyscf_semicanonical(mf, frozen):
     """Diagonalize separate alpha/beta active oo and vv Fock blocks in NumPy."""
     from pyscf import cc, scf
-    from gradscf.integrals.mo import unrestricted_frozen_indices
+    from gradscf.ao2mo import unrestricted_frozen_indices
     reference = scf.addons.convert_to_uhf(mf)
     coeff = np.asarray(reference.mo_coeff).copy()
     fock = reference.get_fock()
@@ -118,9 +118,10 @@ def test_semicanonical_orbital_rotation_invariance(oh_rohf):
     np.testing.assert_allclose(out.energy, expected, atol=2e-12, rtol=0)
 
 
-def test_semicanonical_cc_response_at_exact_orbital_degeneracy():
+@pytest.mark.parametrize("algorithm", ["auto", "streamed"])
+def test_semicanonical_cc_response_at_exact_orbital_degeneracy(algorithm):
     from gradscf import cc
-    from gradscf.integrals.mo import spin_orbital_integrals
+    from gradscf.ao2mo import spin_orbital_integrals
     rng = np.random.default_rng(52)
     b = rng.normal(size=(5, 4, 4))*.06
     b += b.transpose(0, 2, 1)
@@ -138,11 +139,18 @@ def test_semicanonical_cc_response_at_exact_orbital_degeneracy():
     def correction(x):
         hs = (h[0]+x*direction, h[1])
         state = cc.run_ucc(hs, g, nocc=(2, 1), config=cfg)
-        return cc.triples_correction(hs, g, state, nocc=(2, 1), orbital_basis="semicanonical")
+        return cc.triples_correction(hs, g, state, nocc=(2, 1), orbital_basis="semicanonical",
+                                     algorithm=algorithm)
     value, derivative = jax.jit(jax.value_and_grad(correction))(0.)
     assert abs(value) > 1e-9 and np.isfinite(derivative)
     np.testing.assert_allclose(derivative, (correction(1e-4)-correction(-1e-4))/2e-4,
                                atol=2e-9, rtol=0)
+    curvature = jax.jit(jax.grad(jax.grad(correction)))(0.)
+    gradient = jax.jit(jax.grad(correction))
+    assert np.isfinite(curvature)
+    for step in (3e-4, 1e-4):
+        finite = (gradient(step)-gradient(-step))/(2*step)
+        np.testing.assert_allclose(curvature, finite, atol=2e-9, rtol=2e-5)
 
 
 def test_semicanonical_empty_space_and_invalid_state():

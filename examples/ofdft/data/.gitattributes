@@ -1,0 +1,2 @@
+# Preserve upstream RECPOT bytes (including header spaces) for checksum provenance.
+*.recpot whitespace=-blank-at-eol

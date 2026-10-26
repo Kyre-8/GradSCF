@@ -12,14 +12,13 @@ import numpy as np
 
 jax.config.update("jax_enable_x64", True)
 
-from gradscf import gto, dft, cc
+from gradscf import gto, scf, cc
 
 start = perf_counter()
-mf = dft.RKS(
+mf = scf.RHF(
     gto.M(
         atom="O 0 0 0; H 0 -.757 .587; H 0 .757 .587", basis="6-31g", unit="Angstrom"
     ),
-    xc="hf",
     conv_tol=1e-12,
 ).run()
 mycc = cc.CCSD(mf, conv_tol=1e-12, residual_tol=1e-11).run()

@@ -17,17 +17,20 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+import numpy as np
 import jax.numpy as jnp
 from jax.lax import Precision
 from jaxtyping import Array
 
 from ...integrals.periodic.fft import get_jk
 from ..freq import scaled_legendre_grid
-from ..g0w0 import _qp_loop
+from ..g0w0 import _qp_loop, _requested_orbitals
+from ..outer_response import require_occupation_gap
 from ..polarizability import rho_response_iw
 from ..screened import screened_w_imag_axis
 from ..types import GWResult
-from .product_basis import gamma_product_factors
+from .product_basis import gamma_product_factors, _require_paired_lehmann
+from .krgw import _validate_gw_reference
 
 
 def g0w0_cd_gamma_unrestricted(
@@ -50,18 +53,34 @@ def g0w0_cd_gamma_unrestricted(
     For an HF starting point the exchange potentials are rebuilt from the
     Ewald-corrected FFT exchange (``fock_matrix=None``); otherwise the
     converged spin Fock matrices are required.
+    The total spin-summed OV/VO covariance must support an even-W contour.
+    Empty/full spin sectors retain their fixed occupations, with a contour
+    Fermi level outside that sector's spectrum. AD requires a parameter path
+    preserving the checked covariance pairing.
     """
     e_a, e_b = (jnp.asarray(e, dtype=jnp.float64) for e in mo_energy)
     c_a, c_b = (jnp.asarray(c, dtype=jnp.complex128) for c in mo_coeff)
     nocc_a, nocc_b = int(nocc[0]), int(nocc[1])
+    if e_a.ndim != 1 or not e_a.size or e_b.shape != e_a.shape:
+        raise ValueError('Spin spectra must share a nonempty (nmo,) shape.')
     nmo = e_a.shape[0]
-    if orbs is None:
-        orbs = range(nmo)
+    require_occupation_gap(jnp.stack((e_a, e_b)), (nocc_a, nocc_b), 'Gamma unrestricted GW')
+    orbs = _requested_orbitals(orbs, nmo)
 
     b_a = gamma_product_factors(inputs, c_a, mesh=mesh)
     b_b = gamma_product_factors(inputs, c_b, mesh=mesh)
     b_ov_a = b_a[:, :nocc_a, nocc_a:]
     b_ov_b = b_b[:, :nocc_b, nocc_b:]
+    vertices, gaps, signs = [], [], []
+    for factors, energy, occupied in ((b_a, e_a, nocc_a), (b_b, e_b, nocc_b)):
+        pairs = np.array([(i, a) for i in range(occupied) for a in range(occupied, nmo)],
+                         dtype=int).reshape(-1, 2)
+        differences = energy[pairs[:, 0]]-energy[pairs[:, 1]]
+        vertices.extend((factors[:, pairs[:, 0], pairs[:, 1]], factors[:, pairs[:, 1], pairs[:, 0]]))
+        gaps.extend((differences, -differences))
+        signs.extend((jnp.ones(len(pairs)), -jnp.ones(len(pairs))))
+    _require_paired_lehmann(jnp.concatenate(vertices, axis=1), jnp.concatenate(gaps),
+                           jnp.concatenate(signs), label='Gamma unrestricted GW')
 
     density_spin = jnp.asarray(density_spin)
     j_mat, k_ewald = get_jk(inputs, density_spin, exxdiv="ewald", with_k=True)
@@ -77,8 +96,13 @@ def g0w0_cd_gamma_unrestricted(
         delta_v_a = jnp.diag(-(ca_t @ k_ewald[0] @ c_a + vmf_a)).real
         delta_v_b = jnp.diag(-(cb_t @ k_ewald[1] @ c_b + vmf_b)).real
 
-    ef_a = 0.5 * (e_a[nocc_a - 1] + e_a[nocc_a])
-    ef_b = 0.5 * (e_b[nocc_b - 1] + e_b[nocc_b])
+    def fermi(energy, occupied):
+        if occupied == 0:
+            return jnp.min(energy)-(1+jnp.ptp(energy))
+        if occupied == nmo:
+            return jnp.max(energy)+(1+jnp.ptp(energy))
+        return .5*(jnp.max(energy[:occupied])+jnp.min(energy[occupied:]))
+    ef_a, ef_b = fermi(e_a, nocc_a), fermi(e_b, nocc_b)
     freqs, wts = scaled_legendre_grid(nw)
 
     def response_fn(omega):
@@ -88,17 +112,21 @@ def g0w0_cd_gamma_unrestricted(
 
     wmn_a = screened_w_imag_axis(b_a, response_fn, freqs, conjugate=True)
     wmn_b = screened_w_imag_axis(b_b, response_fn, freqs, conjugate=True)
+    static_a = screened_w_imag_axis(b_a, response_fn, jnp.zeros(1), conjugate=True)[0]
+    static_b = screened_w_imag_axis(b_b, response_fn, jnp.zeros(1), conjugate=True)[0]
     channels = ((e_a, b_ov_a, 1.0), (e_b, b_ov_b, 1.0))
 
-    qp_a, sig_a, mask_a, conv_a, residual_a = _qp_loop(
+    qp_a, sig_a, mask_a, conv_a, residual_a, weight_a, diagnostics_a = _qp_loop(
         mo_energy=e_a, b_mn=b_a, channels=channels, wmn=wmn_a, freqs=freqs, wts=wts,
         ef=ef_a, eta=float(eta), delta_v=delta_v_a, nocc=nocc_a, orbs=orbs,
         diff_mode=diff_mode, conjugate=True,
+        wmn_static=static_a, return_diagnostics=True,
     )
-    qp_b, sig_b, mask_b, conv_b, residual_b = _qp_loop(
+    qp_b, sig_b, mask_b, conv_b, residual_b, weight_b, diagnostics_b = _qp_loop(
         mo_energy=e_b, b_mn=b_b, channels=channels, wmn=wmn_b, freqs=freqs, wts=wts,
         ef=ef_b, eta=float(eta), delta_v=delta_v_b, nocc=nocc_b, orbs=orbs,
         diff_mode=diff_mode, conjugate=True,
+        wmn_static=static_b, return_diagnostics=True,
     )
     return GWResult(
         mo_energy=jnp.stack([qp_a, qp_b]),
@@ -108,6 +136,11 @@ def g0w0_cd_gamma_unrestricted(
         converged_mask=jnp.stack([mask_a, mask_b]),
         nw=int(nw),
         qp_residual=jnp.stack([residual_a, residual_b]),
+        qp_weight=jnp.stack((weight_a, weight_b)),
+        qp_computed_mask=jnp.zeros((2, nmo), dtype=bool).at[:, jnp.asarray(orbs)].set(True),
+        screening_energy=jnp.stack((e_a, e_b)),
+        method='periodic_gamma_ugw_cd',
+        **{name: jnp.stack((diagnostics_a[name], diagnostics_b[name])) for name in diagnostics_a},
     )
 
 
@@ -138,6 +171,7 @@ class KUGW:
 
     def kernel(self, orbs: Sequence[int] | None = None):
         mf = self._scf
+        _validate_gw_reference(mf)
         result = mf.result
         mo_energy = jnp.asarray(result.mo_energy_spin[:, 0])
         mo_coeff = jnp.asarray(result.mo_coeff_spin[:, 0])

@@ -43,19 +43,21 @@ from gradscf.model.neural_xc import (
     DEFAULT_NETWORK_HIDDEN_DIMS,
 )
 from gradscf.tools.spectra import HARTREE_TO_EV
-from gradscf.model.training import (
+from gradscf.model.neural_xc.training import (
     MolecularTrainingDatum,
     MolecularTrainingConfig,
-    create_train_state_from_molecule,
     molecular_loss,
     load_params_checkpoint,
     make_ground_state_predictor,
-    make_molecular_loss_and_grad,
-    make_molecular_train_step,
     predict_excitation_energies,
     predict_ground_state_molecule,
     predict_oscillator_strengths,
     save_params_checkpoint,
+)
+from gradscf.model.neural_xc.training.trainer import (
+    create_train_state_from_molecule,
+    make_molecular_loss_and_grad,
+    make_molecular_train_step,
 )
 
 

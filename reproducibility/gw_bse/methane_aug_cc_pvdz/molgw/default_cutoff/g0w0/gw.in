@@ -1,0 +1,28 @@
+&molgw
+scf='HF'
+basis='AUG-CC-PVDZ'
+auxil_basis='weigend'
+gaussian_type='CART'
+tolscf=1.0e-10
+nscf=100
+frozencore='no'
+ncoreg=0
+ncorew=0
+nvirtualg=62
+nvirtualw=62
+selfenergy_state_min=1
+selfenergy_state_max=34
+nomega_sigma=4001
+step_sigma=0.0005
+postscf='G0W0'
+nstep_gw=1
+eta=0.00001
+print_w='no'
+length_unit='angstrom'
+natom=5
+/
+C   0.000   0.000   0.000
+H   0.629   0.629   0.629
+H   0.629  -0.629  -0.629
+H  -0.629   0.629  -0.629
+H  -0.629  -0.629   0.629

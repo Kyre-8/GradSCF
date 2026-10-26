@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from typing import Any, Literal
+from dataclasses import replace
 
+from ..scf.reference import as_reference
 from ..tools import spectra
 from ..tools.spectra import HARTREE_TO_EV
 from ..tddft.defaults import PYSCF_TD_DAVIDSON_MAX_CYCLE
@@ -14,35 +16,6 @@ from ..tddft._semilocal_response import SemilocalResponseFunctional
 from ..tddft._unrestricted_semilocal_response import (
     UnrestrictedSemilocalResponseFunctional,
 )
-
-
-def _molecule_from_source(source: Any) -> Any:
-    if hasattr(source, "molecule"):
-        molecule = getattr(source, "molecule")
-        if molecule is None:
-            ensure_molecule = getattr(source, "_ensure_molecule", None)
-            if callable(ensure_molecule):
-                return ensure_molecule()
-    if hasattr(source, "reference"):
-        ensure_reference = getattr(source, "_ensure_reference", None)
-        if callable(ensure_reference):
-            return ensure_reference()
-        molecule = getattr(source, "reference")
-        if molecule is None:
-            ensure_molecule = getattr(source, "_ensure_molecule", None)
-            if callable(ensure_molecule):
-                return ensure_molecule()
-            ensure_reference = getattr(source, "_ensure_reference", None)
-            if callable(ensure_reference):
-                return ensure_reference()
-            raise RuntimeError(
-                "Run ground-state mf.kernel() or mf.run() before launching TD-SCF."
-            )
-        return molecule
-    return source
-
-
-_reference_from_source = _molecule_from_source
 
 
 def _is_unrestricted_molecule(molecule: Any) -> bool:
@@ -109,6 +82,7 @@ class _BaseTD:
         eigenvector_adjoint_tol: float = 1e-6,
         eigenvector_adjoint_max_iter: int = 64,
         response_kernel_options: Any | None = None,
+        max_memory: float | None = None,
         **kwargs: Any,
     ) -> None:
         if mf_or_molecule is None and "mf_or_reference" in kwargs:
@@ -133,6 +107,7 @@ class _BaseTD:
         self.eigenvector_adjoint_tol = eigenvector_adjoint_tol
         self.eigenvector_adjoint_max_iter = eigenvector_adjoint_max_iter
         self.response_kernel_options = response_kernel_options
+        self.max_memory = max_memory
 
         self.result: Any | None = None
         self.e: Any | None = None
@@ -143,7 +118,39 @@ class _BaseTD:
 
     @property
     def molecule(self) -> Any:
-        return _molecule_from_source(self.mf)
+        from ..scf.rsh import rsh_preset
+
+        rsh_source = (rsh_preset(getattr(self.mf, "xc", None) or getattr(self.mf, "xc_spec", "")) is not None
+                      or getattr(self.mf, "range_separated_coefficients", None) is not None
+                      or getattr(self.mf, "eri_lr", None) is not None)
+        if rsh_source:
+            from ..scf.facade import RKS, UKS
+            from ..scf.molecules import RestrictedMolecule, UnrestrictedMolecule
+            from ..tddft.response import _restricted_rsh_coefficients
+
+            if not isinstance(self.mf, (RKS, UKS, RestrictedMolecule, UnrestrictedMolecule)):
+                raise NotImplementedError("Range-separated TD response requires a molecular RKS/UKS reference.")
+            if isinstance(self.mf, (RKS, RestrictedMolecule)) and not getattr(self, "singlet", True):
+                raise NotImplementedError("Range-separated triplet TD response is not implemented; only singlets are supported.")
+            if self.xc_params is not None:
+                raise NotImplementedError("Range-separated TD response does not support XC parameter overrides.")
+            if self.xc_functional is not None:
+                override = self.xc_functional
+                if isinstance(override, (SemilocalResponseFunctional, UnrestrictedSemilocalResponseFunctional)):
+                    override = override.xc_spec
+                if hasattr(override, "spec"):
+                    override = override.spec
+                if str(override).lower() == "hyb_gga_xc_wb97x_d":
+                    raise NotImplementedError("Range-separated TD response requires the complete wb97xd functional.")
+                if not isinstance(override, str) or rsh_preset(override) is None:
+                    raise NotImplementedError("Range-separated TD response requires a complete named RSH functional.")
+            # This private TD adapter deliberately leaves the general
+            # to_reference/as_reference GW/DFPT boundary closed. Reuse the
+            # facade's existing freshness and converged-state checks.
+            reference = self.mf._ensure_reference() if isinstance(self.mf, (RKS, UKS)) else self.mf
+            _restricted_rsh_coefficients(reference)
+            return reference
+        return as_reference(self.mf)
 
     @property
     def reference(self) -> Any:
@@ -151,10 +158,18 @@ class _BaseTD:
 
     def _resolved_xc_functional(self) -> Any | None:
         if self.xc_functional is not None:
-            if isinstance(self.xc_functional, str):
-                return SemilocalResponseFunctional(self.xc_functional)
-            return self.xc_functional
-        source_xc = getattr(self.mf, "xc", None)
+            functional = getattr(self.xc_functional, "spec", self.xc_functional)
+            if isinstance(functional, str):
+                return SemilocalResponseFunctional(functional)
+            return functional
+        source_xc = getattr(self.mf, "xc", None) or getattr(self.mf, "xc_spec", None)
+        source_xc = getattr(source_xc, "spec", source_xc)
+        if source_xc is None and getattr(self.mf, "range_separated_coefficients", None) is not None:
+            from ..scf.rsh import rsh_preset
+            if tuple(self.mf.range_separated_coefficients) == rsh_preset("wb97xd").to_range_separated_hybrid_coefficients():
+                source_xc = "wb97xd"
+            else:
+                raise ValueError("An RSH array reference without xc_spec requires an explicit complete xc_functional.")
         if source_xc is None:
             return None
         if isinstance(source_xc, str):
@@ -162,13 +177,32 @@ class _BaseTD:
         return source_xc
 
     def _common_solver_kwargs(self, molecule: Any) -> dict[str, Any]:
+        from ..dft.functional import Functional
+
+        params = self.xc_params
+        inherit_params = self.xc_functional is None or (
+            isinstance(self.xc_functional, Functional)
+            and self.xc_functional is getattr(self.mf, "xc", None))
+        if params is None and inherit_params:
+            params = getattr(self.mf, "params", None)
         return {
             "molecule": molecule,
             "xc_functional": self._resolved_xc_functional(),
-            "xc_params": self.xc_params,
+            "xc_params": params,
             "occupation_tolerance": self.occupation_tolerance,
             "excitation_threshold": self.excitation_threshold,
         }
+
+    def _response_options(self):
+        from .._memory import DEFAULT_MAX_MEMORY_MB
+        from ..tddft.response_options import normalize_response_kernel_options
+
+        options = normalize_response_kernel_options(
+            self.response_kernel_options,
+            default_max_memory=getattr(self.mf, "max_memory", DEFAULT_MAX_MEMORY_MB))
+        if self.max_memory is not None:
+            options = normalize_response_kernel_options(replace(options, max_memory=self.max_memory))
+        return options
 
     def _restricted_solver_kwargs(self, molecule: Any) -> dict[str, Any]:
         kwargs = self._common_solver_kwargs(molecule)
@@ -184,7 +218,7 @@ class _BaseTD:
                 "tda_gradient_mode": self.tda_gradient_mode,
                 "eigenvector_adjoint_tol": self.eigenvector_adjoint_tol,
                 "eigenvector_adjoint_max_iter": self.eigenvector_adjoint_max_iter,
-                "response_kernel_options": self.response_kernel_options,
+                "response_kernel_options": self._response_options(),
             }
         )
         return kwargs
@@ -193,7 +227,10 @@ class _BaseTD:
         kwargs = self._common_solver_kwargs(molecule)
         source_xc = self.xc_functional
         if source_xc is None:
-            source_xc = getattr(self.mf, "xc", None)
+            source_xc = getattr(self.mf, "xc", None) or getattr(self.mf, "xc_spec", None)
+        if source_xc is None:
+            source_xc = getattr(kwargs["xc_functional"], "xc_spec", None)
+        source_xc = getattr(source_xc, "spec", source_xc)
         if isinstance(source_xc, str):
             source_xc = UnrestrictedSemilocalResponseFunctional(source_xc)
         kwargs["xc_functional"] = source_xc
@@ -207,6 +244,7 @@ class _BaseTD:
                 "tda_gradient_mode": self.tda_gradient_mode,
                 "eigenvector_adjoint_tol": self.eigenvector_adjoint_tol,
                 "eigenvector_adjoint_max_iter": self.eigenvector_adjoint_max_iter,
+                "response_kernel_options": self._response_options(),
             }
         )
         return kwargs

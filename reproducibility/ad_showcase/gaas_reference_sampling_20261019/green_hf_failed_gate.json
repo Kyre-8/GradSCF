@@ -1,0 +1,38 @@
+{
+  "source_sha256": "f8a8d0b94c4c9ee912e6d28ae8f6a599ee3016dd55b3472c020eed1700e59594",
+  "checkpoint_sha256": "b6697e3d1bf13a52bac6775a7602039fc26296c896829cfcb0273f91c797d09f",
+  "binary_sha256": "a7083772d3627721b43ac45faeeaeb5a39d8287680e56d934afc45121b179431",
+  "external_reader_validated": true,
+  "mode": "One unmixed HF physical map; not a converged HF calculation",
+  "frame": "Fixed orthonormal native source MO",
+  "beta_hartree_inverse": 400.0,
+  "grid_version": "0.2.4",
+  "source_kmesh": [
+    2,
+    1,
+    1
+  ],
+  "iteration": 1,
+  "green_shape": [
+    144,
+    1,
+    2,
+    14,
+    14
+  ],
+  "sigma_shape": [
+    1,
+    2,
+    14,
+    14
+  ],
+  "chemical_potential_hartree": 0.29783017174122506,
+  "electron_number": 17.999999999957886,
+  "density_hermiticity": 1.501398024246071e-10,
+  "sigma_hermiticity_hartree": 1.1909377645114584e-11,
+  "sigma_native_max_error_hartree": 5.95468988237534e-12,
+  "sigma_native_frobenius_error_hartree": 1.5188832782631553e-11,
+  "elapsed_seconds": 0.9118350500002634,
+  "particle_number_error": 4.211386794850114e-11,
+  "accepted": false
+}

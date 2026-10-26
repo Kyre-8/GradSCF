@@ -1,0 +1,77 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+_____ test_quadratic_insertions_match_independent_wavefunction_quadrature ______
+
+    def test_quadratic_insertions_match_independent_wavefunction_quadrature():
+>       from gradscf_tools.franck_condon import ground_state_quadratic_coordinate_overlaps
+E       ImportError: cannot import name 'ground_state_quadratic_coordinate_overlaps' from 'gradscf_tools.franck_condon' (/home/yjiao/gradscf_checks/ad-showcase-v07-20261016/src/gradscf_tools/franck_condon.py)
+
+tests/test_khd_raman.py:27: ImportError
+______________ test_both_vertex_closures_without_renormalization _______________
+
+    def test_both_vertex_closures_without_renormalization():
+>       from gradscf_tools.khd_raman import vertex_closure
+E       ModuleNotFoundError: No module named 'gradscf_tools.khd_raman'
+
+tests/test_khd_raman.py:47: ModuleNotFoundError
+______ test_identical_oscillator_exact_nonsymmetric_one_quantum_amplitude ______
+
+    def test_identical_oscillator_exact_nonsymmetric_one_quantum_amplitude():
+>       from gradscf_tools.khd_raman import linear_dipole_vertices, khd_tensor
+E       ModuleNotFoundError: No module named 'gradscf_tools.khd_raman'
+
+tests/test_khd_raman.py:59: ModuleNotFoundError
+________________ test_khd_gauges_and_chunking[electronic_phase] ________________
+
+operation = 'electronic_phase'
+
+    @pytest.mark.parametrize("operation", ["electronic_phase", "mode_gauge", "cartesian_rotation"])
+    def test_khd_gauges_and_chunking(operation):
+>       from gradscf_tools.khd_raman import linear_dipole_vertices, khd_tensor, isotropic_strengths
+E       ModuleNotFoundError: No module named 'gradscf_tools.khd_raman'
+
+tests/test_khd_raman.py:82: ModuleNotFoundError
+___________________ test_khd_gauges_and_chunking[mode_gauge] ___________________
+
+operation = 'mode_gauge'
+
+    @pytest.mark.parametrize("operation", ["electronic_phase", "mode_gauge", "cartesian_rotation"])
+    def test_khd_gauges_and_chunking(operation):
+>       from gradscf_tools.khd_raman import linear_dipole_vertices, khd_tensor, isotropic_strengths
+E       ModuleNotFoundError: No module named 'gradscf_tools.khd_raman'
+
+tests/test_khd_raman.py:82: ModuleNotFoundError
+_______________ test_khd_gauges_and_chunking[cartesian_rotation] _______________
+
+operation = 'cartesian_rotation'
+
+    @pytest.mark.parametrize("operation", ["electronic_phase", "mode_gauge", "cartesian_rotation"])
+    def test_khd_gauges_and_chunking(operation):
+>       from gradscf_tools.khd_raman import linear_dipole_vertices, khd_tensor, isotropic_strengths
+E       ModuleNotFoundError: No module named 'gradscf_tools.khd_raman'
+
+tests/test_khd_raman.py:82: ModuleNotFoundError
+________________ test_general_complex_tensor_rotational_average ________________
+
+    def test_general_complex_tensor_rotational_average():
+>       from gradscf_tools.khd_raman import isotropic_strengths
+E       ModuleNotFoundError: No module named 'gradscf_tools.khd_raman'
+
+tests/test_khd_raman.py:108: ModuleNotFoundError
+_______________ test_elastic_principal_value_and_invalid_inputs ________________
+
+    def test_elastic_principal_value_and_invalid_inputs():
+>       from gradscf_tools.khd_raman import khd_tensor
+E       ModuleNotFoundError: No module named 'gradscf_tools.khd_raman'
+
+tests/test_khd_raman.py:127: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/test_khd_raman.py::test_quadratic_insertions_match_independent_wavefunction_quadrature
+FAILED tests/test_khd_raman.py::test_both_vertex_closures_without_renormalization
+FAILED tests/test_khd_raman.py::test_identical_oscillator_exact_nonsymmetric_one_quantum_amplitude
+FAILED tests/test_khd_raman.py::test_khd_gauges_and_chunking[electronic_phase]
+FAILED tests/test_khd_raman.py::test_khd_gauges_and_chunking[mode_gauge] - Mo...
+FAILED tests/test_khd_raman.py::test_khd_gauges_and_chunking[cartesian_rotation]
+FAILED tests/test_khd_raman.py::test_general_complex_tensor_rotational_average
+FAILED tests/test_khd_raman.py::test_elastic_principal_value_and_invalid_inputs
+8 failed in 1.33s

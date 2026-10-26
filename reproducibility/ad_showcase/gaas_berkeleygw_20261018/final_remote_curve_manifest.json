@@ -1,0 +1,16 @@
+{
+  "files": {
+    "correlation_curves.npz": "a89135053672fad541172e6020792a03f80de1342c275f2d44a4615f5da8599e",
+    "comparison.json": "8950a49f61157d01c564df20720f96c7baca35e1b3009db77bffaccec5bf1a6c",
+    "gaas_native_bgw_sigma.pdf": "43e3b39d993d754551986897969fa8de934460a81a7a1c82f0b2d33e4a27c07c",
+    "gaas_native_bgw_sigma.png": "a5fc8bc10ba1e2de9c9b3e8115b58b4e5a018682f3cb63583ec0d8435f76d426",
+    "selected_gamma_comparison.csv": "28660911a9d22e6f8fc34ba7b56ee9d63e251c4500ce3b7fe661572a51b9b331",
+    "comparison_before_control_metadata.json": "bc5fa4109e282a81ab550faca0a75ebe952d9273ad623ad244cffccc01c7cf81",
+    "curve_certificate.json": "a1f5ab33eb6bf305f303ea29fc25537a257055144e24949eceff0fe29d62854e",
+    "sampling_resource.json": "fa728817689a2a52ac23b961bc948111833553d5ca3f2860e39860b0f2533cba",
+    "render_resource.json": "f82ced6ea3871e9e8fb988fa57e25c16fab34702a11492f7d03183d78127298e",
+    "pole_neighborhood.json": "1611fa75ab001f104eab626b0ae824fac2f798f4d7f8d31abc9a8289373e684b",
+    "finite_eta_protocol.json": "4a858876a5037554ea67717f0cfbec175f65b77dc24b79ddd7de387ac8fe557d",
+    "comparison_before_eta_protocol.json": "3a934dc6defd80791205f4cac597e85943f09b3e315d96daf395eae0afa67bf5"
+  }
+}

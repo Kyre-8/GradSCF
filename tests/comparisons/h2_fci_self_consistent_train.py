@@ -20,10 +20,11 @@ import numpy as np
 import optax
 from pyscf import ao2mo, dft, fci, gto, scf
 
-from gradscf.model import neural_xc, training
+from gradscf.model import neural_xc
+from gradscf.model.neural_xc import training
 from pyscf_data_reference import restricted_reference_from_pyscf
 from gradscf.tools.spectra import HARTREE_TO_EV
-from gradscf.dft.libxc_jax import b3lyp_component_basis
+from gradscf.dft.xc import b3lyp_component_basis
 
 
 jax.config.update("jax_enable_x64", True)
@@ -119,13 +120,13 @@ def main() -> None:
         )
         for reference, target in zip(references, targets, strict=True)
     )
-    state = training.create_train_state_from_molecule(
+    state = training.trainer.create_train_state_from_molecule(
         functional,
         jax.random.PRNGKey(0),
         references[0],
         optax.adam(args.learning_rate),
     )
-    train_step = training.make_molecular_train_step(
+    train_step = training.trainer.make_molecular_train_step(
         functional,
         training_config=config,
     )

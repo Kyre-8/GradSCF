@@ -30,11 +30,16 @@ add_library(gradscf_integrals SHARED
   ${CINT_SOURCES} vendor/libcint/src/autocode/intor1.c
   vendor/libcint/src/autocode/int3c2e.c
   vendor/libcint/src/autocode/grad1.c vendor/libcint/src/autocode/grad2.c
-  vendor/pyscf/pyscf/lib/gto/fill_int2e.c csrc/ffi.cc csrc/geometry.cc csrc/compact.cc
+  vendor/libcint/src/autocode/hess.c
+  vendor/pyscf/pyscf/lib/gto/fill_int2e.c csrc/ffi.cc csrc/geometry.cc csrc/geometry_hessian.cc csrc/geometry_higher.cc csrc/coefficients.cc csrc/exponents.cc csrc/compact.cc
+  csrc/packed_eri.cc csrc/density_fitting.cc csrc/direct_jk.cc csrc/direct_jk_geometry.cc csrc/packed_jk.cc
   vendor/pyscf_ecp/gto/nr_ecp.c vendor/pyscf_ecp/np_helper/np_helper.c csrc/ecp.cc)
 target_include_directories(gradscf_integrals PRIVATE
   "${JAX_INCLUDE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/generated"
   vendor/libcint/src vendor/libcint/include vendor/pyscf_ecp)
+find_package(Threads REQUIRED)
+target_link_libraries(gradscf_integrals PRIVATE Threads::Threads)
+
 if(APPLE)
   find_library(ACCELERATE_FRAMEWORK Accelerate REQUIRED)
   target_link_libraries(gradscf_integrals PRIVATE m ${ACCELERATE_FRAMEWORK})

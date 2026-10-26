@@ -3,7 +3,7 @@ import pytest
 
 from gradscf.integrals import basis_from_pyscf_spec, basis_from_spec
 from gradscf.integrals.basis import _normalize_raw_shell_coefficients
-from gradscf.integrals.basis_data import load_basis_from_snapshot
+from gradscf.integrals.basis.data import load_basis_from_snapshot
 from gradscf.integrals import build_hcore, eri_tensor, overlap_matrix
 
 

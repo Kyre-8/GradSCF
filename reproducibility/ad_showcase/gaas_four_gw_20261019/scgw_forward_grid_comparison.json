@@ -1,0 +1,50 @@
+{
+  "sc256_gauss_t4": {
+    "input": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/sc256_gauss_t4/scgw.npz",
+    "input_sha256": "25964b1f6f6db86e43157e5cb9c443fc3893b6a524491caa8a533928816ef3fe",
+    "frame": "SRC align_source verified and aligned; fixed reference MO frame",
+    "sigma_comparison_note": "Raw SC solution difference at common relative iomega nodes, each sampled at its own absolute z=mu+iomega; not fixed-absolute-z error.",
+    "previous_chemical_potential_hartree": 0.490024046747794,
+    "current_chemical_potential_hartree": 0.4899145003244022,
+    "density_max_abs": 0.0005198307980337213,
+    "fock_max_abs": 0.0002125665060876969,
+    "moment_max_abs": 0.0010625022181779409,
+    "chemical_potential_difference": -0.000109546423391782,
+    "sigma_first64_max_abs": 0.0001246951564815899,
+    "sigma_first64_relative": 0.0013941198299025298,
+    "frequency_first64_interval_hartree": [
+      0.007853981633974483,
+      0.9974556675147593
+    ],
+    "sigma_first128_max_abs": 0.00012763891510252822,
+    "sigma_first128_relative": 0.0015626516932390566,
+    "frequency_first128_interval_hartree": [
+      0.007853981633974483,
+      2.0027653166634933
+    ]
+  },
+  "sc512_gauss_t4": {
+    "input": "/home/yjiao/gradscf_checks/ad-showcase-query-lowdim-20261016/jobs/gaas_four_methods_20261018/sc512_gauss_t4/scgw.npz",
+    "input_sha256": "c0fa2ccf9325417941f6d7efaa8f0a2cb9e352e6140275d9b7e0bec6b5aa669f",
+    "frame": "SRC align_source verified and aligned; fixed reference MO frame",
+    "sigma_comparison_note": "Raw SC solution difference at common relative iomega nodes, each sampled at its own absolute z=mu+iomega; not fixed-absolute-z error.",
+    "previous_chemical_potential_hartree": 0.48991507233416853,
+    "current_chemical_potential_hartree": 0.4899145003244022,
+    "density_max_abs": 4.1768675571189184e-05,
+    "fock_max_abs": 1.5344452591214974e-05,
+    "moment_max_abs": 0.00012486586980337,
+    "chemical_potential_difference": -5.720097663308721e-07,
+    "sigma_first64_max_abs": 9.048477825054316e-06,
+    "sigma_first64_relative": 6.786698864466298e-05,
+    "frequency_first64_interval_hartree": [
+      0.007853981633974483,
+      0.9974556675147593
+    ],
+    "sigma_first128_max_abs": 9.409428891542955e-06,
+    "sigma_first128_relative": 8.544778754705536e-05,
+    "frequency_first128_interval_hartree": [
+      0.007853981633974483,
+      2.0027653166634933
+    ]
+  }
+}

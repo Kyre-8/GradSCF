@@ -9,7 +9,7 @@ import jax.numpy as jnp
 from jaxtyping import Array
 
 from gradscf.integrals.basis import CartesianBasis
-from gradscf.integrals.backends.jax_reference.packed_eri import build_jk_from_eri_pair_matrix
+from gradscf.integrals.molecular.jk import build_jk_from_eri_pair_matrix
 from gradscf.integrals.backends.jax_reference.screening import shell_pair_schwarz_bounds as integral_shell_pair_schwarz_bounds
 from gradscf.integrals.backends.jax_reference.two_electron import (
     _compiled_eri_shell_block_kernel_batched,

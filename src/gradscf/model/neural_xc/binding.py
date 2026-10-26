@@ -19,14 +19,14 @@ from ...tddft.cisd import (
     restricted_cisd_second_order_correction,
     unrestricted_cisd_second_order_correction,
 )
-from .inputs import (
+from gradscf.dft.hfx import (
     has_hfx_nu_source,
     hfx_nu_grid_chunk_padded,
     hfx_nu_shape,
     hfx_nu_source,
     is_chunked_hfx_nu,
 )
-from ...dft.libxc_jax.jax_libxc import RestrictedFeatureBundle
+from ...dft.xc import RestrictedFeatureBundle
 
 
 def _pack_restricted_grid_payload(
@@ -672,38 +672,19 @@ class NeuralXCBindingMixin:
         v_tau = jnp.nan_to_num(projected_vtau, nan=0.0, posinf=0.0, neginf=0.0)
         v_lapl = jnp.nan_to_num(projected_vlapl, nan=0.0, posinf=0.0, neginf=0.0)
 
-        ao = jnp.asarray(molecule.ao, dtype=functional_dtype)
         kind = self._response_feature_kind_label()
-        ao_deriv1 = getattr(molecule, "ao_deriv1", None)
-        if ao_deriv1 is None:
-            kind = "LDA"
-            ao_deriv1_arr = jnp.zeros((4, ao.shape[0], ao.shape[1]), dtype=ao.dtype)
-        else:
-            ao_deriv1_arr = jnp.asarray(ao_deriv1, dtype=functional_dtype)
-            if ao_deriv1_arr.shape[0] < 4 and kind in {"GGA", "MGGA", "MGGA_LAPL"}:
-                kind = "LDA"
-        ao_laplacian = getattr(molecule, "ao_laplacian", None)
-        if ao_laplacian is None:
-            ao_laplacian_arr = jnp.zeros_like(ao)
-            if kind == "MGGA_LAPL":
-                kind = "MGGA"
-        else:
-            ao_laplacian_arr = jnp.asarray(ao_laplacian, dtype=functional_dtype)
+        from ...scf.differentiable import _build_vxc_matrix_from_components
 
-        from ...scf.rks import _vxc_matrix_from_grid_potential
-
-        vxc_matrix = _vxc_matrix_from_grid_potential(
-            ao=ao,
-            ao_deriv1=ao_deriv1_arr,
-            ao_laplacian=ao_laplacian_arr,
+        vxc_matrix = _build_vxc_matrix_from_components(
+            molecule=molecule,
             weights=jnp.asarray(weights, dtype=functional_dtype),
-            vxc_rho=jnp.asarray(v_rho, dtype=functional_dtype),
-            vxc_grad=jnp.asarray(v_grad, dtype=functional_dtype),
-            vxc_tau=jnp.asarray(v_tau, dtype=functional_dtype),
-            vxc_lapl=jnp.asarray(v_lapl, dtype=functional_dtype),
+            v_rho=jnp.asarray(v_rho, dtype=functional_dtype),
+            v_grad=jnp.asarray(v_grad, dtype=functional_dtype),
+            v_tau=jnp.asarray(v_tau, dtype=functional_dtype),
+            v_lapl=jnp.asarray(v_lapl, dtype=functional_dtype),
             xc_kind=kind,
         )
-        return vxc_matrix, alpha, hfx_fock, xc_energy
+        return jnp.asarray(vxc_matrix, dtype=functional_dtype), alpha, hfx_fock, xc_energy
 
     def _grid_hfx_feature_gradients(
         self,

@@ -1,0 +1,117 @@
+{
+  "complete": true,
+  "passed": true,
+  "settings": {
+    "a_bohr": 7.780032276700287,
+    "xc": "pbe",
+    "basis": "gth-szv",
+    "pseudo": "gth-pade",
+    "mesh": [
+      15,
+      15,
+      15
+    ],
+    "kmesh": [
+      2,
+      2,
+      2
+    ],
+    "precision": 1e-10,
+    "displacement_bohr": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ]
+    ]
+  },
+  "explicit_nelectron": 4,
+  "pseudopotential_valence_charges": [
+    3,
+    1
+  ],
+  "electron_number": 3.9999999999999996,
+  "nao": 3,
+  "occupied_orbitals": 2,
+  "sampled_indirect_gap_hartree": 0.142630888895083,
+  "mo_fock_occupied_virtual_norm": 1.3484921614644222e-15,
+  "minimum_overlap_eigenvalue": 0.015429640460994253,
+  "occupation_values": [
+    0.0,
+    2.0
+  ],
+  "scf_converged": true,
+  "scf_cycles": 12,
+  "masses_amu": [
+    7.0160034366,
+    1.00782503223
+  ],
+  "displacement_per_Q": [
+    [
+      0.0,
+      0.0,
+      0.003133839896049145
+    ],
+    [
+      0.0,
+      0.0,
+      -0.021816318088254467
+    ]
+  ],
+  "mass_norm": 0.9999999999999998,
+  "center_of_mass_derivative": [
+    0.0,
+    0.0,
+    -3.469446951953614e-18
+  ],
+  "response": {
+    "chi_column": [
+      0.00024234684089731833,
+      0.04499491656109409,
+      0.00024234684089732782
+    ],
+    "derivative": [
+      5.634130848572789e-17,
+      -5.7717913462506335e-18,
+      -2.7800478869634944e-17
+    ],
+    "field_residual": 3.163083772803676e-12,
+    "mixed_residual": 1.2233269952588444e-14,
+    "reference_residual": 1.060091379176488e-15
+  },
+  "raw_forbidden_maximum": 5.634130848572789e-17,
+  "maximum_cartesian_step_bohr": 0.0001,
+  "qstep_sqrt_me_bohr": 0.004583724879490013,
+  "reconverged_chi_columns": [
+    [
+      0.00024234683320222586,
+      0.044994916369742684,
+      0.00024234683412425117
+    ],
+    [
+      0.00024234683320215202,
+      0.04499491636974227,
+      0.0002423468341243031
+    ]
+  ],
+  "finite_difference": [
+    8.053948468486362e-15,
+    4.541433497648698e-14,
+    -5.664965222327412e-15
+  ],
+  "maximum_fd_error": 4.542010676783323e-14,
+  "elapsed_seconds": 513.997409435,
+  "peak_rss_kib": 11881960,
+  "source_sha256": {
+    "examples/pbc/lih_raman_selection.py": "51caf87ae85c964f23f6ae3201e729e82865655a350dc3c64cc4c07dc72e8003",
+    "examples/pbc/silicon_raman.py": "4157e35f94bd6428396dd100b3ecd21afba0934621cdcb599e07e7005012220c",
+    "src/gradscf/dfpt/electric.py": "c1f42df314bc6a646b975b0f44e6188097884b8095f86f30017f5fcd25cd2c1d",
+    "src/gradscf/pbc/polarization.py": "0c43b3aa5c9085bdcaca16b19396a3f35535dbe378d2d06aa4aeba6a8802e096"
+  },
+  "scope": "Inversion selection rule for this FFT15 finite model; no FFT71 frequency or material-convergence claim."
+}

@@ -1,0 +1,14 @@
+roots [0.14851936 0.31605728 0.33333062 0.33680248 0.35901779 0.37562584]
+root residuals [1.27136935e-14 2.12661913e-14 2.97907214e-14 1.88484394e-14
+ 2.99188440e-14 1.91324441e-14]
+nearest requested-root gaps [0.16753792105076556, 0.017273343197166224, 0.0034718573983402168, 0.0034718573983402168, 0.016608055320083748, 0.016608055320083748]
+linear dim=272 rhs=1.218934062611e+00 true_residual=2.187303411653e-14 rtol=1.000e-10 atol=0.000e+00 converged_input=True valid=True
+linear dim=272 rhs=6.856037792143e-01 true_residual=1.180888997167e-13 rtol=1.000e-10 atol=0.000e+00 converged_input=True valid=True
+linear dim=272 rhs=1.926232518778e-01 true_residual=1.322566417040e-12 rtol=1.000e-10 atol=0.000e+00 converged_input=True valid=True
+linear dim=272 rhs=8.201702834709e-02 true_residual=1.881451484185e-04 rtol=1.000e-10 atol=0.000e+00 converged_input=True valid=False
+linear dim=272 rhs=9.887622116746e-02 true_residual=8.547178453849e-04 rtol=1.000e-10 atol=0.000e+00 converged_input=True valid=False
+linear dim=272 rhs=1.932537963670e-01 true_residual=1.380334345858e-03 rtol=1.000e-10 atol=0.000e+00 converged_input=True valid=False
+linear dim=272 rhs=1.051224479407e-01 true_residual=2.267877800417e-03 rtol=1.000e-10 atol=0.000e+00 converged_input=True valid=False
+linear dim=272 rhs=1.998018418252e-01 true_residual=7.148430190275e-10 rtol=1.000e-10 atol=0.000e+00 converged_input=True valid=False
+linear dim=272 rhs=nan true_residual=nan rtol=1.000e-10 atol=0.000e+00 converged_input=True valid=False
+full HVP failure JaxRuntimeError('INVALID_ARGUMENT: Derivative vector must be finite')

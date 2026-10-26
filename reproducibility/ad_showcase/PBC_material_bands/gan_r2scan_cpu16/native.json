@@ -1,0 +1,25 @@
+{
+  "complete": false,
+  "passed": false,
+  "material": "gan",
+  "method": "r2scan",
+  "settings": {
+    "basis": "gth-dzvp-molopt-sr",
+    "pseudo": "gth-pbe",
+    "mesh": [
+      41,
+      41,
+      65
+    ],
+    "kmesh": [
+      2,
+      2,
+      2
+    ],
+    "temperature": null,
+    "vacuum": 20.0,
+    "path_points": 121,
+    "chunk_size": 2
+  },
+  "discretization_converged": false
+}

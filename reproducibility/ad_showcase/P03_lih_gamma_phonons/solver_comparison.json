@@ -1,0 +1,54 @@
+{
+  "complete": true,
+  "passed": true,
+  "errors": {
+    "force_constants_hartree_per_bohr2": 4.73232564246473e-15,
+    "signed_frequencies_cm1": 9.234213393938262e-11,
+    "raw_asr_hartree_per_bohr2": 1.7316877098938477e-15,
+    "baseline_force_constants_hartree_per_bohr2": 0.0
+  },
+  "gates": {
+    "force_constants_hartree_per_bohr2": 1e-08,
+    "signed_frequencies_cm1": 0.0001,
+    "raw_asr_hartree_per_bohr2": 1e-08,
+    "baseline_force_constants_hartree_per_bohr2": 1e-10
+  },
+  "input_sha256": {
+    "direct": "27532fb740aae18d52ba2bef8cd841a8c3dd519adaeb5d8c43a577d3eeb09f6a",
+    "gmres": "57316d2013a4f3e63360cb7893bcef32876536dd577eb58efa56566ec36971da"
+  },
+  "baseline_sha256": "6356e9e23e6df18c019fba1c8dcaa9aa240ee6a1fa5c714e3903086012f7e571",
+  "source_python_sha256": "0de7c6c920f84563529fe04238cd8c92b625c3e05665bfe2fcccc278e0077470",
+  "script_sha256": "7174bd482734e0bf1d62445651e335b7dee9c5a2e0d86b7aaaf81360619afa59",
+  "methods": {
+    "direct": {
+      "linear_solver": {
+        "method": "direct",
+        "rtol": 1e-10,
+        "atol": 1e-12,
+        "maxiter": 100,
+        "restart": 40,
+        "max_dense": 256
+      },
+      "linear_residual_norm": 4.8802916865722525e-17,
+      "elapsed_seconds": 115.21599544098717,
+      "phonon_seconds_includes_compilation": 86.50723970599938,
+      "peak_rss_kib": 13914000
+    },
+    "gmres": {
+      "linear_solver": {
+        "method": "gmres",
+        "rtol": 1e-10,
+        "atol": 1e-12,
+        "maxiter": 100,
+        "restart": 40,
+        "max_dense": 256
+      },
+      "linear_residual_norm": 8.525971614526411e-13,
+      "elapsed_seconds": 120.1865440600086,
+      "phonon_seconds_includes_compilation": 92.8206541800173,
+      "peak_rss_kib": 7046284
+    }
+  },
+  "scope": "Same finite FFT31 model; fresh-process total times and high-water RSS, not exclusive-core or general scaling results."
+}

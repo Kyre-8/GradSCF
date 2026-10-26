@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal, Sequence
 
-from ...dft.libxc_jax.jax_libxc import b3lyp_component_basis, b3lyp_component_coefficients
+from ...dft.xc import b3lyp_component_basis, b3lyp_component_coefficients
 
 
 DEFAULT_NEURAL_XC_SEMILOCAL_XC = b3lyp_component_basis()

@@ -1,0 +1,20 @@
+--- src/m_eri_calculate.f90
++++ src/m_eri_calculate.f90
+@@ -1114,7 +1114,7 @@
+     !
+     ! Skip the too small eigenvalues if not genuine
+     !
+-    nauxil_kept = COUNT( eigval(:) > TOO_LOW_EIGENVAL )
++    nauxil_kept = COUNT( eigval(:) > 1.0e-10_dp )
+ 
+   else
+     nauxil_kept    = 0
+@@ -1252,7 +1252,7 @@
+   write(stdout, '(/,1x,a)')      'All 2-center integrals have been calculated, diagonalized and stored'
+   write(stdout, '(1x,a,es16.6)') 'Lowest eigenvalue: ', MINVAL(eigval(:))
+   write(stdout, '(1x,a,i6)')     'Some have been eliminated due to too large overlap ', nauxil_neglect
+-  write(stdout, '(1x,a,es16.6)') 'because their eigenvalue was lower than:', TOO_LOW_EIGENVAL
++  write(stdout, '(1x,a,es16.6)') 'because their eigenvalue was lower than:', 1.0e-10_dp
+ 
+   call clean_deallocate('2-center integrals eigenvectors', eri_2center_eigvec)
+   call clean_deallocate('2-center integrals', eri_2center)
